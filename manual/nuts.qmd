@@ -1,0 +1,22 @@
+---
+title: "NUTS Algorithm"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+The No-U-Turn Sampler (NUTS) is the primary MCMC algorithm used in bgms for 
+continuous parameter sampling.
+
+## Overview
+
+*Content to be added: No U-Turn criterion, binary tree construction, trajectory 
+length selection.*
+
+## References
+
+- Hoffman, M. D., & Gelman, A. (2014). The No-U-Turn Sampler: Adaptively setting 
+  path lengths in Hamiltonian Monte Carlo. *JMLR*, 15, 1593–1623.
+- Betancourt, M. (2017). A conceptual introduction to Hamiltonian Monte Carlo. 
+  arXiv:1701.02434.

@@ -1,0 +1,26 @@
+---
+title: "User's Guide"
+---
+ 
+The User's Guide provides conceptual background and practical tutorials for 
+using bgms.
+
+## Contents
+
+- [Getting Started](getting-started.qmd) — Installation and first steps
+- [Ordinal MRF](omrf.qmd) — Understanding the ordinal Markov random field
+- [GGM](ggm.qmd) — Gaussian graphical models for continuous data
+- [Edge Selection](edge-selection.qmd) — Spike-and-slab priors for structure learning
+- [Group Comparison](group-comparison.qmd) — Comparing networks with bgmCompare
+- [Prior Guide](prior-guide.qmd) — Choosing priors for your analysis
+
+## Prerequisites
+
+This guide assumes basic familiarity with:
+
+- R programming
+- Bayesian inference concepts
+- Graphical models / network analysis
+
+For background on Bayesian analysis of psychological networks, see 
+[Huth et al. (2023)](https://doi.org/10.1177/25152459231193334).

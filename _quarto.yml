@@ -1,0 +1,77 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "bgms"
+  description: "Bayesian Graphical Models in R"
+
+  navbar:
+    left:
+      - text: "Guide"
+        href: guide/index.qmd
+      - text: "Reference"
+        href: reference/index.qmd
+      - text: "Manual"
+        href: manual/index.qmd
+    right:
+      - text: "BGM Lab"
+        href: https://bayesiangraphicalmodeling.com
+      - icon: github
+        href: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
+
+  sidebar:
+    - title: "User's Guide"
+      style: docked
+      contents:
+        - guide/index.qmd
+        - guide/getting-started.qmd
+        - section: "Models"
+          contents:
+            - guide/omrf.qmd
+            - guide/ggm.qmd
+        - section: "Inference"
+          contents:
+            - guide/edge-selection.qmd
+            - guide/group-comparison.qmd
+            - guide/prior-guide.qmd
+
+    - title: "Reference"
+      contents:
+        - reference/index.qmd
+        - section: "Core Functions"
+          contents:
+            - reference/bgm.qmd
+            - reference/bgmCompare.qmd
+        - section: "Methods"
+          contents:
+            - reference/methods.qmd
+        - reference/extractors.qmd
+        - reference/datasets.qmd
+
+    - title: "Manual"
+      contents:
+        - manual/index.qmd
+        - manual/architecture.qmd
+        - section: "MCMC"
+          contents:
+            - manual/nuts.qmd
+            - manual/warmup.qmd
+        - manual/model-classes.qmd
+        - manual/numerical.qmd
+
+  search:
+    location: navbar
+    type: overlay
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    code-overflow: wrap
+    highlight-style: github

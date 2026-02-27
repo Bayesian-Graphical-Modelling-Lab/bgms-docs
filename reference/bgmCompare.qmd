@@ -1,0 +1,54 @@
+---
+title: "bgmCompare"
+---
+
+Compare graphical models between groups.
+
+## Description
+
+`bgmCompare()` tests for differences in network structure between independent 
+groups using Bayes factor tests.
+
+## Usage
+
+```r
+bgmCompare(
+  x,
+  group,
+  ...
+)
+```
+
+## Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `x` | A data frame or matrix of observations. |
+| `group` | A factor or vector indicating group membership. |
+| `...` | Additional arguments passed to the sampler. |
+
+## Value
+
+An object of class `bgmCompare` containing posterior samples and Bayes factors 
+for group differences.
+
+## Examples
+
+```{r}
+#| eval: false
+library(bgms)
+
+# Simulated example
+# fit <- bgmCompare(data, group = group_variable)
+# summary(fit)
+```
+
+## See Also
+
+[bgm()](bgm.qmd), [summary.bgmCompare](methods.qmd)
+
+## References
+
+Marsman, M., Waldorp, L. J., Sekulovski, N., & Haslbeck, J. M. B. (2025). Bayes 
+factor tests for group differences in ordinal and binary graphical models. 
+*Psychometrika*, 90(5), 1809–1842.

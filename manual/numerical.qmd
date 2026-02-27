@@ -1,0 +1,15 @@
+---
+title: "Numerical Considerations"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+Cross-platform numerical consistency in bgms.
+
+## Custom exp/log
+
+bgms uses openlibm for consistent exp/log behavior across platforms.
+
+*Content to be added: rationale, implementation details.*

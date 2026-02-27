@@ -1,0 +1,29 @@
+/* bgms documentation - Quarto-inspired clean look */
+
+:root {
+  --bs-primary: #0d6efd;
+  --bs-link-color: #0d6efd;
+}
+
+.navbar {
+  border-bottom: 1px solid #dee2e6;
+}
+
+pre {
+  border-radius: 6px;
+}
+
+.content {
+  max-width: 900px;
+}
+
+/* Math styling */
+.math {
+  font-size: 1.1em;
+}
+
+/* Code block improvements */
+div.sourceCode {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}

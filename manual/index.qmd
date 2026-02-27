@@ -1,0 +1,27 @@
+---
+title: "Reference Manual"
+---
+
+Technical documentation for the bgms C++ backend and MCMC algorithms.
+
+This manual is intended for:
+
+- Contributors to bgms development
+- Users who want to understand the implementation details
+- Researchers extending bgms for new models
+
+## Contents
+
+- [Architecture](architecture.qmd) — C++ backend design and structure
+- [NUTS Algorithm](nuts.qmd) — No-U-Turn Sampler implementation
+- [Warmup Schedule](warmup.qmd) — Adaptation stages and tuning
+- [Model Classes](model-classes.qmd) — BaseModel hierarchy
+- [Numerical Considerations](numerical.qmd) — Precision and cross-platform issues
+
+## Prerequisites
+
+This manual assumes familiarity with:
+
+- C++ programming
+- MCMC methods
+- Hamiltonian Monte Carlo

@@ -1,0 +1,20 @@
+---
+title: "Ordinal Markov Random Field"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+The ordinal Markov random field (MRF) is a graphical model for networks of 
+binary and ordinal variables.
+
+## Overview
+
+*Content to be added: joint distribution, threshold parameters, interaction 
+parameters, pseudolikelihood approximation.*
+
+## References
+
+Marsman, M., van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian analysis 
+of the ordinal Markov random field. *Psychometrika*, 90(1), 146–182.

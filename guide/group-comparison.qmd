@@ -1,0 +1,21 @@
+---
+title: "Group Comparison"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+The `bgmCompare()` function tests for differences in network structure between 
+groups.
+
+## Overview
+
+*Content to be added: bgmCompare methodology, Bayes factor tests for group 
+differences.*
+
+## References
+
+Marsman, M., Waldorp, L. J., Sekulovski, N., & Haslbeck, J. M. B. (2025). Bayes 
+factor tests for group differences in ordinal and binary graphical models. 
+*Psychometrika*, 90(5), 1809–1842.

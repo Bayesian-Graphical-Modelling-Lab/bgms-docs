@@ -1,0 +1,9 @@
+---
+title: "Extractor Functions"
+---
+
+Functions to extract specific components from fitted bgms objects.
+
+::: {.callout-note}
+Documentation to be generated from roxygen.
+:::

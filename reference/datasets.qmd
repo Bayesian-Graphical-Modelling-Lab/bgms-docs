@@ -1,0 +1,33 @@
+---
+title: "Datasets"
+---
+
+Example datasets included in bgms.
+
+## ADHD
+
+ADHD symptom data.
+
+```r
+data(ADHD)
+```
+
+## Boredom
+
+Boredom proneness questionnaire data.
+
+```r
+data(Boredom)
+```
+
+## Wenchuan
+
+Post-traumatic stress symptoms following the 2008 Wenchuan earthquake.
+
+```r
+data(Wenchuan)
+```
+
+::: {.callout-note}
+Full documentation to be generated from roxygen.
+:::

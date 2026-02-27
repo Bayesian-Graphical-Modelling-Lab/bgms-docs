@@ -1,0 +1,49 @@
+---
+title: "S3 Methods"
+---
+
+S3 methods for `bgms` and `bgmCompare` objects.
+
+## print {#print}
+
+Print a brief summary of a fitted model.
+
+```r
+print(x, ...)
+```
+
+## summary {#summary}
+
+Summarize a fitted model with parameter estimates and diagnostics.
+
+```r
+summary(object, ...)
+```
+
+## coef {#coef}
+
+Extract coefficient estimates.
+
+```r
+coef(object, ...)
+```
+
+## predict {#predict}
+
+Predict values for new observations.
+
+```r
+predict(object, newdata, ...)
+```
+
+## simulate {#simulate}
+
+Simulate data from a fitted model.
+
+```r
+simulate(object, nsim = 1, ...)
+```
+
+::: {.callout-note}
+Full documentation for each method to be generated from roxygen.
+:::

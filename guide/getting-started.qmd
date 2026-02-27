@@ -1,0 +1,54 @@
+---
+title: "Getting Started"
+---
+
+This chapter covers installation and basic usage of bgms.
+
+## Installation
+
+### From CRAN
+
+```r
+install.packages("bgms")
+```
+
+### Development Version
+
+```r
+if(!requireNamespace("remotes")) {
+  install.packages("remotes")
+}
+remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")
+```
+
+## Basic Example
+
+We'll use the Wenchuan earthquake data included in the package:
+
+```{r}
+#| eval: false
+library(bgms)
+
+# Load example data
+data(Wenchuan)
+
+# Fit a Bayesian graphical model
+fit <- bgm(Wenchuan)
+
+# View results
+summary(fit)
+```
+
+## Understanding the Output
+
+The `summary()` output shows:
+ 
+- **Edge inclusion probabilities** — How likely is each edge to be present?
+- **Parameter estimates** — Posterior means for interaction strengths
+- **Convergence diagnostics** — ESS and R-hat values
+
+## Next Steps
+
+- Learn about the [statistical model](omrf.qmd) underlying bgms
+- Understand [edge selection](edge-selection.qmd) with spike-and-slab priors
+- Compare groups with [bgmCompare](group-comparison.qmd)

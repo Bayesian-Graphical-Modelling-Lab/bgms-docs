@@ -1,0 +1,39 @@
+---
+title: "C++ Architecture"
+---
+
+::: {.callout-note}
+This chapter is under development. Content will be migrated from 
+`dev/plans/architecture.md` in the bgms repository.
+:::
+
+## Overview
+
+The bgms C++ backend is organized in three layers:
+
+| Layer | Location | Role |
+|-------|----------|------|
+| Algorithms | `mcmc/algorithms/` | Pure functions: `nuts_step()`, `leapfrog()` |
+| Samplers | `mcmc/samplers/` | Stateful objects: `NUTSSampler`, `HMCSampler` |
+| Runner | `mcmc/execution/` | MCMC loop orchestration |
+
+## Source Layout
+
+```
+src/
+├── mcmc/
+│   ├── algorithms/     # Stateless math
+│   ├── samplers/       # Adaptation state
+│   └── execution/      # Chain runner
+├── models/
+│   ├── base_model.h
+│   ├── omrf/
+│   └── ggm/
+├── priors/
+├── math/
+└── utils/
+```
+
+## Design Principles
+
+*Content to be added: separation of concerns, model hierarchy, warmup schedule.*

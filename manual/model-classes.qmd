@@ -1,0 +1,27 @@
+---
+title: "Model Classes"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+The model hierarchy in bgms.
+
+## BaseModel
+
+Abstract interface defining:
+
+- `log_likelihood()`
+- `log_prior()` 
+- `gradient()`
+
+## OMRFModel
+
+Ordinal Markov random field implementation.
+
+## GGMModel
+
+Gaussian graphical model implementation.
+
+*Content to be added: class documentation, extension guide.*

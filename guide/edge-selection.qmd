@@ -1,0 +1,15 @@
+---
+title: "Edge Selection"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+bgms uses spike-and-slab priors to determine which edges are present in the 
+network.
+
+## Overview
+
+*Content to be added: spike-and-slab priors, posterior inclusion probabilities, 
+Bayes factors, edge evidence categories.*

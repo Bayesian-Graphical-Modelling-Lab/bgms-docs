@@ -1,0 +1,63 @@
+---
+title: "bgm"
+---
+
+Bayesian estimation of graphical models for binary and/or ordinal variables.
+
+## Description
+
+`bgm()` fits a Bayesian graphical model using MCMC sampling. The model can 
+handle ordinal variables (ordinal MRF) or continuous variables (Gaussian 
+graphical model).
+
+## Usage
+
+```r
+bgm(
+ x,
+ variable_type = "ordinal",
+ reference_category,
+ iter = 10000,
+ burnin = 1000,
+ ...
+)
+```
+
+## Arguments
+ 
+| Argument | Description |
+|----------|-------------|
+| `x` | A data frame or matrix of observations. |
+| `variable_type` | Character; `"ordinal"` (default) or `"continuous"`. |
+| `reference_category` | Reference category for ordinal variables. |
+| `iter` | Number of MCMC iterations after burnin. |
+| `burnin` | Number of burnin iterations. |
+| `...` | Additional arguments (see documentation). |
+
+## Value
+
+An object of class `bgms` containing:
+
+- `interactions` — Posterior samples for edge weights
+- `thresholds` — Posterior samples for threshold parameters  
+- `gamma` — Edge inclusion indicators
+- `prior` — Prior specification used
+
+## Examples
+
+```{r}
+#| eval: false
+library(bgms)
+data(Wenchuan)
+
+# Basic usage
+fit <- bgm(Wenchuan)
+summary(fit)
+
+# With edge selection
+fit <- bgm(Wenchuan, edge_selection = TRUE)
+```
+
+## See Also
+
+[bgmCompare()](bgmCompare.qmd), [summary.bgms](methods.qmd)

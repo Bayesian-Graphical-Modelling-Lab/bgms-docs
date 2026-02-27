@@ -1,0 +1,32 @@
+---
+title: "Function Reference"
+---
+
+Complete documentation for all exported functions in bgms.
+
+## Core Functions
+
+| Function | Description |
+|----------|-------------|
+| [bgm()](bgm.qmd) | Fit a Bayesian graphical model |
+| [bgmCompare()](bgmCompare.qmd) | Compare networks between groups |
+
+## S3 Methods
+
+| Method | Description |
+|--------|-------------|
+| [print, summary, coef](methods.qmd) | Inspect fitted models |
+| [predict](methods.qmd#predict) | Predict new observations |
+| [simulate](methods.qmd#simulate) | Simulate from fitted models |
+
+## Extractors
+
+| Function | Description |
+|----------|-------------|
+| [Extractor functions](extractors.qmd) | Extract specific model components |
+
+## Datasets
+
+| Dataset | Description |
+|---------|-------------|
+| [ADHD, Boredom, Wenchuan](datasets.qmd) | Example datasets |

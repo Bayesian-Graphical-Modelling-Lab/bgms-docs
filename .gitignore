@@ -1,0 +1,17 @@
+# Quarto
+/.quarto/
+/_site/
+
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*~

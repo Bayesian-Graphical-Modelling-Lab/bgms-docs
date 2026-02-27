@@ -1,0 +1,13 @@
+---
+title: "Gaussian Graphical Model"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+The Gaussian graphical model (GGM) is used for networks of continuous variables.
+
+## Overview
+
+*Content to be added: precision matrix, partial correlations, interpretation.*

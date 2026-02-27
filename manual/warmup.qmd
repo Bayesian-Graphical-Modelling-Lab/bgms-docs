@@ -1,0 +1,20 @@
+---
+title: "Warmup Schedule"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+bgms uses a three-stage warmup schedule to tune MCMC sampler parameters.
+
+## Stages
+
+1. **Initial exploration** — Find reasonable step size
+2. **Adaptation windows** — Estimate mass matrix, tune step size
+3. **Final tuning** — Finalize step size
+
+## Implementation
+
+*Content to be added: `WarmupSchedule` class, `DualAveraging`, 
+`DiagMassMatrixAccumulator`.*
