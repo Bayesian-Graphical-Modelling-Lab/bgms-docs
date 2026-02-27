@@ -1,0 +1,888 @@
+[
+  {
+    "objectID": "manual/warmup.html",
+    "href": "manual/warmup.html",
+    "title": "Warmup Schedule",
+    "section": "",
+    "text": "Note\n\n\n\nThis chapter is under development.\nbgms uses a three-stage warmup schedule to tune MCMC sampler parameters.",
+    "crumbs": [
+      "Manual",
+      "MCMC",
+      "Warmup Schedule"
+    ]
+  },
+  {
+    "objectID": "manual/warmup.html#stages",
+    "href": "manual/warmup.html#stages",
+    "title": "Warmup Schedule",
+    "section": "Stages",
+    "text": "Stages\n\nInitial exploration — Find reasonable step size\nAdaptation windows — Estimate mass matrix, tune step size\nFinal tuning — Finalize step size",
+    "crumbs": [
+      "Manual",
+      "MCMC",
+      "Warmup Schedule"
+    ]
+  },
+  {
+    "objectID": "manual/warmup.html#implementation",
+    "href": "manual/warmup.html#implementation",
+    "title": "Warmup Schedule",
+    "section": "Implementation",
+    "text": "Implementation\nContent to be added: WarmupSchedule class, DualAveraging, DiagMassMatrixAccumulator.",
+    "crumbs": [
+      "Manual",
+      "MCMC",
+      "Warmup Schedule"
+    ]
+  },
+  {
+    "objectID": "manual/nuts.html",
+    "href": "manual/nuts.html",
+    "title": "NUTS Algorithm",
+    "section": "",
+    "text": "Note\n\n\n\nThis chapter is under development.\nThe No-U-Turn Sampler (NUTS) is the primary MCMC algorithm used in bgms for continuous parameter sampling.",
+    "crumbs": [
+      "Manual",
+      "MCMC",
+      "NUTS Algorithm"
+    ]
+  },
+  {
+    "objectID": "manual/nuts.html#overview",
+    "href": "manual/nuts.html#overview",
+    "title": "NUTS Algorithm",
+    "section": "Overview",
+    "text": "Overview\nContent to be added: No U-Turn criterion, binary tree construction, trajectory length selection.",
+    "crumbs": [
+      "Manual",
+      "MCMC",
+      "NUTS Algorithm"
+    ]
+  },
+  {
+    "objectID": "manual/nuts.html#references",
+    "href": "manual/nuts.html#references",
+    "title": "NUTS Algorithm",
+    "section": "References",
+    "text": "References\n\nHoffman, M. D., & Gelman, A. (2014). The No-U-Turn Sampler: Adaptively setting path lengths in Hamiltonian Monte Carlo. JMLR, 15, 1593–1623.\nBetancourt, M. (2017). A conceptual introduction to Hamiltonian Monte Carlo. arXiv:1701.02434.",
+    "crumbs": [
+      "Manual",
+      "MCMC",
+      "NUTS Algorithm"
+    ]
+  },
+  {
+    "objectID": "manual/model-classes.html",
+    "href": "manual/model-classes.html",
+    "title": "Model Classes",
+    "section": "",
+    "text": "Note\n\n\n\nThis chapter is under development.\nThe model hierarchy in bgms.",
+    "crumbs": [
+      "Manual",
+      "Model Classes"
+    ]
+  },
+  {
+    "objectID": "manual/model-classes.html#basemodel",
+    "href": "manual/model-classes.html#basemodel",
+    "title": "Model Classes",
+    "section": "BaseModel",
+    "text": "BaseModel\nAbstract interface defining:\n\nlog_likelihood()\nlog_prior()\ngradient()",
+    "crumbs": [
+      "Manual",
+      "Model Classes"
+    ]
+  },
+  {
+    "objectID": "manual/model-classes.html#omrfmodel",
+    "href": "manual/model-classes.html#omrfmodel",
+    "title": "Model Classes",
+    "section": "OMRFModel",
+    "text": "OMRFModel\nOrdinal Markov random field implementation.",
+    "crumbs": [
+      "Manual",
+      "Model Classes"
+    ]
+  },
+  {
+    "objectID": "manual/model-classes.html#ggmmodel",
+    "href": "manual/model-classes.html#ggmmodel",
+    "title": "Model Classes",
+    "section": "GGMModel",
+    "text": "GGMModel\nGaussian graphical model implementation.\nContent to be added: class documentation, extension guide.",
+    "crumbs": [
+      "Manual",
+      "Model Classes"
+    ]
+  },
+  {
+    "objectID": "reference/bgmCompare.html",
+    "href": "reference/bgmCompare.html",
+    "title": "bgmCompare",
+    "section": "",
+    "text": "Compare graphical models between groups.",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgmCompare"
+    ]
+  },
+  {
+    "objectID": "reference/bgmCompare.html#description",
+    "href": "reference/bgmCompare.html#description",
+    "title": "bgmCompare",
+    "section": "Description",
+    "text": "Description\nbgmCompare() tests for differences in network structure between independent groups using Bayes factor tests.",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgmCompare"
+    ]
+  },
+  {
+    "objectID": "reference/bgmCompare.html#usage",
+    "href": "reference/bgmCompare.html#usage",
+    "title": "bgmCompare",
+    "section": "Usage",
+    "text": "Usage\nbgmCompare(\n  x,\n  group,\n  ...\n)",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgmCompare"
+    ]
+  },
+  {
+    "objectID": "reference/bgmCompare.html#arguments",
+    "href": "reference/bgmCompare.html#arguments",
+    "title": "bgmCompare",
+    "section": "Arguments",
+    "text": "Arguments\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix of observations.\n\n\ngroup\nA factor or vector indicating group membership.\n\n\n...\nAdditional arguments passed to the sampler.",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgmCompare"
+    ]
+  },
+  {
+    "objectID": "reference/bgmCompare.html#value",
+    "href": "reference/bgmCompare.html#value",
+    "title": "bgmCompare",
+    "section": "Value",
+    "text": "Value\nAn object of class bgmCompare containing posterior samples and Bayes factors for group differences.",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgmCompare"
+    ]
+  },
+  {
+    "objectID": "reference/bgmCompare.html#examples",
+    "href": "reference/bgmCompare.html#examples",
+    "title": "bgmCompare",
+    "section": "Examples",
+    "text": "Examples\n\nlibrary(bgms)\n\n# Simulated example\n# fit &lt;- bgmCompare(data, group = group_variable)\n# summary(fit)",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgmCompare"
+    ]
+  },
+  {
+    "objectID": "reference/bgmCompare.html#see-also",
+    "href": "reference/bgmCompare.html#see-also",
+    "title": "bgmCompare",
+    "section": "See Also",
+    "text": "See Also\nbgm(), summary.bgmCompare",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgmCompare"
+    ]
+  },
+  {
+    "objectID": "reference/bgmCompare.html#references",
+    "href": "reference/bgmCompare.html#references",
+    "title": "bgmCompare",
+    "section": "References",
+    "text": "References\nMarsman, M., Waldorp, L. J., Sekulovski, N., & Haslbeck, J. M. B. (2025). Bayes factor tests for group differences in ordinal and binary graphical models. Psychometrika, 90(5), 1809–1842.",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgmCompare"
+    ]
+  },
+  {
+    "objectID": "reference/datasets.html",
+    "href": "reference/datasets.html",
+    "title": "Datasets",
+    "section": "",
+    "text": "Example datasets included in bgms.",
+    "crumbs": [
+      "Reference",
+      "Datasets"
+    ]
+  },
+  {
+    "objectID": "reference/datasets.html#adhd",
+    "href": "reference/datasets.html#adhd",
+    "title": "Datasets",
+    "section": "ADHD",
+    "text": "ADHD\nADHD symptom data.\ndata(ADHD)",
+    "crumbs": [
+      "Reference",
+      "Datasets"
+    ]
+  },
+  {
+    "objectID": "reference/datasets.html#boredom",
+    "href": "reference/datasets.html#boredom",
+    "title": "Datasets",
+    "section": "Boredom",
+    "text": "Boredom\nBoredom proneness questionnaire data.\ndata(Boredom)",
+    "crumbs": [
+      "Reference",
+      "Datasets"
+    ]
+  },
+  {
+    "objectID": "reference/datasets.html#wenchuan",
+    "href": "reference/datasets.html#wenchuan",
+    "title": "Datasets",
+    "section": "Wenchuan",
+    "text": "Wenchuan\nPost-traumatic stress symptoms following the 2008 Wenchuan earthquake.\ndata(Wenchuan)\n\n\n\n\n\n\nNote\n\n\n\nFull documentation to be generated from roxygen.",
+    "crumbs": [
+      "Reference",
+      "Datasets"
+    ]
+  },
+  {
+    "objectID": "reference/bgm.html",
+    "href": "reference/bgm.html",
+    "title": "bgm",
+    "section": "",
+    "text": "Bayesian estimation of graphical models for binary and/or ordinal variables.",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgm"
+    ]
+  },
+  {
+    "objectID": "reference/bgm.html#description",
+    "href": "reference/bgm.html#description",
+    "title": "bgm",
+    "section": "Description",
+    "text": "Description\nbgm() fits a Bayesian graphical model using MCMC sampling. The model can handle ordinal variables (ordinal MRF) or continuous variables (Gaussian graphical model).",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgm"
+    ]
+  },
+  {
+    "objectID": "reference/bgm.html#usage",
+    "href": "reference/bgm.html#usage",
+    "title": "bgm",
+    "section": "Usage",
+    "text": "Usage\nbgm(\n x,\n variable_type = \"ordinal\",\n reference_category,\n iter = 10000,\n burnin = 1000,\n ...\n)",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgm"
+    ]
+  },
+  {
+    "objectID": "reference/bgm.html#arguments",
+    "href": "reference/bgm.html#arguments",
+    "title": "bgm",
+    "section": "Arguments",
+    "text": "Arguments\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix of observations.\n\n\nvariable_type\nCharacter; \"ordinal\" (default) or \"continuous\".\n\n\nreference_category\nReference category for ordinal variables.\n\n\niter\nNumber of MCMC iterations after burnin.\n\n\nburnin\nNumber of burnin iterations.\n\n\n...\nAdditional arguments (see documentation).",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgm"
+    ]
+  },
+  {
+    "objectID": "reference/bgm.html#value",
+    "href": "reference/bgm.html#value",
+    "title": "bgm",
+    "section": "Value",
+    "text": "Value\nAn object of class bgms containing:\n\ninteractions — Posterior samples for edge weights\nthresholds — Posterior samples for threshold parameters\n\ngamma — Edge inclusion indicators\nprior — Prior specification used",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgm"
+    ]
+  },
+  {
+    "objectID": "reference/bgm.html#examples",
+    "href": "reference/bgm.html#examples",
+    "title": "bgm",
+    "section": "Examples",
+    "text": "Examples\n\nlibrary(bgms)\ndata(Wenchuan)\n\n# Basic usage\nfit &lt;- bgm(Wenchuan)\nsummary(fit)\n\n# With edge selection\nfit &lt;- bgm(Wenchuan, edge_selection = TRUE)",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgm"
+    ]
+  },
+  {
+    "objectID": "reference/bgm.html#see-also",
+    "href": "reference/bgm.html#see-also",
+    "title": "bgm",
+    "section": "See Also",
+    "text": "See Also\nbgmCompare(), summary.bgms",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgm"
+    ]
+  },
+  {
+    "objectID": "guide/edge-selection.html",
+    "href": "guide/edge-selection.html",
+    "title": "Edge Selection",
+    "section": "",
+    "text": "Note\n\n\n\nThis chapter is under development.\nbgms uses spike-and-slab priors to determine which edges are present in the network.",
+    "crumbs": [
+      "Get Started",
+      "Inference",
+      "Edge Selection"
+    ]
+  },
+  {
+    "objectID": "guide/edge-selection.html#overview",
+    "href": "guide/edge-selection.html#overview",
+    "title": "Edge Selection",
+    "section": "Overview",
+    "text": "Overview\nContent to be added: spike-and-slab priors, posterior inclusion probabilities, Bayes factors, edge evidence categories.",
+    "crumbs": [
+      "Get Started",
+      "Inference",
+      "Edge Selection"
+    ]
+  },
+  {
+    "objectID": "guide/prior-guide.html",
+    "href": "guide/prior-guide.html",
+    "title": "Prior Specification",
+    "section": "",
+    "text": "Note\n\n\n\nThis chapter is under development.\nGuidance on choosing priors for bgms analyses.",
+    "crumbs": [
+      "Get Started",
+      "Inference",
+      "Prior Specification"
+    ]
+  },
+  {
+    "objectID": "guide/prior-guide.html#overview",
+    "href": "guide/prior-guide.html#overview",
+    "title": "Prior Specification",
+    "section": "Overview",
+    "text": "Overview\nContent to be added: threshold priors, interaction priors, edge priors (Bernoulli, Beta-Bernoulli, SBM).",
+    "crumbs": [
+      "Get Started",
+      "Inference",
+      "Prior Specification"
+    ]
+  },
+  {
+    "objectID": "guide/group-comparison.html",
+    "href": "guide/group-comparison.html",
+    "title": "Group Comparison",
+    "section": "",
+    "text": "Note\n\n\n\nThis chapter is under development.\nThe bgmCompare() function tests for differences in network structure between groups.",
+    "crumbs": [
+      "Get Started",
+      "Inference",
+      "Group Comparison"
+    ]
+  },
+  {
+    "objectID": "guide/group-comparison.html#overview",
+    "href": "guide/group-comparison.html#overview",
+    "title": "Group Comparison",
+    "section": "Overview",
+    "text": "Overview\nContent to be added: bgmCompare methodology, Bayes factor tests for group differences.",
+    "crumbs": [
+      "Get Started",
+      "Inference",
+      "Group Comparison"
+    ]
+  },
+  {
+    "objectID": "guide/group-comparison.html#references",
+    "href": "guide/group-comparison.html#references",
+    "title": "Group Comparison",
+    "section": "References",
+    "text": "References\nMarsman, M., Waldorp, L. J., Sekulovski, N., & Haslbeck, J. M. B. (2025). Bayes factor tests for group differences in ordinal and binary graphical models. Psychometrika, 90(5), 1809–1842.",
+    "crumbs": [
+      "Get Started",
+      "Inference",
+      "Group Comparison"
+    ]
+  },
+  {
+    "objectID": "guide/index.html",
+    "href": "guide/index.html",
+    "title": "User’s Guide",
+    "section": "",
+    "text": "The User’s Guide provides conceptual background and practical tutorials for using bgms.",
+    "crumbs": [
+      "Get Started",
+      "User's Guide"
+    ]
+  },
+  {
+    "objectID": "guide/index.html#contents",
+    "href": "guide/index.html#contents",
+    "title": "User’s Guide",
+    "section": "Contents",
+    "text": "Contents\n\nGetting Started — Installation and first steps\nOrdinal MRF — Understanding the ordinal Markov random field\nGGM — Gaussian graphical models for continuous data\nEdge Selection — Spike-and-slab priors for structure learning\nGroup Comparison — Comparing networks with bgmCompare\nPrior Guide — Choosing priors for your analysis",
+    "crumbs": [
+      "Get Started",
+      "User's Guide"
+    ]
+  },
+  {
+    "objectID": "guide/index.html#prerequisites",
+    "href": "guide/index.html#prerequisites",
+    "title": "User’s Guide",
+    "section": "Prerequisites",
+    "text": "Prerequisites\nThis guide assumes basic familiarity with:\n\nR programming\nBayesian inference concepts\nGraphical models / network analysis\n\nFor background on Bayesian analysis of psychological networks, see Huth et al. (2023).",
+    "crumbs": [
+      "Get Started",
+      "User's Guide"
+    ]
+  },
+  {
+    "objectID": "STYLE_GUIDE.html",
+    "href": "STYLE_GUIDE.html",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "Never use # Heading in .qmd files\nThe page title comes from the YAML front matter title: field\nThis automatically renders as H1 and appears in the browser tab\n\n---\ntitle: \"Getting Started\"\n---\n\n\n\n\nUse ## Heading for top-level content sections\nThese appear in the right-side Table of Contents (TOC)\nKeep concise: 1-3 words when possible\n\n## Installation\n## Basic Example\n## Understanding the Output\n\n\n\n\nUse ### Heading for subsections within H2 sections\nAlso appear in TOC (nested under parent H2)\nUse when a section needs logical subdivisions\n\n## Installation\n\n### From CRAN\n\n### Development Version\n\n\n\n\nUse sparingly - consider restructuring if you need H4\nDo not appear in TOC\nGood for: parameter groups, minor distinctions\n\n\n\n\n\n\n\n\nGoal: Overview/navigation page with minimal TOC\nStructure:\n---\ntitle: \"User's Guide\"\nsubtitle: \"Short description of this section\"\n---\n\nUse descriptive prose instead of heading-heavy structure\nLink to content pages inline or via bullet lists\nIf headings are needed, add toc: false to front matter\n\n\n\n\nStructure:\n---\ntitle: \"Getting Started\"\n---\n\nBrief introduction paragraph.\n\n## Installation\n\nExplanation...\n\n### From CRAN\n\n```r\ninstall.packages(\"bgms\")\n\n\n\nremotes::install_github(...)\n\n\n\n\n…\n\n### Reference Pages (function documentation)\n\n**Standard sections (in order):**\n```markdown\n---\ntitle: \"bgm\"\n---\n\nBrief one-line description.\n\n## Description\n\nDetailed explanation of what the function does.\n\n## Usage\n\n```r\nbgm(data, ...)\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\ndata\nA data frame…\n\n\n\n\n\n\nDescription of return value.\n\n\n\n# Load data\ndata(Wenchuan)\nfit &lt;- bgm(Wenchuan)\n\n\n\nLinks to related functions.\n\n\n\nCitations if applicable. ```\n\n\n\n\n\n\n\nScenario\nTOC Visible?\nSolution\n\n\n\n\nPage has H2/H3 headings\nYes\nExpected behavior\n\n\nIndex page, want no TOC\nAdd toc: false\nClean navigation page\n\n\nLong page with many sections\nYes\nGood for navigation\n\n\nShort page (&lt; 3 headings)\nMinimal\nConsider removing headings\n\n\n\n\n\n\n\n\nOne H2 minimum for content pages (generates useful TOC)\nConsistent naming across similar pages (all reference pages use same sections)\nNo orphan headings - every heading should have content below it\nCode comments are not headings - # comment inside code blocks is fine\nCross-reference with IDs when needed: ## Overview {#overview}"
+  },
+  {
+    "objectID": "STYLE_GUIDE.html#heading-hierarchy",
+    "href": "STYLE_GUIDE.html#heading-hierarchy",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "Never use # Heading in .qmd files\nThe page title comes from the YAML front matter title: field\nThis automatically renders as H1 and appears in the browser tab\n\n---\ntitle: \"Getting Started\"\n---\n\n\n\n\nUse ## Heading for top-level content sections\nThese appear in the right-side Table of Contents (TOC)\nKeep concise: 1-3 words when possible\n\n## Installation\n## Basic Example\n## Understanding the Output\n\n\n\n\nUse ### Heading for subsections within H2 sections\nAlso appear in TOC (nested under parent H2)\nUse when a section needs logical subdivisions\n\n## Installation\n\n### From CRAN\n\n### Development Version\n\n\n\n\nUse sparingly - consider restructuring if you need H4\nDo not appear in TOC\nGood for: parameter groups, minor distinctions"
+  },
+  {
+    "objectID": "STYLE_GUIDE.html#page-types",
+    "href": "STYLE_GUIDE.html#page-types",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "Goal: Overview/navigation page with minimal TOC\nStructure:\n---\ntitle: \"User's Guide\"\nsubtitle: \"Short description of this section\"\n---\n\nUse descriptive prose instead of heading-heavy structure\nLink to content pages inline or via bullet lists\nIf headings are needed, add toc: false to front matter\n\n\n\n\nStructure:\n---\ntitle: \"Getting Started\"\n---\n\nBrief introduction paragraph.\n\n## Installation\n\nExplanation...\n\n### From CRAN\n\n```r\ninstall.packages(\"bgms\")\n\n\n\nremotes::install_github(...)"
+  },
+  {
+    "objectID": "STYLE_GUIDE.html#basic-example",
+    "href": "STYLE_GUIDE.html#basic-example",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "…\n\n### Reference Pages (function documentation)\n\n**Standard sections (in order):**\n```markdown\n---\ntitle: \"bgm\"\n---\n\nBrief one-line description.\n\n## Description\n\nDetailed explanation of what the function does.\n\n## Usage\n\n```r\nbgm(data, ...)"
+  },
+  {
+    "objectID": "STYLE_GUIDE.html#arguments",
+    "href": "STYLE_GUIDE.html#arguments",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "Argument\nDescription\n\n\n\n\ndata\nA data frame…"
+  },
+  {
+    "objectID": "STYLE_GUIDE.html#value",
+    "href": "STYLE_GUIDE.html#value",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "Description of return value."
+  },
+  {
+    "objectID": "STYLE_GUIDE.html#examples",
+    "href": "STYLE_GUIDE.html#examples",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "# Load data\ndata(Wenchuan)\nfit &lt;- bgm(Wenchuan)"
+  },
+  {
+    "objectID": "STYLE_GUIDE.html#see-also",
+    "href": "STYLE_GUIDE.html#see-also",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "Links to related functions."
+  },
+  {
+    "objectID": "STYLE_GUIDE.html#references",
+    "href": "STYLE_GUIDE.html#references",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "Citations if applicable. ```"
+  },
+  {
+    "objectID": "STYLE_GUIDE.html#toc-behavior",
+    "href": "STYLE_GUIDE.html#toc-behavior",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "Scenario\nTOC Visible?\nSolution\n\n\n\n\nPage has H2/H3 headings\nYes\nExpected behavior\n\n\nIndex page, want no TOC\nAdd toc: false\nClean navigation page\n\n\nLong page with many sections\nYes\nGood for navigation\n\n\nShort page (&lt; 3 headings)\nMinimal\nConsider removing headings"
+  },
+  {
+    "objectID": "STYLE_GUIDE.html#general-rules",
+    "href": "STYLE_GUIDE.html#general-rules",
+    "title": "bgms Documentation Style Guide",
+    "section": "",
+    "text": "One H2 minimum for content pages (generates useful TOC)\nConsistent naming across similar pages (all reference pages use same sections)\nNo orphan headings - every heading should have content below it\nCode comments are not headings - # comment inside code blocks is fine\nCross-reference with IDs when needed: ## Overview {#overview}"
+  },
+  {
+    "objectID": "guide/getting-started.html",
+    "href": "guide/getting-started.html",
+    "title": "Getting Started",
+    "section": "",
+    "text": "This chapter covers installation and basic usage of bgms.",
+    "crumbs": [
+      "Get Started",
+      "Getting Started"
+    ]
+  },
+  {
+    "objectID": "guide/getting-started.html#installation",
+    "href": "guide/getting-started.html#installation",
+    "title": "Getting Started",
+    "section": "Installation",
+    "text": "Installation\n\nFrom CRAN\ninstall.packages(\"bgms\")\n\n\nDevelopment Version\nif(!requireNamespace(\"remotes\")) {\n  install.packages(\"remotes\")\n}\nremotes::install_github(\"Bayesian-Graphical-Modelling-Lab/bgms\")",
+    "crumbs": [
+      "Get Started",
+      "Getting Started"
+    ]
+  },
+  {
+    "objectID": "guide/getting-started.html#basic-example",
+    "href": "guide/getting-started.html#basic-example",
+    "title": "Getting Started",
+    "section": "Basic Example",
+    "text": "Basic Example\nWe’ll use the Wenchuan earthquake data included in the package:\n\nlibrary(bgms)\n\n# Load example data\ndata(Wenchuan)\n\n# Fit a Bayesian graphical model\nfit &lt;- bgm(Wenchuan)\n\n# View results\nsummary(fit)",
+    "crumbs": [
+      "Get Started",
+      "Getting Started"
+    ]
+  },
+  {
+    "objectID": "guide/getting-started.html#understanding-the-output",
+    "href": "guide/getting-started.html#understanding-the-output",
+    "title": "Getting Started",
+    "section": "Understanding the Output",
+    "text": "Understanding the Output\nThe summary() output shows:\n\nEdge inclusion probabilities — How likely is each edge to be present?\nParameter estimates — Posterior means for interaction strengths\nConvergence diagnostics — ESS and R-hat values",
+    "crumbs": [
+      "Get Started",
+      "Getting Started"
+    ]
+  },
+  {
+    "objectID": "guide/getting-started.html#next-steps",
+    "href": "guide/getting-started.html#next-steps",
+    "title": "Getting Started",
+    "section": "Next Steps",
+    "text": "Next Steps\n\nLearn about the statistical model underlying bgms\nUnderstand edge selection with spike-and-slab priors\nCompare groups with bgmCompare",
+    "crumbs": [
+      "Get Started",
+      "Getting Started"
+    ]
+  },
+  {
+    "objectID": "guide/ggm.html",
+    "href": "guide/ggm.html",
+    "title": "Gaussian Graphical Model",
+    "section": "",
+    "text": "Note\n\n\n\nThis chapter is under development.\nThe Gaussian graphical model (GGM) is used for networks of continuous variables.",
+    "crumbs": [
+      "Get Started",
+      "Models",
+      "Gaussian Graphical Model"
+    ]
+  },
+  {
+    "objectID": "guide/ggm.html#overview",
+    "href": "guide/ggm.html#overview",
+    "title": "Gaussian Graphical Model",
+    "section": "Overview",
+    "text": "Overview\nContent to be added: precision matrix, partial correlations, interpretation.",
+    "crumbs": [
+      "Get Started",
+      "Models",
+      "Gaussian Graphical Model"
+    ]
+  },
+  {
+    "objectID": "guide/omrf.html",
+    "href": "guide/omrf.html",
+    "title": "Ordinal Markov Random Field",
+    "section": "",
+    "text": "Note\n\n\n\nThis chapter is under development.\nThe ordinal Markov random field (MRF) is a graphical model for networks of binary and ordinal variables.",
+    "crumbs": [
+      "Get Started",
+      "Models",
+      "Ordinal Markov Random Field"
+    ]
+  },
+  {
+    "objectID": "guide/omrf.html#overview",
+    "href": "guide/omrf.html#overview",
+    "title": "Ordinal Markov Random Field",
+    "section": "Overview",
+    "text": "Overview\nContent to be added: joint distribution, threshold parameters, interaction parameters, pseudolikelihood approximation.",
+    "crumbs": [
+      "Get Started",
+      "Models",
+      "Ordinal Markov Random Field"
+    ]
+  },
+  {
+    "objectID": "guide/omrf.html#references",
+    "href": "guide/omrf.html#references",
+    "title": "Ordinal Markov Random Field",
+    "section": "References",
+    "text": "References\nMarsman, M., van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian analysis of the ordinal Markov random field. Psychometrika, 90(1), 146–182.",
+    "crumbs": [
+      "Get Started",
+      "Models",
+      "Ordinal Markov Random Field"
+    ]
+  },
+  {
+    "objectID": "reference/index.html",
+    "href": "reference/index.html",
+    "title": "Function Reference",
+    "section": "",
+    "text": "Complete documentation for all exported functions in bgms.",
+    "crumbs": [
+      "Reference",
+      "Function Reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#core-functions",
+    "href": "reference/index.html#core-functions",
+    "title": "Function Reference",
+    "section": "Core Functions",
+    "text": "Core Functions\n\n\n\nFunction\nDescription\n\n\n\n\nbgm()\nFit a Bayesian graphical model\n\n\nbgmCompare()\nCompare networks between groups",
+    "crumbs": [
+      "Reference",
+      "Function Reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#s3-methods",
+    "href": "reference/index.html#s3-methods",
+    "title": "Function Reference",
+    "section": "S3 Methods",
+    "text": "S3 Methods\n\n\n\nMethod\nDescription\n\n\n\n\nprint, summary, coef\nInspect fitted models\n\n\npredict\nPredict new observations\n\n\nsimulate\nSimulate from fitted models",
+    "crumbs": [
+      "Reference",
+      "Function Reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#extractors",
+    "href": "reference/index.html#extractors",
+    "title": "Function Reference",
+    "section": "Extractors",
+    "text": "Extractors\n\n\n\nFunction\nDescription\n\n\n\n\nExtractor functions\nExtract specific model components",
+    "crumbs": [
+      "Reference",
+      "Function Reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#datasets",
+    "href": "reference/index.html#datasets",
+    "title": "Function Reference",
+    "section": "Datasets",
+    "text": "Datasets\n\n\n\nDataset\nDescription\n\n\n\n\nADHD, Boredom, Wenchuan\nExample datasets",
+    "crumbs": [
+      "Reference",
+      "Function Reference"
+    ]
+  },
+  {
+    "objectID": "reference/methods.html",
+    "href": "reference/methods.html",
+    "title": "S3 Methods",
+    "section": "",
+    "text": "S3 methods for bgms and bgmCompare objects.",
+    "crumbs": [
+      "Reference",
+      "Methods",
+      "S3 Methods"
+    ]
+  },
+  {
+    "objectID": "reference/methods.html#print",
+    "href": "reference/methods.html#print",
+    "title": "S3 Methods",
+    "section": "print",
+    "text": "print\nPrint a brief summary of a fitted model.\nprint(x, ...)",
+    "crumbs": [
+      "Reference",
+      "Methods",
+      "S3 Methods"
+    ]
+  },
+  {
+    "objectID": "reference/methods.html#summary",
+    "href": "reference/methods.html#summary",
+    "title": "S3 Methods",
+    "section": "summary",
+    "text": "summary\nSummarize a fitted model with parameter estimates and diagnostics.\nsummary(object, ...)",
+    "crumbs": [
+      "Reference",
+      "Methods",
+      "S3 Methods"
+    ]
+  },
+  {
+    "objectID": "reference/methods.html#coef",
+    "href": "reference/methods.html#coef",
+    "title": "S3 Methods",
+    "section": "coef",
+    "text": "coef\nExtract coefficient estimates.\ncoef(object, ...)",
+    "crumbs": [
+      "Reference",
+      "Methods",
+      "S3 Methods"
+    ]
+  },
+  {
+    "objectID": "reference/methods.html#predict",
+    "href": "reference/methods.html#predict",
+    "title": "S3 Methods",
+    "section": "predict",
+    "text": "predict\nPredict values for new observations.\npredict(object, newdata, ...)",
+    "crumbs": [
+      "Reference",
+      "Methods",
+      "S3 Methods"
+    ]
+  },
+  {
+    "objectID": "reference/methods.html#simulate",
+    "href": "reference/methods.html#simulate",
+    "title": "S3 Methods",
+    "section": "simulate",
+    "text": "simulate\nSimulate data from a fitted model.\nsimulate(object, nsim = 1, ...)\n\n\n\n\n\n\nNote\n\n\n\nFull documentation for each method to be generated from roxygen.",
+    "crumbs": [
+      "Reference",
+      "Methods",
+      "S3 Methods"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html",
+    "href": "reference/extractors.html",
+    "title": "Extractor Functions",
+    "section": "",
+    "text": "Functions to extract specific components from fitted bgms objects.\n\n\n\n\n\n\nNote\n\n\n\nDocumentation to be generated from roxygen.",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "manual/index.html",
+    "href": "manual/index.html",
+    "title": "Reference Manual",
+    "section": "",
+    "text": "Technical documentation for the bgms C++ backend and MCMC algorithms.\nThis manual is intended for:",
+    "crumbs": [
+      "Manual",
+      "Reference Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#contents",
+    "href": "manual/index.html#contents",
+    "title": "Reference Manual",
+    "section": "Contents",
+    "text": "Contents\n\nArchitecture — C++ backend design and structure\nNUTS Algorithm — No-U-Turn Sampler implementation\nWarmup Schedule — Adaptation stages and tuning\nModel Classes — BaseModel hierarchy\nNumerical Considerations — Precision and cross-platform issues",
+    "crumbs": [
+      "Manual",
+      "Reference Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#prerequisites",
+    "href": "manual/index.html#prerequisites",
+    "title": "Reference Manual",
+    "section": "Prerequisites",
+    "text": "Prerequisites\nThis manual assumes familiarity with:\n\nC++ programming\nMCMC methods\nHamiltonian Monte Carlo",
+    "crumbs": [
+      "Manual",
+      "Reference Manual"
+    ]
+  },
+  {
+    "objectID": "manual/numerical.html",
+    "href": "manual/numerical.html",
+    "title": "Numerical Considerations",
+    "section": "",
+    "text": "Note\n\n\n\nThis chapter is under development.\nCross-platform numerical consistency in bgms.",
+    "crumbs": [
+      "Manual",
+      "Numerical Considerations"
+    ]
+  },
+  {
+    "objectID": "manual/numerical.html#custom-explog",
+    "href": "manual/numerical.html#custom-explog",
+    "title": "Numerical Considerations",
+    "section": "Custom exp/log",
+    "text": "Custom exp/log\nbgms uses openlibm for consistent exp/log behavior across platforms.\nContent to be added: rationale, implementation details.",
+    "crumbs": [
+      "Manual",
+      "Numerical Considerations"
+    ]
+  },
+  {
+    "objectID": "manual/architecture.html",
+    "href": "manual/architecture.html",
+    "title": "C++ Architecture",
+    "section": "",
+    "text": "Note\n\n\n\nThis chapter is under development. Content will be migrated from dev/plans/architecture.md in the bgms repository.",
+    "crumbs": [
+      "Manual",
+      "C++ Architecture"
+    ]
+  },
+  {
+    "objectID": "manual/architecture.html#overview",
+    "href": "manual/architecture.html#overview",
+    "title": "C++ Architecture",
+    "section": "Overview",
+    "text": "Overview\nThe bgms C++ backend is organized in three layers:\n\n\n\n\n\n\n\n\nLayer\nLocation\nRole\n\n\n\n\nAlgorithms\nmcmc/algorithms/\nPure functions: nuts_step(), leapfrog()\n\n\nSamplers\nmcmc/samplers/\nStateful objects: NUTSSampler, HMCSampler\n\n\nRunner\nmcmc/execution/\nMCMC loop orchestration",
+    "crumbs": [
+      "Manual",
+      "C++ Architecture"
+    ]
+  },
+  {
+    "objectID": "manual/architecture.html#source-layout",
+    "href": "manual/architecture.html#source-layout",
+    "title": "C++ Architecture",
+    "section": "Source Layout",
+    "text": "Source Layout\nsrc/\n├── mcmc/\n│   ├── algorithms/     # Stateless math\n│   ├── samplers/       # Adaptation state\n│   └── execution/      # Chain runner\n├── models/\n│   ├── base_model.h\n│   ├── omrf/\n│   └── ggm/\n├── priors/\n├── math/\n└── utils/",
+    "crumbs": [
+      "Manual",
+      "C++ Architecture"
+    ]
+  },
+  {
+    "objectID": "manual/architecture.html#design-principles",
+    "href": "manual/architecture.html#design-principles",
+    "title": "C++ Architecture",
+    "section": "Design Principles",
+    "text": "Design Principles\nContent to be added: separation of concerns, model hierarchy, warmup schedule.",
+    "crumbs": [
+      "Manual",
+      "C++ Architecture"
+    ]
+  }
+]
