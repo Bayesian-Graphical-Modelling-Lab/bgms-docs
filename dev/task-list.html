@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>task-list – bgms</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-de8274a4d1ecc1e6aaeaf6e5564b5074.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-497d5e0ea340e534ae290fd684e0aa73.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-5e08fe990edabedcb4edcc21f3ca5bbd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-497d5e0ea340e534ae290fd684e0aa73.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": true,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../bgms_sticker.svg" alt="bgms logo" class="navbar-logo light-content">
+    <img src="../bgms_sticker.svg" alt="bgms logo" class="navbar-logo dark-content">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Overview</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../guide/getting-started.html"> 
+<span class="menu-text">Get Started</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../guide/index.html"> 
+<span class="menu-text">Guide</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../reference/index.html"> 
+<span class="menu-text">Reference</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../manual/index.html"> 
+<span class="menu-text">Manual</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms" title="bgms GitHub" class="quarto-navigation-tool px-1" aria-label="bgms GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#bgms-docs-task-list-single-source-of-truth" id="toc-bgms-docs-task-list-single-source-of-truth" class="nav-link active" data-scroll-target="#bgms-docs-task-list-single-source-of-truth">bgms-docs Task List (Single Source of Truth)</a>
+  <ul class="collapse">
+  <li><a href="#how-to-use-this-board" id="toc-how-to-use-this-board" class="nav-link" data-scroll-target="#how-to-use-this-board">How To Use This Board</a></li>
+  <li><a href="#current-cycle-focus" id="toc-current-cycle-focus" class="nav-link" data-scroll-target="#current-cycle-focus">Current Cycle Focus</a></li>
+  <li><a href="#review-sequence-main-workflow" id="toc-review-sequence-main-workflow" class="nav-link" data-scroll-target="#review-sequence-main-workflow">Review Sequence (Main Workflow)</a>
+  <ul class="collapse">
+  <li><a href="#a.-draft-and-source-linking" id="toc-a.-draft-and-source-linking" class="nav-link" data-scroll-target="#a.-draft-and-source-linking">A. Draft and source-linking</a></li>
+  <li><a href="#b.-automated-qa-gate" id="toc-b.-automated-qa-gate" class="nav-link" data-scroll-target="#b.-automated-qa-gate">B. Automated QA gate</a></li>
+  <li><a href="#c.-human-review-gate" id="toc-c.-human-review-gate" class="nav-link" data-scroll-target="#c.-human-review-gate">C. Human review gate</a></li>
+  <li><a href="#d.-final-release-gate" id="toc-d.-final-release-gate" class="nav-link" data-scroll-target="#d.-final-release-gate">D. Final release gate</a></li>
+  </ul></li>
+  <li><a href="#page-status-board" id="toc-page-status-board" class="nav-link" data-scroll-target="#page-status-board">Page Status Board</a></li>
+  <li><a href="#secondary-backlog-not-part-of-a---b-review-sequence" id="toc-secondary-backlog-not-part-of-a---b-review-sequence" class="nav-link" data-scroll-target="#secondary-backlog-not-part-of-a---b-review-sequence">Secondary Backlog (Not Part of A -&gt; B Review Sequence)</a>
+  <ul class="collapse">
+  <li><a href="#p1---documentation-delivery-workflow" id="toc-p1---documentation-delivery-workflow" class="nav-link" data-scroll-target="#p1---documentation-delivery-workflow">P1 - Documentation delivery workflow</a></li>
+  <li><a href="#p2---infrastructure" id="toc-p2---infrastructure" class="nav-link" data-scroll-target="#p2---infrastructure">P2 - Infrastructure</a></li>
+  <li><a href="#p2---documentation-maintenance" id="toc-p2---documentation-maintenance" class="nav-link" data-scroll-target="#p2---documentation-maintenance">P2 - Documentation maintenance</a></li>
+  <li><a href="#p3---upstream-change-automation-bgms---bgms-docs" id="toc-p3---upstream-change-automation-bgms---bgms-docs" class="nav-link" data-scroll-target="#p3---upstream-change-automation-bgms---bgms-docs">P3 - Upstream change automation (bgms -&gt; bgms-docs)</a></li>
+  <li><a href="#p3---design-de-risking-quarto-derived-skeleton" id="toc-p3---design-de-risking-quarto-derived-skeleton" class="nav-link" data-scroll-target="#p3---design-de-risking-quarto-derived-skeleton">P3 - Design de-risking (Quarto-derived skeleton)</a></li>
+  </ul></li>
+  <li><a href="#open-decisions" id="toc-open-decisions" class="nav-link" data-scroll-target="#open-decisions">Open Decisions</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/edit/main/dev/task-list.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+
+
+
+
+
+<section id="bgms-docs-task-list-single-source-of-truth" class="level1">
+<h1>bgms-docs Task List (Single Source of Truth)</h1>
+<p>This file is the official status board for docs work. If another note conflicts with this file, this file wins.</p>
+<section id="how-to-use-this-board" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-use-this-board">How To Use This Board</h2>
+<ul>
+<li>Keep updates short and concrete.</li>
+<li>Update this file when page status changes.</li>
+<li>Use one status value only: <code>Scaffolded</code>, <code>Populated</code>, <code>Contradiction-checked</code>, <code>Reviewed</code>, <code>Approved</code>, <code>Blocked</code>.</li>
+<li>Technical sign-off owner: Maarten.</li>
+<li>Readability sign-off owner: Emily.</li>
+</ul>
+</section>
+<section id="current-cycle-focus" class="level2">
+<h2 class="anchored" data-anchor-id="current-cycle-focus">Current Cycle Focus</h2>
+<ul>
+<li>Build trusted docs with automation-first QA.</li>
+<li>Run runnable R code checks on all pages with runnable code.</li>
+<li>Keep accountability links for high-risk claims.</li>
+</ul>
+</section>
+<section id="review-sequence-main-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="review-sequence-main-workflow">Review Sequence (Main Workflow)</h2>
+<p>This is the main A -&gt; B workflow for Maarten and Emily. Anything below in “Secondary Backlog” is not part of this immediate review sequence.</p>
+<section id="a.-draft-and-source-linking" class="level3">
+<h3 class="anchored" data-anchor-id="a.-draft-and-source-linking">A. Draft and source-linking</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Draft or update page content.</label></li>
+<li><label><input type="checkbox">Add provenance/accountability links for high-risk claims (hard gate).</label></li>
+<li><label><input type="checkbox">Ensure no unresolved factual placeholders remain except explicit blockers.</label></li>
+</ul>
+</section>
+<section id="b.-automated-qa-gate" class="level3">
+<h3 class="anchored" data-anchor-id="b.-automated-qa-gate">B. Automated QA gate</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Full render passes.</label></li>
+<li><label><input type="checkbox">Link checks pass.</label></li>
+<li><label><input type="checkbox">Search index sanity check passes.</label></li>
+<li><label><input type="checkbox">No unresolved <code>TODO:</code> markers.</label></li>
+<li><label><input type="checkbox">No malformed <code>SOURCE:</code> markers (if inline provenance is used).</label></li>
+<li><label><input type="checkbox">Runnable code executes on all pages that contain runnable code.</label></li>
+</ul>
+</section>
+<section id="c.-human-review-gate" class="level3">
+<h3 class="anchored" data-anchor-id="c.-human-review-gate">C. Human review gate</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Maarten completes technical sign-off.</label></li>
+<li><label><input type="checkbox">Emily completes readability sign-off.</label></li>
+<li><label><input type="checkbox">Any blocking issue is logged in the page board and resolved.</label></li>
+</ul>
+</section>
+<section id="d.-final-release-gate" class="level3">
+<h3 class="anchored" data-anchor-id="d.-final-release-gate">D. Final release gate</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Short human smoke check (desktop/mobile visual sanity and navigation behavior).</label></li>
+<li><label><input type="checkbox">Zero unresolved factual issues.</label></li>
+<li><label><input type="checkbox">Page status moved to <code>Approved</code>.</label></li>
+<li><label><input type="checkbox">Automation QA requirements from step B are still green at merge time.</label></li>
+</ul>
+</section>
+</section>
+<section id="page-status-board" class="level2">
+<h2 class="anchored" data-anchor-id="page-status-board">Page Status Board</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Page</th>
+<th>Risk</th>
+<th>Status</th>
+<th>Technical sign-off (Maarten)</th>
+<th>Readability sign-off (Emily)</th>
+<th>Blocking issue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>guide/index.qmd</td>
+<td>Low</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>guide/getting-started.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>guide/ggm.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>guide/group-comparison.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>guide/edge-selection.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>guide/omrf.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>guide/prior-guide.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>reference/index.qmd</td>
+<td>Low</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>reference/bgm.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>reference/bgmCompare.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>reference/methods.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>reference/extractors.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>reference/datasets.qmd</td>
+<td>Low</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/index.qmd</td>
+<td>Low</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>manual/architecture.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/model-classes.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>manual/numerical.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/nuts.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>manual/warmup.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="secondary-backlog-not-part-of-a---b-review-sequence" class="level2">
+<h2 class="anchored" data-anchor-id="secondary-backlog-not-part-of-a---b-review-sequence">Secondary Backlog (Not Part of A -&gt; B Review Sequence)</h2>
+<p>These tasks are important but are not part of the core review flow above.</p>
+<section id="p1---documentation-delivery-workflow" class="level3">
+<h3 class="anchored" data-anchor-id="p1---documentation-delivery-workflow">P1 - Documentation delivery workflow</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Finalize and follow the process in <code>dev/set-up.md</code>.</label></li>
+<li><label><input type="checkbox">Keep this file updated at every status change.</label></li>
+<li><label><input type="checkbox">Define accountability link examples for high-risk claims.</label></li>
+<li><label><input type="checkbox">Add a small script/CI job for the required automation QA checklist.</label></li>
+</ul>
+</section>
+<section id="p2---infrastructure" class="level3">
+<h3 class="anchored" data-anchor-id="p2---infrastructure">P2 - Infrastructure</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Host the documentation from bgms-docs while keeping the public URL at https://bayesian-graphical-modelling-lab.github.io/bgms/.</label></li>
+<li><label><input type="checkbox">Add GitHub Actions workflow in bgms-docs to render Quarto and deploy to the publishing target used by the bgms website.</label></li>
+<li><label><input type="checkbox">Configure deployment credentials (fine-grained PAT or GitHub App) with least-privilege access.</label></li>
+<li><label><input type="checkbox">Document deployment and rollback steps for maintainers.</label></li>
+</ul>
+</section>
+<section id="p2---documentation-maintenance" class="level3">
+<h3 class="anchored" data-anchor-id="p2---documentation-maintenance">P2 - Documentation maintenance</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Define a process to monitor upstream bgms repository changes for documentation impact.</label></li>
+<li><label><input type="checkbox">Add criteria for when code/API changes require documentation updates.</label></li>
+<li><label><input type="checkbox">Add attribution/licensing note after confirming terms for reused Quarto website structure/content.</label></li>
+<li><label><input type="checkbox">Investigate similar projects for attribution, content licensing, and trademark notices.</label></li>
+<li><label><input type="checkbox">Optional future check: if Positron website assets/templates are introduced later, reassess attribution and license compatibility.</label></li>
+<li><label><input type="checkbox">Deferred: draft <code>docs/attribution.md</code> template and <code>README.md</code> provenance boilerplate after licensing position is confirmed.</label></li>
+</ul>
+</section>
+<section id="p3---upstream-change-automation-bgms---bgms-docs" class="level3">
+<h3 class="anchored" data-anchor-id="p3---upstream-change-automation-bgms---bgms-docs">P3 - Upstream change automation (bgms -&gt; bgms-docs)</h3>
+<p>Event-driven alerts:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">In bgms repo: add workflow that detects docs-impacting file changes and sends <code>repository_dispatch</code> to bgms-docs.</label></li>
+<li><label><input type="checkbox">In bgms repo: define docs-impacting path filters (<code>R/**</code>, <code>src/**</code>, <code>man/**</code>, <code>NAMESPACE</code>, <code>DESCRIPTION</code>, <code>NEWS*</code>, selected <code>vignettes/**</code>).</label></li>
+<li><label><input type="checkbox">In bgms-docs repo: add workflow triggered by <code>repository_dispatch</code> to create or update a docs-sync issue immediately.</label></li>
+<li><label><input type="checkbox">In bgms-docs repo: issue body should include commit SHA, PR number/title, changed files summary, compare URL, and trigger timestamp.</label></li>
+</ul>
+<p>Scheduled checks:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Add weekly scheduled workflow in bgms-docs to compare latest processed bgms SHA with upstream default branch SHA.</label></li>
+<li><label><input type="checkbox">Add monthly scheduled workflow option (configurable) for lower-noise periods.</label></li>
+<li><label><input type="checkbox">Ensure scheduled run opens/updates issue only when there is meaningful delta.</label></li>
+</ul>
+<p>Triage workflow:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Auto-apply labels on created/updated issue: <code>docs-sync</code>, <code>needs-triage</code>.</label></li>
+<li><label><input type="checkbox">Add triage decision checklist to issue template: <code>no-doc-change</code>, <code>minor-doc-update</code>, <code>major-doc-update</code>.</label></li>
+<li><label><input type="checkbox">Auto-convert triage decision to follow-up issue labels (<code>minor</code>, <code>major</code>, <code>blocked</code>) when triage is completed.</label></li>
+<li><label><input type="checkbox">Keep one rolling tracking issue per release cycle to avoid issue spam.</label></li>
+</ul>
+<p>Reliability and security:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Configure cross-repo auth using least-privilege token (<code>BGMS_DOCS_DISPATCH_TOKEN</code>) stored as repository secret.</label></li>
+<li><label><input type="checkbox">Add idempotency guard so the same commit/PR event is not appended twice.</label></li>
+<li><label><input type="checkbox">Add failure notification path (workflow summary + optional issue comment) when dispatch or API update fails.</label></li>
+</ul>
+<p>Optional enhancements:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">In bgms PR template: add checkbox “This change may require docs updates” and map to <code>docs-impact</code> label.</label></li>
+<li><label><input type="checkbox">If <code>docs-impact</code> label is set, force dispatch regardless of path-filter outcome.</label></li>
+<li><label><input type="checkbox">Add contributor docs in <code>README.md</code> describing how automated docs-sync signals are generated and triaged.</label></li>
+</ul>
+</section>
+<section id="p3---design-de-risking-quarto-derived-skeleton" class="level3">
+<h3 class="anchored" data-anchor-id="p3---design-de-risking-quarto-derived-skeleton">P3 - Design de-risking (Quarto-derived skeleton)</h3>
+<p>Layout-impact guardrails:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Capture visual baseline for home, one guide page, one reference page, one manual page, in both light and dark mode.</label></li>
+<li><label><input type="checkbox">Define acceptance criteria per page type (navbar, sidebar, TOC, heading scale, code readability, mobile nav).</label></li>
+<li><label><input type="checkbox">Use change sequencing: replace styles/scripts first, then remove legacy files after replacement behavior is verified.</label></li>
+<li><label><input type="checkbox">For each de-risking PR, include before/after screenshots and a short note on intentional layout changes.</label></li>
+<li><label><input type="checkbox">Keep a rollback path: avoid deleting original files until replacement CSS/JS has passed review.</label></li>
+</ul>
+<p>Keep:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Keep Quarto-generated runtime assets in <code>docs/site_libs/</code> as standard framework output; do not hand-edit generated files.</label></li>
+<li><label><input type="checkbox">Keep overall information architecture pattern (navbar + sidebar + TOC) as implementation pattern, not copied branding.</label></li>
+<li><label><input type="checkbox">Keep package-specific content structure in <code>guide/</code>, <code>reference/</code>, and <code>manual/</code>.</label></li>
+</ul>
+<p>Change:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Refactor <code>index.css</code> hero/banner layout to diverge clearly from inherited skeleton.</label></li>
+<li><label><input type="checkbox">Rewrite <code>theme.scss</code> token choices to a bgms-specific design system.</label></li>
+<li><label><input type="checkbox">Rewrite <code>theme-dark.scss</code> custom rules and remove Quarto/Posit-specific language.</label></li>
+<li><label><input type="checkbox">Review and simplify <code>js.html</code> behavior; keep only behavior needed for bgms docs UX.</label></li>
+<li><label><input type="checkbox">Update <code>styles.css</code> to remove “Quarto-inspired” framing and define explicit bgms branding tokens.</label></li>
+</ul>
+<p>Remove or archive:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Remove <code>_quarto.yml.quarto-web-original</code> when internal reference is no longer needed.</label></li>
+<li><label><input type="checkbox">Remove or replace <code>filters/tools-tabset.lua</code> if tools-tabset UI is unused; otherwise rewrite labels/icons/text.</label></li>
+<li><label><input type="checkbox">Remove leftover Quarto/Posit naming in comments, alt text, class names, and metadata when not functionally required.</label></li>
+</ul>
+<p>Governance and traceability:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Add <code>docs/attribution.md</code> with explicit acknowledgments and links once licensing/permission is clarified.</label></li>
+<li><label><input type="checkbox">Add provenance note in <code>README.md</code> describing what was adapted vs rewritten.</label></li>
+<li><label><input type="checkbox">Record source map in <code>docs/attribution.md</code>: adapted elements vs original bgms work.</label></li>
+<li><label><input type="checkbox">Add release checklist item: design de-risking pass completed before first public deployment.</label></li>
+</ul>
+</section>
+</section>
+<section id="open-decisions" class="level2">
+<h2 class="anchored" data-anchor-id="open-decisions">Open Decisions</h2>
+<ul>
+<li>None currently.</li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script type="text/javascript">
+
+// replace cmd keyboard shortcut w/ control on non-Mac platforms
+const kPlatformMac = typeof navigator !== 'undefined' ? /Mac/.test(navigator.platform) : false;
+if (!kPlatformMac) {
+   var kbds = document.querySelectorAll("kbd")
+   kbds.forEach(function(kbd) {
+      kbd.innerHTML = kbd.innerHTML.replace(/⌘/g, '⌃');
+   });
+}
+
+// tweak headings in pymd
+document.querySelectorAll(".pymd span.co").forEach(el => {
+   if (!el.innerText.startsWith("#|")) {
+      el.style.fontWeight = 1000;
+   }
+});
+
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/bayesian-graphical-modelling-lab\.github\.io\/bgms-docs");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Developed by the <a href="https://bayesiangraphicalmodeling.com">BGM Lab</a></p>
+</div>   
+    <div class="nav-footer-center">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="../guide/index.html">
+<p>Guide</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="../reference/index.html">
+<p>Reference</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="../manual/index.html">
+<p>Manual</p>
+</a>
+  </li>  
+</ul>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/edit/main/dev/task-list.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms">
+      <i class="bi bi-github" role="img" aria-label="bgms GitHub">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
