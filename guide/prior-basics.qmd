@@ -2,26 +2,98 @@
 title: "Prior Basics"
 ---
 
-::: {.callout-note}
-This chapter is under development. Replaces the former prior-guide page
-with a shared primer. Analysis-specific prior guidance lives on the
-edge-selection, group-comparison, and clustering pages.
-:::
+This chapter explains what priors are, how bgms uses them, and when
+the defaults should be changed. Analysis-specific prior guidance
+appears on the [Edge Selection](edge-selection.qmd),
+[Group Comparison](group-comparison.qmd), and
+[Edge Clustering](clustering.qmd) pages.
 
-What priors are, how bgms uses them, and why they matter.
+## What is a prior?
 
-## What Is a Prior?
-
-<!-- TODO: source — accessible introduction to prior distributions -->
+A prior distribution encodes assumptions about a parameter before
+observing data. In Bayesian inference, the prior is combined with the
+likelihood to produce the posterior distribution. The prior matters most
+when data are sparse; as data accumulate, the posterior is increasingly
+driven by the likelihood.
 
 ## Priors in bgms
 
-<!-- TODO: source — R/bgm.R prior-related arguments, man/bgm.Rd -->
+bgms places priors on three types of quantities: pairwise interaction
+parameters, main effect parameters, and (when edge selection is active)
+edge inclusion indicators. Each has a distinct role.
 
-## Edge Priors vs. Parameter Priors
+### Pairwise interaction prior
 
-<!-- TODO: source — distinction between inclusion prior and effect-size prior -->
+The pairwise interactions $\sigma_{ij}$ receive a Cauchy prior (a
+Student-$t$ distribution with one degree of freedom) centered at zero. The
+scale is controlled by `pairwise_scale` (default: 2.5).
 
-## Default Choices and When to Change Them
+The Cauchy distribution has heavy tails, allowing large effects when supported
+by the data, while the peak at zero provides moderate shrinkage. In models
+with many variables and limited data, this regularization prevents extreme
+estimates.
 
-<!-- TODO: source — R/bgm.R defaults, design rationale -->
+When `standardize = TRUE`, the prior scale is adjusted based on the range
+of response scores. Variables with more categories have larger score
+products, which typically correspond to smaller interaction effects. Without
+standardization, a fixed scale is relatively wide for high-category pairs
+and narrow for low-category pairs. The adjustment ensures equivalent
+relative shrinkage across all variable pairs.
+
+### Main effect prior
+
+Main effects (category threshold parameters for ordinal models) receive
+a beta-prime prior with shape parameters `main_alpha` and `main_beta`
+(both default to 0.5). When the two shape parameters are equal, the prior is
+symmetric. The beta-prime distribution is defined on the positive reals and
+provides light regularization of the threshold parameters.
+
+### Edge inclusion prior
+
+When `edge_selection = TRUE`, each edge has a binary indicator
+$\gamma_{ij} \in \{0, 1\}$ governing whether the interaction is included.
+The prior on these indicators is controlled by `edge_prior`:
+
+| Prior | Parameters | Behavior |
+|-------|-----------|----------|
+| `"Bernoulli"` | `inclusion_probability` (default 0.5) | Fixed inclusion probability, same for all edges |
+| `"Beta-Bernoulli"` | `beta_bernoulli_alpha`, `beta_bernoulli_beta` (both default 1) | Inclusion probability given a Beta prior, learned from data |
+| `"Stochastic-Block"` | Multiple (see [Clustering](clustering.qmd)) | Cluster-based inclusion probabilities with separate within/between rates |
+
+## Edge priors vs. parameter priors
+
+These two types of priors serve different purposes:
+
+- **Edge inclusion priors** determine how likely each edge is to be present
+  _a priori_. They control the sparsity of the estimated network.
+
+- **Parameter priors** (Cauchy for interactions, beta-prime for thresholds)
+  control the regularization of effect sizes. They determine how much
+  shrinkage is applied to nonzero effects.
+
+In a spike-and-slab framework, the "spike" is the prior mass at zero (edge
+excluded), and the "slab" is the Cauchy prior over effect sizes (edge
+included). Both matter for the posterior, but they answer different
+questions: the inclusion prior affects _whether_ an edge is present, while
+the parameter prior affects _how large_ the estimated effect is.
+
+## Default choices and when to change them
+
+The defaults are designed for moderate-sized networks (5–30 variables) with
+ordinal data and are a reasonable starting point for most analyses:
+
+- **`pairwise_scale = 2.5`**: Appropriate for standardized ordinal data.
+  Consider increasing it if effects are expected to be large, or decreasing
+  it for stronger shrinkage in dense networks.
+
+- **`inclusion_probability = 0.5`**: Assigns equal prior weight to edge
+  presence and absence. This is a standard noninformative choice. Lowering
+  it encodes a prior expectation of sparser networks.
+
+- **`main_alpha = 0.5`, `main_beta = 0.5`**: A weakly informative symmetric
+  prior. Changing these is rarely necessary unless there is strong prior
+  information about threshold magnitudes.
+
+- **`standardize = FALSE`**: Turned off by default. Set to `TRUE` when
+  variables have different numbers of response categories and comparable
+  shrinkage across pairs is desired.

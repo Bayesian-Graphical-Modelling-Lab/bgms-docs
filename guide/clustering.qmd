@@ -2,25 +2,87 @@
 title: "Edge Clustering"
 ---
 
-::: {.callout-note}
-This chapter is under development.
-:::
+The stochastic block model (SBM) prior in bgms discovers clusters of
+edges in the network. Nodes are assigned to latent blocks, and edge
+inclusion probabilities depend on whether the two endpoints belong to the
+same block or different blocks.
 
-Using the stochastic block model prior to discover clusters of edges
-in the network.
+## What is edge clustering?
 
-## What Is Edge Clustering?
+In many applied networks, edges are not exchangeable: some groups of
+variables are densely connected while connections between groups are sparse.
+The SBM prior captures this structure by learning block assignments from
+the data. Nodes within the same block share a within-cluster inclusion
+probability, and edges between blocks share a (typically lower)
+between-cluster inclusion probability.
 
-<!-- TODO: source — SBM/MFM conceptual overview -->
+## Setting up the SBM prior
 
-## Setting Up the SBM Prior
+To use the SBM prior, set `edge_prior = "Stochastic-Block"` in `bgm()`:
 
-<!-- TODO: source — bgm() edge_prior argument, man/bgm.Rd -->
+```r
+fit = bgm(
+  x = data,
+  edge_prior = "Stochastic-Block",
+  seed = 1234
+)
+```
 
-## Interpreting Block Structure
+The SBM prior has several hyperparameters:
 
-<!-- TODO: source — extract_sbm(), co-clustering matrix -->
+| Parameter | Default | Role |
+|-----------|---------|------|
+| `beta_bernoulli_alpha`, `beta_bernoulli_beta` | 1, 1 | Shape parameters of the Beta prior on within-cluster inclusion probability |
+| `beta_bernoulli_alpha_between`, `beta_bernoulli_beta_between` | 1, 1 | Shape parameters of the Beta prior on between-cluster inclusion probability |
+| `dirichlet_alpha` | 1 | Concentration of the Dirichlet prior on block assignments |
+| `lambda` | 1 | Rate of the zero-truncated Poisson prior on the number of clusters |
 
-## Prior Choices for Clustering
+With the defaults, the prior is symmetric (within and between clusters
+have the same Beta(1, 1) prior on inclusion probability) and the number
+of clusters is determined by the data.
 
-<!-- TODO: source — SBM-specific prior parameters -->
+## Interpreting block structure
+
+The `extract_sbm()` function retrieves the SBM results:
+
+```r
+sbm = extract_sbm(fit)
+```
+
+This returns:
+
+- **`posterior_mean_allocations`**: the estimated cluster assignment for
+  each node, computed using the method of Dahl (2006).
+- **`posterior_mode_allocations`**: the most frequent cluster assignment
+  across iterations.
+- **`posterior_coclustering_matrix`**: a symmetric matrix where entry
+  $(i, j)$ is the proportion of iterations in which nodes $i$ and $j$
+  were assigned to the same cluster. Plotting this matrix reveals the
+  block structure.
+- **`posterior_num_blocks`**: a table of posterior probabilities for each
+  possible number of clusters.
+
+## Prior choices for clustering
+
+- **`lambda`** controls the expected number of clusters. A small
+  `lambda` favors fewer clusters; a larger `lambda` allows more. The
+  zero-truncated Poisson prior ensures at least one cluster.
+
+- **`dirichlet_alpha`** controls how evenly nodes are distributed across
+  clusters. A value of 1 gives a uniform prior over partitions. Smaller
+  values favor uneven cluster sizes (a few large clusters and several
+  small ones).
+
+- The **within-cluster** Beta parameters control how dense within-cluster
+  connectivity is _a priori_. Setting `beta_bernoulli_alpha > beta_bernoulli_beta`
+  favors dense within-cluster connections.
+
+- The **between-cluster** Beta parameters control between-cluster
+  connectivity. Setting `beta_bernoulli_beta_between > beta_bernoulli_alpha_between`
+  favors sparse between-cluster connections.
+
+## References
+
+Sekulovski, N., Keetelaar, S., Haslbeck, J. M. B., & Marsman, M. (2025).
+Bayesian variable selection in multilevel and multi-group graphical models
+using a stochastic block model. *Manuscript submitted for publication*.

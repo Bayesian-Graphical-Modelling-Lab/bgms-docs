@@ -2,12 +2,61 @@
 title: "Gaussian Graphical Model"
 ---
 
-::: {.callout-note}
-This chapter is under development.
-:::
+The Gaussian graphical model (GGM) is a Markov Random Field for continuous
+variables. In bgms, the GGM is fit when `variable_type = "continuous"`.
 
-The Gaussian graphical model (GGM) is used for networks of continuous variables.
+## The model
 
-## Overview
+A GGM assumes that $p$ continuous variables follow a multivariate normal
+distribution:
 
-*Content to be added: precision matrix, partial correlations, interpretation.*
+$$
+\mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})
+$$
+
+The network structure is encoded in the precision matrix
+$\boldsymbol{K} = \boldsymbol{\Sigma}^{-1}$. A zero entry $K_{ij} = 0$
+means that variables $i$ and $j$ are conditionally independent given all
+other variables — equivalently, the edge between nodes $i$ and $j$ is
+absent.
+
+## Partial correlations
+
+The off-diagonal entries of the standardized precision matrix are partial
+correlations:
+
+$$
+\rho_{ij \cdot \text{rest}} = -\frac{K_{ij}}{\sqrt{K_{ii} K_{jj}}}
+$$
+
+A positive partial correlation means that, holding all other variables
+constant, higher values of $x_i$ are associated with higher values of $x_j$.
+bgms reports these partial correlations as the pairwise interaction
+parameters.
+
+## Fitting a GGM
+
+To fit a GGM, pass continuous data and set `variable_type`:
+
+```r
+fit = bgm(x = continuous_data, variable_type = "continuous", seed = 1234)
+```
+
+The `summary()` and `coef()` methods work the same as for ordinal models.
+The pairwise effects in the output are partial correlations, and the
+diagonal of the pairwise matrix contains the precision matrix diagonal.
+
+## Edge selection
+
+When `edge_selection = TRUE` (the default), bgms applies spike-and-slab
+priors to the off-diagonal entries of the precision matrix. Edges with
+posterior inclusion probability above 0.5 have more evidence for presence
+than absence. See [Edge Selection](edge-selection.qmd) for details.
+
+## Missing data
+
+For continuous data, missing values can be imputed within the MCMC sampler
+by setting `na_action = "impute"`. Missing entries are resampled at each
+iteration from their full conditional distribution. The default behavior is
+`na_action = "listwise"`, which removes rows with any missing values before
+fitting.

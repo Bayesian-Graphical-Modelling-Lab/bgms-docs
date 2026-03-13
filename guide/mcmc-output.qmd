@@ -2,24 +2,112 @@
 title: "MCMC Output"
 ---
 
-::: {.callout-note}
-This chapter is under development.
-:::
+This chapter describes what `bgm()` and `bgmCompare()` return and how to
+access specific components of the output.
 
-What the sampler returns and how to work with the output.
+## The fit object
 
-## The bgms Fit Object
+Both `bgm()` and `bgmCompare()` return a list (of class `"bgms"` or
+`"bgmCompare"`) containing posterior summaries, posterior mean matrices,
+raw MCMC samples, and metadata.
 
-<!-- TODO: source — R/build_output.R, str(fit) -->
+```r
+fit = bgm(x = data, seed = 1234)
+names(fit)
+```
 
-## Posterior Summaries
+## Posterior summaries
 
-<!-- TODO: source — posterior_summary_*, posterior_mean_* fields -->
+The `summary()` method prints formatted tables of posterior statistics. Each
+table includes:
 
-## Raw Samples
+| Column | Meaning |
+|--------|---------|
+| `mean` | Posterior mean |
+| `sd` | Posterior standard deviation |
+| `MCSE` | Monte Carlo standard error |
+| `n_eff` | Effective sample size (unconditional) |
+| `Rhat` | Split R-hat convergence diagnostic |
 
-<!-- TODO: source — fit$raw_samples structure, per-chain layout -->
+For pairwise effects under edge selection, two additional columns appear:
 
-## Extracting Specific Results
+| Column | Meaning |
+|--------|---------|
+| `n_eff_mixt` | Mixture ESS accounting for spike-and-slab selection |
+| `inclusion_probability` | Posterior inclusion probability |
 
-<!-- TODO: source — R/extractor_functions.R -->
+Access specific summary tables with:
+
+```r
+summary(fit)$pairwise   # pairwise interactions
+summary(fit)$main        # category thresholds (ordinal) or means (GGM)
+summary(fit)$indicator   # inclusion indicators (if edge selection active)
+```
+
+## Posterior mean matrices
+
+The `coef()` method returns posterior means in matrix form:
+
+```r
+coef(fit)$pairwise   # p x p symmetric matrix of interaction strengths
+coef(fit)$indicator   # p x p symmetric matrix of inclusion probabilities
+```
+
+For ordinal models, `coef(fit)$main` returns a matrix of category threshold
+means (variables in rows, categories in columns). For mixed MRFs, it returns
+a list with `$discrete` and `$continuous` components.
+
+## Raw MCMC samples
+
+For custom analyses, the raw posterior draws are stored in
+`fit$raw_samples`:
+
+```r
+str(fit$raw_samples, max.level = 1)
+```
+
+The structure is:
+
+- `$main`: list of matrices (one per chain), each with rows = iterations
+  and columns = main effect parameters.
+- `$pairwise`: list of matrices (one per chain) for pairwise interactions.
+- `$indicator`: list of matrices for edge indicators (if edge selection
+  was active).
+- `$allocations`: list of matrices for cluster assignments (if SBM prior
+  was used).
+- `$nchains`: number of chains.
+- `$niter`: number of post-warmup iterations per chain.
+- `$parameter_names`: named lists of parameter labels.
+
+Each chain is stored separately, allowing per-chain diagnostics and
+trace plots (see [MCMC Diagnostics](mcmc-diagnostics.qmd)).
+
+## Extracting specific results
+
+The `extract_*()` family of functions provides targeted access to model
+components. These are documented in the
+[Extractor Functions](../reference/extractors.qmd) reference, but the most
+commonly used are:
+
+| Function | Returns |
+|----------|---------|
+| `extract_arguments()` | Arguments used when fitting the model |
+| `extract_pairwise_interactions()` | Raw pairwise interaction samples |
+| `extract_main_effects()` | Raw main effect samples |
+| `extract_indicators()` | Raw indicator samples |
+| `extract_posterior_inclusion_probabilities()` | Posterior inclusion probabilities |
+| `extract_ess()` | Effective sample sizes |
+| `extract_rhat()` | Split R-hat values |
+| `extract_sbm()` | SBM cluster assignments and co-clustering matrix |
+
+## NUTS diagnostics
+
+When `update_method = "nuts"` (the default), additional diagnostics are
+stored in `fit$nuts_diag`:
+
+```r
+fit$nuts_diag$summary       # per-chain summary of tree depth, divergences, energy
+fit$nuts_diag$warmup_check  # warmup equilibration diagnostics
+```
+
+These are described in detail in [MCMC Diagnostics](mcmc-diagnostics.qmd).

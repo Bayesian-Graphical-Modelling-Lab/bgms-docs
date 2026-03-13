@@ -2,19 +2,101 @@
 title: "Ordinal Markov Random Field"
 ---
 
-::: {.callout-note}
-This chapter is under development.
-:::
+The ordinal Markov Random Field (MRF) is a graphical model for networks of
+binary and ordinal variables. It is the default model in bgms.
 
-The ordinal Markov random field (MRF) is a graphical model for networks of 
-binary and ordinal variables.
+## The model
 
-## Overview
+For $p$ ordinal variables with observations
+$\mathbf{x} = (x_1, \ldots, x_p)$, the ordinal MRF specifies the joint
+distribution as:
 
-*Content to be added: joint distribution, threshold parameters, interaction 
-parameters, pseudolikelihood approximation.*
+$$
+p(\mathbf{x}) \propto \exp\left(\sum_{i=1}^{p} \mu_{x_i}^{(i)} +
+\sum_{i<j} \sigma_{ij} \, x_i \, x_j\right)
+$$
+
+where $\mu_{x_i}^{(i)}$ are category threshold parameters for variable $i$
+(one per category above the lowest) and $\sigma_{ij}$ is the pairwise
+interaction between variables $i$ and $j$.
+
+A positive interaction $\sigma_{ij} > 0$ means that higher categories of
+$x_i$ tend to co-occur with higher categories of $x_j$, conditional on all
+other variables. The category thresholds control the marginal distribution
+of each variable.
+
+## Regular ordinal variables
+
+By default, bgms treats ordinal variables as "regular": each category
+above the lowest receives its own threshold parameter. This imposes no
+constraint on the shape of the category distribution. Variables are
+internally recoded to consecutive integers starting at 0.
+
+For binary variables (two categories, coded 0 and 1), the model reduces to
+the Ising model, a classical MRF for binary data. The single threshold
+parameter controls the probability of category 1 relative to category 0.
+
+## Blume-Capel variables
+
+For ordinal variables with a natural baseline or reference category (e.g., a
+"neutral" response), the Blume-Capel parameterization models category
+thresholds as a quadratic function of distance from the baseline:
+
+$$
+\mu_c = \alpha \cdot (c - b) + \beta \cdot (c - b)^2
+$$
+
+where $c$ is the category, $b$ is the baseline category, $\alpha$ captures
+the linear trend across categories, and $\beta$ captures the preference
+toward or away from the baseline:
+
+- $\beta < 0$: the model favors responses near the baseline category
+- $\beta > 0$: the model favors extreme responses (far from the baseline)
+
+Pairwise interactions between Blume-Capel variables use centered scores
+$(c - b)$ rather than raw category values.
+
+To use Blume-Capel variables, set `variable_type = "blume-capel"` and
+provide the `baseline_category` argument:
+
+```r
+fit = bgm(x = data, variable_type = "blume-capel",
+          baseline_category = 2, seed = 1234)
+```
+
+The `baseline_category` can be a single integer (applied to all variables)
+or a vector of length $p$.
+
+## Pseudolikelihood
+
+The normalizing constant of the ordinal MRF is intractable for all but
+the smallest networks. bgms uses a pseudolikelihood approximation: the
+product of full conditional distributions replaces the joint distribution.
+This makes estimation feasible for networks with many variables while
+retaining consistent parameter estimates.
+
+## Fitting an ordinal MRF
+
+The ordinal MRF is the default model type. For ordinal or binary data,
+call `bgm()` directly:
+
+```r
+fit = bgm(x = data, seed = 1234)
+```
+
+For Blume-Capel variables specifically:
+
+```r
+fit = bgm(x = data, variable_type = "blume-capel",
+          baseline_category = 3, seed = 1234)
+```
+
+The output contains posterior summaries for both threshold parameters
+(`posterior_summary_main`) and pairwise interactions
+(`posterior_summary_pairwise`).
 
 ## References
 
-Marsman, M., van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian analysis 
-of the ordinal Markov random field. *Psychometrika*, 90(1), 146–182.
+Marsman, M., van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian
+analysis of the ordinal Markov random field. *Psychometrika*, 90(1),
+146–182.

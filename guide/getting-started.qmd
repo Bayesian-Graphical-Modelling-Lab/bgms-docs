@@ -2,7 +2,8 @@
 title: "Getting Started"
 ---
 
-This chapter covers installation and basic usage of bgms.
+This chapter covers installation, a first model fit, and how to read the
+output.
 
 ## Installation
 
@@ -12,7 +13,7 @@ This chapter covers installation and basic usage of bgms.
 install.packages("bgms")
 ```
 
-### Development Version
+### Development version
 
 ```r
 if(!requireNamespace("remotes")) {
@@ -21,34 +22,103 @@ if(!requireNamespace("remotes")) {
 remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")
 ```
 
-## Basic Example
+## Fitting a model
 
-We'll use the Wenchuan earthquake data included in the package:
+The main entry point is `bgm()`. It accepts a data frame of binary, ordinal,
+continuous, or mixed variables and estimates a Markov Random Field.
+
+The Wenchuan dataset, included in the package, contains ordinal posttraumatic
+stress ratings from 362 survivors of the 2008 Wenchuan earthquake. We use a
+five-item subset as a quick demonstration.
+
+```{r}
+library(bgms)
+
+data(Wenchuan)
+data = Wenchuan[, 1:5]
+head(data)
+```
 
 ```{r}
 #| eval: false
-library(bgms)
+fit = bgm(data, seed = 1234)
+```
 
-# Load example data
-data(Wenchuan)
+```{r}
+#| include: false
+fit = bgm(data, seed = 1234, chains = 2, display_progress = "none",
+           verbose = FALSE)
+```
 
-# Fit a Bayesian graphical model
-fit <- bgm(Wenchuan)
+By default, `bgm()` runs four parallel MCMC chains using the No-U-Turn
+Sampler (NUTS), with Bayesian edge selection enabled. Here we use
+`seed = 1234` for reproducibility.
 
-# View results
+## Posterior summaries
+
+```{r}
 summary(fit)
 ```
 
-## Understanding the Output
+The summary shows posterior means, standard deviations, Monte Carlo standard
+errors (MCSE), effective sample sizes (ESS), and R-hat values for each
+parameter. For pairwise interactions, it also reports posterior inclusion
+probabilities when edge selection is active.
 
-The `summary()` output shows:
- 
-- **Edge inclusion probabilities** — How likely is each edge to be present?
-- **Parameter estimates** — Posterior means for interaction strengths
-- **Convergence diagnostics** — ESS and R-hat values
+## Posterior means
 
-## Next Steps
+```{r}
+coef(fit)
+```
 
-- Learn about the [statistical model](omrf.qmd) underlying bgms
+`coef()` returns posterior mean matrices: `$pairwise` contains the
+interaction strengths and `$indicator` contains edge inclusion
+probabilities.
+
+## Network plot
+
+To visualize the estimated network, threshold inclusion probabilities at 0.5
+and plot the result using the qgraph package.
+
+```{r}
+#| fig-width: 7
+#| fig-height: 7
+library(qgraph)
+
+median_probability_network = coef(fit)$pairwise
+median_probability_network[coef(fit)$indicator < 0.5] = 0.0
+
+qgraph(median_probability_network,
+  theme = "TeamFortress",
+  maximum = 1,
+  fade = FALSE,
+  color = c("#f0ae0e"), vsize = 10, repulsion = .9,
+  label.cex = 1, label.scale = "FALSE",
+  labels = colnames(data)
+)
+```
+
+Edges with posterior inclusion probability below 0.5 are set to zero, so only
+edges with at least moderate evidence of inclusion appear in the plot.
+
+## Continuous data
+
+For continuous variables, `bgm()` fits a Gaussian graphical model. Set
+`variable_type = "continuous"`:
+
+```r
+fit_ggm = bgm(continuous_data, variable_type = "continuous", seed = 1234)
+summary(fit_ggm)
+```
+
+The pairwise effects are partial correlations (off-diagonal entries of the
+standardized precision matrix). Missing values can be imputed during sampling
+with `na_action = "impute"`.
+
+## Next steps
+
+- Learn about the [ordinal MRF](omrf.qmd) and [GGM](ggm.qmd) underlying
+  bgms
 - Understand [edge selection](edge-selection.qmd) with spike-and-slab priors
-- Compare groups with [bgmCompare](group-comparison.qmd)
+- Compare groups with [`bgmCompare()`](group-comparison.qmd)
+- Check convergence with [MCMC diagnostics](mcmc-diagnostics.qmd)

@@ -2,24 +2,80 @@
 title: "The Bayesian Approach"
 ---
 
-::: {.callout-note}
-This chapter is under development.
-:::
+bgms uses Bayesian inference to estimate graphical models. This means that
+all unknown quantities — interaction parameters, edge inclusion indicators,
+and model structure — are treated as random variables with probability
+distributions. The output is a posterior distribution, not a single point
+estimate.
 
-Why bgms uses Bayesian inference and what that means for the user.
+## Prior, likelihood, posterior
 
-## Prior, Likelihood, Posterior
+Bayesian inference combines a prior distribution with the likelihood of the
+observed data to produce a posterior distribution. For a parameter $\theta$
+and data $\mathbf{x}$:
 
-<!-- TODO: source — standard Bayesian inference overview -->
+$$
+p(\theta \mid \mathbf{x}) \propto p(\mathbf{x} \mid \theta) \; p(\theta)
+$$
 
-## Credible Intervals
+- The **prior** $p(\theta)$ encodes assumptions about the parameter before
+  observing data. In bgms, priors are placed on interaction parameters, main
+  effects, and edge indicators. See [Prior Basics](prior-basics.qmd) for
+  details.
 
-<!-- TODO: source — posterior summaries as returned by bgm() -->
+- The **likelihood** $p(\mathbf{x} \mid \theta)$ measures how well the
+  model with parameter value $\theta$ explains the observed data.
 
-## Bayes Factors
+- The **posterior** $p(\theta \mid \mathbf{x})$ is the updated distribution
+  of $\theta$ after observing the data. All inference — point estimates,
+  intervals, hypothesis tests — comes from this posterior.
 
-<!-- TODO: source — Bayes factor for edge inclusion in bgms -->
+## Posterior summaries
 
-## How bgms Uses MCMC
+bgms summarizes the posterior with several quantities:
 
-<!-- TODO: source — brief forward pointer to mcmc-output and mcmc-diagnostics -->
+- **Posterior mean**: the average of the posterior distribution. Reported by
+  `coef()` and in the `summary()` output.
+
+- **Posterior standard deviation**: the spread of the posterior. A small
+  standard deviation indicates a precise estimate.
+
+- **Credible intervals**: ranges that contain the parameter with a given
+  posterior probability (e.g., a 95% credible interval). Unlike frequentist
+  confidence intervals, credible intervals have a direct probability
+  interpretation.
+
+## Bayes factors
+
+For edge selection, bgms uses Bayes factors to quantify evidence for the
+presence or absence of each edge. The inclusion Bayes factor for edge
+$(i, j)$ is:
+
+$$
+\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{p(\gamma_{ij} = 0 \mid \mathbf{x})} \bigg/ \frac{p(\gamma_{ij} = 1)}{p(\gamma_{ij} = 0)}
+$$
+
+where $\gamma_{ij}$ is the binary indicator for edge inclusion. When the
+prior inclusion probability is 0.5, this simplifies to the posterior odds:
+
+$$
+\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{1 - p(\gamma_{ij} = 1 \mid \mathbf{x})}
+$$
+
+A Bayes factor greater than 1 favors edge inclusion; less than 1 favors
+exclusion. The reciprocal $1 / \text{BF}_{10}$ gives the evidence for
+exclusion. See [Edge Selection](edge-selection.qmd) for interpretation
+guidelines.
+
+## How bgms uses MCMC
+
+The posterior distributions in bgms do not have closed-form solutions.
+Instead, bgms draws samples from the posterior using Markov chain Monte
+Carlo (MCMC) methods. The default sampler is the No-U-Turn Sampler (NUTS),
+an adaptive form of Hamiltonian Monte Carlo. bgms also supports fixed-length
+HMC and adaptive Metropolis-Hastings.
+
+Multiple chains run in parallel to diagnose convergence. Key diagnostics —
+effective sample size (ESS), R-hat, and energy diagnostics — are described
+in [MCMC Diagnostics](mcmc-diagnostics.qmd). The structure of the raw MCMC
+output is described in [MCMC Output](mcmc-output.qmd).

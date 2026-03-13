@@ -2,26 +2,37 @@
 title: "User's Guide"
 toc: false
 ---
- 
-The User's Guide provides conceptual background and practical tutorials for 
-using bgms.
 
-## Contents
+The User's Guide covers conceptual background and practical tutorials for
+bgms. It is organized into four parts: background concepts, model types,
+analysis workflows, and MCMC output.
 
-- [Getting Started](getting-started.qmd) — Installation and first steps
-- [Ordinal MRF](omrf.qmd) — Understanding the ordinal Markov random field
-- [GGM](ggm.qmd) — Gaussian graphical models for continuous data
+### Background
+
+- [Getting Started](getting-started.qmd) — Installation and first model fit
+- [Graphical Models](graphical-models.qmd) — Nodes, edges, and conditional independence
+- [The Bayesian Approach](bayesian-approach.qmd) — Priors, posteriors, and Bayes factors
+- [Prior Basics](prior-basics.qmd) — How bgms uses priors and when to change defaults
+
+### Models
+
+- [Gaussian Graphical Model](ggm.qmd) — Continuous data, partial correlations, precision matrix
+- [Ordinal MRF](omrf.qmd) — Binary and ordinal data, category thresholds, pairwise interactions
+- [Mixed MRF](mixed-model.qmd) — Datasets with both continuous and discrete variables
+
+### Analyses
+
 - [Edge Selection](edge-selection.qmd) — Spike-and-slab priors for structure learning
-- [Group Comparison](group-comparison.qmd) — Comparing networks with bgmCompare
-- [Prior Guide](prior-guide.qmd) — Choosing priors for your analysis
+- [Group Comparison](group-comparison.qmd) — Comparing networks across groups with `bgmCompare()`
+- [Edge Clustering](clustering.qmd) — Stochastic block model prior for discovering edge clusters
 
-## Prerequisites
+### MCMC Output
 
-This guide assumes basic familiarity with:
+- [MCMC Output](mcmc-output.qmd) — What the sampler returns and how to access it
+- [MCMC Diagnostics](mcmc-diagnostics.qmd) — Convergence checks: ESS, R-hat, trace plots, divergences
 
-- R programming
-- Bayesian inference concepts
-- Graphical models / network analysis
+### Prerequisites
 
-For background on Bayesian analysis of psychological networks, see 
-[Huth et al. (2023)](https://doi.org/10.1177/25152459231193334).
+This guide assumes basic familiarity with R programming and the goals of
+network analysis. The [Background](#background) chapters introduce the
+necessary statistical concepts.

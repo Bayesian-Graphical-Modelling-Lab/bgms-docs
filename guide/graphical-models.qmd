@@ -2,25 +2,81 @@
 title: "Graphical Models"
 ---
 
-::: {.callout-note}
-This chapter is under development.
-:::
+A graphical model represents the statistical relationships among a set of
+variables as a graph. Each variable is a node, and edges between nodes
+encode direct statistical associations. bgms estimates undirected graphical
+models — specifically, Markov Random Fields.
 
-What graphical models are and why they are useful for analyzing
-multivariate data.
+## Nodes and edges
 
-## Nodes and Edges
+In a graphical model, the $p$ variables in a dataset are represented as
+nodes (or vertices) of a graph. An edge between two nodes indicates a
+direct statistical association between the corresponding variables, after
+accounting for all other variables in the model.
 
-<!-- TODO: source — introductory MRF/network literature -->
+The absence of an edge between two nodes means that the two variables are
+conditionally independent given the remaining variables. This is the key
+interpretive property of undirected graphical models: the graph encodes the
+conditional independence structure of the joint distribution.
 
-## Conditional Independence
+## Conditional independence
 
-<!-- TODO: source — separation in undirected graphs -->
+Two variables $X_i$ and $X_j$ are conditionally independent given the rest
+if knowing the value of $X_i$ provides no additional information about $X_j$
+once all other variables are observed. In the graph, this corresponds to the
+absence of a direct edge between nodes $i$ and $j$.
+
+Conditional independence is distinct from marginal independence. Two variables
+may be marginally correlated (both associated with a third variable) yet
+conditionally independent once that third variable is accounted for. The
+graphical model separates direct from indirect associations.
 
 ## Markov Random Fields
 
-<!-- TODO: source — connection to bgms model families (GGM, OMRF) -->
+A Markov Random Field (MRF) is an undirected graphical model in which the
+joint distribution of the variables factorizes according to the graph
+structure. For a set of $p$ variables with observations
+$\mathbf{x} = (x_1, \ldots, x_p)$, the MRF specifies:
 
-## Why Networks?
+$$
+p(\mathbf{x}) \propto \exp\left(\sum_{i} \theta_i(x_i) +
+\sum_{i < j} \sigma_{ij} \, s_i(x_i) \, s_j(x_j)\right)
+$$
 
-<!-- TODO: source — applied motivation for network analysis -->
+where $\theta_i(x_i)$ are main effects (node potentials), $\sigma_{ij}$ are
+pairwise interaction parameters, and $s_i(x_i)$ are sufficient statistics
+that depend on the variable type.
+
+The pairwise interaction $\sigma_{ij}$ controls the edge between nodes $i$
+and $j$: when $\sigma_{ij} = 0$, the edge is absent and the two variables
+are conditionally independent.
+
+## Model families in bgms
+
+bgms supports three model families, all MRFs:
+
+- **Ordinal MRF** — for binary and ordinal variables. Category thresholds
+  serve as main effects, and pairwise interactions capture associations
+  between ordinal scores. See [Ordinal MRF](omrf.qmd).
+
+- **Gaussian Graphical Model (GGM)** — for continuous variables. The
+  precision matrix (inverse covariance matrix) determines the edge
+  structure: nonzero off-diagonal entries correspond to edges. See
+  [GGM](ggm.qmd).
+
+- **Mixed MRF** — for datasets containing both discrete and continuous
+  variables. Combines the ordinal MRF and GGM into a joint model. See
+  [Mixed MRF](mixed-model.qmd).
+
+## Why networks?
+
+In psychology and the social sciences, graphical models are used to study
+how symptoms, attitudes, or behaviors relate to each other directly, rather
+than through latent constructs. Estimating the conditional independence
+structure — the network — identifies which pairs of variables have direct
+associations and which are only indirectly related.
+
+Bayesian methods add the ability to quantify evidence for the presence or
+absence of each edge, rather than relying on thresholding rules applied to
+point estimates. bgms implements this through Bayesian edge selection with
+spike-and-slab priors (see [Edge Selection](edge-selection.qmd)).

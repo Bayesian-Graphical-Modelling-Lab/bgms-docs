@@ -2,25 +2,90 @@
 title: "Mixed Markov Random Field"
 ---
 
-::: {.callout-note}
-This chapter is under development.
-:::
+The mixed MRF is a graphical model for datasets containing both discrete
+(binary or ordinal) and continuous variables. bgms fits a mixed MRF
+automatically when `variable_type` includes both discrete and continuous
+types.
 
-Fitting a network model when the data contains both continuous and
-discrete variables.
+## When to use a mixed MRF
 
-## When to Use a Mixed MRF
+Use a mixed MRF when the dataset contains a mix of variable types —
+for example, ordinal symptom ratings alongside continuous physiological
+measurements. Rather than discretizing continuous variables or treating
+ordinal scores as continuous, the mixed MRF models each variable according
+to its measurement scale.
 
-<!-- TODO: source — model selection logic in R/bgm_spec.R -->
+## The model
 
-## Data Requirements
+The mixed MRF combines the ordinal MRF (for discrete variables) and the
+GGM (for continuous variables) into a single joint distribution. The model
+includes three types of pairwise interactions:
 
-<!-- TODO: source — R/validate_data.R, R/validate_variable_types.R -->
+- **Discrete–discrete**: interactions between ordinal/binary variables,
+  as in the ordinal MRF.
+- **Continuous–continuous**: partial correlations between continuous
+  variables, as in the GGM (encoded in a precision-like matrix $K_{yy}$).
+- **Cross-type**: interactions between discrete and continuous variables,
+  capturing how a change in an ordinal variable's category is associated
+  with a shift in a continuous variable's conditional mean.
 
-## Fitting the Model
+## Data requirements
 
-<!-- TODO: source — bgm() with mixed data, man/bgm.Rd -->
+Each column in the data frame must have a corresponding entry in
+`variable_type`. Allowed types are `"ordinal"`, `"blume-capel"`, and
+`"continuous"`. A per-variable vector is required when the types differ:
 
-## Interpreting Mixed Parameters
+```r
+# Example: first 3 variables ordinal, last 2 continuous
+fit = bgm(
+  x = data,
+  variable_type = c("ordinal", "ordinal", "ordinal",
+                     "continuous", "continuous"),
+  seed = 1234
+)
+```
 
-<!-- TODO: source — discrete-discrete, continuous-continuous, cross-type blocks -->
+bgms validates that ordinal variables contain integer-valued responses and
+that continuous variables are numeric. Missing values are handled by
+`na_action` (`"listwise"` or `"impute"`), just as for single-type models.
+
+## Pseudolikelihood options
+
+For mixed MRFs, the `pseudolikelihood` argument controls how the discrete
+full conditional distributions are approximated:
+
+- **`"conditional"`** (default): conditions on the observed continuous
+  variables when computing the discrete full conditionals. This is faster
+  because the discrete pseudolikelihood does not depend on the continuous
+  interaction matrix $K_{yy}$.
+
+- **`"marginal"`**: integrates out the continuous variables, so the discrete
+  full conditionals account for indirect associations induced through the
+  continuous block. This is more expensive per iteration but may be more
+  appropriate when discrete-continuous coupling is strong.
+
+## Interpreting the output
+
+The `coef()` method returns a single `$pairwise` matrix that contains all
+three types of interactions. The diagonal entries correspond to the $K_{yy}$
+diagonal (for continuous variables) or are zero (for discrete variables).
+The off-diagonal entries are pairwise interactions regardless of variable
+type.
+
+The `$indicator` matrix (when edge selection is active) reports posterior
+inclusion probabilities for all edges, including cross-type edges.
+
+## Fitting a mixed MRF
+
+```r
+fit = bgm(
+  x = data,
+  variable_type = c("ordinal", "ordinal", "continuous", "continuous"),
+  seed = 1234
+)
+summary(fit)
+coef(fit)
+```
+
+The workflow — fitting, summarizing, extracting coefficients, checking
+diagnostics — is the same as for pure ordinal or pure continuous models.
