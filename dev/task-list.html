@@ -42,9 +42,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-b114666cb3f3bbe485ca70f4b8702a30.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-d6fc7e6f91b07f5c686a965d04b7fdef.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-b114666cb3f3bbe485ca70f4b8702a30.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8a9d6b8e492df61c245adf37faf86101.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-e6057a134f0d111b58dfd49f1d11c2a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8a9d6b8e492df61c245adf37faf86101.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -77,7 +77,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -303,36 +303,7 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#bgms-docs-task-list-single-source-of-truth" id="toc-bgms-docs-task-list-single-source-of-truth" class="nav-link active" data-scroll-target="#bgms-docs-task-list-single-source-of-truth">bgms-docs Task List (Single Source of Truth)</a>
-  <ul class="collapse">
-  <li><a href="#how-to-use-this-board" id="toc-how-to-use-this-board" class="nav-link" data-scroll-target="#how-to-use-this-board">How To Use This Board</a></li>
-  <li><a href="#current-cycle-focus" id="toc-current-cycle-focus" class="nav-link" data-scroll-target="#current-cycle-focus">Current Cycle Focus</a></li>
-  <li><a href="#review-sequence-main-workflow" id="toc-review-sequence-main-workflow" class="nav-link" data-scroll-target="#review-sequence-main-workflow">Review Sequence (Main Workflow)</a>
-  <ul class="collapse">
-  <li><a href="#a.-draft-and-source-linking" id="toc-a.-draft-and-source-linking" class="nav-link" data-scroll-target="#a.-draft-and-source-linking">A. Draft and source-linking</a></li>
-  <li><a href="#b.-automated-qa-gate" id="toc-b.-automated-qa-gate" class="nav-link" data-scroll-target="#b.-automated-qa-gate">B. Automated QA gate</a></li>
-  <li><a href="#c.-human-review-gate" id="toc-c.-human-review-gate" class="nav-link" data-scroll-target="#c.-human-review-gate">C. Human review gate</a></li>
-  <li><a href="#d.-final-release-gate" id="toc-d.-final-release-gate" class="nav-link" data-scroll-target="#d.-final-release-gate">D. Final release gate</a></li>
-  </ul></li>
-  <li><a href="#page-status-board" id="toc-page-status-board" class="nav-link" data-scroll-target="#page-status-board">Page Status Board</a></li>
-  <li><a href="#secondary-backlog-not-part-of-a---b-review-sequence" id="toc-secondary-backlog-not-part-of-a---b-review-sequence" class="nav-link" data-scroll-target="#secondary-backlog-not-part-of-a---b-review-sequence">Secondary Backlog (Not Part of A -&gt; B Review Sequence)</a>
-  <ul class="collapse">
-  <li><a href="#p1---documentation-delivery-workflow" id="toc-p1---documentation-delivery-workflow" class="nav-link" data-scroll-target="#p1---documentation-delivery-workflow">P1 - Documentation delivery workflow</a></li>
-  <li><a href="#p2---infrastructure" id="toc-p2---infrastructure" class="nav-link" data-scroll-target="#p2---infrastructure">P2 - Infrastructure</a></li>
-  <li><a href="#p2---documentation-maintenance" id="toc-p2---documentation-maintenance" class="nav-link" data-scroll-target="#p2---documentation-maintenance">P2 - Documentation maintenance</a></li>
-  <li><a href="#p3---upstream-change-automation-bgms---bgms-docs" id="toc-p3---upstream-change-automation-bgms---bgms-docs" class="nav-link" data-scroll-target="#p3---upstream-change-automation-bgms---bgms-docs">P3 - Upstream change automation (bgms -&gt; bgms-docs)</a></li>
-  <li><a href="#p3---design-de-risking-quarto-derived-skeleton" id="toc-p3---design-de-risking-quarto-derived-skeleton" class="nav-link" data-scroll-target="#p3---design-de-risking-quarto-derived-skeleton">P3 - Design de-risking (Quarto-derived skeleton)</a></li>
-  </ul></li>
-  <li><a href="#open-decisions" id="toc-open-decisions" class="nav-link" data-scroll-target="#open-decisions">Open Decisions</a></li>
-  </ul></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/edit/main/dev/task-list.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
@@ -1367,7 +1338,7 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
 </a>
   </li>  
 </ul>
-    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/edit/main/dev/task-list.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="toc-actions"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/edit/main/dev/task-list.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">
