@@ -50,6 +50,22 @@ a:hover {
   padding-bottom: 0.3rem;
 }
 
+/* Custom navbar icons */
+.navbar-icon {
+  height: 20px;
+  width: auto;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.navbar-icon:hover {
+  opacity: 1;
+}
+
+.navbar-nav .nav-link .navbar-icon {
+  vertical-align: middle;
+}
+
 pre {
   border-radius: 6px;
 }
