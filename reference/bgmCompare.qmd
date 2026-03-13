@@ -2,6 +2,10 @@
 title: "bgmCompare"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 Bayesian estimation and variable selection for group differences in Markov
 Random Fields.
 

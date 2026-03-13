@@ -2,6 +2,10 @@
 title: "Graphical Models"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 A graphical model represents the statistical relationships among a set of
 variables as a graph. Each variable is a node, and edges between nodes
 encode direct statistical associations. bgms estimates undirected graphical

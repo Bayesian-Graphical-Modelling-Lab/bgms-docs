@@ -2,6 +2,10 @@
 title: "Prior Basics"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 This chapter explains what priors are, how bgms uses them, and when
 the defaults should be changed. Analysis-specific prior guidance
 appears on the [Edge Selection](edge-selection.qmd),

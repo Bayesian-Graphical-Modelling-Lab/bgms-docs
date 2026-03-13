@@ -2,6 +2,10 @@
 title: "MCMC Diagnostics"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 Before interpreting results from `bgm()` or `bgmCompare()`, check that the
 MCMC sampler has converged and that posterior estimates are reliable. This
 chapter covers the diagnostic tools available in bgms.

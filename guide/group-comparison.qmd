@@ -2,6 +2,10 @@
 title: "Group Comparison"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 The `bgmCompare()` function tests for differences in network structure
 between groups. It estimates whether pairwise interactions and category
 thresholds differ across groups in an ordinal Markov Random Field.

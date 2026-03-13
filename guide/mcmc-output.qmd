@@ -2,6 +2,10 @@
 title: "MCMC Output"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 This chapter describes what `bgm()` and `bgmCompare()` return and how to
 access specific components of the output.
 

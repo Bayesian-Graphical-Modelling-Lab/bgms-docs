@@ -2,6 +2,10 @@
 title: "Gaussian Graphical Model"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 The Gaussian graphical model (GGM) is a Markov Random Field for continuous
 variables. In bgms, the GGM is fit when `variable_type = "continuous"`.
 

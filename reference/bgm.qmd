@@ -2,6 +2,10 @@
 title: "bgm"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 Bayesian estimation or edge selection for Markov Random Fields.
 
 ## Description

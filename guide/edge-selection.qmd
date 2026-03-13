@@ -2,6 +2,10 @@
 title: "Edge Selection"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 Bayesian edge selection determines which edges are present in the network
 by placing spike-and-slab priors on the pairwise interaction parameters.
 When `edge_selection = TRUE` (the default), `bgm()` estimates both the

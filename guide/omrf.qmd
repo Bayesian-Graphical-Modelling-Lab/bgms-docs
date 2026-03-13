@@ -2,6 +2,10 @@
 title: "Ordinal Markov Random Field"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 The ordinal Markov Random Field (MRF) is a graphical model for networks of
 binary and ordinal variables. It is the default model in bgms.
 

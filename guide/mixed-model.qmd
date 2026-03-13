@@ -2,6 +2,10 @@
 title: "Mixed Markov Random Field"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 The mixed MRF is a graphical model for datasets containing both discrete
 (binary or ordinal) and continuous variables. bgms fits a mixed MRF
 automatically when `variable_type` includes both discrete and continuous

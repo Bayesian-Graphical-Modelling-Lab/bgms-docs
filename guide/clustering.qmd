@@ -2,6 +2,10 @@
 title: "Edge Clustering"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 The stochastic block model (SBM) prior in bgms discovers clusters of
 edges in the network. Nodes are assigned to latent blocks, and edge
 inclusion probabilities depend on whether the two endpoints belong to the

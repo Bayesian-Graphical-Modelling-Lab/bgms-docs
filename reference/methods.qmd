@@ -2,6 +2,10 @@
 title: "S3 Methods"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 S3 methods for inspecting, summarizing, and using `bgms` and `bgmCompare`
 model fits.
 

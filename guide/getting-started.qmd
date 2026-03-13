@@ -2,6 +2,10 @@
 title: "Getting Started"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 This chapter covers installation, a first model fit, and how to read the
 output.
 
@@ -81,6 +85,7 @@ To visualize the estimated network, threshold inclusion probabilities at 0.5
 and plot the result using the qgraph package.
 
 ```{r}
+#| eval: false
 #| fig-width: 7
 #| fig-height: 7
 library(qgraph)

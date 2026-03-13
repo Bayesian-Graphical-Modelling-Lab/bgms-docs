@@ -2,6 +2,10 @@
 title: "The Bayesian Approach"
 ---
 
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
 bgms uses Bayesian inference to estimate graphical models. This means that
 all unknown quantities — interaction parameters, edge inclusion indicators,
 and model structure — are treated as random variables with probability
