@@ -8,6 +8,7 @@ highlight-style: a11y
 
 website:
   title: "bgms"
+  favicon: bgms_sticker.svg
   description: "Bayesian Graphical Models in R"
   site-url: https://bayesian-graphical-modelling-lab.github.io/bgms
   repo-url: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs

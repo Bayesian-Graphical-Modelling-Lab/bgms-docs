@@ -1,5 +1,5 @@
 ---
-title: "bgm"
+title: "bgm()"
 ---
 
 ::: {.callout-warning}

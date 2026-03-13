@@ -1,5 +1,5 @@
 ---
-title: "bgmCompare"
+title: "bgmCompare()"
 ---
 
 ::: {.callout-warning}
