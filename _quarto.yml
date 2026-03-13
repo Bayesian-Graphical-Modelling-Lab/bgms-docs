@@ -2,13 +2,46 @@ project:
   type: website
   output-dir: docs
 
+highlight-style: a11y
+
 website:
   title: "bgms"
   description: "Bayesian Graphical Models in R"
+  site-url: https://bayesian-graphical-modelling-lab.github.io/bgms
+  repo-url: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
+  repo-actions: [edit, issue]
+  page-navigation: true
+  bread-crumbs: true
+  search:
+    show-item-context: true
+    type: overlay
+
+  page-footer:
+    left: |
+      Developed by the [BGM Lab](https://bayesiangraphicalmodeling.com)
+    center:
+      - text: "Guide"
+        href: guide/index.qmd
+      - text: "Reference"
+        href: reference/index.qmd
+      - text: "Manual"
+        href: manual/index.qmd
+    right:
+      - icon: github
+        href: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
+        aria-label: bgms GitHub
 
   navbar:
+    background: light
     logo: bgms_sticker.svg
+    logo-alt: "bgms logo"
+    title: false
+    collapse-below: lg
     left:
+      - text: "Overview"
+        href: index.qmd
+      - text: "Get Started"
+        href: guide/getting-started.qmd
       - text: "Guide"
         href: guide/index.qmd
       - text: "Reference"
@@ -17,15 +50,17 @@ website:
         href: manual/index.qmd
       - text: "Examples"
         href: examples/index.qmd
-    right:
-      - text: "BGM Lab"
-        href: https://bayesiangraphicalmodeling.com
+    tools:
       - icon: github
         href: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
+        text: bgms GitHub
 
   sidebar:
-    - title: "User's Guide"
-      style: docked
+    - id: guide
+      title: "User's Guide"
+      style: "floating"
+      collapse-level: 2
+      align: left
       contents:
         - guide/index.qmd
         - guide/getting-started.qmd
@@ -49,7 +84,11 @@ website:
             - guide/mcmc-output.qmd
             - guide/mcmc-diagnostics.qmd
 
-    - title: "Reference"
+    - id: reference
+      title: "Reference"
+      style: "floating"
+      collapse-level: 2
+      align: left
       contents:
         - reference/index.qmd
         - section: "Core Functions"
@@ -62,7 +101,11 @@ website:
         - reference/extractors.qmd
         - reference/datasets.qmd
 
-    - title: "Manual"
+    - id: manual
+      title: "Manual"
+      style: "floating"
+      collapse-level: 2
+      align: left
       contents:
         - manual/index.qmd
         - section: "Architecture"
@@ -93,7 +136,11 @@ website:
           contents:
             - manual/numerical.qmd
 
-    - title: "Examples"
+    - id: examples
+      title: "Examples"
+      style: "floating"
+      collapse-level: 2
+      align: left
       contents:
         - examples/index.qmd
         - examples/binary-network.qmd
@@ -103,18 +150,23 @@ website:
         - examples/group-comparison.qmd
         - examples/clustering.qmd
 
-  search:
-    location: navbar
-    type: overlay
-
 format:
   html:
-    theme:
-      light: cosmo
-      dark: darkly
-    css: styles.css
+    respect-user-color-scheme: true
     toc: true
-    toc-depth: 3
+    theme:
+      light: [cosmo, theme.scss]
+      dark: [cosmo, theme-dark.scss]
     code-copy: true
     code-overflow: wrap
-    highlight-style: github
+    css: styles.css
+    include-after-body: js.html
+    grid:
+      sidebar-width: 250px
+      body-width: 900px
+      margin-width: 300px
+
+filters:
+  - filters/color-box.lua
+  - at: post-quarto
+    path: filters/include-dark.lua

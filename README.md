@@ -30,4 +30,6 @@ Output goes to `docs/`.
 
 ## License
 
-CC BY 4.0
+Documentation content is licensed under [CC BY 4.0](LICENSE).
+
+Site theme files (`theme.scss`, `theme-dark.scss`, `index.css`, `js.html`, `filters/`) were adapted from the [quarto-dev/quarto-web](https://github.com/quarto-dev/quarto-web) project (MIT License, Copyright &copy; 2022 Posit Software, PBC).
