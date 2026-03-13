@@ -2,81 +2,54 @@ project:
   type: website
   output-dir: docs
 
-highlight-style: a11y
-
 website:
   title: "bgms"
   description: "Bayesian Graphical Models in R"
-  site-url: https://bayesian-graphical-modelling-lab.github.io/bgms-docs
-  repo-url: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
-  repo-actions: [edit, issue]
-  page-navigation: true
-  bread-crumbs: true
-  search:
-    show-item-context: true
-    type: overlay
-
-  page-footer:
-    left: |
-      Developed by the [BGM Lab](https://bayesiangraphicalmodeling.com)
-    center:
-      - text: "Guide"
-        href: guide/index.qmd
-      - text: "Reference"
-        href: reference/index.qmd
-      - text: "Manual"
-        href: manual/index.qmd
-    right:
-      - icon: github
-        href: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
-        aria-label: bgms GitHub
 
   navbar:
-    background: light
     logo: bgms_sticker.svg
-    logo-alt: "bgms logo"
-    title: false
-    collapse-below: lg
     left:
-      - text: "Overview"
-        href: index.qmd
-      - text: "Get Started"
-        href: guide/getting-started.qmd
       - text: "Guide"
         href: guide/index.qmd
       - text: "Reference"
         href: reference/index.qmd
       - text: "Manual"
         href: manual/index.qmd
-    tools:
+      - text: "Examples"
+        href: examples/index.qmd
+    right:
+      - text: "BGM Lab"
+        href: https://bayesiangraphicalmodeling.com
       - icon: github
         href: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
-        text: bgms GitHub
 
   sidebar:
-    - id: guide
-      title: "User's Guide"
-      style: "floating"
-      collapse-level: 2
-      align: left
+    - title: "User's Guide"
+      style: docked
       contents:
         - guide/index.qmd
         - guide/getting-started.qmd
+        - section: "Background"
+          contents:
+            - guide/graphical-models.qmd
+            - guide/bayesian-approach.qmd
+            - guide/prior-basics.qmd
         - section: "Models"
           contents:
-            - guide/omrf.qmd
             - guide/ggm.qmd
-        - section: "Inference"
+            - guide/omrf.qmd
+            - guide/mixed-model.qmd
+        - section: "Analyses"
           contents:
             - guide/edge-selection.qmd
             - guide/group-comparison.qmd
-            - guide/prior-guide.qmd
+            - guide/clustering.qmd
+        - section: "MCMC Output"
+          contents:
+            - guide/mcmc-output.qmd
+            - guide/mcmc-diagnostics.qmd
 
-    - id: reference
-      title: "Reference"
-      style: "floating"
-      collapse-level: 2
-      align: left
+    - title: "Reference"
       contents:
         - reference/index.qmd
         - section: "Core Functions"
@@ -89,39 +62,59 @@ website:
         - reference/extractors.qmd
         - reference/datasets.qmd
 
-    - id: manual
-      title: "Manual"
-      style: "floating"
-      collapse-level: 2
-      align: left
+    - title: "Manual"
       contents:
         - manual/index.qmd
-        - manual/architecture.qmd
-        - section: "MCMC"
+        - section: "Architecture"
           contents:
+            - manual/architecture.qmd
+            - manual/r-scaffolding.qmd
+            - manual/model-classes.qmd
+        - section: "MCMC Engine"
+          contents:
+            - manual/samplers.qmd
             - manual/nuts.qmd
             - manual/warmup.qmd
-        - manual/model-classes.qmd
-        - manual/numerical.qmd
+            - manual/parallel-chains.qmd
+        - section: "Models"
+          contents:
+            - manual/ggm-internals.qmd
+            - manual/omrf-internals.qmd
+            - manual/variable-helpers.qmd
+            - manual/mixed-internals.qmd
+        - section: "Priors & Edge Selection"
+          contents:
+            - manual/edge-priors.qmd
+            - manual/sbm-prior.qmd
+        - section: "Group Comparison"
+          contents:
+            - manual/bgmcompare-internals.qmd
+        - section: "Numerical Methods"
+          contents:
+            - manual/numerical.qmd
+
+    - title: "Examples"
+      contents:
+        - examples/index.qmd
+        - examples/binary-network.qmd
+        - examples/ordinal-network.qmd
+        - examples/continuous-network.qmd
+        - examples/mixed-network.qmd
+        - examples/group-comparison.qmd
+        - examples/clustering.qmd
+
+  search:
+    location: navbar
+    type: overlay
 
 format:
   html:
-    respect-user-color-scheme: true
-    toc: true
     theme:
-      light: [cosmo, theme.scss]
-      dark: [cosmo, theme-dark.scss]
+      light: cosmo
+      dark: darkly
+    css: styles.css
+    toc: true
+    toc-depth: 3
     code-copy: true
     code-overflow: wrap
-    css: styles.css
-    include-after-body: js.html
-    grid:
-      sidebar-width: 250px
-      body-width: 900px
-      margin-width: 300px
-
-filters:
-  - filters/tools-tabset.lua
-  - filters/color-box.lua
-  - at: post-quarto
-    path: filters/include-dark.lua
+    highlight-style: github

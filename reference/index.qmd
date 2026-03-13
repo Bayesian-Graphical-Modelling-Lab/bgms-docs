@@ -1,7 +1,5 @@
 ---
 title: "Function Reference"
-toc: false
-anchor-sections: false
 ---
 
 Complete documentation for all exported functions in bgms.

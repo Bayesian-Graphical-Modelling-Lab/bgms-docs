@@ -1,52 +1,37 @@
 ---
-pagetitle: "bgms"
-page-layout: custom
-section-divs: false
-toc: false
-css: index.css
-description: | 
-  Bayesian estimation and model comparison for graphical models with binary and ordinal variables in R.
-hide-description: true
+title: "bgms"
+subtitle: "Bayesian Graphical Models in R"
 ---
 
-::: {.hero-banner}
+The **bgms** package provides Bayesian estimation and model comparison for 
+graphical models with binary and ordinal variables.
 
-::: {.content-block .py-4}
+## Documentation
 
-::: {.hero-text}
-# bgms {.mt-1}
+::: {.grid}
 
-### Bayesian Graphical Models in R
+::: {.g-col-4}
+### [User's Guide](guide/index.qmd)
 
-- Bayesian estimation for **ordinal Markov random fields** and **Gaussian graphical models**
-- **Edge selection** via posterior inclusion probabilities and Bayes factors
-- **Group comparison** to identify network differences between populations
-- Built on efficient **C++ MCMC algorithms** with the No-U-Turn Sampler
-
-### Understand structure in your data with principled Bayesian inference.
-
-::: {.grid .gap-3 .pb-3 .pt-4}
-::: {.g-col-12 .g-col-sm-4}
-[Get Started](guide/getting-started.qmd){.btn-action-primary .btn-action .btn .btn-lg .w-100 role="button"}
-:::
-::: {.g-col-12 .g-col-sm-4 .mb-2}
-[User's Guide](guide/index.qmd){#btn-guide .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
-::: 
-::: 
+Learn bgms from the ground up: installation, basic usage, and statistical 
+concepts behind ordinal MRFs and Gaussian graphical models.
 :::
 
-::: {.hero-animation}
-![](bgms_sticker.svg){width="250px"}
+::: {.g-col-4}
+### [Reference](reference/index.qmd)
+
+Complete documentation for all R functions: `bgm()`, `bgmCompare()`, 
+S3 methods, and extractor functions.
+:::
+
+::: {.g-col-4}
+### [Manual](manual/index.qmd)
+
+Technical documentation for contributors: C++ architecture, MCMC algorithms, 
+and implementation details.
 :::
 
 :::
-
-:::
-
-:::
-
-::: {.alt-background}
-::: {.content-block .quick-start}
 
 ## Quick Start
 
@@ -54,49 +39,17 @@ hide-description: true
 # Install from CRAN
 install.packages("bgms")
 
-# Fit an ordinal MRF to the Wenchuan earthquake data
+# Or development version from GitHub
+remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")
+
+# Fit a model
 library(bgms)
 data(Wenchuan)
 fit <- bgm(Wenchuan)
 summary(fit)
 ```
 
-:::
-:::
-
-::: {.content-block}
-
-::: {.features}
-
-::: {.feature}
-### User's Guide
-Learn bgms from the ground up: installation, basic usage, and statistical concepts behind ordinal MRFs and Gaussian graphical models.
-
-[Guide →](guide/index.qmd)
-:::
-
-::: {.feature}
-### Reference
-Complete documentation for all R functions: `bgm()`, `bgmCompare()`, S3 methods, and extractor functions.
-
-[Reference →](reference/index.qmd)
-:::
-
-::: {.feature}
-### Manual
-Technical documentation for contributors: C++ architecture, MCMC algorithms, and implementation details.
-
-[Manual →](manual/index.qmd)
-:::
-
-:::
-
-:::
-
-::: {.get-started .alt-background}
-::: {.content-block}
-
-### Citation
+## Citation
 
 If you use bgms in your research, please cite:
 
@@ -104,5 +57,8 @@ If you use bgms in your research, please cite:
 > of the ordinal Markov random field. *Psychometrika*, 90(1), 146–182. 
 > https://doi.org/10.1017/psy.2024.4
 
-:::
-:::
+## Links
+
+- [GitHub Repository](https://github.com/Bayesian-Graphical-Modelling-Lab/bgms)
+- [CRAN Package](https://cran.r-project.org/package=bgms)
+- [BGM Lab](https://bayesiangraphicalmodeling.com)
