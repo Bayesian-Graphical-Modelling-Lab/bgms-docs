@@ -2409,109 +2409,109 @@
   {
     "objectID": "reference/bgm.html",
     "href": "reference/bgm.html",
-    "title": "bgm",
+    "title": "bgm()",
     "section": "",
     "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nBayesian estimation or edge selection for Markov Random Fields.",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgm"
+      "bgm()"
     ]
   },
   {
     "objectID": "reference/bgm.html#description",
     "href": "reference/bgm.html#description",
-    "title": "bgm",
+    "title": "bgm()",
     "section": "Description",
     "text": "Description\nThe bgm function estimates the pseudoposterior distribution of the parameters of a Markov Random Field (MRF) for binary, ordinal, continuous, or mixed (discrete and continuous) variables. Depending on the variable types, the model is an ordinal MRF, a Gaussian graphical model (GGM), or a mixed MRF. Optionally, it performs Bayesian edge selection using spike-and-slab priors to infer the network structure.",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgm"
+      "bgm()"
     ]
   },
   {
     "objectID": "reference/bgm.html#usage",
     "href": "reference/bgm.html#usage",
-    "title": "bgm",
+    "title": "bgm()",
     "section": "Usage",
     "text": "Usage\nbgm(\n  x,\n  variable_type = \"ordinal\",\n  baseline_category,\n  iter = 1000,\n  warmup = 1000,\n  pairwise_scale = 2.5,\n  main_alpha = 0.5,\n  main_beta = 0.5,\n  edge_selection = TRUE,\n  edge_prior = c(\"Bernoulli\", \"Beta-Bernoulli\", \"Stochastic-Block\"),\n  inclusion_probability = 0.5,\n  beta_bernoulli_alpha = 1,\n  beta_bernoulli_beta = 1,\n  beta_bernoulli_alpha_between = 1,\n  beta_bernoulli_beta_between = 1,\n  dirichlet_alpha = 1,\n  lambda = 1,\n  na_action = c(\"listwise\", \"impute\"),\n  update_method = c(\"nuts\", \"adaptive-metropolis\", \"hamiltonian-mc\"),\n  target_accept,\n  hmc_num_leapfrogs = 100,\n  nuts_max_depth = 10,\n  learn_mass_matrix = TRUE,\n  chains = 4,\n  cores = parallel::detectCores(),\n  display_progress = c(\"per-chain\", \"total\", \"none\"),\n  seed = NULL,\n  standardize = FALSE,\n  pseudolikelihood = c(\"conditional\", \"marginal\"),\n  verbose = getOption(\"bgms.verbose\", TRUE)\n)",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgm"
+      "bgm()"
     ]
   },
   {
     "objectID": "reference/bgm.html#arguments",
     "href": "reference/bgm.html#arguments",
-    "title": "bgm",
+    "title": "bgm()",
     "section": "Arguments",
     "text": "Arguments\n\nData\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix with n rows and p columns containing binary and ordinal responses. Variables are automatically recoded to non-negative integers (0, 1, ..., m). For regular ordinal variables, unobserved categories are collapsed; for Blume–Capel variables, all categories are retained.\n\n\nvariable_type\nCharacter or character vector specifying the type of each variable. Allowed values: \"ordinal\", \"blume-capel\", or \"continuous\". A single string applies to all variables. A per-variable vector that mixes discrete (\"ordinal\" / \"blume-capel\") and \"continuous\" types fits a mixed MRF. Binary variables are automatically treated as \"ordinal\". Default: \"ordinal\".\n\n\nbaseline_category\nInteger or vector. Baseline category for Blume–Capel variables. Can be a single integer (applied to all) or a vector of length p. Required if at least one variable is of type \"blume-capel\".\n\n\nna_action\nHow to handle missing data: \"listwise\" (drop rows with missing values) or \"impute\" (single imputation during sampling). Default: \"listwise\".\n\n\n\n\n\nPrior specification\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\npairwise_scale\nScale of the Cauchy prior for pairwise interaction parameters. Default: 2.5.\n\n\nmain_alpha, main_beta\nShape parameters of the beta-prime prior for threshold parameters. Must be positive. Defaults: 0.5.\n\n\nedge_selection\nLogical. Whether to perform Bayesian edge selection. If FALSE, the model estimates all edges. Default: TRUE.\n\n\nedge_prior\nPrior for edge inclusion: \"Bernoulli\", \"Beta-Bernoulli\", or \"Stochastic-Block\". Default: \"Bernoulli\".\n\n\ninclusion_probability\nPrior inclusion probability of each edge (Bernoulli prior). Default: 0.5.\n\n\nbeta_bernoulli_alpha, beta_bernoulli_beta\nShape parameters for the beta distribution in the Beta–Bernoulli and Stochastic-Block priors. For the Stochastic-Block prior these are the within-cluster parameters. Defaults: 1.\n\n\nbeta_bernoulli_alpha_between, beta_bernoulli_beta_between\nShape parameters for between-cluster edge inclusion probabilities in the Stochastic-Block prior. Defaults: 1.\n\n\ndirichlet_alpha\nConcentration parameter of the Dirichlet prior on block assignments (Stochastic Block model). Default: 1.\n\n\nlambda\nRate of the zero-truncated Poisson prior on the number of clusters (Stochastic Block model). Default: 1.\n\n\nstandardize\nLogical. If TRUE, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products, so standardization ensures equivalent relative shrinkage across all pairs. Default: FALSE.\n\n\n\n\n\nSampler settings\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\niter\nNumber of post-warmup iterations per chain. Default: 1000.\n\n\nwarmup\nNumber of warmup iterations before collecting samples. A minimum of 1000 is enforced. Default: 1000.\n\n\nupdate_method\nSampling algorithm: \"nuts\" (No-U-Turn Sampler), \"adaptive-metropolis\" (componentwise Metropolis–Hastings with Robbins–Monro adaptation), or \"hamiltonian-mc\" (HMC with fixed path length). Default: \"nuts\".\n\n\ntarget_accept\nTarget acceptance rate (0 to 1). Defaults: 0.44 for adaptive Metropolis, 0.65 for HMC, 0.80 for NUTS.\n\n\nhmc_num_leapfrogs\nNumber of leapfrog steps for HMC. Default: 100.\n\n\nnuts_max_depth\nMaximum tree depth in NUTS. Default: 10.\n\n\nlearn_mass_matrix\nLogical. If TRUE, adapt a diagonal mass matrix during warmup (HMC/NUTS only). Default: TRUE.\n\n\nchains\nNumber of parallel chains. Default: 4.\n\n\ncores\nNumber of CPU cores for parallel execution. Default: parallel::detectCores().\n\n\ndisplay_progress\nProgress reporting: \"per-chain\", \"total\", or \"none\". Default: \"per-chain\".\n\n\nseed\nOptional integer seed for reproducibility.\n\n\npseudolikelihood\nFor mixed MRF models: \"conditional\" (conditions on continuous variables for discrete updates; faster) or \"marginal\" (integrates out continuous variables; more expensive). Ignored for pure ordinal or pure continuous data. Default: \"conditional\".\n\n\nverbose\nLogical. Print informational messages during data processing. Default: getOption(\"bgms.verbose\", TRUE).",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgm"
+      "bgm()"
     ]
   },
   {
     "objectID": "reference/bgm.html#value",
     "href": "reference/bgm.html#value",
-    "title": "bgm",
+    "title": "bgm()",
     "section": "Value",
     "text": "Value\nA list of class \"bgms\" with posterior summaries, posterior mean matrices, and access to raw MCMC draws. The object can be passed to print(), summary(), and coef().\nMain components:\n\nposterior_summary_main — Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for main-effect parameters. For OMRF models these are category thresholds; for mixed MRF models these are discrete thresholds and continuous means. NULL for GGM models.\nposterior_summary_quadratic — Data frame with posterior summaries for the precision matrix diagonal (GGM and mixed MRF). NULL for OMRF models.\nposterior_summary_pairwise — Data frame with posterior summaries for pairwise interaction parameters.\nposterior_summary_indicator — Data frame with posterior summaries for edge inclusion indicators (if edge_selection = TRUE).\nposterior_mean_main — Posterior mean of main-effect parameters.\nposterior_mean_pairwise — Symmetric matrix of posterior mean pairwise interaction strengths. For GGM and mixed MRF models, the precision matrix diagonal is on the matrix diagonal.\nposterior_mean_indicator — Symmetric matrix of posterior mean inclusion probabilities (if edge selection was enabled).\nraw_samples — A list of raw MCMC draws per chain, with sublists for main, pairwise, indicator, and allocations (SBM prior).\narguments — A list of function call arguments and metadata.\n\nAdditional summaries when edge_prior = \"Stochastic-Block\":\n\nposterior_summary_pairwise_allocations — Data frame with posterior summaries for pairwise cluster co-occurrence.\nposterior_coclustering_matrix — Symmetric co-clustering proportion matrix.\nposterior_mean_allocations — Posterior mean cluster allocations.\nposterior_mode_allocations — Posterior mode cluster allocations.\nposterior_num_blocks — Posterior probabilities for each possible number of clusters.\n\nNUTS diagnostics (tree depth, divergences, energy, E-BFMI) are available in fit$nuts_diag when update_method = \"nuts\".",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgm"
+      "bgm()"
     ]
   },
   {
     "objectID": "reference/bgm.html#details",
     "href": "reference/bgm.html#details",
-    "title": "bgm",
+    "title": "bgm()",
     "section": "Details",
     "text": "Details\n\nOrdinal variables\nThe function supports two types of ordinal variables.\nRegular ordinal variables assign a category threshold parameter to each response category except the lowest. The model imposes no additional constraints on the distribution of category responses.\nBlume–Capel ordinal variables assume a baseline category (e.g., a “neutral” response) and score responses by distance from this baseline. Category thresholds are modeled as:\n\\[\\mu_c = \\alpha \\cdot (c - b) + \\beta \\cdot (c - b)^2\\]\nwhere \\(\\mu_c\\) is the category threshold for category \\(c\\), \\(\\alpha\\) is a linear trend across categories, \\(\\beta\\) is a quadratic effect (negative values favor responses near the baseline; positive values favor extremes), and \\(b\\) is the baseline category.\n\n\nEdge selection\nWhen edge_selection = TRUE, the function performs Bayesian variable selection on pairwise interactions using spike-and-slab priors:\n\nBernoulli — Fixed inclusion probability across edges.\nBeta-Bernoulli — Inclusion probability is given a Beta prior.\nStochastic-Block — Cluster-based edge priors with Beta, Dirichlet, and Poisson hyperpriors.\n\n\n\nPrior distributions\n\nPairwise effects — Cauchy (slab) prior.\nMain effects — Beta-prime distribution.\nEdge indicators — Bernoulli, Beta-Bernoulli, or Stochastic-Block prior.\n\n\n\nSampling algorithms and warmup\nParameters are updated within a Gibbs framework using one of three algorithms:\n\nAdaptive Metropolis–Hastings — Componentwise random-walk updates with Robbins–Monro proposal adaptation.\nHamiltonian Monte Carlo — Joint updates using fixed-length leapfrog trajectories. Step size is tuned during warmup via dual averaging; the diagonal mass matrix can also be adapted.\nNo-U-Turn Sampler — Adaptive extension of HMC with dynamically chosen trajectory lengths. Warmup uses a staged fast–slow–fast schedule.\n\nWhen edge_selection = TRUE, edge-inclusion indicator updates are delayed until after the core warmup phase. The warmup schedule appends additional stages for proposal-SD tuning (Stage 3b) and graph initialization (Stage 3c), so the total warmup exceeds the user-specified value.\n\n\nMissing data\nIf na_action = \"listwise\", rows with missing values are removed. If na_action = \"impute\", missing values are imputed within the MCMC loop via Gibbs sampling.",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgm"
+      "bgm()"
     ]
   },
   {
     "objectID": "reference/bgm.html#examples",
     "href": "reference/bgm.html#examples",
-    "title": "bgm",
+    "title": "bgm()",
     "section": "Examples",
     "text": "Examples\n\n# Fit a model on a subset of the Wenchuan data\nfit = bgm(x = Wenchuan[, 1:5], chains = 2)\n\n# Posterior inclusion probabilities\nsummary(fit)$indicator\n\n# Posterior pairwise effects\nsummary(fit)$pairwise",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgm"
+      "bgm()"
     ]
   },
   {
     "objectID": "reference/bgm.html#see-also",
     "href": "reference/bgm.html#see-also",
-    "title": "bgm",
+    "title": "bgm()",
     "section": "See also",
     "text": "See also\nbgmCompare() for group comparisons, S3 methods for print, summary, and coef, extractor functions for accessing specific model components.",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgm"
+      "bgm()"
     ]
   },
   {
     "objectID": "reference/bgm.html#references",
     "href": "reference/bgm.html#references",
-    "title": "bgm",
+    "title": "bgm()",
     "section": "References",
     "text": "References\nMarsman, M., Van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian analysis of the ordinal Markov random field. Psychometrika.",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgm"
+      "bgm()"
     ]
   },
   {
@@ -2572,109 +2572,109 @@
   {
     "objectID": "reference/bgmCompare.html",
     "href": "reference/bgmCompare.html",
-    "title": "bgmCompare",
+    "title": "bgmCompare()",
     "section": "",
     "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nBayesian estimation and variable selection for group differences in Markov Random Fields.",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgmCompare"
+      "bgmCompare()"
     ]
   },
   {
     "objectID": "reference/bgmCompare.html#description",
     "href": "reference/bgmCompare.html#description",
-    "title": "bgmCompare",
+    "title": "bgmCompare()",
     "section": "Description",
     "text": "Description\nThe bgmCompare function estimates group differences in category threshold parameters (main effects) and pairwise interactions (pairwise effects) of a Markov Random Field (MRF) for binary and ordinal variables. Groups can be defined either by supplying two separate datasets (x and y) or by a group membership vector. Optionally, Bayesian variable selection identifies differences across groups.",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgmCompare"
+      "bgmCompare()"
     ]
   },
   {
     "objectID": "reference/bgmCompare.html#usage",
     "href": "reference/bgmCompare.html#usage",
-    "title": "bgmCompare",
+    "title": "bgmCompare()",
     "section": "Usage",
     "text": "Usage\nbgmCompare(\n  x,\n  y,\n  group_indicator,\n  difference_selection = TRUE,\n  main_difference_selection = FALSE,\n  variable_type = \"ordinal\",\n  baseline_category,\n  difference_scale = 1,\n  difference_prior = c(\"Bernoulli\", \"Beta-Bernoulli\"),\n  difference_probability = 0.5,\n  beta_bernoulli_alpha = 1,\n  beta_bernoulli_beta = 1,\n  pairwise_scale = 2.5,\n  main_alpha = 0.5,\n  main_beta = 0.5,\n  iter = 1000,\n  warmup = 1000,\n  na_action = c(\"listwise\", \"impute\"),\n  update_method = c(\"nuts\", \"adaptive-metropolis\", \"hamiltonian-mc\"),\n  target_accept,\n  hmc_num_leapfrogs = 100,\n  nuts_max_depth = 10,\n  learn_mass_matrix = TRUE,\n  chains = 4,\n  cores = parallel::detectCores(),\n  display_progress = c(\"per-chain\", \"total\", \"none\"),\n  seed = NULL,\n  standardize = FALSE,\n  verbose = getOption(\"bgms.verbose\", TRUE)\n)",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgmCompare"
+      "bgmCompare()"
     ]
   },
   {
     "objectID": "reference/bgmCompare.html#arguments",
     "href": "reference/bgmCompare.html#arguments",
-    "title": "bgmCompare",
+    "title": "bgmCompare()",
     "section": "Arguments",
     "text": "Arguments\n\nData and groups\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix of binary and ordinal responses for Group 1. Variables should be coded as nonnegative integers starting at 0. For ordinal variables, unused categories are collapsed; for Blume–Capel variables, all categories are retained.\n\n\ny\nOptional data frame or matrix for Group 2 (two-group designs). Must have the same variables (columns) as x.\n\n\ngroup_indicator\nOptional integer vector of group memberships for rows of x (multi-group designs). Ignored if y is supplied.\n\n\nvariable_type\nCharacter vector specifying the type of each variable: \"ordinal\" (default) or \"blume-capel\".\n\n\nbaseline_category\nInteger or vector giving the baseline category for Blume–Capel variables.\n\n\nna_action\nHow to handle missing data: \"listwise\" (drop rows) or \"impute\" (impute within Gibbs). Default: \"listwise\".\n\n\n\n\n\nDifference selection\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\ndifference_selection\nLogical. If TRUE, spike-and-slab priors are applied to difference parameters. Default: TRUE.\n\n\nmain_difference_selection\nLogical. If TRUE, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is FALSE. Only used when difference_selection = TRUE.\n\n\ndifference_scale\nScale of the Cauchy prior for difference parameters. Default: 1.\n\n\ndifference_prior\nPrior for difference inclusion: \"Bernoulli\" or \"Beta-Bernoulli\". Default: \"Bernoulli\".\n\n\ndifference_probability\nPrior inclusion probability for differences (Bernoulli prior). Default: 0.5.\n\n\nbeta_bernoulli_alpha, beta_bernoulli_beta\nShape parameters of the Beta prior for inclusion probabilities in the Beta–Bernoulli model. Defaults: 1.\n\n\n\n\n\nPrior specification\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\npairwise_scale\nScale of the Cauchy prior for baseline pairwise interactions. Default: 2.5.\n\n\nmain_alpha, main_beta\nShape parameters of the beta-prime prior for baseline threshold parameters. Defaults: 0.5.\n\n\nstandardize\nLogical. If TRUE, the Cauchy prior scale for each pairwise interaction (both baseline and difference) is adjusted based on the range of response scores. Default: FALSE.\n\n\n\n\n\nSampler settings\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\niter\nNumber of post-warmup iterations per chain. Default: 1000.\n\n\nwarmup\nNumber of warmup iterations before sampling. Default: 1000.\n\n\nupdate_method\nSampling algorithm: \"nuts\", \"adaptive-metropolis\", or \"hamiltonian-mc\". Default: \"nuts\".\n\n\ntarget_accept\nTarget acceptance rate. Defaults: 0.44 (Metropolis), 0.65 (HMC), 0.80 (NUTS).\n\n\nhmc_num_leapfrogs\nLeapfrog steps for HMC. Default: 100.\n\n\nnuts_max_depth\nMaximum tree depth for NUTS. Default: 10.\n\n\nlearn_mass_matrix\nLogical. If TRUE, adapts a diagonal mass matrix during warmup (HMC/NUTS only). Default: TRUE.\n\n\nchains\nNumber of parallel chains. Default: 4.\n\n\ncores\nNumber of CPU cores. Default: parallel::detectCores().\n\n\ndisplay_progress\nProgress reporting: \"per-chain\", \"total\", or \"none\". Default: \"per-chain\".\n\n\nseed\nOptional integer seed for reproducibility.\n\n\nverbose\nLogical. Print informational messages during data processing. Default: getOption(\"bgms.verbose\", TRUE).",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgmCompare"
+      "bgmCompare()"
     ]
   },
   {
     "objectID": "reference/bgmCompare.html#value",
     "href": "reference/bgmCompare.html#value",
-    "title": "bgmCompare",
+    "title": "bgmCompare()",
     "section": "Value",
     "text": "Value\nA list of class \"bgmCompare\" containing posterior summaries, posterior mean matrices, and raw MCMC samples:\n\nposterior_summary_main_baseline, posterior_summary_pairwise_baseline — Summaries of baseline thresholds and pairwise interactions.\nposterior_summary_main_differences, posterior_summary_pairwise_differences — Summaries of group differences in thresholds and pairwise interactions.\nposterior_summary_indicator — Summaries of inclusion indicators (if difference_selection = TRUE).\nposterior_mean_main_baseline, posterior_mean_pairwise_baseline — Posterior mean matrices (legacy style).\nraw_samples — List of raw draws per chain for main, pairwise, and indicator parameters.\narguments — List of function call arguments and metadata.\n\nThe summary() method prints formatted summaries, and coef() extracts posterior means. NUTS diagnostics are available in fit$nuts_diag when update_method = \"nuts\".",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgmCompare"
+      "bgmCompare()"
     ]
   },
   {
     "objectID": "reference/bgmCompare.html#details",
     "href": "reference/bgmCompare.html#details",
-    "title": "bgmCompare",
+    "title": "bgmCompare()",
     "section": "Details",
     "text": "Details\n\nPairwise interactions\nFor variables \\(i\\) and \\(j\\), the group-specific interaction is represented as:\n\\[\\theta_{ij}^{(g)} = \\phi_{ij} + \\delta_{ij}^{(g)}\\]\nwhere \\(\\phi_{ij}\\) is the baseline effect and \\(\\delta_{ij}^{(g)}\\) are group differences constrained to sum to zero.\n\n\nOrdinal variables\nRegular ordinal variables: category thresholds are decomposed into a baseline plus group differences for each category.\nBlume–Capel variables: category thresholds are quadratic in the category index, with both the linear and quadratic terms split into a baseline plus group differences.\n\n\nVariable selection\nWhen difference_selection = TRUE, spike-and-slab priors are applied to difference parameters:\n\nBernoulli — Fixed prior inclusion probability.\nBeta-Bernoulli — Inclusion probability given a Beta prior.\n\n\n\nSampling algorithms and warmup\nParameters are updated within a Gibbs framework, using the same sampling algorithms and staged warmup scheme described in bgm(): adaptive Metropolis–Hastings, Hamiltonian Monte Carlo, or the No-U-Turn Sampler. When difference_selection = TRUE, indicator updates are delayed until late warmup.",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgmCompare"
+      "bgmCompare()"
     ]
   },
   {
     "objectID": "reference/bgmCompare.html#examples",
     "href": "reference/bgmCompare.html#examples",
-    "title": "bgmCompare",
+    "title": "bgmCompare()",
     "section": "Examples",
     "text": "Examples\n\n# Compare French and non-French groups on a subset of the Boredom data\nx = Boredom[Boredom$language == \"fr\", 2:6]\ny = Boredom[Boredom$language != \"fr\", 2:6]\n\nfit = bgmCompare(x, y, chains = 2)\n\n# Posterior inclusion probabilities\nsummary(fit)$indicator\n\n# Bayesian model averaged main effects for the groups\ncoef(fit)$main_effects_groups\n\n# Bayesian model averaged pairwise effects for the groups\ncoef(fit)$pairwise_effects_groups",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgmCompare"
+      "bgmCompare()"
     ]
   },
   {
     "objectID": "reference/bgmCompare.html#see-also",
     "href": "reference/bgmCompare.html#see-also",
-    "title": "bgmCompare",
+    "title": "bgmCompare()",
     "section": "See also",
     "text": "See also\nbgm() for single-group models, S3 methods for print, summary, and coef, extractor functions for accessing specific model components.",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgmCompare"
+      "bgmCompare()"
     ]
   },
   {
     "objectID": "reference/bgmCompare.html#references",
     "href": "reference/bgmCompare.html#references",
-    "title": "bgmCompare",
+    "title": "bgmCompare()",
     "section": "References",
     "text": "References\nMarsman, M., Waldorp, L. J., Sekulovski, N., & Haslbeck, J. M. B. (2025). Bayes factor tests for group differences in ordinal and binary graphical models. Psychometrika, 90(5), 1809–1842.",
     "crumbs": [
       "Reference",
       "Core Functions",
-      "bgmCompare"
+      "bgmCompare()"
     ]
   },
   {
