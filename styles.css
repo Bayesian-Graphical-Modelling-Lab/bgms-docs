@@ -39,8 +39,15 @@ a:hover {
 
 /* Logo sizing in navbar */
 .navbar-brand img {
-  height: 80px;
+  height: 50px;
   width: auto;
+  max-height: none;
+}
+
+.navbar {
+  min-height: 66px;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
 }
 
 pre {
