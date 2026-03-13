@@ -153,7 +153,7 @@ website:
 format:
   html:
     respect-user-color-scheme: true
-    toc: true
+    toc: false
     theme:
       light: [cosmo, theme.scss]
       dark: [cosmo, theme-dark.scss]
@@ -163,8 +163,8 @@ format:
     include-after-body: js.html
     grid:
       sidebar-width: 250px
-      body-width: 900px
-      margin-width: 300px
+      body-width: 1100px
+      margin-width: 200px
 
 filters:
   - filters/color-box.lua

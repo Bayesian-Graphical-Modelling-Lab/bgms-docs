@@ -47,10 +47,6 @@ pre {
   border-radius: 6px;
 }
 
-.content {
-  max-width: 900px;
-}
-
 /* Math styling */
 .math {
   font-size: 1.1em;
@@ -77,9 +73,13 @@ h3 {
   font-size: 1.3rem;
 }
 
-/* Sidebar font size */
+/* Sidebar styling */
 .sidebar-navigation .sidebar-item a {
   font-size: 0.95rem;
+}
+
+.sidebar-navigation {
+  padding-left: 0;
 }
 
 /* Table of contents */
