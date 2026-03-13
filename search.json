@@ -656,7 +656,139 @@
     "href": "reference/extractors.html",
     "title": "Extractor Functions",
     "section": "",
-    "text": "Functions to extract specific components from fitted bgms objects.\n\n\n\n\n\n\nNote\n\n\n\nDocumentation to be generated from roxygen.",
+    "text": "Functions to extract specific components from fitted bgms and bgmCompare objects.",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#extract_arguments",
+    "href": "reference/extractors.html#extract_arguments",
+    "title": "Extractor Functions",
+    "section": "extract_arguments",
+    "text": "extract_arguments\nRetrieve the arguments used when fitting a model with bgm() or bgmCompare().\nextract_arguments(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a named list containing all arguments passed to the fitting function, including data dimensions, prior settings, and MCMC configuration.",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#extract_main_effects",
+    "href": "reference/extractors.html#extract_main_effects",
+    "title": "Extractor Functions",
+    "section": "extract_main_effects",
+    "text": "extract_main_effects\nRetrieve posterior mean main-effect parameters.\nextract_main_effects(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nThe structure depends on the model type:\n\nGGM (bgms): NULL. GGM models have no main effects; the precision matrix diagonal is on coef(fit)$pairwise.\nOMRF (bgms): A numeric matrix (p x max_categories) of posterior mean category thresholds. Columns beyond the number of categories for a variable are NA.\nMixed MRF (bgms): A list with $discrete (threshold matrix) and $continuous (means matrix).\nbgmCompare: A matrix with one row per post-warmup iteration, containing posterior samples of baseline main-effect parameters.",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#extract_pairwise_interactions",
+    "href": "reference/extractors.html#extract_pairwise_interactions",
+    "title": "Extractor Functions",
+    "section": "extract_pairwise_interactions",
+    "text": "extract_pairwise_interactions\nRetrieve posterior samples of pairwise interaction parameters.\nextract_pairwise_interactions(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a matrix with one row per post-warmup iteration and one column per edge. For bgmCompare, columns correspond to baseline pairwise interaction parameters.",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#extract_indicators",
+    "href": "reference/extractors.html#extract_indicators",
+    "title": "Extractor Functions",
+    "section": "extract_indicators",
+    "text": "extract_indicators\nRetrieve posterior samples of inclusion indicators.\nextract_indicators(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a matrix with one row per post-warmup iteration and one column per indicator, containing binary (0/1) samples:\n\nbgms: One column per edge. Requires edge_selection = TRUE.\nbgmCompare: Columns for main-effect and pairwise difference indicators. Requires difference_selection = TRUE.",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#extract_posterior_inclusion_probabilities",
+    "href": "reference/extractors.html#extract_posterior_inclusion_probabilities",
+    "title": "Extractor Functions",
+    "section": "extract_posterior_inclusion_probabilities",
+    "text": "extract_posterior_inclusion_probabilities\nCompute posterior inclusion probabilities.\nextract_posterior_inclusion_probabilities(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a symmetric p x p matrix of posterior inclusion probabilities:\n\nbgms: Off-diagonal entries are edge inclusion probabilities. Requires edge_selection = TRUE.\nbgmCompare: Diagonal entries are main-effect inclusion probabilities; off-diagonal entries are pairwise difference inclusion probabilities. Requires difference_selection = TRUE.",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#extract_indicator_priors",
+    "href": "reference/extractors.html#extract_indicator_priors",
+    "title": "Extractor Functions",
+    "section": "extract_indicator_priors",
+    "text": "extract_indicator_priors\nRetrieve the prior specification used for inclusion indicators.\nextract_indicator_priors(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a named list describing the prior structure, including the prior type and hyperparameters:\n\nbgms: Requires edge_selection = TRUE. Returns the prior type (\"Bernoulli\", \"Beta-Bernoulli\", or \"Stochastic-Block\") and associated hyperparameters.\nbgmCompare: Requires difference_selection = TRUE. Returns the difference prior specification.",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#extract_group_params",
+    "href": "reference/extractors.html#extract_group_params",
+    "title": "Extractor Functions",
+    "section": "extract_group_params",
+    "text": "extract_group_params\nCompute group-specific parameter estimates by combining baseline parameters and group differences.\nextract_group_params(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgmCompare object.\n\n\n\nReturns a list with main_effects_groups (main effects per group) and pairwise_effects_groups (pairwise effects per group).",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#extract_sbm",
+    "href": "reference/extractors.html#extract_sbm",
+    "title": "Extractor Functions",
+    "section": "extract_sbm",
+    "text": "extract_sbm\nRetrieve posterior summaries from a model fitted with the Stochastic Block prior.\nextract_sbm(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms object.\n\n\n\nRequires edge_selection = TRUE and edge_prior = \"Stochastic-Block\". Returns a list with:\n\nposterior_num_blocks — Posterior probabilities for each possible number of clusters.\nposterior_mean_allocations — Posterior mean cluster allocations.\nposterior_mode_allocations — Posterior mode cluster allocations.\nposterior_mean_coclustering_matrix — Co-clustering proportion matrix.",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#extract_ess",
+    "href": "reference/extractors.html#extract_ess",
+    "title": "Extractor Functions",
+    "section": "extract_ess",
+    "text": "extract_ess\nRetrieve effective sample size estimates for all parameters.\nextract_ess(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a named list with ESS values for each parameter type present in the model (e.g., main, pairwise, indicator).",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#extract_rhat",
+    "href": "reference/extractors.html#extract_rhat",
+    "title": "Extractor Functions",
+    "section": "extract_rhat",
+    "text": "extract_rhat\nRetrieve R-hat convergence diagnostics for all parameters.\nextract_rhat(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a named list with R-hat values for each parameter type present in the model (e.g., main, pairwise, indicator).",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#deprecated-functions",
+    "href": "reference/extractors.html#deprecated-functions",
+    "title": "Extractor Functions",
+    "section": "Deprecated functions",
+    "text": "Deprecated functions\n\nextract_category_thresholds() — Renamed to extract_main_effects().\nextract_edge_indicators() — Renamed to extract_indicators().\nextract_pairwise_thresholds() — Renamed to extract_main_effects().",
+    "crumbs": [
+      "Reference",
+      "Extractor Functions"
+    ]
+  },
+  {
+    "objectID": "reference/extractors.html#see-also",
+    "href": "reference/extractors.html#see-also",
+    "title": "Extractor Functions",
+    "section": "See also",
+    "text": "See also\nbgm(), bgmCompare(), S3 methods",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -667,7 +799,7 @@
     "href": "reference/methods.html",
     "title": "S3 Methods",
     "section": "",
-    "text": "S3 methods for bgms and bgmCompare objects.",
+    "text": "S3 methods for inspecting, summarizing, and using bgms and bgmCompare model fits.",
     "crumbs": [
       "Reference",
       "Methods",
@@ -679,7 +811,7 @@
     "href": "reference/methods.html#print",
     "title": "S3 Methods",
     "section": "print",
-    "text": "print\nPrint a brief summary of a fitted model.\nprint(x, ...)",
+    "text": "print\nMinimal console output for a fitted model.\n\nbgms\nprint(x, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nx\nAn object of class bgms.\n\n\n...\nIgnored.\n\n\n\nReturns x invisibly.\n\n\nbgmCompare\nprint(x, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nx\nAn object of class bgmCompare.\n\n\n...\nIgnored.\n\n\n\nReturns x invisibly.",
     "crumbs": [
       "Reference",
       "Methods",
@@ -691,7 +823,7 @@
     "href": "reference/methods.html#summary",
     "title": "S3 Methods",
     "section": "summary",
-    "text": "summary\nSummarize a fitted model with parameter estimates and diagnostics.\nsummary(object, ...)",
+    "text": "summary\nPosterior summaries and diagnostics for a fitted model.\n\nbgms\nsummary(object, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms.\n\n\n...\nCurrently ignored.\n\n\n\nReturns an object of class summary.bgms with posterior summaries.\n\n\nbgmCompare\nsummary(object, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgmCompare.\n\n\n...\nCurrently ignored.\n\n\n\nReturns an object of class summary.bgmCompare with posterior summaries.",
     "crumbs": [
       "Reference",
       "Methods",
@@ -703,7 +835,7 @@
     "href": "reference/methods.html#coef",
     "title": "S3 Methods",
     "section": "coef",
-    "text": "coef\nExtract coefficient estimates.\ncoef(object, ...)",
+    "text": "coef\nExtract posterior mean coefficients.\n\nbgms\ncoef(object, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms.\n\n\n...\nIgnored.\n\n\n\nReturns a list with:\n\nmain — Posterior mean main-effect parameters. NULL for GGM models. For OMRF models: a numeric matrix (p x max_categories) of category thresholds. For mixed MRF models: a list with $discrete (threshold matrix) and $continuous (means matrix).\npairwise — Posterior mean pairwise interaction matrix. For GGM and mixed MRF models the precision matrix diagonal is included on the diagonal.\nindicator — Posterior mean edge inclusion indicators (if available).\n\n\n\nbgmCompare\ncoef(object, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgmCompare.\n\n\n...\nIgnored.\n\n\n\nReturns a list with:\n\nmain_effects_raw — Posterior means of raw main-effect parameters (variables x (baseline + differences)).\npairwise_effects_raw — Posterior means of raw pairwise-effect parameters (pairs x (baseline + differences)).\nmain_effects_groups — Posterior means of group-specific main effects (variables x groups), computed as baseline plus projected differences.\npairwise_effects_groups — Posterior means of group-specific pairwise effects (pairs x groups), computed as baseline plus projected differences.\nindicators — Posterior mean inclusion probabilities as a symmetric matrix, with diagonals for main effects and off-diagonals for pairwise effects.",
     "crumbs": [
       "Reference",
       "Methods",
@@ -715,7 +847,7 @@
     "href": "reference/methods.html#predict",
     "title": "S3 Methods",
     "section": "predict",
-    "text": "predict\nPredict values for new observations.\npredict(object, newdata, ...)",
+    "text": "predict\nCompute conditional probability distributions for one or more variables given the observed values of other variables in the data.\n\nbgms\npredict(object, newdata, variables = NULL,\n        type = c(\"probabilities\", \"response\"),\n        method = c(\"posterior-mean\", \"posterior-sample\"),\n        ndraws = NULL, seed = NULL, ...)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms.\n\n\nnewdata\nA matrix or data frame with n rows and p columns. Must match the variables used in fitting.\n\n\nvariables\nCharacter vector of names, integer vector of column indices, or NULL (all variables).\n\n\ntype\n\"probabilities\" (full conditional distribution) or \"response\" (predicted category).\n\n\nmethod\n\"posterior-mean\" (use posterior means) or \"posterior-sample\" (average over draws).\n\n\nndraws\nNumber of posterior draws for \"posterior-sample\". NULL uses all draws.\n\n\nseed\nOptional random seed.\n\n\n\nOrdinal models: For type = \"probabilities\", returns a named list with one matrix per variable (n rows x (num_categories + 1) columns). For type = \"response\", returns a matrix of predicted categories.\nGGM models: For type = \"probabilities\", returns a list with one matrix per variable (n rows x 2 columns: \"mean\" and \"sd\"). For type = \"response\", returns conditional means.\nMixed MRF models: Returns a list combining both formats for discrete and continuous variables.\nWhen method = \"posterior-sample\", predictions include an \"sd\" attribute with the standard deviation across draws.\n\n\nbgmCompare\npredict(object, newdata, group, variables = NULL,\n        type = c(\"probabilities\", \"response\"),\n        method = c(\"posterior-mean\"), ...)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgmCompare.\n\n\nnewdata\nA matrix or data frame matching the original variables.\n\n\ngroup\nInteger specifying which group’s parameters to use (1 to number of groups). Required.\n\n\nvariables\nWhich variables to predict (character, integer, or NULL for all).\n\n\ntype\n\"probabilities\" or \"response\".\n\n\nmethod\n\"posterior-mean\" (posterior mean parameters).\n\n\n\nReturns the same structure as predict.bgms, using group-specific parameters obtained by combining baseline parameters and group differences.",
     "crumbs": [
       "Reference",
       "Methods",
@@ -727,7 +859,31 @@
     "href": "reference/methods.html#simulate",
     "title": "S3 Methods",
     "section": "simulate",
-    "text": "simulate\nSimulate data from a fitted model.\nsimulate(object, nsim = 1, ...)\n\n\n\n\n\n\nNote\n\n\n\nFull documentation for each method to be generated from roxygen.",
+    "text": "simulate\nGenerate new observations from a fitted model.\n\nbgms\nsimulate(object, nsim = 500, seed = NULL,\n         method = c(\"posterior-mean\", \"posterior-sample\"),\n         ndraws = NULL, iter = 1000,\n         cores = parallel::detectCores(),\n         display_progress = c(\"per-chain\", \"total\", \"none\"), ...)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms.\n\n\nnsim\nNumber of observations to simulate. Default: 500.\n\n\nseed\nOptional random seed.\n\n\nmethod\n\"posterior-mean\" (single simulation) or \"posterior-sample\" (one dataset per draw, parallel).\n\n\nndraws\nNumber of posterior draws for \"posterior-sample\". NULL uses all.\n\n\niter\nGibbs iterations for equilibration. Default: 1000.\n\n\ncores\nCPU cores for parallel execution with \"posterior-sample\".\n\n\ndisplay_progress\nProgress bar style: \"per-chain\", \"total\", or \"none\".\n\n\n\nIf method = \"posterior-mean\": a matrix (nsim x p). If method = \"posterior-sample\": a list of matrices, one per posterior draw. For mixed MRF models, discrete columns contain integers and continuous columns contain real values.\n\n\nbgmCompare\nsimulate(object, nsim = 500, seed = NULL, group,\n         method = c(\"posterior-mean\"), iter = 1000, ...)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgmCompare.\n\n\nnsim\nNumber of observations to simulate. Default: 500.\n\n\nseed\nOptional random seed.\n\n\ngroup\nInteger specifying which group to simulate from (1 to number of groups). Required.\n\n\nmethod\n\"posterior-mean\".\n\n\niter\nGibbs iterations for equilibration. Default: 1000.\n\n\n\nReturns a matrix (nsim x p) of simulated observations for the specified group.",
+    "crumbs": [
+      "Reference",
+      "Methods",
+      "S3 Methods"
+    ]
+  },
+  {
+    "objectID": "reference/methods.html#simulate_mrf",
+    "href": "reference/methods.html#simulate_mrf",
+    "title": "S3 Methods",
+    "section": "simulate_mrf",
+    "text": "simulate_mrf\nSimulate observations from a Markov Random Field using user-specified parameters (no fitted model needed).\nsimulate_mrf(\n  num_states,\n  num_variables,\n  num_categories,\n  pairwise,\n  main,\n  variable_type = \"ordinal\",\n  baseline_category,\n  iter = 1000,\n  seed = NULL\n)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nnum_states\nNumber of observations to generate.\n\n\nnum_variables\nNumber of variables in the MRF.\n\n\nnum_categories\nInteger or integer vector. Number of response categories on top of the base category (1 = binary).\n\n\npairwise\nSymmetric matrix of pairwise interactions. For continuous variables, this is the precision matrix (must be positive definite).\n\n\nmain\nMain-effect parameters. For ordinal variables: a matrix of category thresholds. For continuous variables: a means vector.\n\n\nvariable_type\n\"ordinal\", \"blume-capel\", or \"continuous\". Can be a vector for mixed types (ordinal/Blume-Capel only).\n\n\nbaseline_category\nInteger vector of baseline categories for Blume–Capel variables.\n\n\niter\nGibbs iterations for equilibration (ordinal only). Default: 1000.\n\n\nseed\nOptional random seed.\n\n\n\nReturns a (num_states x num_variables) matrix of simulated observations.\nFor ordinal and Blume-Capel variables, the Gibbs sampler generates observations from full conditional distributions. For continuous variables, observations are drawn directly from \\(N(\\mu, \\Omega^{-1})\\).",
+    "crumbs": [
+      "Reference",
+      "Methods",
+      "S3 Methods"
+    ]
+  },
+  {
+    "objectID": "reference/methods.html#see-also",
+    "href": "reference/methods.html#see-also",
+    "title": "S3 Methods",
+    "section": "See also",
+    "text": "See also\nbgm(), bgmCompare(), extractor functions",
     "crumbs": [
       "Reference",
       "Methods",
@@ -750,7 +906,7 @@
     "href": "reference/index.html#core-functions",
     "title": "Function Reference",
     "section": "Core Functions",
-    "text": "Core Functions\n\n\n\nFunction\nDescription\n\n\n\n\nbgm()\nFit a Bayesian graphical model\n\n\nbgmCompare()\nCompare networks between groups",
+    "text": "Core Functions\n\n\n\nFunction\nDescription\n\n\n\n\nbgm()\nBayesian estimation or edge selection for Markov Random Fields\n\n\nbgmCompare()\nBayesian estimation and variable selection for group differences in MRFs",
     "crumbs": [
       "Reference",
       "Function Reference"
@@ -761,18 +917,18 @@
     "href": "reference/index.html#s3-methods",
     "title": "Function Reference",
     "section": "S3 Methods",
-    "text": "S3 Methods\n\n\n\nMethod\nDescription\n\n\n\n\nprint, summary, coef\nInspect fitted models\n\n\npredict\nPredict new observations\n\n\nsimulate\nSimulate from fitted models",
+    "text": "S3 Methods\n\n\n\nMethod\nDescription\n\n\n\n\nprint()\nMinimal console output for a fitted model\n\n\nsummary()\nSummary statistics for posterior samples\n\n\ncoef()\nExtract posterior means of model parameters\n\n\npredict()\nPredict new observations from a fitted model\n\n\nsimulate()\nSimulate datasets from the posterior distribution\n\n\nsimulate_mrf()\nSimulate observations from a Markov Random Field",
     "crumbs": [
       "Reference",
       "Function Reference"
     ]
   },
   {
-    "objectID": "reference/index.html#extractors",
-    "href": "reference/index.html#extractors",
+    "objectID": "reference/index.html#extractor-functions",
+    "href": "reference/index.html#extractor-functions",
     "title": "Function Reference",
-    "section": "Extractors",
-    "text": "Extractors\n\n\n\nFunction\nDescription\n\n\n\n\nExtractor functions\nExtract specific model components",
+    "section": "Extractor Functions",
+    "text": "Extractor Functions\n\n\n\nFunction\nDescription\n\n\n\n\nextract_arguments()\nRetrieve the arguments used when fitting a model\n\n\nextract_main_effects()\nExtract posterior samples of category threshold parameters\n\n\nextract_pairwise_interactions()\nExtract posterior samples of pairwise interaction parameters\n\n\nextract_indicators()\nExtract posterior samples of edge or difference indicators\n\n\nextract_posterior_inclusion_probabilities()\nCompute posterior inclusion probabilities from indicator samples\n\n\nextract_indicator_priors()\nRetrieve prior inclusion probabilities for indicators\n\n\nextract_group_params()\nExtract group-specific parameters from a bgmCompare fit\n\n\nextract_sbm()\nExtract stochastic block model assignments and probabilities\n\n\nextract_ess()\nCompute effective sample sizes for model parameters\n\n\nextract_rhat()\nCompute split-R-hat convergence diagnostics",
     "crumbs": [
       "Reference",
       "Function Reference"
@@ -783,7 +939,7 @@
     "href": "reference/index.html#datasets",
     "title": "Function Reference",
     "section": "Datasets",
-    "text": "Datasets\n\n\n\nDataset\nDescription\n\n\n\n\nADHD, Boredom, Wenchuan\nExample datasets",
+    "text": "Datasets\n\n\n\nDataset\nDescription\n\n\n\n\nADHD\nBinary ADHD symptom ratings for 355 children (18 items)\n\n\nBoredom\nOrdinal boredom proneness scores for 986 participants (9 items)\n\n\nWenchuan\nOrdinal PTSD symptom ratings for 362 survivors (17 items)",
     "crumbs": [
       "Reference",
       "Function Reference"
@@ -1658,7 +1814,7 @@
     "href": "reference/bgm.html",
     "title": "bgm",
     "section": "",
-    "text": "Bayesian estimation of graphical models for binary and/or ordinal variables.",
+    "text": "Bayesian estimation or edge selection for Markov Random Fields.",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1670,7 +1826,7 @@
     "href": "reference/bgm.html#description",
     "title": "bgm",
     "section": "Description",
-    "text": "Description\nbgm() fits a Bayesian graphical model using MCMC sampling. The model can handle ordinal variables (ordinal MRF) or continuous variables (Gaussian graphical model).",
+    "text": "Description\nThe bgm function estimates the pseudoposterior distribution of the parameters of a Markov Random Field (MRF) for binary, ordinal, continuous, or mixed (discrete and continuous) variables. Depending on the variable types, the model is an ordinal MRF, a Gaussian graphical model (GGM), or a mixed MRF. Optionally, it performs Bayesian edge selection using spike-and-slab priors to infer the network structure.",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1682,7 +1838,7 @@
     "href": "reference/bgm.html#usage",
     "title": "bgm",
     "section": "Usage",
-    "text": "Usage\nbgm(\n x,\n variable_type = \"ordinal\",\n reference_category,\n iter = 10000,\n burnin = 1000,\n ...\n)",
+    "text": "Usage\nbgm(\n  x,\n  variable_type = \"ordinal\",\n  baseline_category,\n  iter = 1000,\n  warmup = 1000,\n  pairwise_scale = 2.5,\n  main_alpha = 0.5,\n  main_beta = 0.5,\n  edge_selection = TRUE,\n  edge_prior = c(\"Bernoulli\", \"Beta-Bernoulli\", \"Stochastic-Block\"),\n  inclusion_probability = 0.5,\n  beta_bernoulli_alpha = 1,\n  beta_bernoulli_beta = 1,\n  beta_bernoulli_alpha_between = 1,\n  beta_bernoulli_beta_between = 1,\n  dirichlet_alpha = 1,\n  lambda = 1,\n  na_action = c(\"listwise\", \"impute\"),\n  update_method = c(\"nuts\", \"adaptive-metropolis\", \"hamiltonian-mc\"),\n  target_accept,\n  hmc_num_leapfrogs = 100,\n  nuts_max_depth = 10,\n  learn_mass_matrix = TRUE,\n  chains = 4,\n  cores = parallel::detectCores(),\n  display_progress = c(\"per-chain\", \"total\", \"none\"),\n  seed = NULL,\n  standardize = FALSE,\n  pseudolikelihood = c(\"conditional\", \"marginal\"),\n  verbose = getOption(\"bgms.verbose\", TRUE)\n)",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1694,7 +1850,7 @@
     "href": "reference/bgm.html#arguments",
     "title": "bgm",
     "section": "Arguments",
-    "text": "Arguments\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix of observations.\n\n\nvariable_type\nCharacter; \"ordinal\" (default) or \"continuous\".\n\n\nreference_category\nReference category for ordinal variables.\n\n\niter\nNumber of MCMC iterations after burnin.\n\n\nburnin\nNumber of burnin iterations.\n\n\n...\nAdditional arguments (see documentation).",
+    "text": "Arguments\n\nData\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix with n rows and p columns containing binary and ordinal responses. Variables are automatically recoded to non-negative integers (0, 1, ..., m). For regular ordinal variables, unobserved categories are collapsed; for Blume–Capel variables, all categories are retained.\n\n\nvariable_type\nCharacter or character vector specifying the type of each variable. Allowed values: \"ordinal\", \"blume-capel\", or \"continuous\". A single string applies to all variables. A per-variable vector that mixes discrete (\"ordinal\" / \"blume-capel\") and \"continuous\" types fits a mixed MRF. Binary variables are automatically treated as \"ordinal\". Default: \"ordinal\".\n\n\nbaseline_category\nInteger or vector. Baseline category for Blume–Capel variables. Can be a single integer (applied to all) or a vector of length p. Required if at least one variable is of type \"blume-capel\".\n\n\nna_action\nHow to handle missing data: \"listwise\" (drop rows with missing values) or \"impute\" (single imputation during sampling). Default: \"listwise\".\n\n\n\n\n\nPrior specification\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\npairwise_scale\nScale of the Cauchy prior for pairwise interaction parameters. Default: 2.5.\n\n\nmain_alpha, main_beta\nShape parameters of the beta-prime prior for threshold parameters. Must be positive. Defaults: 0.5.\n\n\nedge_selection\nLogical. Whether to perform Bayesian edge selection. If FALSE, the model estimates all edges. Default: TRUE.\n\n\nedge_prior\nPrior for edge inclusion: \"Bernoulli\", \"Beta-Bernoulli\", or \"Stochastic-Block\". Default: \"Bernoulli\".\n\n\ninclusion_probability\nPrior inclusion probability of each edge (Bernoulli prior). Default: 0.5.\n\n\nbeta_bernoulli_alpha, beta_bernoulli_beta\nShape parameters for the beta distribution in the Beta–Bernoulli and Stochastic-Block priors. For the Stochastic-Block prior these are the within-cluster parameters. Defaults: 1.\n\n\nbeta_bernoulli_alpha_between, beta_bernoulli_beta_between\nShape parameters for between-cluster edge inclusion probabilities in the Stochastic-Block prior. Defaults: 1.\n\n\ndirichlet_alpha\nConcentration parameter of the Dirichlet prior on block assignments (Stochastic Block model). Default: 1.\n\n\nlambda\nRate of the zero-truncated Poisson prior on the number of clusters (Stochastic Block model). Default: 1.\n\n\nstandardize\nLogical. If TRUE, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products, so standardization ensures equivalent relative shrinkage across all pairs. Default: FALSE.\n\n\n\n\n\nSampler settings\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\niter\nNumber of post-warmup iterations per chain. Default: 1000.\n\n\nwarmup\nNumber of warmup iterations before collecting samples. A minimum of 1000 is enforced. Default: 1000.\n\n\nupdate_method\nSampling algorithm: \"nuts\" (No-U-Turn Sampler), \"adaptive-metropolis\" (componentwise Metropolis–Hastings with Robbins–Monro adaptation), or \"hamiltonian-mc\" (HMC with fixed path length). Default: \"nuts\".\n\n\ntarget_accept\nTarget acceptance rate (0 to 1). Defaults: 0.44 for adaptive Metropolis, 0.65 for HMC, 0.80 for NUTS.\n\n\nhmc_num_leapfrogs\nNumber of leapfrog steps for HMC. Default: 100.\n\n\nnuts_max_depth\nMaximum tree depth in NUTS. Default: 10.\n\n\nlearn_mass_matrix\nLogical. If TRUE, adapt a diagonal mass matrix during warmup (HMC/NUTS only). Default: TRUE.\n\n\nchains\nNumber of parallel chains. Default: 4.\n\n\ncores\nNumber of CPU cores for parallel execution. Default: parallel::detectCores().\n\n\ndisplay_progress\nProgress reporting: \"per-chain\", \"total\", or \"none\". Default: \"per-chain\".\n\n\nseed\nOptional integer seed for reproducibility.\n\n\npseudolikelihood\nFor mixed MRF models: \"conditional\" (conditions on continuous variables for discrete updates; faster) or \"marginal\" (integrates out continuous variables; more expensive). Ignored for pure ordinal or pure continuous data. Default: \"conditional\".\n\n\nverbose\nLogical. Print informational messages during data processing. Default: getOption(\"bgms.verbose\", TRUE).",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1706,7 +1862,19 @@
     "href": "reference/bgm.html#value",
     "title": "bgm",
     "section": "Value",
-    "text": "Value\nAn object of class bgms containing:\n\ninteractions — Posterior samples for edge weights\nthresholds — Posterior samples for threshold parameters\n\ngamma — Edge inclusion indicators\nprior — Prior specification used",
+    "text": "Value\nA list of class \"bgms\" with posterior summaries, posterior mean matrices, and access to raw MCMC draws. The object can be passed to print(), summary(), and coef().\nMain components:\n\nposterior_summary_main — Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for main-effect parameters. For OMRF models these are category thresholds; for mixed MRF models these are discrete thresholds and continuous means. NULL for GGM models.\nposterior_summary_quadratic — Data frame with posterior summaries for the precision matrix diagonal (GGM and mixed MRF). NULL for OMRF models.\nposterior_summary_pairwise — Data frame with posterior summaries for pairwise interaction parameters.\nposterior_summary_indicator — Data frame with posterior summaries for edge inclusion indicators (if edge_selection = TRUE).\nposterior_mean_main — Posterior mean of main-effect parameters.\nposterior_mean_pairwise — Symmetric matrix of posterior mean pairwise interaction strengths. For GGM and mixed MRF models, the precision matrix diagonal is on the matrix diagonal.\nposterior_mean_indicator — Symmetric matrix of posterior mean inclusion probabilities (if edge selection was enabled).\nraw_samples — A list of raw MCMC draws per chain, with sublists for main, pairwise, indicator, and allocations (SBM prior).\narguments — A list of function call arguments and metadata.\n\nAdditional summaries when edge_prior = \"Stochastic-Block\":\n\nposterior_summary_pairwise_allocations — Data frame with posterior summaries for pairwise cluster co-occurrence.\nposterior_coclustering_matrix — Symmetric co-clustering proportion matrix.\nposterior_mean_allocations — Posterior mean cluster allocations.\nposterior_mode_allocations — Posterior mode cluster allocations.\nposterior_num_blocks — Posterior probabilities for each possible number of clusters.\n\nNUTS diagnostics (tree depth, divergences, energy, E-BFMI) are available in fit$nuts_diag when update_method = \"nuts\".",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgm"
+    ]
+  },
+  {
+    "objectID": "reference/bgm.html#details",
+    "href": "reference/bgm.html#details",
+    "title": "bgm",
+    "section": "Details",
+    "text": "Details\n\nOrdinal variables\nThe function supports two types of ordinal variables.\nRegular ordinal variables assign a category threshold parameter to each response category except the lowest. The model imposes no additional constraints on the distribution of category responses.\nBlume–Capel ordinal variables assume a baseline category (e.g., a “neutral” response) and score responses by distance from this baseline. Category thresholds are modeled as:\n\\[\\mu_c = \\alpha \\cdot (c - b) + \\beta \\cdot (c - b)^2\\]\nwhere \\(\\mu_c\\) is the category threshold for category \\(c\\), \\(\\alpha\\) is a linear trend across categories, \\(\\beta\\) is a quadratic effect (negative values favor responses near the baseline; positive values favor extremes), and \\(b\\) is the baseline category.\n\n\nEdge selection\nWhen edge_selection = TRUE, the function performs Bayesian variable selection on pairwise interactions using spike-and-slab priors:\n\nBernoulli — Fixed inclusion probability across edges.\nBeta-Bernoulli — Inclusion probability is given a Beta prior.\nStochastic-Block — Cluster-based edge priors with Beta, Dirichlet, and Poisson hyperpriors.\n\n\n\nPrior distributions\n\nPairwise effects — Cauchy (slab) prior.\nMain effects — Beta-prime distribution.\nEdge indicators — Bernoulli, Beta-Bernoulli, or Stochastic-Block prior.\n\n\n\nSampling algorithms and warmup\nParameters are updated within a Gibbs framework using one of three algorithms:\n\nAdaptive Metropolis–Hastings — Componentwise random-walk updates with Robbins–Monro proposal adaptation.\nHamiltonian Monte Carlo — Joint updates using fixed-length leapfrog trajectories. Step size is tuned during warmup via dual averaging; the diagonal mass matrix can also be adapted.\nNo-U-Turn Sampler — Adaptive extension of HMC with dynamically chosen trajectory lengths. Warmup uses a staged fast–slow–fast schedule.\n\nWhen edge_selection = TRUE, edge-inclusion indicator updates are delayed until after the core warmup phase. The warmup schedule appends additional stages for proposal-SD tuning (Stage 3b) and graph initialization (Stage 3c), so the total warmup exceeds the user-specified value.\n\n\nMissing data\nIf na_action = \"listwise\", rows with missing values are removed. If na_action = \"impute\", missing values are imputed within the MCMC loop via Gibbs sampling.",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1718,7 +1886,7 @@
     "href": "reference/bgm.html#examples",
     "title": "bgm",
     "section": "Examples",
-    "text": "Examples\n\nlibrary(bgms)\ndata(Wenchuan)\n\n# Basic usage\nfit &lt;- bgm(Wenchuan)\nsummary(fit)\n\n# With edge selection\nfit &lt;- bgm(Wenchuan, edge_selection = TRUE)",
+    "text": "Examples\n\n# Fit a model on a subset of the Wenchuan data\nfit = bgm(x = Wenchuan[, 1:5], chains = 2)\n\n# Posterior inclusion probabilities\nsummary(fit)$indicator\n\n# Posterior pairwise effects\nsummary(fit)$pairwise",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1729,8 +1897,20 @@
     "objectID": "reference/bgm.html#see-also",
     "href": "reference/bgm.html#see-also",
     "title": "bgm",
-    "section": "See Also",
-    "text": "See Also\nbgmCompare(), summary.bgms",
+    "section": "See also",
+    "text": "See also\nbgmCompare() for group comparisons, S3 methods for print, summary, and coef, extractor functions for accessing specific model components.",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgm"
+    ]
+  },
+  {
+    "objectID": "reference/bgm.html#references",
+    "href": "reference/bgm.html#references",
+    "title": "bgm",
+    "section": "References",
+    "text": "References\nMarsman, M., Van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian analysis of the ordinal Markov random field. Psychometrika.",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1753,7 +1933,7 @@
     "href": "reference/datasets.html#adhd",
     "title": "Datasets",
     "section": "ADHD",
-    "text": "ADHD\nADHD symptom data.\ndata(ADHD)",
+    "text": "ADHD\nADHD symptom ratings for 355 children aged 6 to 8 years from the Children’s Attention Project (CAP) cohort (Silk et al., 2019). The sample consists of 146 children diagnosed with ADHD and 209 without a diagnosis. Symptoms were assessed through structured interviews with parents using the NIMH Diagnostic Interview Schedule for Children IV (DISC-IV; Shaffer et al., 2000). The checklist includes 18 items: 9 Inattentive (I) and 9 Hyperactive/Impulsive (HI). Each item is binary (1 = present, 0 = absent).\ndata(\"ADHD\")\nA matrix with 355 rows and 19 columns:\n\n\n\n\n\n\n\nColumn\nDescription\n\n\n\n\ngroup\nADHD diagnosis: 1 = diagnosed, 0 = not diagnosed\n\n\navoid\nOften avoids tasks that require sustained mental effort (I)\n\n\ncloseatt\nOften fails to give close attention to details (I)\n\n\ndistract\nIs often easily distracted by extraneous stimuli (I)\n\n\nforget\nIs often forgetful in daily activities (I)\n\n\ninstruct\nOften does not follow through on instructions (I)\n\n\nlisten\nOften does not seem to listen when spoken to directly (I)\n\n\nloses\nOften loses things necessary for tasks (I)\n\n\norg\nOften has difficulty organizing tasks (I)\n\n\nsusatt\nOften has difficulty sustaining attention (I)\n\n\nblurts\nOften blurts out answers before questions are completed (HI)\n\n\nfidget\nOften fidgets with hands or feet (HI)\n\n\ninterrupt\nOften interrupts or intrudes on others (HI)\n\n\nmotor\nIs often “on the go” or acts as if “driven by a motor” (HI)\n\n\nquiet\nOften has difficulty playing quietly (HI)\n\n\nruns\nOften runs about or climbs excessively (HI)\n\n\nseat\nOften leaves seat when remaining seated is expected (HI)\n\n\ntalks\nOften talks excessively (HI)\n\n\nturn\nOften has difficulty awaiting turn (HI)\n\n\n\nSource: Silk et al. (2019). Data retrieved from doi:10.1371/journal.pone.0211053.s004. Licensed under CC-BY 4.0.",
     "crumbs": [
       "Reference",
       "Datasets"
@@ -1764,7 +1944,7 @@
     "href": "reference/datasets.html#boredom",
     "title": "Datasets",
     "section": "Boredom",
-    "text": "Boredom\nBoredom proneness questionnaire data.\ndata(Boredom)",
+    "text": "Boredom\nResponses to the 8-item Short Boredom Proneness Scale (SBPS), a self-report measure of susceptibility to boredom (Martarelli et al., 2023). Items were rated on a 7-point Likert scale from 1 (“strongly disagree”) to 7 (“strongly agree”). The scale was administered in either English (Struk et al., 2015) or French (Martarelli et al., 2023).\ndata(\"Boredom\")\nA matrix with 986 rows and 9 columns:\n\n\n\n\n\n\n\nColumn\nDescription\n\n\n\n\nlanguage\nLanguage: \"en\" = English, \"fr\" = French\n\n\nloose_ends\nI often find myself at “loose ends,” not knowing what to do.\n\n\nentertain\nI find it hard to entertain myself.\n\n\nrepetitive\nMany things I have to do are repetitive and monotonous.\n\n\nstimulation\nIt takes more stimulation to get me going than most people.\n\n\nmotivated\nI don’t feel motivated by most things that I do.\n\n\nkeep_interest\nIn most situations, it is hard for me to find something to keep me interested.\n\n\nsit_around\nMuch of the time, I just sit around doing nothing.\n\n\nhalf_dead_dull\nUnless I am doing something exciting, even dangerous, I feel half-dead and dull.\n\n\n\nSource: Martarelli et al. (2023). Data retrieved from osf.io/qhux8. Licensed under CC-BY 4.0.",
     "crumbs": [
       "Reference",
       "Datasets"
@@ -1775,7 +1955,18 @@
     "href": "reference/datasets.html#wenchuan",
     "title": "Datasets",
     "section": "Wenchuan",
-    "text": "Wenchuan\nPost-traumatic stress symptoms following the 2008 Wenchuan earthquake.\ndata(Wenchuan)\n\n\n\n\n\n\nNote\n\n\n\nFull documentation to be generated from roxygen.",
+    "text": "Wenchuan\nResponses to 17 items assessing PTSD symptoms in Chinese adults who survived the 2008 Wenchuan earthquake and lost at least one child in the disaster (McNally et al., 2015). Participants completed the civilian version of the Posttraumatic Checklist, with each item corresponding to a DSM-IV PTSD symptom. Items were rated on a 5-point Likert scale from “not at all” to “extremely.”\ndata(\"Wenchuan\")\nA matrix with 362 rows and 17 columns:\n\n\n\n\n\n\n\nColumn\nDescription\n\n\n\n\nintrusion\nRepeated, disturbing memories, thoughts, or images of a stressful experience?\n\n\ndreams\nRepeated, disturbing dreams of a stressful experience?\n\n\nflash\nSuddenly acting or feeling as if a stressful experience were happening again?\n\n\nupset\nFeeling very upset when something reminded you of a stressful experience?\n\n\nphysior\nHaving physical reactions when something reminded you of a stressful experience?\n\n\navoidth\nAvoiding thinking about or talking about a stressful experience?\n\n\navoidact\nAvoiding activities or situations because they reminded you of a stressful experience?\n\n\namnesia\nTrouble remembering important parts of a stressful experience?\n\n\nlossint\nLoss of interest in activities that you used to enjoy?\n\n\ndistant\nFeeling distant or cut off from other people?\n\n\nnumb\nFeeling emotionally numb or unable to have loving feelings?\n\n\nfuture\nFeeling as if your future will somehow be cut short?\n\n\nsleep\nTrouble falling or staying asleep?\n\n\nanger\nFeeling irritable or having angry outbursts?\n\n\nconcen\nHaving difficulty concentrating?\n\n\nhyper\nBeing “super-alert” or watchful or on guard?\n\n\nstartle\nFeeling jumpy or easily startled?\n\n\n\nSource: McNally et al. (2015). Data retrieved from psychosystems.org.",
+    "crumbs": [
+      "Reference",
+      "Datasets"
+    ]
+  },
+  {
+    "objectID": "reference/datasets.html#references",
+    "href": "reference/datasets.html#references",
+    "title": "Datasets",
+    "section": "References",
+    "text": "References\n\nMartarelli, C. S., et al. (2023). Boredom proneness predicts self-assessed decision errors in everyday life. Psychological Research, 87, 440–452.\nMcNally, R. J., et al. (2015). Mental disorders as causal systems: A network approach to posttraumatic stress disorder. Clinical Psychological Science, 3(6), 836–849.\nShaffer, D., et al. (2000). NIMH Diagnostic Interview Schedule for Children Version IV. Journal of the American Academy of Child and Adolescent Psychiatry, 39, 28–38.\nSilk, T. J., et al. (2019). A network analysis approach to ADHD symptoms in early adolescence. PLoS ONE, 14(1), e0211053.\nStruk, A. A., et al. (2015). A short Boredom Proneness Scale. Assessment, 24(3), 346–359.",
     "crumbs": [
       "Reference",
       "Datasets"
@@ -1786,7 +1977,7 @@
     "href": "reference/bgmCompare.html",
     "title": "bgmCompare",
     "section": "",
-    "text": "Compare graphical models between groups.",
+    "text": "Bayesian estimation and variable selection for group differences in Markov Random Fields.",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1798,7 +1989,7 @@
     "href": "reference/bgmCompare.html#description",
     "title": "bgmCompare",
     "section": "Description",
-    "text": "Description\nbgmCompare() tests for differences in network structure between independent groups using Bayes factor tests.",
+    "text": "Description\nThe bgmCompare function estimates group differences in category threshold parameters (main effects) and pairwise interactions (pairwise effects) of a Markov Random Field (MRF) for binary and ordinal variables. Groups can be defined either by supplying two separate datasets (x and y) or by a group membership vector. Optionally, Bayesian variable selection identifies differences across groups.",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1810,7 +2001,7 @@
     "href": "reference/bgmCompare.html#usage",
     "title": "bgmCompare",
     "section": "Usage",
-    "text": "Usage\nbgmCompare(\n  x,\n  group,\n  ...\n)",
+    "text": "Usage\nbgmCompare(\n  x,\n  y,\n  group_indicator,\n  difference_selection = TRUE,\n  main_difference_selection = FALSE,\n  variable_type = \"ordinal\",\n  baseline_category,\n  difference_scale = 1,\n  difference_prior = c(\"Bernoulli\", \"Beta-Bernoulli\"),\n  difference_probability = 0.5,\n  beta_bernoulli_alpha = 1,\n  beta_bernoulli_beta = 1,\n  pairwise_scale = 2.5,\n  main_alpha = 0.5,\n  main_beta = 0.5,\n  iter = 1000,\n  warmup = 1000,\n  na_action = c(\"listwise\", \"impute\"),\n  update_method = c(\"nuts\", \"adaptive-metropolis\", \"hamiltonian-mc\"),\n  target_accept,\n  hmc_num_leapfrogs = 100,\n  nuts_max_depth = 10,\n  learn_mass_matrix = TRUE,\n  chains = 4,\n  cores = parallel::detectCores(),\n  display_progress = c(\"per-chain\", \"total\", \"none\"),\n  seed = NULL,\n  standardize = FALSE,\n  verbose = getOption(\"bgms.verbose\", TRUE)\n)",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1822,7 +2013,7 @@
     "href": "reference/bgmCompare.html#arguments",
     "title": "bgmCompare",
     "section": "Arguments",
-    "text": "Arguments\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix of observations.\n\n\ngroup\nA factor or vector indicating group membership.\n\n\n...\nAdditional arguments passed to the sampler.",
+    "text": "Arguments\n\nData and groups\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix of binary and ordinal responses for Group 1. Variables should be coded as nonnegative integers starting at 0. For ordinal variables, unused categories are collapsed; for Blume–Capel variables, all categories are retained.\n\n\ny\nOptional data frame or matrix for Group 2 (two-group designs). Must have the same variables (columns) as x.\n\n\ngroup_indicator\nOptional integer vector of group memberships for rows of x (multi-group designs). Ignored if y is supplied.\n\n\nvariable_type\nCharacter vector specifying the type of each variable: \"ordinal\" (default) or \"blume-capel\".\n\n\nbaseline_category\nInteger or vector giving the baseline category for Blume–Capel variables.\n\n\nna_action\nHow to handle missing data: \"listwise\" (drop rows) or \"impute\" (impute within Gibbs). Default: \"listwise\".\n\n\n\n\n\nDifference selection\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\ndifference_selection\nLogical. If TRUE, spike-and-slab priors are applied to difference parameters. Default: TRUE.\n\n\nmain_difference_selection\nLogical. If TRUE, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is FALSE. Only used when difference_selection = TRUE.\n\n\ndifference_scale\nScale of the Cauchy prior for difference parameters. Default: 1.\n\n\ndifference_prior\nPrior for difference inclusion: \"Bernoulli\" or \"Beta-Bernoulli\". Default: \"Bernoulli\".\n\n\ndifference_probability\nPrior inclusion probability for differences (Bernoulli prior). Default: 0.5.\n\n\nbeta_bernoulli_alpha, beta_bernoulli_beta\nShape parameters of the Beta prior for inclusion probabilities in the Beta–Bernoulli model. Defaults: 1.\n\n\n\n\n\nPrior specification\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\npairwise_scale\nScale of the Cauchy prior for baseline pairwise interactions. Default: 2.5.\n\n\nmain_alpha, main_beta\nShape parameters of the beta-prime prior for baseline threshold parameters. Defaults: 0.5.\n\n\nstandardize\nLogical. If TRUE, the Cauchy prior scale for each pairwise interaction (both baseline and difference) is adjusted based on the range of response scores. Default: FALSE.\n\n\n\n\n\nSampler settings\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\niter\nNumber of post-warmup iterations per chain. Default: 1000.\n\n\nwarmup\nNumber of warmup iterations before sampling. Default: 1000.\n\n\nupdate_method\nSampling algorithm: \"nuts\", \"adaptive-metropolis\", or \"hamiltonian-mc\". Default: \"nuts\".\n\n\ntarget_accept\nTarget acceptance rate. Defaults: 0.44 (Metropolis), 0.65 (HMC), 0.80 (NUTS).\n\n\nhmc_num_leapfrogs\nLeapfrog steps for HMC. Default: 100.\n\n\nnuts_max_depth\nMaximum tree depth for NUTS. Default: 10.\n\n\nlearn_mass_matrix\nLogical. If TRUE, adapts a diagonal mass matrix during warmup (HMC/NUTS only). Default: TRUE.\n\n\nchains\nNumber of parallel chains. Default: 4.\n\n\ncores\nNumber of CPU cores. Default: parallel::detectCores().\n\n\ndisplay_progress\nProgress reporting: \"per-chain\", \"total\", or \"none\". Default: \"per-chain\".\n\n\nseed\nOptional integer seed for reproducibility.\n\n\nverbose\nLogical. Print informational messages during data processing. Default: getOption(\"bgms.verbose\", TRUE).",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1834,7 +2025,19 @@
     "href": "reference/bgmCompare.html#value",
     "title": "bgmCompare",
     "section": "Value",
-    "text": "Value\nAn object of class bgmCompare containing posterior samples and Bayes factors for group differences.",
+    "text": "Value\nA list of class \"bgmCompare\" containing posterior summaries, posterior mean matrices, and raw MCMC samples:\n\nposterior_summary_main_baseline, posterior_summary_pairwise_baseline — Summaries of baseline thresholds and pairwise interactions.\nposterior_summary_main_differences, posterior_summary_pairwise_differences — Summaries of group differences in thresholds and pairwise interactions.\nposterior_summary_indicator — Summaries of inclusion indicators (if difference_selection = TRUE).\nposterior_mean_main_baseline, posterior_mean_pairwise_baseline — Posterior mean matrices (legacy style).\nraw_samples — List of raw draws per chain for main, pairwise, and indicator parameters.\narguments — List of function call arguments and metadata.\n\nThe summary() method prints formatted summaries, and coef() extracts posterior means. NUTS diagnostics are available in fit$nuts_diag when update_method = \"nuts\".",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "bgmCompare"
+    ]
+  },
+  {
+    "objectID": "reference/bgmCompare.html#details",
+    "href": "reference/bgmCompare.html#details",
+    "title": "bgmCompare",
+    "section": "Details",
+    "text": "Details\n\nPairwise interactions\nFor variables \\(i\\) and \\(j\\), the group-specific interaction is represented as:\n\\[\\theta_{ij}^{(g)} = \\phi_{ij} + \\delta_{ij}^{(g)}\\]\nwhere \\(\\phi_{ij}\\) is the baseline effect and \\(\\delta_{ij}^{(g)}\\) are group differences constrained to sum to zero.\n\n\nOrdinal variables\nRegular ordinal variables: category thresholds are decomposed into a baseline plus group differences for each category.\nBlume–Capel variables: category thresholds are quadratic in the category index, with both the linear and quadratic terms split into a baseline plus group differences.\n\n\nVariable selection\nWhen difference_selection = TRUE, spike-and-slab priors are applied to difference parameters:\n\nBernoulli — Fixed prior inclusion probability.\nBeta-Bernoulli — Inclusion probability given a Beta prior.\n\n\n\nSampling algorithms and warmup\nParameters are updated within a Gibbs framework, using the same sampling algorithms and staged warmup scheme described in bgm(): adaptive Metropolis–Hastings, Hamiltonian Monte Carlo, or the No-U-Turn Sampler. When difference_selection = TRUE, indicator updates are delayed until late warmup.",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1846,7 +2049,7 @@
     "href": "reference/bgmCompare.html#examples",
     "title": "bgmCompare",
     "section": "Examples",
-    "text": "Examples\n\nlibrary(bgms)\n\n# Simulated example\n# fit &lt;- bgmCompare(data, group = group_variable)\n# summary(fit)",
+    "text": "Examples\n\n# Compare French and non-French groups on a subset of the Boredom data\nx = Boredom[Boredom$language == \"fr\", 2:6]\ny = Boredom[Boredom$language != \"fr\", 2:6]\n\nfit = bgmCompare(x, y, chains = 2)\n\n# Posterior inclusion probabilities\nsummary(fit)$indicator\n\n# Bayesian model averaged main effects for the groups\ncoef(fit)$main_effects_groups\n\n# Bayesian model averaged pairwise effects for the groups\ncoef(fit)$pairwise_effects_groups",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -1857,8 +2060,8 @@
     "objectID": "reference/bgmCompare.html#see-also",
     "href": "reference/bgmCompare.html#see-also",
     "title": "bgmCompare",
-    "section": "See Also",
-    "text": "See Also\nbgm(), summary.bgmCompare",
+    "section": "See also",
+    "text": "See also\nbgm() for single-group models, S3 methods for print, summary, and coef, extractor functions for accessing specific model components.",
     "crumbs": [
       "Reference",
       "Core Functions",

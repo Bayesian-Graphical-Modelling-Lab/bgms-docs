@@ -451,31 +451,256 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Example datasets included in bgms.</p>
 <section id="adhd" class="level2">
 <h2 class="anchored" data-anchor-id="adhd">ADHD</h2>
-<p>ADHD symptom data.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(ADHD)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>ADHD symptom ratings for 355 children aged 6 to 8 years from the Children’s Attention Project (CAP) cohort (Silk et al., 2019). The sample consists of 146 children diagnosed with ADHD and 209 without a diagnosis. Symptoms were assessed through structured interviews with parents using the NIMH Diagnostic Interview Schedule for Children IV (DISC-IV; Shaffer et al., 2000). The checklist includes 18 items: 9 Inattentive (I) and 9 Hyperactive/Impulsive (HI). Each item is binary (1 = present, 0 = absent).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"ADHD"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A matrix with 355 rows and 19 columns:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 38%">
+<col style="width: 61%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>group</code></td>
+<td>ADHD diagnosis: 1 = diagnosed, 0 = not diagnosed</td>
+</tr>
+<tr class="even">
+<td><code>avoid</code></td>
+<td>Often avoids tasks that require sustained mental effort (I)</td>
+</tr>
+<tr class="odd">
+<td><code>closeatt</code></td>
+<td>Often fails to give close attention to details (I)</td>
+</tr>
+<tr class="even">
+<td><code>distract</code></td>
+<td>Is often easily distracted by extraneous stimuli (I)</td>
+</tr>
+<tr class="odd">
+<td><code>forget</code></td>
+<td>Is often forgetful in daily activities (I)</td>
+</tr>
+<tr class="even">
+<td><code>instruct</code></td>
+<td>Often does not follow through on instructions (I)</td>
+</tr>
+<tr class="odd">
+<td><code>listen</code></td>
+<td>Often does not seem to listen when spoken to directly (I)</td>
+</tr>
+<tr class="even">
+<td><code>loses</code></td>
+<td>Often loses things necessary for tasks (I)</td>
+</tr>
+<tr class="odd">
+<td><code>org</code></td>
+<td>Often has difficulty organizing tasks (I)</td>
+</tr>
+<tr class="even">
+<td><code>susatt</code></td>
+<td>Often has difficulty sustaining attention (I)</td>
+</tr>
+<tr class="odd">
+<td><code>blurts</code></td>
+<td>Often blurts out answers before questions are completed (HI)</td>
+</tr>
+<tr class="even">
+<td><code>fidget</code></td>
+<td>Often fidgets with hands or feet (HI)</td>
+</tr>
+<tr class="odd">
+<td><code>interrupt</code></td>
+<td>Often interrupts or intrudes on others (HI)</td>
+</tr>
+<tr class="even">
+<td><code>motor</code></td>
+<td>Is often “on the go” or acts as if “driven by a motor” (HI)</td>
+</tr>
+<tr class="odd">
+<td><code>quiet</code></td>
+<td>Often has difficulty playing quietly (HI)</td>
+</tr>
+<tr class="even">
+<td><code>runs</code></td>
+<td>Often runs about or climbs excessively (HI)</td>
+</tr>
+<tr class="odd">
+<td><code>seat</code></td>
+<td>Often leaves seat when remaining seated is expected (HI)</td>
+</tr>
+<tr class="even">
+<td><code>talks</code></td>
+<td>Often talks excessively (HI)</td>
+</tr>
+<tr class="odd">
+<td><code>turn</code></td>
+<td>Often has difficulty awaiting turn (HI)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Source</strong>: Silk et al.&nbsp;(2019). Data retrieved from <a href="https://doi.org/10.1371/journal.pone.0211053.s004">doi:10.1371/journal.pone.0211053.s004</a>. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>.</p>
 </section>
 <section id="boredom" class="level2">
 <h2 class="anchored" data-anchor-id="boredom">Boredom</h2>
-<p>Boredom proneness questionnaire data.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Boredom)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Responses to the 8-item Short Boredom Proneness Scale (SBPS), a self-report measure of susceptibility to boredom (Martarelli et al., 2023). Items were rated on a 7-point Likert scale from 1 (“strongly disagree”) to 7 (“strongly agree”). The scale was administered in either English (Struk et al., 2015) or French (Martarelli et al., 2023).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Boredom"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A matrix with 986 rows and 9 columns:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 38%">
+<col style="width: 61%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>language</code></td>
+<td>Language: <code>"en"</code> = English, <code>"fr"</code> = French</td>
+</tr>
+<tr class="even">
+<td><code>loose_ends</code></td>
+<td>I often find myself at “loose ends,” not knowing what to do.</td>
+</tr>
+<tr class="odd">
+<td><code>entertain</code></td>
+<td>I find it hard to entertain myself.</td>
+</tr>
+<tr class="even">
+<td><code>repetitive</code></td>
+<td>Many things I have to do are repetitive and monotonous.</td>
+</tr>
+<tr class="odd">
+<td><code>stimulation</code></td>
+<td>It takes more stimulation to get me going than most people.</td>
+</tr>
+<tr class="even">
+<td><code>motivated</code></td>
+<td>I don’t feel motivated by most things that I do.</td>
+</tr>
+<tr class="odd">
+<td><code>keep_interest</code></td>
+<td>In most situations, it is hard for me to find something to keep me interested.</td>
+</tr>
+<tr class="even">
+<td><code>sit_around</code></td>
+<td>Much of the time, I just sit around doing nothing.</td>
+</tr>
+<tr class="odd">
+<td><code>half_dead_dull</code></td>
+<td>Unless I am doing something exciting, even dangerous, I feel half-dead and dull.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Source</strong>: Martarelli et al.&nbsp;(2023). Data retrieved from <a href="https://osf.io/qhux8">osf.io/qhux8</a>. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>.</p>
 </section>
 <section id="wenchuan" class="level2">
 <h2 class="anchored" data-anchor-id="wenchuan">Wenchuan</h2>
-<p>Post-traumatic stress symptoms following the 2008 Wenchuan earthquake.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Wenchuan)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Full documentation to be generated from roxygen.</p>
-</div>
-</div>
+<p>Responses to 17 items assessing PTSD symptoms in Chinese adults who survived the 2008 Wenchuan earthquake and lost at least one child in the disaster (McNally et al., 2015). Participants completed the civilian version of the Posttraumatic Checklist, with each item corresponding to a DSM-IV PTSD symptom. Items were rated on a 5-point Likert scale from “not at all” to “extremely.”</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Wenchuan"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A matrix with 362 rows and 17 columns:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 38%">
+<col style="width: 61%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>intrusion</code></td>
+<td>Repeated, disturbing memories, thoughts, or images of a stressful experience?</td>
+</tr>
+<tr class="even">
+<td><code>dreams</code></td>
+<td>Repeated, disturbing dreams of a stressful experience?</td>
+</tr>
+<tr class="odd">
+<td><code>flash</code></td>
+<td>Suddenly acting or feeling as if a stressful experience were happening again?</td>
+</tr>
+<tr class="even">
+<td><code>upset</code></td>
+<td>Feeling very upset when something reminded you of a stressful experience?</td>
+</tr>
+<tr class="odd">
+<td><code>physior</code></td>
+<td>Having physical reactions when something reminded you of a stressful experience?</td>
+</tr>
+<tr class="even">
+<td><code>avoidth</code></td>
+<td>Avoiding thinking about or talking about a stressful experience?</td>
+</tr>
+<tr class="odd">
+<td><code>avoidact</code></td>
+<td>Avoiding activities or situations because they reminded you of a stressful experience?</td>
+</tr>
+<tr class="even">
+<td><code>amnesia</code></td>
+<td>Trouble remembering important parts of a stressful experience?</td>
+</tr>
+<tr class="odd">
+<td><code>lossint</code></td>
+<td>Loss of interest in activities that you used to enjoy?</td>
+</tr>
+<tr class="even">
+<td><code>distant</code></td>
+<td>Feeling distant or cut off from other people?</td>
+</tr>
+<tr class="odd">
+<td><code>numb</code></td>
+<td>Feeling emotionally numb or unable to have loving feelings?</td>
+</tr>
+<tr class="even">
+<td><code>future</code></td>
+<td>Feeling as if your future will somehow be cut short?</td>
+</tr>
+<tr class="odd">
+<td><code>sleep</code></td>
+<td>Trouble falling or staying asleep?</td>
+</tr>
+<tr class="even">
+<td><code>anger</code></td>
+<td>Feeling irritable or having angry outbursts?</td>
+</tr>
+<tr class="odd">
+<td><code>concen</code></td>
+<td>Having difficulty concentrating?</td>
+</tr>
+<tr class="even">
+<td><code>hyper</code></td>
+<td>Being “super-alert” or watchful or on guard?</td>
+</tr>
+<tr class="odd">
+<td><code>startle</code></td>
+<td>Feeling jumpy or easily startled?</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Source</strong>: McNally et al.&nbsp;(2015). Data retrieved from <a href="https://psychosystems.org/wp-content/uploads/2014/10/Wenchuan.csv">psychosystems.org</a>.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Martarelli, C. S., et al.&nbsp;(2023). Boredom proneness predicts self-assessed decision errors in everyday life. <em>Psychological Research</em>, 87, 440–452.</li>
+<li>McNally, R. J., et al.&nbsp;(2015). Mental disorders as causal systems: A network approach to posttraumatic stress disorder. <em>Clinical Psychological Science</em>, 3(6), 836–849.</li>
+<li>Shaffer, D., et al.&nbsp;(2000). NIMH Diagnostic Interview Schedule for Children Version IV. <em>Journal of the American Academy of Child and Adolescent Psychiatry</em>, 39, 28–38.</li>
+<li>Silk, T. J., et al.&nbsp;(2019). A network analysis approach to ADHD symptoms in early adolescence. <em>PLoS ONE</em>, 14(1), e0211053.</li>
+<li>Struk, A. A., et al.&nbsp;(2015). A short Boredom Proneness Scale. <em>Assessment</em>, 24(3), 346–359.</li>
+</ul>
 
 
 </section>

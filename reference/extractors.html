@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -414,22 +449,245 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Functions to extract specific components from fitted bgms objects.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Documentation to be generated from roxygen.</p>
-</div>
-</div>
+<p>Functions to extract specific components from fitted <code>bgms</code> and <code>bgmCompare</code> objects.</p>
+<section id="extract_arguments" class="level2">
+<h2 class="anchored" data-anchor-id="extract_arguments">extract_arguments</h2>
+<p>Retrieve the arguments used when fitting a model with <code>bgm()</code> or <code>bgmCompare()</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_arguments</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a named list containing all arguments passed to the fitting function, including data dimensions, prior settings, and MCMC configuration.</p>
+</section>
+<section id="extract_main_effects" class="level2">
+<h2 class="anchored" data-anchor-id="extract_main_effects">extract_main_effects</h2>
+<p>Retrieve posterior mean main-effect parameters.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_main_effects</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>The structure depends on the model type:</p>
+<ul>
+<li><strong>GGM</strong> (<code>bgms</code>): <code>NULL</code>. GGM models have no main effects; the precision matrix diagonal is on <code>coef(fit)$pairwise</code>.</li>
+<li><strong>OMRF</strong> (<code>bgms</code>): A numeric matrix (p x max_categories) of posterior mean category thresholds. Columns beyond the number of categories for a variable are <code>NA</code>.</li>
+<li><strong>Mixed MRF</strong> (<code>bgms</code>): A list with <code>$discrete</code> (threshold matrix) and <code>$continuous</code> (means matrix).</li>
+<li><strong><code>bgmCompare</code></strong>: A matrix with one row per post-warmup iteration, containing posterior samples of baseline main-effect parameters.</li>
+</ul>
+</section>
+<section id="extract_pairwise_interactions" class="level2">
+<h2 class="anchored" data-anchor-id="extract_pairwise_interactions">extract_pairwise_interactions</h2>
+<p>Retrieve posterior samples of pairwise interaction parameters.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_pairwise_interactions</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a matrix with one row per post-warmup iteration and one column per edge. For <code>bgmCompare</code>, columns correspond to baseline pairwise interaction parameters.</p>
+</section>
+<section id="extract_indicators" class="level2">
+<h2 class="anchored" data-anchor-id="extract_indicators">extract_indicators</h2>
+<p>Retrieve posterior samples of inclusion indicators.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_indicators</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a matrix with one row per post-warmup iteration and one column per indicator, containing binary (0/1) samples:</p>
+<ul>
+<li><strong><code>bgms</code></strong>: One column per edge. Requires <code>edge_selection = TRUE</code>.</li>
+<li><strong><code>bgmCompare</code></strong>: Columns for main-effect and pairwise difference indicators. Requires <code>difference_selection = TRUE</code>.</li>
+</ul>
+</section>
+<section id="extract_posterior_inclusion_probabilities" class="level2">
+<h2 class="anchored" data-anchor-id="extract_posterior_inclusion_probabilities">extract_posterior_inclusion_probabilities</h2>
+<p>Compute posterior inclusion probabilities.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_posterior_inclusion_probabilities</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a symmetric p x p matrix of posterior inclusion probabilities:</p>
+<ul>
+<li><strong><code>bgms</code></strong>: Off-diagonal entries are edge inclusion probabilities. Requires <code>edge_selection = TRUE</code>.</li>
+<li><strong><code>bgmCompare</code></strong>: Diagonal entries are main-effect inclusion probabilities; off-diagonal entries are pairwise difference inclusion probabilities. Requires <code>difference_selection = TRUE</code>.</li>
+</ul>
+</section>
+<section id="extract_indicator_priors" class="level2">
+<h2 class="anchored" data-anchor-id="extract_indicator_priors">extract_indicator_priors</h2>
+<p>Retrieve the prior specification used for inclusion indicators.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_indicator_priors</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a named list describing the prior structure, including the prior type and hyperparameters:</p>
+<ul>
+<li><strong><code>bgms</code></strong>: Requires <code>edge_selection = TRUE</code>. Returns the prior type (<code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, or <code>"Stochastic-Block"</code>) and associated hyperparameters.</li>
+<li><strong><code>bgmCompare</code></strong>: Requires <code>difference_selection = TRUE</code>. Returns the difference prior specification.</li>
+</ul>
+</section>
+<section id="extract_group_params" class="level2">
+<h2 class="anchored" data-anchor-id="extract_group_params">extract_group_params</h2>
+<p>Compute group-specific parameter estimates by combining baseline parameters and group differences.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_group_params</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgmCompare</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a list with <code>main_effects_groups</code> (main effects per group) and <code>pairwise_effects_groups</code> (pairwise effects per group).</p>
+</section>
+<section id="extract_sbm" class="level2">
+<h2 class="anchored" data-anchor-id="extract_sbm">extract_sbm</h2>
+<p>Retrieve posterior summaries from a model fitted with the Stochastic Block prior.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_sbm</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>Requires <code>edge_selection = TRUE</code> and <code>edge_prior = "Stochastic-Block"</code>. Returns a list with:</p>
+<ul>
+<li><code>posterior_num_blocks</code> — Posterior probabilities for each possible number of clusters.</li>
+<li><code>posterior_mean_allocations</code> — Posterior mean cluster allocations.</li>
+<li><code>posterior_mode_allocations</code> — Posterior mode cluster allocations.</li>
+<li><code>posterior_mean_coclustering_matrix</code> — Co-clustering proportion matrix.</li>
+</ul>
+</section>
+<section id="extract_ess" class="level2">
+<h2 class="anchored" data-anchor-id="extract_ess">extract_ess</h2>
+<p>Retrieve effective sample size estimates for all parameters.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_ess</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a named list with ESS values for each parameter type present in the model (e.g., <code>main</code>, <code>pairwise</code>, <code>indicator</code>).</p>
+</section>
+<section id="extract_rhat" class="level2">
+<h2 class="anchored" data-anchor-id="extract_rhat">extract_rhat</h2>
+<p>Retrieve R-hat convergence diagnostics for all parameters.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_rhat</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a named list with R-hat values for each parameter type present in the model (e.g., <code>main</code>, <code>pairwise</code>, <code>indicator</code>).</p>
+</section>
+<section id="deprecated-functions" class="level2">
+<h2 class="anchored" data-anchor-id="deprecated-functions">Deprecated functions</h2>
+<ul>
+<li><code>extract_category_thresholds()</code> — Renamed to <code>extract_main_effects()</code>.</li>
+<li><code>extract_edge_indicators()</code> — Renamed to <code>extract_indicators()</code>.</li>
+<li><code>extract_pairwise_thresholds()</code> — Renamed to <code>extract_main_effects()</code>.</li>
+</ul>
+</section>
+<section id="see-also" class="level2">
+<h2 class="anchored" data-anchor-id="see-also">See also</h2>
+<p><a href="../reference/bgm.html">bgm()</a>, <a href="../reference/bgmCompare.html">bgmCompare()</a>, <a href="../reference/methods.html">S3 methods</a></p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script type="text/javascript">

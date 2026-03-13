@@ -110,6 +110,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -449,22 +478,54 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Compare graphical models between groups.</p>
+<p>Bayesian estimation and variable selection for group differences in Markov Random Fields.</p>
 <section id="description" class="level2">
 <h2 class="anchored" data-anchor-id="description">Description</h2>
-<p><code>bgmCompare()</code> tests for differences in network structure between independent groups using Bayes factor tests.</p>
+<p>The <code>bgmCompare</code> function estimates group differences in category threshold parameters (main effects) and pairwise interactions (pairwise effects) of a Markov Random Field (MRF) for binary and ordinal variables. Groups can be defined either by supplying two separate datasets (<code>x</code> and <code>y</code>) or by a group membership vector. Optionally, Bayesian variable selection identifies differences across groups.</p>
 </section>
 <section id="usage" class="level2">
 <h2 class="anchored" data-anchor-id="usage">Usage</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bgmCompare</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  x,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  group,</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  ...</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  y,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  group_indicator,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference_selection =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">main_difference_selection =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="st">"ordinal"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  baseline_category,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference_scale =</span> <span class="dv">1</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference_prior =</span> <span class="fu">c</span>(<span class="st">"Bernoulli"</span>, <span class="st">"Beta-Bernoulli"</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference_probability =</span> <span class="fl">0.5</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha =</span> <span class="dv">1</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_beta =</span> <span class="dv">1</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">pairwise_scale =</span> <span class="fl">2.5</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">main_alpha =</span> <span class="fl">0.5</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">main_beta =</span> <span class="fl">0.5</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">1000</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_action =</span> <span class="fu">c</span>(<span class="st">"listwise"</span>, <span class="st">"impute"</span>),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">update_method =</span> <span class="fu">c</span>(<span class="st">"nuts"</span>, <span class="st">"adaptive-metropolis"</span>, <span class="st">"hamiltonian-mc"</span>),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  target_accept,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">hmc_num_leapfrogs =</span> <span class="dv">100</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">nuts_max_depth =</span> <span class="dv">10</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_mass_matrix =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>(),</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="arguments" class="level2">
 <h2 class="anchored" data-anchor-id="arguments">Arguments</h2>
+<section id="data-and-groups" class="level3">
+<h3 class="anchored" data-anchor-id="data-and-groups">Data and groups</h3>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Argument</th>
@@ -474,36 +535,228 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>x</code></td>
-<td>A data frame or matrix of observations.</td>
+<td>A data frame or matrix of binary and ordinal responses for Group 1. Variables should be coded as nonnegative integers starting at 0. For ordinal variables, unused categories are collapsed; for Blume–Capel variables, all categories are retained.</td>
 </tr>
 <tr class="even">
-<td><code>group</code></td>
-<td>A factor or vector indicating group membership.</td>
+<td><code>y</code></td>
+<td>Optional data frame or matrix for Group 2 (two-group designs). Must have the same variables (columns) as <code>x</code>.</td>
 </tr>
 <tr class="odd">
-<td><code>...</code></td>
-<td>Additional arguments passed to the sampler.</td>
+<td><code>group_indicator</code></td>
+<td>Optional integer vector of group memberships for rows of <code>x</code> (multi-group designs). Ignored if <code>y</code> is supplied.</td>
+</tr>
+<tr class="even">
+<td><code>variable_type</code></td>
+<td>Character vector specifying the type of each variable: <code>"ordinal"</code> (default) or <code>"blume-capel"</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>baseline_category</code></td>
+<td>Integer or vector giving the baseline category for Blume–Capel variables.</td>
+</tr>
+<tr class="even">
+<td><code>na_action</code></td>
+<td>How to handle missing data: <code>"listwise"</code> (drop rows) or <code>"impute"</code> (impute within Gibbs). Default: <code>"listwise"</code>.</td>
 </tr>
 </tbody>
 </table>
 </section>
+<section id="difference-selection" class="level3">
+<h3 class="anchored" data-anchor-id="difference-selection">Difference selection</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>difference_selection</code></td>
+<td>Logical. If <code>TRUE</code>, spike-and-slab priors are applied to difference parameters. Default: <code>TRUE</code>.</td>
+</tr>
+<tr class="even">
+<td><code>main_difference_selection</code></td>
+<td>Logical. If <code>TRUE</code>, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is <code>FALSE</code>. Only used when <code>difference_selection = TRUE</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>difference_scale</code></td>
+<td>Scale of the Cauchy prior for difference parameters. Default: <code>1</code>.</td>
+</tr>
+<tr class="even">
+<td><code>difference_prior</code></td>
+<td>Prior for difference inclusion: <code>"Bernoulli"</code> or <code>"Beta-Bernoulli"</code>. Default: <code>"Bernoulli"</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>difference_probability</code></td>
+<td>Prior inclusion probability for differences (Bernoulli prior). Default: <code>0.5</code>.</td>
+</tr>
+<tr class="even">
+<td><code>beta_bernoulli_alpha</code>, <code>beta_bernoulli_beta</code></td>
+<td>Shape parameters of the Beta prior for inclusion probabilities in the Beta–Bernoulli model. Defaults: <code>1</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="prior-specification" class="level3">
+<h3 class="anchored" data-anchor-id="prior-specification">Prior specification</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pairwise_scale</code></td>
+<td>Scale of the Cauchy prior for baseline pairwise interactions. Default: <code>2.5</code>.</td>
+</tr>
+<tr class="even">
+<td><code>main_alpha</code>, <code>main_beta</code></td>
+<td>Shape parameters of the beta-prime prior for baseline threshold parameters. Defaults: <code>0.5</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>standardize</code></td>
+<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each pairwise interaction (both baseline and difference) is adjusted based on the range of response scores. Default: <code>FALSE</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sampler-settings" class="level3">
+<h3 class="anchored" data-anchor-id="sampler-settings">Sampler settings</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>iter</code></td>
+<td>Number of post-warmup iterations per chain. Default: <code>1000</code>.</td>
+</tr>
+<tr class="even">
+<td><code>warmup</code></td>
+<td>Number of warmup iterations before sampling. Default: <code>1000</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>update_method</code></td>
+<td>Sampling algorithm: <code>"nuts"</code>, <code>"adaptive-metropolis"</code>, or <code>"hamiltonian-mc"</code>. Default: <code>"nuts"</code>.</td>
+</tr>
+<tr class="even">
+<td><code>target_accept</code></td>
+<td>Target acceptance rate. Defaults: <code>0.44</code> (Metropolis), <code>0.65</code> (HMC), <code>0.80</code> (NUTS).</td>
+</tr>
+<tr class="odd">
+<td><code>hmc_num_leapfrogs</code></td>
+<td>Leapfrog steps for HMC. Default: <code>100</code>.</td>
+</tr>
+<tr class="even">
+<td><code>nuts_max_depth</code></td>
+<td>Maximum tree depth for NUTS. Default: <code>10</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>learn_mass_matrix</code></td>
+<td>Logical. If <code>TRUE</code>, adapts a diagonal mass matrix during warmup (HMC/NUTS only). Default: <code>TRUE</code>.</td>
+</tr>
+<tr class="even">
+<td><code>chains</code></td>
+<td>Number of parallel chains. Default: <code>4</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>cores</code></td>
+<td>Number of CPU cores. Default: <code>parallel::detectCores()</code>.</td>
+</tr>
+<tr class="even">
+<td><code>display_progress</code></td>
+<td>Progress reporting: <code>"per-chain"</code>, <code>"total"</code>, or <code>"none"</code>. Default: <code>"per-chain"</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>seed</code></td>
+<td>Optional integer seed for reproducibility.</td>
+</tr>
+<tr class="even">
+<td><code>verbose</code></td>
+<td>Logical. Print informational messages during data processing. Default: <code>getOption("bgms.verbose", TRUE)</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
 <section id="value" class="level2">
 <h2 class="anchored" data-anchor-id="value">Value</h2>
-<p>An object of class <code>bgmCompare</code> containing posterior samples and Bayes factors for group differences.</p>
+<p>A list of class <code>"bgmCompare"</code> containing posterior summaries, posterior mean matrices, and raw MCMC samples:</p>
+<ul>
+<li><code>posterior_summary_main_baseline</code>, <code>posterior_summary_pairwise_baseline</code> — Summaries of baseline thresholds and pairwise interactions.</li>
+<li><code>posterior_summary_main_differences</code>, <code>posterior_summary_pairwise_differences</code> — Summaries of group differences in thresholds and pairwise interactions.</li>
+<li><code>posterior_summary_indicator</code> — Summaries of inclusion indicators (if <code>difference_selection = TRUE</code>).</li>
+<li><code>posterior_mean_main_baseline</code>, <code>posterior_mean_pairwise_baseline</code> — Posterior mean matrices (legacy style).</li>
+<li><code>raw_samples</code> — List of raw draws per chain for main, pairwise, and indicator parameters.</li>
+<li><code>arguments</code> — List of function call arguments and metadata.</li>
+</ul>
+<p>The <code>summary()</code> method prints formatted summaries, and <code>coef()</code> extracts posterior means. NUTS diagnostics are available in <code>fit$nuts_diag</code> when <code>update_method = "nuts"</code>.</p>
+</section>
+<section id="details" class="level2">
+<h2 class="anchored" data-anchor-id="details">Details</h2>
+<section id="pairwise-interactions" class="level3">
+<h3 class="anchored" data-anchor-id="pairwise-interactions">Pairwise interactions</h3>
+<p>For variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, the group-specific interaction is represented as:</p>
+<p><span class="math display">\[\theta_{ij}^{(g)} = \phi_{ij} + \delta_{ij}^{(g)}\]</span></p>
+<p>where <span class="math inline">\(\phi_{ij}\)</span> is the baseline effect and <span class="math inline">\(\delta_{ij}^{(g)}\)</span> are group differences constrained to sum to zero.</p>
+</section>
+<section id="ordinal-variables" class="level3">
+<h3 class="anchored" data-anchor-id="ordinal-variables">Ordinal variables</h3>
+<p><strong>Regular ordinal variables</strong>: category thresholds are decomposed into a baseline plus group differences for each category.</p>
+<p><strong>Blume–Capel variables</strong>: category thresholds are quadratic in the category index, with both the linear and quadratic terms split into a baseline plus group differences.</p>
+</section>
+<section id="variable-selection" class="level3">
+<h3 class="anchored" data-anchor-id="variable-selection">Variable selection</h3>
+<p>When <code>difference_selection = TRUE</code>, spike-and-slab priors are applied to difference parameters:</p>
+<ul>
+<li><strong>Bernoulli</strong> — Fixed prior inclusion probability.</li>
+<li><strong>Beta-Bernoulli</strong> — Inclusion probability given a Beta prior.</li>
+</ul>
+</section>
+<section id="sampling-algorithms-and-warmup" class="level3">
+<h3 class="anchored" data-anchor-id="sampling-algorithms-and-warmup">Sampling algorithms and warmup</h3>
+<p>Parameters are updated within a Gibbs framework, using the same sampling algorithms and staged warmup scheme described in <a href="../reference/bgm.html">bgm()</a>: adaptive Metropolis–Hastings, Hamiltonian Monte Carlo, or the No-U-Turn Sampler. When <code>difference_selection = TRUE</code>, indicator updates are delayed until late warmup.</p>
+</section>
 </section>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bgms)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulated example</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># fit &lt;- bgmCompare(data, group = group_variable)</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(fit)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare French and non-French groups on a subset of the Boredom data</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">=</span> Boredom[Boredom<span class="sc">$</span>language <span class="sc">==</span> <span class="st">"fr"</span>, <span class="dv">2</span><span class="sc">:</span><span class="dv">6</span>]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> Boredom[Boredom<span class="sc">$</span>language <span class="sc">!=</span> <span class="st">"fr"</span>, <span class="dv">2</span><span class="sc">:</span><span class="dv">6</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgmCompare</span>(x, y, <span class="at">chains =</span> <span class="dv">2</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior inclusion probabilities</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>indicator</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Bayesian model averaged main effects for the groups</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)<span class="sc">$</span>main_effects_groups</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Bayesian model averaged pairwise effects for the groups</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)<span class="sc">$</span>pairwise_effects_groups</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="see-also" class="level2">
-<h2 class="anchored" data-anchor-id="see-also">See Also</h2>
-<p><a href="../reference/bgm.html">bgm()</a>, <a href="../reference/methods.html">summary.bgmCompare</a></p>
+<h2 class="anchored" data-anchor-id="see-also">See also</h2>
+<p><a href="../reference/bgm.html">bgm()</a> for single-group models, <a href="../reference/methods.html">S3 methods</a> for <code>print</code>, <code>summary</code>, and <code>coef</code>, <a href="../reference/extractors.html">extractor functions</a> for accessing specific model components.</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>

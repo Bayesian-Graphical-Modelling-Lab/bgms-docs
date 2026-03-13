@@ -425,12 +425,12 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../reference/bgm.html">bgm()</a></td>
-<td>Fit a Bayesian graphical model</td>
+<td><a href="../reference/bgm.html"><code>bgm()</code></a></td>
+<td>Bayesian estimation or edge selection for Markov Random Fields</td>
 </tr>
 <tr class="even">
-<td><a href="../reference/bgmCompare.html">bgmCompare()</a></td>
-<td>Compare networks between groups</td>
+<td><a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a></td>
+<td>Bayesian estimation and variable selection for group differences in MRFs</td>
 </tr>
 </tbody>
 </table>
@@ -446,22 +446,34 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../reference/methods.html">print, summary, coef</a></td>
-<td>Inspect fitted models</td>
+<td><a href="../reference/methods.html#print"><code>print()</code></a></td>
+<td>Minimal console output for a fitted model</td>
 </tr>
 <tr class="even">
-<td><a href="../reference/methods.html#predict">predict</a></td>
-<td>Predict new observations</td>
+<td><a href="../reference/methods.html#summary"><code>summary()</code></a></td>
+<td>Summary statistics for posterior samples</td>
 </tr>
 <tr class="odd">
-<td><a href="../reference/methods.html#simulate">simulate</a></td>
-<td>Simulate from fitted models</td>
+<td><a href="../reference/methods.html#coef"><code>coef()</code></a></td>
+<td>Extract posterior means of model parameters</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/methods.html#predict"><code>predict()</code></a></td>
+<td>Predict new observations from a fitted model</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/methods.html#simulate"><code>simulate()</code></a></td>
+<td>Simulate datasets from the posterior distribution</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/methods.html#simulate_mrf"><code>simulate_mrf()</code></a></td>
+<td>Simulate observations from a Markov Random Field</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="extractors" class="level2">
-<h2 class="anchored" data-anchor-id="extractors">Extractors</h2>
+<section id="extractor-functions" class="level2">
+<h2 class="anchored" data-anchor-id="extractor-functions">Extractor Functions</h2>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -471,8 +483,44 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../reference/extractors.html">Extractor functions</a></td>
-<td>Extract specific model components</td>
+<td><a href="../reference/extractors.html#extract_arguments"><code>extract_arguments()</code></a></td>
+<td>Retrieve the arguments used when fitting a model</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/extractors.html#extract_main_effects"><code>extract_main_effects()</code></a></td>
+<td>Extract posterior samples of category threshold parameters</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/extractors.html#extract_pairwise_interactions"><code>extract_pairwise_interactions()</code></a></td>
+<td>Extract posterior samples of pairwise interaction parameters</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/extractors.html#extract_indicators"><code>extract_indicators()</code></a></td>
+<td>Extract posterior samples of edge or difference indicators</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/extractors.html#extract_posterior_inclusion_probabilities"><code>extract_posterior_inclusion_probabilities()</code></a></td>
+<td>Compute posterior inclusion probabilities from indicator samples</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/extractors.html#extract_indicator_priors"><code>extract_indicator_priors()</code></a></td>
+<td>Retrieve prior inclusion probabilities for indicators</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/extractors.html#extract_group_params"><code>extract_group_params()</code></a></td>
+<td>Extract group-specific parameters from a <code>bgmCompare</code> fit</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/extractors.html#extract_sbm"><code>extract_sbm()</code></a></td>
+<td>Extract stochastic block model assignments and probabilities</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/extractors.html#extract_ess"><code>extract_ess()</code></a></td>
+<td>Compute effective sample sizes for model parameters</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/extractors.html#extract_rhat"><code>extract_rhat()</code></a></td>
+<td>Compute split-R-hat convergence diagnostics</td>
 </tr>
 </tbody>
 </table>
@@ -488,8 +536,16 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../reference/datasets.html">ADHD, Boredom, Wenchuan</a></td>
-<td>Example datasets</td>
+<td><a href="../reference/datasets.html#adhd"><code>ADHD</code></a></td>
+<td>Binary ADHD symptom ratings for 355 children (18 items)</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/datasets.html#boredom"><code>Boredom</code></a></td>
+<td>Ordinal boredom proneness scores for 986 participants (9 items)</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/datasets.html#wenchuan"><code>Wenchuan</code></a></td>
+<td>Ordinal PTSD symptom ratings for 362 survivors (17 items)</td>
 </tr>
 </tbody>
 </table>
