@@ -2,53 +2,188 @@
 title: "bgmCompare"
 ---
 
-Compare graphical models between groups.
+Bayesian estimation and variable selection for group differences in Markov
+Random Fields.
 
 ## Description
 
-`bgmCompare()` tests for differences in network structure between independent 
-groups using Bayes factor tests.
+The `bgmCompare` function estimates group differences in category threshold
+parameters (main effects) and pairwise interactions (pairwise effects) of a
+Markov Random Field (MRF) for binary and ordinal variables. Groups can be
+defined either by supplying two separate datasets (`x` and `y`) or by a
+group membership vector. Optionally, Bayesian variable selection identifies
+differences across groups.
 
 ## Usage
 
 ```r
 bgmCompare(
   x,
-  group,
-  ...
+  y,
+  group_indicator,
+  difference_selection = TRUE,
+  main_difference_selection = FALSE,
+  variable_type = "ordinal",
+  baseline_category,
+  difference_scale = 1,
+  difference_prior = c("Bernoulli", "Beta-Bernoulli"),
+  difference_probability = 0.5,
+  beta_bernoulli_alpha = 1,
+  beta_bernoulli_beta = 1,
+  pairwise_scale = 2.5,
+  main_alpha = 0.5,
+  main_beta = 0.5,
+  iter = 1000,
+  warmup = 1000,
+  na_action = c("listwise", "impute"),
+  update_method = c("nuts", "adaptive-metropolis", "hamiltonian-mc"),
+  target_accept,
+  hmc_num_leapfrogs = 100,
+  nuts_max_depth = 10,
+  learn_mass_matrix = TRUE,
+  chains = 4,
+  cores = parallel::detectCores(),
+  display_progress = c("per-chain", "total", "none"),
+  seed = NULL,
+  standardize = FALSE,
+  verbose = getOption("bgms.verbose", TRUE)
 )
 ```
 
 ## Arguments
 
+### Data and groups
+
 | Argument | Description |
 |----------|-------------|
-| `x` | A data frame or matrix of observations. |
-| `group` | A factor or vector indicating group membership. |
-| `...` | Additional arguments passed to the sampler. |
+| `x` | A data frame or matrix of binary and ordinal responses for Group 1. Variables should be coded as nonnegative integers starting at 0. For ordinal variables, unused categories are collapsed; for Blume--Capel variables, all categories are retained. |
+| `y` | Optional data frame or matrix for Group 2 (two-group designs). Must have the same variables (columns) as `x`. |
+| `group_indicator` | Optional integer vector of group memberships for rows of `x` (multi-group designs). Ignored if `y` is supplied. |
+| `variable_type` | Character vector specifying the type of each variable: `"ordinal"` (default) or `"blume-capel"`. |
+| `baseline_category` | Integer or vector giving the baseline category for Blume--Capel variables. |
+| `na_action` | How to handle missing data: `"listwise"` (drop rows) or `"impute"` (impute within Gibbs). Default: `"listwise"`. |
+
+### Difference selection
+
+| Argument | Description |
+|----------|-------------|
+| `difference_selection` | Logical. If `TRUE`, spike-and-slab priors are applied to difference parameters. Default: `TRUE`. |
+| `main_difference_selection` | Logical. If `TRUE`, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is `FALSE`. Only used when `difference_selection = TRUE`. |
+| `difference_scale` | Scale of the Cauchy prior for difference parameters. Default: `1`. |
+| `difference_prior` | Prior for difference inclusion: `"Bernoulli"` or `"Beta-Bernoulli"`. Default: `"Bernoulli"`. |
+| `difference_probability` | Prior inclusion probability for differences (Bernoulli prior). Default: `0.5`. |
+| `beta_bernoulli_alpha`, `beta_bernoulli_beta` | Shape parameters of the Beta prior for inclusion probabilities in the Beta--Bernoulli model. Defaults: `1`. |
+
+### Prior specification
+
+| Argument | Description |
+|----------|-------------|
+| `pairwise_scale` | Scale of the Cauchy prior for baseline pairwise interactions. Default: `2.5`. |
+| `main_alpha`, `main_beta` | Shape parameters of the beta-prime prior for baseline threshold parameters. Defaults: `0.5`. |
+| `standardize` | Logical. If `TRUE`, the Cauchy prior scale for each pairwise interaction (both baseline and difference) is adjusted based on the range of response scores. Default: `FALSE`. |
+
+### Sampler settings
+
+| Argument | Description |
+|----------|-------------|
+| `iter` | Number of post-warmup iterations per chain. Default: `1000`. |
+| `warmup` | Number of warmup iterations before sampling. Default: `1000`. |
+| `update_method` | Sampling algorithm: `"nuts"`, `"adaptive-metropolis"`, or `"hamiltonian-mc"`. Default: `"nuts"`. |
+| `target_accept` | Target acceptance rate. Defaults: `0.44` (Metropolis), `0.65` (HMC), `0.80` (NUTS). |
+| `hmc_num_leapfrogs` | Leapfrog steps for HMC. Default: `100`. |
+| `nuts_max_depth` | Maximum tree depth for NUTS. Default: `10`. |
+| `learn_mass_matrix` | Logical. If `TRUE`, adapts a diagonal mass matrix during warmup (HMC/NUTS only). Default: `TRUE`. |
+| `chains` | Number of parallel chains. Default: `4`. |
+| `cores` | Number of CPU cores. Default: `parallel::detectCores()`. |
+| `display_progress` | Progress reporting: `"per-chain"`, `"total"`, or `"none"`. Default: `"per-chain"`. |
+| `seed` | Optional integer seed for reproducibility. |
+| `verbose` | Logical. Print informational messages during data processing. Default: `getOption("bgms.verbose", TRUE)`. |
 
 ## Value
 
-An object of class `bgmCompare` containing posterior samples and Bayes factors 
-for group differences.
+A list of class `"bgmCompare"` containing posterior summaries, posterior mean
+matrices, and raw MCMC samples:
+
+- `posterior_summary_main_baseline`, `posterior_summary_pairwise_baseline` ---
+  Summaries of baseline thresholds and pairwise interactions.
+- `posterior_summary_main_differences`, `posterior_summary_pairwise_differences`
+  --- Summaries of group differences in thresholds and pairwise interactions.
+- `posterior_summary_indicator` --- Summaries of inclusion indicators (if
+  `difference_selection = TRUE`).
+- `posterior_mean_main_baseline`, `posterior_mean_pairwise_baseline` ---
+  Posterior mean matrices (legacy style).
+- `raw_samples` --- List of raw draws per chain for main, pairwise, and
+  indicator parameters.
+- `arguments` --- List of function call arguments and metadata.
+
+The `summary()` method prints formatted summaries, and `coef()` extracts
+posterior means. NUTS diagnostics are available in `fit$nuts_diag` when
+`update_method = "nuts"`.
+
+## Details
+
+### Pairwise interactions
+
+For variables $i$ and $j$, the group-specific interaction is represented as:
+
+$$\theta_{ij}^{(g)} = \phi_{ij} + \delta_{ij}^{(g)}$$
+
+where $\phi_{ij}$ is the baseline effect and $\delta_{ij}^{(g)}$ are group
+differences constrained to sum to zero.
+
+### Ordinal variables
+
+**Regular ordinal variables**: category thresholds are decomposed into a
+baseline plus group differences for each category.
+
+**Blume--Capel variables**: category thresholds are quadratic in the category
+index, with both the linear and quadratic terms split into a baseline plus
+group differences.
+
+### Variable selection
+
+When `difference_selection = TRUE`, spike-and-slab priors are applied to
+difference parameters:
+
+- **Bernoulli** --- Fixed prior inclusion probability.
+- **Beta-Bernoulli** --- Inclusion probability given a Beta prior.
+
+### Sampling algorithms and warmup
+
+Parameters are updated within a Gibbs framework, using the same sampling
+algorithms and staged warmup scheme described in [bgm()](bgm.qmd):
+adaptive Metropolis--Hastings, Hamiltonian Monte Carlo, or the No-U-Turn
+Sampler. When `difference_selection = TRUE`, indicator updates are delayed
+until late warmup.
 
 ## Examples
 
 ```{r}
 #| eval: false
-library(bgms)
+# Compare French and non-French groups on a subset of the Boredom data
+x = Boredom[Boredom$language == "fr", 2:6]
+y = Boredom[Boredom$language != "fr", 2:6]
 
-# Simulated example
-# fit <- bgmCompare(data, group = group_variable)
-# summary(fit)
+fit = bgmCompare(x, y, chains = 2)
+
+# Posterior inclusion probabilities
+summary(fit)$indicator
+
+# Bayesian model averaged main effects for the groups
+coef(fit)$main_effects_groups
+
+# Bayesian model averaged pairwise effects for the groups
+coef(fit)$pairwise_effects_groups
 ```
 
-## See Also
+## See also
 
-[bgm()](bgm.qmd), [summary.bgmCompare](methods.qmd)
+[bgm()](bgm.qmd) for single-group models, [S3 methods](methods.qmd)
+for `print`, `summary`, and `coef`, [extractor functions](extractors.qmd) for
+accessing specific model components.
 
 ## References
 
-Marsman, M., Waldorp, L. J., Sekulovski, N., & Haslbeck, J. M. B. (2025). Bayes 
-factor tests for group differences in ordinal and binary graphical models. 
-*Psychometrika*, 90(5), 1809–1842.
+Marsman, M., Waldorp, L. J., Sekulovski, N., & Haslbeck, J. M. B. (2025).
+Bayes factor tests for group differences in ordinal and binary graphical
+models. *Psychometrika*, 90(5), 1809--1842.

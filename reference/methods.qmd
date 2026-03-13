@@ -2,48 +2,264 @@
 title: "S3 Methods"
 ---
 
-S3 methods for `bgms` and `bgmCompare` objects.
+S3 methods for inspecting, summarizing, and using `bgms` and `bgmCompare`
+model fits.
 
 ## print {#print}
 
-Print a brief summary of a fitted model.
+Minimal console output for a fitted model.
+
+### bgms
 
 ```r
 print(x, ...)
 ```
 
+| Argument | Description |
+|----------|-------------|
+| `x` | An object of class `bgms`. |
+| `...` | Ignored. |
+
+Returns `x` invisibly.
+
+### bgmCompare
+
+```r
+print(x, ...)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `x` | An object of class `bgmCompare`. |
+| `...` | Ignored. |
+
+Returns `x` invisibly.
+
 ## summary {#summary}
 
-Summarize a fitted model with parameter estimates and diagnostics.
+Posterior summaries and diagnostics for a fitted model.
+
+### bgms
 
 ```r
 summary(object, ...)
 ```
 
+| Argument | Description |
+|----------|-------------|
+| `object` | An object of class `bgms`. |
+| `...` | Currently ignored. |
+
+Returns an object of class `summary.bgms` with posterior summaries.
+
+### bgmCompare
+
+```r
+summary(object, ...)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `object` | An object of class `bgmCompare`. |
+| `...` | Currently ignored. |
+
+Returns an object of class `summary.bgmCompare` with posterior summaries.
+
 ## coef {#coef}
 
-Extract coefficient estimates.
+Extract posterior mean coefficients.
+
+### bgms
 
 ```r
 coef(object, ...)
 ```
 
-## predict {#predict}
+| Argument | Description |
+|----------|-------------|
+| `object` | An object of class `bgms`. |
+| `...` | Ignored. |
 
-Predict values for new observations.
+Returns a list with:
+
+- `main` --- Posterior mean main-effect parameters. `NULL` for GGM models.
+  For OMRF models: a numeric matrix (p x max_categories) of category
+  thresholds. For mixed MRF models: a list with `$discrete` (threshold
+  matrix) and `$continuous` (means matrix).
+- `pairwise` --- Posterior mean pairwise interaction matrix. For GGM and
+  mixed MRF models the precision matrix diagonal is included on the diagonal.
+- `indicator` --- Posterior mean edge inclusion indicators (if available).
+
+### bgmCompare
 
 ```r
-predict(object, newdata, ...)
+coef(object, ...)
 ```
+
+| Argument | Description |
+|----------|-------------|
+| `object` | An object of class `bgmCompare`. |
+| `...` | Ignored. |
+
+Returns a list with:
+
+- `main_effects_raw` --- Posterior means of raw main-effect parameters
+  (variables x (baseline + differences)).
+- `pairwise_effects_raw` --- Posterior means of raw pairwise-effect
+  parameters (pairs x (baseline + differences)).
+- `main_effects_groups` --- Posterior means of group-specific main effects
+  (variables x groups), computed as baseline plus projected differences.
+- `pairwise_effects_groups` --- Posterior means of group-specific pairwise
+  effects (pairs x groups), computed as baseline plus projected differences.
+- `indicators` --- Posterior mean inclusion probabilities as a symmetric
+  matrix, with diagonals for main effects and off-diagonals for pairwise
+  effects.
+
+## predict {#predict}
+
+Compute conditional probability distributions for one or more variables
+given the observed values of other variables in the data.
+
+### bgms
+
+```r
+predict(object, newdata, variables = NULL,
+        type = c("probabilities", "response"),
+        method = c("posterior-mean", "posterior-sample"),
+        ndraws = NULL, seed = NULL, ...)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `object` | An object of class `bgms`. |
+| `newdata` | A matrix or data frame with `n` rows and `p` columns. Must match the variables used in fitting. |
+| `variables` | Character vector of names, integer vector of column indices, or `NULL` (all variables). |
+| `type` | `"probabilities"` (full conditional distribution) or `"response"` (predicted category). |
+| `method` | `"posterior-mean"` (use posterior means) or `"posterior-sample"` (average over draws). |
+| `ndraws` | Number of posterior draws for `"posterior-sample"`. `NULL` uses all draws. |
+| `seed` | Optional random seed. |
+
+**Ordinal models**: For `type = "probabilities"`, returns a named list with
+one matrix per variable (n rows x (num_categories + 1) columns). For
+`type = "response"`, returns a matrix of predicted categories.
+
+**GGM models**: For `type = "probabilities"`, returns a list with one matrix
+per variable (n rows x 2 columns: `"mean"` and `"sd"`). For
+`type = "response"`, returns conditional means.
+
+**Mixed MRF models**: Returns a list combining both formats for discrete and
+continuous variables.
+
+When `method = "posterior-sample"`, predictions include an `"sd"` attribute
+with the standard deviation across draws.
+
+### bgmCompare
+
+```r
+predict(object, newdata, group, variables = NULL,
+        type = c("probabilities", "response"),
+        method = c("posterior-mean"), ...)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `object` | An object of class `bgmCompare`. |
+| `newdata` | A matrix or data frame matching the original variables. |
+| `group` | Integer specifying which group's parameters to use (1 to number of groups). Required. |
+| `variables` | Which variables to predict (character, integer, or `NULL` for all). |
+| `type` | `"probabilities"` or `"response"`. |
+| `method` | `"posterior-mean"` (posterior mean parameters). |
+
+Returns the same structure as `predict.bgms`, using group-specific
+parameters obtained by combining baseline parameters and group differences.
 
 ## simulate {#simulate}
 
-Simulate data from a fitted model.
+Generate new observations from a fitted model.
+
+### bgms
 
 ```r
-simulate(object, nsim = 1, ...)
+simulate(object, nsim = 500, seed = NULL,
+         method = c("posterior-mean", "posterior-sample"),
+         ndraws = NULL, iter = 1000,
+         cores = parallel::detectCores(),
+         display_progress = c("per-chain", "total", "none"), ...)
 ```
 
-::: {.callout-note}
-Full documentation for each method to be generated from roxygen.
-:::
+| Argument | Description |
+|----------|-------------|
+| `object` | An object of class `bgms`. |
+| `nsim` | Number of observations to simulate. Default: `500`. |
+| `seed` | Optional random seed. |
+| `method` | `"posterior-mean"` (single simulation) or `"posterior-sample"` (one dataset per draw, parallel). |
+| `ndraws` | Number of posterior draws for `"posterior-sample"`. `NULL` uses all. |
+| `iter` | Gibbs iterations for equilibration. Default: `1000`. |
+| `cores` | CPU cores for parallel execution with `"posterior-sample"`. |
+| `display_progress` | Progress bar style: `"per-chain"`, `"total"`, or `"none"`. |
+
+If `method = "posterior-mean"`: a matrix (nsim x p). If
+`method = "posterior-sample"`: a list of matrices, one per posterior draw.
+For mixed MRF models, discrete columns contain integers and continuous
+columns contain real values.
+
+### bgmCompare
+
+```r
+simulate(object, nsim = 500, seed = NULL, group,
+         method = c("posterior-mean"), iter = 1000, ...)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `object` | An object of class `bgmCompare`. |
+| `nsim` | Number of observations to simulate. Default: `500`. |
+| `seed` | Optional random seed. |
+| `group` | Integer specifying which group to simulate from (1 to number of groups). Required. |
+| `method` | `"posterior-mean"`. |
+| `iter` | Gibbs iterations for equilibration. Default: `1000`. |
+
+Returns a matrix (nsim x p) of simulated observations for the specified
+group.
+
+## simulate_mrf {#simulate_mrf}
+
+Simulate observations from a Markov Random Field using user-specified
+parameters (no fitted model needed).
+
+```r
+simulate_mrf(
+  num_states,
+  num_variables,
+  num_categories,
+  pairwise,
+  main,
+  variable_type = "ordinal",
+  baseline_category,
+  iter = 1000,
+  seed = NULL
+)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `num_states` | Number of observations to generate. |
+| `num_variables` | Number of variables in the MRF. |
+| `num_categories` | Integer or integer vector. Number of response categories on top of the base category (`1` = binary). |
+| `pairwise` | Symmetric matrix of pairwise interactions. For continuous variables, this is the precision matrix (must be positive definite). |
+| `main` | Main-effect parameters. For ordinal variables: a matrix of category thresholds. For continuous variables: a means vector. |
+| `variable_type` | `"ordinal"`, `"blume-capel"`, or `"continuous"`. Can be a vector for mixed types (ordinal/Blume-Capel only). |
+| `baseline_category` | Integer vector of baseline categories for Blume--Capel variables. |
+| `iter` | Gibbs iterations for equilibration (ordinal only). Default: `1000`. |
+| `seed` | Optional random seed. |
+
+Returns a (num_states x num_variables) matrix of simulated observations.
+
+For ordinal and Blume-Capel variables, the Gibbs sampler generates
+observations from full conditional distributions. For continuous variables,
+observations are drawn directly from $N(\mu, \Omega^{-1})$.
+
+## See also
+
+[bgm()](bgm.qmd), [bgmCompare()](bgmCompare.qmd),
+[extractor functions](extractors.qmd)

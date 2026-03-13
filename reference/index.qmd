@@ -9,25 +9,39 @@ Complete documentation for all exported functions in bgms.
 
 | Function | Description |
 |----------|-------------|
-| [bgm()](bgm.qmd) | Fit a Bayesian graphical model |
-| [bgmCompare()](bgmCompare.qmd) | Compare networks between groups |
+| [`bgm()`](bgm.qmd) | Bayesian estimation or edge selection for Markov Random Fields |
+| [`bgmCompare()`](bgmCompare.qmd) | Bayesian estimation and variable selection for group differences in MRFs |
 
 ## S3 Methods
 
 | Method | Description |
 |--------|-------------|
-| [print, summary, coef](methods.qmd) | Inspect fitted models |
-| [predict](methods.qmd#predict) | Predict new observations |
-| [simulate](methods.qmd#simulate) | Simulate from fitted models |
+| [`print()`](methods.qmd#print) | Minimal console output for a fitted model |
+| [`summary()`](methods.qmd#summary) | Summary statistics for posterior samples |
+| [`coef()`](methods.qmd#coef) | Extract posterior means of model parameters |
+| [`predict()`](methods.qmd#predict) | Predict new observations from a fitted model |
+| [`simulate()`](methods.qmd#simulate) | Simulate datasets from the posterior distribution |
+| [`simulate_mrf()`](methods.qmd#simulate_mrf) | Simulate observations from a Markov Random Field |
 
-## Extractors
+## Extractor Functions
 
 | Function | Description |
 |----------|-------------|
-| [Extractor functions](extractors.qmd) | Extract specific model components |
+| [`extract_arguments()`](extractors.qmd#extract_arguments) | Retrieve the arguments used when fitting a model |
+| [`extract_main_effects()`](extractors.qmd#extract_main_effects) | Extract posterior samples of category threshold parameters |
+| [`extract_pairwise_interactions()`](extractors.qmd#extract_pairwise_interactions) | Extract posterior samples of pairwise interaction parameters |
+| [`extract_indicators()`](extractors.qmd#extract_indicators) | Extract posterior samples of edge or difference indicators |
+| [`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities) | Compute posterior inclusion probabilities from indicator samples |
+| [`extract_indicator_priors()`](extractors.qmd#extract_indicator_priors) | Retrieve prior inclusion probabilities for indicators |
+| [`extract_group_params()`](extractors.qmd#extract_group_params) | Extract group-specific parameters from a `bgmCompare` fit |
+| [`extract_sbm()`](extractors.qmd#extract_sbm) | Extract stochastic block model assignments and probabilities |
+| [`extract_ess()`](extractors.qmd#extract_ess) | Compute effective sample sizes for model parameters |
+| [`extract_rhat()`](extractors.qmd#extract_rhat) | Compute split-R-hat convergence diagnostics |
 
 ## Datasets
 
 | Dataset | Description |
 |---------|-------------|
-| [ADHD, Boredom, Wenchuan](datasets.qmd) | Example datasets |
+| [`ADHD`](datasets.qmd#adhd) | Binary ADHD symptom ratings for 355 children (18 items) |
+| [`Boredom`](datasets.qmd#boredom) | Ordinal boredom proneness scores for 986 participants (9 items) |
+| [`Wenchuan`](datasets.qmd#wenchuan) | Ordinal PTSD symptom ratings for 362 survivors (17 items) |
