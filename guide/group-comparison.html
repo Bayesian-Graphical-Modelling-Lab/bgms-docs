@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -75,6 +110,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -478,23 +542,71 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The <code>bgmCompare()</code> function tests for differences in network structure between groups.</p>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p><em>Content to be added: bgmCompare methodology, Bayes factor tests for group differences.</em></p>
+<p>The <code>bgmCompare()</code> function tests for differences in network structure between groups. It estimates whether pairwise interactions and category thresholds differ across groups in an ordinal Markov Random Field.</p>
+<section id="the-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-model">The model</h2>
+<p>For each pair of variables <span class="math inline">\((i, j)\)</span>, the group-specific interaction is decomposed as:</p>
+<p><span class="math display">\[
+\theta_{ij}^{(g)} = \phi_{ij} + \delta_{ij}^{(g)}
+\]</span></p>
+<p>where <span class="math inline">\(\phi_{ij}\)</span> is the baseline effect (shared across groups) and <span class="math inline">\(\delta_{ij}^{(g)}\)</span> is the group-specific difference, constrained so that the differences sum to zero across groups. The same decomposition applies to category threshold parameters.</p>
+</section>
+<section id="defining-groups" class="level2">
+<h2 class="anchored" data-anchor-id="defining-groups">Defining groups</h2>
+<p>Groups can be specified in two ways:</p>
+<p><strong>Two separate datasets</strong> — pass <code>x</code> (Group 1) and <code>y</code> (Group 2):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgmCompare</span>(<span class="at">x =</span> data_group1, <span class="at">y =</span> data_group2, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Group membership vector</strong> — pass a single dataset with a group indicator:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgmCompare</span>(<span class="at">x =</span> data, <span class="at">group_indicator =</span> groups, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>group_indicator</code> approach supports more than two groups.</p>
+</section>
+<section id="difference-selection" class="level2">
+<h2 class="anchored" data-anchor-id="difference-selection">Difference selection</h2>
+<p>When <code>difference_selection = TRUE</code> (the default), spike-and-slab priors are placed on the difference parameters <span class="math inline">\(\delta_{ij}^{(g)}\)</span>. The posterior inclusion probability for each difference indicates how plausible it is that the groups differ on that parameter.</p>
+<p>By default, only pairwise interaction differences are selected (<code>main_difference_selection = FALSE</code>). Main effect (threshold) differences are always included. This default reflects that main effects are often nuisance parameters, and their selection can interfere with pairwise selection under the Beta-Bernoulli prior.</p>
+</section>
+<section id="interpreting-the-output" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-output">Interpreting the output</h2>
+<p>The <code>summary()</code> method reports:</p>
+<ul>
+<li><strong>Baseline effects</strong>: posterior summaries for the shared parameters <span class="math inline">\(\phi_{ij}\)</span>.</li>
+<li><strong>Difference effects</strong>: posterior summaries for the group differences <span class="math inline">\(\delta_{ij}^{(g)}\)</span>, including inclusion probabilities and Bayes factors.</li>
+</ul>
+<p>The <code>coef()</code> method returns:</p>
+<ul>
+<li><code>$pairwise_effects_groups</code>: group-specific posterior mean pairwise interactions (baseline + difference).</li>
+<li><code>$main_effects_groups</code>: group-specific posterior mean thresholds.</li>
+<li><code>$indicator</code>: posterior inclusion probabilities for differences.</li>
+</ul>
+</section>
+<section id="bayes-factors-for-group-differences" class="level2">
+<h2 class="anchored" data-anchor-id="bayes-factors-for-group-differences">Bayes factors for group differences</h2>
+<p>When <code>difference_probability = 0.5</code> (the default), the Bayes factor for a group difference equals the posterior odds:</p>
+<p><span class="math display">\[
+\text{BF}_{10} = \frac{p(\gamma = 1 \mid \mathbf{x})}{1 - p(\gamma = 1 \mid \mathbf{x})}
+\]</span></p>
+<p>A large Bayes factor indicates that the groups differ on that parameter; a small one (or equivalently, a large <span class="math inline">\(1 / \text{BF}_{10}\)</span>) indicates that they do not.</p>
+</section>
+<section id="prior-guidance-for-group-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="prior-guidance-for-group-comparison">Prior guidance for group comparison</h2>
+<ul>
+<li><strong><code>difference_scale = 1</code></strong> (default): scale of the Cauchy prior for difference parameters. This is smaller than the default <code>pairwise_scale</code> (2.5) because group differences are typically smaller than the effects themselves.</li>
+<li><strong><code>difference_prior = "Bernoulli"</code></strong> (default): fixed inclusion probability for differences. <code>"Beta-Bernoulli"</code> lets the data inform the overall rate of group differences.</li>
+<li><strong><code>difference_probability = 0.5</code></strong> (default): prior probability that any given difference is nonzero.</li>
+</ul>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>

@@ -513,7 +513,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This chapter covers installation and basic usage of bgms.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This page has not yet passed technical or readability review.</p>
+</div>
+</div>
+<p>This chapter covers installation, a first model fit, and how to read the output.</p>
 <section id="installation" class="level2">
 <h2 class="anchored" data-anchor-id="installation">Installation</h2>
 <section id="from-cran" class="level3">
@@ -521,44 +534,153 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"bgms"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="development-version" class="level3">
-<h3 class="anchored" data-anchor-id="development-version">Development Version</h3>
+<h3 class="anchored" data-anchor-id="development-version">Development version</h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">"remotes"</span>)) {</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"remotes"</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"Bayesian-Graphical-Modelling-Lab/bgms"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </section>
-<section id="basic-example" class="level2">
-<h2 class="anchored" data-anchor-id="basic-example">Basic Example</h2>
-<p>We’ll use the Wenchuan earthquake data included in the package:</p>
+<section id="fitting-a-model" class="level2">
+<h2 class="anchored" data-anchor-id="fitting-a-model">Fitting a model</h2>
+<p>The main entry point is <code>bgm()</code>. It accepts a data frame of binary, ordinal, continuous, or mixed variables and estimates a Markov Random Field.</p>
+<p>The Wenchuan dataset, included in the package, contains ordinal posttraumatic stress ratings from 362 survivors of the 2008 Wenchuan earthquake. We use a five-item subset as a quick demonstration.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bgms)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load example data</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Wenchuan)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit a Bayesian graphical model</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">bgm</span>(Wenchuan)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># View results</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Wenchuan)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> Wenchuan[, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     intrusion dreams flash upset physior
+[1,]         2      2     2     2       3
+[2,]         2      2     2     3       3
+[3,]         2      4     4     4       3
+[4,]         2      1     2     2       1
+[5,]         2      2     2     2       2
+[6,]         4      3     2     2       2</code></pre>
 </div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(data, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>By default, <code>bgm()</code> runs four parallel MCMC chains using the No-U-Turn Sampler (NUTS), with Bayesian edge selection enabled. Here we use <code>seed = 1234</code> for reproducibility.</p>
 </section>
-<section id="understanding-the-output" class="level2">
-<h2 class="anchored" data-anchor-id="understanding-the-output">Understanding the Output</h2>
-<p>The <code>summary()</code> output shows:</p>
-<ul>
-<li><strong>Edge inclusion probabilities</strong> — How likely is each edge to be present?</li>
-<li><strong>Parameter estimates</strong> — Posterior means for interaction strengths</li>
-<li><strong>Convergence diagnostics</strong> — ESS and R-hat values</li>
-</ul>
+<section id="posterior-summaries" class="level2">
+<h2 class="anchored" data-anchor-id="posterior-summaries">Posterior summaries</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Posterior summaries from Bayesian estimation:
+
+Category thresholds:
+                mean  mcse    sd    n_eff  Rhat
+intrusion (1)  0.475 0.007 0.223 1157.788 1.001
+intrusion (2) -1.906 0.011 0.315  880.403 1.005
+intrusion (3) -4.846 0.017 0.514  875.204 1.007
+intrusion (4) -9.519 0.028 0.845  904.952 1.008
+dreams (1)    -0.588 0.006 0.192 1159.841 1.001
+dreams (2)    -3.782 0.012 0.353  871.629 1.000
+... (use `summary(fit)$main` to see full output)
+
+Pairwise interactions:
+                   mean    sd  mcse    n_eff  Rhat
+intrusion-dreams  0.629 0.002 0.067 1382.782 1.005
+intrusion-flash   0.339 0.002 0.060 1444.285 1.002
+intrusion-upset   0.202 0.064 0.005  187.988 1.003
+intrusion-physior 0.189 0.071 0.006  137.040 1.000
+dreams-flash      0.500 0.002 0.060 1124.700 1.002
+dreams-upset      0.226 0.053 0.002 1128.334 1.000
+... (use `summary(fit)$pairwise` to see full output)
+Note: NA values are suppressed in the print table. They occur here when an 
+indicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;
+`summary(fit)$pairwise` still contains the NA values.
+
+Inclusion probabilities:
+                   mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1   n_eff  Rhat
+intrusion-dreams  1.000 0.000           0     0     0  1999              
+intrusion-flash   1.000 0.000           0     0     0  1999              
+intrusion-upset   0.979 0.143  0.02    40     2     2  1955  49.853 1.311
+intrusion-physior 0.941 0.237 0.029   112     7     7  1873  64.566 1.016
+dreams-flash      1.000 0.000           0     0     0  1999              
+dreams-upset      0.999 0.039 0.002     2     1     1  1995 400.722 1.292
+... (use `summary(fit)$indicator` to see full output)
+Note: NA values are suppressed in the print table. They occur when an indicator
+was constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat
+are undefined; `summary(fit)$indicator` still contains the NA values.
+
+Use `summary(fit)$&lt;component&gt;` to access full results.
+See the `easybgm` package for other summary and plotting tools.</code></pre>
+</div>
+</div>
+<p>The summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For pairwise interactions, it also reports posterior inclusion probabilities when edge selection is active.</p>
+</section>
+<section id="posterior-means" class="level2">
+<h2 class="anchored" data-anchor-id="posterior-means">Posterior means</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$main
+             cat (1)   cat (2)   cat (3)    cat (4)
+intrusion  0.4752393 -1.905757 -4.846385  -9.519480
+dreams    -0.5884216 -3.781525 -7.109964 -11.530285
+flash     -0.1051154 -2.566799 -5.365407  -9.674749
+upset      0.4216365 -1.308488 -3.370565  -7.037020
+physior   -0.6037679 -3.140033 -6.167547 -10.489248
+
+$pairwise
+          intrusion      dreams       flash       upset     physior
+intrusion 0.0000000 0.629338089 0.338657791 0.202376428 0.188939686
+dreams    0.6293381 0.000000000 0.499816233 0.225595383 0.007497679
+flash     0.3386578 0.499816233 0.000000000 0.004566734 0.308420955
+upset     0.2023764 0.225595383 0.004566734 0.000000000 0.707339037
+physior   0.1889397 0.007497679 0.308420955 0.707339037 0.000000000
+
+$indicator
+          intrusion dreams  flash  upset physior
+intrusion    0.0000 1.0000 1.0000 0.9790  0.9405
+dreams       1.0000 0.0000 1.0000 0.9985  0.0820
+flash        1.0000 1.0000 0.0000 0.0545  1.0000
+upset        0.9790 0.9985 0.0545 0.0000  1.0000
+physior      0.9405 0.0820 1.0000 1.0000  0.0000</code></pre>
+</div>
+</div>
+<p><code>coef()</code> returns posterior mean matrices: <code>$pairwise</code> contains the interaction strengths and <code>$indicator</code> contains edge inclusion probabilities.</p>
+</section>
+<section id="network-plot" class="level2">
+<h2 class="anchored" data-anchor-id="network-plot">Network plot</h2>
+<p>To visualize the estimated network, threshold inclusion probabilities at 0.5 and plot the result using the qgraph package.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(qgraph)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>median_probability_network <span class="ot">=</span> <span class="fu">coef</span>(fit)<span class="sc">$</span>pairwise</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>median_probability_network[<span class="fu">coef</span>(fit)<span class="sc">$</span>indicator <span class="sc">&lt;</span> <span class="fl">0.5</span>] <span class="ot">=</span> <span class="fl">0.0</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">qgraph</span>(median_probability_network,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">theme =</span> <span class="st">"TeamFortress"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">maximum =</span> <span class="dv">1</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">fade =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">c</span>(<span class="st">"#f0ae0e"</span>), <span class="at">vsize =</span> <span class="dv">10</span>, <span class="at">repulsion =</span> .<span class="dv">9</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">label.cex =</span> <span class="dv">1</span>, <span class="at">label.scale =</span> <span class="st">"FALSE"</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">colnames</span>(data)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Edges with posterior inclusion probability below 0.5 are set to zero, so only edges with at least moderate evidence of inclusion appear in the plot.</p>
+</section>
+<section id="continuous-data" class="level2">
+<h2 class="anchored" data-anchor-id="continuous-data">Continuous data</h2>
+<p>For continuous variables, <code>bgm()</code> fits a Gaussian graphical model. Set <code>variable_type = "continuous"</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fit_ggm <span class="ot">=</span> <span class="fu">bgm</span>(continuous_data, <span class="at">variable_type =</span> <span class="st">"continuous"</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_ggm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The pairwise effects are partial correlations (off-diagonal entries of the standardized precision matrix). Missing values can be imputed during sampling with <code>na_action = "impute"</code>.</p>
 </section>
 <section id="next-steps" class="level2">
-<h2 class="anchored" data-anchor-id="next-steps">Next Steps</h2>
+<h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
 <ul>
-<li>Learn about the <a href="../guide/omrf.html">statistical model</a> underlying bgms</li>
+<li>Learn about the <a href="../guide/omrf.html">ordinal MRF</a> and <a href="../guide/ggm.html">GGM</a> underlying bgms</li>
 <li>Understand <a href="../guide/edge-selection.html">edge selection</a> with spike-and-slab priors</li>
-<li>Compare groups with <a href="../guide/group-comparison.html">bgmCompare</a></li>
+<li>Compare groups with <a href="../guide/group-comparison.html"><code>bgmCompare()</code></a></li>
+<li>Check convergence with <a href="../guide/mcmc-diagnostics.html">MCMC diagnostics</a></li>
 </ul>
 
 

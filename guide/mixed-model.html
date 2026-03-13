@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -75,6 +110,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -478,35 +542,68 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>Fitting a network model when the data contains both continuous and discrete variables.</p>
+<p>The mixed MRF is a graphical model for datasets containing both discrete (binary or ordinal) and continuous variables. bgms fits a mixed MRF automatically when <code>variable_type</code> includes both discrete and continuous types.</p>
 <section id="when-to-use-a-mixed-mrf" class="level2">
-<h2 class="anchored" data-anchor-id="when-to-use-a-mixed-mrf">When to Use a Mixed MRF</h2>
-<!-- TODO: source — model selection logic in R/bgm_spec.R -->
+<h2 class="anchored" data-anchor-id="when-to-use-a-mixed-mrf">When to use a mixed MRF</h2>
+<p>Use a mixed MRF when the dataset contains a mix of variable types — for example, ordinal symptom ratings alongside continuous physiological measurements. Rather than discretizing continuous variables or treating ordinal scores as continuous, the mixed MRF models each variable according to its measurement scale.</p>
+</section>
+<section id="the-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-model">The model</h2>
+<p>The mixed MRF combines the ordinal MRF (for discrete variables) and the GGM (for continuous variables) into a single joint distribution. The model includes three types of pairwise interactions:</p>
+<ul>
+<li><strong>Discrete–discrete</strong>: interactions between ordinal/binary variables, as in the ordinal MRF.</li>
+<li><strong>Continuous–continuous</strong>: partial correlations between continuous variables, as in the GGM (encoded in a precision-like matrix <span class="math inline">\(K_{yy}\)</span>).</li>
+<li><strong>Cross-type</strong>: interactions between discrete and continuous variables, capturing how a change in an ordinal variable’s category is associated with a shift in a continuous variable’s conditional mean.</li>
+</ul>
 </section>
 <section id="data-requirements" class="level2">
-<h2 class="anchored" data-anchor-id="data-requirements">Data Requirements</h2>
-<!-- TODO: source — R/validate_data.R, R/validate_variable_types.R -->
+<h2 class="anchored" data-anchor-id="data-requirements">Data requirements</h2>
+<p>Each column in the data frame must have a corresponding entry in <code>variable_type</code>. Allowed types are <code>"ordinal"</code>, <code>"blume-capel"</code>, and <code>"continuous"</code>. A per-variable vector is required when the types differ:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example: first 3 variables ordinal, last 2 continuous</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="fu">c</span>(<span class="st">"ordinal"</span>, <span class="st">"ordinal"</span>, <span class="st">"ordinal"</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"continuous"</span>, <span class="st">"continuous"</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>bgms validates that ordinal variables contain integer-valued responses and that continuous variables are numeric. Missing values are handled by <code>na_action</code> (<code>"listwise"</code> or <code>"impute"</code>), just as for single-type models.</p>
 </section>
-<section id="fitting-the-model" class="level2">
-<h2 class="anchored" data-anchor-id="fitting-the-model">Fitting the Model</h2>
-<!-- TODO: source — bgm() with mixed data, man/bgm.Rd -->
+<section id="pseudolikelihood-options" class="level2">
+<h2 class="anchored" data-anchor-id="pseudolikelihood-options">Pseudolikelihood options</h2>
+<p>For mixed MRFs, the <code>pseudolikelihood</code> argument controls how the discrete full conditional distributions are approximated:</p>
+<ul>
+<li><p><strong><code>"conditional"</code></strong> (default): conditions on the observed continuous variables when computing the discrete full conditionals. This is faster because the discrete pseudolikelihood does not depend on the continuous interaction matrix <span class="math inline">\(K_{yy}\)</span>.</p></li>
+<li><p><strong><code>"marginal"</code></strong>: integrates out the continuous variables, so the discrete full conditionals account for indirect associations induced through the continuous block. This is more expensive per iteration but may be more appropriate when discrete-continuous coupling is strong.</p></li>
+</ul>
 </section>
-<section id="interpreting-mixed-parameters" class="level2">
-<h2 class="anchored" data-anchor-id="interpreting-mixed-parameters">Interpreting Mixed Parameters</h2>
-<!-- TODO: source — discrete-discrete, continuous-continuous, cross-type blocks -->
+<section id="interpreting-the-output" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-output">Interpreting the output</h2>
+<p>The <code>coef()</code> method returns a single <code>$pairwise</code> matrix that contains all three types of interactions. The diagonal entries correspond to the <span class="math inline">\(K_{yy}\)</span> diagonal (for continuous variables) or are zero (for discrete variables). The off-diagonal entries are pairwise interactions regardless of variable type.</p>
+<p>The <code>$indicator</code> matrix (when edge selection is active) reports posterior inclusion probabilities for all edges, including cross-type edges.</p>
+</section>
+<section id="fitting-a-mixed-mrf" class="level2">
+<h2 class="anchored" data-anchor-id="fitting-a-mixed-mrf">Fitting a mixed MRF</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="fu">c</span>(<span class="st">"ordinal"</span>, <span class="st">"ordinal"</span>, <span class="st">"continuous"</span>, <span class="st">"continuous"</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The workflow — fitting, summarizing, extracting coefficients, checking diagnostics — is the same as for pure ordinal or pure continuous models.</p>
 
 
 </section>

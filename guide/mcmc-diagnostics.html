@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -477,39 +512,129 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>How to check whether the sampler converged and the results are trustworthy.</p>
+<p>Before interpreting results from <code>bgm()</code> or <code>bgmCompare()</code>, check that the MCMC sampler has converged and that posterior estimates are reliable. This chapter covers the diagnostic tools available in bgms.</p>
 <section id="effective-sample-size-ess" class="level2">
-<h2 class="anchored" data-anchor-id="effective-sample-size-ess">Effective Sample Size (ESS)</h2>
-<!-- TODO: source — R/mcmc_summary.R, C++ ESS computation -->
+<h2 class="anchored" data-anchor-id="effective-sample-size-ess">Effective sample size (ESS)</h2>
+<p>The effective sample size estimates how many independent draws the MCMC chain is equivalent to. Correlated draws reduce the effective information per sample. A larger ESS means more precise posterior estimates.</p>
+<p>The <code>summary()</code> output reports <code>n_eff</code> for each parameter. Values of <code>n_eff</code> above 400 are generally sufficient for reliable posterior means and credible intervals. Lower values suggest that more iterations may be needed.</p>
+<section id="mixture-ess-for-edge-selected-parameters" class="level3">
+<h3 class="anchored" data-anchor-id="mixture-ess-for-edge-selected-parameters">Mixture ESS for edge-selected parameters</h3>
+<p>When edge selection is active, pairwise effects are governed by spike-and-slab priors. The parameter is set to exactly zero when the edge is excluded, creating a chain that mixes between zero and nonzero values.</p>
+<p>Two ESS measures are reported:</p>
+<ul>
+<li><strong><code>n_eff</code></strong>: the unconditional ESS, computed from the full chain (including zeros). Measures how precisely the overall posterior mean is estimated.</li>
+<li><strong><code>n_eff_mixt</code></strong>: the mixture ESS, which accounts for additional uncertainty from the spike-and-slab switching. When the indicator rarely switches (fewer than 5 transitions), <code>n_eff_mixt</code> is suppressed.</li>
+</ul>
+</section>
 </section>
 <section id="r-hat" class="level2">
 <h2 class="anchored" data-anchor-id="r-hat">R-hat</h2>
-<!-- TODO: source — R/mcmc_summary.R, C++ Rhat computation -->
+<p>R-hat (split R-hat) compares the between-chain and within-chain variance. Values close to 1.0 indicate that the chains have converged to the same distribution. R-hat values above 1.01 suggest that the chains have not mixed and should be run longer.</p>
+<p>bgms reports R-hat in <code>summary()</code> output and through <code>extract_rhat()</code>.</p>
 </section>
 <section id="trace-plots" class="level2">
-<h2 class="anchored" data-anchor-id="trace-plots">Trace Plots</h2>
-<!-- TODO: source — plot method for bgms objects -->
+<h2 class="anchored" data-anchor-id="trace-plots">Trace plots</h2>
+<p>Visually inspecting the sampled values across iterations is a direct way to assess convergence. Chains that have converged look like random noise fluctuating around a stable mean; chains that have not converged show trends, level shifts, or poor mixing.</p>
+<p>Raw samples are accessible through <code>fit$raw_samples</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>param_index <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>chains <span class="ot">=</span> fit<span class="sc">$</span>raw_samples<span class="sc">$</span>pairwise</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>nchains <span class="ot">=</span> <span class="fu">length</span>(chains)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"firebrick"</span>, <span class="st">"steelblue"</span>, <span class="st">"darkgreen"</span>, <span class="st">"goldenrod"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(chains[[<span class="dv">1</span>]][, param_index], <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> cols[<span class="dv">1</span>],</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Iteration"</span>, <span class="at">ylab =</span> <span class="st">"Value"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Traceplot"</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">range</span>(<span class="fu">sapply</span>(chains, <span class="cf">function</span>(ch) <span class="fu">range</span>(ch[, param_index]))))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(nchains <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(c <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>nchains) {</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(chains[[c]][, param_index], <span class="at">col =</span> cols[c])</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="divergences" class="level2">
-<h2 class="anchored" data-anchor-id="divergences">Divergences</h2>
-<!-- TODO: source — R/nuts_diagnostics.R, divergent transitions -->
+<section id="nuts-specific-diagnostics" class="level2">
+<h2 class="anchored" data-anchor-id="nuts-specific-diagnostics">NUTS-specific diagnostics</h2>
+<p>When using <code>update_method = "nuts"</code> (the default), additional diagnostics are stored in <code>fit$nuts_diag</code>.</p>
+<section id="e-bfmi" class="level3">
+<h3 class="anchored" data-anchor-id="e-bfmi">E-BFMI</h3>
+<p>E-BFMI (Energy Bayesian Fraction of Missing Information) measures how efficiently the sampler explores the posterior. It compares the typical size of energy changes between successive samples to the overall spread of energies. Values close to 1 indicate efficient exploration; values below 0.3 suggest the sampler may be getting stuck.</p>
+<p>A low E-BFMI does not necessarily mean the results are wrong, but it does warrant investigation. In models with edge selection, the most common cause is that the warmup period was too short for the discrete graph structure to equilibrate. Increasing <code>warmup</code> often resolves this.</p>
 </section>
-<section id="energy-diagnostics-e-bfmi" class="level2">
-<h2 class="anchored" data-anchor-id="energy-diagnostics-e-bfmi">Energy Diagnostics (E-BFMI)</h2>
-<!-- TODO: source — R/nuts_diagnostics.R, E-BFMI threshold -->
+<section id="divergent-transitions" class="level3">
+<h3 class="anchored" data-anchor-id="divergent-transitions">Divergent transitions</h3>
+<p>Divergent transitions occur when the numerical integrator encounters regions where the posterior curvature changes too rapidly for the current step size. A small number of divergences (fewer than 0.1% of samples) is generally acceptable. Many divergences indicate that the sampler may be missing important parts of the posterior.</p>
+<p>If divergences are frequent, increase <code>target_accept</code> (which reduces the step size). If that does not help, try <code>update_method = "adaptive-metropolis"</code> and compare results.</p>
+</section>
+<section id="tree-depth" class="level3">
+<h3 class="anchored" data-anchor-id="tree-depth">Tree depth</h3>
+<p>NUTS builds trajectories by repeatedly doubling their length until a U-turn criterion is satisfied. If the trajectory frequently reaches the maximum allowed depth (<code>nuts_max_depth</code>, default 10), the sampler may benefit from longer trajectories. Hitting the maximum depth occasionally is normal; hitting it on most iterations may indicate challenging posterior geometry. Consider increasing <code>nuts_max_depth</code>.</p>
+</section>
+</section>
+<section id="warmup-equilibration-check" class="level2">
+<h2 class="anchored" data-anchor-id="warmup-equilibration-check">Warmup equilibration check</h2>
+<p>In models with edge selection, the discrete graph structure may take longer to reach stationarity than the continuous parameters. Even after warmup completes, the first portion of the sampling phase may still show transient behavior.</p>
+<p>The <code>fit$nuts_diag$warmup_check</code> component provides diagnostics comparing the first and second halves of the post-warmup samples:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>warmup_incomplete</code></td>
+<td><code>TRUE</code> if any indicator below suggests non-stationarity</td>
+</tr>
+<tr class="even">
+<td><code>energy_slope</code></td>
+<td>Slope of energy vs.&nbsp;iteration; near zero = stable</td>
+</tr>
+<tr class="odd">
+<td><code>slope_significant</code></td>
+<td><code>TRUE</code> if energy slope is significant (p &lt; 0.01)</td>
+</tr>
+<tr class="even">
+<td><code>ebfmi_first_half</code></td>
+<td>E-BFMI for the first half of post-warmup samples</td>
+</tr>
+<tr class="odd">
+<td><code>ebfmi_second_half</code></td>
+<td>E-BFMI for the second half</td>
+</tr>
+<tr class="even">
+<td><code>var_ratio</code></td>
+<td>Ratio of energy variance (first half / second half); &gt; 2 suggests settling</td>
+</tr>
+</tbody>
+</table>
+<p>If these diagnostics suggest the chain was still settling, increase <code>warmup</code> and refit. If diagnostics remain problematic after doubling or tripling warmup, try refitting with <code>update_method = "adaptive-metropolis"</code> and compare posterior summaries. If the two samplers produce similar results, the estimates are likely trustworthy despite the warnings; if they differ, further investigation is warranted.</p>
+</section>
+<section id="recommended-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="recommended-workflow">Recommended workflow</h2>
+<ol type="1">
+<li><strong>Inspect <code>summary()</code></strong>: check R-hat (&lt; 1.01) and ESS (&gt; 400) for all parameters.</li>
+<li><strong>Check NUTS diagnostics</strong>: <code>fit$nuts_diag$summary</code> for divergences, tree depth saturation, and E-BFMI.</li>
+<li><strong>Check warmup</strong>: <code>fit$nuts_diag$warmup_check</code> for signs of incomplete equilibration.</li>
+<li><strong>Plot traces</strong>: visually inspect a few key parameters for mixing and stationarity.</li>
+<li><strong>If problems are found</strong>: increase <code>warmup</code> and/or <code>iter</code>, adjust <code>target_accept</code>, or switch samplers.</li>
+</ol>
 
 
 </section>

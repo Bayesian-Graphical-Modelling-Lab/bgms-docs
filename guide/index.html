@@ -477,27 +477,42 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>The User’s Guide provides conceptual background and practical tutorials for using bgms.</p>
-<section id="contents" class="level2">
-<h2 class="anchored" data-anchor-id="contents">Contents</h2>
+<p>The User’s Guide covers conceptual background and practical tutorials for bgms. It is organized into four parts: background concepts, model types, analysis workflows, and MCMC output.</p>
+<section id="background" class="level3">
+<h3 class="anchored" data-anchor-id="background">Background</h3>
 <ul>
-<li><a href="../guide/getting-started.html">Getting Started</a> — Installation and first steps</li>
-<li><a href="../guide/omrf.html">Ordinal MRF</a> — Understanding the ordinal Markov random field</li>
-<li><a href="../guide/ggm.html">GGM</a> — Gaussian graphical models for continuous data</li>
-<li><a href="../guide/edge-selection.html">Edge Selection</a> — Spike-and-slab priors for structure learning</li>
-<li><a href="../guide/group-comparison.html">Group Comparison</a> — Comparing networks with bgmCompare</li>
-<li><a href="prior-guide.qmd">Prior Guide</a> — Choosing priors for your analysis</li>
+<li><a href="../guide/getting-started.html">Getting Started</a> — Installation and first model fit</li>
+<li><a href="../guide/graphical-models.html">Graphical Models</a> — Nodes, edges, and conditional independence</li>
+<li><a href="../guide/bayesian-approach.html">The Bayesian Approach</a> — Priors, posteriors, and Bayes factors</li>
+<li><a href="../guide/prior-basics.html">Prior Basics</a> — How bgms uses priors and when to change defaults</li>
 </ul>
 </section>
-<section id="prerequisites" class="level2">
-<h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
-<p>This guide assumes basic familiarity with:</p>
+<section id="models" class="level3">
+<h3 class="anchored" data-anchor-id="models">Models</h3>
 <ul>
-<li>R programming</li>
-<li>Bayesian inference concepts</li>
-<li>Graphical models / network analysis</li>
+<li><a href="../guide/ggm.html">Gaussian Graphical Model</a> — Continuous data, partial correlations, precision matrix</li>
+<li><a href="../guide/omrf.html">Ordinal MRF</a> — Binary and ordinal data, category thresholds, pairwise interactions</li>
+<li><a href="../guide/mixed-model.html">Mixed MRF</a> — Datasets with both continuous and discrete variables</li>
 </ul>
-<p>For background on Bayesian analysis of psychological networks, see <a href="https://doi.org/10.1177/25152459231193334">Huth et al.&nbsp;(2023)</a>.</p>
+</section>
+<section id="analyses" class="level3">
+<h3 class="anchored" data-anchor-id="analyses">Analyses</h3>
+<ul>
+<li><a href="../guide/edge-selection.html">Edge Selection</a> — Spike-and-slab priors for structure learning</li>
+<li><a href="../guide/group-comparison.html">Group Comparison</a> — Comparing networks across groups with <code>bgmCompare()</code></li>
+<li><a href="../guide/clustering.html">Edge Clustering</a> — Stochastic block model prior for discovering edge clusters</li>
+</ul>
+</section>
+<section id="mcmc-output" class="level3">
+<h3 class="anchored" data-anchor-id="mcmc-output">MCMC Output</h3>
+<ul>
+<li><a href="../guide/mcmc-output.html">MCMC Output</a> — What the sampler returns and how to access it</li>
+<li><a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a> — Convergence checks: ESS, R-hat, trace plots, divergences</li>
+</ul>
+</section>
+<section id="prerequisites" class="level3">
+<h3 class="anchored" data-anchor-id="prerequisites">Prerequisites</h3>
+<p>This guide assumes basic familiarity with R programming and the goals of network analysis. The <a href="#background">Background</a> chapters introduce the necessary statistical concepts.</p>
 
 
 </section>

@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -75,6 +110,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -478,23 +542,64 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The ordinal Markov random field (MRF) is a graphical model for networks of binary and ordinal variables.</p>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p><em>Content to be added: joint distribution, threshold parameters, interaction parameters, pseudolikelihood approximation.</em></p>
+<p>The ordinal Markov Random Field (MRF) is a graphical model for networks of binary and ordinal variables. It is the default model in bgms.</p>
+<section id="the-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-model">The model</h2>
+<p>For <span class="math inline">\(p\)</span> ordinal variables with observations <span class="math inline">\(\mathbf{x} = (x_1, \ldots, x_p)\)</span>, the ordinal MRF specifies the joint distribution as:</p>
+<p><span class="math display">\[
+p(\mathbf{x}) \propto \exp\left(\sum_{i=1}^{p} \mu_{x_i}^{(i)} +
+\sum_{i&lt;j} \sigma_{ij} \, x_i \, x_j\right)
+\]</span></p>
+<p>where <span class="math inline">\(\mu_{x_i}^{(i)}\)</span> are category threshold parameters for variable <span class="math inline">\(i\)</span> (one per category above the lowest) and <span class="math inline">\(\sigma_{ij}\)</span> is the pairwise interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</p>
+<p>A positive interaction <span class="math inline">\(\sigma_{ij} &gt; 0\)</span> means that higher categories of <span class="math inline">\(x_i\)</span> tend to co-occur with higher categories of <span class="math inline">\(x_j\)</span>, conditional on all other variables. The category thresholds control the marginal distribution of each variable.</p>
+</section>
+<section id="regular-ordinal-variables" class="level2">
+<h2 class="anchored" data-anchor-id="regular-ordinal-variables">Regular ordinal variables</h2>
+<p>By default, bgms treats ordinal variables as “regular”: each category above the lowest receives its own threshold parameter. This imposes no constraint on the shape of the category distribution. Variables are internally recoded to consecutive integers starting at 0.</p>
+<p>For binary variables (two categories, coded 0 and 1), the model reduces to the Ising model, a classical MRF for binary data. The single threshold parameter controls the probability of category 1 relative to category 0.</p>
+</section>
+<section id="blume-capel-variables" class="level2">
+<h2 class="anchored" data-anchor-id="blume-capel-variables">Blume-Capel variables</h2>
+<p>For ordinal variables with a natural baseline or reference category (e.g., a “neutral” response), the Blume-Capel parameterization models category thresholds as a quadratic function of distance from the baseline:</p>
+<p><span class="math display">\[
+\mu_c = \alpha \cdot (c - b) + \beta \cdot (c - b)^2
+\]</span></p>
+<p>where <span class="math inline">\(c\)</span> is the category, <span class="math inline">\(b\)</span> is the baseline category, <span class="math inline">\(\alpha\)</span> captures the linear trend across categories, and <span class="math inline">\(\beta\)</span> captures the preference toward or away from the baseline:</p>
+<ul>
+<li><span class="math inline">\(\beta &lt; 0\)</span>: the model favors responses near the baseline category</li>
+<li><span class="math inline">\(\beta &gt; 0\)</span>: the model favors extreme responses (far from the baseline)</li>
+</ul>
+<p>Pairwise interactions between Blume-Capel variables use centered scores <span class="math inline">\((c - b)\)</span> rather than raw category values.</p>
+<p>To use Blume-Capel variables, set <code>variable_type = "blume-capel"</code> and provide the <code>baseline_category</code> argument:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">variable_type =</span> <span class="st">"blume-capel"</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">baseline_category =</span> <span class="dv">2</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>baseline_category</code> can be a single integer (applied to all variables) or a vector of length <span class="math inline">\(p\)</span>.</p>
+</section>
+<section id="pseudolikelihood" class="level2">
+<h2 class="anchored" data-anchor-id="pseudolikelihood">Pseudolikelihood</h2>
+<p>The normalizing constant of the ordinal MRF is intractable for all but the smallest networks. bgms uses a pseudolikelihood approximation: the product of full conditional distributions replaces the joint distribution. This makes estimation feasible for networks with many variables while retaining consistent parameter estimates.</p>
+</section>
+<section id="fitting-an-ordinal-mrf" class="level2">
+<h2 class="anchored" data-anchor-id="fitting-an-ordinal-mrf">Fitting an ordinal MRF</h2>
+<p>The ordinal MRF is the default model type. For ordinal or binary data, call <code>bgm()</code> directly:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For Blume-Capel variables specifically:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">variable_type =</span> <span class="st">"blume-capel"</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">baseline_category =</span> <span class="dv">3</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The output contains posterior summaries for both threshold parameters (<code>posterior_summary_main</code>) and pairwise interactions (<code>posterior_summary_pairwise</code>).</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>

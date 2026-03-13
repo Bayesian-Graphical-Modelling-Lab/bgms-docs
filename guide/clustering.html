@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -75,6 +110,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -478,35 +542,95 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>Using the stochastic block model prior to discover clusters of edges in the network.</p>
+<p>The stochastic block model (SBM) prior in bgms discovers clusters of edges in the network. Nodes are assigned to latent blocks, and edge inclusion probabilities depend on whether the two endpoints belong to the same block or different blocks.</p>
 <section id="what-is-edge-clustering" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-edge-clustering">What Is Edge Clustering?</h2>
-<!-- TODO: source — SBM/MFM conceptual overview -->
+<h2 class="anchored" data-anchor-id="what-is-edge-clustering">What is edge clustering?</h2>
+<p>In many applied networks, edges are not exchangeable: some groups of variables are densely connected while connections between groups are sparse. The SBM prior captures this structure by learning block assignments from the data. Nodes within the same block share a within-cluster inclusion probability, and edges between blocks share a (typically lower) between-cluster inclusion probability.</p>
 </section>
 <section id="setting-up-the-sbm-prior" class="level2">
-<h2 class="anchored" data-anchor-id="setting-up-the-sbm-prior">Setting Up the SBM Prior</h2>
-<!-- TODO: source — bgm() edge_prior argument, man/bgm.Rd -->
+<h2 class="anchored" data-anchor-id="setting-up-the-sbm-prior">Setting up the SBM prior</h2>
+<p>To use the SBM prior, set <code>edge_prior = "Stochastic-Block"</code> in <code>bgm()</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="st">"Stochastic-Block"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The SBM prior has several hyperparameters:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 42%">
+<col style="width: 34%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Default</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>beta_bernoulli_alpha</code>, <code>beta_bernoulli_beta</code></td>
+<td>1, 1</td>
+<td>Shape parameters of the Beta prior on within-cluster inclusion probability</td>
+</tr>
+<tr class="even">
+<td><code>beta_bernoulli_alpha_between</code>, <code>beta_bernoulli_beta_between</code></td>
+<td>1, 1</td>
+<td>Shape parameters of the Beta prior on between-cluster inclusion probability</td>
+</tr>
+<tr class="odd">
+<td><code>dirichlet_alpha</code></td>
+<td>1</td>
+<td>Concentration of the Dirichlet prior on block assignments</td>
+</tr>
+<tr class="even">
+<td><code>lambda</code></td>
+<td>1</td>
+<td>Rate of the zero-truncated Poisson prior on the number of clusters</td>
+</tr>
+</tbody>
+</table>
+<p>With the defaults, the prior is symmetric (within and between clusters have the same Beta(1, 1) prior on inclusion probability) and the number of clusters is determined by the data.</p>
 </section>
 <section id="interpreting-block-structure" class="level2">
-<h2 class="anchored" data-anchor-id="interpreting-block-structure">Interpreting Block Structure</h2>
-<!-- TODO: source — extract_sbm(), co-clustering matrix -->
+<h2 class="anchored" data-anchor-id="interpreting-block-structure">Interpreting block structure</h2>
+<p>The <code>extract_sbm()</code> function retrieves the SBM results:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sbm <span class="ot">=</span> <span class="fu">extract_sbm</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This returns:</p>
+<ul>
+<li><strong><code>posterior_mean_allocations</code></strong>: the estimated cluster assignment for each node, computed using the method of Dahl (2006).</li>
+<li><strong><code>posterior_mode_allocations</code></strong>: the most frequent cluster assignment across iterations.</li>
+<li><strong><code>posterior_coclustering_matrix</code></strong>: a symmetric matrix where entry <span class="math inline">\((i, j)\)</span> is the proportion of iterations in which nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> were assigned to the same cluster. Plotting this matrix reveals the block structure.</li>
+<li><strong><code>posterior_num_blocks</code></strong>: a table of posterior probabilities for each possible number of clusters.</li>
+</ul>
 </section>
 <section id="prior-choices-for-clustering" class="level2">
-<h2 class="anchored" data-anchor-id="prior-choices-for-clustering">Prior Choices for Clustering</h2>
-<!-- TODO: source — SBM-specific prior parameters -->
+<h2 class="anchored" data-anchor-id="prior-choices-for-clustering">Prior choices for clustering</h2>
+<ul>
+<li><p><strong><code>lambda</code></strong> controls the expected number of clusters. A small <code>lambda</code> favors fewer clusters; a larger <code>lambda</code> allows more. The zero-truncated Poisson prior ensures at least one cluster.</p></li>
+<li><p><strong><code>dirichlet_alpha</code></strong> controls how evenly nodes are distributed across clusters. A value of 1 gives a uniform prior over partitions. Smaller values favor uneven cluster sizes (a few large clusters and several small ones).</p></li>
+<li><p>The <strong>within-cluster</strong> Beta parameters control how dense within-cluster connectivity is <em>a priori</em>. Setting <code>beta_bernoulli_alpha &gt; beta_bernoulli_beta</code> favors dense within-cluster connections.</p></li>
+<li><p>The <strong>between-cluster</strong> Beta parameters control between-cluster connectivity. Setting <code>beta_bernoulli_beta_between &gt; beta_bernoulli_alpha_between</code> favors sparse between-cluster connections.</p></li>
+</ul>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p>Sekulovski, N., Keetelaar, S., Haslbeck, J. M. B., &amp; Marsman, M. (2025). Bayesian variable selection in multilevel and multi-group graphical models using a stochastic block model. <em>Manuscript submitted for publication</em>.</p>
 
 
 </section>

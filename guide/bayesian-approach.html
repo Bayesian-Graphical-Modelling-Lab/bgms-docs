@@ -75,6 +75,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -478,35 +507,57 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>Why bgms uses Bayesian inference and what that means for the user.</p>
+<p>bgms uses Bayesian inference to estimate graphical models. This means that all unknown quantities — interaction parameters, edge inclusion indicators, and model structure — are treated as random variables with probability distributions. The output is a posterior distribution, not a single point estimate.</p>
 <section id="prior-likelihood-posterior" class="level2">
-<h2 class="anchored" data-anchor-id="prior-likelihood-posterior">Prior, Likelihood, Posterior</h2>
-<!-- TODO: source — standard Bayesian inference overview -->
+<h2 class="anchored" data-anchor-id="prior-likelihood-posterior">Prior, likelihood, posterior</h2>
+<p>Bayesian inference combines a prior distribution with the likelihood of the observed data to produce a posterior distribution. For a parameter <span class="math inline">\(\theta\)</span> and data <span class="math inline">\(\mathbf{x}\)</span>:</p>
+<p><span class="math display">\[
+p(\theta \mid \mathbf{x}) \propto p(\mathbf{x} \mid \theta) \; p(\theta)
+\]</span></p>
+<ul>
+<li><p>The <strong>prior</strong> <span class="math inline">\(p(\theta)\)</span> encodes assumptions about the parameter before observing data. In bgms, priors are placed on interaction parameters, main effects, and edge indicators. See <a href="../guide/prior-basics.html">Prior Basics</a> for details.</p></li>
+<li><p>The <strong>likelihood</strong> <span class="math inline">\(p(\mathbf{x} \mid \theta)\)</span> measures how well the model with parameter value <span class="math inline">\(\theta\)</span> explains the observed data.</p></li>
+<li><p>The <strong>posterior</strong> <span class="math inline">\(p(\theta \mid \mathbf{x})\)</span> is the updated distribution of <span class="math inline">\(\theta\)</span> after observing the data. All inference — point estimates, intervals, hypothesis tests — comes from this posterior.</p></li>
+</ul>
 </section>
-<section id="credible-intervals" class="level2">
-<h2 class="anchored" data-anchor-id="credible-intervals">Credible Intervals</h2>
-<!-- TODO: source — posterior summaries as returned by bgm() -->
+<section id="posterior-summaries" class="level2">
+<h2 class="anchored" data-anchor-id="posterior-summaries">Posterior summaries</h2>
+<p>bgms summarizes the posterior with several quantities:</p>
+<ul>
+<li><p><strong>Posterior mean</strong>: the average of the posterior distribution. Reported by <code>coef()</code> and in the <code>summary()</code> output.</p></li>
+<li><p><strong>Posterior standard deviation</strong>: the spread of the posterior. A small standard deviation indicates a precise estimate.</p></li>
+<li><p><strong>Credible intervals</strong>: ranges that contain the parameter with a given posterior probability (e.g., a 95% credible interval). Unlike frequentist confidence intervals, credible intervals have a direct probability interpretation.</p></li>
+</ul>
 </section>
 <section id="bayes-factors" class="level2">
-<h2 class="anchored" data-anchor-id="bayes-factors">Bayes Factors</h2>
-<!-- TODO: source — Bayes factor for edge inclusion in bgms -->
+<h2 class="anchored" data-anchor-id="bayes-factors">Bayes factors</h2>
+<p>For edge selection, bgms uses Bayes factors to quantify evidence for the presence or absence of each edge. The inclusion Bayes factor for edge <span class="math inline">\((i, j)\)</span> is:</p>
+<p><span class="math display">\[
+\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{p(\gamma_{ij} = 0 \mid \mathbf{x})} \bigg/ \frac{p(\gamma_{ij} = 1)}{p(\gamma_{ij} = 0)}
+\]</span></p>
+<p>where <span class="math inline">\(\gamma_{ij}\)</span> is the binary indicator for edge inclusion. When the prior inclusion probability is 0.5, this simplifies to the posterior odds:</p>
+<p><span class="math display">\[
+\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{1 - p(\gamma_{ij} = 1 \mid \mathbf{x})}
+\]</span></p>
+<p>A Bayes factor greater than 1 favors edge inclusion; less than 1 favors exclusion. The reciprocal <span class="math inline">\(1 / \text{BF}_{10}\)</span> gives the evidence for exclusion. See <a href="../guide/edge-selection.html">Edge Selection</a> for interpretation guidelines.</p>
 </section>
 <section id="how-bgms-uses-mcmc" class="level2">
-<h2 class="anchored" data-anchor-id="how-bgms-uses-mcmc">How bgms Uses MCMC</h2>
-<!-- TODO: source — brief forward pointer to mcmc-output and mcmc-diagnostics -->
+<h2 class="anchored" data-anchor-id="how-bgms-uses-mcmc">How bgms uses MCMC</h2>
+<p>The posterior distributions in bgms do not have closed-form solutions. Instead, bgms draws samples from the posterior using Markov chain Monte Carlo (MCMC) methods. The default sampler is the No-U-Turn Sampler (NUTS), an adaptive form of Hamiltonian Monte Carlo. bgms also supports fixed-length HMC and adaptive Metropolis-Hastings.</p>
+<p>Multiple chains run in parallel to diagnose convergence. Key diagnostics — effective sample size (ESS), R-hat, and energy diagnostics — are described in <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>. The structure of the raw MCMC output is described in <a href="../guide/mcmc-output.html">MCMC Output</a>.</p>
 
 
 </section>

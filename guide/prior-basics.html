@@ -75,6 +75,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -478,35 +507,86 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development. Replaces the former prior-guide page with a shared primer. Analysis-specific prior guidance lives on the edge-selection, group-comparison, and clustering pages.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>What priors are, how bgms uses them, and why they matter.</p>
+<p>This chapter explains what priors are, how bgms uses them, and when the defaults should be changed. Analysis-specific prior guidance appears on the <a href="../guide/edge-selection.html">Edge Selection</a>, <a href="../guide/group-comparison.html">Group Comparison</a>, and <a href="../guide/clustering.html">Edge Clustering</a> pages.</p>
 <section id="what-is-a-prior" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-a-prior">What Is a Prior?</h2>
-<!-- TODO: source — accessible introduction to prior distributions -->
+<h2 class="anchored" data-anchor-id="what-is-a-prior">What is a prior?</h2>
+<p>A prior distribution encodes assumptions about a parameter before observing data. In Bayesian inference, the prior is combined with the likelihood to produce the posterior distribution. The prior matters most when data are sparse; as data accumulate, the posterior is increasingly driven by the likelihood.</p>
 </section>
 <section id="priors-in-bgms" class="level2">
 <h2 class="anchored" data-anchor-id="priors-in-bgms">Priors in bgms</h2>
-<!-- TODO: source — R/bgm.R prior-related arguments, man/bgm.Rd -->
+<p>bgms places priors on three types of quantities: pairwise interaction parameters, main effect parameters, and (when edge selection is active) edge inclusion indicators. Each has a distinct role.</p>
+<section id="pairwise-interaction-prior" class="level3">
+<h3 class="anchored" data-anchor-id="pairwise-interaction-prior">Pairwise interaction prior</h3>
+<p>The pairwise interactions <span class="math inline">\(\sigma_{ij}\)</span> receive a Cauchy prior (a Student-<span class="math inline">\(t\)</span> distribution with one degree of freedom) centered at zero. The scale is controlled by <code>pairwise_scale</code> (default: 2.5).</p>
+<p>The Cauchy distribution has heavy tails, allowing large effects when supported by the data, while the peak at zero provides moderate shrinkage. In models with many variables and limited data, this regularization prevents extreme estimates.</p>
+<p>When <code>standardize = TRUE</code>, the prior scale is adjusted based on the range of response scores. Variables with more categories have larger score products, which typically correspond to smaller interaction effects. Without standardization, a fixed scale is relatively wide for high-category pairs and narrow for low-category pairs. The adjustment ensures equivalent relative shrinkage across all variable pairs.</p>
+</section>
+<section id="main-effect-prior" class="level3">
+<h3 class="anchored" data-anchor-id="main-effect-prior">Main effect prior</h3>
+<p>Main effects (category threshold parameters for ordinal models) receive a beta-prime prior with shape parameters <code>main_alpha</code> and <code>main_beta</code> (both default to 0.5). When the two shape parameters are equal, the prior is symmetric. The beta-prime distribution is defined on the positive reals and provides light regularization of the threshold parameters.</p>
+</section>
+<section id="edge-inclusion-prior" class="level3">
+<h3 class="anchored" data-anchor-id="edge-inclusion-prior">Edge inclusion prior</h3>
+<p>When <code>edge_selection = TRUE</code>, each edge has a binary indicator <span class="math inline">\(\gamma_{ij} \in \{0, 1\}\)</span> governing whether the interaction is included. The prior on these indicators is controlled by <code>edge_prior</code>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Prior</th>
+<th>Parameters</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>"Bernoulli"</code></td>
+<td><code>inclusion_probability</code> (default 0.5)</td>
+<td>Fixed inclusion probability, same for all edges</td>
+</tr>
+<tr class="even">
+<td><code>"Beta-Bernoulli"</code></td>
+<td><code>beta_bernoulli_alpha</code>, <code>beta_bernoulli_beta</code> (both default 1)</td>
+<td>Inclusion probability given a Beta prior, learned from data</td>
+</tr>
+<tr class="odd">
+<td><code>"Stochastic-Block"</code></td>
+<td>Multiple (see <a href="../guide/clustering.html">Clustering</a>)</td>
+<td>Cluster-based inclusion probabilities with separate within/between rates</td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 <section id="edge-priors-vs.-parameter-priors" class="level2">
-<h2 class="anchored" data-anchor-id="edge-priors-vs.-parameter-priors">Edge Priors vs.&nbsp;Parameter Priors</h2>
-<!-- TODO: source — distinction between inclusion prior and effect-size prior -->
+<h2 class="anchored" data-anchor-id="edge-priors-vs.-parameter-priors">Edge priors vs.&nbsp;parameter priors</h2>
+<p>These two types of priors serve different purposes:</p>
+<ul>
+<li><p><strong>Edge inclusion priors</strong> determine how likely each edge is to be present <em>a priori</em>. They control the sparsity of the estimated network.</p></li>
+<li><p><strong>Parameter priors</strong> (Cauchy for interactions, beta-prime for thresholds) control the regularization of effect sizes. They determine how much shrinkage is applied to nonzero effects.</p></li>
+</ul>
+<p>In a spike-and-slab framework, the “spike” is the prior mass at zero (edge excluded), and the “slab” is the Cauchy prior over effect sizes (edge included). Both matter for the posterior, but they answer different questions: the inclusion prior affects <em>whether</em> an edge is present, while the parameter prior affects <em>how large</em> the estimated effect is.</p>
 </section>
 <section id="default-choices-and-when-to-change-them" class="level2">
-<h2 class="anchored" data-anchor-id="default-choices-and-when-to-change-them">Default Choices and When to Change Them</h2>
-<!-- TODO: source — R/bgm.R defaults, design rationale -->
+<h2 class="anchored" data-anchor-id="default-choices-and-when-to-change-them">Default choices and when to change them</h2>
+<p>The defaults are designed for moderate-sized networks (5–30 variables) with ordinal data and are a reasonable starting point for most analyses:</p>
+<ul>
+<li><p><strong><code>pairwise_scale = 2.5</code></strong>: Appropriate for standardized ordinal data. Consider increasing it if effects are expected to be large, or decreasing it for stronger shrinkage in dense networks.</p></li>
+<li><p><strong><code>inclusion_probability = 0.5</code></strong>: Assigns equal prior weight to edge presence and absence. This is a standard noninformative choice. Lowering it encodes a prior expectation of sparser networks.</p></li>
+<li><p><strong><code>main_alpha = 0.5</code>, <code>main_beta = 0.5</code></strong>: A weakly informative symmetric prior. Changing these is rarely necessary unless there is strong prior information about threshold magnitudes.</p></li>
+<li><p><strong><code>standardize = FALSE</code></strong>: Turned off by default. Set to <code>TRUE</code> when variables have different numbers of response categories and comparable shrinkage across pairs is desired.</p></li>
+</ul>
 
 
 </section>

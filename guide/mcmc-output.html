@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -478,35 +513,162 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>What the sampler returns and how to work with the output.</p>
-<section id="the-bgms-fit-object" class="level2">
-<h2 class="anchored" data-anchor-id="the-bgms-fit-object">The bgms Fit Object</h2>
-<!-- TODO: source — R/build_output.R, str(fit) -->
+<p>This chapter describes what <code>bgm()</code> and <code>bgmCompare()</code> return and how to access specific components of the output.</p>
+<section id="the-fit-object" class="level2">
+<h2 class="anchored" data-anchor-id="the-fit-object">The fit object</h2>
+<p>Both <code>bgm()</code> and <code>bgmCompare()</code> return a list (of class <code>"bgms"</code> or <code>"bgmCompare"</code>) containing posterior summaries, posterior mean matrices, raw MCMC samples, and metadata.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">seed =</span> <span class="dv">1234</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="posterior-summaries" class="level2">
-<h2 class="anchored" data-anchor-id="posterior-summaries">Posterior Summaries</h2>
-<!-- TODO: source — posterior_summary_*, posterior_mean_* fields -->
+<h2 class="anchored" data-anchor-id="posterior-summaries">Posterior summaries</h2>
+<p>The <code>summary()</code> method prints formatted tables of posterior statistics. Each table includes:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>mean</code></td>
+<td>Posterior mean</td>
+</tr>
+<tr class="even">
+<td><code>sd</code></td>
+<td>Posterior standard deviation</td>
+</tr>
+<tr class="odd">
+<td><code>MCSE</code></td>
+<td>Monte Carlo standard error</td>
+</tr>
+<tr class="even">
+<td><code>n_eff</code></td>
+<td>Effective sample size (unconditional)</td>
+</tr>
+<tr class="odd">
+<td><code>Rhat</code></td>
+<td>Split R-hat convergence diagnostic</td>
+</tr>
+</tbody>
+</table>
+<p>For pairwise effects under edge selection, two additional columns appear:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>n_eff_mixt</code></td>
+<td>Mixture ESS accounting for spike-and-slab selection</td>
+</tr>
+<tr class="even">
+<td><code>inclusion_probability</code></td>
+<td>Posterior inclusion probability</td>
+</tr>
+</tbody>
+</table>
+<p>Access specific summary tables with:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>pairwise   <span class="co"># pairwise interactions</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>main        <span class="co"># category thresholds (ordinal) or means (GGM)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>indicator   <span class="co"># inclusion indicators (if edge selection active)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="raw-samples" class="level2">
-<h2 class="anchored" data-anchor-id="raw-samples">Raw Samples</h2>
-<!-- TODO: source — fit$raw_samples structure, per-chain layout -->
+<section id="posterior-mean-matrices" class="level2">
+<h2 class="anchored" data-anchor-id="posterior-mean-matrices">Posterior mean matrices</h2>
+<p>The <code>coef()</code> method returns posterior means in matrix form:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)<span class="sc">$</span>pairwise   <span class="co"># p x p symmetric matrix of interaction strengths</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)<span class="sc">$</span>indicator   <span class="co"># p x p symmetric matrix of inclusion probabilities</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For ordinal models, <code>coef(fit)$main</code> returns a matrix of category threshold means (variables in rows, categories in columns). For mixed MRFs, it returns a list with <code>$discrete</code> and <code>$continuous</code> components.</p>
+</section>
+<section id="raw-mcmc-samples" class="level2">
+<h2 class="anchored" data-anchor-id="raw-mcmc-samples">Raw MCMC samples</h2>
+<p>For custom analyses, the raw posterior draws are stored in <code>fit$raw_samples</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(fit<span class="sc">$</span>raw_samples, <span class="at">max.level =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The structure is:</p>
+<ul>
+<li><code>$main</code>: list of matrices (one per chain), each with rows = iterations and columns = main effect parameters.</li>
+<li><code>$pairwise</code>: list of matrices (one per chain) for pairwise interactions.</li>
+<li><code>$indicator</code>: list of matrices for edge indicators (if edge selection was active).</li>
+<li><code>$allocations</code>: list of matrices for cluster assignments (if SBM prior was used).</li>
+<li><code>$nchains</code>: number of chains.</li>
+<li><code>$niter</code>: number of post-warmup iterations per chain.</li>
+<li><code>$parameter_names</code>: named lists of parameter labels.</li>
+</ul>
+<p>Each chain is stored separately, allowing per-chain diagnostics and trace plots (see <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>).</p>
 </section>
 <section id="extracting-specific-results" class="level2">
-<h2 class="anchored" data-anchor-id="extracting-specific-results">Extracting Specific Results</h2>
-<!-- TODO: source — R/extractor_functions.R -->
+<h2 class="anchored" data-anchor-id="extracting-specific-results">Extracting specific results</h2>
+<p>The <code>extract_*()</code> family of functions provides targeted access to model components. These are documented in the <a href="../reference/extractors.html">Extractor Functions</a> reference, but the most commonly used are:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 52%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>extract_arguments()</code></td>
+<td>Arguments used when fitting the model</td>
+</tr>
+<tr class="even">
+<td><code>extract_pairwise_interactions()</code></td>
+<td>Raw pairwise interaction samples</td>
+</tr>
+<tr class="odd">
+<td><code>extract_main_effects()</code></td>
+<td>Raw main effect samples</td>
+</tr>
+<tr class="even">
+<td><code>extract_indicators()</code></td>
+<td>Raw indicator samples</td>
+</tr>
+<tr class="odd">
+<td><code>extract_posterior_inclusion_probabilities()</code></td>
+<td>Posterior inclusion probabilities</td>
+</tr>
+<tr class="even">
+<td><code>extract_ess()</code></td>
+<td>Effective sample sizes</td>
+</tr>
+<tr class="odd">
+<td><code>extract_rhat()</code></td>
+<td>Split R-hat values</td>
+</tr>
+<tr class="even">
+<td><code>extract_sbm()</code></td>
+<td>SBM cluster assignments and co-clustering matrix</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="nuts-diagnostics" class="level2">
+<h2 class="anchored" data-anchor-id="nuts-diagnostics">NUTS diagnostics</h2>
+<p>When <code>update_method = "nuts"</code> (the default), additional diagnostics are stored in <code>fit$nuts_diag</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit<span class="sc">$</span>nuts_diag<span class="sc">$</span>summary       <span class="co"># per-chain summary of tree depth, divergences, energy</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fit<span class="sc">$</span>nuts_diag<span class="sc">$</span>warmup_check  <span class="co"># warmup equilibration diagnostics</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>These are described in detail in <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>.</p>
 
 
 </section>
