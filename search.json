@@ -4,7 +4,7 @@
     "href": "examples/continuous-network.html",
     "title": "Continuous Network",
     "section": "",
-    "text": "Note\n\n\n\nThis example is under development.\nA complete analysis of continuous data using the Gaussian graphical model.",
+    "text": "Warning\n\n\n\nThis example is under development. No bundled continuous dataset is available yet.\nA complete analysis of continuous data using the Gaussian graphical model.",
     "crumbs": [
       "Examples",
       "Continuous Network"
@@ -70,7 +70,7 @@
     "href": "examples/group-comparison.html",
     "title": "Group Comparison",
     "section": "",
-    "text": "Note\n\n\n\nThis example is under development.\nComparing networks across two groups using bgmCompare().",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nComparing networks across two independent groups using bgmCompare(). This example uses the ADHD dataset bundled with bgms.",
     "crumbs": [
       "Examples",
       "Group Comparison"
@@ -81,7 +81,7 @@
     "href": "examples/group-comparison.html#data",
     "title": "Group Comparison",
     "section": "Data",
-    "text": "Data",
+    "text": "Data\nThe ADHD dataset contains binary symptom ratings for 355 children. Column 1 is a group indicator: 1 = ADHD diagnosis (n = 146), 0 = no diagnosis (n = 209). We split on this column and analyze the first five Inattentive items in each group.\n\nlibrary(bgms)\n\ndata_adhd = ADHD[ADHD$group == 1, -1]\ndata_adhd = data_adhd[, 1:5]\n\ndata_no_adhd = ADHD[ADHD$group == 0, -1]\ndata_no_adhd = data_no_adhd[, 1:5]",
     "crumbs": [
       "Examples",
       "Group Comparison"
@@ -91,8 +91,19 @@
     "objectID": "examples/group-comparison.html#fit-the-comparison-model",
     "href": "examples/group-comparison.html#fit-the-comparison-model",
     "title": "Group Comparison",
-    "section": "Fit the Comparison Model",
-    "text": "Fit the Comparison Model",
+    "section": "Fit the comparison model",
+    "text": "Fit the comparison model\nbgmCompare() estimates whether edge weights and category thresholds differ between the two groups.\n\nfit = bgmCompare(x = data_adhd, y = data_no_adhd, seed = 1234)",
+    "crumbs": [
+      "Examples",
+      "Group Comparison"
+    ]
+  },
+  {
+    "objectID": "examples/group-comparison.html#posterior-summaries",
+    "href": "examples/group-comparison.html#posterior-summaries",
+    "title": "Group Comparison",
+    "section": "Posterior summaries",
+    "text": "Posterior summaries\nThe summary shows baseline effects and group differences. coef() provides posterior means and inclusion probabilities for both.\n\nsummary(fit)\ncoef(fit)",
     "crumbs": [
       "Examples",
       "Group Comparison"
@@ -102,8 +113,8 @@
     "objectID": "examples/group-comparison.html#identifying-network-differences",
     "href": "examples/group-comparison.html#identifying-network-differences",
     "title": "Group Comparison",
-    "section": "Identifying Network Differences",
-    "text": "Identifying Network Differences",
+    "section": "Identifying network differences",
+    "text": "Identifying network differences\nPosterior inclusion probabilities indicate how plausible it is that a given parameter differs between groups. These convert to Bayes factors in the same way as for single-group models.",
     "crumbs": [
       "Examples",
       "Group Comparison"
@@ -114,7 +125,7 @@
     "href": "examples/group-comparison.html#interpretation",
     "title": "Group Comparison",
     "section": "Interpretation",
-    "text": "Interpretation",
+    "text": "Interpretation\nExtract the group-specific pairwise effects and plot the network for the ADHD group.\n\nlibrary(qgraph)\n\nadhd_network = matrix(0, 5, 5)\nadhd_network[lower.tri(adhd_network)] = coef(fit)$pairwise_effects_groups[, 1]\nadhd_network = adhd_network + t(adhd_network)\ncolnames(adhd_network) = colnames(data_adhd)\nrownames(adhd_network) = colnames(data_adhd)\n\nqgraph(adhd_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data_adhd)\n)",
     "crumbs": [
       "Examples",
       "Group Comparison"
@@ -125,7 +136,7 @@
     "href": "examples/group-comparison.html#diagnostics",
     "title": "Group Comparison",
     "section": "Diagnostics",
-    "text": "Diagnostics",
+    "text": "Diagnostics\n\nsummary(fit)$pairwise\n\nSee the MCMC Diagnostics guide for interpretation.",
     "crumbs": [
       "Examples",
       "Group Comparison"
@@ -136,7 +147,7 @@
     "href": "examples/ordinal-network.html",
     "title": "Ordinal Network",
     "section": "",
-    "text": "Note\n\n\n\nThis example is under development.\nA complete analysis of ordinal data using the ordinal MRF.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nAn end-to-end analysis of ordinal data using the ordinal Markov random field. This example uses the Wenchuan earthquake PTSD dataset bundled with bgms.",
     "crumbs": [
       "Examples",
       "Ordinal Network"
@@ -147,7 +158,7 @@
     "href": "examples/ordinal-network.html#data",
     "title": "Ordinal Network",
     "section": "Data",
-    "text": "Data",
+    "text": "Data\nThe Wenchuan dataset contains responses from 362 survivors of the 2008 Wenchuan earthquake on 17 posttraumatic stress items, scored on a five-point scale from “not at all” to “extremely”. We analyze a subset of the first five items.\n\nlibrary(bgms)\ndata = Wenchuan[, 1:5]\nhead(data)",
     "crumbs": [
       "Examples",
       "Ordinal Network"
@@ -157,8 +168,19 @@
     "objectID": "examples/ordinal-network.html#fit-the-model",
     "href": "examples/ordinal-network.html#fit-the-model",
     "title": "Ordinal Network",
-    "section": "Fit the Model",
-    "text": "Fit the Model",
+    "section": "Fit the model",
+    "text": "Fit the model\nPass the data to bgm(). Because all variables are ordinal, bgms fits an ordinal MRF with spike-and-slab edge selection by default.\n\nfit = bgm(data, seed = 1234)",
+    "crumbs": [
+      "Examples",
+      "Ordinal Network"
+    ]
+  },
+  {
+    "objectID": "examples/ordinal-network.html#posterior-summaries",
+    "href": "examples/ordinal-network.html#posterior-summaries",
+    "title": "Ordinal Network",
+    "section": "Posterior summaries",
+    "text": "Posterior summaries\nsummary() returns posterior means, standard deviations, R-hat, and effective sample sizes for all pairwise interaction and threshold parameters. coef() provides posterior means and inclusion probabilities.\n\nsummary(fit)\ncoef(fit)",
     "crumbs": [
       "Examples",
       "Ordinal Network"
@@ -168,8 +190,8 @@
     "objectID": "examples/ordinal-network.html#edge-selection",
     "href": "examples/ordinal-network.html#edge-selection",
     "title": "Ordinal Network",
-    "section": "Edge Selection",
-    "text": "Edge Selection",
+    "section": "Edge selection",
+    "text": "Edge selection\nThe spike-and-slab prior assigns each edge a posterior inclusion probability. Values near 1 indicate strong evidence the edge is present; values near 0 indicate strong evidence the edge is absent; values near 0.5 are inconclusive.\n\ncoef(fit)$indicator\n\nWhen the prior inclusion probability equals 0.5 (the default for a Bernoulli prior), inclusion probabilities convert directly to Bayes factors:\n\np = coef(fit)$indicator[1, 5]\nBF_10 = p / (1 - p)\nBF_10\n\nThe reciprocal gives the Bayes factor in favor of exclusion:\n\n1 / BF_10",
     "crumbs": [
       "Examples",
       "Ordinal Network"
@@ -180,7 +202,7 @@
     "href": "examples/ordinal-network.html#interpretation",
     "title": "Ordinal Network",
     "section": "Interpretation",
-    "text": "Interpretation",
+    "text": "Interpretation\nThreshold the inclusion probabilities at 0.5 to obtain the median probability network, then plot with qgraph.\n\nlibrary(qgraph)\n\nmedian_probability_network = coef(fit)$pairwise\nmedian_probability_network[coef(fit)$indicator &lt; 0.5] = 0.0\n\nqgraph(median_probability_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data)\n)",
     "crumbs": [
       "Examples",
       "Ordinal Network"
@@ -191,7 +213,7 @@
     "href": "examples/ordinal-network.html#diagnostics",
     "title": "Ordinal Network",
     "section": "Diagnostics",
-    "text": "Diagnostics",
+    "text": "Diagnostics\nCheck convergence with the R-hat and ESS columns from the pairwise summary table.\n\nsummary(fit)$pairwise\n\nNUTS-specific diagnostics — E-BFMI, divergent transitions, tree depth, and warmup equilibration — are available via fit$nuts_diag:\n\nfit$nuts_diag$summary\nfit$nuts_diag$warmup_check\n\nSee the MCMC Diagnostics guide for interpretation of these quantities.",
     "crumbs": [
       "Examples",
       "Ordinal Network"
@@ -1680,7 +1702,7 @@
     "href": "guide/getting-started.html#posterior-summaries",
     "title": "Getting Started",
     "section": "Posterior summaries",
-    "text": "Posterior summaries\n\nsummary(fit)\n\nPosterior summaries from Bayesian estimation:\n\nCategory thresholds:\n                mean  mcse    sd    n_eff  Rhat\nintrusion (1)  0.465 0.008 0.240  974.945 1.000\nintrusion (2) -1.924 0.012 0.354  806.634 1.000\nintrusion (3) -4.891 0.023 0.584  636.265 1.001\nintrusion (4) -9.591 0.038 0.945  618.333 1.000\ndreams (1)    -0.588 0.006 0.195 1001.809 1.005\ndreams (2)    -3.776 0.014 0.369  658.738 1.009\n... (use `summary(fit)$main` to see full output)\n\nPairwise interactions:\n                   mean    sd  mcse    n_eff  Rhat\nintrusion-dreams  0.633 0.002 0.070 1274.619 1.008\nintrusion-flash   0.339 0.002 0.063 1357.397 1.003\nintrusion-upset   0.191 0.075 0.005  199.675 1.022\nintrusion-physior 0.205 0.065 0.004  310.716 1.003\ndreams-flash      0.498 0.002 0.060 1426.023 1.000\ndreams-upset      0.223 0.064 0.006  106.871 1.003\n... (use `summary(fit)$pairwise` to see full output)\nNote: NA values are suppressed in the print table. They occur here when an \nindicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;\n`summary(fit)$pairwise` still contains the NA values.\n\nInclusion probabilities:\n                   mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1  n_eff  Rhat\nintrusion-dreams  1.000 0.000           0     0     0  1999             \nintrusion-flash   1.000 0.000           0     0     0  1999             \nintrusion-upset   0.942 0.234 0.024   106    10     9  1874 95.323  1.36\nintrusion-physior 0.979 0.145 0.015    39     4     4  1952 99.813 1.216\ndreams-flash      1.000 0.000           0     0     0  1999             \ndreams-upset      0.974 0.161 0.026    51     2     2  1944  39.53 1.014\n... (use `summary(fit)$indicator` to see full output)\nNote: NA values are suppressed in the print table. They occur when an indicator\nwas constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat\nare undefined; `summary(fit)$indicator` still contains the NA values.\n\nUse `summary(fit)$&lt;component&gt;` to access full results.\nSee the `easybgm` package for other summary and plotting tools.\n\n\nThe summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For pairwise interactions, it also reports posterior inclusion probabilities when edge selection is active.",
+    "text": "Posterior summaries\n\nsummary(fit)\n\nPosterior summaries from Bayesian estimation:\n\nCategory thresholds:\n                mean  mcse    sd    n_eff  Rhat\nintrusion (1)  0.475 0.007 0.223 1157.788 1.001\nintrusion (2) -1.906 0.011 0.315  880.403 1.005\nintrusion (3) -4.846 0.017 0.514  875.204 1.007\nintrusion (4) -9.519 0.028 0.845  904.952 1.008\ndreams (1)    -0.588 0.006 0.192 1159.841 1.001\ndreams (2)    -3.782 0.012 0.353  871.629 1.000\n... (use `summary(fit)$main` to see full output)\n\nPairwise interactions:\n                   mean    sd  mcse    n_eff  Rhat\nintrusion-dreams  0.629 0.002 0.067 1382.782 1.005\nintrusion-flash   0.339 0.002 0.060 1444.285 1.002\nintrusion-upset   0.202 0.064 0.005  187.988 1.003\nintrusion-physior 0.189 0.071 0.006  137.040 1.000\ndreams-flash      0.500 0.002 0.060 1124.700 1.002\ndreams-upset      0.226 0.053 0.002 1128.334 1.000\n... (use `summary(fit)$pairwise` to see full output)\nNote: NA values are suppressed in the print table. They occur here when an \nindicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;\n`summary(fit)$pairwise` still contains the NA values.\n\nInclusion probabilities:\n                   mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1   n_eff  Rhat\nintrusion-dreams  1.000 0.000           0     0     0  1999              \nintrusion-flash   1.000 0.000           0     0     0  1999              \nintrusion-upset   0.979 0.143  0.02    40     2     2  1955  49.853 1.311\nintrusion-physior 0.941 0.237 0.029   112     7     7  1873  64.566 1.016\ndreams-flash      1.000 0.000           0     0     0  1999              \ndreams-upset      0.999 0.039 0.002     2     1     1  1995 400.722 1.292\n... (use `summary(fit)$indicator` to see full output)\nNote: NA values are suppressed in the print table. They occur when an indicator\nwas constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat\nare undefined; `summary(fit)$indicator` still contains the NA values.\n\nUse `summary(fit)$&lt;component&gt;` to access full results.\nSee the `easybgm` package for other summary and plotting tools.\n\n\nThe summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For pairwise interactions, it also reports posterior inclusion probabilities when edge selection is active.",
     "crumbs": [
       "Get Started",
       "Getting Started"
@@ -1691,7 +1713,7 @@
     "href": "guide/getting-started.html#posterior-means",
     "title": "Getting Started",
     "section": "Posterior means",
-    "text": "Posterior means\n\ncoef(fit)\n\n$main\n             cat (1)   cat (2)   cat (3)    cat (4)\nintrusion  0.4648767 -1.923783 -4.891105  -9.591242\ndreams    -0.5876677 -3.776004 -7.107302 -11.529369\nflash     -0.1074819 -2.563824 -5.370067  -9.674217\nupset      0.4206631 -1.296911 -3.350500  -7.001428\nphysior   -0.6109229 -3.165193 -6.224768 -10.569553\n\n$pairwise\n          intrusion      dreams      flash      upset     physior\nintrusion 0.0000000 0.632923980 0.33928716 0.19103214 0.205452756\ndreams    0.6329240 0.000000000 0.49819453 0.22305805 0.007213827\nflash     0.3392872 0.498194525 0.00000000 0.01211089 0.301269055\nupset     0.1910321 0.223058053 0.01211089 0.00000000 0.707374914\nphysior   0.2054528 0.007213827 0.30126906 0.70737491 0.000000000\n\n$indicator\n          intrusion dreams  flash  upset physior\nintrusion    0.0000 1.0000 1.0000 0.9420  0.9785\ndreams       1.0000 0.0000 1.0000 0.9735  0.0695\nflash        1.0000 1.0000 0.0000 0.1065  0.9905\nupset        0.9420 0.9735 0.1065 0.0000  1.0000\nphysior      0.9785 0.0695 0.9905 1.0000  0.0000\n\n\ncoef() returns posterior mean matrices: $pairwise contains the interaction strengths and $indicator contains edge inclusion probabilities.",
+    "text": "Posterior means\n\ncoef(fit)\n\n$main\n             cat (1)   cat (2)   cat (3)    cat (4)\nintrusion  0.4752393 -1.905757 -4.846385  -9.519480\ndreams    -0.5884216 -3.781525 -7.109964 -11.530285\nflash     -0.1051154 -2.566799 -5.365407  -9.674749\nupset      0.4216365 -1.308488 -3.370565  -7.037020\nphysior   -0.6037679 -3.140033 -6.167547 -10.489248\n\n$pairwise\n          intrusion      dreams       flash       upset     physior\nintrusion 0.0000000 0.629338089 0.338657791 0.202376428 0.188939686\ndreams    0.6293381 0.000000000 0.499816233 0.225595383 0.007497679\nflash     0.3386578 0.499816233 0.000000000 0.004566734 0.308420955\nupset     0.2023764 0.225595383 0.004566734 0.000000000 0.707339037\nphysior   0.1889397 0.007497679 0.308420955 0.707339037 0.000000000\n\n$indicator\n          intrusion dreams  flash  upset physior\nintrusion    0.0000 1.0000 1.0000 0.9790  0.9405\ndreams       1.0000 0.0000 1.0000 0.9985  0.0820\nflash        1.0000 1.0000 0.0000 0.0545  1.0000\nupset        0.9790 0.9985 0.0545 0.0000  1.0000\nphysior      0.9405 0.0820 1.0000 1.0000  0.0000\n\n\ncoef() returns posterior mean matrices: $pairwise contains the interaction strengths and $indicator contains edge inclusion probabilities.",
     "crumbs": [
       "Get Started",
       "Getting Started"
@@ -3288,7 +3310,7 @@
     "href": "examples/binary-network.html",
     "title": "Binary Network",
     "section": "",
-    "text": "Note\n\n\n\nThis example is under development.\nA complete analysis of binary data using the ordinal MRF.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nAn end-to-end analysis of binary data using the ordinal Markov random field. This example uses the ADHD dataset bundled with bgms.",
     "crumbs": [
       "Examples",
       "Binary Network"
@@ -3299,7 +3321,7 @@
     "href": "examples/binary-network.html#data",
     "title": "Binary Network",
     "section": "Data",
-    "text": "Data",
+    "text": "Data\nThe ADHD dataset contains binary symptom ratings for 355 children. The first column is a group indicator (ADHD diagnosis); columns 2–19 are nine Inattentive and nine Hyperactive/Impulsive items scored as present (1) or absent (0). We drop the group column and analyze the first five Inattentive items.\n\nlibrary(bgms)\ndata = ADHD[, 2:6]\nhead(data)",
     "crumbs": [
       "Examples",
       "Binary Network"
@@ -3309,8 +3331,19 @@
     "objectID": "examples/binary-network.html#fit-the-model",
     "href": "examples/binary-network.html#fit-the-model",
     "title": "Binary Network",
-    "section": "Fit the Model",
-    "text": "Fit the Model",
+    "section": "Fit the model",
+    "text": "Fit the model\nBinary variables are a special case of ordinal data (two categories). bgm() fits an ordinal MRF with spike-and-slab edge selection by default.\n\nfit = bgm(data, seed = 1234)",
+    "crumbs": [
+      "Examples",
+      "Binary Network"
+    ]
+  },
+  {
+    "objectID": "examples/binary-network.html#posterior-summaries",
+    "href": "examples/binary-network.html#posterior-summaries",
+    "title": "Binary Network",
+    "section": "Posterior summaries",
+    "text": "Posterior summaries\n\nsummary(fit)\ncoef(fit)",
     "crumbs": [
       "Examples",
       "Binary Network"
@@ -3320,8 +3353,8 @@
     "objectID": "examples/binary-network.html#edge-selection",
     "href": "examples/binary-network.html#edge-selection",
     "title": "Binary Network",
-    "section": "Edge Selection",
-    "text": "Edge Selection",
+    "section": "Edge selection",
+    "text": "Edge selection\nThe posterior inclusion probabilities indicate the evidence for each edge:\n\ncoef(fit)$indicator\n\nConvert to Bayes factors when the prior inclusion probability equals 0.5:\n\np = coef(fit)$indicator[1, 2]\nBF_10 = p / (1 - p)       # evidence for inclusion\n1 / BF_10                  # evidence for exclusion",
     "crumbs": [
       "Examples",
       "Binary Network"
@@ -3332,7 +3365,7 @@
     "href": "examples/binary-network.html#interpretation",
     "title": "Binary Network",
     "section": "Interpretation",
-    "text": "Interpretation",
+    "text": "Interpretation\nThreshold the inclusion probabilities at 0.5 and plot.\n\nlibrary(qgraph)\n\nmedian_probability_network = coef(fit)$pairwise\nmedian_probability_network[coef(fit)$indicator &lt; 0.5] = 0.0\n\nqgraph(median_probability_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data)\n)",
     "crumbs": [
       "Examples",
       "Binary Network"
@@ -3343,7 +3376,7 @@
     "href": "examples/binary-network.html#diagnostics",
     "title": "Binary Network",
     "section": "Diagnostics",
-    "text": "Diagnostics",
+    "text": "Diagnostics\n\nsummary(fit)$pairwise\nfit$nuts_diag$summary\n\nSee the MCMC Diagnostics guide for interpretation.",
     "crumbs": [
       "Examples",
       "Binary Network"
@@ -3354,7 +3387,7 @@
     "href": "examples/clustering.html",
     "title": "Edge Clustering",
     "section": "",
-    "text": "Note\n\n\n\nThis example is under development.\nDiscovering edge clusters using the stochastic block model prior.",
+    "text": "Warning\n\n\n\nThis example is under development.\nDiscovering edge clusters using the stochastic block model prior.",
     "crumbs": [
       "Examples",
       "Edge Clustering"
@@ -3420,7 +3453,7 @@
     "href": "examples/mixed-network.html",
     "title": "Mixed Network",
     "section": "",
-    "text": "Note\n\n\n\nThis example is under development.\nA complete analysis of mixed (continuous + discrete) data using the mixed MRF.",
+    "text": "Warning\n\n\n\nThis example is under development. No bundled mixed dataset is available yet.\nA complete analysis of mixed (continuous + discrete) data using the mixed MRF.",
     "crumbs": [
       "Examples",
       "Mixed Network"
