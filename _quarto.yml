@@ -8,7 +8,7 @@ website:
   title: "bgms"
   description: "Bayesian Graphical Models in R"
   site-url: https://bayesian-graphical-modelling-lab.github.io/bgms
-  repo-url: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
+  repo-url: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs
   repo-actions: [edit, issue]
   page-navigation: true
   bread-crumbs: true
@@ -19,13 +19,8 @@ website:
   page-footer:
     left: |
       Developed by the [BGM Lab](https://bayesiangraphicalmodeling.com)
-    center:
-      - text: "Guide"
-        href: guide/index.qmd
-      - text: "Reference"
-        href: reference/index.qmd
-      - text: "Manual"
-        href: manual/index.qmd
+    center: |
+      Built with [Quarto](https://quarto.org)
     right:
       - icon: github
         href: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
@@ -54,6 +49,12 @@ website:
       - icon: github
         href: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
         text: bgms GitHub
+      - icon: box-seam
+        href: https://cran.r-project.org/package=bgms
+        text: CRAN
+      - icon: globe2
+        href: https://bayesiangraphicalmodeling.com
+        text: BGM Lab
 
   sidebar:
     - id: guide
