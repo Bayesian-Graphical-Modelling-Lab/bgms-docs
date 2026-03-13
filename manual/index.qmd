@@ -1,5 +1,6 @@
 ---
 title: "Reference Manual"
+toc: false
 ---
 
 Technical documentation for the bgms C++ backend and MCMC algorithms.

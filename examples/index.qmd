@@ -1,5 +1,6 @@
 ---
 title: "Examples"
+toc: false
 ---
 
 Worked analyses from data to interpretation. Each example uses a

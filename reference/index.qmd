@@ -1,5 +1,6 @@
 ---
 title: "Function Reference"
+toc: false
 ---
 
 Complete documentation for all exported functions in bgms.

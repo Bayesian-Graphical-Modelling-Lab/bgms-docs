@@ -1,5 +1,6 @@
 ---
 title: "User's Guide"
+toc: false
 ---
  
 The User's Guide provides conceptual background and practical tutorials for 
