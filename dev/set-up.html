@@ -37,14 +37,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-de8274a4d1ecc1e6aaeaf6e5564b5074.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-8b4baf804e461d9b72633f0de59a0cac.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-f1aadacce99040138bbb613f9330654f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-8b4baf804e461d9b72633f0de59a0cac.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-497d5e0ea340e534ae290fd684e0aa73.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-5e08fe990edabedcb4edcc21f3ca5bbd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-497d5e0ea340e534ae290fd684e0aa73.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-c1e4c03f72d47a6f8151b2314237b7a4.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-d4274720d166f188c01881e7b4b4392d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-c1e4c03f72d47a6f8151b2314237b7a4.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -57,7 +57,6 @@ ul.task-list li input[type="checkbox"] {
     "/",
     "s"
   ],
-  "show-item-context": true,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -220,8 +219,7 @@ ul.task-list li input[type="checkbox"] {
       }
     };
     const authorPrefersDark = false;
-    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-    const darkModeDefault = queryPrefersDark.matches;
+    const darkModeDefault = authorPrefersDark;
       document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
       document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
     let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
@@ -234,14 +232,6 @@ ul.task-list li input[type="checkbox"] {
       toggleGiscusIfUsed(toAlternate, darkModeDefault);
       window.dispatchEvent(new Event('resize'));
     };
-    queryPrefersDark.addEventListener("change", e => {
-      if(window.localStorage.getItem("quarto-color-scheme") !== null)
-        return;
-      const alternate = e.matches
-      toggleColorMode(alternate);
-      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
-      toggleGiscusIfUsed(alternate, darkModeDefault);
-    });
     // Switch to dark mode if need be
     if (hasAlternateSentinel()) {
       toggleColorMode(true);
@@ -256,8 +246,11 @@ ul.task-list li input[type="checkbox"] {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../bgms_sticker.svg" alt="bgms logo" class="navbar-logo light-content">
-    <img src="../bgms_sticker.svg" alt="bgms logo" class="navbar-logo dark-content">
+    <img src="../bgms_sticker.svg" alt="" class="navbar-logo light-content">
+    <img src="../bgms_sticker.svg" alt="" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">bgms</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -266,14 +259,6 @@ ul.task-list li input[type="checkbox"] {
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
-<span class="menu-text">Overview</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../guide/getting-started.html"> 
-<span class="menu-text">Get Started</span></a>
-  </li>  
   <li class="nav-item">
     <a class="nav-link" href="../guide/index.html"> 
 <span class="menu-text">Guide</span></a>
@@ -286,10 +271,24 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link" href="../manual/index.html"> 
 <span class="menu-text">Manual</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../examples/index.html"> 
+<span class="menu-text">Examples</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://bayesiangraphicalmodeling.com"> 
+<span class="menu-text">BGM Lab</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-    <a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms" title="bgms GitHub" class="quarto-navigation-tool px-1" aria-label="bgms GitHub"><i class="bi bi-github"></i></a>
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
@@ -304,41 +303,47 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#bgms-docs-efficient-build-plan-llm-assisted-human-reviewed" id="toc-bgms-docs-efficient-build-plan-llm-assisted-human-reviewed" class="nav-link active" data-scroll-target="#bgms-docs-efficient-build-plan-llm-assisted-human-reviewed">bgms-docs Efficient Build Plan (LLM-assisted + Human-reviewed)</a>
+  <li><a href="#bgms-docs-build-plan" id="toc-bgms-docs-build-plan" class="nav-link active" data-scroll-target="#bgms-docs-build-plan">bgms-docs Build Plan</a>
   <ul class="collapse">
-  <li><a href="#goal" id="toc-goal" class="nav-link" data-scroll-target="#goal">1. Goal</a>
+  <li><a href="#how-this-plan-works" id="toc-how-this-plan-works" class="nav-link" data-scroll-target="#how-this-plan-works">How this plan works</a>
   <ul class="collapse">
-  <li><a href="#novice-friendly-operating-rule" id="toc-novice-friendly-operating-rule" class="nav-link" data-scroll-target="#novice-friendly-operating-rule">Novice-friendly operating rule</a></li>
+  <li><a href="#roles" id="toc-roles" class="nav-link" data-scroll-target="#roles">Roles</a></li>
+  <li><a href="#how-git-branches-work" id="toc-how-git-branches-work" class="nav-link" data-scroll-target="#how-git-branches-work">How git branches work</a></li>
+  <li><a href="#when-sources-disagree-trust-this-order" id="toc-when-sources-disagree-trust-this-order" class="nav-link" data-scroll-target="#when-sources-disagree-trust-this-order">When sources disagree, trust this order</a></li>
   </ul></li>
-  <li><a href="#working-model" id="toc-working-model" class="nav-link" data-scroll-target="#working-model">2. Working Model</a></li>
-  <li><a href="#roles-and-responsibilities" id="toc-roles-and-responsibilities" class="nav-link" data-scroll-target="#roles-and-responsibilities">3. Roles and Responsibilities</a></li>
-  <li><a href="#branch-and-file-workflow" id="toc-branch-and-file-workflow" class="nav-link" data-scroll-target="#branch-and-file-workflow">4. Branch and File Workflow</a></li>
-  <li><a href="#source-of-truth-hierarchy" id="toc-source-of-truth-hierarchy" class="nav-link" data-scroll-target="#source-of-truth-hierarchy">5. Source-of-Truth Hierarchy</a></li>
-  <li><a href="#end-to-end-process" id="toc-end-to-end-process" class="nav-link" data-scroll-target="#end-to-end-process">6. End-to-End Process</a>
+  <li><a href="#phase-0-preparation-one-time" id="toc-phase-0-preparation-one-time" class="nav-link" data-scroll-target="#phase-0-preparation-one-time">Phase 0 — Preparation (one-time)</a></li>
+  <li><a href="#site-structure" id="toc-site-structure" class="nav-link" data-scroll-target="#site-structure">Site Structure</a>
   <ul class="collapse">
-  <li><a href="#phase-0-preparation-one-time" id="toc-phase-0-preparation-one-time" class="nav-link" data-scroll-target="#phase-0-preparation-one-time">Phase 0: Preparation (one-time)</a></li>
-  <li><a href="#phase-1-skeleton-generation-quarto-subfiles" id="toc-phase-1-skeleton-generation-quarto-subfiles" class="nav-link" data-scroll-target="#phase-1-skeleton-generation-quarto-subfiles">Phase 1: Skeleton generation (Quarto subfiles)</a></li>
-  <li><a href="#phase-2-deterministic-content-ingestion" id="toc-phase-2-deterministic-content-ingestion" class="nav-link" data-scroll-target="#phase-2-deterministic-content-ingestion">Phase 2: Deterministic content ingestion</a></li>
-  <li><a href="#phase-3-llm-refinement-controlled" id="toc-phase-3-llm-refinement-controlled" class="nav-link" data-scroll-target="#phase-3-llm-refinement-controlled">Phase 3: LLM refinement (controlled)</a></li>
-  <li><a href="#phase-3.5-contradiction-check-llm-adversarial-pass" id="toc-phase-3.5-contradiction-check-llm-adversarial-pass" class="nav-link" data-scroll-target="#phase-3.5-contradiction-check-llm-adversarial-pass">Phase 3.5: Contradiction check (LLM adversarial pass)</a></li>
-  <li><a href="#phase-4-human-technical-review" id="toc-phase-4-human-technical-review" class="nav-link" data-scroll-target="#phase-4-human-technical-review">Phase 4: Human technical review</a></li>
-  <li><a href="#phase-5-consistency-and-style-pass" id="toc-phase-5-consistency-and-style-pass" class="nav-link" data-scroll-target="#phase-5-consistency-and-style-pass">Phase 5: Consistency and style pass</a></li>
-  <li><a href="#phase-6-pre-release-qa-and-publish" id="toc-phase-6-pre-release-qa-and-publish" class="nav-link" data-scroll-target="#phase-6-pre-release-qa-and-publish">Phase 6: Pre-release QA and publish</a></li>
-  <li><a href="#phase-gates-entryexit-criteria" id="toc-phase-gates-entryexit-criteria" class="nav-link" data-scroll-target="#phase-gates-entryexit-criteria">Phase gates (entry/exit criteria)</a></li>
+  <li><a href="#guide-users-and-applied-analysts" id="toc-guide-users-and-applied-analysts" class="nav-link" data-scroll-target="#guide-users-and-applied-analysts">Guide (users and applied analysts)</a></li>
+  <li><a href="#reference-exact-api-behavior" id="toc-reference-exact-api-behavior" class="nav-link" data-scroll-target="#reference-exact-api-behavior">Reference (exact API behavior)</a></li>
+  <li><a href="#manual-technical-internals-and-algorithms" id="toc-manual-technical-internals-and-algorithms" class="nav-link" data-scroll-target="#manual-technical-internals-and-algorithms">Manual (technical internals and algorithms)</a></li>
+  <li><a href="#examples-worked-analyses" id="toc-examples-worked-analyses" class="nav-link" data-scroll-target="#examples-worked-analyses">Examples (worked analyses)</a></li>
+  <li><a href="#page-counts" id="toc-page-counts" class="nav-link" data-scroll-target="#page-counts">Page counts</a></li>
   </ul></li>
-  <li><a href="#efficient-review-cadence" id="toc-efficient-review-cadence" class="nav-link" data-scroll-target="#efficient-review-cadence">7. Efficient Review Cadence</a></li>
-  <li><a href="#prompting-strategy-for-llms" id="toc-prompting-strategy-for-llms" class="nav-link" data-scroll-target="#prompting-strategy-for-llms">8. Prompting Strategy for LLMs</a></li>
-  <li><a href="#hallucination-and-drift-controls" id="toc-hallucination-and-drift-controls" class="nav-link" data-scroll-target="#hallucination-and-drift-controls">9. Hallucination and Drift Controls</a></li>
-  <li><a href="#page-acceptance-checklist-definition-of-done" id="toc-page-acceptance-checklist-definition-of-done" class="nav-link" data-scroll-target="#page-acceptance-checklist-definition-of-done">10. Page Acceptance Checklist (Definition of Done)</a></li>
-  <li><a href="#minimal-metrics-to-track" id="toc-minimal-metrics-to-track" class="nav-link" data-scroll-target="#minimal-metrics-to-track">11. Minimal Metrics to Track</a></li>
-  <li><a href="#risk-based-review-depth" id="toc-risk-based-review-depth" class="nav-link" data-scroll-target="#risk-based-review-depth">12. Risk-based Review Depth</a></li>
-  <li><a href="#recommended-execution-order-for-speed" id="toc-recommended-execution-order-for-speed" class="nav-link" data-scroll-target="#recommended-execution-order-for-speed">13. Recommended Execution Order (for speed)</a></li>
-  <li><a href="#what-to-ask-other-llms-to-review" id="toc-what-to-ask-other-llms-to-review" class="nav-link" data-scroll-target="#what-to-ask-other-llms-to-review">14. What to Ask Other LLMs to Review</a></li>
-  <li><a href="#ownership-and-status-tracker-template" id="toc-ownership-and-status-tracker-template" class="nav-link" data-scroll-target="#ownership-and-status-tracker-template">15. Ownership and Status Tracker (template)</a></li>
-  <li><a href="#version-synchronization-strategy" id="toc-version-synchronization-strategy" class="nav-link" data-scroll-target="#version-synchronization-strategy">16. Version Synchronization Strategy</a></li>
+  <li><a href="#phase-1-scaffold-all-pages" id="toc-phase-1-scaffold-all-pages" class="nav-link" data-scroll-target="#phase-1-scaffold-all-pages">Phase 1 — Scaffold all pages</a></li>
+  <li><a href="#phase-2-populate-pages-with-real-content" id="toc-phase-2-populate-pages-with-real-content" class="nav-link" data-scroll-target="#phase-2-populate-pages-with-real-content">Phase 2 — Populate pages with real content</a></li>
+  <li><a href="#phase-3-llm-refinement" id="toc-phase-3-llm-refinement" class="nav-link" data-scroll-target="#phase-3-llm-refinement">Phase 3 — LLM refinement</a></li>
+  <li><a href="#phase-4-contradiction-check" id="toc-phase-4-contradiction-check" class="nav-link" data-scroll-target="#phase-4-contradiction-check">Phase 4 — Contradiction check</a></li>
+  <li><a href="#phase-5-human-review" id="toc-phase-5-human-review" class="nav-link" data-scroll-target="#phase-5-human-review">Phase 5 — Human review</a>
+  <ul class="collapse">
+  <li><a href="#maarten-technical-sign-off" id="toc-maarten-technical-sign-off" class="nav-link" data-scroll-target="#maarten-technical-sign-off">Maarten (technical sign-off)</a></li>
+  <li><a href="#emily-readability-sign-off" id="toc-emily-readability-sign-off" class="nav-link" data-scroll-target="#emily-readability-sign-off">Emily (readability sign-off)</a></li>
+  <li><a href="#both" id="toc-both" class="nav-link" data-scroll-target="#both">Both</a></li>
+  <li><a href="#review-cadence" id="toc-review-cadence" class="nav-link" data-scroll-target="#review-cadence">Review cadence</a></li>
+  </ul></li>
+  <li><a href="#phase-6-consistency-and-style-pass" id="toc-phase-6-consistency-and-style-pass" class="nav-link" data-scroll-target="#phase-6-consistency-and-style-pass">Phase 6 — Consistency and style pass</a></li>
+  <li><a href="#phase-7-qa-and-publish" id="toc-phase-7-qa-and-publish" class="nav-link" data-scroll-target="#phase-7-qa-and-publish">Phase 7 — QA and publish</a>
+  <ul class="collapse">
+  <li><a href="#automated-qa-runs-every-cycle-and-pre-release" id="toc-automated-qa-runs-every-cycle-and-pre-release" class="nav-link" data-scroll-target="#automated-qa-runs-every-cycle-and-pre-release">Automated QA (runs every cycle and pre-release)</a></li>
+  <li><a href="#human-smoke-check" id="toc-human-smoke-check" class="nav-link" data-scroll-target="#human-smoke-check">Human smoke check</a></li>
+  <li><a href="#release" id="toc-release" class="nav-link" data-scroll-target="#release">Release</a></li>
+  </ul></li>
+  <li><a href="#page-acceptance-checklist" id="toc-page-acceptance-checklist" class="nav-link" data-scroll-target="#page-acceptance-checklist">Page acceptance checklist</a></li>
+  <li><a href="#ongoing-keeping-docs-in-sync-with-bgms" id="toc-ongoing-keeping-docs-in-sync-with-bgms" class="nav-link" data-scroll-target="#ongoing-keeping-docs-in-sync-with-bgms">Ongoing: keeping docs in sync with bgms</a></li>
+  <li><a href="#optional-metrics-to-track" id="toc-optional-metrics-to-track" class="nav-link" data-scroll-target="#optional-metrics-to-track">Optional: metrics to track</a></li>
   </ul></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/edit/main/dev/set-up.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
@@ -347,535 +352,617 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<section id="bgms-docs-efficient-build-plan-llm-assisted-human-reviewed" class="level1">
-<h1>bgms-docs Efficient Build Plan (LLM-assisted + Human-reviewed)</h1>
-<section id="goal" class="level2">
-<h2 class="anchored" data-anchor-id="goal">1. Goal</h2>
-<p>Build high-quality bgms documentation quickly by combining:</p>
+<section id="bgms-docs-build-plan" class="level1">
+<h1>bgms-docs Build Plan</h1>
+<section id="how-this-plan-works" class="level2">
+<h2 class="anchored" data-anchor-id="how-this-plan-works">How this plan works</h2>
+<p>This plan is written as a step-by-step playbook. Read it top to bottom. Each phase tells you what to do, who does it, and when it is done. All page statuses are tracked in one file: <code>dev/task-list.md</code>.</p>
+<section id="roles" class="level3">
+<h3 class="anchored" data-anchor-id="roles">Roles</h3>
 <ul>
-<li>LLM-generated first drafts for structure and content.</li>
-<li>Deterministic extraction from package documentation (roxygen, inline docs, function signatures).</li>
-<li>Human review by you and a teammate before publication.</li>
+<li><strong>Maarten</strong> — technical sign-off (facts, code, algorithms).</li>
+<li><strong>Emily</strong> — readability sign-off (clarity, audience fit).</li>
+<li><strong>LLMs</strong> — drafting and transformation only. Never treated as source of truth.</li>
 </ul>
-<p>Primary success criteria:</p>
-<ul>
-<li>Fast first complete draft of all pages.</li>
-<li>Clear traceability for where text came from.</li>
-<li>Low hallucination risk.</li>
-<li>Consistent style and terminology.</li>
-<li>Process remains simple and understandable for novice contributors.</li>
-</ul>
-<section id="novice-friendly-operating-rule" class="level3">
-<h3 class="anchored" data-anchor-id="novice-friendly-operating-rule">Novice-friendly operating rule</h3>
-<p>Keep process language plain and steps short:</p>
-<ul>
-<li>If a step cannot be explained in 1-2 sentences, split it into smaller steps.</li>
-<li>Prefer checklists over free-form instructions.</li>
-<li>Record decisions in one place (<code>dev/task-list.md</code>) so newcomers do not need to infer context.</li>
-<li>Treat this plan as a practical playbook, not a theoretical framework.</li>
-</ul>
-<hr>
 </section>
+<section id="how-git-branches-work" class="level3">
+<h3 class="anchored" data-anchor-id="how-git-branches-work">How git branches work</h3>
+<ul>
+<li>All work happens on one cycle branch (e.g.&nbsp;<code>docs/cycle-01</code>).</li>
+<li>Files stay in their normal folders (<code>guide/</code>, <code>reference/</code>, <code>manual/</code>).</li>
+<li>As a page matures, you make new commits on the same branch.</li>
+<li>When pages are approved, merge the cycle branch into <code>main</code>.</li>
+<li>Statuses (Scaffolded, Populated, etc.) are labels in <code>dev/task-list.md</code>, not separate branches.</li>
+</ul>
 </section>
-<section id="working-model" class="level2">
-<h2 class="anchored" data-anchor-id="working-model">2. Working Model</h2>
-<p>Use a two-lane process:</p>
-<ul>
-<li>Lane A: Skeleton and page architecture (Quarto files, section design, navigation).</li>
-<li>Lane B: Content population from sources (reference docs, algorithm design notes, examples).</li>
-</ul>
-<p>Then merge both lanes into a staged review workflow.</p>
-<hr>
-</section>
-<section id="roles-and-responsibilities" class="level2">
-<h2 class="anchored" data-anchor-id="roles-and-responsibilities">3. Roles and Responsibilities</h2>
-<ul>
-<li>Maarten (Editor Lead)
-<ul>
-<li>Own scope, priorities, and final quality bar.</li>
-<li>Own all technical sign-off against bgms source/docs.</li>
-<li>Approve page-level readiness.</li>
-</ul></li>
-<li>Emily (Reviewer Lead)
-<ul>
-<li>Own clarity/readability review and audience fit.</li>
-<li>Provide readability sign-off for each reviewed page.</li>
-</ul></li>
-<li>LLMs (Drafting and Transformation)
-<ul>
-<li>Propose structure and produce initial text.</li>
-<li>Summarize and transform source material.</li>
-<li>Never treated as source of truth.</li>
-</ul></li>
-</ul>
-<p>Rule: no content is considered final until reviewed by one human and spot-checked by another.</p>
-<hr>
-</section>
-<section id="branch-and-file-workflow" class="level2">
-<h2 class="anchored" data-anchor-id="branch-and-file-workflow">4. Branch and File Workflow</h2>
-<p>Recommended git workflow:</p>
-<ul>
-<li><code>main</code>: stable docs.</li>
-<li><code>docs/cycle-&lt;nn&gt;</code>: short-lived cycle branch containing scaffold, generated content, and review commits.</li>
-<li>Optional <code>docs/cycle-&lt;nn&gt;-&lt;section&gt;</code> only when parallel work is needed.</li>
-</ul>
-<p>Commit discipline:</p>
-<ul>
-<li>One commit type per step:
-<ul>
-<li>scaffold only</li>
-<li>generated content import only</li>
-<li>human edits only</li>
-</ul></li>
-<li>Commit messages should include source and intent.</li>
-</ul>
-<p>Rationale:</p>
-<ul>
-<li>Keep traceability with commit prefixes while reducing branch management overhead for a small team.</li>
-</ul>
-<p>Example:</p>
-<ul>
-<li><code>docs(scaffold): add manual chapter templates and section placeholders</code></li>
-<li><code>docs(gen): populate reference pages from roxygen extracts</code></li>
-<li><code>docs(review): correct NUTS warmup description after source check</code></li>
-</ul>
-<hr>
-</section>
-<section id="source-of-truth-hierarchy" class="level2">
-<h2 class="anchored" data-anchor-id="source-of-truth-hierarchy">5. Source-of-Truth Hierarchy</h2>
-<p>When conflicts occur, resolve by this order:</p>
+<section id="when-sources-disagree-trust-this-order" class="level3">
+<h3 class="anchored" data-anchor-id="when-sources-disagree-trust-this-order">When sources disagree, trust this order</h3>
 <ol type="1">
 <li>bgms code behavior (actual implementation)</li>
 <li>roxygen/man generated docs</li>
-<li>design docs/algorithm notes</li>
+<li>design docs / algorithm notes</li>
 <li>existing website text</li>
-<li>LLM-generated narrative text</li>
+<li>LLM-generated text</li>
 </ol>
 <p>Never let LLM text override implementation facts.</p>
 <hr>
 </section>
-<section id="end-to-end-process" class="level2">
-<h2 class="anchored" data-anchor-id="end-to-end-process">6. End-to-End Process</h2>
-<section id="phase-0-preparation-one-time" class="level3">
-<h3 class="anchored" data-anchor-id="phase-0-preparation-one-time">Phase 0: Preparation (one-time)</h3>
-<ol type="1">
-<li>Freeze navigation and page inventory for this iteration.</li>
-</ol>
-<ul>
-<li>Use <code>_quarto.yml</code> sidebar as canonical page inventory unless explicitly overridden.</li>
-</ul>
-<ol start="2" type="1">
-<li>Define audience per section:
-<ul>
-<li>Guide: users and applied analysts.</li>
-<li>Reference: exact API behavior.</li>
-<li>Manual: technical internals and algorithms.</li>
-</ul></li>
-<li>Create acceptance checklist template per page (see Section 10).</li>
-</ol>
-<p>Deliverable:</p>
-<ul>
-<li>Confirmed page map and ownership table.</li>
-</ul>
 </section>
-<section id="phase-1-skeleton-generation-quarto-subfiles" class="level3">
-<h3 class="anchored" data-anchor-id="phase-1-skeleton-generation-quarto-subfiles">Phase 1: Skeleton generation (Quarto subfiles)</h3>
-<ol type="1">
-<li>Use LLM to draft section skeletons only:
+<section id="phase-0-preparation-one-time" class="level2">
+<h2 class="anchored" data-anchor-id="phase-0-preparation-one-time">Phase 0 — Preparation (one-time)</h2>
+<p><strong>Goal:</strong> Lock in the page list and set up the workspace.</p>
+<p>Do this:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Confirm the page list. Use the <code>_quarto.yml</code> sidebar as the starting point.</label></li>
+<li><label><input type="checkbox">Set audience per section:</label>
 <ul>
-<li>title</li>
-<li>3-6 section headings</li>
-<li>placeholder callouts (<code>TODO: source</code>) for uncertain parts.</li>
+<li>Guide → users and applied analysts.</li>
+<li>Reference → exact API behavior.</li>
+<li>Manual → technical internals and algorithms.</li>
 </ul></li>
-<li>Keep placeholders explicit, do not let LLM invent details.</li>
-<li>Render site and fix structure-level issues (links, nav, heading hierarchy).</li>
-</ol>
-<p>Deliverable:</p>
+<li><label><input type="checkbox">Assign risk levels to each page in <code>dev/task-list.md</code>:</label>
 <ul>
-<li>All target <code>.qmd</code> files exist with consistent structure.</li>
+<li>High: algorithm internals, defaults/priors, convergence, NUTS/warmup, core API (<code>bgm</code>, <code>bgmCompare</code>).</li>
+<li>Medium: method interpretation, workflow guidance.</li>
+<li>Low: intro/context pages.</li>
+</ul></li>
+<li><label><input type="checkbox">Create the cycle branch: <code>git checkout -b docs/cycle-01</code>.</label></li>
 </ul>
+<p><strong>Done when:</strong> Page list, audiences, and risk levels are recorded in <code>dev/task-list.md</code>.</p>
+<hr>
 </section>
-<section id="phase-2-deterministic-content-ingestion" class="level3">
-<h3 class="anchored" data-anchor-id="phase-2-deterministic-content-ingestion">Phase 2: Deterministic content ingestion</h3>
-<ol type="1">
-<li>Reference pages:
-<ul>
-<li>Pull function signatures, arguments, return values, examples from roxygen/man.</li>
-</ul></li>
-</ol>
-<ul>
-<li>Prefer deterministic extraction tooling (<code>.Rd</code> parsing, <code>tools::Rd2txt()</code> where useful).</li>
-<li>Insert with minimal paraphrasing first.</li>
-</ul>
-<ol start="2" type="1">
-<li>Guide/manual pages:
-<ul>
-<li>Ingest algorithm design notes and implementation comments.</li>
-<li>Convert into plain-language explanations plus pseudo-steps.</li>
-</ul></li>
-<li>Mark each major block with provenance during drafting (inline markers and/or per-page provenance tracker).</li>
-</ol>
-<p>Deliverable:</p>
-<ul>
-<li>Complete but unpolished content with provenance trail.</li>
-</ul>
+<section id="site-structure" class="level2">
+<h2 class="anchored" data-anchor-id="site-structure">Site Structure</h2>
+<p>Four top-level sections, each with a distinct audience and purpose.</p>
+<section id="guide-users-and-applied-analysts" class="level3">
+<h3 class="anchored" data-anchor-id="guide-users-and-applied-analysts">Guide (users and applied analysts)</h3>
+<p>Teaches concepts and walks through analyses. A reader who finishes the Guide can fit models, interpret output, and set priors with confidence.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Page</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>guide/index.qmd</td>
+<td>Section landing page.</td>
+</tr>
+<tr class="even">
+<td>guide/getting-started.qmd</td>
+<td>Install, load, first <code>bgm()</code> call, read the output.</td>
+</tr>
+<tr class="odd">
+<td><strong>Background</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>guide/graphical-models.qmd</td>
+<td>What is a graphical model? Nodes, edges, conditional independence.</td>
+</tr>
+<tr class="odd">
+<td>guide/bayesian-approach.qmd</td>
+<td>Why Bayesian? Posterior, prior, credible intervals, Bayes factors.</td>
+</tr>
+<tr class="even">
+<td>guide/prior-basics.qmd</td>
+<td>Shared primer: what priors are, how bgms uses them, why they matter. Renamed from prior-guide.qmd.</td>
+</tr>
+<tr class="odd">
+<td><strong>Models</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>guide/ggm.qmd</td>
+<td>Gaussian graphical model: continuous data, partial correlations, precision matrix.</td>
+</tr>
+<tr class="odd">
+<td>guide/omrf.qmd</td>
+<td>Ordinal MRF: ordinal/binary data, category thresholds, Blume-Capel parameterization.</td>
+</tr>
+<tr class="even">
+<td>guide/mixed-model.qmd</td>
+<td>Mixed MRF: datasets with both continuous and discrete variables.</td>
+</tr>
+<tr class="odd">
+<td><strong>Analyses</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>guide/edge-selection.qmd</td>
+<td>Bayesian edge selection: inclusion Bayes factors, posterior inclusion probabilities. Includes analysis-specific prior guidance.</td>
+</tr>
+<tr class="odd">
+<td>guide/group-comparison.qmd</td>
+<td>Comparing networks across groups with <code>bgmCompare()</code>. Includes analysis-specific prior guidance.</td>
+</tr>
+<tr class="even">
+<td>guide/clustering.qmd</td>
+<td>Stochastic block model for edge clustering. Includes analysis-specific prior guidance.</td>
+</tr>
+<tr class="odd">
+<td><strong>MCMC output</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>guide/mcmc-output.qmd</td>
+<td>What the sampler returns: posterior samples, summary statistics, raw output structure.</td>
+</tr>
+<tr class="odd">
+<td>guide/mcmc-diagnostics.qmd</td>
+<td>Convergence checks: ESS, R-hat, trace plots, divergences, E-BFMI.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pedagogical flow:</strong> Background → Models → Analyses → MCMC output. Each analysis page includes a short prior section specific to that analysis, so readers learn about priors in context rather than in the abstract.</p>
 </section>
-<section id="phase-3-llm-refinement-controlled" class="level3">
-<h3 class="anchored" data-anchor-id="phase-3-llm-refinement-controlled">Phase 3: LLM refinement (controlled)</h3>
-<ol type="1">
-<li>Ask LLMs to improve clarity, not facts.</li>
-<li>Prompt constraints:
-<ul>
-<li>preserve function names and parameter semantics</li>
-<li>do not alter numeric defaults unless explicitly sourced</li>
-<li>do not add undocumented features</li>
-</ul></li>
-<li>Request concise rewrites and diff-style changes.</li>
-</ol>
-<p>Deliverable:</p>
-<ul>
-<li>Cleaner prose while preserving factual alignment.</li>
-</ul>
+<section id="reference-exact-api-behavior" class="level3">
+<h3 class="anchored" data-anchor-id="reference-exact-api-behavior">Reference (exact API behavior)</h3>
+<p>One page per exported function or function family. Content is extracted from roxygen documentation with minimal paraphrasing.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Page</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>reference/index.qmd</td>
+<td>Section landing page with function index.</td>
+</tr>
+<tr class="even">
+<td>reference/bgm.qmd</td>
+<td><code>bgm()</code>: all arguments, defaults, return structure.</td>
+</tr>
+<tr class="odd">
+<td>reference/bgmCompare.qmd</td>
+<td><code>bgmCompare()</code>: all arguments, defaults, return structure.</td>
+</tr>
+<tr class="even">
+<td>reference/methods.qmd</td>
+<td>S3 methods: <code>print</code>, <code>plot</code>, <code>summary</code>, <code>simulate</code>, <code>predict</code>.</td>
+</tr>
+<tr class="odd">
+<td>reference/extractors.qmd</td>
+<td>Extractor functions: <code>extract_arguments</code>, <code>extract_indicators</code>, <code>extract_posterior_inclusion_probabilities</code>, <code>extract_sbm</code>.</td>
+</tr>
+<tr class="even">
+<td>reference/datasets.qmd</td>
+<td>Bundled datasets.</td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="phase-3.5-contradiction-check-llm-adversarial-pass" class="level3">
-<h3 class="anchored" data-anchor-id="phase-3.5-contradiction-check-llm-adversarial-pass">Phase 3.5: Contradiction check (LLM adversarial pass)</h3>
-<ol type="1">
-<li>Run an LLM pass that compares page draft text against quoted source excerpts.</li>
-<li>Require mismatch-only output with severity labels (<code>high</code>, <code>medium</code>, <code>low</code>).</li>
-<li>Resolve all <code>high</code> mismatches before human review begins.</li>
-</ol>
-<p>Deliverable:</p>
-<ul>
-<li>Mismatch list attached to the page review note.</li>
-</ul>
+<section id="manual-technical-internals-and-algorithms" class="level3">
+<h3 class="anchored" data-anchor-id="manual-technical-internals-and-algorithms">Manual (technical internals and algorithms)</h3>
+<p>For developers and methodologists who need to understand how bgms works under the hood. Each page explains a subsystem with reference to the actual code.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Page</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>manual/index.qmd</td>
+<td>Section landing page and subsystem map.</td>
+</tr>
+<tr class="even">
+<td><strong>Architecture</strong></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>manual/architecture.qmd</td>
+<td>Top-level design: R front-end → C++ engine. The three-stage pipeline (<code>bgm_spec</code> → <code>run_sampler</code> → <code>build_output</code>). Package directory layout.</td>
+</tr>
+<tr class="even">
+<td>manual/r-scaffolding.qmd</td>
+<td>The R layer in detail: validation pipeline (<code>validate_data</code>, <code>validate_variable_types</code>, <code>validate_sampler</code>), spec construction (<code>bgm_spec</code>, <code>new_bgm_spec</code>, <code>validate_bgm_spec</code>), sampler dispatch (<code>run_sampler</code> → model-specific C++ entry points), output assembly (<code>build_output</code> → posterior summaries, raw samples, diagnostics). Data flow diagram from user call to returned fit object.</td>
+</tr>
+<tr class="odd">
+<td>manual/model-classes.qmd</td>
+<td>C++ class hierarchy: <code>BaseModel</code> → <code>GGMModel</code>, <code>OMRFModel</code>, <code>MixedMRFModel</code>. Virtual interface (capability queries, parameter access, edge selection, adaptation, missing data). How models register their storage layout.</td>
+</tr>
+<tr class="even">
+<td><strong>MCMC engine</strong></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>manual/samplers.qmd</td>
+<td>Sampler hierarchy: <code>SamplerBase</code> → <code>MetropolisSampler</code>, <code>GradientSamplerBase</code> → <code>HMCSampler</code>, <code>NUTSSampler</code>, <code>HybridNUTSSampler</code>. Step-size adaptation, mass matrix tuning. Factory dispatch by <code>sampler_type</code> string.</td>
+</tr>
+<tr class="even">
+<td>manual/nuts.qmd</td>
+<td>NUTS algorithm: recursive tree-building, U-turn criterion, multinomial sampling, divergence detection. How tree depth and energy diagnostics are recorded.</td>
+</tr>
+<tr class="odd">
+<td>manual/warmup.qmd</td>
+<td>Three-stage adaptive warmup schedule: stage 1 (step-size), stage 2 (mass matrix), stage 3a (final step-size). Edge-selection phases 3b (proposal-SD tuning) and 3c (graph initialization). How <code>WarmupSchedule</code> coordinates sampler and model.</td>
+</tr>
+<tr class="even">
+<td>manual/parallel-chains.qmd</td>
+<td>Parallel chain execution: <code>model.clone()</code> / <code>edge_prior.clone()</code> per chain, TBB thread control via <code>tbb::global_control</code>, <code>RcppParallel::parallelFor</code> dispatch through <code>MCMCChainRunner</code>. Sequential fallback for single-thread mode. Per-chain RNG seeding (<code>config.seed + chain_id</code>). Progress tracking and user-interrupt handling across threads.</td>
+</tr>
+<tr class="odd">
+<td><strong>Models</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>manual/ggm-internals.qmd</td>
+<td>GGM implementation: precision matrix parameterization, Cholesky updates (<code>cholupdate</code>), continuous-data likelihood and gradient, edge-specific Metropolis proposals.</td>
+</tr>
+<tr class="odd">
+<td>manual/omrf-internals.qmd</td>
+<td>OMRF implementation: ordinal threshold parameterization, Blume-Capel model with linear + quadratic effects, pseudo-likelihood, full-conditional Gibbs steps for edge indicators.</td>
+</tr>
+<tr class="even">
+<td>manual/variable-helpers.qmd</td>
+<td>Numerically stable computation for MRF variables. The FAST/SAFE dual-path strategy: precomputed exponentials and power-chain accumulation when exponents are bounded (FAST path), direct log-sum-exp evaluation as fallback (SAFE path). Covers <code>compute_denom_ordinal</code>, <code>compute_denom_blume_capel</code>, <code>compute_probs_ordinal</code>, <code>compute_probs_blume_capel</code>, joint <code>LogZAndProbs</code> computation. The <code>EXP_BOUND = 709</code> threshold and contiguous-block scanning for branch-free vectorization.</td>
+</tr>
+<tr class="odd">
+<td>manual/mixed-internals.qmd</td>
+<td>Mixed MRF implementation: block structure (discrete-discrete, continuous-continuous, cross-type), how the sampler handles mixed parameter vectors.</td>
+</tr>
+<tr class="even">
+<td><strong>Priors and edge selection</strong></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>manual/edge-priors.qmd</td>
+<td>Edge prior framework: <code>BaseEdgePrior</code> interface, Beta-Bernoulli default, unit-information prior. How inclusion probabilities and Bayes factors are computed.</td>
+</tr>
+<tr class="even">
+<td>manual/sbm-prior.qmd</td>
+<td>Stochastic block model prior: MFM-SBM formulation, Gibbs block-allocation updates, how cluster structure regularizes edge inclusion. The <code>StochasticBlockEdgePrior</code> class.</td>
+</tr>
+<tr class="odd">
+<td><strong>Group comparison</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>manual/bgmcompare-internals.qmd</td>
+<td><code>bgmCompare</code> engine: separate sampler, multi-group log-posterior and gradient, output handling. How it differs from single-group <code>bgm</code>.</td>
+</tr>
+<tr class="odd">
+<td><strong>Numerical methods</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>manual/numerical.qmd</td>
+<td>Numerical stability toolkit: custom <code>exp</code>/<code>log</code> macros (<code>explog_macros.h</code>), Cholesky rank-1 updates, the FAST/SAFE pattern. Cross-references variable-helpers.qmd for the full dual-path story.</td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="phase-4-human-technical-review" class="level3">
-<h3 class="anchored" data-anchor-id="phase-4-human-technical-review">Phase 4: Human technical review</h3>
-<ol type="1">
-<li>You review high-risk pages first:
-<ul>
-<li>model classes</li>
-</ul></li>
-</ol>
-<ul>
-<li>MCMC/NUTS/warmup</li>
-<li>core function reference (<code>bgm</code>, <code>bgmCompare</code>)</li>
-</ul>
-<ol start="2" type="1">
-<li>Teammate reviews for correctness and readability.</li>
-<li>Log decisions in page-level review notes (what changed and why).</li>
-</ol>
-<p>Deliverable:</p>
-<ul>
-<li>Technically validated pages with recorded review outcomes.</li>
-</ul>
+<section id="examples-worked-analyses" class="level3">
+<h3 class="anchored" data-anchor-id="examples-worked-analyses">Examples (worked analyses)</h3>
+<p>Complete, self-contained analyses from data to interpretation. Each example uses a bundled or simulated dataset and runs end-to-end.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Page</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>examples/index.qmd</td>
+<td>Section landing page.</td>
+</tr>
+<tr class="even">
+<td>examples/binary-network.qmd</td>
+<td>Binary data → OMRF → edge selection → interpretation.</td>
+</tr>
+<tr class="odd">
+<td>examples/ordinal-network.qmd</td>
+<td>Ordinal data → OMRF → edge selection → interpretation.</td>
+</tr>
+<tr class="even">
+<td>examples/continuous-network.qmd</td>
+<td>Continuous data → GGM → edge selection → interpretation.</td>
+</tr>
+<tr class="odd">
+<td>examples/mixed-network.qmd</td>
+<td>Mixed data → Mixed MRF → edge selection → interpretation.</td>
+</tr>
+<tr class="even">
+<td>examples/group-comparison.qmd</td>
+<td>Two-group data → <code>bgmCompare()</code> → network differences.</td>
+</tr>
+<tr class="odd">
+<td>examples/clustering.qmd</td>
+<td>Edge clustering via SBM prior → block structure.</td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="phase-5-consistency-and-style-pass" class="level3">
-<h3 class="anchored" data-anchor-id="phase-5-consistency-and-style-pass">Phase 5: Consistency and style pass</h3>
-<ol type="1">
-<li>Standardize terminology across sections.</li>
-<li>Normalize heading patterns and cross-links.</li>
-<li>Enforce <code>STYLE_GUIDE.md</code> conventions explicitly.</li>
-<li>Ensure examples compile conceptually and match API signatures.</li>
-</ol>
-<p>Deliverable:</p>
-<ul>
-<li>Cohesive style and navigable user experience.</li>
-</ul>
-</section>
-<section id="phase-6-pre-release-qa-and-publish" class="level3">
-<h3 class="anchored" data-anchor-id="phase-6-pre-release-qa-and-publish">Phase 6: Pre-release QA and publish</h3>
-<ol type="1">
-<li>Run automation-first QA bundle (script/CI):
-<ul>
-<li>full render</li>
-<li>link check</li>
-<li>search index sanity check</li>
-</ul></li>
-</ol>
-<ul>
-<li>unresolved marker check (<code>TODO:</code> and malformed <code>SOURCE:</code> markers when inline provenance is used)</li>
-<li>code example execution check for all pages with runnable R code (every cycle and pre-release)</li>
-</ul>
-<ol start="2" type="1">
-<li>Run a short human smoke check (visual layout, navigation behavior, obvious UX regressions).</li>
-<li>Confirm zero unresolved factual issues.</li>
-<li>Final sign-off by both humans.</li>
-<li>Merge and deploy.</li>
-</ol>
-<p>Deliverable:</p>
-<ul>
-<li>Publish-ready docs release.</li>
-</ul>
-</section>
-<section id="phase-gates-entryexit-criteria" class="level3">
-<h3 class="anchored" data-anchor-id="phase-gates-entryexit-criteria">Phase gates (entry/exit criteria)</h3>
-<ul>
-<li>Phase 1 exit:
-<ul>
-<li>no broken links</li>
-<li>heading depth &lt;= 3</li>
-<li>navigation entries present</li>
-</ul></li>
-<li>Phase 2 exit:
-<ul>
-<li>each major claim has a provenance marker</li>
-</ul></li>
-<li>Phase 4 exit:
-<ul>
-<li>each high-risk page has two approvals:
-<ul>
-<li>technical sign-off by Maarten</li>
-<li>readability sign-off by Emily</li>
-</ul></li>
-</ul></li>
-<li>Phase 6 exit:
-<ul>
-<li>clean render</li>
-<li>zero unresolved <code>TODO:</code> / <code>SOURCE:</code> markers</li>
-<li>zero unresolved factual issues</li>
-</ul></li>
-</ul>
+<section id="page-counts" class="level3">
+<h3 class="anchored" data-anchor-id="page-counts">Page counts</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Section</th>
+<th>Pages</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Guide</td>
+<td>13</td>
+</tr>
+<tr class="even">
+<td>Reference</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td>Manual</td>
+<td>16</td>
+</tr>
+<tr class="even">
+<td>Examples</td>
+<td>7</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td><strong>42</strong></td>
+</tr>
+</tbody>
+</table>
 <hr>
 </section>
 </section>
-<section id="efficient-review-cadence" class="level2">
-<h2 class="anchored" data-anchor-id="efficient-review-cadence">7. Efficient Review Cadence</h2>
-<p>Use short review cycles instead of one big review:</p>
+<section id="phase-1-scaffold-all-pages" class="level2">
+<h2 class="anchored" data-anchor-id="phase-1-scaffold-all-pages">Phase 1 — Scaffold all pages</h2>
+<p><strong>Goal:</strong> Every <code>.qmd</code> file exists with headings and placeholders. No real content yet.</p>
+<p>Do this:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">For each page, use an LLM to generate structure only:</label>
 <ul>
-<li>Cycle length: 2-3 days.</li>
-<li>Each cycle targets 3-6 pages max.</li>
-<li>End each cycle with:
-<ul>
-<li>rendered preview</li>
-<li>open issues list</li>
-<li>accepted pages list</li>
+<li>Title.</li>
+<li>3–6 section headings.</li>
+<li><code>TODO: source</code> placeholders for uncertain parts.</li>
 </ul></li>
+<li><label><input type="checkbox">Do not let the LLM invent facts. Headings and placeholders only.</label></li>
+<li><label><input type="checkbox">Render the site. Fix broken links, missing nav entries, and heading hierarchy issues.</label></li>
+<li><label><input type="checkbox">Commit: <code>docs(scaffold): add section templates and placeholders</code>.</label></li>
+<li><label><input type="checkbox">Update status to <code>Scaffolded</code> in <code>dev/task-list.md</code>.</label></li>
 </ul>
-<p>Weekly meeting template (30-45 min):</p>
-<ol type="1">
-<li>Pages completed since last check.</li>
-<li>Blocking factual uncertainties.</li>
-<li>Pages queued for next cycle.</li>
-<li>Quality regressions detected.</li>
-</ol>
+<p><strong>Done when:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox">All target <code>.qmd</code> files exist.</label></li>
+<li><label><input type="checkbox">No broken links.</label></li>
+<li><label><input type="checkbox">Heading depth ≤ 3.</label></li>
+<li><label><input type="checkbox">Navigation entries are present.</label></li>
+</ul>
+<p><strong>Recommended order:</strong> Build all skeletons before populating any page.</p>
 <hr>
 </section>
-<section id="prompting-strategy-for-llms" class="level2">
-<h2 class="anchored" data-anchor-id="prompting-strategy-for-llms">8. Prompting Strategy for LLMs</h2>
-<p>Use specialized prompts by task:</p>
-<ul>
-<li>Skeleton prompt:
-<ul>
-<li>“Create only headings and section intent, no factual claims without source placeholders.”</li>
-</ul></li>
-<li>Extraction prompt:
-<ul>
-<li>“Transform this roxygen/man content into Quarto reference format without adding fields.”</li>
-</ul></li>
-<li>Translation prompt:
-<ul>
-<li>“Translate algorithm notes to user-facing explanation while preserving exact semantics and assumptions.”</li>
-</ul></li>
-<li>Review prompt:
-<ul>
-<li>“Find contradictions between this page and provided source excerpts. Return only concrete mismatches.”</li>
-</ul></li>
+<section id="phase-2-populate-pages-with-real-content" class="level2">
+<h2 class="anchored" data-anchor-id="phase-2-populate-pages-with-real-content">Phase 2 — Populate pages with real content</h2>
+<p><strong>Goal:</strong> Fill pages with facts from sources. Mark where each fact came from.</p>
+<p>Do this for reference pages:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Pull function signatures, arguments, return values, and examples from roxygen/man.</label></li>
+<li><label><input type="checkbox">Use deterministic extraction tooling where possible (<code>.Rd</code> parsing, <code>tools::Rd2txt()</code>).</label></li>
+<li><label><input type="checkbox">Insert with minimal paraphrasing first.</label></li>
 </ul>
-<p>Prompt hygiene:</p>
-<ul>
-<li>Always provide source text snippets.</li>
-<li>Ask for uncertainty flags.</li>
-<li>Ask for output in markdown compatible with target <code>.qmd</code> format.</li>
+<p>Do this for guide and manual pages:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Pull from algorithm design notes and implementation comments.</label></li>
+<li><label><input type="checkbox">Convert into plain-language explanations.</label></li>
 </ul>
-<hr>
-</section>
-<section id="hallucination-and-drift-controls" class="level2">
-<h2 class="anchored" data-anchor-id="hallucination-and-drift-controls">9. Hallucination and Drift Controls</h2>
-<p>Mandatory controls:</p>
-<ul>
-<li>Every nontrivial claim must map to a source file or documented behavior.</li>
-<li>Use strict provenance markers during drafting:
+<p>For all pages:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Add provenance markers to important claims so you can trace where text came from:</label>
 <ul>
 <li><code>SOURCE: R/&lt;file&gt;.R#&lt;function&gt;</code></li>
 <li><code>SOURCE: man/&lt;topic&gt;.Rd</code></li>
 <li><code>SOURCE: design/&lt;note&gt;.md#&lt;section&gt;</code></li>
 </ul></li>
-<li>Keep machine-readable provenance artifacts (inline markers and/or per-page tracker) for maintenance.</li>
-<li>Add accountability links for selected high-impact claims so reviewers and technical experts can jump straight to where behavior is defined.
-<ul>
-<li>Hard release gate for high-risk claims (defaults, priors, convergence, sampling behavior, core API semantics).</li>
-<li>Best effort for low-risk narrative/context text.</li>
-<li>Emergency waiver allowed only for urgent release fixes; waiver must be logged in <code>dev/task-list.md</code> with owner and follow-up due date.</li>
-</ul></li>
-<li>For algorithm pages, verify equations/steps against code or design note before approval.</li>
-<li>No unsourced defaults, priors, or computational claims.</li>
+<li><label><input type="checkbox">For high-risk claims (defaults, priors, convergence, sampling, core API), add accountability links that point a reader or developer straight to the source. This is a hard release gate for high-risk claims. Best effort for low-risk narrative text.</label></li>
+<li><label><input type="checkbox">Commit: <code>docs(gen): populate &lt;section&gt; from &lt;source&gt;</code>.</label></li>
+<li><label><input type="checkbox">Update status to <code>Populated</code> in <code>dev/task-list.md</code>.</label></li>
 </ul>
-<p>If uncertainty remains:</p>
-<ul>
-<li>Keep explicit <code>TODO</code> note and defer publication for that block.</li>
-</ul>
-<p>Pre-release guard:</p>
-<ul>
-<li>Fail release if unresolved <code>TODO:</code> markers remain or any published claim lacks a provenance record.</li>
-</ul>
-<hr>
-</section>
-<section id="page-acceptance-checklist-definition-of-done" class="level2">
-<h2 class="anchored" data-anchor-id="page-acceptance-checklist-definition-of-done">10. Page Acceptance Checklist (Definition of Done)</h2>
-<p>A page is done only if all are true:</p>
-<ul>
-<li>Structure matches section template.</li>
-<li>Facts verified against source hierarchy.</li>
-<li>No unresolved TODOs.</li>
-<li>Cross-links resolve.</li>
-<li>Terminology consistent with related pages.</li>
-<li>Reviewer notes resolved.</li>
-<li>Automation QA checks pass for the page/cycle.</li>
-<li>Rendered page visually sane on desktop and mobile.</li>
-<li>Code examples execute without error on every page that contains runnable code.</li>
-<li>Basic accessibility checks pass (alt text, contrast, keyboard navigation for interactive elements).</li>
-</ul>
-<hr>
-</section>
-<section id="minimal-metrics-to-track" class="level2">
-<h2 class="anchored" data-anchor-id="minimal-metrics-to-track">11. Minimal Metrics to Track</h2>
-<p>Track these simple metrics per cycle:</p>
-<ul>
-<li>Pages scaffolded</li>
-<li>Pages populated</li>
-<li>Pages reviewed (technical)</li>
-<li>Pages approved</li>
-<li>Open factual issues</li>
-<li>Average scaffolded -&gt; approved cycle time</li>
-<li>Number of factual issues older than one cycle</li>
-</ul>
-<p>Goal is directional visibility, not reporting overhead.</p>
-<hr>
-</section>
-<section id="risk-based-review-depth" class="level2">
-<h2 class="anchored" data-anchor-id="risk-based-review-depth">12. Risk-based Review Depth</h2>
-<p>Classify pages and set review intensity accordingly:</p>
-<ul>
-<li>High risk:
-<ul>
-<li>algorithm internals</li>
-<li>defaults, priors, convergence behavior</li>
-<li>core sampling behavior (NUTS/warmup)</li>
-</ul></li>
-<li>Medium risk:
-<ul>
-<li>method interpretation and workflow guidance</li>
-</ul></li>
-<li>Low risk:
-<ul>
-<li>intro/context and orientation pages</li>
-</ul></li>
-</ul>
-<p>Rule:</p>
-<ul>
-<li>Triage review order and required depth by risk class when time is constrained.</li>
-</ul>
-<hr>
-</section>
-<section id="recommended-execution-order-for-speed" class="level2">
-<h2 class="anchored" data-anchor-id="recommended-execution-order-for-speed">13. Recommended Execution Order (for speed)</h2>
+<p><strong>Done when:</strong> Each major claim has a provenance marker.</p>
+<p><strong>Recommended order:</strong></p>
 <ol type="1">
-<li>Build all skeletons first.</li>
-<li>Complete reference pages next (high determinism).</li>
-<li>Populate guide pages (user task flow).</li>
-<li>Finish manual/algorithm internals (highest review depth).</li>
-<li>Final cross-section consistency pass.</li>
+<li>Reference pages first (closest to direct extraction).</li>
+<li>Guide pages next (user task flow).</li>
+<li>Manual/algorithm pages last (highest review depth).</li>
 </ol>
-<p>This order gives early visible progress and reduces risk.</p>
 <hr>
 </section>
-<section id="what-to-ask-other-llms-to-review" class="level2">
-<h2 class="anchored" data-anchor-id="what-to-ask-other-llms-to-review">14. What to Ask Other LLMs to Review</h2>
-<p>When you ask other LLMs to review this plan, request feedback on:</p>
+<section id="phase-3-llm-refinement" class="level2">
+<h2 class="anchored" data-anchor-id="phase-3-llm-refinement">Phase 3 — LLM refinement</h2>
+<p><strong>Goal:</strong> Improve clarity without changing facts.</p>
+<p>Do this:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Ask LLMs to rewrite for readability only.</label></li>
+<li><label><input type="checkbox">Enforce these constraints:</label>
 <ul>
-<li>Risk: where hallucination risk is still high.</li>
-<li>Throughput: bottlenecks in review cadence.</li>
-<li>QA: missing validation gates.</li>
-<li>Collaboration: handoff clarity between two human reviewers.</li>
+<li>Preserve function names and parameter semantics.</li>
+<li>Do not alter numeric defaults unless explicitly sourced.</li>
+<li>Do not add undocumented features.</li>
+</ul></li>
+<li><label><input type="checkbox">Request diff-style changes so you can review what changed.</label></li>
+<li><label><input type="checkbox">Always provide source text snippets in prompts.</label></li>
+<li><label><input type="checkbox">Ask the LLM to flag uncertainty.</label></li>
 </ul>
-<p>Ask them to respond with:</p>
-<ul>
-<li>“Keep”</li>
-<li>“Change”</li>
-<li>“Add”</li>
-</ul>
-<p>for each section to make decisions fast.</p>
+<p><strong>Done when:</strong> Prose is cleaner but facts have not changed.</p>
 <hr>
 </section>
-<section id="ownership-and-status-tracker-template" class="level2">
-<h2 class="anchored" data-anchor-id="ownership-and-status-tracker-template">15. Ownership and Status Tracker (template)</h2>
-<p>Use one mandatory living tracker file for coordination: <code>dev/task-list.md</code>. If any other note conflicts with tracker status, <code>dev/task-list.md</code> is the source of truth.</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Page</th>
-<th>Drafter</th>
-<th>Reviewer</th>
-<th>Risk</th>
-<th>Status</th>
-<th>Blocking issue</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>guide/getting-started.qmd</td>
-<td>Name</td>
-<td>Name</td>
-<td>Medium</td>
-<td>Drafting</td>
-<td>-</td>
-</tr>
-</tbody>
-</table>
-<p>Statuses:</p>
+<section id="phase-4-contradiction-check" class="level2">
+<h2 class="anchored" data-anchor-id="phase-4-contradiction-check">Phase 4 — Contradiction check</h2>
+<p><strong>Goal:</strong> Catch factual errors before human review begins.</p>
+<p>Do this:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Run an LLM pass that compares page text against quoted source excerpts.</label></li>
+<li><label><input type="checkbox">Require mismatch-only output with severity: <code>high</code>, <code>medium</code>, <code>low</code>.</label></li>
+<li><label><input type="checkbox">Fix all <code>high</code> mismatches immediately.</label></li>
+<li><label><input type="checkbox">Log the mismatch list in page-level review notes.</label></li>
+<li><label><input type="checkbox">Update status to <code>Contradiction-checked</code> in <code>dev/task-list.md</code>.</label></li>
+</ul>
+<p><strong>Done when:</strong> All high-severity mismatches are resolved.</p>
+<hr>
+</section>
+<section id="phase-5-human-review" class="level2">
+<h2 class="anchored" data-anchor-id="phase-5-human-review">Phase 5 — Human review</h2>
+<p><strong>Goal:</strong> Maarten validates facts. Emily validates readability. Both sign off.</p>
+<section id="maarten-technical-sign-off" class="level3">
+<h3 class="anchored" data-anchor-id="maarten-technical-sign-off">Maarten (technical sign-off)</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Review high-risk pages first:</label>
 <ul>
-<li><code>Scaffolded</code></li>
-<li><code>Populated</code></li>
-<li><code>Contradiction-checked</code></li>
-<li><code>Reviewed</code></li>
-<li><code>Approved</code></li>
+<li>model classes</li>
+<li>MCMC/NUTS/warmup</li>
+<li>core function reference (<code>bgm</code>, <code>bgmCompare</code>)</li>
+</ul></li>
+<li><label><input type="checkbox">Verify claims against the source-of-truth hierarchy.</label></li>
+<li><label><input type="checkbox">Check that accountability links for high-risk claims actually point to the right source.</label></li>
+<li><label><input type="checkbox">For algorithm pages, verify equations/steps against code or design notes.</label></li>
+<li><label><input type="checkbox">Log review decisions (what changed and why).</label></li>
+</ul>
+</section>
+<section id="emily-readability-sign-off" class="level3">
+<h3 class="anchored" data-anchor-id="emily-readability-sign-off">Emily (readability sign-off)</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Review each page for clarity and audience fit.</label></li>
+<li><label><input type="checkbox">Flag jargon, unclear steps, or confusing structure.</label></li>
+<li><label><input type="checkbox">Log review decisions.</label></li>
+</ul>
+</section>
+<section id="both" class="level3">
+<h3 class="anchored" data-anchor-id="both">Both</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Resolve any blocking issues and record them in <code>dev/task-list.md</code>.</label></li>
+<li><label><input type="checkbox">Commit fixes: <code>docs(review): &lt;description of fix&gt;</code>.</label></li>
+<li><label><input type="checkbox">Update status to <code>Reviewed</code> in <code>dev/task-list.md</code>.</label></li>
+</ul>
+<p><strong>Done when:</strong> Each high-risk page has both sign-offs recorded in the task board.</p>
+</section>
+<section id="review-cadence" class="level3">
+<h3 class="anchored" data-anchor-id="review-cadence">Review cadence</h3>
+<ul>
+<li>Work in short cycles: 2–3 days, 3–6 pages per cycle.</li>
+<li>At the end of each cycle, produce:
+<ul>
+<li>A rendered preview.</li>
+<li>An open issues list.</li>
+<li>An accepted pages list.</li>
+</ul></li>
 </ul>
 <hr>
 </section>
-<section id="version-synchronization-strategy" class="level2">
-<h2 class="anchored" data-anchor-id="version-synchronization-strategy">16. Version Synchronization Strategy</h2>
-<p>To keep docs aligned with package evolution:</p>
+</section>
+<section id="phase-6-consistency-and-style-pass" class="level2">
+<h2 class="anchored" data-anchor-id="phase-6-consistency-and-style-pass">Phase 6 — Consistency and style pass</h2>
+<p><strong>Goal:</strong> Make the whole site feel like one voice.</p>
+<p>Do this:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Standardize terminology across sections.</label></li>
+<li><label><input type="checkbox">Normalize heading patterns and cross-links.</label></li>
+<li><label><input type="checkbox">Enforce <code>STYLE_GUIDE.md</code> conventions.</label></li>
+<li><label><input type="checkbox">Ensure examples match current API signatures.</label></li>
+</ul>
+<p><strong>Done when:</strong> No style inconsistencies across sections.</p>
+<hr>
+</section>
+<section id="phase-7-qa-and-publish" class="level2">
+<h2 class="anchored" data-anchor-id="phase-7-qa-and-publish">Phase 7 — QA and publish</h2>
+<p><strong>Goal:</strong> Final automated and human checks, then deploy.</p>
+<section id="automated-qa-runs-every-cycle-and-pre-release" class="level3">
+<h3 class="anchored" data-anchor-id="automated-qa-runs-every-cycle-and-pre-release">Automated QA (runs every cycle and pre-release)</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Full render succeeds.</label></li>
+<li><label><input type="checkbox">No broken links.</label></li>
+<li><label><input type="checkbox">Search index sanity check passes.</label></li>
+<li><label><input type="checkbox">No unresolved <code>TODO:</code> markers.</label></li>
+<li><label><input type="checkbox">No malformed <code>SOURCE:</code> markers.</label></li>
+<li><label><input type="checkbox">All runnable R code executes without error on every page.</label></li>
+</ul>
+</section>
+<section id="human-smoke-check" class="level3">
+<h3 class="anchored" data-anchor-id="human-smoke-check">Human smoke check</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Desktop and mobile visual sanity.</label></li>
+<li><label><input type="checkbox">Navigation and table-of-contents behavior.</label></li>
+<li><label><input type="checkbox">Zero unresolved factual issues.</label></li>
+</ul>
+</section>
+<section id="release" class="level3">
+<h3 class="anchored" data-anchor-id="release">Release</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Final sign-off by both Maarten and Emily.</label></li>
+<li><label><input type="checkbox">Update status to <code>Approved</code> in <code>dev/task-list.md</code>.</label></li>
+<li><label><input type="checkbox">Merge cycle branch into <code>main</code> and deploy.</label></li>
+</ul>
+<p><strong>Done when:</strong> Site is live and all pages show <code>Approved</code>.</p>
+<hr>
+</section>
+</section>
+<section id="page-acceptance-checklist" class="level2">
+<h2 class="anchored" data-anchor-id="page-acceptance-checklist">Page acceptance checklist</h2>
+<p>A page can only be marked <code>Approved</code> if all of these are true:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Structure matches section template.</label></li>
+<li><label><input type="checkbox">Facts verified against source hierarchy.</label></li>
+<li><label><input type="checkbox">No unresolved TODOs.</label></li>
+<li><label><input type="checkbox">Cross-links resolve.</label></li>
+<li><label><input type="checkbox">Terminology consistent with related pages.</label></li>
+<li><label><input type="checkbox">Reviewer notes resolved.</label></li>
+<li><label><input type="checkbox">Automated QA checks pass.</label></li>
+<li><label><input type="checkbox">Rendered page looks correct on desktop and mobile.</label></li>
+<li><label><input type="checkbox">Code examples execute without error.</label></li>
+<li><label><input type="checkbox">Basic accessibility: alt text, color contrast, keyboard navigation for interactive elements.</label></li>
+<li><label><input type="checkbox">Accountability links present for all high-risk claims.</label></li>
+</ul>
+<hr>
+</section>
+<section id="ongoing-keeping-docs-in-sync-with-bgms" class="level2">
+<h2 class="anchored" data-anchor-id="ongoing-keeping-docs-in-sync-with-bgms">Ongoing: keeping docs in sync with bgms</h2>
+<p>After the first release, keep docs aligned with the package:</p>
 <ol type="1">
-<li>Trigger deterministic extraction when bgms version or API signatures change.</li>
-<li>Maintain a lightweight “changed functions -&gt; affected pages” mapping.</li>
-<li>Re-open approved pages impacted by package changes before release.</li>
+<li>Re-run deterministic extraction when bgms version or API signatures change.</li>
+<li>Maintain a “changed functions → affected pages” mapping.</li>
+<li>Re-open approved pages impacted by package changes before the next release.</li>
 </ol>
+<hr>
+</section>
+<section id="optional-metrics-to-track" class="level2">
+<h2 class="anchored" data-anchor-id="optional-metrics-to-track">Optional: metrics to track</h2>
+<p>If you want visibility into progress, track per cycle:</p>
+<ul>
+<li>Pages scaffolded / populated / reviewed / approved.</li>
+<li>Open factual issues.</li>
+<li>Average time from scaffolded → approved.</li>
+<li>Factual issues older than one cycle.</li>
+</ul>
+<p>Keep it lightweight. This is for direction, not reporting.</p>
 
 
 </section>
 </section>
 
 </main> <!-- /main -->
-<script type="text/javascript">
-
-// replace cmd keyboard shortcut w/ control on non-Mac platforms
-const kPlatformMac = typeof navigator !== 'undefined' ? /Mac/.test(navigator.platform) : false;
-if (!kPlatformMac) {
-   var kbds = document.querySelectorAll("kbd")
-   kbds.forEach(function(kbd) {
-      kbd.innerHTML = kbd.innerHTML.replace(/⌘/g, '⌃');
-   });
-}
-
-// tweak headings in pymd
-document.querySelectorAll(".pymd span.co").forEach(el => {
-   if (!el.innerText.startsWith("#|")) {
-      el.style.fontWeight = 1000;
-   }
-});
-
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -962,7 +1049,7 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/bayesian-graphical-modelling-lab\.github\.io\/bgms-docs");
+        var filterRegex = new RegExp('/' + window.location.host + '/');
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -1290,42 +1377,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
   });
   </script>
 </div> <!-- /content -->
-<footer class="footer">
-  <div class="nav-footer">
-    <div class="nav-footer-left">
-<p>Developed by the <a href="https://bayesiangraphicalmodeling.com">BGM Lab</a></p>
-</div>   
-    <div class="nav-footer-center">
-      <ul class="footer-items list-unstyled">
-    <li class="nav-item">
-    <a class="nav-link" href="../guide/index.html">
-<p>Guide</p>
-</a>
-  </li>  
-    <li class="nav-item">
-    <a class="nav-link" href="../reference/index.html">
-<p>Reference</p>
-</a>
-  </li>  
-    <li class="nav-item">
-    <a class="nav-link" href="../manual/index.html">
-<p>Manual</p>
-</a>
-  </li>  
-</ul>
-    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/edit/main/dev/set-up.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
-    <div class="nav-footer-right">
-      <ul class="footer-items list-unstyled">
-    <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms">
-      <i class="bi bi-github" role="img" aria-label="bgms GitHub">
-</i> 
-    </a>
-  </li>  
-</ul>
-    </div>
-  </div>
-</footer>
 
 
 
