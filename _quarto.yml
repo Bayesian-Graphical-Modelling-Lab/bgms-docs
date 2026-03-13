@@ -49,12 +49,13 @@ website:
       - icon: github
         href: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
         text: bgms GitHub
-      - icon: box-seam
+    right:
+      - text: "![](icons/r-logo.svg){.navbar-icon}"
         href: https://cran.r-project.org/package=bgms
-        text: CRAN
-      - icon: globe2
+        aria-label: CRAN
+      - text: "![](icons/bgmlab-logo.svg){.navbar-icon}"
         href: https://bayesiangraphicalmodeling.com
-        text: BGM Lab
+        aria-label: BGM Lab
 
   sidebar:
     - id: guide
