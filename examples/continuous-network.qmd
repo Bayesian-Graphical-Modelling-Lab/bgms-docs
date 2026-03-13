@@ -1,0 +1,30 @@
+---
+title: "Continuous Network"
+---
+
+::: {.callout-note}
+This example is under development.
+:::
+
+A complete analysis of continuous data using the Gaussian graphical
+model.
+
+## Data
+
+<!-- TODO: source — bundled or simulated continuous dataset -->
+
+## Fit the Model
+
+<!-- TODO: source — bgm() call with continuous data -->
+
+## Edge Selection
+
+<!-- TODO: source — posterior inclusion probabilities, Bayes factors -->
+
+## Interpretation
+
+<!-- TODO: source — network plot, partial correlations -->
+
+## Diagnostics
+
+<!-- TODO: source — convergence checks -->

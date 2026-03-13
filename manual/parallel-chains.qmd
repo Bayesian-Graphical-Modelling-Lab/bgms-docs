@@ -1,0 +1,38 @@
+---
+title: "Parallel Chains"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+How bgms runs multiple MCMC chains in parallel using TBB and
+RcppParallel.
+
+## Design
+
+<!-- TODO: source — src/mcmc/execution/chain_runner.h, chain_runner.cpp -->
+
+## Model and Prior Cloning
+
+<!-- TODO: source — model.clone(), edge_prior.clone() per chain -->
+
+## TBB Thread Control
+
+<!-- TODO: source — tbb::global_control(max_allowed_parallelism, no_threads) -->
+
+## RcppParallel Dispatch
+
+<!-- TODO: source — MCMCChainRunner : RcppParallel::Worker, parallelFor() -->
+
+## Sequential Fallback
+
+<!-- TODO: source — single-thread path in run_mcmc_sampler() -->
+
+## Per-Chain RNG Seeding
+
+<!-- TODO: source — config.seed + chain_id -->
+
+## Progress and Interrupts
+
+<!-- TODO: source — ProgressManager, shouldExit(), userInterrupt flag -->

@@ -1,0 +1,29 @@
+---
+title: "OMRF Internals"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+Implementation details of the ordinal Markov random field in bgms.
+
+## Ordinal Threshold Parameterization
+
+<!-- TODO: source — src/models/omrf/ -->
+
+## Blume-Capel Model
+
+<!-- TODO: source — linear + quadratic effects, reference category -->
+
+## Pseudo-Likelihood
+
+<!-- TODO: source — pseudo-likelihood computation for ordinal data -->
+
+## Full-Conditional Gibbs Steps
+
+<!-- TODO: source — edge indicator updates -->
+
+## Category Probability Computation
+
+<!-- TODO: source — cross-reference manual/variable-helpers.qmd -->

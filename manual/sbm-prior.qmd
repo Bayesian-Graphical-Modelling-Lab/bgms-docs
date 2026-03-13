@@ -1,0 +1,26 @@
+---
+title: "Stochastic Block Model Prior"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+The MFM-SBM edge prior: how cluster structure regularizes edge
+inclusion.
+
+## MFM-SBM Formulation
+
+<!-- TODO: source — src/priors/sbm_edge_prior.h, mixture of finite mixtures -->
+
+## Gibbs Block-Allocation Updates
+
+<!-- TODO: source — StochasticBlockEdgePrior::update(), allocation sampling -->
+
+## How Clusters Regularize Edges
+
+<!-- TODO: source — within-block vs. between-block inclusion rates -->
+
+## Output: Allocations and Co-Clustering
+
+<!-- TODO: source — ChainResult::store_allocations(), R/extractor_functions.R: extract_sbm() -->

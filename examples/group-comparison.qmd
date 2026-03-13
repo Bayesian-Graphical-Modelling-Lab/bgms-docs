@@ -1,0 +1,29 @@
+---
+title: "Group Comparison"
+---
+
+::: {.callout-note}
+This example is under development.
+:::
+
+Comparing networks across two groups using `bgmCompare()`.
+
+## Data
+
+<!-- TODO: source — bundled or simulated two-group dataset -->
+
+## Fit the Comparison Model
+
+<!-- TODO: source — bgmCompare() call -->
+
+## Identifying Network Differences
+
+<!-- TODO: source — posterior inclusion probabilities for group differences -->
+
+## Interpretation
+
+<!-- TODO: source — which edges differ, effect sizes -->
+
+## Diagnostics
+
+<!-- TODO: source — convergence checks -->

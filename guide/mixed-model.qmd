@@ -1,0 +1,26 @@
+---
+title: "Mixed Markov Random Field"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+Fitting a network model when the data contains both continuous and
+discrete variables.
+
+## When to Use a Mixed MRF
+
+<!-- TODO: source — model selection logic in R/bgm_spec.R -->
+
+## Data Requirements
+
+<!-- TODO: source — R/validate_data.R, R/validate_variable_types.R -->
+
+## Fitting the Model
+
+<!-- TODO: source — bgm() with mixed data, man/bgm.Rd -->
+
+## Interpreting Mixed Parameters
+
+<!-- TODO: source — discrete-discrete, continuous-continuous, cross-type blocks -->

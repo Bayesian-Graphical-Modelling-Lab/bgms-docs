@@ -1,0 +1,50 @@
+---
+title: "R Scaffolding"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+The R layer that sits between user-facing functions and the C++ engine:
+validation, spec construction, sampler dispatch, and output assembly.
+
+## Data Flow Overview
+
+<!-- TODO: source — diagram: bgm() → bgm_spec() → run_sampler() → build_output() -->
+
+## Validation Pipeline
+
+<!-- TODO: source — R/validate_data.R, R/validate_variable_types.R, R/validate_sampler.R -->
+
+### Data Checks
+
+<!-- TODO: source — data_check(), validate_missing_data(), reformat_ordinal_data(), center_continuous_data() -->
+
+### Variable Type Detection
+
+<!-- TODO: source — R/validate_variable_types.R -->
+
+### Sampler Validation
+
+<!-- TODO: source — R/validate_sampler.R -->
+
+## Spec Construction
+
+<!-- TODO: source — R/bgm_spec.R: bgm_spec(), new_bgm_spec(), validate_bgm_spec() -->
+
+### Model-Specific Builders
+
+<!-- TODO: source — build_spec_ggm(), build_spec_omrf(), build_spec_mixed_mrf(), build_spec_compare() -->
+
+### Cross-Field Invariants
+
+<!-- TODO: source — validate_bgm_spec() checks -->
+
+## Sampler Dispatch
+
+<!-- TODO: source — R/run_sampler.R: switch on model_type → C++ entry points -->
+
+## Output Assembly
+
+<!-- TODO: source — R/build_output.R: normalize samples, split main/pairwise, assemble S3 object -->

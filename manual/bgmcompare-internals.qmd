@@ -1,0 +1,26 @@
+---
+title: "Group Comparison Engine"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+How `bgmCompare()` works under the hood: separate sampler, multi-group
+posterior, and output handling.
+
+## Differences from Single-Group bgm
+
+<!-- TODO: source — src/bgmCompare/ vs. main sampler architecture -->
+
+## Multi-Group Log-Posterior and Gradient
+
+<!-- TODO: source — src/bgmCompare/bgmCompare_sampler.h -->
+
+## Sampler Implementation
+
+<!-- TODO: source — bgmCompare-specific MCMC loop -->
+
+## Output Handling
+
+<!-- TODO: source — R/build_output.R: build_output_compare() -->

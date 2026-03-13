@@ -1,0 +1,30 @@
+---
+title: "MCMC Diagnostics"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+How to check whether the sampler converged and the results are
+trustworthy.
+
+## Effective Sample Size (ESS)
+
+<!-- TODO: source — R/mcmc_summary.R, C++ ESS computation -->
+
+## R-hat
+
+<!-- TODO: source — R/mcmc_summary.R, C++ Rhat computation -->
+
+## Trace Plots
+
+<!-- TODO: source — plot method for bgms objects -->
+
+## Divergences
+
+<!-- TODO: source — R/nuts_diagnostics.R, divergent transitions -->
+
+## Energy Diagnostics (E-BFMI)
+
+<!-- TODO: source — R/nuts_diagnostics.R, E-BFMI threshold -->

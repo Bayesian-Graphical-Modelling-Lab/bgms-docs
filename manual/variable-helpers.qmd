@@ -1,0 +1,58 @@
+---
+title: "Variable Helpers"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+Numerically stable computation for MRF variables: the FAST/SAFE
+dual-path strategy in `variable_helpers.h` / `variable_helpers.cpp`.
+
+## The Problem
+
+<!-- TODO: source — why naive exp() overflows/underflows for large residual scores or many categories -->
+
+## The Dual-Path Strategy
+
+<!-- TODO: source — src/utils/variable_helpers.h overview -->
+
+### FAST Path
+
+<!-- TODO: source — precomputed exponentials, power-chain accumulation, conditions for safe use -->
+
+### SAFE Path
+
+<!-- TODO: source — direct log-sum-exp evaluation as fallback -->
+
+### Block Scanning
+
+<!-- TODO: source — contiguous-block scan over persons, branch-free vectorization -->
+
+## Ordinal Variables
+
+### compute_denom_ordinal
+
+<!-- TODO: source — src/utils/variable_helpers.cpp: binary shortcut, fast/safe blocks -->
+
+### compute_probs_ordinal
+
+<!-- TODO: source — probability normalization, clamp-at-zero stabilization -->
+
+## Blume-Capel Variables
+
+### compute_denom_blume_capel
+
+<!-- TODO: source — theta precomputation, centered categories, pow_bound checks -->
+
+### compute_probs_blume_capel
+
+<!-- TODO: source — same FAST/SAFE split for probability computation -->
+
+## Joint Log-Normalizer and Probabilities
+
+<!-- TODO: source — LogZAndProbs struct, compute_logZ_and_probs_ordinal, compute_logZ_and_probs_blume_capel -->
+
+## The EXP_BOUND = 709 Threshold
+
+<!-- TODO: source — IEEE 754 double precision, exp(709) ≈ 8.2e307, exp(710) = Inf -->

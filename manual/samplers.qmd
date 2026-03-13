@@ -1,0 +1,38 @@
+---
+title: "Sampler Hierarchy"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+The sampler class hierarchy and how different MCMC algorithms are
+plugged into the chain runner.
+
+## Class Hierarchy
+
+<!-- TODO: source — src/mcmc/samplers/sampler_base.h -->
+
+### SamplerBase
+
+<!-- TODO: source — virtual interface: step(), initialize(), has_nuts_diagnostics() -->
+
+### GradientSamplerBase
+
+<!-- TODO: source — intermediate class for gradient-based samplers -->
+
+### Concrete Samplers
+
+<!-- TODO: source — MetropolisSampler, HMCSampler, NUTSSampler, HybridNUTSSampler -->
+
+## Factory Dispatch
+
+<!-- TODO: source — create_sampler() in src/mcmc/execution/chain_runner.cpp -->
+
+## Step-Size Adaptation
+
+<!-- TODO: source — dual-averaging in sampler implementations -->
+
+## Mass Matrix Tuning
+
+<!-- TODO: source — diagonal mass matrix estimation during warmup -->

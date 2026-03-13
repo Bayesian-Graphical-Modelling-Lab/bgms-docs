@@ -1,0 +1,25 @@
+---
+title: "The Bayesian Approach"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+Why bgms uses Bayesian inference and what that means for the user.
+
+## Prior, Likelihood, Posterior
+
+<!-- TODO: source — standard Bayesian inference overview -->
+
+## Credible Intervals
+
+<!-- TODO: source — posterior summaries as returned by bgm() -->
+
+## Bayes Factors
+
+<!-- TODO: source — Bayes factor for edge inclusion in bgms -->
+
+## How bgms Uses MCMC
+
+<!-- TODO: source — brief forward pointer to mcmc-output and mcmc-diagnostics -->

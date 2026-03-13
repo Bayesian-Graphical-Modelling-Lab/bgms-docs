@@ -1,0 +1,25 @@
+---
+title: "Edge Priors"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+The edge prior framework: how bgms decides which edges to include.
+
+## BaseEdgePrior Interface
+
+<!-- TODO: source — src/priors/edge_prior.h: virtual methods -->
+
+## Beta-Bernoulli Prior
+
+<!-- TODO: source — default prior, inclusion probability update -->
+
+## Unit-Information Prior
+
+<!-- TODO: source — Cauchy-based prior on interaction strength -->
+
+## Inclusion Probabilities and Bayes Factors
+
+<!-- TODO: source — how posterior inclusion probabilities and BFs are computed -->

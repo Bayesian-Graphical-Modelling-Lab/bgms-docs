@@ -150,11 +150,11 @@ Each example uses a bundled or simulated dataset and runs end-to-end.
 
 | Section | Pages |
 |---|---|
-| Guide | 14 |
+| Guide | 13 |
 | Reference | 6 |
-| Manual | 17 |
+| Manual | 16 |
 | Examples | 7 |
-| **Total** | **44** |
+| **Total** | **42** |
 
 ---
 

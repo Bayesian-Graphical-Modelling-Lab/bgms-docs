@@ -1,0 +1,25 @@
+---
+title: "MCMC Output"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+What the sampler returns and how to work with the output.
+
+## The bgms Fit Object
+
+<!-- TODO: source — R/build_output.R, str(fit) -->
+
+## Posterior Summaries
+
+<!-- TODO: source — posterior_summary_*, posterior_mean_* fields -->
+
+## Raw Samples
+
+<!-- TODO: source — fit$raw_samples structure, per-chain layout -->
+
+## Extracting Specific Results
+
+<!-- TODO: source — R/extractor_functions.R -->

@@ -1,0 +1,25 @@
+---
+title: "GGM Internals"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+Implementation details of the Gaussian graphical model in bgms.
+
+## Precision Matrix Parameterization
+
+<!-- TODO: source — src/models/ggm/ -->
+
+## Cholesky Updates
+
+<!-- TODO: source — src/math/cholupdate, rank-1 update/downdate -->
+
+## Likelihood and Gradient
+
+<!-- TODO: source — continuous-data log-posterior and gradient computation -->
+
+## Edge-Specific Metropolis Proposals
+
+<!-- TODO: source — proposal mechanism for individual edges -->

@@ -1,0 +1,29 @@
+---
+title: "Edge Clustering"
+---
+
+::: {.callout-note}
+This example is under development.
+:::
+
+Discovering edge clusters using the stochastic block model prior.
+
+## Data
+
+<!-- TODO: source — bundled or simulated dataset -->
+
+## Fit with SBM Prior
+
+<!-- TODO: source — bgm() with edge_prior = "stochastic-block" -->
+
+## Extracting Block Structure
+
+<!-- TODO: source — extract_sbm(), co-clustering matrix -->
+
+## Interpretation
+
+<!-- TODO: source — block assignments, within/between block inclusion rates -->
+
+## Diagnostics
+
+<!-- TODO: source — convergence checks, allocation mixing -->

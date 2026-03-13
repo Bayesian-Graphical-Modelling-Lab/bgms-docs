@@ -1,0 +1,25 @@
+---
+title: "Mixed MRF Internals"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+Implementation details of the mixed Markov random field in bgms.
+
+## Block Structure
+
+<!-- TODO: source — src/models/mixed/, discrete-discrete / continuous-continuous / cross-type -->
+
+## Parameter Vector Layout
+
+<!-- TODO: source — how mixed parameters are stored and indexed -->
+
+## Sampling Strategy
+
+<!-- TODO: source — how the sampler handles mixed parameter updates -->
+
+## Output Assembly
+
+<!-- TODO: source — R/build_output.R: build_output_mixed_mrf() block layout -->

@@ -1,0 +1,26 @@
+---
+title: "Edge Clustering"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+Using the stochastic block model prior to discover clusters of edges
+in the network.
+
+## What Is Edge Clustering?
+
+<!-- TODO: source — SBM/MFM conceptual overview -->
+
+## Setting Up the SBM Prior
+
+<!-- TODO: source — bgm() edge_prior argument, man/bgm.Rd -->
+
+## Interpreting Block Structure
+
+<!-- TODO: source — extract_sbm(), co-clustering matrix -->
+
+## Prior Choices for Clustering
+
+<!-- TODO: source — SBM-specific prior parameters -->

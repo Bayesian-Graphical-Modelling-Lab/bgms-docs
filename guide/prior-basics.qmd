@@ -1,0 +1,27 @@
+---
+title: "Prior Basics"
+---
+
+::: {.callout-note}
+This chapter is under development. Replaces the former prior-guide page
+with a shared primer. Analysis-specific prior guidance lives on the
+edge-selection, group-comparison, and clustering pages.
+:::
+
+What priors are, how bgms uses them, and why they matter.
+
+## What Is a Prior?
+
+<!-- TODO: source — accessible introduction to prior distributions -->
+
+## Priors in bgms
+
+<!-- TODO: source — R/bgm.R prior-related arguments, man/bgm.Rd -->
+
+## Edge Priors vs. Parameter Priors
+
+<!-- TODO: source — distinction between inclusion prior and effect-size prior -->
+
+## Default Choices and When to Change Them
+
+<!-- TODO: source — R/bgm.R defaults, design rationale -->

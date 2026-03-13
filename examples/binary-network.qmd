@@ -1,0 +1,29 @@
+---
+title: "Binary Network"
+---
+
+::: {.callout-note}
+This example is under development.
+:::
+
+A complete analysis of binary data using the ordinal MRF.
+
+## Data
+
+<!-- TODO: source — bundled or simulated binary dataset -->
+
+## Fit the Model
+
+<!-- TODO: source — bgm() call with binary data -->
+
+## Edge Selection
+
+<!-- TODO: source — posterior inclusion probabilities, Bayes factors -->
+
+## Interpretation
+
+<!-- TODO: source — network plot, parameter estimates -->
+
+## Diagnostics
+
+<!-- TODO: source — convergence checks -->

@@ -1,0 +1,26 @@
+---
+title: "Graphical Models"
+---
+
+::: {.callout-note}
+This chapter is under development.
+:::
+
+What graphical models are and why they are useful for analyzing
+multivariate data.
+
+## Nodes and Edges
+
+<!-- TODO: source — introductory MRF/network literature -->
+
+## Conditional Independence
+
+<!-- TODO: source — separation in undirected graphs -->
+
+## Markov Random Fields
+
+<!-- TODO: source — connection to bgms model families (GGM, OMRF) -->
+
+## Why Networks?
+
+<!-- TODO: source — applied motivation for network analysis -->
