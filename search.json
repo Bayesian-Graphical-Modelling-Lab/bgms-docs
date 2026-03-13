@@ -845,7 +845,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development.\nbgms uses spike-and-slab priors to determine which edges are present in the network.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Analyses",
       "Edge Selection"
     ]
@@ -857,7 +857,7 @@
     "section": "Overview",
     "text": "Overview\nContent to be added: spike-and-slab priors, posterior inclusion probabilities, Bayes factors, edge evidence categories.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Analyses",
       "Edge Selection"
     ]
@@ -869,7 +869,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development.\nWhy bgms uses Bayesian inference and what that means for the user.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "The Bayesian Approach"
     ]
@@ -881,7 +881,7 @@
     "section": "Prior, Likelihood, Posterior",
     "text": "Prior, Likelihood, Posterior",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "The Bayesian Approach"
     ]
@@ -893,7 +893,7 @@
     "section": "Credible Intervals",
     "text": "Credible Intervals",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "The Bayesian Approach"
     ]
@@ -905,7 +905,7 @@
     "section": "Bayes Factors",
     "text": "Bayes Factors",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "The Bayesian Approach"
     ]
@@ -917,7 +917,7 @@
     "section": "How bgms Uses MCMC",
     "text": "How bgms Uses MCMC",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "The Bayesian Approach"
     ]
@@ -929,7 +929,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development.\nThe Gaussian graphical model (GGM) is used for networks of continuous variables.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Models",
       "Gaussian Graphical Model"
     ]
@@ -941,7 +941,7 @@
     "section": "Overview",
     "text": "Overview\nContent to be added: precision matrix, partial correlations, interpretation.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Models",
       "Gaussian Graphical Model"
     ]
@@ -953,7 +953,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development.\nThe bgmCompare() function tests for differences in network structure between groups.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Analyses",
       "Group Comparison"
     ]
@@ -965,7 +965,7 @@
     "section": "Overview",
     "text": "Overview\nContent to be added: bgmCompare methodology, Bayes factor tests for group differences.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Analyses",
       "Group Comparison"
     ]
@@ -977,7 +977,7 @@
     "section": "References",
     "text": "References\nMarsman, M., Waldorp, L. J., Sekulovski, N., & Haslbeck, J. M. B. (2025). Bayes factor tests for group differences in ordinal and binary graphical models. Psychometrika, 90(5), 1809–1842.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Analyses",
       "Group Comparison"
     ]
@@ -989,7 +989,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development.\nWhat graphical models are and why they are useful for analyzing multivariate data.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "Graphical Models"
     ]
@@ -1001,7 +1001,7 @@
     "section": "Nodes and Edges",
     "text": "Nodes and Edges",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "Graphical Models"
     ]
@@ -1013,7 +1013,7 @@
     "section": "Conditional Independence",
     "text": "Conditional Independence",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "Graphical Models"
     ]
@@ -1025,7 +1025,7 @@
     "section": "Markov Random Fields",
     "text": "Markov Random Fields",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "Graphical Models"
     ]
@@ -1037,7 +1037,7 @@
     "section": "Why Networks?",
     "text": "Why Networks?",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "Graphical Models"
     ]
@@ -1049,7 +1049,7 @@
     "section": "",
     "text": "This chapter covers installation and basic usage of bgms.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Getting Started"
     ]
   },
@@ -1060,7 +1060,7 @@
     "section": "Installation",
     "text": "Installation\n\nFrom CRAN\ninstall.packages(\"bgms\")\n\n\nDevelopment Version\nif(!requireNamespace(\"remotes\")) {\n  install.packages(\"remotes\")\n}\nremotes::install_github(\"Bayesian-Graphical-Modelling-Lab/bgms\")",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Getting Started"
     ]
   },
@@ -1071,7 +1071,7 @@
     "section": "Basic Example",
     "text": "Basic Example\nWe’ll use the Wenchuan earthquake data included in the package:\n\nlibrary(bgms)\n\n# Load example data\ndata(Wenchuan)\n\n# Fit a Bayesian graphical model\nfit &lt;- bgm(Wenchuan)\n\n# View results\nsummary(fit)",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Getting Started"
     ]
   },
@@ -1082,7 +1082,7 @@
     "section": "Understanding the Output",
     "text": "Understanding the Output\nThe summary() output shows:\n\nEdge inclusion probabilities — How likely is each edge to be present?\nParameter estimates — Posterior means for interaction strengths\nConvergence diagnostics — ESS and R-hat values",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Getting Started"
     ]
   },
@@ -1093,7 +1093,7 @@
     "section": "Next Steps",
     "text": "Next Steps\n\nLearn about the statistical model underlying bgms\nUnderstand edge selection with spike-and-slab priors\nCompare groups with bgmCompare",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Getting Started"
     ]
   },
@@ -1175,48 +1175,13 @@
     "text": "One H2 minimum for content pages (generates useful TOC)\nConsistent naming across similar pages (all reference pages use same sections)\nNo orphan headings - every heading should have content below it\nCode comments are not headings - # comment inside code blocks is fine\nCross-reference with IDs when needed: ## Overview {#overview}"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "bgms",
-    "section": "",
-    "text": "The bgms package provides Bayesian estimation and model comparison for graphical models with binary and ordinal variables."
-  },
-  {
-    "objectID": "index.html#documentation",
-    "href": "index.html#documentation",
-    "title": "bgms",
-    "section": "Documentation",
-    "text": "Documentation\n\n\nUser’s Guide\nLearn bgms from the ground up: installation, basic usage, and statistical concepts behind ordinal MRFs and Gaussian graphical models.\n\n\nReference\nComplete documentation for all R functions: bgm(), bgmCompare(), S3 methods, and extractor functions.\n\n\nManual\nTechnical documentation for contributors: C++ architecture, MCMC algorithms, and implementation details."
-  },
-  {
-    "objectID": "index.html#quick-start",
-    "href": "index.html#quick-start",
-    "title": "bgms",
-    "section": "Quick Start",
-    "text": "Quick Start\n# Install from CRAN\ninstall.packages(\"bgms\")\n\n# Or development version from GitHub\nremotes::install_github(\"Bayesian-Graphical-Modelling-Lab/bgms\")\n\n# Fit a model\nlibrary(bgms)\ndata(Wenchuan)\nfit &lt;- bgm(Wenchuan)\nsummary(fit)"
-  },
-  {
-    "objectID": "index.html#citation",
-    "href": "index.html#citation",
-    "title": "bgms",
-    "section": "Citation",
-    "text": "Citation\nIf you use bgms in your research, please cite:\n\nMarsman, M., van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian analysis of the ordinal Markov random field. Psychometrika, 90(1), 146–182. https://doi.org/10.1017/psy.2024.4"
-  },
-  {
-    "objectID": "index.html#links",
-    "href": "index.html#links",
-    "title": "bgms",
-    "section": "Links",
-    "text": "Links\n\nGitHub Repository\nCRAN Package\nBGM Lab"
-  },
-  {
     "objectID": "guide/index.html",
     "href": "guide/index.html",
     "title": "User’s Guide",
     "section": "",
     "text": "The User’s Guide provides conceptual background and practical tutorials for using bgms.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "User's Guide"
     ]
   },
@@ -1227,7 +1192,7 @@
     "section": "Contents",
     "text": "Contents\n\nGetting Started — Installation and first steps\nOrdinal MRF — Understanding the ordinal Markov random field\nGGM — Gaussian graphical models for continuous data\nEdge Selection — Spike-and-slab priors for structure learning\nGroup Comparison — Comparing networks with bgmCompare\nPrior Guide — Choosing priors for your analysis",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "User's Guide"
     ]
   },
@@ -1238,7 +1203,7 @@
     "section": "Prerequisites",
     "text": "Prerequisites\nThis guide assumes basic familiarity with:\n\nR programming\nBayesian inference concepts\nGraphical models / network analysis\n\nFor background on Bayesian analysis of psychological networks, see Huth et al. (2023).",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "User's Guide"
     ]
   },
@@ -1249,7 +1214,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development. Replaces the former prior-guide page with a shared primer. Analysis-specific prior guidance lives on the edge-selection, group-comparison, and clustering pages.\nWhat priors are, how bgms uses them, and why they matter.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "Prior Basics"
     ]
@@ -1261,7 +1226,7 @@
     "section": "What Is a Prior?",
     "text": "What Is a Prior?",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "Prior Basics"
     ]
@@ -1273,7 +1238,7 @@
     "section": "Priors in bgms",
     "text": "Priors in bgms",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "Prior Basics"
     ]
@@ -1285,7 +1250,7 @@
     "section": "Edge Priors vs. Parameter Priors",
     "text": "Edge Priors vs. Parameter Priors",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "Prior Basics"
     ]
@@ -1297,7 +1262,7 @@
     "section": "Default Choices and When to Change Them",
     "text": "Default Choices and When to Change Them",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Background",
       "Prior Basics"
     ]
@@ -1309,7 +1274,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development.\nUsing the stochastic block model prior to discover clusters of edges in the network.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Analyses",
       "Edge Clustering"
     ]
@@ -1321,7 +1286,7 @@
     "section": "What Is Edge Clustering?",
     "text": "What Is Edge Clustering?",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Analyses",
       "Edge Clustering"
     ]
@@ -1333,7 +1298,7 @@
     "section": "Setting Up the SBM Prior",
     "text": "Setting Up the SBM Prior",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Analyses",
       "Edge Clustering"
     ]
@@ -1345,7 +1310,7 @@
     "section": "Interpreting Block Structure",
     "text": "Interpreting Block Structure",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Analyses",
       "Edge Clustering"
     ]
@@ -1357,7 +1322,7 @@
     "section": "Prior Choices for Clustering",
     "text": "Prior Choices for Clustering",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Analyses",
       "Edge Clustering"
     ]
@@ -1369,7 +1334,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development.\nFitting a network model when the data contains both continuous and discrete variables.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Models",
       "Mixed Markov Random Field"
     ]
@@ -1381,7 +1346,7 @@
     "section": "When to Use a Mixed MRF",
     "text": "When to Use a Mixed MRF",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Models",
       "Mixed Markov Random Field"
     ]
@@ -1393,7 +1358,7 @@
     "section": "Data Requirements",
     "text": "Data Requirements",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Models",
       "Mixed Markov Random Field"
     ]
@@ -1405,7 +1370,7 @@
     "section": "Fitting the Model",
     "text": "Fitting the Model",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Models",
       "Mixed Markov Random Field"
     ]
@@ -1417,7 +1382,7 @@
     "section": "Interpreting Mixed Parameters",
     "text": "Interpreting Mixed Parameters",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Models",
       "Mixed Markov Random Field"
     ]
@@ -1429,7 +1394,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development.\nWhat the sampler returns and how to work with the output.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Output"
     ]
@@ -1441,7 +1406,7 @@
     "section": "The bgms Fit Object",
     "text": "The bgms Fit Object",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Output"
     ]
@@ -1453,7 +1418,7 @@
     "section": "Posterior Summaries",
     "text": "Posterior Summaries",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Output"
     ]
@@ -1465,7 +1430,7 @@
     "section": "Raw Samples",
     "text": "Raw Samples",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Output"
     ]
@@ -1477,7 +1442,7 @@
     "section": "Extracting Specific Results",
     "text": "Extracting Specific Results",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Output"
     ]
@@ -1489,7 +1454,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development.\nThe ordinal Markov random field (MRF) is a graphical model for networks of binary and ordinal variables.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Models",
       "Ordinal Markov Random Field"
     ]
@@ -1501,7 +1466,7 @@
     "section": "Overview",
     "text": "Overview\nContent to be added: joint distribution, threshold parameters, interaction parameters, pseudolikelihood approximation.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Models",
       "Ordinal Markov Random Field"
     ]
@@ -1513,7 +1478,7 @@
     "section": "References",
     "text": "References\nMarsman, M., van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian analysis of the ordinal Markov random field. Psychometrika, 90(1), 146–182.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "Models",
       "Ordinal Markov Random Field"
     ]
@@ -1525,7 +1490,7 @@
     "section": "",
     "text": "Note\n\n\n\nThis chapter is under development.\nHow to check whether the sampler converged and the results are trustworthy.",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Diagnostics"
     ]
@@ -1537,7 +1502,7 @@
     "section": "Effective Sample Size (ESS)",
     "text": "Effective Sample Size (ESS)",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Diagnostics"
     ]
@@ -1549,7 +1514,7 @@
     "section": "R-hat",
     "text": "R-hat",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Diagnostics"
     ]
@@ -1561,7 +1526,7 @@
     "section": "Trace Plots",
     "text": "Trace Plots",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Diagnostics"
     ]
@@ -1573,7 +1538,7 @@
     "section": "Divergences",
     "text": "Divergences",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Diagnostics"
     ]
@@ -1585,7 +1550,7 @@
     "section": "Energy Diagnostics (E-BFMI)",
     "text": "Energy Diagnostics (E-BFMI)",
     "crumbs": [
-      "Guide",
+      "Get Started",
       "MCMC Output",
       "MCMC Diagnostics"
     ]
