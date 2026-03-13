@@ -2,8 +2,9 @@
 title: "Mixed Network"
 ---
 
-::: {.callout-note}
-This example is under development.
+::: {.callout-warning}
+This example is under development. No bundled mixed dataset is
+available yet.
 :::
 
 A complete analysis of mixed (continuous + discrete) data using the

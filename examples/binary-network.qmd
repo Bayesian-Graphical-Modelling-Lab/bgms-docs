@@ -2,28 +2,95 @@
 title: "Binary Network"
 ---
 
-::: {.callout-note}
-This example is under development.
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
 :::
 
-A complete analysis of binary data using the ordinal MRF.
+An end-to-end analysis of binary data using the ordinal Markov random
+field. This example uses the ADHD dataset bundled with bgms.
 
 ## Data
 
-<!-- TODO: source — bundled or simulated binary dataset -->
+The `ADHD` dataset contains binary symptom ratings for 355 children.
+The first column is a group indicator (ADHD diagnosis); columns 2–19
+are nine Inattentive and nine Hyperactive/Impulsive items scored as
+present (1) or absent (0). We drop the group column and analyze the
+first five Inattentive items.
 
-## Fit the Model
+```{r}
+#| eval: false
+library(bgms)
+data = ADHD[, 2:6]
+head(data)
+```
 
-<!-- TODO: source — bgm() call with binary data -->
+## Fit the model
 
-## Edge Selection
+Binary variables are a special case of ordinal data (two categories).
+`bgm()` fits an ordinal MRF with spike-and-slab edge selection by
+default.
 
-<!-- TODO: source — posterior inclusion probabilities, Bayes factors -->
+```{r}
+#| eval: false
+fit = bgm(data, seed = 1234)
+```
+
+## Posterior summaries
+
+```{r}
+#| eval: false
+summary(fit)
+coef(fit)
+```
+
+## Edge selection
+
+The posterior inclusion probabilities indicate the evidence for each
+edge:
+
+```{r}
+#| eval: false
+coef(fit)$indicator
+```
+
+Convert to Bayes factors when the prior inclusion probability equals
+0.5:
+
+```{r}
+#| eval: false
+p = coef(fit)$indicator[1, 2]
+BF_10 = p / (1 - p)       # evidence for inclusion
+1 / BF_10                  # evidence for exclusion
+```
 
 ## Interpretation
 
-<!-- TODO: source — network plot, parameter estimates -->
+Threshold the inclusion probabilities at 0.5 and plot.
+
+```{r}
+#| eval: false
+library(qgraph)
+
+median_probability_network = coef(fit)$pairwise
+median_probability_network[coef(fit)$indicator < 0.5] = 0.0
+
+qgraph(median_probability_network,
+  theme = "TeamFortress",
+  maximum = 1,
+  fade = FALSE,
+  color = c("#f0ae0e"), vsize = 10, repulsion = .9,
+  label.cex = 1, label.scale = "FALSE",
+  labels = colnames(data)
+)
+```
 
 ## Diagnostics
 
-<!-- TODO: source — convergence checks -->
+```{r}
+#| eval: false
+summary(fit)$pairwise
+fit$nuts_diag$summary
+```
+
+See the [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) guide for
+interpretation.

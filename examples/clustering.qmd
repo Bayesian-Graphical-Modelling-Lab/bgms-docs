@@ -2,7 +2,7 @@
 title: "Edge Clustering"
 ---
 
-::: {.callout-note}
+::: {.callout-warning}
 This example is under development.
 :::
 

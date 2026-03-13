@@ -2,8 +2,9 @@
 title: "Continuous Network"
 ---
 
-::: {.callout-note}
-This example is under development.
+::: {.callout-warning}
+This example is under development. No bundled continuous dataset is
+available yet.
 :::
 
 A complete analysis of continuous data using the Gaussian graphical
