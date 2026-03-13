@@ -75,6 +75,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +359,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,35 +547,114 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>How <code>bgmCompare()</code> works under the hood: separate sampler, multi-group posterior, and output handling.</p>
+<p>How <code>bgmCompare()</code> works under the hood: multi-group posterior, difference parameterization, and sampler implementation. Source: <code>src/bgmCompare/</code> directory.</p>
 <section id="differences-from-single-group-bgm" class="level2">
-<h2 class="anchored" data-anchor-id="differences-from-single-group-bgm">Differences from Single-Group bgm</h2>
-<!-- TODO: source — src/bgmCompare/ vs. main sampler architecture -->
+<h2 class="anchored" data-anchor-id="differences-from-single-group-bgm">Differences from single-group bgm</h2>
+<p>The <code>bgmCompare</code> engine shares the same OMRF likelihood (pseudolikelihood over ordinal/Blume-Capel variables) and the same NUTS/HMC/Metropolis sampler options, but differs in three key ways:</p>
+<ol type="1">
+<li><strong>Parameter decomposition</strong> — Group-specific parameters <span class="math inline">\(\boldsymbol{\theta}^{(g)}\)</span> are decomposed into a shared baseline <span class="math inline">\(\boldsymbol{\varphi}\)</span> and group differences <span class="math inline">\(\boldsymbol{\delta}^{(g)}\)</span>, linked through a contrast matrix.</li>
+<li><strong>Separate sampler</strong> — The bgmCompare engine uses its own chain runner (<code>run_gibbs_sampler_bgmCompare()</code>) rather than the general <code>run_mcmc_chain()</code>, because the multi-group structure requires group-specific likelihood evaluations and difference selection.</li>
+<li><strong>Difference selection</strong> — In addition to edge selection (which edges exist in the shared graph), bgmCompare performs difference selection (which edges differ between groups).</li>
+</ol>
+</section>
+<section id="contrast-matrix-parameterization" class="level2">
+<h2 class="anchored" data-anchor-id="contrast-matrix-parameterization">Contrast-matrix parameterization</h2>
+<p>For <span class="math inline">\(G\)</span> groups, the per-group parameter vector <span class="math inline">\(\boldsymbol{\theta}^{(g)}\)</span> is expressed as:</p>
+<p><span class="math display">\[
+\boldsymbol{\theta}^{(g)} = \boldsymbol{\varphi} + \sum_{h=1}^{G-1} P_{gh}\, \boldsymbol{\delta}^{(h)}
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{P}\)</span> is a <span class="math inline">\(G \times (G-1)\)</span> projection (contrast) matrix. Column <span class="math inline">\(h = 0\)</span> (the baseline <span class="math inline">\(\boldsymbol{\varphi}\)</span>) captures the shared structure; columns <span class="math inline">\(h &gt; 0\)</span> (the differences <span class="math inline">\(\boldsymbol{\delta}^{(h)}\)</span>) capture how groups deviate from the baseline.</p>
+<p>In the flat parameter vector, the baseline and difference parameters are interleaved per effect:</p>
+<pre><code>[ φ_main | δ^(1)_main | ... | δ^(G-1)_main | φ_pair | δ^(1)_pair | ... ]</code></pre>
 </section>
 <section id="multi-group-log-posterior-and-gradient" class="level2">
-<h2 class="anchored" data-anchor-id="multi-group-log-posterior-and-gradient">Multi-Group Log-Posterior and Gradient</h2>
-<!-- TODO: source — src/bgmCompare/bgmCompare_sampler.h -->
+<h2 class="anchored" data-anchor-id="multi-group-log-posterior-and-gradient">Multi-group log-posterior and gradient</h2>
+<p>The log-pseudoposterior sums over groups. For each group <span class="math inline">\(g\)</span>:</p>
+<ol type="1">
+<li>Reconstruct group-specific parameters via the contrast matrix</li>
+<li>Compute the pseudolikelihood using group <span class="math inline">\(g\)</span>’s data (sufficient statistics: category counts, Blume-Capel stats, pairwise stats)</li>
+<li>Evaluate the gradient of the pseudolikelihood with respect to the active parameters</li>
+</ol>
+<p>The gradient has two components:</p>
+<ul>
+<li><strong>Observed-data gradient</strong> (<code>gradient_observed_active()</code>) — Projects group-level sufficient statistics into the active-parameter layout using the contrast matrix</li>
+<li><strong>Expected-data gradient</strong> (<code>gradient_expected_active()</code>) — Computes expected sufficient statistics under the current parameters using category probabilities from the variable helpers</li>
+</ul>
+<p>The prior gradient adds Cauchy penalties on both baseline and difference pairwise parameters.</p>
 </section>
 <section id="sampler-implementation" class="level2">
-<h2 class="anchored" data-anchor-id="sampler-implementation">Sampler Implementation</h2>
-<!-- TODO: source — bgmCompare-specific MCMC loop -->
+<h2 class="anchored" data-anchor-id="sampler-implementation">Sampler implementation</h2>
+<p><code>run_gibbs_sampler_bgmCompare()</code> orchestrates one MCMC chain. Each iteration:</p>
+<ol type="1">
+<li><strong>NUTS/HMC/Metropolis step</strong> — Update all active parameters (baseline + differences) using the joint log-pseudoposterior</li>
+<li><strong>Difference selection</strong> (if active) — For each edge, decide whether the group-difference parameters are included or set to zero. Uses a spike-and-slab mechanism analogous to edge selection in the single-group model.</li>
+<li><strong>Main-effect difference selection</strong> (optional) — Separately select which main-effect parameters differ between groups</li>
+<li><strong>Edge prior update</strong> — Update inclusion probabilities (Bernoulli, Beta-Bernoulli, or SBM)</li>
+<li><strong>Missing data imputation</strong> (if active) — Impute missing observations per group</li>
+</ol>
+<p>The warmup schedule follows the same five-stage structure as the single-group model (see <a href="../manual/warmup.html">Warmup Schedule</a>).</p>
+</section>
+<section id="active-parameter-tracking" class="level2">
+<h2 class="anchored" data-anchor-id="active-parameter-tracking">Active parameter tracking</h2>
+<p>Because difference selection can turn parameters on and off, the <code>total_length()</code> function recomputes the active parameter dimension at each iteration. Index maps (<code>build_index_maps()</code>) provide the mapping between the flat active-parameter vector and the structured (variable, group) parameter layout.</p>
+<p>When a difference parameter is “off” (indicator = 0), it is excluded from the NUTS block. The step size and mass matrix adapt to the current active dimension.</p>
 </section>
 <section id="output-handling" class="level2">
-<h2 class="anchored" data-anchor-id="output-handling">Output Handling</h2>
-<!-- TODO: source — R/build_output.R: build_output_compare() -->
+<h2 class="anchored" data-anchor-id="output-handling">Output handling</h2>
+<p>The <code>bgmCompareOutput</code> struct stores:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>samples</code></td>
+<td>Posterior samples of all parameters (baseline + differences)</td>
+</tr>
+<tr class="even">
+<td><code>indicator_samples</code></td>
+<td>Edge inclusion indicators</td>
+</tr>
+<tr class="odd">
+<td><code>difference_indicator_samples</code></td>
+<td>Difference selection indicators</td>
+</tr>
+<tr class="even">
+<td><code>warmup_check</code></td>
+<td>Warmup diagnostics</td>
+</tr>
+<tr class="odd">
+<td>NUTS fields</td>
+<td>Tree depth, divergences, energy (when NUTS is used)</td>
+</tr>
+</tbody>
+</table>
+<p>The R output builder (<code>build_output_compare()</code>) splits the posterior means into:</p>
+<ul>
+<li><code>$group_posterior_means</code> — Posterior means of the group-level parameters <span class="math inline">\(\boldsymbol{\theta}^{(g)}\)</span>, reconstructed from baseline and differences</li>
+<li><code>$difference_posterior_means</code> — Posterior means of the difference parameters <span class="math inline">\(\boldsymbol{\delta}^{(h)}\)</span></li>
+<li><code>$difference_inclusion_probabilities</code> — Proportion of iterations where each difference indicator was included</li>
+</ul>
 
 
 </section>

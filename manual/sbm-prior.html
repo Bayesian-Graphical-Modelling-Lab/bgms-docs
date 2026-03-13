@@ -75,6 +75,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +359,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,35 +547,138 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The MFM-SBM edge prior: how cluster structure regularizes edge inclusion.</p>
+<p>The MFM-SBM (mixture of finite mixtures – stochastic block model) edge prior assigns variables to latent clusters and uses cluster-structured inclusion probabilities. Source: <code>src/priors/sbm_edge_prior.h</code> and <code>sbm_edge_prior.cpp</code>.</p>
 <section id="mfm-sbm-formulation" class="level2">
-<h2 class="anchored" data-anchor-id="mfm-sbm-formulation">MFM-SBM Formulation</h2>
-<!-- TODO: source — src/priors/sbm_edge_prior.h, mixture of finite mixtures -->
+<h2 class="anchored" data-anchor-id="mfm-sbm-formulation">MFM-SBM formulation</h2>
+<p>The prior has three levels:</p>
+<ol type="1">
+<li><p><strong>Cluster count</strong> — The number of clusters <span class="math inline">\(K\)</span> follows a Poisson(<span class="math inline">\(\lambda\)</span>) prior, with a mixture-of-finite-mixtures (MFM) correction that accounts for the combinatorial allocation structure.</p></li>
+<li><p><strong>Cluster assignments</strong> — Each variable <span class="math inline">\(i\)</span> is assigned to cluster <span class="math inline">\(z_i \in \{1, \ldots, K\}\)</span> with a symmetric Dirichlet prior (concentration <span class="math inline">\(\alpha_D\)</span>) on the cluster proportions.</p></li>
+<li><p><strong>Block inclusion probabilities</strong> — The inclusion probability for edge <span class="math inline">\((i, j)\)</span> depends on whether variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are in the same cluster:</p>
+<p><span class="math display">\[
+\pi_{ij} = \begin{cases}
+\pi_{\text{within}} &amp; \text{if } z_i = z_j \\
+\pi_{\text{between}} &amp; \text{if } z_i \neq z_j
+\end{cases}
+\]</span></p>
+<p>Within-block and between-block probabilities are drawn from Beta distributions with separate hyperparameters.</p></li>
+</ol>
 </section>
-<section id="gibbs-block-allocation-updates" class="level2">
-<h2 class="anchored" data-anchor-id="gibbs-block-allocation-updates">Gibbs Block-Allocation Updates</h2>
-<!-- TODO: source — StochasticBlockEdgePrior::update(), allocation sampling -->
+<section id="gibbs-updates" class="level2">
+<h2 class="anchored" data-anchor-id="gibbs-updates">Gibbs updates</h2>
+<p>The <code>update()</code> method in <code>StochasticBlockEdgePrior</code> runs three sequential Gibbs steps:</p>
+<section id="cluster-allocations" class="level3">
+<h3 class="anchored" data-anchor-id="cluster-allocations">1. Cluster allocations</h3>
+<p><code>block_allocations_mfm_sbm()</code> updates each variable’s cluster assignment <span class="math inline">\(z_i\)</span> by collapsed Gibbs sampling. For each variable <span class="math inline">\(i\)</span>:</p>
+<ol type="1">
+<li>Remove variable <span class="math inline">\(i\)</span> from its current cluster</li>
+<li>For each possible cluster <span class="math inline">\(k\)</span> (including a new cluster), compute the conditional probability based on:
+<ul>
+<li>The MFM allocation prior (CRP-like with log-partition coefficients <span class="math inline">\(\log V_n\)</span>)</li>
+<li>The likelihood of the observed edge indicators between variable <span class="math inline">\(i\)</span> and all other variables, given the block probabilities</li>
+</ul></li>
+<li>Sample <span class="math inline">\(z_i\)</span> from the resulting categorical distribution</li>
+</ol>
+<p>Empty clusters are removed, and the cluster labels are relabeled to be contiguous.</p>
 </section>
-<section id="how-clusters-regularize-edges" class="level2">
-<h2 class="anchored" data-anchor-id="how-clusters-regularize-edges">How Clusters Regularize Edges</h2>
-<!-- TODO: source — within-block vs. between-block inclusion rates -->
+<section id="block-probabilities" class="level3">
+<h3 class="anchored" data-anchor-id="block-probabilities">2. Block probabilities</h3>
+<p><code>block_probs_mfm_sbm()</code> draws new within-block and between-block inclusion probabilities from their Beta full conditionals:</p>
+<p><span class="math display">\[
+\pi_{kl} \sim \text{Beta}\bigl(\alpha_{kl} + e_{kl},\; \beta_{kl} + m_{kl} - e_{kl}\bigr)
+\]</span></p>
+<p>where <span class="math inline">\(e_{kl}\)</span> is the number of included edges between clusters <span class="math inline">\(k\)</span> and <span class="math inline">\(l\)</span>, and <span class="math inline">\(m_{kl}\)</span> is the total number of possible edges. The hyperparameters <span class="math inline">\(\alpha_{kl}\)</span> and <span class="math inline">\(\beta_{kl}\)</span> differ for within-block (<span class="math inline">\(k = l\)</span>) and between-block (<span class="math inline">\(k \neq l\)</span>) pairs.</p>
 </section>
-<section id="output-allocations-and-co-clustering" class="level2">
-<h2 class="anchored" data-anchor-id="output-allocations-and-co-clustering">Output: Allocations and Co-Clustering</h2>
-<!-- TODO: source — ChainResult::store_allocations(), R/extractor_functions.R: extract_sbm() -->
+<section id="inclusion-probability-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="inclusion-probability-matrix">3. Inclusion probability matrix</h3>
+<p>The updated block probabilities are broadcast to the full <span class="math inline">\(p \times p\)</span> inclusion probability matrix based on the current cluster assignments.</p>
+</section>
+</section>
+<section id="log-partition-coefficients" class="level2">
+<h2 class="anchored" data-anchor-id="log-partition-coefficients">Log partition coefficients</h2>
+<p><code>compute_Vn_mfm_sbm()</code> precomputes the log-partition function <span class="math inline">\(\log V_n(t)\)</span> for <span class="math inline">\(t = 1, \ldots, t_{\max}\)</span>. These coefficients encode the MFM prior on the number of occupied clusters and appear in the allocation Gibbs step. They are computed once at initialization.</p>
+<p>The computation involves:</p>
+<ul>
+<li>Poisson probabilities for the total number of components</li>
+<li>Rising factorials (Pochhammer symbols) for the Dirichlet-multinomial allocation counts</li>
+<li>Log-sum-exp accumulation for numerical stability</li>
+</ul>
+</section>
+<section id="hyperparameters" class="level2">
+<h2 class="anchored" data-anchor-id="hyperparameters">Hyperparameters</h2>
+<p>The six SBM hyperparameters are set via <code>bgm()</code>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 29%">
+<col style="width: 24%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>R argument</th>
+<th>Default</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\alpha_w\)</span></td>
+<td><code>beta_bernoulli_alpha</code></td>
+<td>1</td>
+<td>Beta shape for within-block inclusion</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_w\)</span></td>
+<td><code>beta_bernoulli_beta</code></td>
+<td>1</td>
+<td>Beta shape for within-block inclusion</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\alpha_b\)</span></td>
+<td><code>beta_bernoulli_alpha_between</code></td>
+<td>1</td>
+<td>Beta shape for between-block inclusion</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_b\)</span></td>
+<td><code>beta_bernoulli_beta_between</code></td>
+<td>1</td>
+<td>Beta shape for between-block inclusion</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\alpha_D\)</span></td>
+<td><code>dirichlet_alpha</code></td>
+<td>1</td>
+<td>Dirichlet concentration for cluster proportions</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\lambda\)</span></td>
+<td><code>lambda</code></td>
+<td>1</td>
+<td>Poisson rate for number of clusters</td>
+</tr>
+</tbody>
+</table>
+<p>When the between-block hyperparameters are not specified (NULL in R), they default to <span class="math inline">\(-1\)</span> in C++ (sentinel value), and the prior uses the within-block hyperparameters for all blocks.</p>
+</section>
+<section id="output" class="level2">
+<h2 class="anchored" data-anchor-id="output">Output</h2>
+<p>The cluster allocations at each post-warmup iteration are stored in <code>ChainResult::allocation_samples</code> and accessible via <code>extract_sbm()</code> in R, which returns the allocation matrix and a co-clustering probability matrix (proportion of iterations where each pair of variables was in the same cluster).</p>
 
 
 </section>

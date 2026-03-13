@@ -75,6 +75,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +359,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,35 +547,128 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>Implementation details of the mixed Markov random field in bgms.</p>
+<p>Implementation details of the mixed Markov random field in bgms. Source: <code>src/models/mixed/mixed_mrf_model.h</code> and four <code>.cpp</code> files (<code>mixed_mrf_model.cpp</code>, <code>mixed_mrf_gradient.cpp</code>, <code>mixed_mrf_likelihoods.cpp</code>, <code>mixed_mrf_metropolis.cpp</code>).</p>
 <section id="block-structure" class="level2">
-<h2 class="anchored" data-anchor-id="block-structure">Block Structure</h2>
-<!-- TODO: source — src/models/mixed/, discrete-discrete / continuous-continuous / cross-type -->
+<h2 class="anchored" data-anchor-id="block-structure">Block structure</h2>
+<p>The mixed MRF handles <span class="math inline">\(p\)</span> discrete and <span class="math inline">\(q\)</span> continuous variables. The parameter space is organized into three interaction blocks plus main effects:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 33%">
+<col style="width: 18%">
+<col style="width: 27%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Block</th>
+<th>Parameters</th>
+<th>Size</th>
+<th>Sampler</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Main effects</td>
+<td>Discrete thresholds + continuous means</td>
+<td><span class="math inline">\(\text{thresholds} + q\)</span></td>
+<td>NUTS</td>
+</tr>
+<tr class="even">
+<td>Discrete-discrete</td>
+<td><span class="math inline">\(\mathbf{K}_{xx}\)</span> (symmetric)</td>
+<td><span class="math inline">\(p(p-1)/2\)</span></td>
+<td>NUTS</td>
+</tr>
+<tr class="odd">
+<td>Cross-type</td>
+<td><span class="math inline">\(\mathbf{K}_{xy}\)</span></td>
+<td><span class="math inline">\(p \times q\)</span></td>
+<td>NUTS</td>
+</tr>
+<tr class="even">
+<td>Continuous-continuous</td>
+<td><span class="math inline">\(\mathbf{K}_{yy}\)</span> (precision)</td>
+<td><span class="math inline">\(q(q+1)/2\)</span></td>
+<td>Metropolis</td>
+</tr>
+</tbody>
+</table>
+<p>The continuous precision <span class="math inline">\(\mathbf{K}_{yy}\)</span> must remain positive definite, so it is excluded from the NUTS block and updated by element-wise Metropolis proposals with Cholesky rank-1 updates, identical to the GGM strategy.</p>
 </section>
 <section id="parameter-vector-layout" class="level2">
-<h2 class="anchored" data-anchor-id="parameter-vector-layout">Parameter Vector Layout</h2>
-<!-- TODO: source — how mixed parameters are stored and indexed -->
+<h2 class="anchored" data-anchor-id="parameter-vector-layout">Parameter vector layout</h2>
+<p>The model distinguishes three vector types:</p>
+<section id="active-vector-parameter_dimension" class="level3">
+<h3 class="anchored" data-anchor-id="active-vector-parameter_dimension">Active vector (<code>parameter_dimension()</code>)</h3>
+<p>Contains only the parameters that NUTS updates, excluding edges set to zero by edge selection:</p>
+<pre><code>[ thresholds | K_xx (active) | means | K_xy (active) ]</code></pre>
+<p>The mass matrix and gradient are dimensioned to this vector.</p>
 </section>
-<section id="sampling-strategy" class="level2">
-<h2 class="anchored" data-anchor-id="sampling-strategy">Sampling Strategy</h2>
-<!-- TODO: source — how the sampler handles mixed parameter updates -->
+<section id="full-vector-full_parameter_dimension" class="level3">
+<h3 class="anchored" data-anchor-id="full-vector-full_parameter_dimension">Full vector (<code>full_parameter_dimension()</code>)</h3>
+<p>Contains all NUTS-block parameters including inactive edges:</p>
+<pre><code>[ thresholds | K_xx (all) | means | K_xy (all) ]</code></pre>
+<p>Used for storage and initialization.</p>
+</section>
+<section id="storage-vector-storage_dimension" class="level3">
+<h3 class="anchored" data-anchor-id="storage-vector-storage_dimension">Storage vector (<code>storage_dimension()</code>)</h3>
+<p>Adds the Metropolis-updated continuous precision to the full vector:</p>
+<pre><code>[ thresholds | K_xx (all) | means | K_xy (all) | K_yy (all) ]</code></pre>
+<p>This is what gets saved to <code>ChainResult::samples</code> at each iteration.</p>
+</section>
+</section>
+<section id="hybrid-sampling-strategy" class="level2">
+<h2 class="anchored" data-anchor-id="hybrid-sampling-strategy">Hybrid sampling strategy</h2>
+<p>Each MCMC iteration has two phases:</p>
+<ol type="1">
+<li><p><strong>NUTS phase</strong> — Update the active parameter vector (thresholds, <span class="math inline">\(\mathbf{K}_{xx}\)</span>, means, <span class="math inline">\(\mathbf{K}_{xy}\)</span>) using one NUTS step. The <code>logp_and_gradient()</code> method computes the log-pseudoposterior and gradient for this block only.</p></li>
+<li><p><strong>Metropolis phase</strong> — Update the continuous precision elements (<span class="math inline">\(\mathbf{K}_{yy}\)</span>) one at a time via <code>do_pairwise_continuous_metropolis_step()</code>. Each proposal uses a Gaussian perturbation with Robbins-Monro-tuned SD, followed by a Cholesky rank-1 update to maintain positive definiteness.</p></li>
+</ol>
+<p>Edge indicator updates (when active) operate on all three interaction blocks.</p>
+</section>
+<section id="gradient-computation" class="level2">
+<h2 class="anchored" data-anchor-id="gradient-computation">Gradient computation</h2>
+<p>The gradient (<code>mixed_mrf_gradient.cpp</code>) is computed for the NUTS block only. It involves:</p>
+<ol type="1">
+<li><strong>Discrete conditionals</strong> — Category probabilities via <a href="../manual/variable-helpers.html">variable helpers</a>, contributing gradients for thresholds and <span class="math inline">\(\mathbf{K}_{xx}\)</span></li>
+<li><strong>Cross-type terms</strong> — Contributions from <span class="math inline">\(\mathbf{K}_{xy}\)</span> to both discrete and continuous conditional distributions</li>
+<li><strong>Continuous means</strong> — Gradient of the continuous-variable contribution to the pseudolikelihood</li>
+</ol>
+<p>The log-prior gradient adds the Cauchy prior penalty on pairwise interactions.</p>
+</section>
+<section id="pseudolikelihood-options" class="level2">
+<h2 class="anchored" data-anchor-id="pseudolikelihood-options">Pseudolikelihood options</h2>
+<p>The <code>pseudolikelihood</code> argument controls the continuous-variable likelihood:</p>
+<ul>
+<li><code>"conditional"</code> (default) — Uses the conditional distribution of each continuous variable given the rest, consistent with the discrete pseudolikelihood</li>
+<li><code>"marginal"</code> — Uses the marginal normal likelihood for the continuous block, which can be more efficient when <span class="math inline">\(q\)</span> is large</li>
+</ul>
+<p>The choice affects both the log-posterior evaluation and the gradient computation.</p>
+</section>
+<section id="missing-data" class="level2">
+<h2 class="anchored" data-anchor-id="missing-data">Missing data</h2>
+<p>The mixed MRF tracks missing indices separately for discrete and continuous variables (<code>missing_index_discrete</code>, <code>missing_index_continuous</code>). During imputation:</p>
+<ul>
+<li>Missing discrete values are sampled from their full conditional categorical distributions</li>
+<li>Missing continuous values are sampled from their conditional normal distributions given the current precision matrix</li>
+</ul>
 </section>
 <section id="output-assembly" class="level2">
-<h2 class="anchored" data-anchor-id="output-assembly">Output Assembly</h2>
-<!-- TODO: source — R/build_output.R: build_output_mixed_mrf() block layout -->
+<h2 class="anchored" data-anchor-id="output-assembly">Output assembly</h2>
+<p>The R output builder (<code>build_output_mixed_mrf()</code> in <code>build_output.R</code>) maps the flat storage vector back to the original variable ordering using <code>fill_mixed_symmetric()</code>. This function places discrete-discrete, continuous-continuous, and cross-type interactions into the correct cells of the <span class="math inline">\((p+q) \times (p+q)\)</span> output matrix, respecting the original column order (which may interleave discrete and continuous variables).</p>
 
 
 </section>

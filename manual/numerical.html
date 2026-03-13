@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -74,6 +109,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -329,7 +393,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -517,24 +581,93 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>Cross-platform numerical consistency in bgms.</p>
-<section id="custom-explog" class="level2">
-<h2 class="anchored" data-anchor-id="custom-explog">Custom exp/log</h2>
-<p>bgms uses openlibm for consistent exp/log behavior across platforms.</p>
-<p><em>Content to be added: rationale, implementation details.</em></p>
+<p>Cross-platform numerical consistency in bgms. Source: <code>src/math/custom_explog.h</code>, <code>custom_explog.cpp</code>, <code>custom_arma_explog.h</code>, and <code>explog_macros.h</code>.</p>
+<section id="the-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem">The problem</h2>
+<p>Standard library implementations of <code>exp()</code> and <code>log()</code> differ across platforms. The GNU C Library (glibc, used on Linux), macOS libm, and MSVC’s C runtime produce slightly different results for the same input, especially near boundary values. These differences are small (last-bit-of-precision level) but compound across thousands of MCMC iterations, causing:</p>
+<ul>
+<li>Different platforms to produce different posterior samples from the same seed</li>
+<li>CRAN check failures when comparing numerical output across architectures</li>
+<li>Occasional test failures when expected values are computed on one platform and checked on another</li>
+</ul>
+</section>
+<section id="openlibm-solution" class="level2">
+<h2 class="anchored" data-anchor-id="openlibm-solution">OpenLibM solution</h2>
+<p>bgms ships a copy of the <code>__ieee754_exp()</code> and <code>__ieee754_log()</code> implementations from OpenLibM (the FreeBSD/Sun math library). These are self-contained C functions that follow IEEE 754 exactly and produce identical results on all platforms.</p>
+<p>The implementation in <code>custom_explog.cpp</code> (approximately 800 lines) is the original Sun/FreeBSD code, lightly adapted to compile as C++ within an R package.</p>
+</section>
+<section id="platform-detection" class="level2">
+<h2 class="anchored" data-anchor-id="platform-detection">Platform detection</h2>
+<p>The macro system in <code>explog_macros.h</code> controls when custom exp/log is used:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#if (defined(_WIN32) &amp;&amp; (!defined(CUSTOM_EXP_LOG) || CUSTOM_EXP_LOG == 0)) \</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">  || (!defined(_WIN32) &amp;&amp; defined(CUSTOM_EXP_LOG) &amp;&amp; CUSTOM_EXP_LOG != 0)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">#define USE_CUSTOM_LOG </span><span class="dv">1</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#endif</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The logic:</p>
+<ul>
+<li><strong>Windows</strong> — Uses custom exp/log by default because MSVC’s <code>std::exp</code>/<code>std::log</code> differ from POSIX implementations and are slower</li>
+<li><strong>Linux/macOS</strong> — Uses the system libm by default (which is fast and POSIX-compliant). Custom exp/log can be enabled by setting <code>CUSTOM_EXP_LOG=1</code></li>
+</ul>
+<p>The <code>configure</code> and <code>configure.win</code> scripts set the appropriate compiler flag in <code>Makevars</code>.</p>
+</section>
+<section id="usage-in-c-code" class="level2">
+<h2 class="anchored" data-anchor-id="usage-in-c-code">Usage in C++ code</h2>
+<p>Two levels of macros are available:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Macro</th>
+<th>Expands to (custom)</th>
+<th>Expands to (system)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>MY_EXP(x)</code></td>
+<td><code>__ieee754_exp(x)</code></td>
+<td><code>std::exp(x)</code></td>
+</tr>
+<tr class="even">
+<td><code>ARMA_MY_EXP(X)</code></td>
+<td><code>custom_arma_exp(X)</code></td>
+<td><code>arma::exp(X)</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>ARMA_MY_EXP</code> variant applies element-wise custom exp/log to Armadillo matrices and vectors. It wraps <code>custom_arma_exp()</code> and <code>custom_arma_log()</code> from <code>custom_arma_explog.h</code>, which iterate over matrix elements and call the scalar <code>__ieee754_exp</code>/<code>__ieee754_log</code>.</p>
+</section>
+<section id="performance" class="level2">
+<h2 class="anchored" data-anchor-id="performance">Performance</h2>
+<p>On macOS and Linux, the system <code>exp()</code> and <code>log()</code> are highly optimized (hardware-accelerated on some architectures). The custom versions are slightly slower but guarantee cross-platform reproducibility.</p>
+<p>On Windows with MSVC, the custom implementations are often 2–5× <em>faster</em> than <code>std::exp</code>/<code>std::log</code>, making the custom path beneficial for both correctness and speed.</p>
+</section>
+<section id="exp_bound-and-overflow-prevention" class="level2">
+<h2 class="anchored" data-anchor-id="exp_bound-and-overflow-prevention">EXP_BOUND and overflow prevention</h2>
+<p>The <a href="../manual/variable-helpers.html">variable helpers</a> use <code>EXP_BOUND = 709</code> as the threshold for safe exponentiation, derived from the IEEE 754 double-precision range:</p>
+<ul>
+<li><span class="math inline">\(\exp(709) \approx 8.2 \times 10^{307}\)</span> — largest representable</li>
+<li><span class="math inline">\(\exp(710) = +\text{Inf}\)</span></li>
+<li><span class="math inline">\(\exp(-745) \approx 5 \times 10^{-324}\)</span> — smallest positive subnormal</li>
+<li><span class="math inline">\(\exp(-746) = 0\)</span></li>
+</ul>
+<p>This bound is used throughout the codebase (not just in variable helpers) to guard against overflow before calling <code>MY_EXP()</code>.</p>
+</section>
+<section id="r-interface" class="level2">
+<h2 class="anchored" data-anchor-id="r-interface">R interface</h2>
+<p>The <code>explog_interface.cpp</code> file exposes the custom exp/log functions to R for testing purposes. This allows verification that the custom implementations match expected values in R-level unit tests.</p>
 
 
 </section>

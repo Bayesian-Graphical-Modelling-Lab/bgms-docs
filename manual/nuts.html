@@ -75,6 +75,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +359,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,23 +547,118 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The No-U-Turn Sampler (NUTS) is the primary MCMC algorithm used in bgms for continuous parameter sampling.</p>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p><em>Content to be added: No U-Turn criterion, binary tree construction, trajectory length selection.</em></p>
+<p>The No-U-Turn Sampler (NUTS) is the primary MCMC algorithm used in bgms for continuous parameter sampling. It extends Hamiltonian Monte Carlo by adaptively selecting the trajectory length, eliminating the need to tune the number of leapfrog steps.</p>
+<p>The implementation is in <code>src/mcmc/algorithms/nuts.h</code> and <code>nuts.cpp</code>, adapted from Stan’s <code>base_nuts.hpp</code> (BSD-3-Clause).</p>
+<section id="leapfrog-integration" class="level2">
+<h2 class="anchored" data-anchor-id="leapfrog-integration">Leapfrog integration</h2>
+<p>Each elementary step of HMC is a leapfrog integrator that approximately preserves the Hamiltonian <span class="math inline">\(H(\theta, r) = -\log p(\theta) + \frac{1}{2} r^\top M^{-1} r\)</span>:</p>
+<ol type="1">
+<li>Half-step momentum: <span class="math inline">\(r \leftarrow r + \frac{\epsilon}{2} \nabla \log p(\theta)\)</span></li>
+<li>Full-step position: <span class="math inline">\(\theta \leftarrow \theta + \epsilon\, M^{-1} r\)</span></li>
+<li>Half-step momentum: <span class="math inline">\(r \leftarrow r + \frac{\epsilon}{2} \nabla \log p(\theta)\)</span></li>
+</ol>
+<p>The implementation uses a diagonal mass matrix <span class="math inline">\(M\)</span>, stored as the vector of inverse diagonal elements (<code>inv_mass_diag</code>).</p>
+<section id="memoizer" class="level3">
+<h3 class="anchored" data-anchor-id="memoizer">Memoizer</h3>
+<p>The <code>Memoizer</code> class in <code>leapfrog.h</code> caches a single <span class="math inline">\((\log p, \nabla \log p)\)</span> pair keyed by the parameter vector <span class="math inline">\(\theta\)</span>. During NUTS tree building, each leapfrog step produces a new unique <span class="math inline">\(\theta\)</span>, so the cache trivially avoids redundant evaluations at tree-node boundaries where the same <span class="math inline">\(\theta\)</span> appears as both the end of one subtree and the start of another.</p>
+</section>
+</section>
+<section id="binary-tree-construction" class="level2">
+<h2 class="anchored" data-anchor-id="binary-tree-construction">Binary tree construction</h2>
+<p>NUTS builds a balanced binary tree by doubling the trajectory in a randomly chosen direction (forward or backward) at each depth level. The tree grows until one of these stopping conditions is met:</p>
+<ol type="1">
+<li><strong>U-turn</strong> — The trajectory starts bending back. Detected by checking whether the momentum sum across the subtree is no longer moving away from the endpoints (the generalized U-turn criterion from Betancourt, 2017).</li>
+<li><strong>Divergence</strong> — The Hamiltonian error exceeds a threshold (default: <span class="math inline">\(\Delta H &gt; 1000\)</span>), indicating the integrator has entered a region of high curvature.</li>
+<li><strong>Maximum depth</strong> — The tree reaches <code>max_tree_depth</code> (default 10, corresponding to <span class="math inline">\(2^{10} = 1024\)</span> leapfrog steps).</li>
+</ol>
+<section id="buildtreeresult" class="level3">
+<h3 class="anchored" data-anchor-id="buildtreeresult">BuildTreeResult</h3>
+<p>Each subtree returns a <code>BuildTreeResult</code> struct containing:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>theta_min</code>, <code>r_min</code></td>
+<td>Leftmost (backward) endpoint</td>
+</tr>
+<tr class="even">
+<td><code>theta_plus</code>, <code>r_plus</code></td>
+<td>Rightmost (forward) endpoint</td>
+</tr>
+<tr class="odd">
+<td><code>theta_prime</code>, <code>r_prime</code></td>
+<td>Proposed sample from this subtree</td>
+</tr>
+<tr class="even">
+<td><code>rho</code></td>
+<td>Running momentum sum (for U-turn check)</td>
+</tr>
+<tr class="odd">
+<td><code>n_prime</code></td>
+<td>Number of valid states (for multinomial sampling)</td>
+</tr>
+<tr class="even">
+<td><code>s_prime</code></td>
+<td>Continuation flag (0 = stop)</td>
+</tr>
+<tr class="odd">
+<td><code>alpha</code>, <code>n_alpha</code></td>
+<td>Acceptance probability accumulator</td>
+</tr>
+<tr class="even">
+<td><code>divergent</code></td>
+<td>Whether a divergence was detected</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="proposal-selection" class="level3">
+<h3 class="anchored" data-anchor-id="proposal-selection">Proposal selection</h3>
+<p>Within a valid (non-U-turning) subtree, the proposal is selected via multinomial sampling weighted by the unnormalized target density. When two subtrees are merged, the proposed sample is drawn from the combined set with probability proportional to the number of valid states in each subtree.</p>
+</section>
+</section>
+<section id="divergence-detection" class="level2">
+<h2 class="anchored" data-anchor-id="divergence-detection">Divergence detection</h2>
+<p>A divergence occurs when a single leapfrog step produces a Hamiltonian error <span class="math inline">\(\Delta H = H' - H_0 &gt; 1000\)</span>. Divergences indicate that the step size is too large relative to the local curvature of the posterior. The number of divergent transitions is recorded in <code>StepResult::NUTSDiagnostics</code> and surfaced to the user via <code>extract_nuts_diagnostics()</code>.</p>
+</section>
+<section id="step-size-heuristic" class="level2">
+<h2 class="anchored" data-anchor-id="step-size-heuristic">Step-size heuristic</h2>
+<p>Before the first NUTS step, the <code>heuristic_initial_step_size()</code> function in <code>hmc.h</code> finds a reasonable starting step size:</p>
+<ol type="1">
+<li>Start with <span class="math inline">\(\epsilon = 1.0\)</span></li>
+<li>Take one leapfrog step and compute the acceptance probability</li>
+<li>If acceptance is above the target (0.625), double <span class="math inline">\(\epsilon\)</span>; otherwise halve it</li>
+<li>Repeat until the acceptance probability crosses the target</li>
+</ol>
+<p>This heuristic runs once at initialization and again whenever the mass matrix is updated during warmup.</p>
+</section>
+<section id="nuts-diagnostics" class="level2">
+<h2 class="anchored" data-anchor-id="nuts-diagnostics">NUTS diagnostics</h2>
+<p>Each NUTS step records three diagnostics:</p>
+<ul>
+<li><strong>Tree depth</strong> — Number of doubling steps (0 to <code>max_tree_depth</code>). Consistently hitting the maximum indicates the step size may be too small.</li>
+<li><strong>Divergent</strong> — Whether a divergence was detected in any leapfrog step during tree building.</li>
+<li><strong>Energy</strong> — The Hamiltonian <span class="math inline">\(H = -\log p(\theta) + \frac{1}{2} r^\top M^{-1} r\)</span>. Used to compute E-BFMI (energy Bayesian fraction of missing information).</li>
+</ul>
+<p>These diagnostics are collected per chain and accessible via <code>extract_nuts_diagnostics()</code> in R.</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>

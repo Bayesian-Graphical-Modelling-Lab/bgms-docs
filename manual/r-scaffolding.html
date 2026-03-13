@@ -330,7 +330,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,61 +518,183 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The R layer that sits between user-facing functions and the C++ engine: validation, spec construction, sampler dispatch, and output assembly.</p>
-<section id="data-flow-overview" class="level2">
-<h2 class="anchored" data-anchor-id="data-flow-overview">Data Flow Overview</h2>
-<!-- TODO: source — diagram: bgm() → bgm_spec() → run_sampler() → build_output() -->
+<p>The R layer sits between user-facing functions (<code>bgm()</code>, <code>bgmCompare()</code>) and the C++ engine. It validates inputs, constructs a specification object, dispatches to the appropriate C++ sampler, and assembles the returned output into an S3 fit object.</p>
+<section id="data-flow" class="level2">
+<h2 class="anchored" data-anchor-id="data-flow">Data flow</h2>
+<pre><code>bgm(x, ...)
+  ↓
+bgm_spec()            ← validates, assembles sub-lists
+  ↓
+new_bgm_spec()        ← asserts types and field presence
+  ↓
+validate_bgm_spec()   ← cross-field invariant checks
+  ↓
+run_sampler(spec)      ← dispatches to C++ via switch(model_type)
+  ↓
+build_output(spec, raw) ← normalizes raw C++ output into S3 object</code></pre>
+<p>Both <code>bgm()</code> and <code>bgmCompare()</code> follow this pipeline. The <code>bgmCompare()</code> path adds group-specific preprocessing (projection matrices, group indices, precomputed sufficient statistics) before the spec is constructed.</p>
 </section>
 <section id="validation-pipeline" class="level2">
-<h2 class="anchored" data-anchor-id="validation-pipeline">Validation Pipeline</h2>
-<!-- TODO: source — R/validate_data.R, R/validate_variable_types.R, R/validate_sampler.R -->
-<section id="data-checks" class="level3">
-<h3 class="anchored" data-anchor-id="data-checks">Data Checks</h3>
-<!-- TODO: source — data_check(), validate_missing_data(), reformat_ordinal_data(), center_continuous_data() -->
+<h2 class="anchored" data-anchor-id="validation-pipeline">Validation pipeline</h2>
+<p>Validation is split across four files, each with a focused scope.</p>
+<section id="data-checks-validate_data.r" class="level3">
+<h3 class="anchored" data-anchor-id="data-checks-validate_data.r">Data checks (<code>validate_data.R</code>)</h3>
+<p><code>data_check()</code> is the entry point. It enforces:</p>
+<ul>
+<li>Input is a data frame or matrix (converts to integer matrix for ordinal data)</li>
+<li>No constant columns</li>
+<li>At least two variables</li>
+<li>Column names exist and are unique</li>
+<li>For ordinal data: all values are non-negative integers</li>
+</ul>
+<p>Missing data handling branches on <code>na_action</code>:</p>
+<ul>
+<li><code>"listwise"</code> — rows with any <code>NA</code> are dropped</li>
+<li><code>"impute"</code> — missing indices are recorded for Bayesian imputation in C++</li>
+</ul>
 </section>
-<section id="variable-type-detection" class="level3">
-<h3 class="anchored" data-anchor-id="variable-type-detection">Variable Type Detection</h3>
-<!-- TODO: source — R/validate_variable_types.R -->
+<section id="variable-type-detection-validate_model.r" class="level3">
+<h3 class="anchored" data-anchor-id="variable-type-detection-validate_model.r">Variable type detection (<code>validate_model.R</code>)</h3>
+<p><code>validate_variable_types()</code> classifies each column as <code>"ordinal"</code> or <code>"blume-capel"</code> (for discrete variables) based on the <code>variable_type</code> argument. When <code>variable_type = "ordinal"</code> (the default), all discrete variables are treated as ordinal. When a named vector is provided, each variable is classified individually.</p>
+<p><code>validate_baseline_category()</code> sets the reference category for Blume-Capel variables. The default (0) places the reference at the lowest observed category.</p>
 </section>
-<section id="sampler-validation" class="level3">
-<h3 class="anchored" data-anchor-id="sampler-validation">Sampler Validation</h3>
-<!-- TODO: source — R/validate_sampler.R -->
+<section id="sampler-validation-validate_sampler.r" class="level3">
+<h3 class="anchored" data-anchor-id="sampler-validation-validate_sampler.r">Sampler validation (<code>validate_sampler.R</code>)</h3>
+<p><code>validate_sampler()</code> resolves the <code>interaction_scale</code> argument into a concrete sampler type (<code>"nuts"</code>, <code>"hmc"</code>, or <code>"adaptive_metropolis"</code>) and sets defaults for tuning parameters (<code>target_accept</code>, <code>nuts_max_depth</code>, <code>hmc_num_leapfrogs</code>). It detects the number of available cores and resolves the progress display type.</p>
 </section>
-</section>
-<section id="spec-construction" class="level2">
-<h2 class="anchored" data-anchor-id="spec-construction">Spec Construction</h2>
-<!-- TODO: source — R/bgm_spec.R: bgm_spec(), new_bgm_spec(), validate_bgm_spec() -->
-<section id="model-specific-builders" class="level3">
-<h3 class="anchored" data-anchor-id="model-specific-builders">Model-Specific Builders</h3>
-<!-- TODO: source — build_spec_ggm(), build_spec_omrf(), build_spec_mixed_mrf(), build_spec_compare() -->
-</section>
-<section id="cross-field-invariants" class="level3">
-<h3 class="anchored" data-anchor-id="cross-field-invariants">Cross-Field Invariants</h3>
-<!-- TODO: source — validate_bgm_spec() checks -->
+<section id="edge-prior-validation-validate_model.r" class="level3">
+<h3 class="anchored" data-anchor-id="edge-prior-validation-validate_model.r">Edge prior validation (<code>validate_model.R</code>)</h3>
+<p><code>validate_edge_prior()</code> and <code>validate_difference_prior()</code> map string names (<code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, <code>"Stochastic-Block"</code>) to validated prior configurations. For the SBM prior, the six hyperparameters (<code>beta_bernoulli_alpha</code>, <code>beta_bernoulli_beta</code>, <code>beta_bernoulli_alpha_between</code>, <code>beta_bernoulli_beta_between</code>, <code>dirichlet_alpha</code>, <code>lambda</code>) are checked and defaults applied.</p>
 </section>
 </section>
-<section id="sampler-dispatch" class="level2">
-<h2 class="anchored" data-anchor-id="sampler-dispatch">Sampler Dispatch</h2>
-<!-- TODO: source — R/run_sampler.R: switch on model_type → C++ entry points -->
+<section id="spec-construction-bgm_spec.r" class="level2">
+<h2 class="anchored" data-anchor-id="spec-construction-bgm_spec.r">Spec construction (<code>bgm_spec.R</code>)</h2>
+<p><code>bgm_spec()</code> is the user-facing constructor. It calls all validators, then delegates to one of four model-specific builders:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 31%">
+<col style="width: 25%">
+<col style="width: 42%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model type</th>
+<th>Builder</th>
+<th>Key additions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>"ggm"</code></td>
+<td><code>build_spec_ggm()</code></td>
+<td>Sufficient statistics (<code>X'X</code>), precision scale</td>
+</tr>
+<tr class="even">
+<td><code>"omrf"</code></td>
+<td><code>build_spec_omrf()</code></td>
+<td>Category counts, ordinal/BC flags, scaling factors</td>
+</tr>
+<tr class="odd">
+<td><code>"mixed_mrf"</code></td>
+<td><code>build_spec_mixed_mrf()</code></td>
+<td>Separate discrete/continuous matrices, pseudolikelihood type</td>
+</tr>
+<tr class="even">
+<td><code>"compare"</code></td>
+<td><code>build_spec_compare()</code></td>
+<td>Group indices, projection matrix, precomputed pairwise stats</td>
+</tr>
+</tbody>
+</table>
+<p>Each builder assembles five sub-lists:</p>
+<ul>
+<li><code>$data</code> — observations, dimensions, variable names</li>
+<li><code>$variables</code> — variable types, ordinal flags, baseline categories</li>
+<li><code>$missing</code> — <code>na_action</code>, imputation flag, missing indices</li>
+<li><code>$prior</code> — prior type, hyperparameters, scaling factors</li>
+<li><code>$sampler</code> — algorithm, iterations, warmup, chains, seed</li>
+</ul>
+<p>The result passes through <code>new_bgm_spec()</code> (type assertions) and <code>validate_bgm_spec()</code> (cross-field invariants, such as: if <code>edge_selection = FALSE</code> then <code>edge_prior</code> must be <code>"Not applicable"</code>).</p>
 </section>
-<section id="output-assembly" class="level2">
-<h2 class="anchored" data-anchor-id="output-assembly">Output Assembly</h2>
-<!-- TODO: source — R/build_output.R: normalize samples, split main/pairwise, assemble S3 object -->
+<section id="sampler-dispatch-run_sampler.r" class="level2">
+<h2 class="anchored" data-anchor-id="sampler-dispatch-run_sampler.r">Sampler dispatch (<code>run_sampler.R</code>)</h2>
+<p><code>run_sampler()</code> reads <code>spec$model_type</code> and calls the corresponding C++ entry point:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 35%">
+<col style="width: 35%">
+<col style="width: 29%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><code>model_type</code></th>
+<th>C++ function</th>
+<th>Entry file</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>"ggm"</code></td>
+<td><code>sample_ggm()</code></td>
+<td><code>src/sample_ggm.cpp</code></td>
+</tr>
+<tr class="even">
+<td><code>"omrf"</code></td>
+<td><code>sample_omrf()</code></td>
+<td><code>src/sample_omrf.cpp</code></td>
+</tr>
+<tr class="odd">
+<td><code>"mixed_mrf"</code></td>
+<td><code>sample_mixed_mrf()</code></td>
+<td><code>src/sample_mixed.cpp</code></td>
+</tr>
+<tr class="even">
+<td><code>"compare"</code></td>
+<td><code>run_bgmCompare_parallel()</code></td>
+<td><code>src/bgmCompare_interface.cpp</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each C++ function receives an R list of arguments, constructs model and prior objects, and calls <code>run_mcmc_sampler()</code> from the chain runner. The return value is a list of per-chain raw output.</p>
+</section>
+<section id="output-assembly-build_output.r" class="level2">
+<h2 class="anchored" data-anchor-id="output-assembly-build_output.r">Output assembly (<code>build_output.R</code>)</h2>
+<p><code>build_output()</code> transforms raw C++ output into the S3 objects returned to the user (<code>"bgms"</code> or <code>"bgmCompare"</code> class).</p>
+<section id="ggm-and-omrf-build_output_bgm" class="level3">
+<h3 class="anchored" data-anchor-id="ggm-and-omrf-build_output_bgm">GGM and OMRF (<code>build_output_bgm()</code>)</h3>
+<p>The GGM and OMRF paths share a unified builder. Key operations:</p>
+<ol type="1">
+<li><strong>Normalize raw samples</strong> — Split the flat parameter vector into main-effect and pairwise-interaction matrices per chain</li>
+<li><strong>Compute posterior means</strong> — Average across iterations and chains</li>
+<li><strong>Compute inclusion probabilities</strong> — Average indicator samples (when edge selection is active)</li>
+<li><strong>Assemble <code>$raw_samples</code></strong> — Per-chain lists of <code>main</code>, <code>pairwise</code>, <code>indicator</code>, and <code>allocations</code> matrices</li>
+<li><strong>NUTS diagnostics</strong> — When available, collect tree depth, divergence, and energy samples into <code>$nuts_diagnostics</code></li>
+<li><strong>Warmup check</strong> — Collect <code>$warmup_check</code> from C++</li>
+</ol>
+</section>
+<section id="mixed-mrf-build_output_mixed_mrf" class="level3">
+<h3 class="anchored" data-anchor-id="mixed-mrf-build_output_mixed_mrf">Mixed MRF (<code>build_output_mixed_mrf()</code>)</h3>
+<p>The mixed MRF builder handles the block structure: discrete-discrete, continuous-continuous, and cross-type interactions are stored in separate blocks by C++ and need to be mapped back to the original variable ordering.</p>
+</section>
+<section id="compare-build_output_compare" class="level3">
+<h3 class="anchored" data-anchor-id="compare-build_output_compare">Compare (<code>build_output_compare()</code>)</h3>
+<p>The comparison builder splits posterior means into group-level (<code>$group_posterior_means</code>) and difference (<code>$difference_posterior_means</code>) components, and computes difference inclusion probabilities.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

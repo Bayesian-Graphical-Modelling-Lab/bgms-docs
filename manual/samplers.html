@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -75,6 +110,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +394,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,47 +582,99 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The sampler class hierarchy and how different MCMC algorithms are plugged into the chain runner.</p>
+<p>The sampler classes in <code>src/mcmc/samplers/</code> are header-only wrappers that own adaptation state and delegate to the stateless algorithm functions in <code>src/mcmc/algorithms/</code>. The chain runner interacts with samplers through the <code>SamplerBase</code> interface.</p>
 <section id="class-hierarchy" class="level2">
-<h2 class="anchored" data-anchor-id="class-hierarchy">Class Hierarchy</h2>
-<!-- TODO: source — src/mcmc/samplers/sampler_base.h -->
-<section id="samplerbase" class="level3">
-<h3 class="anchored" data-anchor-id="samplerbase">SamplerBase</h3>
-<!-- TODO: source — virtual interface: step(), initialize(), has_nuts_diagnostics() -->
+<h2 class="anchored" data-anchor-id="class-hierarchy">Class hierarchy</h2>
+<pre><code>SamplerBase                       (abstract)
+├── MetropolisSampler             — element-wise Metropolis-Hastings
+└── GradientSamplerBase           (abstract, owns HMCAdaptationController)
+    ├── HMCSampler                — fixed-length leapfrog
+    └── NUTSSampler               — adaptive tree depth</code></pre>
+<p>The <code>HybridNUTSSampler</code> variant exists for the mixed MRF, combining a NUTS step for the main parameter block with a Metropolis step for the continuous precision elements.</p>
 </section>
-<section id="gradientsamplerbase" class="level3">
-<h3 class="anchored" data-anchor-id="gradientsamplerbase">GradientSamplerBase</h3>
-<!-- TODO: source — intermediate class for gradient-based samplers -->
+<section id="samplerbase-interface" class="level2">
+<h2 class="anchored" data-anchor-id="samplerbase-interface">SamplerBase interface</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SamplerBase <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> StepResult step<span class="op">(</span>BaseModel<span class="op">&amp;</span> model<span class="op">,</span> <span class="dt">int</span> iteration<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">void</span> initialize<span class="op">(</span>BaseModel<span class="op">&amp;</span> model<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">bool</span> has_nuts_diagnostics<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>step()</code> performs one MCMC iteration and returns a <code>StepResult</code> containing the accepted parameter vector, acceptance probability, and optional NUTS diagnostics.</p>
+<p><code>initialize()</code> is called once before the first iteration. For gradient-based samplers, it runs the step-size heuristic that finds a reasonable initial step size by iteratively doubling or halving until the acceptance probability is near the target (default 0.625).</p>
 </section>
-<section id="concrete-samplers" class="level3">
-<h3 class="anchored" data-anchor-id="concrete-samplers">Concrete Samplers</h3>
-<!-- TODO: source — MetropolisSampler, HMCSampler, NUTSSampler, HybridNUTSSampler -->
+<section id="metropolissampler" class="level2">
+<h2 class="anchored" data-anchor-id="metropolissampler">MetropolisSampler</h2>
+<p>The simplest sampler. Each call to <code>step()</code>:</p>
+<ol type="1">
+<li>Calls <code>model.do_one_metropolis_step(iteration)</code>, which performs a full sweep of element-wise proposals</li>
+<li>If the model has edge selection and the warmup schedule indicates selection is active, calls <code>model.update_edge_indicators()</code></li>
+<li>Returns the current parameters as the accepted state</li>
+</ol>
+<p>Proposal standard deviations are tuned during warmup via Robbins-Monro updates (see <a href="../manual/warmup.html">Warmup Schedule</a>).</p>
 </section>
+<section id="gradientsamplerbase" class="level2">
+<h2 class="anchored" data-anchor-id="gradientsamplerbase">GradientSamplerBase</h2>
+<p>Shared base class for HMC and NUTS. It owns an <code>HMCAdaptationController</code> that manages:</p>
+<ul>
+<li><strong>Dual averaging</strong> for step-size adaptation</li>
+<li><strong>Diagonal mass matrix</strong> accumulation via Welford’s online algorithm</li>
+</ul>
+<p>The <code>step()</code> method in <code>GradientSamplerBase</code>:</p>
+<ol type="1">
+<li>Calls the concrete <code>do_gradient_step()</code> override (HMC or NUTS)</li>
+<li>Passes the acceptance probability to the adaptation controller</li>
+<li>If the mass matrix was just updated (end of a warmup window), reinitializes the step size with the heuristic</li>
+</ol>
+<p>After warmup, the adaptation controller freezes and returns the smoothed step size from dual averaging.</p>
+</section>
+<section id="hmcsampler" class="level2">
+<h2 class="anchored" data-anchor-id="hmcsampler">HMCSampler</h2>
+<p>Performs fixed-length leapfrog integration. The number of leapfrog steps is set at construction from <code>config.num_leapfrogs</code>. Each call to <code>do_gradient_step()</code> invokes <code>hmc_step()</code> from <code>mcmc/algorithms/hmc.h</code>.</p>
+</section>
+<section id="nutssampler" class="level2">
+<h2 class="anchored" data-anchor-id="nutssampler">NUTSSampler</h2>
+<p>Uses the No-U-Turn criterion to adapt trajectory length automatically. The maximum tree depth is set from <code>config.max_tree_depth</code> (default 10). Returns NUTS diagnostics (tree depth, divergence flag, energy) with each step. See <a href="../manual/nuts.html">NUTS Algorithm</a> for the tree-building details.</p>
 </section>
 <section id="factory-dispatch" class="level2">
-<h2 class="anchored" data-anchor-id="factory-dispatch">Factory Dispatch</h2>
-<!-- TODO: source — create_sampler() in src/mcmc/execution/chain_runner.cpp -->
+<h2 class="anchored" data-anchor-id="factory-dispatch">Factory dispatch</h2>
+<p><code>create_sampler()</code> in <code>chain_runner.cpp</code> constructs the right sampler based on the model’s capabilities and the user’s choice:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>unique_ptr<span class="op">&lt;</span>SamplerBase<span class="op">&gt;</span> create_sampler<span class="op">(</span><span class="at">const</span> SamplerConfig<span class="op">&amp;</span> config<span class="op">,</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                                        WarmupSchedule<span class="op">&amp;</span> schedule<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">switch</span><span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> nuts<span class="op">:</span>                <span class="cf">return</span> make_unique<span class="op">&lt;</span>NUTSSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> hamiltonian_mc<span class="op">:</span>      <span class="cf">return</span> make_unique<span class="op">&lt;</span>HMCSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> adaptive_metropolis<span class="op">:</span> <span class="cf">return</span> make_unique<span class="op">&lt;</span>MetropolisSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The GGM always uses <code>MetropolisSampler</code> because it does not provide a gradient. The OMRF and mixed MRF default to NUTS but fall back to Metropolis when the user requests it via <code>interaction_scale</code>.</p>
 </section>
 <section id="step-size-adaptation" class="level2">
-<h2 class="anchored" data-anchor-id="step-size-adaptation">Step-Size Adaptation</h2>
-<!-- TODO: source — dual-averaging in sampler implementations -->
+<h2 class="anchored" data-anchor-id="step-size-adaptation">Step-size adaptation</h2>
+<p>The <code>DualAveraging</code> class implements the Nesterov dual-averaging scheme from Hoffman and Gelman (2014). During warmup, each step’s acceptance probability is fed to the dual averager, which maintains both a current step size (for exploration) and a smoothed average (used after warmup).</p>
+<p>Key parameters:</p>
+<ul>
+<li><strong>Target acceptance</strong> — Default 0.8 for NUTS</li>
+<li><strong><span class="math inline">\(\gamma\)</span>, <span class="math inline">\(t_0\)</span>, <span class="math inline">\(\kappa\)</span></strong> — Shrinkage and decay parameters from the NUTS paper</li>
+</ul>
 </section>
 <section id="mass-matrix-tuning" class="level2">
-<h2 class="anchored" data-anchor-id="mass-matrix-tuning">Mass Matrix Tuning</h2>
-<!-- TODO: source — diagonal mass matrix estimation during warmup -->
+<h2 class="anchored" data-anchor-id="mass-matrix-tuning">Mass matrix tuning</h2>
+<p>The <code>DiagMassMatrixAccumulator</code> collects parameter samples during warmup stage 2 using Welford’s algorithm for numerically stable variance computation. At the end of each adaptation window, the accumulated variance is extracted as the diagonal mass matrix.</p>
+<p>The variance estimate is blended with a prior (shrunk toward 1.0) to prevent degenerate mass matrices early in warmup when few samples are available.</p>
+<p>When the mass matrix changes, the step size is reinitialized from scratch using the heuristic, because the optimal step size depends on the mass matrix.</p>
 
 
 </section>

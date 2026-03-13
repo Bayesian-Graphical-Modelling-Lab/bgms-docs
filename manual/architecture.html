@@ -330,7 +330,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,72 +518,134 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development. Content will be migrated from <code>dev/plans/architecture.md</code> in the bgms repository.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>The bgms C++ backend is organized in three layers:</p>
+<p>The bgms C++ backend is organized in five top-level directories under <code>src/</code>. Each directory has a distinct role, and dependencies flow downward: algorithms depend on math utilities but not on models, and the execution layer orchestrates everything.</p>
+<section id="source-layout" class="level2">
+<h2 class="anchored" data-anchor-id="source-layout">Source layout</h2>
+<pre><code>src/
+├── mcmc/
+│   ├── algorithms/      # Stateless: nuts_step(), hmc_step(), leapfrog()
+│   ├── samplers/        # Stateful: NUTSSampler, HMCSampler, MetropolisSampler
+│   └── execution/       # Orchestration: chain_runner, warmup_schedule, chain_result
+├── models/
+│   ├── base_model.h     # Abstract interface (30+ virtual methods)
+│   ├── ggm/             # GGMModel — precision matrix, Metropolis-only
+│   ├── omrf/            # OMRFModel — ordinal MRF, gradient-based
+│   └── mixed/           # MixedMRFModel — hybrid NUTS+Metropolis
+├── priors/
+│   ├── edge_prior.h     # BaseEdgePrior + Bernoulli, BetaBernoulli, SBM
+│   ├── sbm_edge_prior.h # MFM-SBM Gibbs updates
+│   └── sbm_edge_prior.cpp
+├── math/
+│   ├── cholupdate.h/cpp # Rank-1 Cholesky update/downdate (Givens/hyperbolic)
+│   ├── cholesky_helpers.h # Log-determinant, Schur complement
+│   ├── custom_explog.h/cpp # OpenLibM exp/log for cross-platform consistency
+│   ├── custom_arma_explog.h # Armadillo wrappers for custom exp/log
+│   └── explog_macros.h  # Platform detection macros (MY_EXP, ARMA_MY_EXP)
+├── utils/
+│   ├── variable_helpers.h/cpp # Numerically stable MRF probabilities
+│   ├── common_helpers.h # Enums (UpdateMethod, EdgePrior), counting helpers
+│   ├── progress_manager.h/cpp # Multi-chain progress bar
+│   └── print_mutex.h    # Thread-safe printing
+├── rng/
+│   └── rng_utils.h      # SafeRNG wrapper around dqrng::xoshiro256plusplus
+├── bgmCompare/          # Group comparison sampler and helpers
+│   ├── bgmCompare_sampler.h/cpp
+│   ├── bgmCompare_helper.h/cpp
+│   ├── bgmCompare_logp_and_grad.h/cpp
+│   └── bgmCompare_output.h
+└── [interface files]    # Rcpp entry points: sample_ggm.cpp, sample_omrf.cpp, etc.</code></pre>
+</section>
+<section id="layer-separation" class="level2">
+<h2 class="anchored" data-anchor-id="layer-separation">Layer separation</h2>
 <table class="caption-top table">
 <colgroup>
+<col style="width: 21%">
 <col style="width: 30%">
-<col style="width: 43%">
-<col style="width: 26%">
+<col style="width: 48%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Layer</th>
 <th>Location</th>
-<th>Role</th>
+<th>Responsibility</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>Algorithms</td>
 <td><code>mcmc/algorithms/</code></td>
-<td>Pure functions: <code>nuts_step()</code>, <code>leapfrog()</code></td>
+<td>Pure functions that perform one MCMC step. No state, no model knowledge.</td>
 </tr>
 <tr class="even">
 <td>Samplers</td>
 <td><code>mcmc/samplers/</code></td>
-<td>Stateful objects: <code>NUTSSampler</code>, <code>HMCSampler</code></td>
+<td>Stateful objects that own adaptation state and delegate to algorithms.</td>
 </tr>
 <tr class="odd">
-<td>Runner</td>
+<td>Execution</td>
 <td><code>mcmc/execution/</code></td>
-<td>MCMC loop orchestration</td>
+<td>Chain runner, warmup scheduling, sample storage.</td>
+</tr>
+<tr class="even">
+<td>Models</td>
+<td><code>models/</code></td>
+<td>Log-posterior, gradient, Metropolis proposals. Each model implements <code>BaseModel</code>.</td>
+</tr>
+<tr class="odd">
+<td>Priors</td>
+<td><code>priors/</code></td>
+<td>Edge inclusion prior updates. Each prior implements <code>BaseEdgePrior</code>.</td>
+</tr>
+<tr class="even">
+<td>Math</td>
+<td><code>math/</code></td>
+<td>Numerical primitives: Cholesky updates, cross-platform exp/log.</td>
+</tr>
+<tr class="odd">
+<td>Utilities</td>
+<td><code>utils/</code></td>
+<td>Shared helpers: stable probability computation, progress tracking, enums.</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="source-layout" class="level2">
-<h2 class="anchored" data-anchor-id="source-layout">Source Layout</h2>
-<pre><code>src/
-├── mcmc/
-│   ├── algorithms/     # Stateless math
-│   ├── samplers/       # Adaptation state
-│   └── execution/      # Chain runner
-├── models/
-│   ├── base_model.h
-│   ├── omrf/
-│   └── ggm/
-├── priors/
-├── math/
-└── utils/</code></pre>
-</section>
 <section id="design-principles" class="level2">
-<h2 class="anchored" data-anchor-id="design-principles">Design Principles</h2>
-<p><em>Content to be added: separation of concerns, model hierarchy, warmup schedule.</em></p>
+<h2 class="anchored" data-anchor-id="design-principles">Design principles</h2>
+<p><strong>Separation of concerns.</strong> Algorithms know nothing about models. A <code>nuts_step()</code> call receives a function <code>logp_and_gradient(vec) → (double, vec)</code> and returns a <code>StepResult</code>. The model provides the function; the algorithm does the math.</p>
+<p><strong>Virtual dispatch for models.</strong> All models inherit from <code>BaseModel</code> and override a small set of virtual methods. The chain runner calls <code>model.logp_and_gradient()</code> without knowing whether it is sampling a GGM or an ordinal MRF. See <a href="../manual/model-classes.html">Model Classes</a>.</p>
+<p><strong>Cloning for parallelism.</strong> Both <code>BaseModel</code> and <code>BaseEdgePrior</code> expose a <code>clone()</code> method that produces an independent copy. The chain runner clones the prototype once per chain before dispatching to TBB threads. See <a href="../manual/parallel-chains.html">Parallel Chains</a>.</p>
+<p><strong>Header-only samplers.</strong> The sampler classes in <code>mcmc/samplers/</code> are header-only. They are lightweight wrappers that hold adaptation state and call algorithm functions from <code>mcmc/algorithms/</code>.</p>
+<p><strong>Rcpp interface files.</strong> The top-level <code>.cpp</code> files in <code>src/</code> (<code>sample_ggm.cpp</code>, <code>sample_omrf.cpp</code>, <code>sample_mixed.cpp</code>, <code>bgmCompare_interface.cpp</code>) are thin Rcpp entry points. They construct C++ objects from R lists and call <code>run_mcmc_sampler()</code>.</p>
+</section>
+<section id="build-system" class="level2">
+<h2 class="anchored" data-anchor-id="build-system">Build system</h2>
+<p><code>src/Makevars.in</code> (configured by <code>configure</code>/<code>configure.win</code>) sets compiler flags and links against RcppArmadillo, RcppParallel (TBB), and dqrng. The file <code>src/sources.mk</code> lists all <code>.cpp</code> translation units and is auto-generated by <code>inst/generate_makevars_sources.R</code>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Never hand-edit <code>src/sources.mk</code>. Run <code>Rscript inst/generate_makevars_sources.R</code> after adding or removing <code>.cpp</code> files.</p>
+</div>
+</div>
 
 
 </section>
@@ -1023,8 +1085,8 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../manual/index.html" class="pagination-link" aria-label="Reference Manual">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Reference Manual</span>
+      <a href="../manual/index.html" class="pagination-link" aria-label="Technical Manual">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Technical Manual</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

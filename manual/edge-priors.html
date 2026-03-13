@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -75,6 +110,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +394,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,35 +582,97 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The edge prior framework: how bgms decides which edges to include.</p>
+<p>The edge prior framework controls which edges are included in the graph. All priors inherit from <code>BaseEdgePrior</code> in <code>src/priors/edge_prior.h</code>.</p>
 <section id="baseedgeprior-interface" class="level2">
-<h2 class="anchored" data-anchor-id="baseedgeprior-interface">BaseEdgePrior Interface</h2>
-<!-- TODO: source — src/priors/edge_prior.h: virtual methods -->
+<h2 class="anchored" data-anchor-id="baseedgeprior-interface">BaseEdgePrior interface</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BaseEdgePrior <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">void</span> update<span class="op">(</span>imat edge_indicators<span class="op">,</span> mat<span class="op">&amp;</span> inclusion_probability<span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                      <span class="dt">int</span> num_variables<span class="op">,</span> <span class="dt">int</span> num_pairwise<span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                      SafeRNG<span class="op">&amp;</span> rng<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> unique_ptr<span class="op">&lt;</span>BaseEdgePrior<span class="op">&gt;</span> clone<span class="op">()</span> <span class="at">const</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">bool</span> has_allocations<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> ivec get_allocations<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> ivec<span class="op">();</span> <span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>update()</code> method is called once per MCMC iteration (when edge selection is active). It receives the current edge indicators and updates the inclusion probability matrix in place. The updated probabilities are used by the model’s <code>update_edge_indicators()</code> method for the next round of edge proposals.</p>
+<p><code>clone()</code> produces an independent copy for parallel chain execution.</p>
 </section>
-<section id="beta-bernoulli-prior" class="level2">
-<h2 class="anchored" data-anchor-id="beta-bernoulli-prior">Beta-Bernoulli Prior</h2>
-<!-- TODO: source — default prior, inclusion probability update -->
+<section id="bernoulliedgeprior" class="level2">
+<h2 class="anchored" data-anchor-id="bernoulliedgeprior">BernoulliEdgePrior</h2>
+<p>The simplest prior: each edge has a fixed inclusion probability that does not change during sampling. The <code>update()</code> method is a no-op.</p>
+<p>This prior is used when the user specifies <code>edge_prior = "Bernoulli"</code> with a fixed inclusion probability matrix.</p>
 </section>
-<section id="unit-information-prior" class="level2">
-<h2 class="anchored" data-anchor-id="unit-information-prior">Unit-Information Prior</h2>
-<!-- TODO: source — Cauchy-based prior on interaction strength -->
+<section id="betabernoulliedgeprior" class="level2">
+<h2 class="anchored" data-anchor-id="betabernoulliedgeprior">BetaBernoulliEdgePrior</h2>
+<p>A conjugate prior that learns a shared inclusion probability from the data. At each iteration:</p>
+<ol type="1">
+<li>Count the number of included edges: <span class="math inline">\(k = \sum_{i&lt;j} \gamma_{ij}\)</span></li>
+<li>Count the total number of possible edges: <span class="math inline">\(m = p(p-1)/2\)</span></li>
+<li>Draw a new inclusion probability: <span class="math inline">\(\pi \sim \text{Beta}(\alpha + k,\; \beta + m - k)\)</span></li>
+<li>Set all entries of the inclusion probability matrix to <span class="math inline">\(\pi\)</span></li>
+</ol>
+<p>The hyperparameters <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> default to 1 (uniform prior on the inclusion probability).</p>
+<p>This is the default edge prior in bgms (<code>edge_prior = "Beta-Bernoulli"</code>).</p>
 </section>
-<section id="inclusion-probabilities-and-bayes-factors" class="level2">
-<h2 class="anchored" data-anchor-id="inclusion-probabilities-and-bayes-factors">Inclusion Probabilities and Bayes Factors</h2>
-<!-- TODO: source — how posterior inclusion probabilities and BFs are computed -->
+<section id="stochasticblockedgeprior" class="level2">
+<h2 class="anchored" data-anchor-id="stochasticblockedgeprior">StochasticBlockEdgePrior</h2>
+<p>The stochastic block model (SBM) prior assigns variables to latent clusters and allows different inclusion probabilities for within-cluster and between-cluster edges. See <a href="../manual/sbm-prior.html">SBM Prior</a> for the full formulation.</p>
+<p>The <code>StochasticBlockEdgePrior</code> class stores:</p>
+<ul>
+<li><code>cluster_allocations_</code> — Current cluster assignment for each variable</li>
+<li><code>cluster_prob_</code> — <span class="math inline">\(K \times K\)</span> matrix of block inclusion probabilities</li>
+<li><code>log_Vn_</code> — Log partition coefficients for the MFM prior on cluster count</li>
+</ul>
+<p>Its <code>update()</code> method runs collapsed Gibbs sampling to update cluster assignments and block probabilities (delegated to functions in <code>sbm_edge_prior.cpp</code>).</p>
+<p><code>has_allocations()</code> returns <code>true</code>, and <code>get_allocations()</code> returns the current cluster assignment vector. These are stored in <code>ChainResult::allocation_samples</code> for post-hoc analysis.</p>
+</section>
+<section id="prior-selection-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="prior-selection-in-r">Prior selection in R</h2>
+<p>The <code>edge_prior</code> argument in <code>bgm()</code> maps to these classes:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 36%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>R value</th>
+<th>C++ class</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>"Bernoulli"</code></td>
+<td><code>BernoulliEdgePrior</code></td>
+<td>Fixed inclusion probabilities</td>
+</tr>
+<tr class="even">
+<td><code>"Beta-Bernoulli"</code></td>
+<td><code>BetaBernoulliEdgePrior</code></td>
+<td>Learns shared inclusion rate</td>
+</tr>
+<tr class="odd">
+<td><code>"Stochastic-Block"</code></td>
+<td><code>StochasticBlockEdgePrior</code></td>
+<td>Cluster-structured inclusion</td>
+</tr>
+</tbody>
+</table>
+<p>When <code>edge_selection = FALSE</code>, no edge prior is instantiated and all edges remain included throughout sampling.</p>
 
 
 </section>

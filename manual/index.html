@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Reference Manual – bgms</title>
+<title>Technical Manual – bgms</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -314,7 +314,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/index.html">Reference Manual</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/index.html">Technical Manual</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -329,7 +329,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -500,7 +500,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Reference Manual</h1>
+<h1 class="title">Technical Manual</h1>
 </div>
 
 
@@ -517,31 +517,59 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Technical documentation for the bgms C++ backend and MCMC algorithms.</p>
-<p>This manual is intended for:</p>
+<p>Technical documentation for the bgms C++ backend, MCMC algorithms, and R scaffolding layer. This manual targets contributors to bgms development, users who need to understand implementation details, and researchers extending bgms for new model types.</p>
+<section id="architecture" class="level2">
+<h2 class="anchored" data-anchor-id="architecture">Architecture</h2>
+<p>How the R front-end and C++ back-end are organized, and how they communicate.</p>
 <ul>
-<li>Contributors to bgms development</li>
-<li>Users who want to understand the implementation details</li>
-<li>Researchers extending bgms for new models</li>
+<li><a href="../manual/architecture.html">C++ Architecture</a> — Source layout, layer separation, design principles</li>
+<li><a href="../manual/r-scaffolding.html">R Scaffolding</a> — Validation, spec construction, sampler dispatch, output assembly</li>
+<li><a href="../manual/model-classes.html">Model Classes</a> — <code>BaseModel</code> hierarchy and virtual interface</li>
 </ul>
-<section id="contents" class="level2">
-<h2 class="anchored" data-anchor-id="contents">Contents</h2>
+</section>
+<section id="mcmc-engine" class="level2">
+<h2 class="anchored" data-anchor-id="mcmc-engine">MCMC Engine</h2>
+<p>The sampling machinery shared by all models.</p>
 <ul>
-<li><a href="../manual/architecture.html">Architecture</a> — C++ backend design and structure</li>
-<li><a href="../manual/nuts.html">NUTS Algorithm</a> — No-U-Turn Sampler implementation</li>
-<li><a href="../manual/warmup.html">Warmup Schedule</a> — Adaptation stages and tuning</li>
-<li><a href="../manual/model-classes.html">Model Classes</a> — BaseModel hierarchy</li>
-<li><a href="../manual/numerical.html">Numerical Considerations</a> — Precision and cross-platform issues</li>
+<li><a href="../manual/samplers.html">Sampler Hierarchy</a> — <code>SamplerBase</code>, gradient-based samplers, factory dispatch</li>
+<li><a href="../manual/nuts.html">NUTS Algorithm</a> — Binary tree construction, U-turn criterion, divergence detection</li>
+<li><a href="../manual/warmup.html">Warmup Schedule</a> — Five-stage adaptation, dual averaging, mass matrix tuning</li>
+<li><a href="../manual/parallel-chains.html">Parallel Chains</a> — TBB threading, model cloning, per-chain RNG</li>
+</ul>
+</section>
+<section id="models" class="level2">
+<h2 class="anchored" data-anchor-id="models">Models</h2>
+<p>Model-specific sampling and likelihood computation.</p>
+<ul>
+<li><a href="../manual/ggm-internals.html">GGM Internals</a> — Precision matrix Metropolis, Cholesky rank-1 updates</li>
+<li><a href="../manual/omrf-internals.html">OMRF Internals</a> — Ordinal thresholds, Blume-Capel, pseudolikelihood</li>
+<li><a href="../manual/variable-helpers.html">Variable Helpers</a> — Numerically stable probability computation (FAST/SAFE)</li>
+<li><a href="../manual/mixed-internals.html">Mixed MRF Internals</a> — Hybrid NUTS+Metropolis, block parameter layout</li>
+</ul>
+</section>
+<section id="priors-edge-selection" class="level2">
+<h2 class="anchored" data-anchor-id="priors-edge-selection">Priors &amp; Edge Selection</h2>
+<p>Prior specification and edge inclusion machinery.</p>
+<ul>
+<li><a href="../manual/edge-priors.html">Edge Priors</a> — Bernoulli, Beta-Bernoulli, and SBM prior classes</li>
+<li><a href="../manual/sbm-prior.html">SBM Prior</a> — MFM-SBM formulation, collapsed Gibbs, cluster allocation</li>
+</ul>
+</section>
+<section id="group-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="group-comparison">Group Comparison</h2>
+<ul>
+<li><a href="../manual/bgmcompare-internals.html">bgmCompare Engine</a> — Multi-group posterior, difference selection</li>
+</ul>
+</section>
+<section id="numerical-methods" class="level2">
+<h2 class="anchored" data-anchor-id="numerical-methods">Numerical Methods</h2>
+<ul>
+<li><a href="../manual/numerical.html">Numerical Considerations</a> — Cross-platform exp/log, OpenLibM, IEEE 754 compliance</li>
 </ul>
 </section>
 <section id="prerequisites" class="level2">
 <h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
-<p>This manual assumes familiarity with:</p>
-<ul>
-<li>C++ programming</li>
-<li>MCMC methods</li>
-<li>Hamiltonian Monte Carlo</li>
-</ul>
+<p>This manual assumes familiarity with C++ programming, MCMC methods, and Hamiltonian Monte Carlo. The <a href="../guide/index.html">User’s Guide</a> covers the statistical background at a conceptual level.</p>
 
 
 </section>

@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -75,6 +110,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +394,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,47 +582,126 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>How bgms runs multiple MCMC chains in parallel using TBB and RcppParallel.</p>
+<p>bgms runs multiple MCMC chains in parallel using Intel TBB (Threading Building Blocks), accessed through the RcppParallel package. The implementation is in <code>src/mcmc/execution/chain_runner.h</code> and <code>chain_runner.cpp</code>.</p>
 <section id="design" class="level2">
 <h2 class="anchored" data-anchor-id="design">Design</h2>
-<!-- TODO: source — src/mcmc/execution/chain_runner.h, chain_runner.cpp -->
+<p>The entry point is <code>run_mcmc_sampler()</code>, which takes a prototype model, a prototype edge prior, and a sampler configuration. It follows a clone-and-dispatch pattern:</p>
+<ol type="1">
+<li><strong>Clone</strong> — Create independent copies of the model and edge prior for each chain via <code>model.clone()</code> and <code>edge_prior.clone()</code>. Each clone has its own internal state and RNG.</li>
+<li><strong>Seed</strong> — Each clone is seeded with <code>config.seed + chain_id</code> to ensure reproducibility while avoiding correlated chains.</li>
+<li><strong>Dispatch</strong> — All chains are dispatched to threads. Each thread runs <code>run_mcmc_chain()</code> with its own model, prior, and result container.</li>
+<li><strong>Collect</strong> — Results are gathered and returned as a vector of <code>ChainResult</code> objects.</li>
+</ol>
 </section>
 <section id="model-and-prior-cloning" class="level2">
-<h2 class="anchored" data-anchor-id="model-and-prior-cloning">Model and Prior Cloning</h2>
-<!-- TODO: source — model.clone(), edge_prior.clone() per chain -->
+<h2 class="anchored" data-anchor-id="model-and-prior-cloning">Model and prior cloning</h2>
+<p>Both <code>BaseModel::clone()</code> and <code>BaseEdgePrior::clone()</code> perform deep copies. For the model, this includes the full parameter state, Cholesky factors (GGM), residual matrices (OMRF), and all internal buffers. For the SBM edge prior, the cluster allocations and block probability matrix are cloned.</p>
+<p>The clone methods return <code>unique_ptr</code>, so each chain owns its objects exclusively with no shared mutable state between threads.</p>
 </section>
 <section id="tbb-thread-control" class="level2">
-<h2 class="anchored" data-anchor-id="tbb-thread-control">TBB Thread Control</h2>
-<!-- TODO: source — tbb::global_control(max_allowed_parallelism, no_threads) -->
+<h2 class="anchored" data-anchor-id="tbb-thread-control">TBB thread control</h2>
+<p>Before dispatching, bgms sets the maximum parallelism via TBB’s global control:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tbb<span class="op">::</span>global_control gc<span class="op">(</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    tbb<span class="op">::</span>global_control<span class="op">::</span>max_allowed_parallelism<span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    no_threads</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This limits the TBB thread pool to <code>no_threads</code> (the <code>cores</code> argument in R), respecting the user’s request even when the system has more cores available.</p>
 </section>
 <section id="rcppparallel-dispatch" class="level2">
-<h2 class="anchored" data-anchor-id="rcppparallel-dispatch">RcppParallel Dispatch</h2>
-<!-- TODO: source — MCMCChainRunner : RcppParallel::Worker, parallelFor() -->
+<h2 class="anchored" data-anchor-id="rcppparallel-dispatch">RcppParallel dispatch</h2>
+<p>The <code>MCMCChainRunner</code> struct inherits from <code>RcppParallel::Worker</code> and implements <code>operator()(begin, end)</code>. Each unit of work is one chain:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> MCMCChainRunner<span class="op">::</span><span class="kw">operator</span><span class="op">()(</span><span class="dt">size_t</span> begin<span class="op">,</span> <span class="dt">size_t</span> end<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">size_t</span> i <span class="op">=</span> begin<span class="op">;</span> i <span class="op">&lt;</span> end<span class="op">;</span> <span class="op">++</span>i<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        run_mcmc_chain<span class="op">(</span><span class="va">results_</span><span class="op">[</span>i<span class="op">],</span> <span class="op">*</span><span class="va">models_</span><span class="op">[</span>i<span class="op">],</span> <span class="op">*</span><span class="va">edge_priors_</span><span class="op">[</span>i<span class="op">],</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                       <span class="va">config_</span><span class="op">,</span> i<span class="op">,</span> <span class="va">pm_</span><span class="op">);</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Dispatch uses <code>RcppParallel::parallelFor(0, no_chains, runner)</code>.</p>
 </section>
 <section id="sequential-fallback" class="level2">
-<h2 class="anchored" data-anchor-id="sequential-fallback">Sequential Fallback</h2>
-<!-- TODO: source — single-thread path in run_mcmc_sampler() -->
+<h2 class="anchored" data-anchor-id="sequential-fallback">Sequential fallback</h2>
+<p>When <code>no_threads = 1</code> or <code>no_chains = 1</code>, bgms skips TBB and runs chains sequentially in a simple loop. This avoids TBB overhead for single-chain runs and simplifies debugging.</p>
 </section>
 <section id="per-chain-rng-seeding" class="level2">
-<h2 class="anchored" data-anchor-id="per-chain-rng-seeding">Per-Chain RNG Seeding</h2>
-<!-- TODO: source — config.seed + chain_id -->
+<h2 class="anchored" data-anchor-id="per-chain-rng-seeding">Per-chain RNG seeding</h2>
+<p>Each chain’s RNG is a <code>SafeRNG</code> wrapping <code>dqrng::xoshiro256plusplus</code>. The seed for chain <span class="math inline">\(k\)</span> is <code>config.seed + k</code>, ensuring:</p>
+<ul>
+<li>Reproducibility: the same seed and chain count always produce the same results</li>
+<li>Independence: different chains explore different random number sequences</li>
+</ul>
 </section>
 <section id="progress-and-interrupts" class="level2">
-<h2 class="anchored" data-anchor-id="progress-and-interrupts">Progress and Interrupts</h2>
-<!-- TODO: source — ProgressManager, shouldExit(), userInterrupt flag -->
+<h2 class="anchored" data-anchor-id="progress-and-interrupts">Progress and interrupts</h2>
+<p>The <code>ProgressManager</code> class handles progress display and user interrupt detection across threads.</p>
+<ul>
+<li><strong>Progress bar</strong> — Updated by each chain independently. The manager aggregates progress across chains and displays a single bar (or per-chain bars, depending on <code>progress_type</code>).</li>
+<li><strong>User interrupts</strong> — Each chain checks <code>pm.shouldExit()</code> between iterations. If the user presses Ctrl-C, the flag is set and all chains exit their sampling loops. The partial results are still returned (with a warning) rather than discarded.</li>
+<li><strong>Thread safety</strong> — Progress updates and interrupt checks use a shared <code>print_mutex</code> to prevent garbled console output.</li>
+</ul>
+</section>
+<section id="chainresult-storage" class="level2">
+<h2 class="anchored" data-anchor-id="chainresult-storage">ChainResult storage</h2>
+<p>Each chain writes its output into a preallocated <code>ChainResult</code>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 30%">
+<col style="width: 39%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Shape</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>samples</code></td>
+<td>param_dim × n_iter</td>
+<td>Parameter samples (post-warmup)</td>
+</tr>
+<tr class="even">
+<td><code>indicator_samples</code></td>
+<td>n_edges × n_iter</td>
+<td>Edge indicators (if edge selection)</td>
+</tr>
+<tr class="odd">
+<td><code>allocation_samples</code></td>
+<td>n_vars × n_iter</td>
+<td>SBM cluster allocations (if SBM prior)</td>
+</tr>
+<tr class="even">
+<td><code>treedepth_samples</code></td>
+<td>n_iter</td>
+<td>NUTS tree depth (if NUTS)</td>
+</tr>
+<tr class="odd">
+<td><code>divergent_samples</code></td>
+<td>n_iter</td>
+<td>Divergence flags (if NUTS)</td>
+</tr>
+<tr class="even">
+<td><code>energy_samples</code></td>
+<td>n_iter</td>
+<td>Hamiltonian energy (if NUTS)</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>ChainResult</code> also carries error status and user interrupt flags per chain. These are checked by the R output builder to decide whether to warn or error.</p>
 
 
 </section>

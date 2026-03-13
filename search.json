@@ -212,19 +212,7 @@
     "href": "manual/architecture.html",
     "title": "C++ Architecture",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development. Content will be migrated from dev/plans/architecture.md in the bgms repository.",
-    "crumbs": [
-      "Manual",
-      "Architecture",
-      "C++ Architecture"
-    ]
-  },
-  {
-    "objectID": "manual/architecture.html#overview",
-    "href": "manual/architecture.html#overview",
-    "title": "C++ Architecture",
-    "section": "Overview",
-    "text": "Overview\nThe bgms C++ backend is organized in three layers:\n\n\n\n\n\n\n\n\nLayer\nLocation\nRole\n\n\n\n\nAlgorithms\nmcmc/algorithms/\nPure functions: nuts_step(), leapfrog()\n\n\nSamplers\nmcmc/samplers/\nStateful objects: NUTSSampler, HMCSampler\n\n\nRunner\nmcmc/execution/\nMCMC loop orchestration",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe bgms C++ backend is organized in five top-level directories under src/. Each directory has a distinct role, and dependencies flow downward: algorithms depend on math utilities but not on models, and the execution layer orchestrates everything.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -235,8 +223,20 @@
     "objectID": "manual/architecture.html#source-layout",
     "href": "manual/architecture.html#source-layout",
     "title": "C++ Architecture",
-    "section": "Source Layout",
-    "text": "Source Layout\nsrc/\n├── mcmc/\n│   ├── algorithms/     # Stateless math\n│   ├── samplers/       # Adaptation state\n│   └── execution/      # Chain runner\n├── models/\n│   ├── base_model.h\n│   ├── omrf/\n│   └── ggm/\n├── priors/\n├── math/\n└── utils/",
+    "section": "Source layout",
+    "text": "Source layout\nsrc/\n├── mcmc/\n│   ├── algorithms/      # Stateless: nuts_step(), hmc_step(), leapfrog()\n│   ├── samplers/        # Stateful: NUTSSampler, HMCSampler, MetropolisSampler\n│   └── execution/       # Orchestration: chain_runner, warmup_schedule, chain_result\n├── models/\n│   ├── base_model.h     # Abstract interface (30+ virtual methods)\n│   ├── ggm/             # GGMModel — precision matrix, Metropolis-only\n│   ├── omrf/            # OMRFModel — ordinal MRF, gradient-based\n│   └── mixed/           # MixedMRFModel — hybrid NUTS+Metropolis\n├── priors/\n│   ├── edge_prior.h     # BaseEdgePrior + Bernoulli, BetaBernoulli, SBM\n│   ├── sbm_edge_prior.h # MFM-SBM Gibbs updates\n│   └── sbm_edge_prior.cpp\n├── math/\n│   ├── cholupdate.h/cpp # Rank-1 Cholesky update/downdate (Givens/hyperbolic)\n│   ├── cholesky_helpers.h # Log-determinant, Schur complement\n│   ├── custom_explog.h/cpp # OpenLibM exp/log for cross-platform consistency\n│   ├── custom_arma_explog.h # Armadillo wrappers for custom exp/log\n│   └── explog_macros.h  # Platform detection macros (MY_EXP, ARMA_MY_EXP)\n├── utils/\n│   ├── variable_helpers.h/cpp # Numerically stable MRF probabilities\n│   ├── common_helpers.h # Enums (UpdateMethod, EdgePrior), counting helpers\n│   ├── progress_manager.h/cpp # Multi-chain progress bar\n│   └── print_mutex.h    # Thread-safe printing\n├── rng/\n│   └── rng_utils.h      # SafeRNG wrapper around dqrng::xoshiro256plusplus\n├── bgmCompare/          # Group comparison sampler and helpers\n│   ├── bgmCompare_sampler.h/cpp\n│   ├── bgmCompare_helper.h/cpp\n│   ├── bgmCompare_logp_and_grad.h/cpp\n│   └── bgmCompare_output.h\n└── [interface files]    # Rcpp entry points: sample_ggm.cpp, sample_omrf.cpp, etc.",
+    "crumbs": [
+      "Manual",
+      "Architecture",
+      "C++ Architecture"
+    ]
+  },
+  {
+    "objectID": "manual/architecture.html#layer-separation",
+    "href": "manual/architecture.html#layer-separation",
+    "title": "C++ Architecture",
+    "section": "Layer separation",
+    "text": "Layer separation\n\n\n\n\n\n\n\n\nLayer\nLocation\nResponsibility\n\n\n\n\nAlgorithms\nmcmc/algorithms/\nPure functions that perform one MCMC step. No state, no model knowledge.\n\n\nSamplers\nmcmc/samplers/\nStateful objects that own adaptation state and delegate to algorithms.\n\n\nExecution\nmcmc/execution/\nChain runner, warmup scheduling, sample storage.\n\n\nModels\nmodels/\nLog-posterior, gradient, Metropolis proposals. Each model implements BaseModel.\n\n\nPriors\npriors/\nEdge inclusion prior updates. Each prior implements BaseEdgePrior.\n\n\nMath\nmath/\nNumerical primitives: Cholesky updates, cross-platform exp/log.\n\n\nUtilities\nutils/\nShared helpers: stable probability computation, progress tracking, enums.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -247,8 +247,20 @@
     "objectID": "manual/architecture.html#design-principles",
     "href": "manual/architecture.html#design-principles",
     "title": "C++ Architecture",
-    "section": "Design Principles",
-    "text": "Design Principles\nContent to be added: separation of concerns, model hierarchy, warmup schedule.",
+    "section": "Design principles",
+    "text": "Design principles\nSeparation of concerns. Algorithms know nothing about models. A nuts_step() call receives a function logp_and_gradient(vec) → (double, vec) and returns a StepResult. The model provides the function; the algorithm does the math.\nVirtual dispatch for models. All models inherit from BaseModel and override a small set of virtual methods. The chain runner calls model.logp_and_gradient() without knowing whether it is sampling a GGM or an ordinal MRF. See Model Classes.\nCloning for parallelism. Both BaseModel and BaseEdgePrior expose a clone() method that produces an independent copy. The chain runner clones the prototype once per chain before dispatching to TBB threads. See Parallel Chains.\nHeader-only samplers. The sampler classes in mcmc/samplers/ are header-only. They are lightweight wrappers that hold adaptation state and call algorithm functions from mcmc/algorithms/.\nRcpp interface files. The top-level .cpp files in src/ (sample_ggm.cpp, sample_omrf.cpp, sample_mixed.cpp, bgmCompare_interface.cpp) are thin Rcpp entry points. They construct C++ objects from R lists and call run_mcmc_sampler().",
+    "crumbs": [
+      "Manual",
+      "Architecture",
+      "C++ Architecture"
+    ]
+  },
+  {
+    "objectID": "manual/architecture.html#build-system",
+    "href": "manual/architecture.html#build-system",
+    "title": "C++ Architecture",
+    "section": "Build system",
+    "text": "Build system\nsrc/Makevars.in (configured by configure/configure.win) sets compiler flags and links against RcppArmadillo, RcppParallel (TBB), and dqrng. The file src/sources.mk lists all .cpp translation units and is auto-generated by inst/generate_makevars_sources.R.\n\n\n\n\n\n\nWarning\n\n\n\nNever hand-edit src/sources.mk. Run Rscript inst/generate_makevars_sources.R after adding or removing .cpp files.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -260,7 +272,7 @@
     "href": "manual/sbm-prior.html",
     "title": "Stochastic Block Model Prior",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nThe MFM-SBM edge prior: how cluster structure regularizes edge inclusion.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe MFM-SBM (mixture of finite mixtures – stochastic block model) edge prior assigns variables to latent clusters and uses cluster-structured inclusion probabilities. Source: src/priors/sbm_edge_prior.h and sbm_edge_prior.cpp.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -271,8 +283,8 @@
     "objectID": "manual/sbm-prior.html#mfm-sbm-formulation",
     "href": "manual/sbm-prior.html#mfm-sbm-formulation",
     "title": "Stochastic Block Model Prior",
-    "section": "MFM-SBM Formulation",
-    "text": "MFM-SBM Formulation",
+    "section": "MFM-SBM formulation",
+    "text": "MFM-SBM formulation\nThe prior has three levels:\n\nCluster count — The number of clusters \\(K\\) follows a Poisson(\\(\\lambda\\)) prior, with a mixture-of-finite-mixtures (MFM) correction that accounts for the combinatorial allocation structure.\nCluster assignments — Each variable \\(i\\) is assigned to cluster \\(z_i \\in \\{1, \\ldots, K\\}\\) with a symmetric Dirichlet prior (concentration \\(\\alpha_D\\)) on the cluster proportions.\nBlock inclusion probabilities — The inclusion probability for edge \\((i, j)\\) depends on whether variables \\(i\\) and \\(j\\) are in the same cluster:\n\\[\n\\pi_{ij} = \\begin{cases}\n\\pi_{\\text{within}} & \\text{if } z_i = z_j \\\\\n\\pi_{\\text{between}} & \\text{if } z_i \\neq z_j\n\\end{cases}\n\\]\nWithin-block and between-block probabilities are drawn from Beta distributions with separate hyperparameters.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -280,11 +292,11 @@
     ]
   },
   {
-    "objectID": "manual/sbm-prior.html#gibbs-block-allocation-updates",
-    "href": "manual/sbm-prior.html#gibbs-block-allocation-updates",
+    "objectID": "manual/sbm-prior.html#gibbs-updates",
+    "href": "manual/sbm-prior.html#gibbs-updates",
     "title": "Stochastic Block Model Prior",
-    "section": "Gibbs Block-Allocation Updates",
-    "text": "Gibbs Block-Allocation Updates",
+    "section": "Gibbs updates",
+    "text": "Gibbs updates\nThe update() method in StochasticBlockEdgePrior runs three sequential Gibbs steps:\n\n1. Cluster allocations\nblock_allocations_mfm_sbm() updates each variable’s cluster assignment \\(z_i\\) by collapsed Gibbs sampling. For each variable \\(i\\):\n\nRemove variable \\(i\\) from its current cluster\nFor each possible cluster \\(k\\) (including a new cluster), compute the conditional probability based on:\n\nThe MFM allocation prior (CRP-like with log-partition coefficients \\(\\log V_n\\))\nThe likelihood of the observed edge indicators between variable \\(i\\) and all other variables, given the block probabilities\n\nSample \\(z_i\\) from the resulting categorical distribution\n\nEmpty clusters are removed, and the cluster labels are relabeled to be contiguous.\n\n\n2. Block probabilities\nblock_probs_mfm_sbm() draws new within-block and between-block inclusion probabilities from their Beta full conditionals:\n\\[\n\\pi_{kl} \\sim \\text{Beta}\\bigl(\\alpha_{kl} + e_{kl},\\; \\beta_{kl} + m_{kl} - e_{kl}\\bigr)\n\\]\nwhere \\(e_{kl}\\) is the number of included edges between clusters \\(k\\) and \\(l\\), and \\(m_{kl}\\) is the total number of possible edges. The hyperparameters \\(\\alpha_{kl}\\) and \\(\\beta_{kl}\\) differ for within-block (\\(k = l\\)) and between-block (\\(k \\neq l\\)) pairs.\n\n\n3. Inclusion probability matrix\nThe updated block probabilities are broadcast to the full \\(p \\times p\\) inclusion probability matrix based on the current cluster assignments.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -292,11 +304,11 @@
     ]
   },
   {
-    "objectID": "manual/sbm-prior.html#how-clusters-regularize-edges",
-    "href": "manual/sbm-prior.html#how-clusters-regularize-edges",
+    "objectID": "manual/sbm-prior.html#log-partition-coefficients",
+    "href": "manual/sbm-prior.html#log-partition-coefficients",
     "title": "Stochastic Block Model Prior",
-    "section": "How Clusters Regularize Edges",
-    "text": "How Clusters Regularize Edges",
+    "section": "Log partition coefficients",
+    "text": "Log partition coefficients\ncompute_Vn_mfm_sbm() precomputes the log-partition function \\(\\log V_n(t)\\) for \\(t = 1, \\ldots, t_{\\max}\\). These coefficients encode the MFM prior on the number of occupied clusters and appear in the allocation Gibbs step. They are computed once at initialization.\nThe computation involves:\n\nPoisson probabilities for the total number of components\nRising factorials (Pochhammer symbols) for the Dirichlet-multinomial allocation counts\nLog-sum-exp accumulation for numerical stability",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -304,11 +316,23 @@
     ]
   },
   {
-    "objectID": "manual/sbm-prior.html#output-allocations-and-co-clustering",
-    "href": "manual/sbm-prior.html#output-allocations-and-co-clustering",
+    "objectID": "manual/sbm-prior.html#hyperparameters",
+    "href": "manual/sbm-prior.html#hyperparameters",
     "title": "Stochastic Block Model Prior",
-    "section": "Output: Allocations and Co-Clustering",
-    "text": "Output: Allocations and Co-Clustering",
+    "section": "Hyperparameters",
+    "text": "Hyperparameters\nThe six SBM hyperparameters are set via bgm():\n\n\n\n\n\n\n\n\n\nParameter\nR argument\nDefault\nRole\n\n\n\n\n\\(\\alpha_w\\)\nbeta_bernoulli_alpha\n1\nBeta shape for within-block inclusion\n\n\n\\(\\beta_w\\)\nbeta_bernoulli_beta\n1\nBeta shape for within-block inclusion\n\n\n\\(\\alpha_b\\)\nbeta_bernoulli_alpha_between\n1\nBeta shape for between-block inclusion\n\n\n\\(\\beta_b\\)\nbeta_bernoulli_beta_between\n1\nBeta shape for between-block inclusion\n\n\n\\(\\alpha_D\\)\ndirichlet_alpha\n1\nDirichlet concentration for cluster proportions\n\n\n\\(\\lambda\\)\nlambda\n1\nPoisson rate for number of clusters\n\n\n\nWhen the between-block hyperparameters are not specified (NULL in R), they default to \\(-1\\) in C++ (sentinel value), and the prior uses the within-block hyperparameters for all blocks.",
+    "crumbs": [
+      "Manual",
+      "Priors & Edge Selection",
+      "Stochastic Block Model Prior"
+    ]
+  },
+  {
+    "objectID": "manual/sbm-prior.html#output",
+    "href": "manual/sbm-prior.html#output",
+    "title": "Stochastic Block Model Prior",
+    "section": "Output",
+    "text": "Output\nThe cluster allocations at each post-warmup iteration are stored in ChainResult::allocation_samples and accessible via extract_sbm() in R, which returns the allocation matrix and a co-clustering probability matrix (proportion of iterations where each pair of variables was in the same cluster).",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -320,7 +344,7 @@
     "href": "manual/bgmcompare-internals.html",
     "title": "Group Comparison Engine",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nHow bgmCompare() works under the hood: separate sampler, multi-group posterior, and output handling.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nHow bgmCompare() works under the hood: multi-group posterior, difference parameterization, and sampler implementation. Source: src/bgmCompare/ directory.",
     "crumbs": [
       "Manual",
       "Group Comparison",
@@ -331,8 +355,20 @@
     "objectID": "manual/bgmcompare-internals.html#differences-from-single-group-bgm",
     "href": "manual/bgmcompare-internals.html#differences-from-single-group-bgm",
     "title": "Group Comparison Engine",
-    "section": "Differences from Single-Group bgm",
-    "text": "Differences from Single-Group bgm",
+    "section": "Differences from single-group bgm",
+    "text": "Differences from single-group bgm\nThe bgmCompare engine shares the same OMRF likelihood (pseudolikelihood over ordinal/Blume-Capel variables) and the same NUTS/HMC/Metropolis sampler options, but differs in three key ways:\n\nParameter decomposition — Group-specific parameters \\(\\boldsymbol{\\theta}^{(g)}\\) are decomposed into a shared baseline \\(\\boldsymbol{\\varphi}\\) and group differences \\(\\boldsymbol{\\delta}^{(g)}\\), linked through a contrast matrix.\nSeparate sampler — The bgmCompare engine uses its own chain runner (run_gibbs_sampler_bgmCompare()) rather than the general run_mcmc_chain(), because the multi-group structure requires group-specific likelihood evaluations and difference selection.\nDifference selection — In addition to edge selection (which edges exist in the shared graph), bgmCompare performs difference selection (which edges differ between groups).",
+    "crumbs": [
+      "Manual",
+      "Group Comparison",
+      "Group Comparison Engine"
+    ]
+  },
+  {
+    "objectID": "manual/bgmcompare-internals.html#contrast-matrix-parameterization",
+    "href": "manual/bgmcompare-internals.html#contrast-matrix-parameterization",
+    "title": "Group Comparison Engine",
+    "section": "Contrast-matrix parameterization",
+    "text": "Contrast-matrix parameterization\nFor \\(G\\) groups, the per-group parameter vector \\(\\boldsymbol{\\theta}^{(g)}\\) is expressed as:\n\\[\n\\boldsymbol{\\theta}^{(g)} = \\boldsymbol{\\varphi} + \\sum_{h=1}^{G-1} P_{gh}\\, \\boldsymbol{\\delta}^{(h)}\n\\]\nwhere \\(\\mathbf{P}\\) is a \\(G \\times (G-1)\\) projection (contrast) matrix. Column \\(h = 0\\) (the baseline \\(\\boldsymbol{\\varphi}\\)) captures the shared structure; columns \\(h &gt; 0\\) (the differences \\(\\boldsymbol{\\delta}^{(h)}\\)) capture how groups deviate from the baseline.\nIn the flat parameter vector, the baseline and difference parameters are interleaved per effect:\n[ φ_main | δ^(1)_main | ... | δ^(G-1)_main | φ_pair | δ^(1)_pair | ... ]",
     "crumbs": [
       "Manual",
       "Group Comparison",
@@ -343,8 +379,8 @@
     "objectID": "manual/bgmcompare-internals.html#multi-group-log-posterior-and-gradient",
     "href": "manual/bgmcompare-internals.html#multi-group-log-posterior-and-gradient",
     "title": "Group Comparison Engine",
-    "section": "Multi-Group Log-Posterior and Gradient",
-    "text": "Multi-Group Log-Posterior and Gradient",
+    "section": "Multi-group log-posterior and gradient",
+    "text": "Multi-group log-posterior and gradient\nThe log-pseudoposterior sums over groups. For each group \\(g\\):\n\nReconstruct group-specific parameters via the contrast matrix\nCompute the pseudolikelihood using group \\(g\\)’s data (sufficient statistics: category counts, Blume-Capel stats, pairwise stats)\nEvaluate the gradient of the pseudolikelihood with respect to the active parameters\n\nThe gradient has two components:\n\nObserved-data gradient (gradient_observed_active()) — Projects group-level sufficient statistics into the active-parameter layout using the contrast matrix\nExpected-data gradient (gradient_expected_active()) — Computes expected sufficient statistics under the current parameters using category probabilities from the variable helpers\n\nThe prior gradient adds Cauchy penalties on both baseline and difference pairwise parameters.",
     "crumbs": [
       "Manual",
       "Group Comparison",
@@ -355,8 +391,20 @@
     "objectID": "manual/bgmcompare-internals.html#sampler-implementation",
     "href": "manual/bgmcompare-internals.html#sampler-implementation",
     "title": "Group Comparison Engine",
-    "section": "Sampler Implementation",
-    "text": "Sampler Implementation",
+    "section": "Sampler implementation",
+    "text": "Sampler implementation\nrun_gibbs_sampler_bgmCompare() orchestrates one MCMC chain. Each iteration:\n\nNUTS/HMC/Metropolis step — Update all active parameters (baseline + differences) using the joint log-pseudoposterior\nDifference selection (if active) — For each edge, decide whether the group-difference parameters are included or set to zero. Uses a spike-and-slab mechanism analogous to edge selection in the single-group model.\nMain-effect difference selection (optional) — Separately select which main-effect parameters differ between groups\nEdge prior update — Update inclusion probabilities (Bernoulli, Beta-Bernoulli, or SBM)\nMissing data imputation (if active) — Impute missing observations per group\n\nThe warmup schedule follows the same five-stage structure as the single-group model (see Warmup Schedule).",
+    "crumbs": [
+      "Manual",
+      "Group Comparison",
+      "Group Comparison Engine"
+    ]
+  },
+  {
+    "objectID": "manual/bgmcompare-internals.html#active-parameter-tracking",
+    "href": "manual/bgmcompare-internals.html#active-parameter-tracking",
+    "title": "Group Comparison Engine",
+    "section": "Active parameter tracking",
+    "text": "Active parameter tracking\nBecause difference selection can turn parameters on and off, the total_length() function recomputes the active parameter dimension at each iteration. Index maps (build_index_maps()) provide the mapping between the flat active-parameter vector and the structured (variable, group) parameter layout.\nWhen a difference parameter is “off” (indicator = 0), it is excluded from the NUTS block. The step size and mass matrix adapt to the current active dimension.",
     "crumbs": [
       "Manual",
       "Group Comparison",
@@ -367,8 +415,8 @@
     "objectID": "manual/bgmcompare-internals.html#output-handling",
     "href": "manual/bgmcompare-internals.html#output-handling",
     "title": "Group Comparison Engine",
-    "section": "Output Handling",
-    "text": "Output Handling",
+    "section": "Output handling",
+    "text": "Output handling\nThe bgmCompareOutput struct stores:\n\n\n\n\n\n\n\nField\nContent\n\n\n\n\nsamples\nPosterior samples of all parameters (baseline + differences)\n\n\nindicator_samples\nEdge inclusion indicators\n\n\ndifference_indicator_samples\nDifference selection indicators\n\n\nwarmup_check\nWarmup diagnostics\n\n\nNUTS fields\nTree depth, divergences, energy (when NUTS is used)\n\n\n\nThe R output builder (build_output_compare()) splits the posterior means into:\n\n$group_posterior_means — Posterior means of the group-level parameters \\(\\boldsymbol{\\theta}^{(g)}\\), reconstructed from baseline and differences\n$difference_posterior_means — Posterior means of the difference parameters \\(\\boldsymbol{\\delta}^{(h)}\\)\n$difference_inclusion_probabilities — Proportion of iterations where each difference indicator was included",
     "crumbs": [
       "Manual",
       "Group Comparison",
@@ -380,7 +428,7 @@
     "href": "manual/nuts.html",
     "title": "NUTS Algorithm",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nThe No-U-Turn Sampler (NUTS) is the primary MCMC algorithm used in bgms for continuous parameter sampling.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe No-U-Turn Sampler (NUTS) is the primary MCMC algorithm used in bgms for continuous parameter sampling. It extends Hamiltonian Monte Carlo by adaptively selecting the trajectory length, eliminating the need to tune the number of leapfrog steps.\nThe implementation is in src/mcmc/algorithms/nuts.h and nuts.cpp, adapted from Stan’s base_nuts.hpp (BSD-3-Clause).",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -388,11 +436,59 @@
     ]
   },
   {
-    "objectID": "manual/nuts.html#overview",
-    "href": "manual/nuts.html#overview",
+    "objectID": "manual/nuts.html#leapfrog-integration",
+    "href": "manual/nuts.html#leapfrog-integration",
     "title": "NUTS Algorithm",
-    "section": "Overview",
-    "text": "Overview\nContent to be added: No U-Turn criterion, binary tree construction, trajectory length selection.",
+    "section": "Leapfrog integration",
+    "text": "Leapfrog integration\nEach elementary step of HMC is a leapfrog integrator that approximately preserves the Hamiltonian \\(H(\\theta, r) = -\\log p(\\theta) + \\frac{1}{2} r^\\top M^{-1} r\\):\n\nHalf-step momentum: \\(r \\leftarrow r + \\frac{\\epsilon}{2} \\nabla \\log p(\\theta)\\)\nFull-step position: \\(\\theta \\leftarrow \\theta + \\epsilon\\, M^{-1} r\\)\nHalf-step momentum: \\(r \\leftarrow r + \\frac{\\epsilon}{2} \\nabla \\log p(\\theta)\\)\n\nThe implementation uses a diagonal mass matrix \\(M\\), stored as the vector of inverse diagonal elements (inv_mass_diag).\n\nMemoizer\nThe Memoizer class in leapfrog.h caches a single \\((\\log p, \\nabla \\log p)\\) pair keyed by the parameter vector \\(\\theta\\). During NUTS tree building, each leapfrog step produces a new unique \\(\\theta\\), so the cache trivially avoids redundant evaluations at tree-node boundaries where the same \\(\\theta\\) appears as both the end of one subtree and the start of another.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "NUTS Algorithm"
+    ]
+  },
+  {
+    "objectID": "manual/nuts.html#binary-tree-construction",
+    "href": "manual/nuts.html#binary-tree-construction",
+    "title": "NUTS Algorithm",
+    "section": "Binary tree construction",
+    "text": "Binary tree construction\nNUTS builds a balanced binary tree by doubling the trajectory in a randomly chosen direction (forward or backward) at each depth level. The tree grows until one of these stopping conditions is met:\n\nU-turn — The trajectory starts bending back. Detected by checking whether the momentum sum across the subtree is no longer moving away from the endpoints (the generalized U-turn criterion from Betancourt, 2017).\nDivergence — The Hamiltonian error exceeds a threshold (default: \\(\\Delta H &gt; 1000\\)), indicating the integrator has entered a region of high curvature.\nMaximum depth — The tree reaches max_tree_depth (default 10, corresponding to \\(2^{10} = 1024\\) leapfrog steps).\n\n\nBuildTreeResult\nEach subtree returns a BuildTreeResult struct containing:\n\n\n\nField\nPurpose\n\n\n\n\ntheta_min, r_min\nLeftmost (backward) endpoint\n\n\ntheta_plus, r_plus\nRightmost (forward) endpoint\n\n\ntheta_prime, r_prime\nProposed sample from this subtree\n\n\nrho\nRunning momentum sum (for U-turn check)\n\n\nn_prime\nNumber of valid states (for multinomial sampling)\n\n\ns_prime\nContinuation flag (0 = stop)\n\n\nalpha, n_alpha\nAcceptance probability accumulator\n\n\ndivergent\nWhether a divergence was detected\n\n\n\n\n\nProposal selection\nWithin a valid (non-U-turning) subtree, the proposal is selected via multinomial sampling weighted by the unnormalized target density. When two subtrees are merged, the proposed sample is drawn from the combined set with probability proportional to the number of valid states in each subtree.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "NUTS Algorithm"
+    ]
+  },
+  {
+    "objectID": "manual/nuts.html#divergence-detection",
+    "href": "manual/nuts.html#divergence-detection",
+    "title": "NUTS Algorithm",
+    "section": "Divergence detection",
+    "text": "Divergence detection\nA divergence occurs when a single leapfrog step produces a Hamiltonian error \\(\\Delta H = H' - H_0 &gt; 1000\\). Divergences indicate that the step size is too large relative to the local curvature of the posterior. The number of divergent transitions is recorded in StepResult::NUTSDiagnostics and surfaced to the user via extract_nuts_diagnostics().",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "NUTS Algorithm"
+    ]
+  },
+  {
+    "objectID": "manual/nuts.html#step-size-heuristic",
+    "href": "manual/nuts.html#step-size-heuristic",
+    "title": "NUTS Algorithm",
+    "section": "Step-size heuristic",
+    "text": "Step-size heuristic\nBefore the first NUTS step, the heuristic_initial_step_size() function in hmc.h finds a reasonable starting step size:\n\nStart with \\(\\epsilon = 1.0\\)\nTake one leapfrog step and compute the acceptance probability\nIf acceptance is above the target (0.625), double \\(\\epsilon\\); otherwise halve it\nRepeat until the acceptance probability crosses the target\n\nThis heuristic runs once at initialization and again whenever the mass matrix is updated during warmup.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "NUTS Algorithm"
+    ]
+  },
+  {
+    "objectID": "manual/nuts.html#nuts-diagnostics",
+    "href": "manual/nuts.html#nuts-diagnostics",
+    "title": "NUTS Algorithm",
+    "section": "NUTS diagnostics",
+    "text": "NUTS diagnostics\nEach NUTS step records three diagnostics:\n\nTree depth — Number of doubling steps (0 to max_tree_depth). Consistently hitting the maximum indicates the step size may be too small.\nDivergent — Whether a divergence was detected in any leapfrog step during tree building.\nEnergy — The Hamiltonian \\(H = -\\log p(\\theta) + \\frac{1}{2} r^\\top M^{-1} r\\). Used to compute E-BFMI (energy Bayesian fraction of missing information).\n\nThese diagnostics are collected per chain and accessible via extract_nuts_diagnostics() in R.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -416,7 +512,7 @@
     "href": "manual/samplers.html",
     "title": "Sampler Hierarchy",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nThe sampler class hierarchy and how different MCMC algorithms are plugged into the chain runner.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe sampler classes in src/mcmc/samplers/ are header-only wrappers that own adaptation state and delegate to the stateless algorithm functions in src/mcmc/algorithms/. The chain runner interacts with samplers through the SamplerBase interface.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -427,8 +523,68 @@
     "objectID": "manual/samplers.html#class-hierarchy",
     "href": "manual/samplers.html#class-hierarchy",
     "title": "Sampler Hierarchy",
-    "section": "Class Hierarchy",
-    "text": "Class Hierarchy\n\n\nSamplerBase\n\n\n\nGradientSamplerBase\n\n\n\nConcrete Samplers",
+    "section": "Class hierarchy",
+    "text": "Class hierarchy\nSamplerBase                       (abstract)\n├── MetropolisSampler             — element-wise Metropolis-Hastings\n└── GradientSamplerBase           (abstract, owns HMCAdaptationController)\n    ├── HMCSampler                — fixed-length leapfrog\n    └── NUTSSampler               — adaptive tree depth\nThe HybridNUTSSampler variant exists for the mixed MRF, combining a NUTS step for the main parameter block with a Metropolis step for the continuous precision elements.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Sampler Hierarchy"
+    ]
+  },
+  {
+    "objectID": "manual/samplers.html#samplerbase-interface",
+    "href": "manual/samplers.html#samplerbase-interface",
+    "title": "Sampler Hierarchy",
+    "section": "SamplerBase interface",
+    "text": "SamplerBase interface\nclass SamplerBase {\n  virtual StepResult step(BaseModel& model, int iteration) = 0;\n  virtual void initialize(BaseModel& model) {}\n  virtual bool has_nuts_diagnostics() const { return false; }\n};\nstep() performs one MCMC iteration and returns a StepResult containing the accepted parameter vector, acceptance probability, and optional NUTS diagnostics.\ninitialize() is called once before the first iteration. For gradient-based samplers, it runs the step-size heuristic that finds a reasonable initial step size by iteratively doubling or halving until the acceptance probability is near the target (default 0.625).",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Sampler Hierarchy"
+    ]
+  },
+  {
+    "objectID": "manual/samplers.html#metropolissampler",
+    "href": "manual/samplers.html#metropolissampler",
+    "title": "Sampler Hierarchy",
+    "section": "MetropolisSampler",
+    "text": "MetropolisSampler\nThe simplest sampler. Each call to step():\n\nCalls model.do_one_metropolis_step(iteration), which performs a full sweep of element-wise proposals\nIf the model has edge selection and the warmup schedule indicates selection is active, calls model.update_edge_indicators()\nReturns the current parameters as the accepted state\n\nProposal standard deviations are tuned during warmup via Robbins-Monro updates (see Warmup Schedule).",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Sampler Hierarchy"
+    ]
+  },
+  {
+    "objectID": "manual/samplers.html#gradientsamplerbase",
+    "href": "manual/samplers.html#gradientsamplerbase",
+    "title": "Sampler Hierarchy",
+    "section": "GradientSamplerBase",
+    "text": "GradientSamplerBase\nShared base class for HMC and NUTS. It owns an HMCAdaptationController that manages:\n\nDual averaging for step-size adaptation\nDiagonal mass matrix accumulation via Welford’s online algorithm\n\nThe step() method in GradientSamplerBase:\n\nCalls the concrete do_gradient_step() override (HMC or NUTS)\nPasses the acceptance probability to the adaptation controller\nIf the mass matrix was just updated (end of a warmup window), reinitializes the step size with the heuristic\n\nAfter warmup, the adaptation controller freezes and returns the smoothed step size from dual averaging.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Sampler Hierarchy"
+    ]
+  },
+  {
+    "objectID": "manual/samplers.html#hmcsampler",
+    "href": "manual/samplers.html#hmcsampler",
+    "title": "Sampler Hierarchy",
+    "section": "HMCSampler",
+    "text": "HMCSampler\nPerforms fixed-length leapfrog integration. The number of leapfrog steps is set at construction from config.num_leapfrogs. Each call to do_gradient_step() invokes hmc_step() from mcmc/algorithms/hmc.h.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Sampler Hierarchy"
+    ]
+  },
+  {
+    "objectID": "manual/samplers.html#nutssampler",
+    "href": "manual/samplers.html#nutssampler",
+    "title": "Sampler Hierarchy",
+    "section": "NUTSSampler",
+    "text": "NUTSSampler\nUses the No-U-Turn criterion to adapt trajectory length automatically. The maximum tree depth is set from config.max_tree_depth (default 10). Returns NUTS diagnostics (tree depth, divergence flag, energy) with each step. See NUTS Algorithm for the tree-building details.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -439,8 +595,8 @@
     "objectID": "manual/samplers.html#factory-dispatch",
     "href": "manual/samplers.html#factory-dispatch",
     "title": "Sampler Hierarchy",
-    "section": "Factory Dispatch",
-    "text": "Factory Dispatch",
+    "section": "Factory dispatch",
+    "text": "Factory dispatch\ncreate_sampler() in chain_runner.cpp constructs the right sampler based on the model’s capabilities and the user’s choice:\nunique_ptr&lt;SamplerBase&gt; create_sampler(const SamplerConfig& config,\n                                        WarmupSchedule& schedule) {\n  switch(config.sampler_type) {\n    case nuts:                return make_unique&lt;NUTSSampler&gt;(config, schedule);\n    case hamiltonian_mc:      return make_unique&lt;HMCSampler&gt;(config, schedule);\n    case adaptive_metropolis: return make_unique&lt;MetropolisSampler&gt;(config, schedule);\n  }\n}\nThe GGM always uses MetropolisSampler because it does not provide a gradient. The OMRF and mixed MRF default to NUTS but fall back to Metropolis when the user requests it via interaction_scale.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -451,8 +607,8 @@
     "objectID": "manual/samplers.html#step-size-adaptation",
     "href": "manual/samplers.html#step-size-adaptation",
     "title": "Sampler Hierarchy",
-    "section": "Step-Size Adaptation",
-    "text": "Step-Size Adaptation",
+    "section": "Step-size adaptation",
+    "text": "Step-size adaptation\nThe DualAveraging class implements the Nesterov dual-averaging scheme from Hoffman and Gelman (2014). During warmup, each step’s acceptance probability is fed to the dual averager, which maintains both a current step size (for exploration) and a smoothed average (used after warmup).\nKey parameters:\n\nTarget acceptance — Default 0.8 for NUTS\n\\(\\gamma\\), \\(t_0\\), \\(\\kappa\\) — Shrinkage and decay parameters from the NUTS paper",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -463,8 +619,8 @@
     "objectID": "manual/samplers.html#mass-matrix-tuning",
     "href": "manual/samplers.html#mass-matrix-tuning",
     "title": "Sampler Hierarchy",
-    "section": "Mass Matrix Tuning",
-    "text": "Mass Matrix Tuning",
+    "section": "Mass matrix tuning",
+    "text": "Mass matrix tuning\nThe DiagMassMatrixAccumulator collects parameter samples during warmup stage 2 using Welford’s algorithm for numerically stable variance computation. At the end of each adaptation window, the accumulated variance is extracted as the diagonal mass matrix.\nThe variance estimate is blended with a prior (shrunk toward 1.0) to prevent degenerate mass matrices early in warmup when few samples are available.\nWhen the mass matrix changes, the step size is reinitialized from scratch using the heuristic, because the optimal step size depends on the mass matrix.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -476,7 +632,7 @@
     "href": "manual/numerical.html",
     "title": "Numerical Considerations",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nCross-platform numerical consistency in bgms.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nCross-platform numerical consistency in bgms. Source: src/math/custom_explog.h, custom_explog.cpp, custom_arma_explog.h, and explog_macros.h.",
     "crumbs": [
       "Manual",
       "Numerical Methods",
@@ -484,11 +640,83 @@
     ]
   },
   {
-    "objectID": "manual/numerical.html#custom-explog",
-    "href": "manual/numerical.html#custom-explog",
+    "objectID": "manual/numerical.html#the-problem",
+    "href": "manual/numerical.html#the-problem",
     "title": "Numerical Considerations",
-    "section": "Custom exp/log",
-    "text": "Custom exp/log\nbgms uses openlibm for consistent exp/log behavior across platforms.\nContent to be added: rationale, implementation details.",
+    "section": "The problem",
+    "text": "The problem\nStandard library implementations of exp() and log() differ across platforms. The GNU C Library (glibc, used on Linux), macOS libm, and MSVC’s C runtime produce slightly different results for the same input, especially near boundary values. These differences are small (last-bit-of-precision level) but compound across thousands of MCMC iterations, causing:\n\nDifferent platforms to produce different posterior samples from the same seed\nCRAN check failures when comparing numerical output across architectures\nOccasional test failures when expected values are computed on one platform and checked on another",
+    "crumbs": [
+      "Manual",
+      "Numerical Methods",
+      "Numerical Considerations"
+    ]
+  },
+  {
+    "objectID": "manual/numerical.html#openlibm-solution",
+    "href": "manual/numerical.html#openlibm-solution",
+    "title": "Numerical Considerations",
+    "section": "OpenLibM solution",
+    "text": "OpenLibM solution\nbgms ships a copy of the __ieee754_exp() and __ieee754_log() implementations from OpenLibM (the FreeBSD/Sun math library). These are self-contained C functions that follow IEEE 754 exactly and produce identical results on all platforms.\nThe implementation in custom_explog.cpp (approximately 800 lines) is the original Sun/FreeBSD code, lightly adapted to compile as C++ within an R package.",
+    "crumbs": [
+      "Manual",
+      "Numerical Methods",
+      "Numerical Considerations"
+    ]
+  },
+  {
+    "objectID": "manual/numerical.html#platform-detection",
+    "href": "manual/numerical.html#platform-detection",
+    "title": "Numerical Considerations",
+    "section": "Platform detection",
+    "text": "Platform detection\nThe macro system in explog_macros.h controls when custom exp/log is used:\n#if (defined(_WIN32) && (!defined(CUSTOM_EXP_LOG) || CUSTOM_EXP_LOG == 0)) \\\n  || (!defined(_WIN32) && defined(CUSTOM_EXP_LOG) && CUSTOM_EXP_LOG != 0)\n  #define USE_CUSTOM_LOG 1\n#endif\nThe logic:\n\nWindows — Uses custom exp/log by default because MSVC’s std::exp/std::log differ from POSIX implementations and are slower\nLinux/macOS — Uses the system libm by default (which is fast and POSIX-compliant). Custom exp/log can be enabled by setting CUSTOM_EXP_LOG=1\n\nThe configure and configure.win scripts set the appropriate compiler flag in Makevars.",
+    "crumbs": [
+      "Manual",
+      "Numerical Methods",
+      "Numerical Considerations"
+    ]
+  },
+  {
+    "objectID": "manual/numerical.html#usage-in-c-code",
+    "href": "manual/numerical.html#usage-in-c-code",
+    "title": "Numerical Considerations",
+    "section": "Usage in C++ code",
+    "text": "Usage in C++ code\nTwo levels of macros are available:\n\n\n\nMacro\nExpands to (custom)\nExpands to (system)\n\n\n\n\nMY_EXP(x)\n__ieee754_exp(x)\nstd::exp(x)\n\n\nARMA_MY_EXP(X)\ncustom_arma_exp(X)\narma::exp(X)\n\n\n\nThe ARMA_MY_EXP variant applies element-wise custom exp/log to Armadillo matrices and vectors. It wraps custom_arma_exp() and custom_arma_log() from custom_arma_explog.h, which iterate over matrix elements and call the scalar __ieee754_exp/__ieee754_log.",
+    "crumbs": [
+      "Manual",
+      "Numerical Methods",
+      "Numerical Considerations"
+    ]
+  },
+  {
+    "objectID": "manual/numerical.html#performance",
+    "href": "manual/numerical.html#performance",
+    "title": "Numerical Considerations",
+    "section": "Performance",
+    "text": "Performance\nOn macOS and Linux, the system exp() and log() are highly optimized (hardware-accelerated on some architectures). The custom versions are slightly slower but guarantee cross-platform reproducibility.\nOn Windows with MSVC, the custom implementations are often 2–5× faster than std::exp/std::log, making the custom path beneficial for both correctness and speed.",
+    "crumbs": [
+      "Manual",
+      "Numerical Methods",
+      "Numerical Considerations"
+    ]
+  },
+  {
+    "objectID": "manual/numerical.html#exp_bound-and-overflow-prevention",
+    "href": "manual/numerical.html#exp_bound-and-overflow-prevention",
+    "title": "Numerical Considerations",
+    "section": "EXP_BOUND and overflow prevention",
+    "text": "EXP_BOUND and overflow prevention\nThe variable helpers use EXP_BOUND = 709 as the threshold for safe exponentiation, derived from the IEEE 754 double-precision range:\n\n\\(\\exp(709) \\approx 8.2 \\times 10^{307}\\) — largest representable\n\\(\\exp(710) = +\\text{Inf}\\)\n\\(\\exp(-745) \\approx 5 \\times 10^{-324}\\) — smallest positive subnormal\n\\(\\exp(-746) = 0\\)\n\nThis bound is used throughout the codebase (not just in variable helpers) to guard against overflow before calling MY_EXP().",
+    "crumbs": [
+      "Manual",
+      "Numerical Methods",
+      "Numerical Considerations"
+    ]
+  },
+  {
+    "objectID": "manual/numerical.html#r-interface",
+    "href": "manual/numerical.html#r-interface",
+    "title": "Numerical Considerations",
+    "section": "R interface",
+    "text": "R interface\nThe explog_interface.cpp file exposes the custom exp/log functions to R for testing purposes. This allows verification that the custom implementations match expected values in R-level unit tests.",
     "crumbs": [
       "Manual",
       "Numerical Methods",
@@ -500,7 +728,7 @@
     "href": "manual/ggm-internals.html",
     "title": "GGM Internals",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nImplementation details of the Gaussian graphical model in bgms.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nImplementation details of the Gaussian graphical model in bgms. Source: src/models/ggm/ggm_model.h and ggm_model.cpp.",
     "crumbs": [
       "Manual",
       "Models",
@@ -511,8 +739,8 @@
     "objectID": "manual/ggm-internals.html#precision-matrix-parameterization",
     "href": "manual/ggm-internals.html#precision-matrix-parameterization",
     "title": "GGM Internals",
-    "section": "Precision Matrix Parameterization",
-    "text": "Precision Matrix Parameterization",
+    "section": "Precision matrix parameterization",
+    "text": "Precision matrix parameterization\nThe GGM is parameterized by the \\(p \\times p\\) precision matrix \\(\\boldsymbol{\\Omega}\\) (inverse covariance). The off-diagonal elements \\(\\omega_{ij}\\) are the negative partial correlations (up to scaling). The model maintains an upper-triangular Cholesky factor \\(\\mathbf{R}\\) such that \\(\\mathbf{R}^\\top \\mathbf{R} = \\boldsymbol{\\Omega}\\) throughout sampling.\nFor complete data, the likelihood depends on the data only through the sufficient statistic \\(\\mathbf{S} = \\mathbf{X}^\\top \\mathbf{X}\\). The GGMModel constructor accepts either raw data or precomputed sufficient statistics.",
     "crumbs": [
       "Manual",
       "Models",
@@ -520,11 +748,11 @@
     ]
   },
   {
-    "objectID": "manual/ggm-internals.html#cholesky-updates",
-    "href": "manual/ggm-internals.html#cholesky-updates",
+    "objectID": "manual/ggm-internals.html#element-wise-metropolis",
+    "href": "manual/ggm-internals.html#element-wise-metropolis",
     "title": "GGM Internals",
-    "section": "Cholesky Updates",
-    "text": "Cholesky Updates",
+    "section": "Element-wise Metropolis",
+    "text": "Element-wise Metropolis\nThe GGM does not support gradient-based samplers because the precision matrix must remain positive definite — a constraint that is difficult to enforce in a global HMC step. Instead, each off-diagonal element \\(\\omega_{ij}\\) is updated individually:\n\nPropose \\(\\omega_{ij}^* \\sim \\mathcal{N}(\\omega_{ij}, \\sigma_{ij}^2)\\)\nCompute the log-acceptance ratio using the Cholesky factor\nAccept or reject via Metropolis-Hastings\n\nThe proposal standard deviations \\(\\sigma_{ij}\\) are tuned during warmup by Robbins-Monro updates targeting an acceptance rate of 0.234.",
     "crumbs": [
       "Manual",
       "Models",
@@ -532,11 +760,11 @@
     ]
   },
   {
-    "objectID": "manual/ggm-internals.html#likelihood-and-gradient",
-    "href": "manual/ggm-internals.html#likelihood-and-gradient",
+    "objectID": "manual/ggm-internals.html#cholesky-rank-1-updates",
+    "href": "manual/ggm-internals.html#cholesky-rank-1-updates",
     "title": "GGM Internals",
-    "section": "Likelihood and Gradient",
-    "text": "Likelihood and Gradient",
+    "section": "Cholesky rank-1 updates",
+    "text": "Cholesky rank-1 updates\nWhen a single element \\(\\omega_{ij}\\) changes by \\(\\delta\\), the precision matrix changes by a rank-1 update: \\(\\boldsymbol{\\Omega}' = \\boldsymbol{\\Omega} + \\delta (\\mathbf{e}_i \\mathbf{e}_j^\\top + \\mathbf{e}_j \\mathbf{e}_i^\\top)\\). Rather than recomputing the full Cholesky decomposition in \\(O(p^3)\\), bgms applies a rank-1 update to \\(\\mathbf{R}\\) in \\(O(p^2)\\).\n\nGivens rotation update\nFor an increase in \\(\\omega_{ij}\\) (adding a positive-semidefinite term), the Cholesky factor is updated using Givens rotations. The update satisfies \\(\\mathbf{R}'^{\\!\\top}\\mathbf{R}' = \\mathbf{R}^\\top\\mathbf{R} + \\mathbf{u}\\mathbf{u}^\\top\\).\n\n\nHyperbolic rotation downdate\nFor a decrease (subtracting a term), a hyperbolic rotation is used: \\(\\mathbf{R}'^{\\!\\top}\\mathbf{R}' = \\mathbf{R}^\\top\\mathbf{R} - \\mathbf{u}\\mathbf{u}^\\top\\). If the result would not be positive definite (detected by a negative radicand), the downdate sets a sentinel value (R(1,0) = -2.0) and the proposal is rejected.\nThe Cholesky update/downdate code in src/math/cholupdate.cpp is ported from Simon Wood’s mgcv package (GPL).",
     "crumbs": [
       "Manual",
       "Models",
@@ -544,11 +772,35 @@
     ]
   },
   {
-    "objectID": "manual/ggm-internals.html#edge-specific-metropolis-proposals",
-    "href": "manual/ggm-internals.html#edge-specific-metropolis-proposals",
+    "objectID": "manual/ggm-internals.html#edge-specific-proposals",
+    "href": "manual/ggm-internals.html#edge-specific-proposals",
     "title": "GGM Internals",
-    "section": "Edge-Specific Metropolis Proposals",
-    "text": "Edge-Specific Metropolis Proposals",
+    "section": "Edge-specific proposals",
+    "text": "Edge-specific proposals\nWhen edge selection is active, each edge \\((i,j)\\) has a binary indicator \\(\\gamma_{ij}\\). The update cycle for a single edge:\n\nPropose inclusion/exclusion — Compute the Bayes factor for including vs. excluding the edge, using the change in log-likelihood and the prior inclusion probability\nIf included (\\(\\gamma_{ij} = 1\\)) — Sample \\(\\omega_{ij}\\) from its full conditional via the Metropolis proposal\nIf excluded (\\(\\gamma_{ij} = 0\\)) — Set \\(\\omega_{ij} = 0\\)\n\nThe order of edge updates is randomized at each iteration to avoid systematic sweep artifacts.",
+    "crumbs": [
+      "Manual",
+      "Models",
+      "GGM Internals"
+    ]
+  },
+  {
+    "objectID": "manual/ggm-internals.html#log-likelihood-computation",
+    "href": "manual/ggm-internals.html#log-likelihood-computation",
+    "title": "GGM Internals",
+    "section": "Log-likelihood computation",
+    "text": "Log-likelihood computation\nThe GGM log-likelihood for \\(n\\) observations is:\n\\[\n\\ell(\\boldsymbol{\\Omega}) = \\frac{n}{2} \\log |\\boldsymbol{\\Omega}| - \\frac{1}{2} \\text{tr}(\\mathbf{S}\\boldsymbol{\\Omega})\n\\]\nThe log-determinant is computed from the Cholesky factor as \\(\\log|\\boldsymbol{\\Omega}| = 2\\sum_i \\log R_{ii}\\). The trace term uses the precomputed sufficient statistic \\(\\mathbf{S}\\).",
+    "crumbs": [
+      "Manual",
+      "Models",
+      "GGM Internals"
+    ]
+  },
+  {
+    "objectID": "manual/ggm-internals.html#missing-data-imputation",
+    "href": "manual/ggm-internals.html#missing-data-imputation",
+    "title": "GGM Internals",
+    "section": "Missing data imputation",
+    "text": "Missing data imputation\nWhen na_action = \"impute\", the GGM imputes missing values using the conditional normal distribution implied by the current precision matrix. After imputation, the sufficient statistic \\(\\mathbf{S}\\) is recomputed for the next likelihood evaluation.",
     "crumbs": [
       "Manual",
       "Models",
@@ -560,7 +812,7 @@
     "href": "manual/parallel-chains.html",
     "title": "Parallel Chains",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nHow bgms runs multiple MCMC chains in parallel using TBB and RcppParallel.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nbgms runs multiple MCMC chains in parallel using Intel TBB (Threading Building Blocks), accessed through the RcppParallel package. The implementation is in src/mcmc/execution/chain_runner.h and chain_runner.cpp.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -572,7 +824,7 @@
     "href": "manual/parallel-chains.html#design",
     "title": "Parallel Chains",
     "section": "Design",
-    "text": "Design",
+    "text": "Design\nThe entry point is run_mcmc_sampler(), which takes a prototype model, a prototype edge prior, and a sampler configuration. It follows a clone-and-dispatch pattern:\n\nClone — Create independent copies of the model and edge prior for each chain via model.clone() and edge_prior.clone(). Each clone has its own internal state and RNG.\nSeed — Each clone is seeded with config.seed + chain_id to ensure reproducibility while avoiding correlated chains.\nDispatch — All chains are dispatched to threads. Each thread runs run_mcmc_chain() with its own model, prior, and result container.\nCollect — Results are gathered and returned as a vector of ChainResult objects.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -583,8 +835,8 @@
     "objectID": "manual/parallel-chains.html#model-and-prior-cloning",
     "href": "manual/parallel-chains.html#model-and-prior-cloning",
     "title": "Parallel Chains",
-    "section": "Model and Prior Cloning",
-    "text": "Model and Prior Cloning",
+    "section": "Model and prior cloning",
+    "text": "Model and prior cloning\nBoth BaseModel::clone() and BaseEdgePrior::clone() perform deep copies. For the model, this includes the full parameter state, Cholesky factors (GGM), residual matrices (OMRF), and all internal buffers. For the SBM edge prior, the cluster allocations and block probability matrix are cloned.\nThe clone methods return unique_ptr, so each chain owns its objects exclusively with no shared mutable state between threads.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -595,8 +847,8 @@
     "objectID": "manual/parallel-chains.html#tbb-thread-control",
     "href": "manual/parallel-chains.html#tbb-thread-control",
     "title": "Parallel Chains",
-    "section": "TBB Thread Control",
-    "text": "TBB Thread Control",
+    "section": "TBB thread control",
+    "text": "TBB thread control\nBefore dispatching, bgms sets the maximum parallelism via TBB’s global control:\ntbb::global_control gc(\n    tbb::global_control::max_allowed_parallelism,\n    no_threads\n);\nThis limits the TBB thread pool to no_threads (the cores argument in R), respecting the user’s request even when the system has more cores available.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -607,8 +859,8 @@
     "objectID": "manual/parallel-chains.html#rcppparallel-dispatch",
     "href": "manual/parallel-chains.html#rcppparallel-dispatch",
     "title": "Parallel Chains",
-    "section": "RcppParallel Dispatch",
-    "text": "RcppParallel Dispatch",
+    "section": "RcppParallel dispatch",
+    "text": "RcppParallel dispatch\nThe MCMCChainRunner struct inherits from RcppParallel::Worker and implements operator()(begin, end). Each unit of work is one chain:\nvoid MCMCChainRunner::operator()(size_t begin, size_t end) {\n    for(size_t i = begin; i &lt; end; ++i) {\n        run_mcmc_chain(results_[i], *models_[i], *edge_priors_[i],\n                       config_, i, pm_);\n    }\n}\nDispatch uses RcppParallel::parallelFor(0, no_chains, runner).",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -619,8 +871,8 @@
     "objectID": "manual/parallel-chains.html#sequential-fallback",
     "href": "manual/parallel-chains.html#sequential-fallback",
     "title": "Parallel Chains",
-    "section": "Sequential Fallback",
-    "text": "Sequential Fallback",
+    "section": "Sequential fallback",
+    "text": "Sequential fallback\nWhen no_threads = 1 or no_chains = 1, bgms skips TBB and runs chains sequentially in a simple loop. This avoids TBB overhead for single-chain runs and simplifies debugging.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -631,8 +883,8 @@
     "objectID": "manual/parallel-chains.html#per-chain-rng-seeding",
     "href": "manual/parallel-chains.html#per-chain-rng-seeding",
     "title": "Parallel Chains",
-    "section": "Per-Chain RNG Seeding",
-    "text": "Per-Chain RNG Seeding",
+    "section": "Per-chain RNG seeding",
+    "text": "Per-chain RNG seeding\nEach chain’s RNG is a SafeRNG wrapping dqrng::xoshiro256plusplus. The seed for chain \\(k\\) is config.seed + k, ensuring:\n\nReproducibility: the same seed and chain count always produce the same results\nIndependence: different chains explore different random number sequences",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -643,8 +895,20 @@
     "objectID": "manual/parallel-chains.html#progress-and-interrupts",
     "href": "manual/parallel-chains.html#progress-and-interrupts",
     "title": "Parallel Chains",
-    "section": "Progress and Interrupts",
-    "text": "Progress and Interrupts",
+    "section": "Progress and interrupts",
+    "text": "Progress and interrupts\nThe ProgressManager class handles progress display and user interrupt detection across threads.\n\nProgress bar — Updated by each chain independently. The manager aggregates progress across chains and displays a single bar (or per-chain bars, depending on progress_type).\nUser interrupts — Each chain checks pm.shouldExit() between iterations. If the user presses Ctrl-C, the flag is set and all chains exit their sampling loops. The partial results are still returned (with a warning) rather than discarded.\nThread safety — Progress updates and interrupt checks use a shared print_mutex to prevent garbled console output.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Parallel Chains"
+    ]
+  },
+  {
+    "objectID": "manual/parallel-chains.html#chainresult-storage",
+    "href": "manual/parallel-chains.html#chainresult-storage",
+    "title": "Parallel Chains",
+    "section": "ChainResult storage",
+    "text": "ChainResult storage\nEach chain writes its output into a preallocated ChainResult:\n\n\n\n\n\n\n\n\nField\nShape\nContent\n\n\n\n\nsamples\nparam_dim × n_iter\nParameter samples (post-warmup)\n\n\nindicator_samples\nn_edges × n_iter\nEdge indicators (if edge selection)\n\n\nallocation_samples\nn_vars × n_iter\nSBM cluster allocations (if SBM prior)\n\n\ntreedepth_samples\nn_iter\nNUTS tree depth (if NUTS)\n\n\ndivergent_samples\nn_iter\nDivergence flags (if NUTS)\n\n\nenergy_samples\nn_iter\nHamiltonian energy (if NUTS)\n\n\n\nThe ChainResult also carries error status and user interrupt flags per chain. These are checked by the R output builder to decide whether to warn or error.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -1416,7 +1680,7 @@
     "href": "guide/getting-started.html#posterior-summaries",
     "title": "Getting Started",
     "section": "Posterior summaries",
-    "text": "Posterior summaries\n\nsummary(fit)\n\nPosterior summaries from Bayesian estimation:\n\nCategory thresholds:\n                mean  mcse    sd    n_eff  Rhat\nintrusion (1)  0.475 0.007 0.223 1157.788 1.001\nintrusion (2) -1.906 0.011 0.315  880.403 1.005\nintrusion (3) -4.846 0.017 0.514  875.204 1.007\nintrusion (4) -9.519 0.028 0.845  904.952 1.008\ndreams (1)    -0.588 0.006 0.192 1159.841 1.001\ndreams (2)    -3.782 0.012 0.353  871.629 1.000\n... (use `summary(fit)$main` to see full output)\n\nPairwise interactions:\n                   mean    sd  mcse    n_eff  Rhat\nintrusion-dreams  0.629 0.002 0.067 1382.782 1.005\nintrusion-flash   0.339 0.002 0.060 1444.285 1.002\nintrusion-upset   0.202 0.064 0.005  187.988 1.003\nintrusion-physior 0.189 0.071 0.006  137.040 1.000\ndreams-flash      0.500 0.002 0.060 1124.700 1.002\ndreams-upset      0.226 0.053 0.002 1128.334 1.000\n... (use `summary(fit)$pairwise` to see full output)\nNote: NA values are suppressed in the print table. They occur here when an \nindicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;\n`summary(fit)$pairwise` still contains the NA values.\n\nInclusion probabilities:\n                   mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1   n_eff  Rhat\nintrusion-dreams  1.000 0.000           0     0     0  1999              \nintrusion-flash   1.000 0.000           0     0     0  1999              \nintrusion-upset   0.979 0.143  0.02    40     2     2  1955  49.853 1.311\nintrusion-physior 0.941 0.237 0.029   112     7     7  1873  64.566 1.016\ndreams-flash      1.000 0.000           0     0     0  1999              \ndreams-upset      0.999 0.039 0.002     2     1     1  1995 400.722 1.292\n... (use `summary(fit)$indicator` to see full output)\nNote: NA values are suppressed in the print table. They occur when an indicator\nwas constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat\nare undefined; `summary(fit)$indicator` still contains the NA values.\n\nUse `summary(fit)$&lt;component&gt;` to access full results.\nSee the `easybgm` package for other summary and plotting tools.\n\n\nThe summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For pairwise interactions, it also reports posterior inclusion probabilities when edge selection is active.",
+    "text": "Posterior summaries\n\nsummary(fit)\n\nPosterior summaries from Bayesian estimation:\n\nCategory thresholds:\n                mean  mcse    sd    n_eff  Rhat\nintrusion (1)  0.465 0.008 0.240  974.945 1.000\nintrusion (2) -1.924 0.012 0.354  806.634 1.000\nintrusion (3) -4.891 0.023 0.584  636.265 1.001\nintrusion (4) -9.591 0.038 0.945  618.333 1.000\ndreams (1)    -0.588 0.006 0.195 1001.809 1.005\ndreams (2)    -3.776 0.014 0.369  658.738 1.009\n... (use `summary(fit)$main` to see full output)\n\nPairwise interactions:\n                   mean    sd  mcse    n_eff  Rhat\nintrusion-dreams  0.633 0.002 0.070 1274.619 1.008\nintrusion-flash   0.339 0.002 0.063 1357.397 1.003\nintrusion-upset   0.191 0.075 0.005  199.675 1.022\nintrusion-physior 0.205 0.065 0.004  310.716 1.003\ndreams-flash      0.498 0.002 0.060 1426.023 1.000\ndreams-upset      0.223 0.064 0.006  106.871 1.003\n... (use `summary(fit)$pairwise` to see full output)\nNote: NA values are suppressed in the print table. They occur here when an \nindicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;\n`summary(fit)$pairwise` still contains the NA values.\n\nInclusion probabilities:\n                   mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1  n_eff  Rhat\nintrusion-dreams  1.000 0.000           0     0     0  1999             \nintrusion-flash   1.000 0.000           0     0     0  1999             \nintrusion-upset   0.942 0.234 0.024   106    10     9  1874 95.323  1.36\nintrusion-physior 0.979 0.145 0.015    39     4     4  1952 99.813 1.216\ndreams-flash      1.000 0.000           0     0     0  1999             \ndreams-upset      0.974 0.161 0.026    51     2     2  1944  39.53 1.014\n... (use `summary(fit)$indicator` to see full output)\nNote: NA values are suppressed in the print table. They occur when an indicator\nwas constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat\nare undefined; `summary(fit)$indicator` still contains the NA values.\n\nUse `summary(fit)$&lt;component&gt;` to access full results.\nSee the `easybgm` package for other summary and plotting tools.\n\n\nThe summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For pairwise interactions, it also reports posterior inclusion probabilities when edge selection is active.",
     "crumbs": [
       "Get Started",
       "Getting Started"
@@ -1427,7 +1691,7 @@
     "href": "guide/getting-started.html#posterior-means",
     "title": "Getting Started",
     "section": "Posterior means",
-    "text": "Posterior means\n\ncoef(fit)\n\n$main\n             cat (1)   cat (2)   cat (3)    cat (4)\nintrusion  0.4752393 -1.905757 -4.846385  -9.519480\ndreams    -0.5884216 -3.781525 -7.109964 -11.530285\nflash     -0.1051154 -2.566799 -5.365407  -9.674749\nupset      0.4216365 -1.308488 -3.370565  -7.037020\nphysior   -0.6037679 -3.140033 -6.167547 -10.489248\n\n$pairwise\n          intrusion      dreams       flash       upset     physior\nintrusion 0.0000000 0.629338089 0.338657791 0.202376428 0.188939686\ndreams    0.6293381 0.000000000 0.499816233 0.225595383 0.007497679\nflash     0.3386578 0.499816233 0.000000000 0.004566734 0.308420955\nupset     0.2023764 0.225595383 0.004566734 0.000000000 0.707339037\nphysior   0.1889397 0.007497679 0.308420955 0.707339037 0.000000000\n\n$indicator\n          intrusion dreams  flash  upset physior\nintrusion    0.0000 1.0000 1.0000 0.9790  0.9405\ndreams       1.0000 0.0000 1.0000 0.9985  0.0820\nflash        1.0000 1.0000 0.0000 0.0545  1.0000\nupset        0.9790 0.9985 0.0545 0.0000  1.0000\nphysior      0.9405 0.0820 1.0000 1.0000  0.0000\n\n\ncoef() returns posterior mean matrices: $pairwise contains the interaction strengths and $indicator contains edge inclusion probabilities.",
+    "text": "Posterior means\n\ncoef(fit)\n\n$main\n             cat (1)   cat (2)   cat (3)    cat (4)\nintrusion  0.4648767 -1.923783 -4.891105  -9.591242\ndreams    -0.5876677 -3.776004 -7.107302 -11.529369\nflash     -0.1074819 -2.563824 -5.370067  -9.674217\nupset      0.4206631 -1.296911 -3.350500  -7.001428\nphysior   -0.6109229 -3.165193 -6.224768 -10.569553\n\n$pairwise\n          intrusion      dreams      flash      upset     physior\nintrusion 0.0000000 0.632923980 0.33928716 0.19103214 0.205452756\ndreams    0.6329240 0.000000000 0.49819453 0.22305805 0.007213827\nflash     0.3392872 0.498194525 0.00000000 0.01211089 0.301269055\nupset     0.1910321 0.223058053 0.01211089 0.00000000 0.707374914\nphysior   0.2054528 0.007213827 0.30126906 0.70737491 0.000000000\n\n$indicator\n          intrusion dreams  flash  upset physior\nintrusion    0.0000 1.0000 1.0000 0.9420  0.9785\ndreams       1.0000 0.0000 1.0000 0.9735  0.0695\nflash        1.0000 1.0000 0.0000 0.1065  0.9905\nupset        0.9420 0.9735 0.1065 0.0000  1.0000\nphysior      0.9785 0.0695 0.9905 1.0000  0.0000\n\n\ncoef() returns posterior mean matrices: $pairwise contains the interaction strengths and $indicator contains edge inclusion probabilities.",
     "crumbs": [
       "Get Started",
       "Getting Started"
@@ -2394,34 +2658,89 @@
   {
     "objectID": "manual/index.html",
     "href": "manual/index.html",
-    "title": "Reference Manual",
+    "title": "Technical Manual",
     "section": "",
-    "text": "Technical documentation for the bgms C++ backend and MCMC algorithms.\nThis manual is intended for:",
+    "text": "Technical documentation for the bgms C++ backend, MCMC algorithms, and R scaffolding layer. This manual targets contributors to bgms development, users who need to understand implementation details, and researchers extending bgms for new model types.",
     "crumbs": [
       "Manual",
-      "Reference Manual"
+      "Technical Manual"
     ]
   },
   {
-    "objectID": "manual/index.html#contents",
-    "href": "manual/index.html#contents",
-    "title": "Reference Manual",
-    "section": "Contents",
-    "text": "Contents\n\nArchitecture — C++ backend design and structure\nNUTS Algorithm — No-U-Turn Sampler implementation\nWarmup Schedule — Adaptation stages and tuning\nModel Classes — BaseModel hierarchy\nNumerical Considerations — Precision and cross-platform issues",
+    "objectID": "manual/index.html#architecture",
+    "href": "manual/index.html#architecture",
+    "title": "Technical Manual",
+    "section": "Architecture",
+    "text": "Architecture\nHow the R front-end and C++ back-end are organized, and how they communicate.\n\nC++ Architecture — Source layout, layer separation, design principles\nR Scaffolding — Validation, spec construction, sampler dispatch, output assembly\nModel Classes — BaseModel hierarchy and virtual interface",
     "crumbs": [
       "Manual",
-      "Reference Manual"
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#mcmc-engine",
+    "href": "manual/index.html#mcmc-engine",
+    "title": "Technical Manual",
+    "section": "MCMC Engine",
+    "text": "MCMC Engine\nThe sampling machinery shared by all models.\n\nSampler Hierarchy — SamplerBase, gradient-based samplers, factory dispatch\nNUTS Algorithm — Binary tree construction, U-turn criterion, divergence detection\nWarmup Schedule — Five-stage adaptation, dual averaging, mass matrix tuning\nParallel Chains — TBB threading, model cloning, per-chain RNG",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#models",
+    "href": "manual/index.html#models",
+    "title": "Technical Manual",
+    "section": "Models",
+    "text": "Models\nModel-specific sampling and likelihood computation.\n\nGGM Internals — Precision matrix Metropolis, Cholesky rank-1 updates\nOMRF Internals — Ordinal thresholds, Blume-Capel, pseudolikelihood\nVariable Helpers — Numerically stable probability computation (FAST/SAFE)\nMixed MRF Internals — Hybrid NUTS+Metropolis, block parameter layout",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#priors-edge-selection",
+    "href": "manual/index.html#priors-edge-selection",
+    "title": "Technical Manual",
+    "section": "Priors & Edge Selection",
+    "text": "Priors & Edge Selection\nPrior specification and edge inclusion machinery.\n\nEdge Priors — Bernoulli, Beta-Bernoulli, and SBM prior classes\nSBM Prior — MFM-SBM formulation, collapsed Gibbs, cluster allocation",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#group-comparison",
+    "href": "manual/index.html#group-comparison",
+    "title": "Technical Manual",
+    "section": "Group Comparison",
+    "text": "Group Comparison\n\nbgmCompare Engine — Multi-group posterior, difference selection",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#numerical-methods",
+    "href": "manual/index.html#numerical-methods",
+    "title": "Technical Manual",
+    "section": "Numerical Methods",
+    "text": "Numerical Methods\n\nNumerical Considerations — Cross-platform exp/log, OpenLibM, IEEE 754 compliance",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
     ]
   },
   {
     "objectID": "manual/index.html#prerequisites",
     "href": "manual/index.html#prerequisites",
-    "title": "Reference Manual",
+    "title": "Technical Manual",
     "section": "Prerequisites",
-    "text": "Prerequisites\nThis manual assumes familiarity with:\n\nC++ programming\nMCMC methods\nHamiltonian Monte Carlo",
+    "text": "Prerequisites\nThis manual assumes familiarity with C++ programming, MCMC methods, and Hamiltonian Monte Carlo. The User’s Guide covers the statistical background at a conceptual level.",
     "crumbs": [
       "Manual",
-      "Reference Manual"
+      "Technical Manual"
     ]
   },
   {
@@ -2429,7 +2748,7 @@
     "href": "manual/model-classes.html",
     "title": "Model Classes",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nThe model hierarchy in bgms.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nAll graphical models in bgms inherit from a single abstract base class, BaseModel, defined in src/models/base_model.h. The chain runner interacts with models exclusively through this interface, so adding a new model type requires implementing the relevant virtual methods without modifying the MCMC engine.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -2437,23 +2756,11 @@
     ]
   },
   {
-    "objectID": "manual/model-classes.html#basemodel",
-    "href": "manual/model-classes.html#basemodel",
+    "objectID": "manual/model-classes.html#basemodel-interface",
+    "href": "manual/model-classes.html#basemodel-interface",
     "title": "Model Classes",
-    "section": "BaseModel",
-    "text": "BaseModel\nAbstract interface defining:\n\nlog_likelihood()\nlog_prior()\ngradient()",
-    "crumbs": [
-      "Manual",
-      "Architecture",
-      "Model Classes"
-    ]
-  },
-  {
-    "objectID": "manual/model-classes.html#omrfmodel",
-    "href": "manual/model-classes.html#omrfmodel",
-    "title": "Model Classes",
-    "section": "OMRFModel",
-    "text": "OMRFModel\nOrdinal Markov random field implementation.",
+    "section": "BaseModel interface",
+    "text": "BaseModel interface\nBaseModel declares over 30 virtual methods. The most important groups are:\n\nCapability queries\nThese methods tell the sampler what the model supports. The chain runner and sampler factory use them to select the correct algorithm.\n\n\n\nMethod\nDefault\nGGMModel\nOMRFModel\nMixedMRFModel\n\n\n\n\nhas_gradient()\nfalse\nfalse\ntrue\ntrue\n\n\nhas_adaptive_metropolis()\nfalse\ntrue\ntrue\ntrue\n\n\nhas_nuts()\nfalse\nfalse\ntrue\ntrue\n\n\nhas_edge_selection()\nfalse\ntrue\ntrue\ntrue\n\n\nhas_missing_data()\nfalse\ntrue\ntrue\ntrue\n\n\n\n\n\nSampling methods\nvirtual void do_one_metropolis_step(int iteration) = 0;\nvirtual vec gradient(vec parameters);\nvirtual pair&lt;double, vec&gt; logp_and_gradient(vec parameters);\nEvery model must implement do_one_metropolis_step(). Models that support gradient-based samplers (NUTS, HMC) also override gradient() and logp_and_gradient(). The joint function is more efficient because the log-posterior and gradient share intermediate computations.\n\n\nParameter access\nvirtual vec get_vectorized_parameters() const = 0;\nvirtual void set_vectorized_parameters(const vec& params) = 0;\nvirtual vec get_full_vectorized_parameters() const;\nvirtual vec get_storage_vectorized_parameters() const;\nvirtual size_t parameter_dimension() const = 0;\nvirtual size_t full_parameter_dimension() const;\nvirtual size_t storage_dimension() const;\nget_vectorized_parameters() returns the parameters that the gradient-based sampler updates. get_storage_vectorized_parameters() returns all parameters that need to be saved (including those updated by Metropolis steps outside the NUTS block).\nThe distinction matters for the mixed MRF, where the NUTS block contains thresholds, pairwise discrete interactions, means, and cross-type interactions, but the continuous-continuous precision elements are updated by a separate Metropolis step and only appear in the storage vector.\n\n\nEdge selection\nvirtual void update_edge_indicators();\nvirtual void initialize_graph();\nvirtual void set_edge_selection_active(bool active);\nWhen edge selection is active, update_edge_indicators() performs a full scan over all edges, proposing inclusion/exclusion for each using the spike-and-slab prior. initialize_graph() sets starting edge indicators (all edges included by default).\n\n\nAdaptation support\nvirtual void init_metropolis_adaptation(WarmupSchedule& schedule);\nvirtual void tune_proposal_sd(int iteration, WarmupSchedule& schedule);\nvirtual void prepare_iteration();\nModels with element-wise Metropolis proposals (GGM, OMRF, mixed MRF) implement these methods to tune proposal standard deviations during warmup using Robbins-Monro updates.\n\n\nInfrastructure\nvirtual void set_seed(int seed) = 0;\nvirtual unique_ptr&lt;BaseModel&gt; clone() const = 0;\nclone() produces an independent deep copy for parallel chain execution. Each clone gets its own RNG state via set_seed().",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -2465,7 +2772,31 @@
     "href": "manual/model-classes.html#ggmmodel",
     "title": "Model Classes",
     "section": "GGMModel",
-    "text": "GGMModel\nGaussian graphical model implementation.\nContent to be added: class documentation, extension guide.",
+    "text": "GGMModel\nDefined in src/models/ggm/ggm_model.h and ggm_model.cpp.\nParameterization. The GGM is parameterized by the precision matrix \\(\\boldsymbol{\\Omega}\\) (inverse covariance). The model maintains an upper-triangular Cholesky factor \\(\\mathbf{R}\\) such that \\(\\mathbf{R}^\\top\\mathbf{R} = \\boldsymbol{\\Omega}\\).\nSampling. Because the precision matrix must remain positive definite, the GGM does not support gradient-based samplers. Instead, it uses element-wise Metropolis-Hastings: each off-diagonal element \\(\\omega_{ij}\\) is proposed from a Gaussian centered on the current value. After each proposal, the Cholesky factor is updated via a rank-1 Givens rotation (or hyperbolic rotation for downdates), avoiding a full \\(O(p^3)\\) decomposition.\nSufficient statistics. For complete data, the GGM only needs the sufficient statistic \\(\\mathbf{X}^\\top\\mathbf{X}\\), not the raw data matrix. When missing data imputation is active, the sufficient statistics are recomputed after each imputation step.\nSpike-and-slab. Edge indicators \\(\\gamma_{ij} \\in \\{0, 1\\}\\) control whether edge \\((i,j)\\) is included. When \\(\\gamma_{ij} = 0\\), the corresponding precision element is fixed at zero.",
+    "crumbs": [
+      "Manual",
+      "Architecture",
+      "Model Classes"
+    ]
+  },
+  {
+    "objectID": "manual/model-classes.html#omrfmodel",
+    "href": "manual/model-classes.html#omrfmodel",
+    "title": "Model Classes",
+    "section": "OMRFModel",
+    "text": "OMRFModel\nDefined in src/models/omrf/omrf_model.h and omrf_model.cpp.\nParameterization. The ordinal MRF has two parameter types: main effects (category thresholds) and pairwise interactions. For ordinal variables, there is one threshold per category. For Blume-Capel variables, there are two parameters: a linear effect \\(\\alpha\\) and a quadratic effect \\(\\beta\\), with the category score \\(\\mu_c = \\alpha(c - b) + \\beta(c - b)^2\\) where \\(b\\) is the reference category.\nGradient. The OMRF supports logp_and_gradient(), enabling NUTS and HMC sampling. The gradient involves category probabilities computed by the variable helpers, which use a FAST/SAFE dual-path strategy for numerical stability.\nResidual matrix. The model maintains a precomputed residual matrix \\(\\mathbf{R}_{ni} = \\sum_{j \\neq i} x_{nj} \\sigma_{ij}\\) that caches the contribution of pairwise interactions to each variable’s conditional distribution. This matrix is updated incrementally when a single interaction changes.\nMetropolis fallback. Even when NUTS is the primary sampler, the OMRF uses element-wise Metropolis proposals for edge indicator updates during the edge selection phase.",
+    "crumbs": [
+      "Manual",
+      "Architecture",
+      "Model Classes"
+    ]
+  },
+  {
+    "objectID": "manual/model-classes.html#mixedmrfmodel",
+    "href": "manual/model-classes.html#mixedmrfmodel",
+    "title": "Model Classes",
+    "section": "MixedMRFModel",
+    "text": "MixedMRFModel\nDefined in src/models/mixed/mixed_mrf_model.h and four .cpp files.\nParameterization. The mixed MRF handles \\(p\\) discrete and \\(q\\) continuous variables jointly. The log-density has the form:\n\\[\n\\log f(\\mathbf{x}, \\mathbf{y}) = \\sum_i \\mu_i(x_i) + \\mathbf{x}^\\top \\mathbf{K}_{xx} \\mathbf{x} + \\mathbf{y}^\\top \\mathbf{K}_{yy} \\mathbf{y} + 2\\mathbf{x}^\\top \\mathbf{K}_{xy} \\mathbf{y}\n\\]\nwhere \\(\\mathbf{K}_{xx}\\), \\(\\mathbf{K}_{yy}\\), and \\(\\mathbf{K}_{xy}\\) are the discrete-discrete, continuous-continuous, and cross-type interaction matrices.\nHybrid sampling. The NUTS block updates thresholds, discrete pairwise interactions (\\(\\mathbf{K}_{xx}\\)), continuous means, and cross-type interactions (\\(\\mathbf{K}_{xy}\\)). The continuous precision elements (\\(\\mathbf{K}_{yy}\\)) are excluded from the NUTS block because the precision matrix must remain positive definite; they are updated by a separate element-wise Metropolis step (do_pairwise_continuous_metropolis_step()), analogous to the GGM.\nThree dimension concepts. The model distinguishes:\n\nparameter_dimension() — Active NUTS parameters (excludes inactive edges and \\(\\mathbf{K}_{yy}\\))\nfull_parameter_dimension() — All NUTS-block parameters (includes inactive edges, excludes \\(\\mathbf{K}_{yy}\\))\nstorage_dimension() — All parameters including \\(\\mathbf{K}_{yy}\\) (what gets saved to output)\n\nPseudolikelihood options. The pseudolikelihood argument controls whether the model uses conditional or marginal pseudolikelihood for the continuous block. See the User’s Guide for the statistical distinction.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -2477,7 +2808,7 @@
     "href": "manual/omrf-internals.html",
     "title": "OMRF Internals",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nImplementation details of the ordinal Markov random field in bgms.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nImplementation details of the ordinal Markov random field in bgms. Source: src/models/omrf/omrf_model.h and omrf_model.cpp.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2488,8 +2819,8 @@
     "objectID": "manual/omrf-internals.html#ordinal-threshold-parameterization",
     "href": "manual/omrf-internals.html#ordinal-threshold-parameterization",
     "title": "OMRF Internals",
-    "section": "Ordinal Threshold Parameterization",
-    "text": "Ordinal Threshold Parameterization",
+    "section": "Ordinal threshold parameterization",
+    "text": "Ordinal threshold parameterization\nFor an ordinal variable \\(X_i\\) with \\(K_i\\) categories \\((0, 1, \\ldots, K_i - 1)\\), the model assigns one threshold parameter \\(\\mu_i(c)\\) per category \\(c\\). The category \\(c = 0\\) serves as the reference with \\(\\mu_i(0) = 0\\). The conditional probability of observing category \\(c\\) for person \\(n\\) is:\n\\[\nP(X_{ni} = c \\mid \\text{rest}) = \\frac{\\exp\\!\\bigl(\\mu_i(c) + c \\cdot r_{ni}\\bigr)}{\\sum_{k=0}^{K_i - 1} \\exp\\!\\bigl(\\mu_i(k) + k \\cdot r_{ni}\\bigr)}\n\\]\nwhere \\(r_{ni} = \\sum_{j \\neq i} x_{nj}\\, \\sigma_{ij}\\) is the residual score summarizing the pairwise interactions with all other variables.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2500,8 +2831,8 @@
     "objectID": "manual/omrf-internals.html#blume-capel-model",
     "href": "manual/omrf-internals.html#blume-capel-model",
     "title": "OMRF Internals",
-    "section": "Blume-Capel Model",
-    "text": "Blume-Capel Model",
+    "section": "Blume-Capel model",
+    "text": "Blume-Capel model\nFor Blume-Capel variables, the threshold structure is replaced by two parameters: a linear effect \\(\\alpha_i\\) and a quadratic effect \\(\\beta_i\\). The category score is:\n\\[\n\\mu_i(c) = \\alpha_i (c - b_i) + \\beta_i (c - b_i)^2\n\\]\nwhere \\(b_i\\) is the reference (baseline) category. This allows the model to capture non-monotone category effects, such as preferences for moderate responses.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2509,11 +2840,11 @@
     ]
   },
   {
-    "objectID": "manual/omrf-internals.html#pseudo-likelihood",
-    "href": "manual/omrf-internals.html#pseudo-likelihood",
+    "objectID": "manual/omrf-internals.html#residual-matrix",
+    "href": "manual/omrf-internals.html#residual-matrix",
     "title": "OMRF Internals",
-    "section": "Pseudo-Likelihood",
-    "text": "Pseudo-Likelihood",
+    "section": "Residual matrix",
+    "text": "Residual matrix\nThe model maintains a precomputed \\(n \\times p\\) residual matrix where entry \\((n, i)\\) stores:\n\\[\nr_{ni} = \\sum_{j \\neq i} x_{nj}\\, \\sigma_{ij}\n\\]\nWhen a single interaction \\(\\sigma_{ij}\\) changes by \\(\\delta\\), the residual matrix is updated incrementally:\n\nColumn \\(i\\): \\(r_{ni} \\leftarrow r_{ni} + \\delta \\cdot x_{nj}\\) for all \\(n\\)\nColumn \\(j\\): \\(r_{nj} \\leftarrow r_{nj} + \\delta \\cdot x_{ni}\\) for all \\(n\\)\n\nThis avoids recomputing the full matrix product after each parameter update.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2521,11 +2852,11 @@
     ]
   },
   {
-    "objectID": "manual/omrf-internals.html#full-conditional-gibbs-steps",
-    "href": "manual/omrf-internals.html#full-conditional-gibbs-steps",
+    "objectID": "manual/omrf-internals.html#pseudolikelihood",
+    "href": "manual/omrf-internals.html#pseudolikelihood",
     "title": "OMRF Internals",
-    "section": "Full-Conditional Gibbs Steps",
-    "text": "Full-Conditional Gibbs Steps",
+    "section": "Pseudolikelihood",
+    "text": "Pseudolikelihood\nThe OMRF uses a pseudolikelihood approximation: the product of full conditional distributions rather than the intractable joint distribution. The log-pseudolikelihood is:\n\\[\n\\text{PL}(\\boldsymbol{\\theta}) = \\sum_{i=1}^{p} \\sum_{n=1}^{N} \\log P(X_{ni} = x_{ni} \\mid \\text{rest})\n\\]\nThe gradient of the log-pseudolikelihood with respect to each parameter involves the expected category values under the current conditionals, computed by the variable helpers.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2533,11 +2864,35 @@
     ]
   },
   {
-    "objectID": "manual/omrf-internals.html#category-probability-computation",
-    "href": "manual/omrf-internals.html#category-probability-computation",
+    "objectID": "manual/omrf-internals.html#gradient-computation",
+    "href": "manual/omrf-internals.html#gradient-computation",
     "title": "OMRF Internals",
-    "section": "Category Probability Computation",
-    "text": "Category Probability Computation",
+    "section": "Gradient computation",
+    "text": "Gradient computation\nThe logp_and_gradient() method computes both the log-pseudoposterior and its gradient in a single pass. The gradient for a pairwise interaction \\(\\sigma_{ij}\\) accumulates over all persons:\n\\[\n\\frac{\\partial \\text{PL}}{\\partial \\sigma_{ij}} = \\sum_{n=1}^{N} \\bigl(x_{ni} - E[X_i \\mid \\text{rest}]\\bigr)\\, x_{nj} + \\bigl(x_{nj} - E[X_j \\mid \\text{rest}]\\bigr)\\, x_{ni}\n\\]\nThe expected values \\(E[X_i \\mid \\text{rest}]\\) are computed from the category probabilities, which are obtained via the numerically stable FAST/SAFE paths in variable_helpers.cpp.",
+    "crumbs": [
+      "Manual",
+      "Models",
+      "OMRF Internals"
+    ]
+  },
+  {
+    "objectID": "manual/omrf-internals.html#edge-indicator-updates",
+    "href": "manual/omrf-internals.html#edge-indicator-updates",
+    "title": "OMRF Internals",
+    "section": "Edge indicator updates",
+    "text": "Edge indicator updates\nWhen edge selection is active, the model performs a full scan over all \\(p(p-1)/2\\) edges after each gradient-based step. For each edge \\((i, j)\\):\n\nCompute the pseudolikelihood ratio for inclusion vs. exclusion\nCombine with the prior inclusion probability to get the posterior inclusion probability\nSample the indicator \\(\\gamma_{ij} \\sim \\text{Bernoulli}(p_{ij})\\)\nIf the indicator changes, update the residual matrix accordingly\n\nThe scan order is randomized at each iteration via prepare_iteration(), which calls arma_randperm().",
+    "crumbs": [
+      "Manual",
+      "Models",
+      "OMRF Internals"
+    ]
+  },
+  {
+    "objectID": "manual/omrf-internals.html#adaptive-metropolis-fallback",
+    "href": "manual/omrf-internals.html#adaptive-metropolis-fallback",
+    "title": "OMRF Internals",
+    "section": "Adaptive Metropolis fallback",
+    "text": "Adaptive Metropolis fallback\nEven when NUTS is the primary sampler, the OMRF implements element-wise adaptive Metropolis proposals for use during warmup stage 3b (proposal SD learning) and as a user-selectable alternative via interaction_scale = \"fixed\". The proposal SDs are tuned by Robbins-Monro targeting 0.234 acceptance, clamped to \\([0.001, 2.0]\\).",
     "crumbs": [
       "Manual",
       "Models",
@@ -2549,7 +2904,7 @@
     "href": "manual/variable-helpers.html",
     "title": "Variable Helpers",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nNumerically stable computation for MRF variables: the FAST/SAFE dual-path strategy in variable_helpers.h / variable_helpers.cpp.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nNumerically stable computation of MRF category denominators and probabilities. Source: src/utils/variable_helpers.h and variable_helpers.cpp.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2560,8 +2915,8 @@
     "objectID": "manual/variable-helpers.html#the-problem",
     "href": "manual/variable-helpers.html#the-problem",
     "title": "Variable Helpers",
-    "section": "The Problem",
-    "text": "The Problem",
+    "section": "The problem",
+    "text": "The problem\nMRF conditional probabilities involve exponentials of residual scores. For large networks or extreme parameter values, the arguments to exp() can exceed the IEEE 754 double-precision range, producing Inf or underflowing to zero. Naive computation (direct exponentiation followed by normalization) fails silently in these cases.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2569,11 +2924,11 @@
     ]
   },
   {
-    "objectID": "manual/variable-helpers.html#the-dual-path-strategy",
-    "href": "manual/variable-helpers.html#the-dual-path-strategy",
+    "objectID": "manual/variable-helpers.html#the-fastsafe-dual-path-strategy",
+    "href": "manual/variable-helpers.html#the-fastsafe-dual-path-strategy",
     "title": "Variable Helpers",
-    "section": "The Dual-Path Strategy",
-    "text": "The Dual-Path Strategy\n\n\nFAST Path\n\n\n\nSAFE Path\n\n\n\nBlock Scanning",
+    "section": "The FAST/SAFE dual-path strategy",
+    "text": "The FAST/SAFE dual-path strategy\nEvery denominator and probability function in variable_helpers.cpp uses a two-path approach:\n\nFAST path — Precomputed exponentials with power-chain accumulation. Used when the exponent arguments stay within safe bounds.\nSAFE path — Direct log-sum-exp evaluation as a fallback when bounds are violated.\n\nThe choice is made per-person (per row of the data matrix) based on whether the residual score times the maximum category exceeds the EXP_BOUND threshold.\n\nFAST path detail\nFor an ordinal variable with categories \\(0, 1, \\ldots, K-1\\) and residual \\(r\\):\n\nPrecompute \\(e_r = \\exp(r)\\) and \\(e_m = \\exp(\\mu(c))\\) for each category\nAccumulate the denominator as a Horner-like chain: \\(D = e^{-b}(1 + e_m[1] \\cdot e_r + e_m[2] \\cdot e_r^2 + \\cdots)\\) where \\(b\\) is a stabilizing shift\n\nThis avoids computing exp() for each category-residual combination independently and exploits the geometric structure of the category scores.\n\n\nSAFE path detail\nWhen the FAST path would overflow or underflow:\n\nCompute \\(s_c = \\mu(c) + c \\cdot r\\) for each category\nFind \\(s_{\\max} = \\max_c s_c\\)\nCompute \\(D = \\exp(s_{\\max}) \\sum_c \\exp(s_c - s_{\\max})\\)\n\nThis is the standard log-sum-exp trick, applied per person.\n\n\nBlock scanning\nThe functions process persons in contiguous blocks. Within each block, all persons follow the same path (FAST or SAFE). The block boundaries are determined by scanning the residual vector for bound violations. This enables branch-free vectorization within each block.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2584,8 +2939,8 @@
     "objectID": "manual/variable-helpers.html#ordinal-variables",
     "href": "manual/variable-helpers.html#ordinal-variables",
     "title": "Variable Helpers",
-    "section": "Ordinal Variables",
-    "text": "Ordinal Variables\n\ncompute_denom_ordinal\n\n\n\ncompute_probs_ordinal",
+    "section": "Ordinal variables",
+    "text": "Ordinal variables\n\ncompute_denom_ordinal()\nComputes the normalization constant (denominator) for each person’s conditional distribution. Takes the residual vector, main-effect vector, and precomputed bound vector. Returns a vector of length \\(n\\).\n\n\ncompute_probs_ordinal()\nComputes the full category probability matrix (\\(n \\times K\\)) for one ordinal variable. Probabilities are clamped at zero to prevent negative values from floating-point error in the normalization step.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2596,8 +2951,8 @@
     "objectID": "manual/variable-helpers.html#blume-capel-variables",
     "href": "manual/variable-helpers.html#blume-capel-variables",
     "title": "Variable Helpers",
-    "section": "Blume-Capel Variables",
-    "text": "Blume-Capel Variables\n\ncompute_denom_blume_capel\n\n\n\ncompute_probs_blume_capel",
+    "section": "Blume-Capel variables",
+    "text": "Blume-Capel variables\n\ncompute_denom_blume_capel()\nHandles the Blume-Capel parameterization, where the category score involves both linear and quadratic terms: \\(\\mu(c) = \\alpha(c - b) + \\beta(c - b)^2\\). The precomputation of \\(\\theta_c = \\alpha(c - b) + \\beta(c - b)^2\\) is done once per variable, and the FAST/SAFE split proceeds as for ordinal variables.\n\n\ncompute_probs_blume_capel()\nAnalogous to the ordinal version, but with the Blume-Capel category scores.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2608,8 +2963,8 @@
     "objectID": "manual/variable-helpers.html#joint-log-normalizer-and-probabilities",
     "href": "manual/variable-helpers.html#joint-log-normalizer-and-probabilities",
     "title": "Variable Helpers",
-    "section": "Joint Log-Normalizer and Probabilities",
-    "text": "Joint Log-Normalizer and Probabilities",
+    "section": "Joint log-normalizer and probabilities",
+    "text": "Joint log-normalizer and probabilities\nThe LogZAndProbs struct bundles the log-normalizer \\(\\log Z\\) and the probability matrix into a single return value. The joint computation functions (compute_logZ_and_probs_ordinal(), compute_logZ_and_probs_blume_capel()) share work between the two quantities, avoiding redundant exponential evaluations.\nThese joint functions are used in the gradient computation, where both the log-pseudolikelihood (which needs \\(\\log Z\\)) and the gradient (which needs category probabilities) are computed in the same pass.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2620,8 +2975,8 @@
     "objectID": "manual/variable-helpers.html#the-exp_bound-709-threshold",
     "href": "manual/variable-helpers.html#the-exp_bound-709-threshold",
     "title": "Variable Helpers",
-    "section": "The EXP_BOUND = 709 Threshold",
-    "text": "The EXP_BOUND = 709 Threshold",
+    "section": "The EXP_BOUND = 709 threshold",
+    "text": "The EXP_BOUND = 709 threshold\nThe bound that triggers the SAFE path is set to 709, derived from IEEE 754 double precision: \\(\\exp(709) \\approx 8.2 \\times 10^{307}\\) is the largest representable value, while \\(\\exp(710) = \\text{Inf}\\). The FAST path checks whether \\(|r| \\cdot (K - 1) &lt; 709\\) before proceeding.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2633,7 +2988,7 @@
     "href": "manual/mixed-internals.html",
     "title": "Mixed MRF Internals",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nImplementation details of the mixed Markov random field in bgms.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nImplementation details of the mixed Markov random field in bgms. Source: src/models/mixed/mixed_mrf_model.h and four .cpp files (mixed_mrf_model.cpp, mixed_mrf_gradient.cpp, mixed_mrf_likelihoods.cpp, mixed_mrf_metropolis.cpp).",
     "crumbs": [
       "Manual",
       "Models",
@@ -2644,8 +2999,8 @@
     "objectID": "manual/mixed-internals.html#block-structure",
     "href": "manual/mixed-internals.html#block-structure",
     "title": "Mixed MRF Internals",
-    "section": "Block Structure",
-    "text": "Block Structure",
+    "section": "Block structure",
+    "text": "Block structure\nThe mixed MRF handles \\(p\\) discrete and \\(q\\) continuous variables. The parameter space is organized into three interaction blocks plus main effects:\n\n\n\n\n\n\n\n\n\nBlock\nParameters\nSize\nSampler\n\n\n\n\nMain effects\nDiscrete thresholds + continuous means\n\\(\\text{thresholds} + q\\)\nNUTS\n\n\nDiscrete-discrete\n\\(\\mathbf{K}_{xx}\\) (symmetric)\n\\(p(p-1)/2\\)\nNUTS\n\n\nCross-type\n\\(\\mathbf{K}_{xy}\\)\n\\(p \\times q\\)\nNUTS\n\n\nContinuous-continuous\n\\(\\mathbf{K}_{yy}\\) (precision)\n\\(q(q+1)/2\\)\nMetropolis\n\n\n\nThe continuous precision \\(\\mathbf{K}_{yy}\\) must remain positive definite, so it is excluded from the NUTS block and updated by element-wise Metropolis proposals with Cholesky rank-1 updates, identical to the GGM strategy.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2656,8 +3011,8 @@
     "objectID": "manual/mixed-internals.html#parameter-vector-layout",
     "href": "manual/mixed-internals.html#parameter-vector-layout",
     "title": "Mixed MRF Internals",
-    "section": "Parameter Vector Layout",
-    "text": "Parameter Vector Layout",
+    "section": "Parameter vector layout",
+    "text": "Parameter vector layout\nThe model distinguishes three vector types:\n\nActive vector (parameter_dimension())\nContains only the parameters that NUTS updates, excluding edges set to zero by edge selection:\n[ thresholds | K_xx (active) | means | K_xy (active) ]\nThe mass matrix and gradient are dimensioned to this vector.\n\n\nFull vector (full_parameter_dimension())\nContains all NUTS-block parameters including inactive edges:\n[ thresholds | K_xx (all) | means | K_xy (all) ]\nUsed for storage and initialization.\n\n\nStorage vector (storage_dimension())\nAdds the Metropolis-updated continuous precision to the full vector:\n[ thresholds | K_xx (all) | means | K_xy (all) | K_yy (all) ]\nThis is what gets saved to ChainResult::samples at each iteration.",
     "crumbs": [
       "Manual",
       "Models",
@@ -2665,11 +3020,47 @@
     ]
   },
   {
-    "objectID": "manual/mixed-internals.html#sampling-strategy",
-    "href": "manual/mixed-internals.html#sampling-strategy",
+    "objectID": "manual/mixed-internals.html#hybrid-sampling-strategy",
+    "href": "manual/mixed-internals.html#hybrid-sampling-strategy",
     "title": "Mixed MRF Internals",
-    "section": "Sampling Strategy",
-    "text": "Sampling Strategy",
+    "section": "Hybrid sampling strategy",
+    "text": "Hybrid sampling strategy\nEach MCMC iteration has two phases:\n\nNUTS phase — Update the active parameter vector (thresholds, \\(\\mathbf{K}_{xx}\\), means, \\(\\mathbf{K}_{xy}\\)) using one NUTS step. The logp_and_gradient() method computes the log-pseudoposterior and gradient for this block only.\nMetropolis phase — Update the continuous precision elements (\\(\\mathbf{K}_{yy}\\)) one at a time via do_pairwise_continuous_metropolis_step(). Each proposal uses a Gaussian perturbation with Robbins-Monro-tuned SD, followed by a Cholesky rank-1 update to maintain positive definiteness.\n\nEdge indicator updates (when active) operate on all three interaction blocks.",
+    "crumbs": [
+      "Manual",
+      "Models",
+      "Mixed MRF Internals"
+    ]
+  },
+  {
+    "objectID": "manual/mixed-internals.html#gradient-computation",
+    "href": "manual/mixed-internals.html#gradient-computation",
+    "title": "Mixed MRF Internals",
+    "section": "Gradient computation",
+    "text": "Gradient computation\nThe gradient (mixed_mrf_gradient.cpp) is computed for the NUTS block only. It involves:\n\nDiscrete conditionals — Category probabilities via variable helpers, contributing gradients for thresholds and \\(\\mathbf{K}_{xx}\\)\nCross-type terms — Contributions from \\(\\mathbf{K}_{xy}\\) to both discrete and continuous conditional distributions\nContinuous means — Gradient of the continuous-variable contribution to the pseudolikelihood\n\nThe log-prior gradient adds the Cauchy prior penalty on pairwise interactions.",
+    "crumbs": [
+      "Manual",
+      "Models",
+      "Mixed MRF Internals"
+    ]
+  },
+  {
+    "objectID": "manual/mixed-internals.html#pseudolikelihood-options",
+    "href": "manual/mixed-internals.html#pseudolikelihood-options",
+    "title": "Mixed MRF Internals",
+    "section": "Pseudolikelihood options",
+    "text": "Pseudolikelihood options\nThe pseudolikelihood argument controls the continuous-variable likelihood:\n\n\"conditional\" (default) — Uses the conditional distribution of each continuous variable given the rest, consistent with the discrete pseudolikelihood\n\"marginal\" — Uses the marginal normal likelihood for the continuous block, which can be more efficient when \\(q\\) is large\n\nThe choice affects both the log-posterior evaluation and the gradient computation.",
+    "crumbs": [
+      "Manual",
+      "Models",
+      "Mixed MRF Internals"
+    ]
+  },
+  {
+    "objectID": "manual/mixed-internals.html#missing-data",
+    "href": "manual/mixed-internals.html#missing-data",
+    "title": "Mixed MRF Internals",
+    "section": "Missing data",
+    "text": "Missing data\nThe mixed MRF tracks missing indices separately for discrete and continuous variables (missing_index_discrete, missing_index_continuous). During imputation:\n\nMissing discrete values are sampled from their full conditional categorical distributions\nMissing continuous values are sampled from their conditional normal distributions given the current precision matrix",
     "crumbs": [
       "Manual",
       "Models",
@@ -2680,8 +3071,8 @@
     "objectID": "manual/mixed-internals.html#output-assembly",
     "href": "manual/mixed-internals.html#output-assembly",
     "title": "Mixed MRF Internals",
-    "section": "Output Assembly",
-    "text": "Output Assembly",
+    "section": "Output assembly",
+    "text": "Output assembly\nThe R output builder (build_output_mixed_mrf() in build_output.R) maps the flat storage vector back to the original variable ordering using fill_mixed_symmetric(). This function places discrete-discrete, continuous-continuous, and cross-type interactions into the correct cells of the \\((p+q) \\times (p+q)\\) output matrix, respecting the original column order (which may interleave discrete and continuous variables).",
     "crumbs": [
       "Manual",
       "Models",
@@ -2693,7 +3084,7 @@
     "href": "manual/edge-priors.html",
     "title": "Edge Priors",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nThe edge prior framework: how bgms decides which edges to include.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe edge prior framework controls which edges are included in the graph. All priors inherit from BaseEdgePrior in src/priors/edge_prior.h.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -2704,8 +3095,8 @@
     "objectID": "manual/edge-priors.html#baseedgeprior-interface",
     "href": "manual/edge-priors.html#baseedgeprior-interface",
     "title": "Edge Priors",
-    "section": "BaseEdgePrior Interface",
-    "text": "BaseEdgePrior Interface",
+    "section": "BaseEdgePrior interface",
+    "text": "BaseEdgePrior interface\nclass BaseEdgePrior {\n  virtual void update(imat edge_indicators, mat& inclusion_probability,\n                      int num_variables, int num_pairwise,\n                      SafeRNG& rng) = 0;\n  virtual unique_ptr&lt;BaseEdgePrior&gt; clone() const = 0;\n  virtual bool has_allocations() const { return false; }\n  virtual ivec get_allocations() const { return ivec(); }\n};\nThe update() method is called once per MCMC iteration (when edge selection is active). It receives the current edge indicators and updates the inclusion probability matrix in place. The updated probabilities are used by the model’s update_edge_indicators() method for the next round of edge proposals.\nclone() produces an independent copy for parallel chain execution.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -2713,11 +3104,11 @@
     ]
   },
   {
-    "objectID": "manual/edge-priors.html#beta-bernoulli-prior",
-    "href": "manual/edge-priors.html#beta-bernoulli-prior",
+    "objectID": "manual/edge-priors.html#bernoulliedgeprior",
+    "href": "manual/edge-priors.html#bernoulliedgeprior",
     "title": "Edge Priors",
-    "section": "Beta-Bernoulli Prior",
-    "text": "Beta-Bernoulli Prior",
+    "section": "BernoulliEdgePrior",
+    "text": "BernoulliEdgePrior\nThe simplest prior: each edge has a fixed inclusion probability that does not change during sampling. The update() method is a no-op.\nThis prior is used when the user specifies edge_prior = \"Bernoulli\" with a fixed inclusion probability matrix.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -2725,11 +3116,11 @@
     ]
   },
   {
-    "objectID": "manual/edge-priors.html#unit-information-prior",
-    "href": "manual/edge-priors.html#unit-information-prior",
+    "objectID": "manual/edge-priors.html#betabernoulliedgeprior",
+    "href": "manual/edge-priors.html#betabernoulliedgeprior",
     "title": "Edge Priors",
-    "section": "Unit-Information Prior",
-    "text": "Unit-Information Prior",
+    "section": "BetaBernoulliEdgePrior",
+    "text": "BetaBernoulliEdgePrior\nA conjugate prior that learns a shared inclusion probability from the data. At each iteration:\n\nCount the number of included edges: \\(k = \\sum_{i&lt;j} \\gamma_{ij}\\)\nCount the total number of possible edges: \\(m = p(p-1)/2\\)\nDraw a new inclusion probability: \\(\\pi \\sim \\text{Beta}(\\alpha + k,\\; \\beta + m - k)\\)\nSet all entries of the inclusion probability matrix to \\(\\pi\\)\n\nThe hyperparameters \\(\\alpha\\) and \\(\\beta\\) default to 1 (uniform prior on the inclusion probability).\nThis is the default edge prior in bgms (edge_prior = \"Beta-Bernoulli\").",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -2737,11 +3128,23 @@
     ]
   },
   {
-    "objectID": "manual/edge-priors.html#inclusion-probabilities-and-bayes-factors",
-    "href": "manual/edge-priors.html#inclusion-probabilities-and-bayes-factors",
+    "objectID": "manual/edge-priors.html#stochasticblockedgeprior",
+    "href": "manual/edge-priors.html#stochasticblockedgeprior",
     "title": "Edge Priors",
-    "section": "Inclusion Probabilities and Bayes Factors",
-    "text": "Inclusion Probabilities and Bayes Factors",
+    "section": "StochasticBlockEdgePrior",
+    "text": "StochasticBlockEdgePrior\nThe stochastic block model (SBM) prior assigns variables to latent clusters and allows different inclusion probabilities for within-cluster and between-cluster edges. See SBM Prior for the full formulation.\nThe StochasticBlockEdgePrior class stores:\n\ncluster_allocations_ — Current cluster assignment for each variable\ncluster_prob_ — \\(K \\times K\\) matrix of block inclusion probabilities\nlog_Vn_ — Log partition coefficients for the MFM prior on cluster count\n\nIts update() method runs collapsed Gibbs sampling to update cluster assignments and block probabilities (delegated to functions in sbm_edge_prior.cpp).\nhas_allocations() returns true, and get_allocations() returns the current cluster assignment vector. These are stored in ChainResult::allocation_samples for post-hoc analysis.",
+    "crumbs": [
+      "Manual",
+      "Priors & Edge Selection",
+      "Edge Priors"
+    ]
+  },
+  {
+    "objectID": "manual/edge-priors.html#prior-selection-in-r",
+    "href": "manual/edge-priors.html#prior-selection-in-r",
+    "title": "Edge Priors",
+    "section": "Prior selection in R",
+    "text": "Prior selection in R\nThe edge_prior argument in bgm() maps to these classes:\n\n\n\n\n\n\n\n\nR value\nC++ class\nBehavior\n\n\n\n\n\"Bernoulli\"\nBernoulliEdgePrior\nFixed inclusion probabilities\n\n\n\"Beta-Bernoulli\"\nBetaBernoulliEdgePrior\nLearns shared inclusion rate\n\n\n\"Stochastic-Block\"\nStochasticBlockEdgePrior\nCluster-structured inclusion\n\n\n\nWhen edge_selection = FALSE, no edge prior is instantiated and all edges remain included throughout sampling.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -2753,7 +3156,7 @@
     "href": "manual/r-scaffolding.html",
     "title": "R Scaffolding",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nThe R layer that sits between user-facing functions and the C++ engine: validation, spec construction, sampler dispatch, and output assembly.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe R layer sits between user-facing functions (bgm(), bgmCompare()) and the C++ engine. It validates inputs, constructs a specification object, dispatches to the appropriate C++ sampler, and assembles the returned output into an S3 fit object.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -2761,11 +3164,11 @@
     ]
   },
   {
-    "objectID": "manual/r-scaffolding.html#data-flow-overview",
-    "href": "manual/r-scaffolding.html#data-flow-overview",
+    "objectID": "manual/r-scaffolding.html#data-flow",
+    "href": "manual/r-scaffolding.html#data-flow",
     "title": "R Scaffolding",
-    "section": "Data Flow Overview",
-    "text": "Data Flow Overview",
+    "section": "Data flow",
+    "text": "Data flow\nbgm(x, ...)\n  ↓\nbgm_spec()            ← validates, assembles sub-lists\n  ↓\nnew_bgm_spec()        ← asserts types and field presence\n  ↓\nvalidate_bgm_spec()   ← cross-field invariant checks\n  ↓\nrun_sampler(spec)      ← dispatches to C++ via switch(model_type)\n  ↓\nbuild_output(spec, raw) ← normalizes raw C++ output into S3 object\nBoth bgm() and bgmCompare() follow this pipeline. The bgmCompare() path adds group-specific preprocessing (projection matrices, group indices, precomputed sufficient statistics) before the spec is constructed.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -2776,8 +3179,8 @@
     "objectID": "manual/r-scaffolding.html#validation-pipeline",
     "href": "manual/r-scaffolding.html#validation-pipeline",
     "title": "R Scaffolding",
-    "section": "Validation Pipeline",
-    "text": "Validation Pipeline\n\n\nData Checks\n\n\n\nVariable Type Detection\n\n\n\nSampler Validation",
+    "section": "Validation pipeline",
+    "text": "Validation pipeline\nValidation is split across four files, each with a focused scope.\n\nData checks (validate_data.R)\ndata_check() is the entry point. It enforces:\n\nInput is a data frame or matrix (converts to integer matrix for ordinal data)\nNo constant columns\nAt least two variables\nColumn names exist and are unique\nFor ordinal data: all values are non-negative integers\n\nMissing data handling branches on na_action:\n\n\"listwise\" — rows with any NA are dropped\n\"impute\" — missing indices are recorded for Bayesian imputation in C++\n\n\n\nVariable type detection (validate_model.R)\nvalidate_variable_types() classifies each column as \"ordinal\" or \"blume-capel\" (for discrete variables) based on the variable_type argument. When variable_type = \"ordinal\" (the default), all discrete variables are treated as ordinal. When a named vector is provided, each variable is classified individually.\nvalidate_baseline_category() sets the reference category for Blume-Capel variables. The default (0) places the reference at the lowest observed category.\n\n\nSampler validation (validate_sampler.R)\nvalidate_sampler() resolves the interaction_scale argument into a concrete sampler type (\"nuts\", \"hmc\", or \"adaptive_metropolis\") and sets defaults for tuning parameters (target_accept, nuts_max_depth, hmc_num_leapfrogs). It detects the number of available cores and resolves the progress display type.\n\n\nEdge prior validation (validate_model.R)\nvalidate_edge_prior() and validate_difference_prior() map string names (\"Bernoulli\", \"Beta-Bernoulli\", \"Stochastic-Block\") to validated prior configurations. For the SBM prior, the six hyperparameters (beta_bernoulli_alpha, beta_bernoulli_beta, beta_bernoulli_alpha_between, beta_bernoulli_beta_between, dirichlet_alpha, lambda) are checked and defaults applied.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -2785,11 +3188,11 @@
     ]
   },
   {
-    "objectID": "manual/r-scaffolding.html#spec-construction",
-    "href": "manual/r-scaffolding.html#spec-construction",
+    "objectID": "manual/r-scaffolding.html#spec-construction-bgm_spec.r",
+    "href": "manual/r-scaffolding.html#spec-construction-bgm_spec.r",
     "title": "R Scaffolding",
-    "section": "Spec Construction",
-    "text": "Spec Construction\n\n\nModel-Specific Builders\n\n\n\nCross-Field Invariants",
+    "section": "Spec construction (bgm_spec.R)",
+    "text": "Spec construction (bgm_spec.R)\nbgm_spec() is the user-facing constructor. It calls all validators, then delegates to one of four model-specific builders:\n\n\n\n\n\n\n\n\nModel type\nBuilder\nKey additions\n\n\n\n\n\"ggm\"\nbuild_spec_ggm()\nSufficient statistics (X'X), precision scale\n\n\n\"omrf\"\nbuild_spec_omrf()\nCategory counts, ordinal/BC flags, scaling factors\n\n\n\"mixed_mrf\"\nbuild_spec_mixed_mrf()\nSeparate discrete/continuous matrices, pseudolikelihood type\n\n\n\"compare\"\nbuild_spec_compare()\nGroup indices, projection matrix, precomputed pairwise stats\n\n\n\nEach builder assembles five sub-lists:\n\n$data — observations, dimensions, variable names\n$variables — variable types, ordinal flags, baseline categories\n$missing — na_action, imputation flag, missing indices\n$prior — prior type, hyperparameters, scaling factors\n$sampler — algorithm, iterations, warmup, chains, seed\n\nThe result passes through new_bgm_spec() (type assertions) and validate_bgm_spec() (cross-field invariants, such as: if edge_selection = FALSE then edge_prior must be \"Not applicable\").",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -2797,11 +3200,11 @@
     ]
   },
   {
-    "objectID": "manual/r-scaffolding.html#sampler-dispatch",
-    "href": "manual/r-scaffolding.html#sampler-dispatch",
+    "objectID": "manual/r-scaffolding.html#sampler-dispatch-run_sampler.r",
+    "href": "manual/r-scaffolding.html#sampler-dispatch-run_sampler.r",
     "title": "R Scaffolding",
-    "section": "Sampler Dispatch",
-    "text": "Sampler Dispatch",
+    "section": "Sampler dispatch (run_sampler.R)",
+    "text": "Sampler dispatch (run_sampler.R)\nrun_sampler() reads spec$model_type and calls the corresponding C++ entry point:\n\n\n\n\n\n\n\n\nmodel_type\nC++ function\nEntry file\n\n\n\n\n\"ggm\"\nsample_ggm()\nsrc/sample_ggm.cpp\n\n\n\"omrf\"\nsample_omrf()\nsrc/sample_omrf.cpp\n\n\n\"mixed_mrf\"\nsample_mixed_mrf()\nsrc/sample_mixed.cpp\n\n\n\"compare\"\nrun_bgmCompare_parallel()\nsrc/bgmCompare_interface.cpp\n\n\n\nEach C++ function receives an R list of arguments, constructs model and prior objects, and calls run_mcmc_sampler() from the chain runner. The return value is a list of per-chain raw output.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -2809,11 +3212,11 @@
     ]
   },
   {
-    "objectID": "manual/r-scaffolding.html#output-assembly",
-    "href": "manual/r-scaffolding.html#output-assembly",
+    "objectID": "manual/r-scaffolding.html#output-assembly-build_output.r",
+    "href": "manual/r-scaffolding.html#output-assembly-build_output.r",
     "title": "R Scaffolding",
-    "section": "Output Assembly",
-    "text": "Output Assembly",
+    "section": "Output assembly (build_output.R)",
+    "text": "Output assembly (build_output.R)\nbuild_output() transforms raw C++ output into the S3 objects returned to the user (\"bgms\" or \"bgmCompare\" class).\n\nGGM and OMRF (build_output_bgm())\nThe GGM and OMRF paths share a unified builder. Key operations:\n\nNormalize raw samples — Split the flat parameter vector into main-effect and pairwise-interaction matrices per chain\nCompute posterior means — Average across iterations and chains\nCompute inclusion probabilities — Average indicator samples (when edge selection is active)\nAssemble $raw_samples — Per-chain lists of main, pairwise, indicator, and allocations matrices\nNUTS diagnostics — When available, collect tree depth, divergence, and energy samples into $nuts_diagnostics\nWarmup check — Collect $warmup_check from C++\n\n\n\nMixed MRF (build_output_mixed_mrf())\nThe mixed MRF builder handles the block structure: discrete-discrete, continuous-continuous, and cross-type interactions are stored in separate blocks by C++ and need to be mapped back to the original variable ordering.\n\n\nCompare (build_output_compare())\nThe comparison builder splits posterior means into group-level ($group_posterior_means) and difference ($difference_posterior_means) components, and computes difference inclusion probabilities.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -2825,7 +3228,7 @@
     "href": "manual/warmup.html",
     "title": "Warmup Schedule",
     "section": "",
-    "text": "Note\n\n\n\nThis chapter is under development.\nbgms uses a three-stage warmup schedule to tune MCMC sampler parameters.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nbgms uses a multi-stage warmup schedule to tune MCMC sampler parameters before collecting posterior samples. The schedule is defined in src/mcmc/execution/warmup_schedule.h and adapts its structure based on whether edge selection is active.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -2833,11 +3236,11 @@
     ]
   },
   {
-    "objectID": "manual/warmup.html#stages",
-    "href": "manual/warmup.html#stages",
+    "objectID": "manual/warmup.html#five-stages",
+    "href": "manual/warmup.html#five-stages",
     "title": "Warmup Schedule",
-    "section": "Stages",
-    "text": "Stages\n\nInitial exploration — Find reasonable step size\nAdaptation windows — Estimate mass matrix, tune step size\nFinal tuning — Finalize step size",
+    "section": "Five stages",
+    "text": "Five stages\nThe warmup period is divided into five stages. Stages 3b and 3c only apply when edge selection is enabled.\n\n\n\n\n\n\n\n\nStage\nName\nPurpose\n\n\n\n\n1\nInitial exploration\nFind a reasonable region of parameter space\n\n\n2\nAdaptation windows\nTune step size (dual averaging) and mass matrix (Welford)\n\n\n3a\nTerminal window\nFinal mass matrix and step-size adaptation\n\n\n3b\nProposal SD learning\nTune element-wise Metropolis proposal SDs with edge selection active\n\n\n3c\nStep-size re-adaptation\nRe-adapt the NUTS/HMC step size after edge selection changes the geometry\n\n\n\n\nStage 1: Initial exploration\nA short burn-in phase (default: the first 75 iterations). The sampler explores freely; no mass matrix accumulation occurs. Dual averaging runs to coarsely tune the step size.\n\n\nStage 2: Adaptation windows\nThe step size and mass matrix are tuned in expanding windows. The first window has 25 iterations. Each subsequent window doubles in size (25 → 50 → 100 → …) until the stage 3a boundary is reached. At the end of each window:\n\nThe accumulated variance from DiagMassMatrixAccumulator is extracted as the new diagonal mass matrix\nThe step-size heuristic runs again with the new mass matrix\nBoth accumulators are reset for the next window\n\n\n\nStage 3a: Terminal window\nThe last adaptation window before edge selection activates. After this stage, the mass matrix is frozen.\n\n\nStage 3b: Proposal SD learning\nWhen edge selection is active, the model needs element-wise Metropolis proposal standard deviations for the edge indicator updates. During stage 3b, edge selection is turned on and the proposal SDs are tuned via Robbins-Monro updates:\n\\[\n\\sigma_{k+1} = \\sigma_k \\cdot \\exp\\!\\bigl(w_k (\\log \\alpha_k - \\log \\alpha^*)\\bigr)\n\\]\nwhere \\(\\alpha_k\\) is the observed acceptance probability and \\(\\alpha^*\\) is the target (default 0.234). The updated SD is clamped to \\([0.001, 2.0]\\).\n\n\nStage 3c: Step-size re-adaptation\nAfter edge selection changes the effective posterior geometry (many edges may be set to zero), the NUTS/HMC step size needs readjustment. Stage 3c runs dual averaging one more time with the final mass matrix and active edge selection.",
     "crumbs": [
       "Manual",
       "MCMC Engine",
@@ -2845,11 +3248,35 @@
     ]
   },
   {
-    "objectID": "manual/warmup.html#implementation",
-    "href": "manual/warmup.html#implementation",
+    "objectID": "manual/warmup.html#budget-allocation",
+    "href": "manual/warmup.html#budget-allocation",
     "title": "Warmup Schedule",
-    "section": "Implementation",
-    "text": "Implementation\nContent to be added: WarmupSchedule class, DualAveraging, DiagMassMatrixAccumulator.",
+    "section": "Budget allocation",
+    "text": "Budget allocation\nWhen edge selection is active, the total warmup budget is split as:\n\nStages 1–3a: 85% of total warmup\nStage 3b: 10% (skipped if fewer than 20 iterations)\nStage 3c: ~5%\n\nWhen edge selection is inactive, stages 3b and 3c are skipped and the full budget is allocated to stages 1–3a.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Warmup Schedule"
+    ]
+  },
+  {
+    "objectID": "manual/warmup.html#warning-system",
+    "href": "manual/warmup.html#warning-system",
+    "title": "Warmup Schedule",
+    "section": "Warning system",
+    "text": "Warning system\nThe WarmupSchedule tracks a warning_type field that records when the warmup budget is insufficient:\n\n\n\nCode\nMeaning\n\n\n\n\n0\nNo warning\n\n\n1\nWarmup too short for the standard schedule\n\n\n2\nProportional fallback used (reduced window sizes)\n\n\n3\nLimited tuning (fewer adaptation windows)\n\n\n4\nProposal SD learning skipped (stage 3b dropped)\n\n\n\nThe warmup_check table returned by bgm() reports these warnings per chain, accessible via fit$warmup_check in R.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Warmup Schedule"
+    ]
+  },
+  {
+    "objectID": "manual/warmup.html#querying-the-schedule",
+    "href": "manual/warmup.html#querying-the-schedule",
+    "title": "Warmup Schedule",
+    "section": "Querying the schedule",
+    "text": "Querying the schedule\nThe WarmupSchedule struct exposes predicate methods used by the chain runner and samplers:\nbool in_stage1(int i) const;\nbool in_stage2(int i) const;\nbool in_stage3a(int i) const;\nbool in_stage3b(int i) const;\nbool in_stage3c(int i) const;\nbool sampling(int i) const;          // i &gt;= total_warmup\nbool selection_enabled(int i) const; // i &gt;= stage3b_start (or never)\nThese predicates control when the adaptation controller accumulates samples, when edge selection is turned on, and when the chain transitions from warmup to sampling.",
     "crumbs": [
       "Manual",
       "MCMC Engine",

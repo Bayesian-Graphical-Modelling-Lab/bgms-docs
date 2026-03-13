@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -75,6 +110,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +394,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,37 +582,147 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The model hierarchy in bgms.</p>
-<section id="basemodel" class="level2">
-<h2 class="anchored" data-anchor-id="basemodel">BaseModel</h2>
-<p>Abstract interface defining:</p>
-<ul>
-<li><code>log_likelihood()</code></li>
-<li><code>log_prior()</code></li>
-<li><code>gradient()</code></li>
-</ul>
+<p>All graphical models in bgms inherit from a single abstract base class, <code>BaseModel</code>, defined in <code>src/models/base_model.h</code>. The chain runner interacts with models exclusively through this interface, so adding a new model type requires implementing the relevant virtual methods without modifying the MCMC engine.</p>
+<section id="basemodel-interface" class="level2">
+<h2 class="anchored" data-anchor-id="basemodel-interface">BaseModel interface</h2>
+<p><code>BaseModel</code> declares over 30 virtual methods. The most important groups are:</p>
+<section id="capability-queries" class="level3">
+<h3 class="anchored" data-anchor-id="capability-queries">Capability queries</h3>
+<p>These methods tell the sampler what the model supports. The chain runner and sampler factory use them to select the correct algorithm.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Default</th>
+<th>GGMModel</th>
+<th>OMRFModel</th>
+<th>MixedMRFModel</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>has_gradient()</code></td>
+<td><code>false</code></td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td><code>true</code></td>
+</tr>
+<tr class="even">
+<td><code>has_adaptive_metropolis()</code></td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td><code>true</code></td>
+<td><code>true</code></td>
+</tr>
+<tr class="odd">
+<td><code>has_nuts()</code></td>
+<td><code>false</code></td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td><code>true</code></td>
+</tr>
+<tr class="even">
+<td><code>has_edge_selection()</code></td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td><code>true</code></td>
+<td><code>true</code></td>
+</tr>
+<tr class="odd">
+<td><code>has_missing_data()</code></td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td><code>true</code></td>
+<td><code>true</code></td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="omrfmodel" class="level2">
-<h2 class="anchored" data-anchor-id="omrfmodel">OMRFModel</h2>
-<p>Ordinal Markov random field implementation.</p>
+<section id="sampling-methods" class="level3">
+<h3 class="anchored" data-anchor-id="sampling-methods">Sampling methods</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> do_one_metropolis_step<span class="op">(</span><span class="dt">int</span> iteration<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> vec gradient<span class="op">(</span>vec parameters<span class="op">);</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> pair<span class="op">&lt;</span><span class="dt">double</span><span class="op">,</span> vec<span class="op">&gt;</span> logp_and_gradient<span class="op">(</span>vec parameters<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Every model must implement <code>do_one_metropolis_step()</code>. Models that support gradient-based samplers (NUTS, HMC) also override <code>gradient()</code> and <code>logp_and_gradient()</code>. The joint function is more efficient because the log-posterior and gradient share intermediate computations.</p>
+</section>
+<section id="parameter-access" class="level3">
+<h3 class="anchored" data-anchor-id="parameter-access">Parameter access</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> vec get_vectorized_parameters<span class="op">()</span> <span class="at">const</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> set_vectorized_parameters<span class="op">(</span><span class="at">const</span> vec<span class="op">&amp;</span> params<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> vec get_full_vectorized_parameters<span class="op">()</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> vec get_storage_vectorized_parameters<span class="op">()</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">size_t</span> parameter_dimension<span class="op">()</span> <span class="at">const</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">size_t</span> full_parameter_dimension<span class="op">()</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">size_t</span> storage_dimension<span class="op">()</span> <span class="at">const</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>get_vectorized_parameters()</code> returns the parameters that the gradient-based sampler updates. <code>get_storage_vectorized_parameters()</code> returns all parameters that need to be saved (including those updated by Metropolis steps outside the NUTS block).</p>
+<p>The distinction matters for the mixed MRF, where the NUTS block contains thresholds, pairwise discrete interactions, means, and cross-type interactions, but the continuous-continuous precision elements are updated by a separate Metropolis step and only appear in the storage vector.</p>
+</section>
+<section id="edge-selection" class="level3">
+<h3 class="anchored" data-anchor-id="edge-selection">Edge selection</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> update_edge_indicators<span class="op">();</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> initialize_graph<span class="op">();</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> set_edge_selection_active<span class="op">(</span><span class="dt">bool</span> active<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>When edge selection is active, <code>update_edge_indicators()</code> performs a full scan over all edges, proposing inclusion/exclusion for each using the spike-and-slab prior. <code>initialize_graph()</code> sets starting edge indicators (all edges included by default).</p>
+</section>
+<section id="adaptation-support" class="level3">
+<h3 class="anchored" data-anchor-id="adaptation-support">Adaptation support</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> init_metropolis_adaptation<span class="op">(</span>WarmupSchedule<span class="op">&amp;</span> schedule<span class="op">);</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> tune_proposal_sd<span class="op">(</span><span class="dt">int</span> iteration<span class="op">,</span> WarmupSchedule<span class="op">&amp;</span> schedule<span class="op">);</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> prepare_iteration<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Models with element-wise Metropolis proposals (GGM, OMRF, mixed MRF) implement these methods to tune proposal standard deviations during warmup using Robbins-Monro updates.</p>
+</section>
+<section id="infrastructure" class="level3">
+<h3 class="anchored" data-anchor-id="infrastructure">Infrastructure</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> set_seed<span class="op">(</span><span class="dt">int</span> seed<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> unique_ptr<span class="op">&lt;</span>BaseModel<span class="op">&gt;</span> clone<span class="op">()</span> <span class="at">const</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>clone()</code> produces an independent deep copy for parallel chain execution. Each clone gets its own RNG state via <code>set_seed()</code>.</p>
+</section>
 </section>
 <section id="ggmmodel" class="level2">
 <h2 class="anchored" data-anchor-id="ggmmodel">GGMModel</h2>
-<p>Gaussian graphical model implementation.</p>
-<p><em>Content to be added: class documentation, extension guide.</em></p>
+<p>Defined in <code>src/models/ggm/ggm_model.h</code> and <code>ggm_model.cpp</code>.</p>
+<p><strong>Parameterization.</strong> The GGM is parameterized by the precision matrix <span class="math inline">\(\boldsymbol{\Omega}\)</span> (inverse covariance). The model maintains an upper-triangular Cholesky factor <span class="math inline">\(\mathbf{R}\)</span> such that <span class="math inline">\(\mathbf{R}^\top\mathbf{R} = \boldsymbol{\Omega}\)</span>.</p>
+<p><strong>Sampling.</strong> Because the precision matrix must remain positive definite, the GGM does not support gradient-based samplers. Instead, it uses element-wise Metropolis-Hastings: each off-diagonal element <span class="math inline">\(\omega_{ij}\)</span> is proposed from a Gaussian centered on the current value. After each proposal, the Cholesky factor is updated via a rank-1 Givens rotation (or hyperbolic rotation for downdates), avoiding a full <span class="math inline">\(O(p^3)\)</span> decomposition.</p>
+<p><strong>Sufficient statistics.</strong> For complete data, the GGM only needs the sufficient statistic <span class="math inline">\(\mathbf{X}^\top\mathbf{X}\)</span>, not the raw data matrix. When missing data imputation is active, the sufficient statistics are recomputed after each imputation step.</p>
+<p><strong>Spike-and-slab.</strong> Edge indicators <span class="math inline">\(\gamma_{ij} \in \{0, 1\}\)</span> control whether edge <span class="math inline">\((i,j)\)</span> is included. When <span class="math inline">\(\gamma_{ij} = 0\)</span>, the corresponding precision element is fixed at zero.</p>
+</section>
+<section id="omrfmodel" class="level2">
+<h2 class="anchored" data-anchor-id="omrfmodel">OMRFModel</h2>
+<p>Defined in <code>src/models/omrf/omrf_model.h</code> and <code>omrf_model.cpp</code>.</p>
+<p><strong>Parameterization.</strong> The ordinal MRF has two parameter types: main effects (category thresholds) and pairwise interactions. For ordinal variables, there is one threshold per category. For Blume-Capel variables, there are two parameters: a linear effect <span class="math inline">\(\alpha\)</span> and a quadratic effect <span class="math inline">\(\beta\)</span>, with the category score <span class="math inline">\(\mu_c = \alpha(c - b) + \beta(c - b)^2\)</span> where <span class="math inline">\(b\)</span> is the reference category.</p>
+<p><strong>Gradient.</strong> The OMRF supports <code>logp_and_gradient()</code>, enabling NUTS and HMC sampling. The gradient involves category probabilities computed by the <a href="../manual/variable-helpers.html">variable helpers</a>, which use a FAST/SAFE dual-path strategy for numerical stability.</p>
+<p><strong>Residual matrix.</strong> The model maintains a precomputed residual matrix <span class="math inline">\(\mathbf{R}_{ni} = \sum_{j \neq i} x_{nj} \sigma_{ij}\)</span> that caches the contribution of pairwise interactions to each variable’s conditional distribution. This matrix is updated incrementally when a single interaction changes.</p>
+<p><strong>Metropolis fallback.</strong> Even when NUTS is the primary sampler, the OMRF uses element-wise Metropolis proposals for edge indicator updates during the edge selection phase.</p>
+</section>
+<section id="mixedmrfmodel" class="level2">
+<h2 class="anchored" data-anchor-id="mixedmrfmodel">MixedMRFModel</h2>
+<p>Defined in <code>src/models/mixed/mixed_mrf_model.h</code> and four <code>.cpp</code> files.</p>
+<p><strong>Parameterization.</strong> The mixed MRF handles <span class="math inline">\(p\)</span> discrete and <span class="math inline">\(q\)</span> continuous variables jointly. The log-density has the form:</p>
+<p><span class="math display">\[
+\log f(\mathbf{x}, \mathbf{y}) = \sum_i \mu_i(x_i) + \mathbf{x}^\top \mathbf{K}_{xx} \mathbf{x} + \mathbf{y}^\top \mathbf{K}_{yy} \mathbf{y} + 2\mathbf{x}^\top \mathbf{K}_{xy} \mathbf{y}
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{K}_{xx}\)</span>, <span class="math inline">\(\mathbf{K}_{yy}\)</span>, and <span class="math inline">\(\mathbf{K}_{xy}\)</span> are the discrete-discrete, continuous-continuous, and cross-type interaction matrices.</p>
+<p><strong>Hybrid sampling.</strong> The NUTS block updates thresholds, discrete pairwise interactions (<span class="math inline">\(\mathbf{K}_{xx}\)</span>), continuous means, and cross-type interactions (<span class="math inline">\(\mathbf{K}_{xy}\)</span>). The continuous precision elements (<span class="math inline">\(\mathbf{K}_{yy}\)</span>) are excluded from the NUTS block because the precision matrix must remain positive definite; they are updated by a separate element-wise Metropolis step (<code>do_pairwise_continuous_metropolis_step()</code>), analogous to the GGM.</p>
+<p><strong>Three dimension concepts.</strong> The model distinguishes:</p>
+<ul>
+<li><code>parameter_dimension()</code> — Active NUTS parameters (excludes inactive edges and <span class="math inline">\(\mathbf{K}_{yy}\)</span>)</li>
+<li><code>full_parameter_dimension()</code> — All NUTS-block parameters (includes inactive edges, excludes <span class="math inline">\(\mathbf{K}_{yy}\)</span>)</li>
+<li><code>storage_dimension()</code> — All parameters including <span class="math inline">\(\mathbf{K}_{yy}\)</span> (what gets saved to output)</li>
+</ul>
+<p><strong>Pseudolikelihood options.</strong> The <code>pseudolikelihood</code> argument controls whether the model uses conditional or marginal pseudolikelihood for the continuous block. See the <a href="../guide/mixed-model.html">User’s Guide</a> for the statistical distinction.</p>
 
 
 </section>

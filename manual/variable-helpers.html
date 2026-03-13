@@ -75,6 +75,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +359,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,69 +547,86 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>Numerically stable computation for MRF variables: the FAST/SAFE dual-path strategy in <code>variable_helpers.h</code> / <code>variable_helpers.cpp</code>.</p>
+<p>Numerically stable computation of MRF category denominators and probabilities. Source: <code>src/utils/variable_helpers.h</code> and <code>variable_helpers.cpp</code>.</p>
 <section id="the-problem" class="level2">
-<h2 class="anchored" data-anchor-id="the-problem">The Problem</h2>
-<!-- TODO: source — why naive exp() overflows/underflows for large residual scores or many categories -->
+<h2 class="anchored" data-anchor-id="the-problem">The problem</h2>
+<p>MRF conditional probabilities involve exponentials of residual scores. For large networks or extreme parameter values, the arguments to <code>exp()</code> can exceed the IEEE 754 double-precision range, producing <code>Inf</code> or underflowing to zero. Naive computation (direct exponentiation followed by normalization) fails silently in these cases.</p>
 </section>
-<section id="the-dual-path-strategy" class="level2">
-<h2 class="anchored" data-anchor-id="the-dual-path-strategy">The Dual-Path Strategy</h2>
-<!-- TODO: source — src/utils/variable_helpers.h overview -->
-<section id="fast-path" class="level3">
-<h3 class="anchored" data-anchor-id="fast-path">FAST Path</h3>
-<!-- TODO: source — precomputed exponentials, power-chain accumulation, conditions for safe use -->
+<section id="the-fastsafe-dual-path-strategy" class="level2">
+<h2 class="anchored" data-anchor-id="the-fastsafe-dual-path-strategy">The FAST/SAFE dual-path strategy</h2>
+<p>Every denominator and probability function in <code>variable_helpers.cpp</code> uses a two-path approach:</p>
+<ol type="1">
+<li><strong>FAST path</strong> — Precomputed exponentials with power-chain accumulation. Used when the exponent arguments stay within safe bounds.</li>
+<li><strong>SAFE path</strong> — Direct log-sum-exp evaluation as a fallback when bounds are violated.</li>
+</ol>
+<p>The choice is made per-person (per row of the data matrix) based on whether the residual score times the maximum category exceeds the <code>EXP_BOUND</code> threshold.</p>
+<section id="fast-path-detail" class="level3">
+<h3 class="anchored" data-anchor-id="fast-path-detail">FAST path detail</h3>
+<p>For an ordinal variable with categories <span class="math inline">\(0, 1, \ldots, K-1\)</span> and residual <span class="math inline">\(r\)</span>:</p>
+<ol type="1">
+<li>Precompute <span class="math inline">\(e_r = \exp(r)\)</span> and <span class="math inline">\(e_m = \exp(\mu(c))\)</span> for each category</li>
+<li>Accumulate the denominator as a Horner-like chain: <span class="math inline">\(D = e^{-b}(1 + e_m[1] \cdot e_r + e_m[2] \cdot e_r^2 + \cdots)\)</span> where <span class="math inline">\(b\)</span> is a stabilizing shift</li>
+</ol>
+<p>This avoids computing <code>exp()</code> for each category-residual combination independently and exploits the geometric structure of the category scores.</p>
 </section>
-<section id="safe-path" class="level3">
-<h3 class="anchored" data-anchor-id="safe-path">SAFE Path</h3>
-<!-- TODO: source — direct log-sum-exp evaluation as fallback -->
+<section id="safe-path-detail" class="level3">
+<h3 class="anchored" data-anchor-id="safe-path-detail">SAFE path detail</h3>
+<p>When the FAST path would overflow or underflow:</p>
+<ol type="1">
+<li>Compute <span class="math inline">\(s_c = \mu(c) + c \cdot r\)</span> for each category</li>
+<li>Find <span class="math inline">\(s_{\max} = \max_c s_c\)</span></li>
+<li>Compute <span class="math inline">\(D = \exp(s_{\max}) \sum_c \exp(s_c - s_{\max})\)</span></li>
+</ol>
+<p>This is the standard log-sum-exp trick, applied per person.</p>
 </section>
 <section id="block-scanning" class="level3">
-<h3 class="anchored" data-anchor-id="block-scanning">Block Scanning</h3>
-<!-- TODO: source — contiguous-block scan over persons, branch-free vectorization -->
+<h3 class="anchored" data-anchor-id="block-scanning">Block scanning</h3>
+<p>The functions process persons in contiguous blocks. Within each block, all persons follow the same path (FAST or SAFE). The block boundaries are determined by scanning the residual vector for bound violations. This enables branch-free vectorization within each block.</p>
 </section>
 </section>
 <section id="ordinal-variables" class="level2">
-<h2 class="anchored" data-anchor-id="ordinal-variables">Ordinal Variables</h2>
+<h2 class="anchored" data-anchor-id="ordinal-variables">Ordinal variables</h2>
 <section id="compute_denom_ordinal" class="level3">
-<h3 class="anchored" data-anchor-id="compute_denom_ordinal">compute_denom_ordinal</h3>
-<!-- TODO: source — src/utils/variable_helpers.cpp: binary shortcut, fast/safe blocks -->
+<h3 class="anchored" data-anchor-id="compute_denom_ordinal"><code>compute_denom_ordinal()</code></h3>
+<p>Computes the normalization constant (denominator) for each person’s conditional distribution. Takes the residual vector, main-effect vector, and precomputed bound vector. Returns a vector of length <span class="math inline">\(n\)</span>.</p>
 </section>
 <section id="compute_probs_ordinal" class="level3">
-<h3 class="anchored" data-anchor-id="compute_probs_ordinal">compute_probs_ordinal</h3>
-<!-- TODO: source — probability normalization, clamp-at-zero stabilization -->
+<h3 class="anchored" data-anchor-id="compute_probs_ordinal"><code>compute_probs_ordinal()</code></h3>
+<p>Computes the full category probability matrix (<span class="math inline">\(n \times K\)</span>) for one ordinal variable. Probabilities are clamped at zero to prevent negative values from floating-point error in the normalization step.</p>
 </section>
 </section>
 <section id="blume-capel-variables" class="level2">
-<h2 class="anchored" data-anchor-id="blume-capel-variables">Blume-Capel Variables</h2>
+<h2 class="anchored" data-anchor-id="blume-capel-variables">Blume-Capel variables</h2>
 <section id="compute_denom_blume_capel" class="level3">
-<h3 class="anchored" data-anchor-id="compute_denom_blume_capel">compute_denom_blume_capel</h3>
-<!-- TODO: source — theta precomputation, centered categories, pow_bound checks -->
+<h3 class="anchored" data-anchor-id="compute_denom_blume_capel"><code>compute_denom_blume_capel()</code></h3>
+<p>Handles the Blume-Capel parameterization, where the category score involves both linear and quadratic terms: <span class="math inline">\(\mu(c) = \alpha(c - b) + \beta(c - b)^2\)</span>. The precomputation of <span class="math inline">\(\theta_c = \alpha(c - b) + \beta(c - b)^2\)</span> is done once per variable, and the FAST/SAFE split proceeds as for ordinal variables.</p>
 </section>
 <section id="compute_probs_blume_capel" class="level3">
-<h3 class="anchored" data-anchor-id="compute_probs_blume_capel">compute_probs_blume_capel</h3>
-<!-- TODO: source — same FAST/SAFE split for probability computation -->
+<h3 class="anchored" data-anchor-id="compute_probs_blume_capel"><code>compute_probs_blume_capel()</code></h3>
+<p>Analogous to the ordinal version, but with the Blume-Capel category scores.</p>
 </section>
 </section>
 <section id="joint-log-normalizer-and-probabilities" class="level2">
-<h2 class="anchored" data-anchor-id="joint-log-normalizer-and-probabilities">Joint Log-Normalizer and Probabilities</h2>
-<!-- TODO: source — LogZAndProbs struct, compute_logZ_and_probs_ordinal, compute_logZ_and_probs_blume_capel -->
+<h2 class="anchored" data-anchor-id="joint-log-normalizer-and-probabilities">Joint log-normalizer and probabilities</h2>
+<p>The <code>LogZAndProbs</code> struct bundles the log-normalizer <span class="math inline">\(\log Z\)</span> and the probability matrix into a single return value. The joint computation functions (<code>compute_logZ_and_probs_ordinal()</code>, <code>compute_logZ_and_probs_blume_capel()</code>) share work between the two quantities, avoiding redundant exponential evaluations.</p>
+<p>These joint functions are used in the gradient computation, where both the log-pseudolikelihood (which needs <span class="math inline">\(\log Z\)</span>) and the gradient (which needs category probabilities) are computed in the same pass.</p>
 </section>
 <section id="the-exp_bound-709-threshold" class="level2">
-<h2 class="anchored" data-anchor-id="the-exp_bound-709-threshold">The EXP_BOUND = 709 Threshold</h2>
-<!-- TODO: source — IEEE 754 double precision, exp(709) ≈ 8.2e307, exp(710) = Inf -->
+<h2 class="anchored" data-anchor-id="the-exp_bound-709-threshold">The EXP_BOUND = 709 threshold</h2>
+<p>The bound that triggers the SAFE path is set to 709, derived from IEEE 754 double precision: <span class="math inline">\(\exp(709) \approx 8.2 \times 10^{307}\)</span> is the largest representable value, while <span class="math inline">\(\exp(710) = \text{Inf}\)</span>. The FAST path checks whether <span class="math inline">\(|r| \cdot (K - 1) &lt; 709\)</span> before proceeding.</p>
 
 
 </section>

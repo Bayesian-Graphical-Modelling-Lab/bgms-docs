@@ -75,6 +75,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +359,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,39 +547,79 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>Implementation details of the ordinal Markov random field in bgms.</p>
+<p>Implementation details of the ordinal Markov random field in bgms. Source: <code>src/models/omrf/omrf_model.h</code> and <code>omrf_model.cpp</code>.</p>
 <section id="ordinal-threshold-parameterization" class="level2">
-<h2 class="anchored" data-anchor-id="ordinal-threshold-parameterization">Ordinal Threshold Parameterization</h2>
-<!-- TODO: source — src/models/omrf/ -->
+<h2 class="anchored" data-anchor-id="ordinal-threshold-parameterization">Ordinal threshold parameterization</h2>
+<p>For an ordinal variable <span class="math inline">\(X_i\)</span> with <span class="math inline">\(K_i\)</span> categories <span class="math inline">\((0, 1, \ldots, K_i - 1)\)</span>, the model assigns one threshold parameter <span class="math inline">\(\mu_i(c)\)</span> per category <span class="math inline">\(c\)</span>. The category <span class="math inline">\(c = 0\)</span> serves as the reference with <span class="math inline">\(\mu_i(0) = 0\)</span>. The conditional probability of observing category <span class="math inline">\(c\)</span> for person <span class="math inline">\(n\)</span> is:</p>
+<p><span class="math display">\[
+P(X_{ni} = c \mid \text{rest}) = \frac{\exp\!\bigl(\mu_i(c) + c \cdot r_{ni}\bigr)}{\sum_{k=0}^{K_i - 1} \exp\!\bigl(\mu_i(k) + k \cdot r_{ni}\bigr)}
+\]</span></p>
+<p>where <span class="math inline">\(r_{ni} = \sum_{j \neq i} x_{nj}\, \sigma_{ij}\)</span> is the residual score summarizing the pairwise interactions with all other variables.</p>
 </section>
 <section id="blume-capel-model" class="level2">
-<h2 class="anchored" data-anchor-id="blume-capel-model">Blume-Capel Model</h2>
-<!-- TODO: source — linear + quadratic effects, reference category -->
+<h2 class="anchored" data-anchor-id="blume-capel-model">Blume-Capel model</h2>
+<p>For Blume-Capel variables, the threshold structure is replaced by two parameters: a linear effect <span class="math inline">\(\alpha_i\)</span> and a quadratic effect <span class="math inline">\(\beta_i\)</span>. The category score is:</p>
+<p><span class="math display">\[
+\mu_i(c) = \alpha_i (c - b_i) + \beta_i (c - b_i)^2
+\]</span></p>
+<p>where <span class="math inline">\(b_i\)</span> is the reference (baseline) category. This allows the model to capture non-monotone category effects, such as preferences for moderate responses.</p>
 </section>
-<section id="pseudo-likelihood" class="level2">
-<h2 class="anchored" data-anchor-id="pseudo-likelihood">Pseudo-Likelihood</h2>
-<!-- TODO: source — pseudo-likelihood computation for ordinal data -->
+<section id="residual-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="residual-matrix">Residual matrix</h2>
+<p>The model maintains a precomputed <span class="math inline">\(n \times p\)</span> residual matrix where entry <span class="math inline">\((n, i)\)</span> stores:</p>
+<p><span class="math display">\[
+r_{ni} = \sum_{j \neq i} x_{nj}\, \sigma_{ij}
+\]</span></p>
+<p>When a single interaction <span class="math inline">\(\sigma_{ij}\)</span> changes by <span class="math inline">\(\delta\)</span>, the residual matrix is updated incrementally:</p>
+<ul>
+<li>Column <span class="math inline">\(i\)</span>: <span class="math inline">\(r_{ni} \leftarrow r_{ni} + \delta \cdot x_{nj}\)</span> for all <span class="math inline">\(n\)</span></li>
+<li>Column <span class="math inline">\(j\)</span>: <span class="math inline">\(r_{nj} \leftarrow r_{nj} + \delta \cdot x_{ni}\)</span> for all <span class="math inline">\(n\)</span></li>
+</ul>
+<p>This avoids recomputing the full matrix product after each parameter update.</p>
 </section>
-<section id="full-conditional-gibbs-steps" class="level2">
-<h2 class="anchored" data-anchor-id="full-conditional-gibbs-steps">Full-Conditional Gibbs Steps</h2>
-<!-- TODO: source — edge indicator updates -->
+<section id="pseudolikelihood" class="level2">
+<h2 class="anchored" data-anchor-id="pseudolikelihood">Pseudolikelihood</h2>
+<p>The OMRF uses a pseudolikelihood approximation: the product of full conditional distributions rather than the intractable joint distribution. The log-pseudolikelihood is:</p>
+<p><span class="math display">\[
+\text{PL}(\boldsymbol{\theta}) = \sum_{i=1}^{p} \sum_{n=1}^{N} \log P(X_{ni} = x_{ni} \mid \text{rest})
+\]</span></p>
+<p>The gradient of the log-pseudolikelihood with respect to each parameter involves the expected category values under the current conditionals, computed by the <a href="../manual/variable-helpers.html">variable helpers</a>.</p>
 </section>
-<section id="category-probability-computation" class="level2">
-<h2 class="anchored" data-anchor-id="category-probability-computation">Category Probability Computation</h2>
-<!-- TODO: source — cross-reference manual/variable-helpers.qmd -->
+<section id="gradient-computation" class="level2">
+<h2 class="anchored" data-anchor-id="gradient-computation">Gradient computation</h2>
+<p>The <code>logp_and_gradient()</code> method computes both the log-pseudoposterior and its gradient in a single pass. The gradient for a pairwise interaction <span class="math inline">\(\sigma_{ij}\)</span> accumulates over all persons:</p>
+<p><span class="math display">\[
+\frac{\partial \text{PL}}{\partial \sigma_{ij}} = \sum_{n=1}^{N} \bigl(x_{ni} - E[X_i \mid \text{rest}]\bigr)\, x_{nj} + \bigl(x_{nj} - E[X_j \mid \text{rest}]\bigr)\, x_{ni}
+\]</span></p>
+<p>The expected values <span class="math inline">\(E[X_i \mid \text{rest}]\)</span> are computed from the category probabilities, which are obtained via the numerically stable FAST/SAFE paths in <code>variable_helpers.cpp</code>.</p>
+</section>
+<section id="edge-indicator-updates" class="level2">
+<h2 class="anchored" data-anchor-id="edge-indicator-updates">Edge indicator updates</h2>
+<p>When edge selection is active, the model performs a full scan over all <span class="math inline">\(p(p-1)/2\)</span> edges after each gradient-based step. For each edge <span class="math inline">\((i, j)\)</span>:</p>
+<ol type="1">
+<li>Compute the pseudolikelihood ratio for inclusion vs.&nbsp;exclusion</li>
+<li>Combine with the prior inclusion probability to get the posterior inclusion probability</li>
+<li>Sample the indicator <span class="math inline">\(\gamma_{ij} \sim \text{Bernoulli}(p_{ij})\)</span></li>
+<li>If the indicator changes, update the residual matrix accordingly</li>
+</ol>
+<p>The scan order is randomized at each iteration via <code>prepare_iteration()</code>, which calls <code>arma_randperm()</code>.</p>
+</section>
+<section id="adaptive-metropolis-fallback" class="level2">
+<h2 class="anchored" data-anchor-id="adaptive-metropolis-fallback">Adaptive Metropolis fallback</h2>
+<p>Even when NUTS is the primary sampler, the OMRF implements element-wise adaptive Metropolis proposals for use during warmup stage 3b (proposal SD learning) and as a user-selectable alternative via <code>interaction_scale = "fixed"</code>. The proposal SDs are tuned by Robbins-Monro targeting 0.234 acceptance, clamped to <span class="math inline">\([0.001, 2.0]\)</span>.</p>
 
 
 </section>

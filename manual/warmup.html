@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -75,6 +110,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -330,7 +394,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference Manual</span></a>
+ <span class="menu-text">Technical Manual</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -518,31 +582,150 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter is under development.</p>
+<p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>bgms uses a three-stage warmup schedule to tune MCMC sampler parameters.</p>
-<section id="stages" class="level2">
-<h2 class="anchored" data-anchor-id="stages">Stages</h2>
+<p>bgms uses a multi-stage warmup schedule to tune MCMC sampler parameters before collecting posterior samples. The schedule is defined in <code>src/mcmc/execution/warmup_schedule.h</code> and adapts its structure based on whether edge selection is active.</p>
+<section id="five-stages" class="level2">
+<h2 class="anchored" data-anchor-id="five-stages">Five stages</h2>
+<p>The warmup period is divided into five stages. Stages 3b and 3c only apply when edge selection is enabled.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 31%">
+<col style="width: 27%">
+<col style="width: 40%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Stage</th>
+<th>Name</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Initial exploration</td>
+<td>Find a reasonable region of parameter space</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Adaptation windows</td>
+<td>Tune step size (dual averaging) and mass matrix (Welford)</td>
+</tr>
+<tr class="odd">
+<td>3a</td>
+<td>Terminal window</td>
+<td>Final mass matrix and step-size adaptation</td>
+</tr>
+<tr class="even">
+<td>3b</td>
+<td>Proposal SD learning</td>
+<td>Tune element-wise Metropolis proposal SDs with edge selection active</td>
+</tr>
+<tr class="odd">
+<td>3c</td>
+<td>Step-size re-adaptation</td>
+<td>Re-adapt the NUTS/HMC step size after edge selection changes the geometry</td>
+</tr>
+</tbody>
+</table>
+<section id="stage-1-initial-exploration" class="level3">
+<h3 class="anchored" data-anchor-id="stage-1-initial-exploration">Stage 1: Initial exploration</h3>
+<p>A short burn-in phase (default: the first 75 iterations). The sampler explores freely; no mass matrix accumulation occurs. Dual averaging runs to coarsely tune the step size.</p>
+</section>
+<section id="stage-2-adaptation-windows" class="level3">
+<h3 class="anchored" data-anchor-id="stage-2-adaptation-windows">Stage 2: Adaptation windows</h3>
+<p>The step size and mass matrix are tuned in expanding windows. The first window has 25 iterations. Each subsequent window doubles in size (25 → 50 → 100 → …) until the stage 3a boundary is reached. At the end of each window:</p>
 <ol type="1">
-<li><strong>Initial exploration</strong> — Find reasonable step size</li>
-<li><strong>Adaptation windows</strong> — Estimate mass matrix, tune step size</li>
-<li><strong>Final tuning</strong> — Finalize step size</li>
+<li>The accumulated variance from <code>DiagMassMatrixAccumulator</code> is extracted as the new diagonal mass matrix</li>
+<li>The step-size heuristic runs again with the new mass matrix</li>
+<li>Both accumulators are reset for the next window</li>
 </ol>
 </section>
-<section id="implementation" class="level2">
-<h2 class="anchored" data-anchor-id="implementation">Implementation</h2>
-<p><em>Content to be added: <code>WarmupSchedule</code> class, <code>DualAveraging</code>, <code>DiagMassMatrixAccumulator</code>.</em></p>
+<section id="stage-3a-terminal-window" class="level3">
+<h3 class="anchored" data-anchor-id="stage-3a-terminal-window">Stage 3a: Terminal window</h3>
+<p>The last adaptation window before edge selection activates. After this stage, the mass matrix is frozen.</p>
+</section>
+<section id="stage-3b-proposal-sd-learning" class="level3">
+<h3 class="anchored" data-anchor-id="stage-3b-proposal-sd-learning">Stage 3b: Proposal SD learning</h3>
+<p>When edge selection is active, the model needs element-wise Metropolis proposal standard deviations for the edge indicator updates. During stage 3b, edge selection is turned on and the proposal SDs are tuned via Robbins-Monro updates:</p>
+<p><span class="math display">\[
+\sigma_{k+1} = \sigma_k \cdot \exp\!\bigl(w_k (\log \alpha_k - \log \alpha^*)\bigr)
+\]</span></p>
+<p>where <span class="math inline">\(\alpha_k\)</span> is the observed acceptance probability and <span class="math inline">\(\alpha^*\)</span> is the target (default 0.234). The updated SD is clamped to <span class="math inline">\([0.001, 2.0]\)</span>.</p>
+</section>
+<section id="stage-3c-step-size-re-adaptation" class="level3">
+<h3 class="anchored" data-anchor-id="stage-3c-step-size-re-adaptation">Stage 3c: Step-size re-adaptation</h3>
+<p>After edge selection changes the effective posterior geometry (many edges may be set to zero), the NUTS/HMC step size needs readjustment. Stage 3c runs dual averaging one more time with the final mass matrix and active edge selection.</p>
+</section>
+</section>
+<section id="budget-allocation" class="level2">
+<h2 class="anchored" data-anchor-id="budget-allocation">Budget allocation</h2>
+<p>When edge selection is active, the total warmup budget is split as:</p>
+<ul>
+<li><strong>Stages 1–3a</strong>: 85% of total warmup</li>
+<li><strong>Stage 3b</strong>: 10% (skipped if fewer than 20 iterations)</li>
+<li><strong>Stage 3c</strong>: ~5%</li>
+</ul>
+<p>When edge selection is inactive, stages 3b and 3c are skipped and the full budget is allocated to stages 1–3a.</p>
+</section>
+<section id="warning-system" class="level2">
+<h2 class="anchored" data-anchor-id="warning-system">Warning system</h2>
+<p>The <code>WarmupSchedule</code> tracks a <code>warning_type</code> field that records when the warmup budget is insufficient:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>No warning</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>Warmup too short for the standard schedule</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>Proportional fallback used (reduced window sizes)</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>Limited tuning (fewer adaptation windows)</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>Proposal SD learning skipped (stage 3b dropped)</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>warmup_check</code> table returned by <code>bgm()</code> reports these warnings per chain, accessible via <code>fit$warmup_check</code> in R.</p>
+</section>
+<section id="querying-the-schedule" class="level2">
+<h2 class="anchored" data-anchor-id="querying-the-schedule">Querying the schedule</h2>
+<p>The <code>WarmupSchedule</code> struct exposes predicate methods used by the chain runner and samplers:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> in_stage1<span class="op">(</span><span class="dt">int</span> i<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> in_stage2<span class="op">(</span><span class="dt">int</span> i<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> in_stage3a<span class="op">(</span><span class="dt">int</span> i<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> in_stage3b<span class="op">(</span><span class="dt">int</span> i<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> in_stage3c<span class="op">(</span><span class="dt">int</span> i<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> sampling<span class="op">(</span><span class="dt">int</span> i<span class="op">)</span> <span class="at">const</span><span class="op">;</span>          <span class="co">// i &gt;= total_warmup</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> selection_enabled<span class="op">(</span><span class="dt">int</span> i<span class="op">)</span> <span class="at">const</span><span class="op">;</span> <span class="co">// i &gt;= stage3b_start (or never)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>These predicates control when the adaptation controller accumulates samples, when edge selection is turned on, and when the chain transitions from warmup to sampling.</p>
 
 
 </section>
