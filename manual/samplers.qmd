@@ -2,37 +2,138 @@
 title: "Sampler Hierarchy"
 ---
 
-::: {.callout-note}
-This chapter is under development.
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
 :::
 
-The sampler class hierarchy and how different MCMC algorithms are
-plugged into the chain runner.
+The sampler classes in `src/mcmc/samplers/` are header-only wrappers
+that own adaptation state and delegate to the stateless algorithm
+functions in `src/mcmc/algorithms/`. The chain runner interacts with
+samplers through the `SamplerBase` interface.
 
-## Class Hierarchy
+## Class hierarchy
 
-<!-- TODO: source — src/mcmc/samplers/sampler_base.h -->
+```
+SamplerBase                       (abstract)
+├── MetropolisSampler             — element-wise Metropolis-Hastings
+└── GradientSamplerBase           (abstract, owns HMCAdaptationController)
+    ├── HMCSampler                — fixed-length leapfrog
+    └── NUTSSampler               — adaptive tree depth
+```
 
-### SamplerBase
+The `HybridNUTSSampler` variant exists for the mixed MRF, combining
+a NUTS step for the main parameter block with a Metropolis step for
+the continuous precision elements.
 
-<!-- TODO: source — virtual interface: step(), initialize(), has_nuts_diagnostics() -->
+## SamplerBase interface
 
-### GradientSamplerBase
+```cpp
+class SamplerBase {
+  virtual StepResult step(BaseModel& model, int iteration) = 0;
+  virtual void initialize(BaseModel& model) {}
+  virtual bool has_nuts_diagnostics() const { return false; }
+};
+```
 
-<!-- TODO: source — intermediate class for gradient-based samplers -->
+`step()` performs one MCMC iteration and returns a `StepResult`
+containing the accepted parameter vector, acceptance probability,
+and optional NUTS diagnostics.
 
-### Concrete Samplers
+`initialize()` is called once before the first iteration. For
+gradient-based samplers, it runs the step-size heuristic that finds
+a reasonable initial step size by iteratively doubling or halving
+until the acceptance probability is near the target (default 0.625).
 
-<!-- TODO: source — MetropolisSampler, HMCSampler, NUTSSampler, HybridNUTSSampler -->
+## MetropolisSampler
 
-## Factory Dispatch
+The simplest sampler. Each call to `step()`:
 
-<!-- TODO: source — create_sampler() in src/mcmc/execution/chain_runner.cpp -->
+1. Calls `model.do_one_metropolis_step(iteration)`, which performs a
+   full sweep of element-wise proposals
+2. If the model has edge selection and the warmup schedule indicates
+   selection is active, calls `model.update_edge_indicators()`
+3. Returns the current parameters as the accepted state
 
-## Step-Size Adaptation
+Proposal standard deviations are tuned during warmup via Robbins-Monro
+updates (see [Warmup Schedule](warmup.qmd)).
 
-<!-- TODO: source — dual-averaging in sampler implementations -->
+## GradientSamplerBase
 
-## Mass Matrix Tuning
+Shared base class for HMC and NUTS. It owns an
+`HMCAdaptationController` that manages:
 
-<!-- TODO: source — diagonal mass matrix estimation during warmup -->
+- **Dual averaging** for step-size adaptation
+- **Diagonal mass matrix** accumulation via Welford's online algorithm
+
+The `step()` method in `GradientSamplerBase`:
+
+1. Calls the concrete `do_gradient_step()` override (HMC or NUTS)
+2. Passes the acceptance probability to the adaptation controller
+3. If the mass matrix was just updated (end of a warmup window),
+   reinitializes the step size with the heuristic
+
+After warmup, the adaptation controller freezes and returns the
+smoothed step size from dual averaging.
+
+## HMCSampler
+
+Performs fixed-length leapfrog integration. The number of leapfrog
+steps is set at construction from `config.num_leapfrogs`. Each call
+to `do_gradient_step()` invokes `hmc_step()` from
+`mcmc/algorithms/hmc.h`.
+
+## NUTSSampler
+
+Uses the No-U-Turn criterion to adapt trajectory length
+automatically. The maximum tree depth is set from
+`config.max_tree_depth` (default 10). Returns NUTS diagnostics
+(tree depth, divergence flag, energy) with each step. See
+[NUTS Algorithm](nuts.qmd) for the tree-building details.
+
+## Factory dispatch
+
+`create_sampler()` in `chain_runner.cpp` constructs the right sampler
+based on the model's capabilities and the user's choice:
+
+```cpp
+unique_ptr<SamplerBase> create_sampler(const SamplerConfig& config,
+                                        WarmupSchedule& schedule) {
+  switch(config.sampler_type) {
+    case nuts:                return make_unique<NUTSSampler>(config, schedule);
+    case hamiltonian_mc:      return make_unique<HMCSampler>(config, schedule);
+    case adaptive_metropolis: return make_unique<MetropolisSampler>(config, schedule);
+  }
+}
+```
+
+The GGM always uses `MetropolisSampler` because it does not provide a
+gradient. The OMRF and mixed MRF default to NUTS but fall back to
+Metropolis when the user requests it via `interaction_scale`.
+
+## Step-size adaptation
+
+The `DualAveraging` class implements the Nesterov dual-averaging
+scheme from Hoffman and Gelman (2014). During warmup, each step's
+acceptance probability is fed to the dual averager, which maintains
+both a current step size (for exploration) and a smoothed average
+(used after warmup).
+
+Key parameters:
+
+- **Target acceptance** — Default 0.8 for NUTS
+- **$\gamma$, $t_0$, $\kappa$** — Shrinkage and decay parameters from the NUTS paper
+
+## Mass matrix tuning
+
+The `DiagMassMatrixAccumulator` collects parameter samples during
+warmup stage 2 using Welford's algorithm for numerically stable
+variance computation. At the end of each adaptation window, the
+accumulated variance is extracted as the diagonal mass matrix.
+
+The variance estimate is blended with a prior (shrunk toward 1.0) to
+prevent degenerate mass matrices early in warmup when few samples
+are available.
+
+When the mass matrix changes, the step size is reinitialized from
+scratch using the heuristic, because the optimal step size depends
+on the mass matrix.

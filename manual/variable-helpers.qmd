@@ -2,57 +2,118 @@
 title: "Variable Helpers"
 ---
 
-::: {.callout-note}
-This chapter is under development.
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
 :::
 
-Numerically stable computation for MRF variables: the FAST/SAFE
-dual-path strategy in `variable_helpers.h` / `variable_helpers.cpp`.
+Numerically stable computation of MRF category denominators and
+probabilities. Source: `src/utils/variable_helpers.h` and
+`variable_helpers.cpp`.
 
-## The Problem
+## The problem
 
-<!-- TODO: source — why naive exp() overflows/underflows for large residual scores or many categories -->
+MRF conditional probabilities involve exponentials of residual
+scores. For large networks or extreme parameter values, the
+arguments to `exp()` can exceed the IEEE 754 double-precision
+range, producing `Inf` or underflowing to zero. Naive computation
+(direct exponentiation followed by normalization) fails silently
+in these cases.
 
-## The Dual-Path Strategy
+## The FAST/SAFE dual-path strategy
 
-<!-- TODO: source — src/utils/variable_helpers.h overview -->
+Every denominator and probability function in `variable_helpers.cpp`
+uses a two-path approach:
 
-### FAST Path
+1. **FAST path** — Precomputed exponentials with power-chain
+   accumulation. Used when the exponent arguments stay within safe
+   bounds.
+2. **SAFE path** — Direct log-sum-exp evaluation as a fallback when
+   bounds are violated.
 
-<!-- TODO: source — precomputed exponentials, power-chain accumulation, conditions for safe use -->
+The choice is made per-person (per row of the data matrix) based on
+whether the residual score times the maximum category exceeds the
+`EXP_BOUND` threshold.
 
-### SAFE Path
+### FAST path detail
 
-<!-- TODO: source — direct log-sum-exp evaluation as fallback -->
+For an ordinal variable with categories $0, 1, \ldots, K-1$ and
+residual $r$:
 
-### Block Scanning
+1. Precompute $e_r = \exp(r)$ and $e_m = \exp(\mu(c))$ for each
+   category
+2. Accumulate the denominator as a Horner-like chain:
+   $D = e^{-b}(1 + e_m[1] \cdot e_r + e_m[2] \cdot e_r^2 + \cdots)$
+   where $b$ is a stabilizing shift
 
-<!-- TODO: source — contiguous-block scan over persons, branch-free vectorization -->
+This avoids computing `exp()` for each category-residual combination
+independently and exploits the geometric structure of the category
+scores.
 
-## Ordinal Variables
+### SAFE path detail
 
-### compute_denom_ordinal
+When the FAST path would overflow or underflow:
 
-<!-- TODO: source — src/utils/variable_helpers.cpp: binary shortcut, fast/safe blocks -->
+1. Compute $s_c = \mu(c) + c \cdot r$ for each category
+2. Find $s_{\max} = \max_c s_c$
+3. Compute $D = \exp(s_{\max}) \sum_c \exp(s_c - s_{\max})$
 
-### compute_probs_ordinal
+This is the standard log-sum-exp trick, applied per person.
 
-<!-- TODO: source — probability normalization, clamp-at-zero stabilization -->
+### Block scanning
 
-## Blume-Capel Variables
+The functions process persons in contiguous blocks. Within each
+block, all persons follow the same path (FAST or SAFE). The block
+boundaries are determined by scanning the residual vector for
+bound violations. This enables branch-free vectorization within
+each block.
 
-### compute_denom_blume_capel
+## Ordinal variables
 
-<!-- TODO: source — theta precomputation, centered categories, pow_bound checks -->
+### `compute_denom_ordinal()`
 
-### compute_probs_blume_capel
+Computes the normalization constant (denominator) for each person's
+conditional distribution. Takes the residual vector, main-effect
+vector, and precomputed bound vector. Returns a vector of length
+$n$.
 
-<!-- TODO: source — same FAST/SAFE split for probability computation -->
+### `compute_probs_ordinal()`
 
-## Joint Log-Normalizer and Probabilities
+Computes the full category probability matrix ($n \times K$) for
+one ordinal variable. Probabilities are clamped at zero to prevent
+negative values from floating-point error in the normalization step.
 
-<!-- TODO: source — LogZAndProbs struct, compute_logZ_and_probs_ordinal, compute_logZ_and_probs_blume_capel -->
+## Blume-Capel variables
 
-## The EXP_BOUND = 709 Threshold
+### `compute_denom_blume_capel()`
 
-<!-- TODO: source — IEEE 754 double precision, exp(709) ≈ 8.2e307, exp(710) = Inf -->
+Handles the Blume-Capel parameterization, where the category score
+involves both linear and quadratic terms:
+$\mu(c) = \alpha(c - b) + \beta(c - b)^2$. The precomputation of
+$\theta_c = \alpha(c - b) + \beta(c - b)^2$ is done once per
+variable, and the FAST/SAFE split proceeds as for ordinal variables.
+
+### `compute_probs_blume_capel()`
+
+Analogous to the ordinal version, but with the Blume-Capel category
+scores.
+
+## Joint log-normalizer and probabilities
+
+The `LogZAndProbs` struct bundles the log-normalizer $\log Z$ and
+the probability matrix into a single return value. The joint
+computation functions (`compute_logZ_and_probs_ordinal()`,
+`compute_logZ_and_probs_blume_capel()`) share work between the
+two quantities, avoiding redundant exponential evaluations.
+
+These joint functions are used in the gradient computation, where
+both the log-pseudolikelihood (which needs $\log Z$) and the
+gradient (which needs category probabilities) are computed in the
+same pass.
+
+## The EXP_BOUND = 709 threshold
+
+The bound that triggers the SAFE path is set to 709, derived from
+IEEE 754 double precision: $\exp(709) \approx 8.2 \times 10^{307}$
+is the largest representable value, while $\exp(710) = \text{Inf}$.
+The FAST path checks whether $|r| \cdot (K - 1) < 709$ before
+proceeding.

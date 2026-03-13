@@ -2,25 +2,128 @@
 title: "Group Comparison Engine"
 ---
 
-::: {.callout-note}
-This chapter is under development.
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
 :::
 
-How `bgmCompare()` works under the hood: separate sampler, multi-group
-posterior, and output handling.
+How `bgmCompare()` works under the hood: multi-group posterior,
+difference parameterization, and sampler implementation. Source:
+`src/bgmCompare/` directory.
 
-## Differences from Single-Group bgm
+## Differences from single-group bgm
 
-<!-- TODO: source — src/bgmCompare/ vs. main sampler architecture -->
+The `bgmCompare` engine shares the same OMRF likelihood
+(pseudolikelihood over ordinal/Blume-Capel variables) and the same
+NUTS/HMC/Metropolis sampler options, but differs in three key ways:
 
-## Multi-Group Log-Posterior and Gradient
+1. **Parameter decomposition** — Group-specific parameters
+   $\boldsymbol{\theta}^{(g)}$ are decomposed into a shared baseline
+   $\boldsymbol{\varphi}$ and group differences
+   $\boldsymbol{\delta}^{(g)}$, linked through a contrast matrix.
+2. **Separate sampler** — The bgmCompare engine uses its own chain
+   runner (`run_gibbs_sampler_bgmCompare()`) rather than the general
+   `run_mcmc_chain()`, because the multi-group structure requires
+   group-specific likelihood evaluations and difference selection.
+3. **Difference selection** — In addition to edge selection (which
+   edges exist in the shared graph), bgmCompare performs difference
+   selection (which edges differ between groups).
 
-<!-- TODO: source — src/bgmCompare/bgmCompare_sampler.h -->
+## Contrast-matrix parameterization
 
-## Sampler Implementation
+For $G$ groups, the per-group parameter vector $\boldsymbol{\theta}^{(g)}$
+is expressed as:
 
-<!-- TODO: source — bgmCompare-specific MCMC loop -->
+$$
+\boldsymbol{\theta}^{(g)} = \boldsymbol{\varphi} + \sum_{h=1}^{G-1} P_{gh}\, \boldsymbol{\delta}^{(h)}
+$$
 
-## Output Handling
+where $\mathbf{P}$ is a $G \times (G-1)$ projection (contrast) matrix.
+Column $h = 0$ (the baseline $\boldsymbol{\varphi}$) captures the
+shared structure; columns $h > 0$ (the differences
+$\boldsymbol{\delta}^{(h)}$) capture how groups deviate from the
+baseline.
 
-<!-- TODO: source — R/build_output.R: build_output_compare() -->
+In the flat parameter vector, the baseline and difference parameters
+are interleaved per effect:
+
+```
+[ φ_main | δ^(1)_main | ... | δ^(G-1)_main | φ_pair | δ^(1)_pair | ... ]
+```
+
+## Multi-group log-posterior and gradient
+
+The log-pseudoposterior sums over groups. For each group $g$:
+
+1. Reconstruct group-specific parameters via the contrast matrix
+2. Compute the pseudolikelihood using group $g$'s data (sufficient
+   statistics: category counts, Blume-Capel stats, pairwise stats)
+3. Evaluate the gradient of the pseudolikelihood with respect to the
+   active parameters
+
+The gradient has two components:
+
+- **Observed-data gradient** (`gradient_observed_active()`) — Projects
+  group-level sufficient statistics into the active-parameter layout
+  using the contrast matrix
+- **Expected-data gradient** (`gradient_expected_active()`) — Computes
+  expected sufficient statistics under the current parameters using
+  category probabilities from the variable helpers
+
+The prior gradient adds Cauchy penalties on both baseline and
+difference pairwise parameters.
+
+## Sampler implementation
+
+`run_gibbs_sampler_bgmCompare()` orchestrates one MCMC chain. Each
+iteration:
+
+1. **NUTS/HMC/Metropolis step** — Update all active parameters
+   (baseline + differences) using the joint log-pseudoposterior
+2. **Difference selection** (if active) — For each edge, decide
+   whether the group-difference parameters are included or set to
+   zero. Uses a spike-and-slab mechanism analogous to edge selection
+   in the single-group model.
+3. **Main-effect difference selection** (optional) — Separately select
+   which main-effect parameters differ between groups
+4. **Edge prior update** — Update inclusion probabilities (Bernoulli,
+   Beta-Bernoulli, or SBM)
+5. **Missing data imputation** (if active) — Impute missing
+   observations per group
+
+The warmup schedule follows the same five-stage structure as the
+single-group model (see [Warmup Schedule](warmup.qmd)).
+
+## Active parameter tracking
+
+Because difference selection can turn parameters on and off, the
+`total_length()` function recomputes the active parameter dimension
+at each iteration. Index maps (`build_index_maps()`) provide the
+mapping between the flat active-parameter vector and the structured
+(variable, group) parameter layout.
+
+When a difference parameter is "off" (indicator = 0), it is excluded
+from the NUTS block. The step size and mass matrix adapt to the
+current active dimension.
+
+## Output handling
+
+The `bgmCompareOutput` struct stores:
+
+| Field | Content |
+|-------|---------|
+| `samples` | Posterior samples of all parameters (baseline + differences) |
+| `indicator_samples` | Edge inclusion indicators |
+| `difference_indicator_samples` | Difference selection indicators |
+| `warmup_check` | Warmup diagnostics |
+| NUTS fields | Tree depth, divergences, energy (when NUTS is used) |
+
+The R output builder (`build_output_compare()`) splits the posterior
+means into:
+
+- `$group_posterior_means` — Posterior means of the group-level
+  parameters $\boldsymbol{\theta}^{(g)}$, reconstructed from baseline
+  and differences
+- `$difference_posterior_means` — Posterior means of the difference
+  parameters $\boldsymbol{\delta}^{(h)}$
+- `$difference_inclusion_probabilities` — Proportion of iterations
+  where each difference indicator was included

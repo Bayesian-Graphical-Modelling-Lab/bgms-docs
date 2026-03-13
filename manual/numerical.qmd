@@ -2,14 +2,106 @@
 title: "Numerical Considerations"
 ---
 
-::: {.callout-note}
-This chapter is under development.
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
 :::
 
-Cross-platform numerical consistency in bgms.
+Cross-platform numerical consistency in bgms. Source:
+`src/math/custom_explog.h`, `custom_explog.cpp`,
+`custom_arma_explog.h`, and `explog_macros.h`.
 
-## Custom exp/log
+## The problem
 
-bgms uses openlibm for consistent exp/log behavior across platforms.
+Standard library implementations of `exp()` and `log()` differ across
+platforms. The GNU C Library (glibc, used on Linux), macOS libm, and
+MSVC's C runtime produce slightly different results for the same
+input, especially near boundary values. These differences are small
+(last-bit-of-precision level) but compound across thousands of MCMC
+iterations, causing:
 
-*Content to be added: rationale, implementation details.*
+- Different platforms to produce different posterior samples from the
+  same seed
+- CRAN check failures when comparing numerical output across
+  architectures
+- Occasional test failures when expected values are computed on one
+  platform and checked on another
+
+## OpenLibM solution
+
+bgms ships a copy of the `__ieee754_exp()` and `__ieee754_log()`
+implementations from OpenLibM (the FreeBSD/Sun math library). These
+are self-contained C functions that follow IEEE 754 exactly and
+produce identical results on all platforms.
+
+The implementation in `custom_explog.cpp` (approximately 800 lines)
+is the original Sun/FreeBSD code, lightly adapted to compile as C++
+within an R package.
+
+## Platform detection
+
+The macro system in `explog_macros.h` controls when custom exp/log
+is used:
+
+```cpp
+#if (defined(_WIN32) && (!defined(CUSTOM_EXP_LOG) || CUSTOM_EXP_LOG == 0)) \
+  || (!defined(_WIN32) && defined(CUSTOM_EXP_LOG) && CUSTOM_EXP_LOG != 0)
+  #define USE_CUSTOM_LOG 1
+#endif
+```
+
+The logic:
+
+- **Windows** — Uses custom exp/log by default because MSVC's
+  `std::exp`/`std::log` differ from POSIX implementations and are
+  slower
+- **Linux/macOS** — Uses the system libm by default (which is fast
+  and POSIX-compliant). Custom exp/log can be enabled by setting
+  `CUSTOM_EXP_LOG=1`
+
+The `configure` and `configure.win` scripts set the appropriate
+compiler flag in `Makevars`.
+
+## Usage in C++ code
+
+Two levels of macros are available:
+
+| Macro | Expands to (custom) | Expands to (system) |
+|-------|-------------------|-------------------|
+| `MY_EXP(x)` | `__ieee754_exp(x)` | `std::exp(x)` |
+| `ARMA_MY_EXP(X)` | `custom_arma_exp(X)` | `arma::exp(X)` |
+
+The `ARMA_MY_EXP` variant applies element-wise custom exp/log to
+Armadillo matrices and vectors. It wraps `custom_arma_exp()` and
+`custom_arma_log()` from `custom_arma_explog.h`, which iterate over
+matrix elements and call the scalar `__ieee754_exp`/`__ieee754_log`.
+
+## Performance
+
+On macOS and Linux, the system `exp()` and `log()` are highly
+optimized (hardware-accelerated on some architectures). The custom
+versions are slightly slower but guarantee cross-platform
+reproducibility.
+
+On Windows with MSVC, the custom implementations are often 2–5×
+*faster* than `std::exp`/`std::log`, making the custom path
+beneficial for both correctness and speed.
+
+## EXP_BOUND and overflow prevention
+
+The [variable helpers](variable-helpers.qmd) use `EXP_BOUND = 709`
+as the threshold for safe exponentiation, derived from the IEEE 754
+double-precision range:
+
+- $\exp(709) \approx 8.2 \times 10^{307}$ — largest representable
+- $\exp(710) = +\text{Inf}$
+- $\exp(-745) \approx 5 \times 10^{-324}$ — smallest positive subnormal
+- $\exp(-746) = 0$
+
+This bound is used throughout the codebase (not just in variable
+helpers) to guard against overflow before calling `MY_EXP()`.
+
+## R interface
+
+The `explog_interface.cpp` file exposes the custom exp/log functions
+to R for testing purposes. This allows verification that the custom
+implementations match expected values in R-level unit tests.

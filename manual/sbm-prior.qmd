@@ -2,25 +2,119 @@
 title: "Stochastic Block Model Prior"
 ---
 
-::: {.callout-note}
-This chapter is under development.
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
 :::
 
-The MFM-SBM edge prior: how cluster structure regularizes edge
-inclusion.
+The MFM-SBM (mixture of finite mixtures – stochastic block model)
+edge prior assigns variables to latent clusters and uses
+cluster-structured inclusion probabilities. Source:
+`src/priors/sbm_edge_prior.h` and `sbm_edge_prior.cpp`.
 
-## MFM-SBM Formulation
+## MFM-SBM formulation
 
-<!-- TODO: source — src/priors/sbm_edge_prior.h, mixture of finite mixtures -->
+The prior has three levels:
 
-## Gibbs Block-Allocation Updates
+1. **Cluster count** — The number of clusters $K$ follows a
+   Poisson($\lambda$) prior, with a mixture-of-finite-mixtures (MFM)
+   correction that accounts for the combinatorial allocation structure.
 
-<!-- TODO: source — StochasticBlockEdgePrior::update(), allocation sampling -->
+2. **Cluster assignments** — Each variable $i$ is assigned to cluster
+   $z_i \in \{1, \ldots, K\}$ with a symmetric Dirichlet prior
+   (concentration $\alpha_D$) on the cluster proportions.
 
-## How Clusters Regularize Edges
+3. **Block inclusion probabilities** — The inclusion probability for
+   edge $(i, j)$ depends on whether variables $i$ and $j$ are in the
+   same cluster:
 
-<!-- TODO: source — within-block vs. between-block inclusion rates -->
+   $$
+   \pi_{ij} = \begin{cases}
+   \pi_{\text{within}} & \text{if } z_i = z_j \\
+   \pi_{\text{between}} & \text{if } z_i \neq z_j
+   \end{cases}
+   $$
 
-## Output: Allocations and Co-Clustering
+   Within-block and between-block probabilities are drawn from
+   Beta distributions with separate hyperparameters.
 
-<!-- TODO: source — ChainResult::store_allocations(), R/extractor_functions.R: extract_sbm() -->
+## Gibbs updates
+
+The `update()` method in `StochasticBlockEdgePrior` runs three
+sequential Gibbs steps:
+
+### 1. Cluster allocations
+
+`block_allocations_mfm_sbm()` updates each variable's cluster
+assignment $z_i$ by collapsed Gibbs sampling. For each variable $i$:
+
+1. Remove variable $i$ from its current cluster
+2. For each possible cluster $k$ (including a new cluster), compute
+   the conditional probability based on:
+   - The MFM allocation prior (CRP-like with log-partition
+     coefficients $\log V_n$)
+   - The likelihood of the observed edge indicators between variable
+     $i$ and all other variables, given the block probabilities
+3. Sample $z_i$ from the resulting categorical distribution
+
+Empty clusters are removed, and the cluster labels are relabeled
+to be contiguous.
+
+### 2. Block probabilities
+
+`block_probs_mfm_sbm()` draws new within-block and between-block
+inclusion probabilities from their Beta full conditionals:
+
+$$
+\pi_{kl} \sim \text{Beta}\bigl(\alpha_{kl} + e_{kl},\; \beta_{kl} + m_{kl} - e_{kl}\bigr)
+$$
+
+where $e_{kl}$ is the number of included edges between clusters $k$
+and $l$, and $m_{kl}$ is the total number of possible edges. The
+hyperparameters $\alpha_{kl}$ and $\beta_{kl}$ differ for within-block
+($k = l$) and between-block ($k \neq l$) pairs.
+
+### 3. Inclusion probability matrix
+
+The updated block probabilities are broadcast to the full
+$p \times p$ inclusion probability matrix based on the current
+cluster assignments.
+
+## Log partition coefficients
+
+`compute_Vn_mfm_sbm()` precomputes the log-partition function
+$\log V_n(t)$ for $t = 1, \ldots, t_{\max}$. These coefficients
+encode the MFM prior on the number of occupied clusters and appear
+in the allocation Gibbs step. They are computed once at
+initialization.
+
+The computation involves:
+
+- Poisson probabilities for the total number of components
+- Rising factorials (Pochhammer symbols) for the Dirichlet-multinomial
+  allocation counts
+- Log-sum-exp accumulation for numerical stability
+
+## Hyperparameters
+
+The six SBM hyperparameters are set via `bgm()`:
+
+| Parameter | R argument | Default | Role |
+|-----------|-----------|---------|------|
+| $\alpha_w$ | `beta_bernoulli_alpha` | 1 | Beta shape for within-block inclusion |
+| $\beta_w$ | `beta_bernoulli_beta` | 1 | Beta shape for within-block inclusion |
+| $\alpha_b$ | `beta_bernoulli_alpha_between` | 1 | Beta shape for between-block inclusion |
+| $\beta_b$ | `beta_bernoulli_beta_between` | 1 | Beta shape for between-block inclusion |
+| $\alpha_D$ | `dirichlet_alpha` | 1 | Dirichlet concentration for cluster proportions |
+| $\lambda$ | `lambda` | 1 | Poisson rate for number of clusters |
+
+When the between-block hyperparameters are not specified (NULL in R),
+they default to $-1$ in C++ (sentinel value), and the prior uses the
+within-block hyperparameters for all blocks.
+
+## Output
+
+The cluster allocations at each post-warmup iteration are stored in
+`ChainResult::allocation_samples` and accessible via
+`extract_sbm()` in R, which returns the allocation matrix and a
+co-clustering probability matrix (proportion of iterations where
+each pair of variables was in the same cluster).

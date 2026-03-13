@@ -2,19 +2,115 @@
 title: "Warmup Schedule"
 ---
 
-::: {.callout-note}
-This chapter is under development.
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
 :::
 
-bgms uses a three-stage warmup schedule to tune MCMC sampler parameters.
+bgms uses a multi-stage warmup schedule to tune MCMC sampler
+parameters before collecting posterior samples. The schedule is
+defined in `src/mcmc/execution/warmup_schedule.h` and adapts its
+structure based on whether edge selection is active.
 
-## Stages
+## Five stages
 
-1. **Initial exploration** — Find reasonable step size
-2. **Adaptation windows** — Estimate mass matrix, tune step size
-3. **Final tuning** — Finalize step size
+The warmup period is divided into five stages. Stages 3b and 3c
+only apply when edge selection is enabled.
 
-## Implementation
+| Stage | Name | Purpose |
+|-------|------|---------|
+| 1 | Initial exploration | Find a reasonable region of parameter space |
+| 2 | Adaptation windows | Tune step size (dual averaging) and mass matrix (Welford) |
+| 3a | Terminal window | Final mass matrix and step-size adaptation |
+| 3b | Proposal SD learning | Tune element-wise Metropolis proposal SDs with edge selection active |
+| 3c | Step-size re-adaptation | Re-adapt the NUTS/HMC step size after edge selection changes the geometry |
 
-*Content to be added: `WarmupSchedule` class, `DualAveraging`, 
-`DiagMassMatrixAccumulator`.*
+### Stage 1: Initial exploration
+
+A short burn-in phase (default: the first 75 iterations). The
+sampler explores freely; no mass matrix accumulation occurs. Dual
+averaging runs to coarsely tune the step size.
+
+### Stage 2: Adaptation windows
+
+The step size and mass matrix are tuned in expanding windows. The
+first window has 25 iterations. Each subsequent window doubles in
+size (25 → 50 → 100 → ...) until the stage 3a boundary is reached.
+At the end of each window:
+
+1. The accumulated variance from `DiagMassMatrixAccumulator` is
+   extracted as the new diagonal mass matrix
+2. The step-size heuristic runs again with the new mass matrix
+3. Both accumulators are reset for the next window
+
+### Stage 3a: Terminal window
+
+The last adaptation window before edge selection activates. After
+this stage, the mass matrix is frozen.
+
+### Stage 3b: Proposal SD learning
+
+When edge selection is active, the model needs element-wise Metropolis
+proposal standard deviations for the edge indicator updates. During
+stage 3b, edge selection is turned on and the proposal SDs are
+tuned via Robbins-Monro updates:
+
+$$
+\sigma_{k+1} = \sigma_k \cdot \exp\!\bigl(w_k (\log \alpha_k - \log \alpha^*)\bigr)
+$$
+
+where $\alpha_k$ is the observed acceptance probability and $\alpha^*$
+is the target (default 0.234). The updated SD is clamped to
+$[0.001, 2.0]$.
+
+### Stage 3c: Step-size re-adaptation
+
+After edge selection changes the effective posterior geometry (many
+edges may be set to zero), the NUTS/HMC step size needs readjustment.
+Stage 3c runs dual averaging one more time with the final mass
+matrix and active edge selection.
+
+## Budget allocation
+
+When edge selection is active, the total warmup budget is split as:
+
+- **Stages 1–3a**: 85% of total warmup
+- **Stage 3b**: 10% (skipped if fewer than 20 iterations)
+- **Stage 3c**: ~5%
+
+When edge selection is inactive, stages 3b and 3c are skipped and
+the full budget is allocated to stages 1–3a.
+
+## Warning system
+
+The `WarmupSchedule` tracks a `warning_type` field that records
+when the warmup budget is insufficient:
+
+| Code | Meaning |
+|------|---------|
+| 0 | No warning |
+| 1 | Warmup too short for the standard schedule |
+| 2 | Proportional fallback used (reduced window sizes) |
+| 3 | Limited tuning (fewer adaptation windows) |
+| 4 | Proposal SD learning skipped (stage 3b dropped) |
+
+The `warmup_check` table returned by `bgm()` reports these warnings
+per chain, accessible via `fit$warmup_check` in R.
+
+## Querying the schedule
+
+The `WarmupSchedule` struct exposes predicate methods used by the
+chain runner and samplers:
+
+```cpp
+bool in_stage1(int i) const;
+bool in_stage2(int i) const;
+bool in_stage3a(int i) const;
+bool in_stage3b(int i) const;
+bool in_stage3c(int i) const;
+bool sampling(int i) const;          // i >= total_warmup
+bool selection_enabled(int i) const; // i >= stage3b_start (or never)
+```
+
+These predicates control when the adaptation controller accumulates
+samples, when edge selection is turned on, and when the chain
+transitions from warmup to sampling.
