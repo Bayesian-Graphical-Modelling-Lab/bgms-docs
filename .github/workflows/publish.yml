@@ -20,6 +20,8 @@ jobs:
           use-public-rspm: true
 
       - name: Install R packages
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: |
           Rscript -e 'install.packages(c("knitr", "rmarkdown", "remotes"))'
           Rscript -e 'remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")'
