@@ -620,7 +620,7 @@ Warning
 <p>Returns a list with:</p>
 <ul>
 <li><code>main</code> — Posterior mean main-effect parameters. <code>NULL</code> for GGM models. For OMRF models: a numeric matrix (p x max_categories) of category thresholds. For mixed MRF models: a list with <code>$discrete</code> (threshold matrix) and <code>$continuous</code> (means matrix).</li>
-<li><code>pairwise</code> — Posterior mean pairwise interaction matrix. For GGM and mixed MRF models the precision matrix diagonal is included on the diagonal.</li>
+<li><code>pairwise</code> — Posterior mean partial association matrix. The diagonal is zero. For model-specific scales, use <code>extract_precision()</code>, <code>extract_partial_correlations()</code>, or <code>extract_log_odds()</code>.</li>
 <li><code>indicator</code> — Posterior mean edge inclusion indicators (if available).</li>
 </ul>
 </section>
@@ -900,7 +900,7 @@ Warning
 </tr>
 <tr class="even">
 <td><code>pairwise</code></td>
-<td>Symmetric matrix of pairwise interactions. For continuous variables, this is the precision matrix (must be positive definite).</td>
+<td>Symmetric matrix of partial associations. For continuous variables, this is the precision matrix (must be positive definite).</td>
 </tr>
 <tr class="odd">
 <td><code>main</code></td>

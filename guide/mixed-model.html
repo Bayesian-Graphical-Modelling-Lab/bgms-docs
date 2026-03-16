@@ -563,12 +563,13 @@ Warning
 </section>
 <section id="the-model" class="level2">
 <h2 class="anchored" data-anchor-id="the-model">The model</h2>
-<p>The mixed MRF combines the ordinal MRF (for discrete variables) and the GGM (for continuous variables) into a single joint distribution. The model includes three types of pairwise interactions:</p>
+<p>The mixed MRF combines the ordinal MRF (for discrete variables) and the GGM (for continuous variables) into a single joint distribution. The model includes three types of partial associations:</p>
 <ul>
-<li><strong>Discrete–discrete</strong>: interactions between ordinal/binary variables, as in the ordinal MRF.</li>
-<li><strong>Continuous–continuous</strong>: partial correlations between continuous variables, as in the GGM (encoded in a precision-like matrix <span class="math inline">\(K_{yy}\)</span>).</li>
-<li><strong>Cross-type</strong>: interactions between discrete and continuous variables, capturing how a change in an ordinal variable’s category is associated with a shift in a continuous variable’s conditional mean.</li>
+<li><strong>Discrete–discrete</strong>: partial associations between ordinal/binary variables, as in the ordinal MRF.</li>
+<li><strong>Continuous–continuous</strong>: partial associations between continuous variables, related to the precision matrix as in the GGM.</li>
+<li><strong>Cross-type</strong>: partial associations between discrete and continuous variables, capturing how a change in an ordinal variable’s category is associated with a shift in a continuous variable’s conditional mean.</li>
 </ul>
+<p>All three types are reported on the same partial association scale in <code>coef(fit)$pairwise</code>. To obtain model-specific parameterizations for the continuous block, use <code>extract_precision(fit)</code> or <code>extract_partial_correlations(fit)</code>. For the discrete block, use <code>extract_log_odds(fit)</code>.</p>
 </section>
 <section id="data-requirements" class="level2">
 <h2 class="anchored" data-anchor-id="data-requirements">Data requirements</h2>
@@ -592,7 +593,7 @@ Warning
 </section>
 <section id="interpreting-the-output" class="level2">
 <h2 class="anchored" data-anchor-id="interpreting-the-output">Interpreting the output</h2>
-<p>The <code>coef()</code> method returns a single <code>$pairwise</code> matrix that contains all three types of interactions. The diagonal entries correspond to the <span class="math inline">\(K_{yy}\)</span> diagonal (for continuous variables) or are zero (for discrete variables). The off-diagonal entries are pairwise interactions regardless of variable type.</p>
+<p>The <code>coef()</code> method returns a single <code>$pairwise</code> matrix that contains all three types of partial associations on the same scale. The off-diagonal entries are partial associations regardless of variable type; the diagonal is zero.</p>
 <p>The <code>$indicator</code> matrix (when edge selection is active) reports posterior inclusion probabilities for all edges, including cross-type edges.</p>
 </section>
 <section id="fitting-a-mixed-mrf" class="level2">

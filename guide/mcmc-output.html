@@ -587,14 +587,14 @@ Warning
 </tbody>
 </table>
 <p>Access specific summary tables with:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>pairwise   <span class="co"># pairwise interactions</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>pairwise   <span class="co"># partial associations</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>main        <span class="co"># category thresholds (ordinal) or means (GGM)</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>indicator   <span class="co"># inclusion indicators (if edge selection active)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="posterior-mean-matrices" class="level2">
 <h2 class="anchored" data-anchor-id="posterior-mean-matrices">Posterior mean matrices</h2>
 <p>The <code>coef()</code> method returns posterior means in matrix form:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)<span class="sc">$</span>pairwise   <span class="co"># p x p symmetric matrix of interaction strengths</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)<span class="sc">$</span>pairwise   <span class="co"># p x p symmetric matrix of partial associations</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)<span class="sc">$</span>indicator   <span class="co"># p x p symmetric matrix of inclusion probabilities</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>For ordinal models, <code>coef(fit)$main</code> returns a matrix of category threshold means (variables in rows, categories in columns). For mixed MRFs, it returns a list with <code>$discrete</code> and <code>$continuous</code> components.</p>
 </section>
@@ -605,7 +605,7 @@ Warning
 <p>The structure is:</p>
 <ul>
 <li><code>$main</code>: list of matrices (one per chain), each with rows = iterations and columns = main effect parameters.</li>
-<li><code>$pairwise</code>: list of matrices (one per chain) for pairwise interactions.</li>
+<li><code>$pairwise</code>: list of matrices (one per chain) for partial associations.</li>
 <li><code>$indicator</code>: list of matrices for edge indicators (if edge selection was active).</li>
 <li><code>$allocations</code>: list of matrices for cluster assignments (if SBM prior was used).</li>
 <li><code>$nchains</code>: number of chains.</li>
@@ -635,7 +635,7 @@ Warning
 </tr>
 <tr class="even">
 <td><code>extract_pairwise_interactions()</code></td>
-<td>Raw pairwise interaction samples</td>
+<td>Raw partial association samples</td>
 </tr>
 <tr class="odd">
 <td><code>extract_main_effects()</code></td>
@@ -650,14 +650,26 @@ Warning
 <td>Posterior inclusion probabilities</td>
 </tr>
 <tr class="even">
+<td><code>extract_precision()</code></td>
+<td>Posterior mean precision matrix (GGM / continuous block)</td>
+</tr>
+<tr class="odd">
+<td><code>extract_partial_correlations()</code></td>
+<td>Posterior mean partial correlation matrix (GGM / continuous block)</td>
+</tr>
+<tr class="even">
+<td><code>extract_log_odds()</code></td>
+<td>Posterior mean log-odds matrix (ordinal / discrete block)</td>
+</tr>
+<tr class="odd">
 <td><code>extract_ess()</code></td>
 <td>Effective sample sizes</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>extract_rhat()</code></td>
 <td>Split R-hat values</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>extract_sbm()</code></td>
 <td>SBM cluster assignments and co-clustering matrix</td>
 </tr>

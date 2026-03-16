@@ -556,13 +556,13 @@ Warning
 <p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>Bayesian edge selection determines which edges are present in the network by placing spike-and-slab priors on the pairwise interaction parameters. When <code>edge_selection = TRUE</code> (the default), <code>bgm()</code> estimates both the edge structure and the effect sizes simultaneously.</p>
+<p>Bayesian edge selection determines which edges are present in the network by placing spike-and-slab priors on the partial association parameters. When <code>edge_selection = TRUE</code> (the default), <code>bgm()</code> estimates both the edge structure and the effect sizes simultaneously.</p>
 <section id="spike-and-slab-priors" class="level2">
 <h2 class="anchored" data-anchor-id="spike-and-slab-priors">Spike-and-slab priors</h2>
 <p>For each edge <span class="math inline">\((i, j)\)</span>, an indicator variable <span class="math inline">\(\gamma_{ij} \in \{0, 1\}\)</span> governs whether the interaction is included in the model:</p>
 <ul>
-<li>When <span class="math inline">\(\gamma_{ij} = 0\)</span> (spike), the interaction <span class="math inline">\(\sigma_{ij}\)</span> is set to exactly zero — the edge is absent.</li>
-<li>When <span class="math inline">\(\gamma_{ij} = 1\)</span> (slab), the interaction receives a Cauchy prior with scale <code>pairwise_scale</code> — the edge is present and the effect size is estimated.</li>
+<li>When <span class="math inline">\(\gamma_{ij} = 0\)</span> (spike), the partial association <span class="math inline">\(\phi_{ij}\)</span> is set to exactly zero — the edge is absent.</li>
+<li>When <span class="math inline">\(\gamma_{ij} = 1\)</span> (slab), the partial association receives a Cauchy prior with scale <code>pairwise_scale</code> — the edge is present and the effect size is estimated.</li>
 </ul>
 <p>The prior probability of inclusion is controlled by the <code>edge_prior</code> argument. See <a href="../guide/prior-basics.html">Prior Basics</a> for the available options (Bernoulli, Beta-Bernoulli, Stochastic-Block).</p>
 </section>

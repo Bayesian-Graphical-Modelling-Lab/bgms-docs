@@ -565,23 +565,32 @@ Warning
 \]</span></p>
 <p>The network structure is encoded in the precision matrix <span class="math inline">\(\boldsymbol{K} = \boldsymbol{\Sigma}^{-1}\)</span>. A zero entry <span class="math inline">\(K_{ij} = 0\)</span> means that variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are conditionally independent given all other variables — equivalently, the edge between nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is absent.</p>
 </section>
-<section id="partial-correlations" class="level2">
-<h2 class="anchored" data-anchor-id="partial-correlations">Partial correlations</h2>
-<p>The off-diagonal entries of the standardized precision matrix are partial correlations:</p>
+<section id="partial-associations" class="level2">
+<h2 class="anchored" data-anchor-id="partial-associations">Partial associations</h2>
+<p>As described in <a href="../guide/graphical-models.html">Graphical Models</a>, bgms reports all pairwise effects on a unified partial association scale. For the GGM, the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is:</p>
+<p><span class="math display">\[
+\phi_{ij} = -\tfrac{1}{2}\, K_{ij}
+\]</span></p>
+<p>This is a linear rescaling of the precision off-diagonal. A positive <span class="math inline">\(\phi_{ij}\)</span> means that, holding all other variables constant, higher values of <span class="math inline">\(x_i\)</span> are associated with higher values of <span class="math inline">\(x_j\)</span>.</p>
+<p>The standardized version of the precision off-diagonal gives the partial correlation:</p>
 <p><span class="math display">\[
 \rho_{ij \cdot \text{rest}} = -\frac{K_{ij}}{\sqrt{K_{ii} K_{jj}}}
 \]</span></p>
-<p>A positive partial correlation means that, holding all other variables constant, higher values of <span class="math inline">\(x_i\)</span> are associated with higher values of <span class="math inline">\(x_j\)</span>. bgms reports these partial correlations as the pairwise interaction parameters.</p>
 </section>
 <section id="fitting-a-ggm" class="level2">
 <h2 class="anchored" data-anchor-id="fitting-a-ggm">Fitting a GGM</h2>
 <p>To fit a GGM, pass continuous data and set <code>variable_type</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> continuous_data, <span class="at">variable_type =</span> <span class="st">"continuous"</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The <code>summary()</code> and <code>coef()</code> methods work the same as for ordinal models. The pairwise effects in the output are partial correlations, and the diagonal of the pairwise matrix contains the precision matrix diagonal.</p>
+<p>The <code>summary()</code> and <code>coef()</code> methods work the same as for ordinal models. <code>coef(fit)$pairwise</code> returns the partial associations <span class="math inline">\(\phi_{ij}\)</span>.</p>
+<p>To obtain model-specific parameterizations, use the dedicated extractors:</p>
+<ul>
+<li><code>extract_precision(fit)</code> — returns the full precision matrix <span class="math inline">\(\boldsymbol{K}\)</span>.</li>
+<li><code>extract_partial_correlations(fit)</code> — returns the partial correlation matrix.</li>
+</ul>
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>
-<p>When <code>edge_selection = TRUE</code> (the default), bgms applies spike-and-slab priors to the off-diagonal entries of the precision matrix. Edges with posterior inclusion probability above 0.5 have more evidence for presence than absence. See <a href="../guide/edge-selection.html">Edge Selection</a> for details.</p>
+<p>When <code>edge_selection = TRUE</code> (the default), bgms applies spike-and-slab priors to the partial associations <span class="math inline">\(\phi_{ij}\)</span>. Edges with posterior inclusion probability above 0.5 have more evidence for presence than absence. See <a href="../guide/edge-selection.html">Edge Selection</a> for details.</p>
 </section>
 <section id="missing-data" class="level2">
 <h2 class="anchored" data-anchor-id="missing-data">Missing data</h2>

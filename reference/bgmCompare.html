@@ -495,7 +495,7 @@ Warning
 <p>Bayesian estimation and variable selection for group differences in Markov Random Fields.</p>
 <section id="description" class="level2">
 <h2 class="anchored" data-anchor-id="description">Description</h2>
-<p>The <code>bgmCompare</code> function estimates group differences in category threshold parameters (main effects) and pairwise interactions (pairwise effects) of a Markov Random Field (MRF) for binary and ordinal variables. Groups can be defined either by supplying two separate datasets (<code>x</code> and <code>y</code>) or by a group membership vector. Optionally, Bayesian variable selection identifies differences across groups.</p>
+<p>The <code>bgmCompare</code> function estimates group differences in category threshold parameters (main effects) and partial associations (pairwise effects) of a Markov Random Field (MRF) for binary and ordinal variables. Groups can be defined either by supplying two separate datasets (<code>x</code> and <code>y</code>) or by a group membership vector. Optionally, Bayesian variable selection identifies differences across groups.</p>
 </section>
 <section id="usage" class="level2">
 <h2 class="anchored" data-anchor-id="usage">Usage</h2>
@@ -631,7 +631,7 @@ Warning
 <tbody>
 <tr class="odd">
 <td><code>pairwise_scale</code></td>
-<td>Scale of the Cauchy prior for baseline pairwise interactions. Default: <code>2.5</code>.</td>
+<td>Scale of the Cauchy prior for baseline partial associations. Default: <code>2.5</code>.</td>
 </tr>
 <tr class="even">
 <td><code>main_alpha</code>, <code>main_beta</code></td>
@@ -639,7 +639,7 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>standardize</code></td>
-<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each pairwise interaction (both baseline and difference) is adjusted based on the range of response scores. Default: <code>FALSE</code>.</td>
+<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each partial association (both baseline and difference) is adjusted based on the range of response scores. Default: <code>FALSE</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -714,8 +714,8 @@ Warning
 <h2 class="anchored" data-anchor-id="value">Value</h2>
 <p>A list of class <code>"bgmCompare"</code> containing posterior summaries, posterior mean matrices, and raw MCMC samples:</p>
 <ul>
-<li><code>posterior_summary_main_baseline</code>, <code>posterior_summary_pairwise_baseline</code> — Summaries of baseline thresholds and pairwise interactions.</li>
-<li><code>posterior_summary_main_differences</code>, <code>posterior_summary_pairwise_differences</code> — Summaries of group differences in thresholds and pairwise interactions.</li>
+<li><code>posterior_summary_main_baseline</code>, <code>posterior_summary_pairwise_baseline</code> — Summaries of baseline thresholds and partial associations.</li>
+<li><code>posterior_summary_main_differences</code>, <code>posterior_summary_pairwise_differences</code> — Summaries of group differences in thresholds and partial associations.</li>
 <li><code>posterior_summary_indicator</code> — Summaries of inclusion indicators (if <code>difference_selection = TRUE</code>).</li>
 <li><code>posterior_mean_main_baseline</code>, <code>posterior_mean_pairwise_baseline</code> — Posterior mean matrices (legacy style).</li>
 <li><code>raw_samples</code> — List of raw draws per chain for main, pairwise, and indicator parameters.</li>
@@ -725,9 +725,9 @@ Warning
 </section>
 <section id="details" class="level2">
 <h2 class="anchored" data-anchor-id="details">Details</h2>
-<section id="pairwise-interactions" class="level3">
-<h3 class="anchored" data-anchor-id="pairwise-interactions">Pairwise interactions</h3>
-<p>For variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, the group-specific interaction is represented as:</p>
+<section id="partial-associations" class="level3">
+<h3 class="anchored" data-anchor-id="partial-associations">Partial associations</h3>
+<p>For variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, the group-specific partial association is represented as:</p>
 <p><span class="math display">\[\theta_{ij}^{(g)} = \phi_{ij} + \delta_{ij}^{(g)}\]</span></p>
 <p>where <span class="math inline">\(\phi_{ij}\)</span> is the baseline effect and <span class="math inline">\(\delta_{ij}^{(g)}\)</span> are group differences constrained to sum to zero.</p>
 </section>

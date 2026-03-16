@@ -562,10 +562,11 @@ Warning
 <p>For <span class="math inline">\(p\)</span> ordinal variables with observations <span class="math inline">\(\mathbf{x} = (x_1, \ldots, x_p)\)</span>, the ordinal MRF specifies the joint distribution as:</p>
 <p><span class="math display">\[
 p(\mathbf{x}) \propto \exp\left(\sum_{i=1}^{p} \mu_{x_i}^{(i)} +
-\sum_{i&lt;j} \sigma_{ij} \, x_i \, x_j\right)
+\sum_{i&lt;j} \phi_{ij} \, x_i \, x_j\right)
 \]</span></p>
-<p>where <span class="math inline">\(\mu_{x_i}^{(i)}\)</span> are category threshold parameters for variable <span class="math inline">\(i\)</span> (one per category above the lowest) and <span class="math inline">\(\sigma_{ij}\)</span> is the pairwise interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</p>
-<p>A positive interaction <span class="math inline">\(\sigma_{ij} &gt; 0\)</span> means that higher categories of <span class="math inline">\(x_i\)</span> tend to co-occur with higher categories of <span class="math inline">\(x_j\)</span>, conditional on all other variables. The category thresholds control the marginal distribution of each variable.</p>
+<p>where <span class="math inline">\(\mu_{x_i}^{(i)}\)</span> are category threshold parameters for variable <span class="math inline">\(i\)</span> (one per category above the lowest) and <span class="math inline">\(\phi_{ij}\)</span> is the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</p>
+<p>A positive partial association <span class="math inline">\(\phi_{ij} &gt; 0\)</span> means that higher categories of <span class="math inline">\(x_i\)</span> tend to co-occur with higher categories of <span class="math inline">\(x_j\)</span>, conditional on all other variables. The category thresholds control the marginal distribution of each variable.</p>
+<p>The partial association is half the log adjacent-category odds ratio: <span class="math inline">\(\phi_{ij} = \tfrac{1}{2}\,\log\text{OR}_{ij}\)</span>. To obtain the full log-odds, use <code>extract_log_odds(fit)</code>.</p>
 </section>
 <section id="regular-ordinal-variables" class="level2">
 <h2 class="anchored" data-anchor-id="regular-ordinal-variables">Regular ordinal variables</h2>
@@ -583,7 +584,7 @@ p(\mathbf{x}) \propto \exp\left(\sum_{i=1}^{p} \mu_{x_i}^{(i)} +
 <li><span class="math inline">\(\beta &lt; 0\)</span>: the model favors responses near the baseline category</li>
 <li><span class="math inline">\(\beta &gt; 0\)</span>: the model favors extreme responses (far from the baseline)</li>
 </ul>
-<p>Pairwise interactions between Blume-Capel variables use centered scores <span class="math inline">\((c - b)\)</span> rather than raw category values.</p>
+<p>Partial associations between Blume-Capel variables use centered scores <span class="math inline">\((c - b)\)</span> rather than raw category values.</p>
 <p>To use Blume-Capel variables, set <code>variable_type = "blume-capel"</code> and provide the <code>baseline_category</code> argument:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">variable_type =</span> <span class="st">"blume-capel"</span>,</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">baseline_category =</span> <span class="dv">2</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -600,7 +601,7 @@ p(\mathbf{x}) \propto \exp\left(\sum_{i=1}^{p} \mu_{x_i}^{(i)} +
 <p>For Blume-Capel variables specifically:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">variable_type =</span> <span class="st">"blume-capel"</span>,</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">baseline_category =</span> <span class="dv">3</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The output contains posterior summaries for both threshold parameters (<code>posterior_summary_main</code>) and pairwise interactions (<code>posterior_summary_pairwise</code>).</p>
+<p>The output contains posterior summaries for both threshold parameters (<code>posterior_summary_main</code>) and partial associations (<code>posterior_summary_pairwise</code>).</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>

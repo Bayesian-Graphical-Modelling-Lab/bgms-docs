@@ -521,17 +521,17 @@ Warning
 <p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>This chapter explains what priors are, how bgms uses them, and when the defaults should be changed. Analysis-specific prior guidance appears on the <a href="../guide/edge-selection.html">Edge Selection</a>, <a href="../guide/group-comparison.html">Group Comparison</a>, and <a href="../guide/clustering.html">Edge Clustering</a> pages.</p>
+<p>This chapter explains what priors are, how <code>bgms</code> uses them, and when the defaults should be changed. Analysis-specific prior guidance appears on the <a href="../guide/edge-selection.html">Edge Selection</a>, <a href="../guide/group-comparison.html">Group Comparison</a>, and <a href="../guide/clustering.html">Edge Clustering</a> pages.</p>
 <section id="what-is-a-prior" class="level2">
 <h2 class="anchored" data-anchor-id="what-is-a-prior">What is a prior?</h2>
 <p>A prior distribution encodes assumptions about a parameter before observing data. In Bayesian inference, the prior is combined with the likelihood to produce the posterior distribution. The prior matters most when data are sparse; as data accumulate, the posterior is increasingly driven by the likelihood.</p>
 </section>
 <section id="priors-in-bgms" class="level2">
 <h2 class="anchored" data-anchor-id="priors-in-bgms">Priors in bgms</h2>
-<p>bgms places priors on three types of quantities: pairwise interaction parameters, main effect parameters, and (when edge selection is active) edge inclusion indicators. Each has a distinct role.</p>
-<section id="pairwise-interaction-prior" class="level3">
-<h3 class="anchored" data-anchor-id="pairwise-interaction-prior">Pairwise interaction prior</h3>
-<p>The pairwise interactions <span class="math inline">\(\sigma_{ij}\)</span> receive a Cauchy prior (a Student-<span class="math inline">\(t\)</span> distribution with one degree of freedom) centered at zero. The scale is controlled by <code>pairwise_scale</code> (default: 2.5).</p>
+<p><code>bgms</code> places priors on three types of quantities: partial association parameters, main effect parameters, and (when edge selection is active) edge inclusion indicators. Each has a distinct role.</p>
+<section id="partial-association-prior" class="level3">
+<h3 class="anchored" data-anchor-id="partial-association-prior">Partial association prior</h3>
+<p>The partial associations <span class="math inline">\(\phi_{ij}\)</span> receive a Cauchy prior (a Student-<span class="math inline">\(t\)</span> distribution with one degree of freedom) centered at zero. The scale is controlled by <code>pairwise_scale</code> (default: 2.5).</p>
 <p>The Cauchy distribution has heavy tails, allowing large effects when supported by the data, while the peak at zero provides moderate shrinkage. In models with many variables and limited data, this regularization prevents extreme estimates.</p>
 <p>When <code>standardize = TRUE</code>, the prior scale is adjusted based on the range of response scores. Variables with more categories have larger score products, which typically correspond to smaller interaction effects. Without standardization, a fixed scale is relatively wide for high-category pairs and narrow for low-category pairs. The adjustment ensures equivalent relative shrinkage across all variable pairs.</p>
 </section>

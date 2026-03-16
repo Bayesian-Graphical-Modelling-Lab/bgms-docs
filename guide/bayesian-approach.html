@@ -562,7 +562,7 @@ p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S},\, \text{data})
 <li>The <strong>posterior standard deviation</strong> as a measure of estimation precision.</li>
 <li>A <strong>credible interval</strong> — a range that contains the parameter with a given posterior probability (e.g., 95%). Unlike frequentist confidence intervals, a 95% credible interval has a direct probability interpretation: there is a 95% posterior probability that the parameter lies within the interval.</li>
 </ul>
-<p>In <code>bgms</code>, <code>coef()</code> and <code>summary</code> return the posterior mean of the partial associations, and <code>summary()</code> adds the posterior standard deviation alongside MCMC diagnostics.</p>
+<p>In <code>bgms</code>, <code>coef(fit)$pairwise</code> returns the posterior means of the partial associations, and <code>summary(fit)$pairwise</code> adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.</p>
 </section>
 <section id="bayesian-structure-learning" class="level2">
 <h2 class="anchored" data-anchor-id="bayesian-structure-learning">Bayesian structure learning</h2>
@@ -576,7 +576,7 @@ p(\gamma_{ij} = 1 \mid \text{data}) =
 p(\mathcal{S} \mid \text{data})
 \]</span></p>
 <p>This posterior inclusion probability aggregates evidence across all possible network structures. In effect, it performs Bayesian model averaging and therefore accounts for our uncertainty about the remaining edges in the network.</p>
-<p>In <code>bgms</code>, <code>coef()</code> and <code>summary</code> return the posterior mean of the inclusion probabilities, and <code>summary()</code> adds the posterior standard deviation alongside MCMC diagnostics.</p>
+<p>In <code>bgms</code>, <code>coef(fit)$indicator</code> returns the posterior means of the inclusion probabilities, and <code>summary(fit)$indicator</code> adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.</p>
 </section>
 <section id="the-inclusion-bayes-factor" class="level3">
 <h3 class="anchored" data-anchor-id="the-inclusion-bayes-factor">The inclusion Bayes factor</h3>
@@ -601,7 +601,7 @@ p(\mathcal{S} \mid \text{data})
 <div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>In graphical modeling, the primary inferential targets are the pairwise interactions <span class="math inline">\(\boldsymbol{\Phi}\)</span> and the network structure <span class="math inline">\(\mathcal{S}\)</span>. The node potentials <span class="math inline">\(\mu_i(x_i)\)</span> are nuisance parameters: they are estimated but typically not of direct inferential interest.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>In graphical modeling, the primary inferential targets are the partial associations <span class="math inline">\(\boldsymbol{\Phi}\)</span> and the network structure <span class="math inline">\(\mathcal{S}\)</span>. The node potentials <span class="math inline">\(\mu_i(x_i)\)</span> are nuisance parameters: they are estimated but typically not of direct inferential interest.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script type="text/javascript">

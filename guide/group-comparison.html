@@ -556,7 +556,7 @@ Warning
 <p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The <code>bgmCompare()</code> function tests for differences in network structure between groups. It estimates whether pairwise interactions and category thresholds differ across groups in an ordinal Markov Random Field.</p>
+<p>The <code>bgmCompare()</code> function tests for differences in network structure between groups. It estimates whether partial associations and category thresholds differ across groups in an ordinal Markov Random Field.</p>
 <section id="the-model" class="level2">
 <h2 class="anchored" data-anchor-id="the-model">The model</h2>
 <p>For each pair of variables <span class="math inline">\((i, j)\)</span>, the group-specific interaction is decomposed as:</p>
@@ -577,7 +577,7 @@ Warning
 <section id="difference-selection" class="level2">
 <h2 class="anchored" data-anchor-id="difference-selection">Difference selection</h2>
 <p>When <code>difference_selection = TRUE</code> (the default), spike-and-slab priors are placed on the difference parameters <span class="math inline">\(\delta_{ij}^{(g)}\)</span>. The posterior inclusion probability for each difference indicates how plausible it is that the groups differ on that parameter.</p>
-<p>By default, only pairwise interaction differences are selected (<code>main_difference_selection = FALSE</code>). Main effect (threshold) differences are always included. This default reflects that main effects are often nuisance parameters, and their selection can interfere with pairwise selection under the Beta-Bernoulli prior.</p>
+<p>By default, only partial association differences are selected (<code>main_difference_selection = FALSE</code>). Main effect (threshold) differences are always included. This default reflects that main effects are often nuisance parameters, and their selection can interfere with pairwise selection under the Beta-Bernoulli prior.</p>
 </section>
 <section id="interpreting-the-output" class="level2">
 <h2 class="anchored" data-anchor-id="interpreting-the-output">Interpreting the output</h2>
@@ -588,7 +588,7 @@ Warning
 </ul>
 <p>The <code>coef()</code> method returns:</p>
 <ul>
-<li><code>$pairwise_effects_groups</code>: group-specific posterior mean pairwise interactions (baseline + difference).</li>
+<li><code>$pairwise_effects_groups</code>: group-specific posterior mean partial associations (baseline + difference).</li>
 <li><code>$main_effects_groups</code>: group-specific posterior mean thresholds.</li>
 <li><code>$indicator</code>: posterior inclusion probabilities for differences.</li>
 </ul>

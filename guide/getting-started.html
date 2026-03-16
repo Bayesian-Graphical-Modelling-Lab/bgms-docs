@@ -641,7 +641,7 @@ Use `summary(fit)$&lt;component&gt;` to access full results.
 See the `easybgm` package for other summary and plotting tools.</code></pre>
 </div>
 </div>
-<p>The summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For pairwise interactions, it also reports posterior inclusion probabilities because we used edge selection.</p>
+<p>The summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For partial associations, it also reports posterior inclusion probabilities because we used edge selection.</p>
 </section>
 <section id="posterior-means" class="level2">
 <h2 class="anchored" data-anchor-id="posterior-means">Posterior means</h2>
@@ -673,7 +673,7 @@ upset        0.9285 0.9895 0.029 0.0000  1.0000
 physior      0.8960 0.0365 1.000 1.0000  0.0000</code></pre>
 </div>
 </div>
-<p><code>coef()</code> returns posterior mean matrices: <code>$pairwise</code> contains the interaction strengths and <code>$indicator</code> contains edge inclusion probabilities.</p>
+<p><code>coef()</code> returns posterior mean matrices: <code>$pairwise</code> contains the partial associations and <code>$indicator</code> contains edge inclusion probabilities.</p>
 </section>
 <section id="network-plot" class="level2">
 <h2 class="anchored" data-anchor-id="network-plot">Network plot</h2>

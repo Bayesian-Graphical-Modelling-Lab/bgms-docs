@@ -583,7 +583,7 @@ Warning
 <tbody>
 <tr class="odd">
 <td><code>pairwise_scale</code></td>
-<td>Scale of the Cauchy prior for pairwise interaction parameters. Default: <code>2.5</code>.</td>
+<td>Scale of the Cauchy prior for partial association parameters. Default: <code>2.5</code>.</td>
 </tr>
 <tr class="even">
 <td><code>main_alpha</code>, <code>main_beta</code></td>
@@ -619,7 +619,7 @@ Warning
 </tr>
 <tr class="even">
 <td><code>standardize</code></td>
-<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products, so standardization ensures equivalent relative shrinkage across all pairs. Default: <code>FALSE</code>.</td>
+<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each partial association is adjusted based on the range of response scores. Variables with more response categories have larger score products, so standardization ensures equivalent relative shrinkage across all pairs. Default: <code>FALSE</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -701,10 +701,10 @@ Warning
 <ul>
 <li><code>posterior_summary_main</code> — Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for main-effect parameters. For OMRF models these are category thresholds; for mixed MRF models these are discrete thresholds and continuous means. <code>NULL</code> for GGM models.</li>
 <li><code>posterior_summary_quadratic</code> — Data frame with posterior summaries for the precision matrix diagonal (GGM and mixed MRF). <code>NULL</code> for OMRF models.</li>
-<li><code>posterior_summary_pairwise</code> — Data frame with posterior summaries for pairwise interaction parameters.</li>
+<li><code>posterior_summary_pairwise</code> — Data frame with posterior summaries for partial association parameters.</li>
 <li><code>posterior_summary_indicator</code> — Data frame with posterior summaries for edge inclusion indicators (if <code>edge_selection = TRUE</code>).</li>
 <li><code>posterior_mean_main</code> — Posterior mean of main-effect parameters.</li>
-<li><code>posterior_mean_pairwise</code> — Symmetric matrix of posterior mean pairwise interaction strengths. For GGM and mixed MRF models, the precision matrix diagonal is on the matrix diagonal.</li>
+<li><code>posterior_mean_associations</code> — Symmetric matrix of posterior mean partial associations. The diagonal is zero.</li>
 <li><code>posterior_mean_indicator</code> — Symmetric matrix of posterior mean inclusion probabilities (if edge selection was enabled).</li>
 <li><code>raw_samples</code> — A list of raw MCMC draws per chain, with sublists for <code>main</code>, <code>pairwise</code>, <code>indicator</code>, and <code>allocations</code> (SBM prior).</li>
 <li><code>arguments</code> — A list of function call arguments and metadata.</li>
@@ -731,7 +731,7 @@ Warning
 </section>
 <section id="edge-selection" class="level3">
 <h3 class="anchored" data-anchor-id="edge-selection">Edge selection</h3>
-<p>When <code>edge_selection = TRUE</code>, the function performs Bayesian variable selection on pairwise interactions using spike-and-slab priors:</p>
+<p>When <code>edge_selection = TRUE</code>, the function performs Bayesian variable selection on partial associations using spike-and-slab priors:</p>
 <ul>
 <li><strong>Bernoulli</strong> — Fixed inclusion probability across edges.</li>
 <li><strong>Beta-Bernoulli</strong> — Inclusion probability is given a Beta prior.</li>
@@ -770,7 +770,7 @@ Warning
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior inclusion probabilities</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>indicator</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior pairwise effects</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior partial associations</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>pairwise</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
