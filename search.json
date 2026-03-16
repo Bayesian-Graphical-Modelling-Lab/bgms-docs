@@ -1597,7 +1597,7 @@
     "href": "guide/graphical-models.html",
     "title": "Graphical Models",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nA graphical model represents the statistical relationships among a set of variables as a graph. Each variable is a node, and edges between nodes encode direct statistical associations. bgms estimates undirected graphical models — specifically, Markov Random Fields.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nA graphical model represents relationships among a set of variables as a graph. bgms estimates a class of undirected graphical models: pairwise Markov random fields.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1609,7 +1609,7 @@
     "href": "guide/graphical-models.html#nodes-and-edges",
     "title": "Graphical Models",
     "section": "Nodes and edges",
-    "text": "Nodes and edges\nIn a graphical model, the \\(p\\) variables in a dataset are represented as nodes (or vertices) of a graph. An edge between two nodes indicates a direct statistical association between the corresponding variables, after accounting for all other variables in the model.\nThe absence of an edge between two nodes means that the two variables are conditionally independent given the remaining variables. This is the key interpretive property of undirected graphical models: the graph encodes the conditional independence structure of the joint distribution.",
+    "text": "Nodes and edges\nIn a graphical model, the \\(p\\) variables in a dataset are represented as nodes (or vertices) of a graph. An edge between two nodes indicates a direct statistical association between the corresponding variables, after accounting for all other variables in the model.\nThe absence of an edge between two nodes means the two variables are conditionally independent given the remaining variables. This is the key interpretive property of Markov random fields: the graph encodes the conditional independence structure of the joint distribution.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1621,7 +1621,7 @@
     "href": "guide/graphical-models.html#conditional-independence",
     "title": "Graphical Models",
     "section": "Conditional independence",
-    "text": "Conditional independence\nTwo variables \\(X_i\\) and \\(X_j\\) are conditionally independent given the rest if knowing the value of \\(X_i\\) provides no additional information about \\(X_j\\) once all other variables are observed. In the graph, this corresponds to the absence of a direct edge between nodes \\(i\\) and \\(j\\).\nConditional independence is distinct from marginal independence. Two variables may be marginally correlated (both associated with a third variable) yet conditionally independent once that third variable is accounted for. The graphical model separates direct from indirect associations.",
+    "text": "Conditional independence\nTwo variables \\(X_i\\) and \\(X_j\\) are conditionally independent given the rest if \\(X_i\\) provides no additional information about \\(X_j\\) once all other variables are observed. In the graph, this corresponds to the absence of a direct edge between nodes \\(i\\) and \\(j\\).\nConditional independence is distinct from marginal independence. Two variables may be marginally correlated (both associated with a third variable) yet conditionally independent once that third variable is accounted for. The Markov random field separates direct from indirect associations.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1633,7 +1633,7 @@
     "href": "guide/graphical-models.html#markov-random-fields",
     "title": "Graphical Models",
     "section": "Markov Random Fields",
-    "text": "Markov Random Fields\nA Markov Random Field (MRF) is an undirected graphical model in which the joint distribution of the variables factorizes according to the graph structure. For a set of \\(p\\) variables with observations \\(\\mathbf{x} = (x_1, \\ldots, x_p)\\), the MRF specifies:\n\\[\np(\\mathbf{x}) \\propto \\exp\\left(\\sum_{i} \\theta_i(x_i) +\n\\sum_{i &lt; j} \\sigma_{ij} \\, s_i(x_i) \\, s_j(x_j)\\right)\n\\]\nwhere \\(\\theta_i(x_i)\\) are main effects (node potentials), \\(\\sigma_{ij}\\) are pairwise interaction parameters, and \\(s_i(x_i)\\) are sufficient statistics that depend on the variable type.\nThe pairwise interaction \\(\\sigma_{ij}\\) controls the edge between nodes \\(i\\) and \\(j\\): when \\(\\sigma_{ij} = 0\\), the edge is absent and the two variables are conditionally independent.",
+    "text": "Markov Random Fields\nA Markov random field (MRF) is an undirected graphical model in which the joint distribution factorizes according to the graph structure. For \\(p\\) variables with observations \\(\\mathbf{x} = (x_1, \\ldots, x_p)\\), the MRF specifies:\n\\[\np(\\mathbf{x}) \\propto \\exp\\left(\\sum_{i} \\mu_i(x_i) +\n\\mathbf{x}^{\\sf T}\\boldsymbol{\\Phi}\\, \\mathbf{x}\\right)\n\\]\nwhere \\(\\mu_i(x_i)\\) are node potentials that capture the univariate properties of variable \\(i\\), and \\(\\boldsymbol{\\Phi}\\) is a symmetric pairwise interaction matrix. The off-diagonal entry \\(\\phi_{ij}\\) is the partial association between variables \\(x_i\\) and \\(x_j\\); when \\(\\phi_{ij} = 0\\), the two variables are conditionally independent and the corresponding edge is absent from the graph.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1645,7 +1645,7 @@
     "href": "guide/graphical-models.html#model-families-in-bgms",
     "title": "Graphical Models",
     "section": "Model families in bgms",
-    "text": "Model families in bgms\nbgms supports three model families, all MRFs:\n\nOrdinal MRF — for binary and ordinal variables. Category thresholds serve as main effects, and pairwise interactions capture associations between ordinal scores. See Ordinal MRF.\nGaussian Graphical Model (GGM) — for continuous variables. The precision matrix (inverse covariance matrix) determines the edge structure: nonzero off-diagonal entries correspond to edges. See GGM.\nMixed MRF — for datasets containing both discrete and continuous variables. Combines the ordinal MRF and GGM into a joint model. See Mixed MRF.",
+    "text": "Model families in bgms\nbgms estimates one general MRF. The variable types in the data determine the form of the node potentials \\(\\mu_i(x_i)\\) and the interpretation of the pairwise interactions \\(\\phi_{ij}\\):\n\nOrdinal MRF — all variables are binary or ordinal. Node potentials are category thresholds, and partial associations are proportional to log adjacent-category odds ratios. See Ordinal MRF.\nGaussian graphical model (GGM) — all variables are continuous. The partial associations are directly related to the precision matrix (inverse covariance matrix), whose standardized off-diagonal entries are partial correlations. See GGM.\nMixed MRF — for mixed discrete and continuous variables. The interaction matrix decomposes into blocks for discrete–discrete, continuous–continuous, and cross-type associations. See Mixed MRF.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1653,11 +1653,11 @@
     ]
   },
   {
-    "objectID": "guide/graphical-models.html#why-networks",
-    "href": "guide/graphical-models.html#why-networks",
+    "objectID": "guide/graphical-models.html#modeling-conditional-independence",
+    "href": "guide/graphical-models.html#modeling-conditional-independence",
     "title": "Graphical Models",
-    "section": "Why networks?",
-    "text": "Why networks?\nIn psychology and the social sciences, graphical models are used to study how symptoms, attitudes, or behaviors relate to each other directly, rather than through latent constructs. Estimating the conditional independence structure — the network — identifies which pairs of variables have direct associations and which are only indirectly related.\nBayesian methods add the ability to quantify evidence for the presence or absence of each edge, rather than relying on thresholding rules applied to point estimates. bgms implements this through Bayesian edge selection with spike-and-slab priors (see Edge Selection).",
+    "section": "Modeling conditional independence",
+    "text": "Modeling conditional independence\nThe conditional independence structure — which edges are present — is typically unknown. bgms treats edge inclusion as a model selection problem, testing \\(\\phi_{ij} = 0\\) against \\(\\phi_{ij} \\neq 0\\) for each pair of variables using spike-and-slab priors. This produces posterior inclusion probabilities that quantify the evidence for each edge. See edge selection).",
     "crumbs": [
       "Get Started",
       "Background",
