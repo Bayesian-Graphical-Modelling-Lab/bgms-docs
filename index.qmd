@@ -19,12 +19,13 @@ hide-description: true
 
 ### Bayesian Graphical Models in R
 
-- Bayesian estimation for **ordinal Markov random fields** and **Gaussian graphical models**
-- **Edge selection** via posterior inclusion probabilities and Bayes factors
-- **Group comparison** to identify network differences between populations
-- Built on efficient **C++ MCMC algorithms** with the No-U-Turn Sampler
+- Estimate networks of mixed **binary**, **ordinal**, and **continuous** variables
+- Quantify evidence for **including or excluding edges** using **Bayesian edge selection**
+- Detect **group differences** in network parameters with Bayesian difference selection
+- Discover **communities of related edges** with Bayesian edge clustering
+- Scale to large datasets with **efficient MCMC algorithms** and a **C++ backend**
 
-### Understand structure in your data with principled Bayesian inference.
+### Explore structure and uncertainty in your network with principled Bayesian inference.
 
 ::: {.grid .gap-3 .pb-3 .pt-4}
 ::: {.g-col-12 .g-col-sm-4}
