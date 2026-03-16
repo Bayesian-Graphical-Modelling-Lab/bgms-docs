@@ -544,28 +544,34 @@ Warning
 </section>
 <section id="fitting-a-model" class="level2">
 <h2 class="anchored" data-anchor-id="fitting-a-model">Fitting a model</h2>
-<p>The main entry point is <code>bgm()</code>. It accepts a data frame of binary, ordinal, continuous, or mixed variables and estimates a Markov Random Field.</p>
-<p>The Wenchuan dataset, included in the package, contains ordinal posttraumatic stress ratings from 362 survivors of the 2008 Wenchuan earthquake. We use a five-item subset as a quick demonstration.</p>
+<p>The main entry point is <code>bgm()</code>. It accepts a data frame or matrix of mixed binary, ordinal, and continuous variables and estimates a Markov Random Field.</p>
+<p>The Wenchuan dataset is included in the package, and contains ordinal measures of symptoms of posttraumatic stress from 362 survivors of the 2008 Wenchuan earthquake.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bgms)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Wenchuan)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> Wenchuan[, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(Wenchuan)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>     intrusion dreams flash upset physior
-[1,]         2      2     2     2       3
-[2,]         2      2     2     3       3
-[3,]         2      4     4     4       3
-[4,]         2      1     2     2       1
-[5,]         2      2     2     2       2
-[6,]         4      3     2     2       2</code></pre>
+<pre><code>     intrusion dreams flash upset physior avoidth avoidact amnesia lossint
+[1,]         2      2     2     2       3       2        3       2       3
+[2,]         2      2     2     3       3       3        3       2       3
+[3,]         2      4     4     4       3       3        3       5       4
+[4,]         2      1     2     2       1       1        2       2       2
+[5,]         2      2     2     2       2       2        2       2       3
+[6,]         4      3     2     2       2       2        3       3       2
+     distant numb future sleep anger concen hyper startle
+[1,]       2    2      1     3     4      3     4       2
+[2,]       3    2      2     3     3      2     3       3
+[3,]       3    2      3     4     4      4     3       4
+[4,]       1    1      2     2     1      2     3       3
+[5,]       2    2      2     3     2      3     2       3
+[6,]       2    2      3     2     3      2     3       2</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(data, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(Wenchuan, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>By default, <code>bgm()</code> runs four parallel MCMC chains using the No-U-Turn Sampler (NUTS), with Bayesian edge selection enabled. Here we use <code>seed = 1234</code> for reproducibility.</p>
+<p>By default, <code>bgm()</code> runs four parallel MCMC chains using the No-U-Turn Sampler (NUTS), in combination with Bayesian edge selection. Here we use <code>seed = 1234</code> for reproducibility.</p>
 </section>
 <section id="posterior-summaries" class="level2">
 <h2 class="anchored" data-anchor-id="posterior-summaries">Posterior summaries</h2>
@@ -575,36 +581,36 @@ Warning
 <pre><code>Posterior summaries from Bayesian estimation:
 
 Category thresholds:
-                mean  mcse    sd    n_eff  Rhat
-intrusion (1)  0.475 0.007 0.223 1157.788 1.001
-intrusion (2) -1.906 0.011 0.315  880.403 1.005
-intrusion (3) -4.846 0.017 0.514  875.204 1.007
-intrusion (4) -9.519 0.028 0.845  904.952 1.008
-dreams (1)    -0.588 0.006 0.192 1159.841 1.001
-dreams (2)    -3.782 0.012 0.353  871.629 1.000
+                 mean  mcse    sd   n_eff  Rhat
+intrusion (1)   0.457 0.010 0.248 637.299 1.004
+intrusion (2)  -2.037 0.022 0.390 318.103 1.021
+intrusion (3)  -5.272 0.036 0.669 350.726 1.023
+intrusion (4) -10.364 0.054 1.071 398.093 1.022
+dreams (1)     -0.820 0.008 0.210 699.707 1.003
+dreams (2)     -4.397 0.018 0.407 516.326 1.004
 ... (use `summary(fit)$main` to see full output)
 
 Pairwise interactions:
-                   mean    sd  mcse    n_eff  Rhat
-intrusion-dreams  0.629 0.002 0.067 1382.782 1.005
-intrusion-flash   0.339 0.002 0.060 1444.285 1.002
-intrusion-upset   0.202 0.064 0.005  187.988 1.003
-intrusion-physior 0.189 0.071 0.006  137.040 1.000
-dreams-flash      0.500 0.002 0.060 1124.700 1.002
-dreams-upset      0.226 0.053 0.002 1128.334 1.000
+                    mean    sd  mcse    n_eff  Rhat
+intrusion-dreams   0.728 0.002 0.073 1315.207 1.002
+intrusion-flash    0.348 0.003 0.069  548.841 1.013
+intrusion-upset    0.100 0.097 0.011   77.135 1.000
+intrusion-physior  0.034 0.061 0.005  166.472 1.011
+intrusion-avoidth  0.000 0.004 0.000  370.188 1.000
+intrusion-avoidact 0.000 0.001 0.000   41.006 1.000
 ... (use `summary(fit)$pairwise` to see full output)
 Note: NA values are suppressed in the print table. They occur here when an 
 indicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;
 `summary(fit)$pairwise` still contains the NA values.
 
 Inclusion probabilities:
-                   mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1   n_eff  Rhat
-intrusion-dreams  1.000 0.000           0     0     0  1999              
-intrusion-flash   1.000 0.000           0     0     0  1999              
-intrusion-upset   0.979 0.143  0.02    40     2     2  1955  49.853 1.311
-intrusion-physior 0.941 0.237 0.029   112     7     7  1873  64.566 1.016
-dreams-flash      1.000 0.000           0     0     0  1999              
-dreams-upset      0.999 0.039 0.002     2     1     1  1995 400.722 1.292
+                    mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1    n_eff  Rhat
+intrusion-dreams   1.000 0.000           0     0     0  1999               
+intrusion-flash    1.000 0.000           0     0     0  1999               
+intrusion-upset    0.549 0.498  0.06   868    33    33  1065    68.98 1.002
+intrusion-physior  0.252 0.434 0.034  1439    56    56   448  160.491 1.029
+intrusion-avoidth  0.020 0.138 0.004  1929    31    31     8 1363.289 1.003
+intrusion-avoidact 0.020 0.140 0.003  1924    35    35     5 1612.933 1.011
 ... (use `summary(fit)$indicator` to see full output)
 Note: NA values are suppressed in the print table. They occur when an indicator
 was constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat
@@ -614,7 +620,7 @@ Use `summary(fit)$&lt;component&gt;` to access full results.
 See the `easybgm` package for other summary and plotting tools.</code></pre>
 </div>
 </div>
-<p>The summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For pairwise interactions, it also reports posterior inclusion probabilities when edge selection is active.</p>
+<p>The summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For pairwise interactions, it also reports posterior inclusion probabilities because we used edge selection.</p>
 </section>
 <section id="posterior-means" class="level2">
 <h2 class="anchored" data-anchor-id="posterior-means">Posterior means</h2>
@@ -622,35 +628,143 @@ See the `easybgm` package for other summary and plotting tools.</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$main
-             cat (1)   cat (2)   cat (3)    cat (4)
-intrusion  0.4752393 -1.905757 -4.846385  -9.519480
-dreams    -0.5884216 -3.781525 -7.109964 -11.530285
-flash     -0.1051154 -2.566799 -5.365407  -9.674749
-upset      0.4216365 -1.308488 -3.370565  -7.037020
-physior   -0.6037679 -3.140033 -6.167547 -10.489248
+              cat (1)   cat (2)   cat (3)    cat (4)
+intrusion  0.45672995 -2.037025 -5.271823 -10.363899
+dreams    -0.81970263 -4.397417 -8.245004 -13.348375
+flash     -0.39256043 -3.308015 -6.764745 -11.943484
+upset      0.06423094 -2.212624 -5.211838 -10.128097
+physior   -0.69956980 -3.541085 -6.960509 -11.843530
+avoidth   -0.80517369 -4.232131 -8.972652 -15.511133
+avoidact   0.09162607 -2.818339 -6.697784 -12.581008
+amnesia   -0.40929340 -2.239588 -3.837565  -6.688522
+lossint   -0.26648293 -2.518787 -5.159915  -8.227801
+distant   -0.94581483 -3.281157 -6.327257  -9.651893
+numb      -1.22818043 -4.508846 -8.218903 -12.030649
+future    -0.95655485 -3.968563 -7.172304 -12.000917
+sleep     -0.19602877 -2.383374 -4.734891  -8.085588
+anger     -0.11308858 -2.305132 -4.285717  -7.872107
+concen    -0.62337711 -3.064129 -6.693562 -11.762826
+hyper     -0.88751127 -4.315231 -8.371406 -14.330424
+startle   -0.67853922 -3.303153 -6.430309 -11.588480
 
 $pairwise
-          intrusion      dreams       flash       upset     physior
-intrusion 0.0000000 0.629338089 0.338657791 0.202376428 0.188939686
-dreams    0.6293381 0.000000000 0.499816233 0.225595383 0.007497679
-flash     0.3386578 0.499816233 0.000000000 0.004566734 0.308420955
-upset     0.2023764 0.225595383 0.004566734 0.000000000 0.707339037
-physior   0.1889397 0.007497679 0.308420955 0.707339037 0.000000000
+              intrusion        dreams         flash         upset       physior
+intrusion  0.000000e+00  0.7280462138  0.3475621853  9.999945e-02  3.431353e-02
+dreams     7.280462e-01  0.0000000000  0.5155392665  2.105775e-01  1.045187e-02
+flash      3.475622e-01  0.5155392665  0.0000000000  2.506873e-03  2.430431e-01
+upset      9.999945e-02  0.2105775082  0.0025068732  0.000000e+00  7.687197e-01
+physior    3.431353e-02  0.0104518669  0.2430431102  7.687197e-01  0.000000e+00
+avoidth   -4.962570e-04  0.0002759450  0.0075188378  2.769277e-01 -9.615461e-04
+avoidact   2.904696e-05  0.0008353231  0.0071118413  5.644851e-03  3.568141e-03
+amnesia   -6.650681e-04  0.0901885411  0.0796358390  2.474051e-02  2.546397e-03
+lossint    1.426416e-03  0.0004514556  0.0009932180 -7.273628e-04  1.836515e-04
+distant   -6.734557e-04  0.0004946118 -0.0011359314 -1.297326e-02  2.085950e-01
+numb      -2.302625e-03 -0.0038480195 -0.0005078936 -7.364782e-03  1.617223e-04
+future     4.417708e-01 -0.2735295652  0.0004522078  7.256550e-03  1.515525e-03
+sleep      1.773581e-02  0.1997628048  0.0033759251 -3.858408e-05  4.655486e-04
+anger      2.084977e-01 -0.0005093547 -0.1602506238  1.911765e-03 -5.777402e-05
+concen    -2.683299e-01  0.0176915141  0.2024493208 -3.862032e-03 -7.817424e-04
+hyper     -9.974512e-04  0.2488295465  0.0012381642 -2.487761e-02  1.929375e-01
+startle   -4.301258e-03 -0.2286403235  0.1906549305  2.405868e-01 -1.369093e-02
+                avoidth      avoidact       amnesia       lossint       distant
+intrusion -0.0004962570  2.904696e-05 -0.0006650681  0.0014264155 -0.0006734557
+dreams     0.0002759450  8.353231e-04  0.0901885411  0.0004514556  0.0004946118
+flash      0.0075188378  7.111841e-03  0.0796358390  0.0009932180 -0.0011359314
+upset      0.2769277044  5.644851e-03  0.0247405091 -0.0007273628 -0.0129732601
+physior   -0.0009615461  3.568141e-03  0.0025463973  0.0001836515  0.2085950233
+avoidth    0.0000000000  1.274866e+00  0.1432716080  0.0222611779 -0.0293519834
+avoidact   1.2748656242  0.000000e+00  0.0447687331  0.2395184293  0.1551883054
+amnesia    0.1432716080  4.476873e-02  0.0000000000  0.1360070902  0.0086660855
+lossint    0.0222611779  2.395184e-01  0.1360070902  0.0000000000  0.3936341616
+distant   -0.0293519834  1.551883e-01  0.0086660855  0.3936341616  0.0000000000
+numb      -0.0006356054 -1.469666e-03  0.0729178186  0.0095680821  0.4089284410
+future    -0.0066282350 -3.831666e-04  0.2089062740 -0.0070635279  0.0058564317
+sleep      0.2203125589  1.372035e-04 -0.0019171028  0.0011587606  0.0001275157
+anger     -0.0004269036 -1.064416e-03  0.0007641609  0.0208573316  0.0036290944
+concen    -0.0041234931 -3.694722e-03  0.0012446490  0.2841533629  0.0016475084
+hyper     -0.0055460410  3.093822e-02  0.0002623994  0.0020716556 -0.0029781534
+startle   -0.0012319373 -4.748700e-03  0.0001639555  0.0001167246 -0.0026619951
+                   numb        future         sleep         anger        concen
+intrusion -2.302625e-03  0.4417708179  1.773581e-02  2.084977e-01 -0.2683299169
+dreams    -3.848020e-03 -0.2735295652  1.997628e-01 -5.093547e-04  0.0176915141
+flash     -5.078936e-04  0.0004522078  3.375925e-03 -1.602506e-01  0.2024493208
+upset     -7.364782e-03  0.0072565502 -3.858408e-05  1.911765e-03 -0.0038620322
+physior    1.617223e-04  0.0015155253  4.655486e-04 -5.777402e-05 -0.0007817424
+avoidth   -6.356054e-04 -0.0066282350  2.203126e-01 -4.269036e-04 -0.0041234931
+avoidact  -1.469666e-03 -0.0003831666  1.372035e-04 -1.064416e-03 -0.0036947217
+amnesia    7.291782e-02  0.2089062740 -1.917103e-03  7.641609e-04  0.0012446490
+lossint    9.568082e-03 -0.0070635279  1.158761e-03  2.085733e-02  0.2841533629
+distant    4.089284e-01  0.0058564317  1.275157e-04  3.629094e-03  0.0016475084
+numb       0.000000e+00  0.3480296848  1.721162e-05  6.250370e-02  0.0041188326
+future     3.480297e-01  0.0000000000  1.995498e-02  4.792121e-04  0.3117134139
+sleep      1.721162e-05  0.0199549764  0.000000e+00  3.202219e-01  0.0489856962
+anger      6.250370e-02  0.0004792121  3.202219e-01  0.000000e+00  0.5301427360
+concen     4.118833e-03  0.3117134139  4.898570e-02  5.301427e-01  0.0000000000
+hyper      1.779598e-01  0.2745805323  1.720039e-03  8.201139e-02  0.2287598905
+startle    1.638416e-02 -0.0011298235  3.029555e-01  5.545158e-04  0.2805748879
+                  hyper       startle
+intrusion -0.0009974512 -0.0043012578
+dreams     0.2488295465 -0.2286403235
+flash      0.0012381642  0.1906549305
+upset     -0.0248776089  0.2405867868
+physior    0.1929374677 -0.0136909329
+avoidth   -0.0055460410 -0.0012319373
+avoidact   0.0309382243 -0.0047486998
+amnesia    0.0002623994  0.0001639555
+lossint    0.0020716556  0.0001167246
+distant   -0.0029781534 -0.0026619951
+numb       0.1779598215  0.0163841591
+future     0.2745805323 -0.0011298235
+sleep      0.0017200395  0.3029554739
+anger      0.0820113903  0.0005545158
+concen     0.2287598905  0.2805748879
+hyper      0.0000000000  0.6826682303
+startle    0.6826682303  0.0000000000
 
 $indicator
-          intrusion dreams  flash  upset physior
-intrusion    0.0000 1.0000 1.0000 0.9790  0.9405
-dreams       1.0000 0.0000 1.0000 0.9985  0.0820
-flash        1.0000 1.0000 0.0000 0.0545  1.0000
-upset        0.9790 0.9985 0.0545 0.0000  1.0000
-physior      0.9405 0.0820 1.0000 1.0000  0.0000</code></pre>
+          intrusion dreams  flash  upset physior avoidth avoidact amnesia
+intrusion    0.0000 1.0000 1.0000 0.5495  0.2520  0.0195   0.0200  0.0190
+dreams       1.0000 0.0000 1.0000 0.9495  0.0845  0.0210   0.0165  0.6125
+flash        1.0000 1.0000 0.0000 0.0315  0.9970  0.0725   0.0740  0.5205
+upset        0.5495 0.9495 0.0315 0.0000  1.0000  1.0000   0.0590  0.2105
+physior      0.2520 0.0845 0.9970 1.0000  0.0000  0.0210   0.0455  0.0445
+avoidth      0.0195 0.0210 0.0725 1.0000  0.0210  0.0000   1.0000  0.7900
+avoidact     0.0200 0.0165 0.0740 0.0590  0.0455  1.0000   0.0000  0.2800
+amnesia      0.0190 0.6125 0.5205 0.2105  0.0445  0.7900   0.2800  0.0000
+lossint      0.0250 0.0195 0.0225 0.0215  0.0125  0.1455   0.9450  0.9070
+distant      0.0205 0.0185 0.0270 0.1165  0.9965  0.2090   0.8110  0.0915
+numb         0.0330 0.0430 0.0275 0.0770  0.0165  0.0215   0.0225  0.4990
+future       1.0000 1.0000 0.0190 0.0695  0.0295  0.0710   0.0165  1.0000
+sleep        0.1325 0.9605 0.0410 0.0220  0.0140  1.0000   0.0155  0.0310
+anger        0.9280 0.0230 0.8145 0.0315  0.0185  0.0175   0.0225  0.0185
+concen       0.9960 0.1340 0.8770 0.0425  0.0185  0.0475   0.0420  0.0285
+hyper        0.0260 0.9930 0.0155 0.1795  0.9250  0.0580   0.2120  0.0130
+startle      0.0495 0.9785 0.9150 0.9840  0.1175  0.0245   0.0520  0.0110
+          lossint distant   numb future  sleep  anger concen  hyper startle
+intrusion  0.0250  0.0205 0.0330 1.0000 0.1325 0.9280 0.9960 0.0260  0.0495
+dreams     0.0195  0.0185 0.0430 1.0000 0.9605 0.0230 0.1340 0.9930  0.9785
+flash      0.0225  0.0270 0.0275 0.0190 0.0410 0.8145 0.8770 0.0155  0.9150
+upset      0.0215  0.1165 0.0770 0.0695 0.0220 0.0315 0.0425 0.1795  0.9840
+physior    0.0125  0.9965 0.0165 0.0295 0.0140 0.0185 0.0185 0.9250  0.1175
+avoidth    0.1455  0.2090 0.0215 0.0710 1.0000 0.0175 0.0475 0.0580  0.0245
+avoidact   0.9450  0.8110 0.0225 0.0165 0.0155 0.0225 0.0420 0.2120  0.0520
+amnesia    0.9070  0.0915 0.4990 1.0000 0.0310 0.0185 0.0285 0.0130  0.0110
+lossint    0.0000  1.0000 0.0940 0.0765 0.0275 0.1885 1.0000 0.0325  0.0105
+distant    1.0000  0.0000 1.0000 0.0695 0.0150 0.0530 0.0305 0.0415  0.0385
+numb       0.0940  1.0000 0.0000 1.0000 0.0165 0.3985 0.0465 0.8100  0.1190
+future     0.0765  0.0695 1.0000 0.0000 0.1800 0.0190 1.0000 1.0000  0.0270
+sleep      0.0275  0.0150 0.0165 0.1800 0.0000 1.0000 0.3345 0.0250  1.0000
+anger      0.1885  0.0530 0.3985 0.0190 1.0000 0.0000 1.0000 0.5110  0.0160
+concen     1.0000  0.0305 0.0465 1.0000 0.3345 1.0000 0.0000 0.9435  1.0000
+hyper      0.0325  0.0415 0.8100 1.0000 0.0250 0.5110 0.9435 0.0000  1.0000
+startle    0.0105  0.0385 0.1190 0.0270 1.0000 0.0160 1.0000 1.0000  0.0000</code></pre>
 </div>
 </div>
 <p><code>coef()</code> returns posterior mean matrices: <code>$pairwise</code> contains the interaction strengths and <code>$indicator</code> contains edge inclusion probabilities.</p>
 </section>
 <section id="network-plot" class="level2">
 <h2 class="anchored" data-anchor-id="network-plot">Network plot</h2>
-<p>To visualize the estimated network, threshold inclusion probabilities at 0.5 and plot the result using the qgraph package.</p>
+<p>To visualize the estimated network, we select the edges with posterior inclusion probabilities 0.5 or up, and plot the result using the <code>qgraph</code> package.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(qgraph)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -663,25 +777,33 @@ physior      0.9405 0.0820 1.0000 1.0000  0.0000</code></pre>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">fade =</span> <span class="cn">FALSE</span>,</span>
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">c</span>(<span class="st">"#f0ae0e"</span>), <span class="at">vsize =</span> <span class="dv">10</span>, <span class="at">repulsion =</span> .<span class="dv">9</span>,</span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">label.cex =</span> <span class="dv">1</span>, <span class="at">label.scale =</span> <span class="st">"FALSE"</span>,</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">colnames</span>(data)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">colnames</span>(Wenchuan)</span>
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Edges with posterior inclusion probability below 0.5 are set to zero, so only edges with at least moderate evidence of inclusion appear in the plot.</p>
+<p>In this plot, edges with posterior inclusion probability below 0.5 are set to zero, so only edges with minimum <strong>evidence for inclusion</strong> appear in the plot.</p>
 </section>
 <section id="continuous-data" class="level2">
 <h2 class="anchored" data-anchor-id="continuous-data">Continuous data</h2>
-<p>For continuous variables, <code>bgm()</code> fits a Gaussian graphical model. Set <code>variable_type = "continuous"</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fit_ggm <span class="ot">=</span> <span class="fu">bgm</span>(continuous_data, <span class="at">variable_type =</span> <span class="st">"continuous"</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_ggm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For continuous variables, bgms fits a Gaussian graphical model. The interface is identical; only the <code>variable_type</code> argument changes.</p>
+<p>As a continuous-data example, we use the classic examination marks dataset from Mardia, Kent, and Bibby (1979), available in the <code>ggm</code> package.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggm)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(marks)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(marks)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fit_ggm <span class="ot">=</span> <span class="fu">bgm</span>(marks, <span class="at">variable_type =</span> <span class="st">"continuous"</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_ggm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <p>The pairwise effects are partial correlations (off-diagonal entries of the standardized precision matrix). Missing values can be imputed during sampling with <code>na_action = "impute"</code>.</p>
 </section>
 <section id="next-steps" class="level2">
 <h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
 <ul>
-<li>Learn about the <a href="../guide/omrf.html">ordinal MRF</a> and <a href="../guide/ggm.html">GGM</a> underlying bgms</li>
+<li>Learn about the unified <a href="../guide/graphical-models.html">graphical model framework</a> in bgms, with <a href="../guide/omrf.html">ordinal</a> and <a href="../guide/ggm.html">continuous</a> special cases</li>
 <li>Understand <a href="../guide/edge-selection.html">edge selection</a> with spike-and-slab priors</li>
 <li>Compare groups with <a href="../guide/group-comparison.html"><code>bgmCompare()</code></a></li>
-<li>Check convergence with <a href="../guide/mcmc-diagnostics.html">MCMC diagnostics</a></li>
+<li>Discover edge communities with <a href="../guide/clustering.html">Bayesian edge clustering</a></li>
 </ul>
 
 
