@@ -603,22 +603,22 @@ Warning
 
 Category thresholds: 
                 mean  mcse    sd    n_eff  Rhat
-intrusion (1)  0.493 0.010 0.235  608.711 1.001
-intrusion (2) -1.867 0.019 0.362  352.495 1.002
-intrusion (3) -4.776 0.041 0.597  212.756 1.002
-intrusion (4) -9.419 0.056 0.967  298.267 1.002
-dreams (1)    -0.603 0.006 0.201 1049.614 1.002
-dreams (2)    -3.809 0.013 0.363  827.265 1.006
+intrusion (1)  0.491 0.007 0.246 1137.422 1.001
+intrusion (2) -1.878 0.013 0.361  813.938 1.002
+intrusion (3) -4.800 0.027 0.584  462.868 1.002
+intrusion (4) -9.448 0.045 0.949  448.045 1.001
+dreams (1)    -0.594 0.006 0.198 1060.065 1.001
+dreams (2)    -3.794 0.012 0.349  821.693 1.001
 ... (use `summary(fit)$main` to see full output)
 
 Pairwise interactions:
                    mean    sd  mcse    n_eff  Rhat
-intrusion-dreams  0.317 0.001 0.035 1173.359 1.003
-intrusion-flash   0.168 0.001 0.032 1210.151 1.005
-intrusion-upset   0.089 0.044 0.006   60.228 1.018
-intrusion-physior 0.102 0.034 0.002  185.928 1.007
-dreams-flash      0.250 0.001 0.030 1364.041 1.003
-dreams-upset      0.118 0.001 0.028  425.029 1.004
+intrusion-dreams  0.316 0.001 0.034 1332.509 1.001
+intrusion-flash   0.170 0.001 0.033 1160.401 1.007
+intrusion-upset   0.098 0.040 0.003  138.076 1.000
+intrusion-physior 0.092 0.040 0.006   53.005 1.001
+dreams-flash      0.250 0.001 0.030 1272.421 1.002
+dreams-upset      0.116 0.029 0.002  230.796 1.003
 ... (use `summary(fit)$pairwise` to see full output)
 Note: NA values are suppressed in the print table. They occur here when an 
 indicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;
@@ -628,10 +628,10 @@ Inclusion probabilities:
                    mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1  n_eff  Rhat
 intrusion-dreams  1.000 0.000           0     0     0  1999             
 intrusion-flash   1.000 0.000           0     0     0  1999             
-intrusion-upset   0.865 0.342 0.054   261     9    10  1719 39.897 1.114
-intrusion-physior 0.971 0.169  0.02    55     4     4  1936 72.387 1.262
+intrusion-upset   0.928 0.258 0.031   134     9     9  1847 70.164 1.002
+intrusion-physior 0.896 0.305 0.053   202     6     6  1785 32.723 1.011
 dreams-flash      1.000 0.000           0     0     0  1999             
-dreams-upset      1.000 0.000           0     0     0  1999             
+dreams-upset      0.990 0.102 0.015    20     1     1  1977 49.311   1.3
 ... (use `summary(fit)$indicator` to see full output)
 Note: NA values are suppressed in the print table. They occur when an indicator
 was constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat
@@ -650,27 +650,27 @@ See the `easybgm` package for other summary and plotting tools.</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>$main
               cat (1)   cat (2)   cat (3)    cat (4)
-intrusion  0.49326700 -1.867211 -4.776173  -9.419060
-dreams    -0.60296934 -3.809193 -7.157296 -11.619584
-flash     -0.08231884 -2.521328 -5.294346  -9.549557
-upset      0.43646983 -1.273984 -3.316790  -6.947837
-physior   -0.60903137 -3.170420 -6.221435 -10.578263
+intrusion  0.49061242 -1.877564 -4.800483  -9.447788
+dreams    -0.59408404 -3.793896 -7.123008 -11.567907
+flash     -0.09682236 -2.560520 -5.366106  -9.683228
+upset      0.41548718 -1.315513 -3.397011  -7.081260
+physior   -0.61306458 -3.159861 -6.206154 -10.549149
 
 $pairwise
            intrusion      dreams       flash       upset     physior
-intrusion 0.00000000 0.316707142 0.167709696 0.088672349 0.101880020
-dreams    0.31670714 0.000000000 0.249884872 0.118073148 0.001072865
-flash     0.16770970 0.249884872 0.000000000 0.001168627 0.152192873
-upset     0.08867235 0.118073148 0.001168627 0.000000000 0.355534822
-physior   0.10188002 0.001072865 0.152192873 0.355534822 0.000000000
+intrusion 0.00000000 0.315727178 0.169941953 0.097690324 0.092034867
+dreams    0.31572718 0.000000000 0.249663910 0.115629020 0.001897334
+flash     0.16994195 0.249663910 0.000000000 0.001330792 0.156551421
+upset     0.09769032 0.115629020 0.001330792 0.000000000 0.358228708
+physior   0.09203487 0.001897334 0.156551421 0.358228708 0.000000000
 
 $indicator
           intrusion dreams flash  upset physior
-intrusion    0.0000  1.000 1.000 0.8645  0.9705
-dreams       1.0000  0.000 1.000 1.0000  0.0260
-flash        1.0000  1.000 0.000 0.0230  1.0000
-upset        0.8645  1.000 0.023 0.0000  1.0000
-physior      0.9705  0.026 1.000 1.0000  0.0000</code></pre>
+intrusion    0.0000 1.0000 1.000 0.9285  0.8960
+dreams       1.0000 0.0000 1.000 0.9895  0.0365
+flash        1.0000 1.0000 0.000 0.0290  1.0000
+upset        0.9285 0.9895 0.029 0.0000  1.0000
+physior      0.8960 0.0365 1.000 1.0000  0.0000</code></pre>
 </div>
 </div>
 <p><code>coef()</code> returns posterior mean matrices: <code>$pairwise</code> contains the interaction strengths and <code>$indicator</code> contains edge inclusion probabilities.</p>
@@ -741,6 +741,49 @@ physior      0.9705  0.026 1.000 1.0000  0.0000</code></pre>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fit_ggm <span class="ot">=</span> <span class="fu">bgm</span>(marks, <span class="at">variable_type =</span> <span class="st">"continuous"</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_ggm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_ggm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Posterior summaries from Bayesian estimation:
+
+Precision matrix diagonal:
+                        mean  mcse    sd   n_eff  Rhat
+mechanics (precision)  0.005 0.000 0.001 120.903 1.003
+vectors (precision)    0.011 0.000 0.002  40.954 1.064
+algebra (precision)    0.033 0.001 0.005  60.003 1.100
+analysis (precision)   0.009 0.000 0.001 338.237 1.010
+statistics (precision) 0.006 0.000 0.001 280.902 1.005
+
+Pairwise interactions:
+                       mean    sd mcse  n_eff  Rhat
+mechanics-vectors    -0.002 0.002    0 20.877 1.078
+mechanics-algebra    -0.002 0.002    0 35.873 1.088
+mechanics-analysis    0.000                        
+mechanics-statistics  0.000                        
+vectors-algebra      -0.007 0.002    0 72.464 1.002
+vectors-analysis      0.000                        
+... (use `summary(fit)$pairwise` to see full output)
+Note: NA values are suppressed in the print table. They occur here when an 
+indicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;
+`summary(fit)$pairwise` still contains the NA values.
+
+Inclusion probabilities:
+                      mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1    n_eff  Rhat
+mechanics-vectors    0.631 0.483 0.109   729     9     9  1252   19.521 1.175
+mechanics-algebra    0.403 0.491 0.083  1177    16    17   789   35.109 1.228
+mechanics-analysis   0.001 0.032 0.001  1995     2     2     0 2004.010      
+mechanics-statistics 0.001 0.032 0.001  1995     2     2     0 2004.010 1.291
+vectors-algebra      0.986 0.117 0.019    27     1     0  1971   36.364 1.304
+vectors-analysis     0.004 0.063 0.002  1987     4     4     4  670.243 1.201
+... (use `summary(fit)$indicator` to see full output)
+Note: NA values are suppressed in the print table. They occur when an indicator
+was constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat
+are undefined; `summary(fit)$indicator` still contains the NA values.
+
+Use `summary(fit)$&lt;component&gt;` to access full results.
+See the `easybgm` package for other summary and plotting tools.</code></pre>
+</div>
 </div>
 </section>
 <section id="next-steps" class="level2">
