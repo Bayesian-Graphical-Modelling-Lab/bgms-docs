@@ -1,0 +1,120 @@
+---
+title: "Parallel Chains"
+---
+
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
+bgms runs multiple MCMC chains in parallel using Intel TBB (Threading
+Building Blocks), accessed through the RcppParallel package. The
+implementation is in `src/mcmc/execution/chain_runner.h` and
+`chain_runner.cpp`.
+
+## Design
+
+The entry point is `run_mcmc_sampler()`, which takes a prototype model,
+a prototype edge prior, and a sampler configuration. It follows a
+clone-and-dispatch pattern:
+
+1. **Clone** — Create independent copies of the model and edge prior
+   for each chain via `model.clone()` and `edge_prior.clone()`. Each
+   clone has its own internal state and RNG.
+2. **Seed** — Each clone is seeded with `config.seed + chain_id` to
+   ensure reproducibility while avoiding correlated chains.
+3. **Dispatch** — All chains are dispatched to threads. Each thread
+   runs `run_mcmc_chain()` with its own model, prior, and result
+   container.
+4. **Collect** — Results are gathered and returned as a vector of
+   `ChainResult` objects.
+
+## Model and prior cloning
+
+Both `BaseModel::clone()` and `BaseEdgePrior::clone()` perform deep
+copies. For the model, this includes the full parameter state,
+Cholesky factors (GGM), residual matrices (OMRF), and all internal
+buffers. For the SBM edge prior, the cluster allocations and block
+probability matrix are cloned.
+
+The clone methods return `unique_ptr`, so each chain owns its objects
+exclusively with no shared mutable state between threads.
+
+## TBB thread control
+
+Before dispatching, bgms sets the maximum parallelism via TBB's
+global control:
+
+```cpp
+tbb::global_control gc(
+    tbb::global_control::max_allowed_parallelism,
+    no_threads
+);
+```
+
+This limits the TBB thread pool to `no_threads` (the `cores` argument
+in R), respecting the user's request even when the system has more
+cores available.
+
+## RcppParallel dispatch
+
+The `MCMCChainRunner` struct inherits from `RcppParallel::Worker` and
+implements `operator()(begin, end)`. Each unit of work is one chain:
+
+```cpp
+void MCMCChainRunner::operator()(size_t begin, size_t end) {
+    for(size_t i = begin; i < end; ++i) {
+        run_mcmc_chain(results_[i], *models_[i], *edge_priors_[i],
+                       config_, i, pm_);
+    }
+}
+```
+
+Dispatch uses `RcppParallel::parallelFor(0, no_chains, runner)`.
+
+## Sequential fallback
+
+When `no_threads = 1` or `no_chains = 1`, bgms skips TBB and runs
+chains sequentially in a simple loop. This avoids TBB overhead for
+single-chain runs and simplifies debugging.
+
+## Per-chain RNG seeding
+
+Each chain's RNG is a `SafeRNG` wrapping `dqrng::xoshiro256plusplus`.
+The seed for chain $k$ is `config.seed + k`, ensuring:
+
+- Reproducibility: the same seed and chain count always produce the
+  same results
+- Independence: different chains explore different random number
+  sequences
+
+## Progress and interrupts
+
+The `ProgressManager` class handles progress display and user
+interrupt detection across threads.
+
+- **Progress bar** — Updated by each chain independently. The
+  manager aggregates progress across chains and displays a single
+  bar (or per-chain bars, depending on `progress_type`).
+- **User interrupts** — Each chain checks `pm.shouldExit()` between
+  iterations. If the user presses Ctrl-C, the flag is set and all
+  chains exit their sampling loops. The partial results are still
+  returned (with a warning) rather than discarded.
+- **Thread safety** — Progress updates and interrupt checks use a
+  shared `print_mutex` to prevent garbled console output.
+
+## ChainResult storage
+
+Each chain writes its output into a preallocated `ChainResult`:
+
+| Field | Shape | Content |
+|-------|-------|---------|
+| `samples` | param_dim × n_iter | Parameter samples (post-warmup) |
+| `indicator_samples` | n_edges × n_iter | Edge indicators (if edge selection) |
+| `allocation_samples` | n_vars × n_iter | SBM cluster allocations (if SBM prior) |
+| `treedepth_samples` | n_iter | NUTS tree depth (if NUTS) |
+| `divergent_samples` | n_iter | Divergence flags (if NUTS) |
+| `energy_samples` | n_iter | Hamiltonian energy (if NUTS) |
+
+The `ChainResult` also carries error status and user interrupt flags
+per chain. These are checked by the R output builder to decide
+whether to warn or error.

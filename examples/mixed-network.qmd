@@ -1,0 +1,31 @@
+---
+title: "Mixed Network"
+---
+
+::: {.callout-warning}
+This example is under development. No bundled mixed dataset is
+available yet.
+:::
+
+A complete analysis of mixed (continuous + discrete) data using the
+mixed MRF.
+
+## Data
+
+<!-- TODO: source — bundled or simulated mixed dataset -->
+
+## Fit the Model
+
+<!-- TODO: source — bgm() call with mixed data -->
+
+## Edge Selection
+
+<!-- TODO: source — posterior inclusion probabilities, Bayes factors -->
+
+## Interpretation
+
+<!-- TODO: source — network plot, cross-type parameters -->
+
+## Diagnostics
+
+<!-- TODO: source — convergence checks -->

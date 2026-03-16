@@ -1,0 +1,150 @@
+---
+title: "MCMC Diagnostics"
+---
+
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
+Before interpreting results from `bgm()` or `bgmCompare()`, check that the
+MCMC sampler has converged and that posterior estimates are reliable. This
+chapter covers the diagnostic tools available in bgms.
+
+## Effective sample size (ESS)
+
+The effective sample size estimates how many independent draws the MCMC
+chain is equivalent to. Correlated draws reduce the effective information
+per sample. A larger ESS means more precise posterior estimates.
+
+The `summary()` output reports `n_eff` for each parameter. Values of
+`n_eff` above 400 are generally sufficient for reliable posterior means and
+credible intervals. Lower values suggest that more iterations may be
+needed.
+
+### Mixture ESS for edge-selected parameters
+
+When edge selection is active, pairwise effects are governed by
+spike-and-slab priors. The parameter is set to exactly zero when the edge
+is excluded, creating a chain that mixes between zero and nonzero values.
+
+Two ESS measures are reported:
+
+- **`n_eff`**: the unconditional ESS, computed from the full chain
+  (including zeros). Measures how precisely the overall posterior mean is
+  estimated.
+- **`n_eff_mixt`**: the mixture ESS, which accounts for additional
+  uncertainty from the spike-and-slab switching. When the indicator rarely
+  switches (fewer than 5 transitions), `n_eff_mixt` is suppressed.
+
+## R-hat
+
+R-hat (split R-hat) compares the between-chain and within-chain variance.
+Values close to 1.0 indicate that the chains have converged to the same
+distribution. R-hat values above 1.01 suggest that the chains have not mixed
+and should be run longer.
+
+bgms reports R-hat in `summary()` output and through `extract_rhat()`.
+
+## Trace plots
+
+Visually inspecting the sampled values across iterations is a direct way to
+assess convergence. Chains that have converged look like random noise
+fluctuating around a stable mean; chains that have not converged show
+trends, level shifts, or poor mixing.
+
+Raw samples are accessible through `fit$raw_samples`:
+
+```r
+param_index = 1
+chains = fit$raw_samples$pairwise
+nchains = length(chains)
+cols = c("firebrick", "steelblue", "darkgreen", "goldenrod")
+
+plot(chains[[1]][, param_index], type = "l", col = cols[1],
+  xlab = "Iteration", ylab = "Value",
+  main = "Traceplot",
+  ylim = range(sapply(chains, function(ch) range(ch[, param_index]))))
+if(nchains > 1) {
+  for(c in 2:nchains) {
+    lines(chains[[c]][, param_index], col = cols[c])
+  }
+}
+```
+
+## NUTS-specific diagnostics
+
+When using `update_method = "nuts"` (the default), additional diagnostics
+are stored in `fit$nuts_diag`.
+
+### E-BFMI
+
+E-BFMI (Energy Bayesian Fraction of Missing Information) measures how
+efficiently the sampler explores the posterior. It compares the typical size
+of energy changes between successive samples to the overall spread of
+energies. Values close to 1 indicate efficient exploration; values below 0.3
+suggest the sampler may be getting stuck.
+
+A low E-BFMI does not necessarily mean the results are wrong, but it does
+warrant investigation. In models with edge selection, the most common cause
+is that the warmup period was too short for the discrete graph structure to
+equilibrate. Increasing `warmup` often resolves this.
+
+### Divergent transitions
+
+Divergent transitions occur when the numerical integrator encounters
+regions where the posterior curvature changes too rapidly for the current
+step size. A small number of divergences (fewer than 0.1% of samples) is
+generally acceptable. Many divergences indicate that the sampler may be
+missing important parts of the posterior.
+
+If divergences are frequent, increase `target_accept` (which reduces the
+step size). If that does not help, try `update_method = "adaptive-metropolis"`
+and compare results.
+
+### Tree depth
+
+NUTS builds trajectories by repeatedly doubling their length until a
+U-turn criterion is satisfied. If the trajectory frequently reaches the
+maximum allowed depth (`nuts_max_depth`, default 10), the sampler may
+benefit from longer trajectories. Hitting the maximum depth occasionally is
+normal; hitting it on most iterations may indicate challenging posterior
+geometry. Consider increasing `nuts_max_depth`.
+
+## Warmup equilibration check
+
+In models with edge selection, the discrete graph structure may take longer
+to reach stationarity than the continuous parameters. Even after warmup
+completes, the first portion of the sampling phase may still show transient
+behavior.
+
+The `fit$nuts_diag$warmup_check` component provides diagnostics comparing
+the first and second halves of the post-warmup samples:
+
+| Field | Meaning |
+|-------|---------|
+| `warmup_incomplete` | `TRUE` if any indicator below suggests non-stationarity |
+| `energy_slope` | Slope of energy vs. iteration; near zero = stable |
+| `slope_significant` | `TRUE` if energy slope is significant (p < 0.01) |
+| `ebfmi_first_half` | E-BFMI for the first half of post-warmup samples |
+| `ebfmi_second_half` | E-BFMI for the second half |
+| `var_ratio` | Ratio of energy variance (first half / second half); > 2 suggests settling |
+
+If these diagnostics suggest the chain was still settling, increase `warmup`
+and refit. If diagnostics remain problematic after doubling or tripling
+warmup, try refitting with `update_method = "adaptive-metropolis"` and
+compare posterior summaries. If the two samplers produce similar results,
+the estimates are likely trustworthy despite the warnings; if they differ,
+further investigation is warranted.
+
+## Recommended workflow
+
+1. **Inspect `summary()`**: check R-hat (< 1.01) and ESS (> 400) for all
+   parameters.
+2. **Check NUTS diagnostics**: `fit$nuts_diag$summary` for divergences,
+   tree depth saturation, and E-BFMI.
+3. **Check warmup**: `fit$nuts_diag$warmup_check` for signs of
+   incomplete equilibration.
+4. **Plot traces**: visually inspect a few key parameters for mixing and
+   stationarity.
+5. **If problems are found**: increase `warmup` and/or `iter`, adjust
+   `target_accept`, or switch samplers.

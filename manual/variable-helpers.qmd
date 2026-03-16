@@ -1,0 +1,119 @@
+---
+title: "Variable Helpers"
+---
+
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
+Numerically stable computation of MRF category denominators and
+probabilities. Source: `src/utils/variable_helpers.h` and
+`variable_helpers.cpp`.
+
+## The problem
+
+MRF conditional probabilities involve exponentials of residual
+scores. For large networks or extreme parameter values, the
+arguments to `exp()` can exceed the IEEE 754 double-precision
+range, producing `Inf` or underflowing to zero. Naive computation
+(direct exponentiation followed by normalization) fails silently
+in these cases.
+
+## The FAST/SAFE dual-path strategy
+
+Every denominator and probability function in `variable_helpers.cpp`
+uses a two-path approach:
+
+1. **FAST path** — Precomputed exponentials with power-chain
+   accumulation. Used when the exponent arguments stay within safe
+   bounds.
+2. **SAFE path** — Direct log-sum-exp evaluation as a fallback when
+   bounds are violated.
+
+The choice is made per-person (per row of the data matrix) based on
+whether the residual score times the maximum category exceeds the
+`EXP_BOUND` threshold.
+
+### FAST path detail
+
+For an ordinal variable with categories $0, 1, \ldots, K-1$ and
+residual $r$:
+
+1. Precompute $e_r = \exp(r)$ and $e_m = \exp(\mu(c))$ for each
+   category
+2. Accumulate the denominator as a Horner-like chain:
+   $D = e^{-b}(1 + e_m[1] \cdot e_r + e_m[2] \cdot e_r^2 + \cdots)$
+   where $b$ is a stabilizing shift
+
+This avoids computing `exp()` for each category-residual combination
+independently and exploits the geometric structure of the category
+scores.
+
+### SAFE path detail
+
+When the FAST path would overflow or underflow:
+
+1. Compute $s_c = \mu(c) + c \cdot r$ for each category
+2. Find $s_{\max} = \max_c s_c$
+3. Compute $D = \exp(s_{\max}) \sum_c \exp(s_c - s_{\max})$
+
+This is the standard log-sum-exp trick, applied per person.
+
+### Block scanning
+
+The functions process persons in contiguous blocks. Within each
+block, all persons follow the same path (FAST or SAFE). The block
+boundaries are determined by scanning the residual vector for
+bound violations. This enables branch-free vectorization within
+each block.
+
+## Ordinal variables
+
+### `compute_denom_ordinal()`
+
+Computes the normalization constant (denominator) for each person's
+conditional distribution. Takes the residual vector, main-effect
+vector, and precomputed bound vector. Returns a vector of length
+$n$.
+
+### `compute_probs_ordinal()`
+
+Computes the full category probability matrix ($n \times K$) for
+one ordinal variable. Probabilities are clamped at zero to prevent
+negative values from floating-point error in the normalization step.
+
+## Blume-Capel variables
+
+### `compute_denom_blume_capel()`
+
+Handles the Blume-Capel parameterization, where the category score
+involves both linear and quadratic terms:
+$\mu(c) = \alpha(c - b) + \beta(c - b)^2$. The precomputation of
+$\theta_c = \alpha(c - b) + \beta(c - b)^2$ is done once per
+variable, and the FAST/SAFE split proceeds as for ordinal variables.
+
+### `compute_probs_blume_capel()`
+
+Analogous to the ordinal version, but with the Blume-Capel category
+scores.
+
+## Joint log-normalizer and probabilities
+
+The `LogZAndProbs` struct bundles the log-normalizer $\log Z$ and
+the probability matrix into a single return value. The joint
+computation functions (`compute_logZ_and_probs_ordinal()`,
+`compute_logZ_and_probs_blume_capel()`) share work between the
+two quantities, avoiding redundant exponential evaluations.
+
+These joint functions are used in the gradient computation, where
+both the log-pseudolikelihood (which needs $\log Z$) and the
+gradient (which needs category probabilities) are computed in the
+same pass.
+
+## The EXP_BOUND = 709 threshold
+
+The bound that triggers the SAFE path is set to 709, derived from
+IEEE 754 double precision: $\exp(709) \approx 8.2 \times 10^{307}$
+is the largest representable value, while $\exp(710) = \text{Inf}$.
+The FAST path checks whether $|r| \cdot (K - 1) < 709$ before
+proceeding.

@@ -2,14 +2,103 @@
 title: "Edge Selection"
 ---
 
-::: {.callout-note}
-This chapter is under development.
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
 :::
 
-bgms uses spike-and-slab priors to determine which edges are present in the 
-network.
+Bayesian edge selection determines which edges are present in the network
+by placing spike-and-slab priors on the pairwise interaction parameters.
+When `edge_selection = TRUE` (the default), `bgm()` estimates both the
+edge structure and the effect sizes simultaneously.
 
-## Overview
+## Spike-and-slab priors
 
-*Content to be added: spike-and-slab priors, posterior inclusion probabilities, 
-Bayes factors, edge evidence categories.*
+For each edge $(i, j)$, an indicator variable $\gamma_{ij} \in \{0, 1\}$
+governs whether the interaction is included in the model:
+
+- When $\gamma_{ij} = 0$ (spike), the interaction $\sigma_{ij}$ is set to
+  exactly zero — the edge is absent.
+- When $\gamma_{ij} = 1$ (slab), the interaction receives a Cauchy prior
+  with scale `pairwise_scale` — the edge is present and the effect size is
+  estimated.
+
+The prior probability of inclusion is controlled by the `edge_prior`
+argument. See [Prior Basics](prior-basics.qmd) for the available options
+(Bernoulli, Beta-Bernoulli, Stochastic-Block).
+
+## Posterior inclusion probabilities
+
+The posterior inclusion probability for edge $(i, j)$ is the posterior
+mean of $\gamma_{ij}$: the proportion of MCMC iterations in which the edge
+was included. It ranges from 0 to 1:
+
+- Values near 1.0: strong evidence that the edge is present
+- Values near 0.0: strong evidence that the edge is absent
+- Values near 0.5: inconclusive (neither inclusion nor exclusion is
+  strongly supported)
+
+These are reported by `coef(fit)$indicator` and in the `summary()` output.
+
+## Bayes factors for edges
+
+When the prior inclusion probability is 0.5, the posterior inclusion
+probability can be directly transformed into a Bayes factor:
+
+$$
+\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{1 - p(\gamma_{ij} = 1 \mid \mathbf{x})}
+$$
+
+For other prior inclusion probabilities, the Bayes factor accounts for
+the prior odds:
+
+$$
+\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x}) / p(\gamma_{ij} = 0 \mid \mathbf{x})}{p(\gamma_{ij} = 1) / p(\gamma_{ij} = 0)}
+$$
+
+The reciprocal $1 / \text{BF}_{10}$ quantifies the evidence for edge
+absence.
+
+## Evidence categories
+
+The following classification, based on Kass and Raftery (1995), is a
+common convention:
+
+| Bayes factor | Evidence |
+|-------------|----------|
+| 1–3 | Weak |
+| 3–10 | Moderate |
+| 10–100 | Strong |
+| > 100 | Decisive |
+
+The same scale applies for evidence of absence using $1 / \text{BF}_{10}$.
+
+## Median probability model
+
+A common summary of the posterior network is the median probability model:
+retain all edges with posterior inclusion probability above 0.5. This
+corresponds to including edges for which there is more evidence for
+presence than absence.
+
+```r
+network = coef(fit)$pairwise
+network[coef(fit)$indicator < 0.5] = 0
+```
+
+## Prior guidance for edge selection
+
+The default `inclusion_probability = 0.5` with a Bernoulli prior is a
+standard noninformative choice. Considerations for changing it:
+
+- **Sparse networks**: lower the inclusion probability (e.g., 0.25) to
+  encode a prior expectation that most edges are absent.
+- **Dense networks**: raise the inclusion probability if prior knowledge
+  suggests many edges.
+- **Learned inclusion probability**: use `edge_prior = "Beta-Bernoulli"`
+  to let the data inform the overall sparsity level.
+- **Structured sparsity**: use `edge_prior = "Stochastic-Block"` when
+  edges are expected to cluster (see [Edge Clustering](clustering.qmd)).
+
+The `pairwise_scale` parameter controls the slab width. A wider slab
+makes it harder for the Bayes factor to favor inclusion when the true effect
+is small, because the prior spreads probability over a wide range. The
+default of 2.5 balances sensitivity to small effects against specificity.

@@ -4,16 +4,17 @@ page-layout: custom
 section-divs: false
 toc: false
 css: index.css
-description: | 
-  Bayesian estimation and model comparison for graphical models with binary and ordinal variables in R.
+description: |
+  Bayesian estimation and model comparison for graphical models with binary and
+  ordinal variables in R.
 hide-description: true
 ---
 
-::: {.hero-banner}
+:::::: {.hero-banner}
 
-::: {.content-block .py-4}
+::::: {.content-block .py-4}
 
-::: {.hero-text}
+:::: {.hero-text}
 # bgms {.mt-1}
 
 ### Bayesian Graphical Models in R
@@ -31,22 +32,21 @@ hide-description: true
 :::
 ::: {.g-col-12 .g-col-sm-4 .mb-2}
 [User's Guide](guide/index.qmd){#btn-guide .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
-::: 
-::: 
 :::
+:::
+
+::::
 
 ::: {.hero-animation}
 ![](bgms_sticker.svg){width="250px"}
 :::
 
-:::
+:::::
 
-:::
+::::::
 
-:::
-
-::: {.alt-background}
-::: {.content-block .quick-start}
+:::::: {.alt-background}
+::::: {.content-block .quick-start}
 
 ## Quick Start
 
@@ -61,48 +61,48 @@ fit <- bgm(Wenchuan)
 summary(fit)
 ```
 
-:::
-:::
+:::::
+::::::
 
-::: {.content-block}
+:::::: {.content-block}
 
-::: {.features}
+::::: {.features}
 
-::: {.feature}
+:::: {.feature}
 ### User's Guide
 Learn bgms from the ground up: installation, basic usage, and statistical concepts behind ordinal MRFs and Gaussian graphical models.
 
 [Guide →](guide/index.qmd)
-:::
+::::
 
-::: {.feature}
+:::: {.feature}
 ### Reference
 Complete documentation for all R functions: `bgm()`, `bgmCompare()`, S3 methods, and extractor functions.
 
 [Reference →](reference/index.qmd)
-:::
+::::
 
-::: {.feature}
+:::: {.feature}
 ### Manual
 Technical documentation for contributors: C++ architecture, MCMC algorithms, and implementation details.
 
 [Manual →](manual/index.qmd)
-:::
+::::
 
-:::
+:::::
 
-:::
+::::::
 
-::: {.get-started .alt-background}
-::: {.content-block}
+:::::: {.get-started .alt-background}
+::::: {.content-block}
 
 ### Citation
 
 If you use bgms in your research, please cite:
 
-> Marsman, M., van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian analysis 
-> of the ordinal Markov random field. *Psychometrika*, 90(1), 146–182. 
+> Marsman, M., van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian analysis
+> of the ordinal Markov random field. *Psychometrika*, 90(1), 146–182.
 > https://doi.org/10.1017/psy.2024.4
 
-:::
-:::
+:::::
+::::::

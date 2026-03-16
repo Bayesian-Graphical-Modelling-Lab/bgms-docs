@@ -54,25 +54,52 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 
 | Page | Risk | Status | Technical sign-off (Maarten) | Readability sign-off (Emily) | Blocking issue |
 |---|---|---|---|---|---|
-| guide/index.qmd | Low | Scaffolded | No | No | - |
+| **Guide** | | | | | |
+| guide/index.qmd | Low | Not started | No | No | - |
 | guide/getting-started.qmd | Medium | Scaffolded | No | No | - |
+| guide/graphical-models.qmd | Low | Not started | No | No | - |
+| guide/bayesian-approach.qmd | Low | Not started | No | No | - |
+| guide/prior-basics.qmd | Medium | Not started | No | No | Renamed from prior-guide.qmd |
 | guide/ggm.qmd | Medium | Scaffolded | No | No | - |
-| guide/group-comparison.qmd | Medium | Scaffolded | No | No | - |
-| guide/edge-selection.qmd | Medium | Scaffolded | No | No | - |
 | guide/omrf.qmd | High | Scaffolded | No | No | - |
-| guide/prior-guide.qmd | High | Scaffolded | No | No | - |
+| guide/mixed-model.qmd | Medium | Not started | No | No | - |
+| guide/edge-selection.qmd | Medium | Scaffolded | No | No | - |
+| guide/group-comparison.qmd | Medium | Scaffolded | No | No | - |
+| guide/clustering.qmd | Medium | Not started | No | No | - |
+| guide/mcmc-output.qmd | Medium | Not started | No | No | - |
+| guide/mcmc-diagnostics.qmd | Medium | Not started | No | No | - |
+| **Reference** | | | | | |
 | reference/index.qmd | Low | Scaffolded | No | No | - |
 | reference/bgm.qmd | High | Scaffolded | No | No | - |
 | reference/bgmCompare.qmd | High | Scaffolded | No | No | - |
 | reference/methods.qmd | Medium | Scaffolded | No | No | - |
 | reference/extractors.qmd | Medium | Scaffolded | No | No | - |
 | reference/datasets.qmd | Low | Scaffolded | No | No | - |
+| **Manual** | | | | | |
 | manual/index.qmd | Low | Scaffolded | No | No | - |
 | manual/architecture.qmd | Medium | Scaffolded | No | No | - |
+| manual/r-scaffolding.qmd | Medium | Not started | No | No | - |
 | manual/model-classes.qmd | High | Scaffolded | No | No | - |
-| manual/numerical.qmd | High | Scaffolded | No | No | - |
+| manual/samplers.qmd | High | Not started | No | No | - |
 | manual/nuts.qmd | High | Scaffolded | No | No | - |
 | manual/warmup.qmd | High | Scaffolded | No | No | - |
+| manual/parallel-chains.qmd | Medium | Not started | No | No | - |
+| manual/ggm-internals.qmd | High | Not started | No | No | - |
+| manual/omrf-internals.qmd | High | Not started | No | No | - |
+| manual/variable-helpers.qmd | High | Not started | No | No | - |
+| manual/mixed-internals.qmd | High | Not started | No | No | - |
+| manual/edge-priors.qmd | High | Not started | No | No | - |
+| manual/sbm-prior.qmd | High | Not started | No | No | - |
+| manual/bgmcompare-internals.qmd | High | Not started | No | No | - |
+| manual/numerical.qmd | High | Scaffolded | No | No | - |
+| **Examples** | | | | | |
+| examples/index.qmd | Low | Not started | No | No | - |
+| examples/binary-network.qmd | Medium | Not started | No | No | - |
+| examples/ordinal-network.qmd | Medium | Not started | No | No | - |
+| examples/continuous-network.qmd | Medium | Not started | No | No | - |
+| examples/mixed-network.qmd | Medium | Not started | No | No | - |
+| examples/group-comparison.qmd | Medium | Not started | No | No | - |
+| examples/clustering.qmd | Medium | Not started | No | No | - |
 
 ## Secondary Backlog (Not Part of A -> B Review Sequence)
 

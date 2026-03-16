@@ -1,0 +1,122 @@
+---
+title: "Ordinal Network"
+---
+
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
+An end-to-end analysis of ordinal data using the ordinal Markov random
+field. This example uses the Wenchuan earthquake PTSD dataset bundled
+with bgms.
+
+## Data
+
+The `Wenchuan` dataset contains responses from 362 survivors of the 2008
+Wenchuan earthquake on 17 posttraumatic stress items, scored on a
+five-point scale from "not at all" to "extremely". We analyze a subset
+of the first five items.
+
+```{r}
+#| eval: false
+library(bgms)
+data = Wenchuan[, 1:5]
+head(data)
+```
+
+## Fit the model
+
+Pass the data to `bgm()`. Because all variables are ordinal, bgms fits
+an ordinal MRF with spike-and-slab edge selection by default.
+
+```{r}
+#| eval: false
+fit = bgm(data, seed = 1234)
+```
+
+## Posterior summaries
+
+`summary()` returns posterior means, standard deviations, R-hat, and
+effective sample sizes for all pairwise interaction and threshold
+parameters. `coef()` provides posterior means and inclusion
+probabilities.
+
+```{r}
+#| eval: false
+summary(fit)
+coef(fit)
+```
+
+## Edge selection
+
+The spike-and-slab prior assigns each edge a posterior inclusion
+probability. Values near 1 indicate strong evidence the edge is present;
+values near 0 indicate strong evidence the edge is absent; values near
+0.5 are inconclusive.
+
+```{r}
+#| eval: false
+coef(fit)$indicator
+```
+
+When the prior inclusion probability equals 0.5 (the default for a
+Bernoulli prior), inclusion probabilities convert directly to Bayes
+factors:
+
+```{r}
+#| eval: false
+p = coef(fit)$indicator[1, 5]
+BF_10 = p / (1 - p)
+BF_10
+```
+
+The reciprocal gives the Bayes factor in favor of exclusion:
+
+```{r}
+#| eval: false
+1 / BF_10
+```
+
+## Interpretation
+
+Threshold the inclusion probabilities at 0.5 to obtain the median
+probability network, then plot with `qgraph`.
+
+```{r}
+#| eval: false
+library(qgraph)
+
+median_probability_network = coef(fit)$pairwise
+median_probability_network[coef(fit)$indicator < 0.5] = 0.0
+
+qgraph(median_probability_network,
+  theme = "TeamFortress",
+  maximum = 1,
+  fade = FALSE,
+  color = c("#f0ae0e"), vsize = 10, repulsion = .9,
+  label.cex = 1, label.scale = "FALSE",
+  labels = colnames(data)
+)
+```
+
+## Diagnostics
+
+Check convergence with the R-hat and ESS columns from the pairwise
+summary table.
+
+```{r}
+#| eval: false
+summary(fit)$pairwise
+```
+
+NUTS-specific diagnostics — E-BFMI, divergent transitions, tree depth,
+and warmup equilibration — are available via `fit$nuts_diag`:
+
+```{r}
+#| eval: false
+fit$nuts_diag$summary
+fit$nuts_diag$warmup_check
+```
+
+See the [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) guide for
+interpretation of these quantities.

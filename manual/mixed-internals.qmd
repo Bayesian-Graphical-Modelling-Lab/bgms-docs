@@ -1,0 +1,134 @@
+---
+title: "Mixed MRF Internals"
+---
+
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
+Implementation details of the mixed Markov random field in bgms.
+Source: `src/models/mixed/mixed_mrf_model.h` and four `.cpp` files
+(`mixed_mrf_model.cpp`, `mixed_mrf_gradient.cpp`,
+`mixed_mrf_likelihoods.cpp`, `mixed_mrf_metropolis.cpp`).
+
+## Block structure
+
+The mixed MRF handles $p$ discrete and $q$ continuous variables. The
+parameter space is organized into three interaction blocks plus
+main effects:
+
+| Block | Parameters | Size | Sampler |
+|-------|-----------|------|---------|
+| Main effects | Discrete thresholds + continuous means | $\text{thresholds} + q$ | NUTS |
+| Discrete-discrete | $\mathbf{K}_{xx}$ (symmetric) | $p(p-1)/2$ | NUTS |
+| Cross-type | $\mathbf{K}_{xy}$ | $p \times q$ | NUTS |
+| Continuous-continuous | $\mathbf{K}_{yy}$ (precision) | $q(q+1)/2$ | Metropolis |
+
+The continuous precision $\mathbf{K}_{yy}$ must remain positive
+definite, so it is excluded from the NUTS block and updated by
+element-wise Metropolis proposals with Cholesky rank-1 updates,
+identical to the GGM strategy.
+
+## Parameter vector layout
+
+The model distinguishes three vector types:
+
+### Active vector (`parameter_dimension()`)
+
+Contains only the parameters that NUTS updates, excluding edges
+set to zero by edge selection:
+
+```
+[ thresholds | K_xx (active) | means | K_xy (active) ]
+```
+
+The mass matrix and gradient are dimensioned to this vector.
+
+### Full vector (`full_parameter_dimension()`)
+
+Contains all NUTS-block parameters including inactive edges:
+
+```
+[ thresholds | K_xx (all) | means | K_xy (all) ]
+```
+
+Used for storage and initialization.
+
+### Storage vector (`storage_dimension()`)
+
+Adds the Metropolis-updated continuous precision to the full vector:
+
+```
+[ thresholds | K_xx (all) | means | K_xy (all) | K_yy (all) ]
+```
+
+This is what gets saved to `ChainResult::samples` at each iteration.
+
+## Hybrid sampling strategy
+
+Each MCMC iteration has two phases:
+
+1. **NUTS phase** — Update the active parameter vector (thresholds,
+   $\mathbf{K}_{xx}$, means, $\mathbf{K}_{xy}$) using one NUTS step.
+   The `logp_and_gradient()` method computes the log-pseudoposterior
+   and gradient for this block only.
+
+2. **Metropolis phase** — Update the continuous precision elements
+   ($\mathbf{K}_{yy}$) one at a time via
+   `do_pairwise_continuous_metropolis_step()`. Each proposal uses a
+   Gaussian perturbation with Robbins-Monro-tuned SD, followed by a
+   Cholesky rank-1 update to maintain positive definiteness.
+
+Edge indicator updates (when active) operate on all three interaction
+blocks.
+
+## Gradient computation
+
+The gradient (`mixed_mrf_gradient.cpp`) is computed for the NUTS
+block only. It involves:
+
+1. **Discrete conditionals** — Category probabilities via
+   [variable helpers](variable-helpers.qmd), contributing gradients
+   for thresholds and $\mathbf{K}_{xx}$
+2. **Cross-type terms** — Contributions from $\mathbf{K}_{xy}$ to
+   both discrete and continuous conditional distributions
+3. **Continuous means** — Gradient of the continuous-variable
+   contribution to the pseudolikelihood
+
+The log-prior gradient adds the Cauchy prior penalty on pairwise
+interactions.
+
+## Pseudolikelihood options
+
+The `pseudolikelihood` argument controls the continuous-variable
+likelihood:
+
+- `"conditional"` (default) — Uses the conditional distribution of
+  each continuous variable given the rest, consistent with the discrete
+  pseudolikelihood
+- `"marginal"` — Uses the marginal normal likelihood for the
+  continuous block, which can be more efficient when $q$ is large
+
+The choice affects both the log-posterior evaluation and the gradient
+computation.
+
+## Missing data
+
+The mixed MRF tracks missing indices separately for discrete and
+continuous variables (`missing_index_discrete`,
+`missing_index_continuous`). During imputation:
+
+- Missing discrete values are sampled from their full conditional
+  categorical distributions
+- Missing continuous values are sampled from their conditional normal
+  distributions given the current precision matrix
+
+## Output assembly
+
+The R output builder (`build_output_mixed_mrf()` in `build_output.R`)
+maps the flat storage vector back to the original variable ordering
+using `fill_mixed_symmetric()`. This function places discrete-discrete,
+continuous-continuous, and cross-type interactions into the correct
+cells of the $(p+q) \times (p+q)$ output matrix, respecting the
+original column order (which may interleave discrete and continuous
+variables).

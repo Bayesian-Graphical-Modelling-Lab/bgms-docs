@@ -1,0 +1,154 @@
+---
+title: "R Scaffolding"
+---
+
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
+The R layer sits between user-facing functions (`bgm()`, `bgmCompare()`)
+and the C++ engine. It validates inputs, constructs a specification
+object, dispatches to the appropriate C++ sampler, and assembles the
+returned output into an S3 fit object.
+
+## Data flow
+
+```
+bgm(x, ...)
+  ↓
+bgm_spec()            ← validates, assembles sub-lists
+  ↓
+new_bgm_spec()        ← asserts types and field presence
+  ↓
+validate_bgm_spec()   ← cross-field invariant checks
+  ↓
+run_sampler(spec)      ← dispatches to C++ via switch(model_type)
+  ↓
+build_output(spec, raw) ← normalizes raw C++ output into S3 object
+```
+
+Both `bgm()` and `bgmCompare()` follow this pipeline. The
+`bgmCompare()` path adds group-specific preprocessing (projection
+matrices, group indices, precomputed sufficient statistics) before
+the spec is constructed.
+
+## Validation pipeline
+
+Validation is split across four files, each with a focused scope.
+
+### Data checks (`validate_data.R`)
+
+`data_check()` is the entry point. It enforces:
+
+- Input is a data frame or matrix (converts to integer matrix for ordinal data)
+- No constant columns
+- At least two variables
+- Column names exist and are unique
+- For ordinal data: all values are non-negative integers
+
+Missing data handling branches on `na_action`:
+
+- `"listwise"` — rows with any `NA` are dropped
+- `"impute"` — missing indices are recorded for Bayesian imputation in C++
+
+### Variable type detection (`validate_model.R`)
+
+`validate_variable_types()` classifies each column as `"ordinal"` or
+`"blume-capel"` (for discrete variables) based on the `variable_type`
+argument. When `variable_type = "ordinal"` (the default), all discrete
+variables are treated as ordinal. When a named vector is provided,
+each variable is classified individually.
+
+`validate_baseline_category()` sets the reference category for
+Blume-Capel variables. The default (0) places the reference at the
+lowest observed category.
+
+### Sampler validation (`validate_sampler.R`)
+
+`validate_sampler()` resolves the `interaction_scale` argument into a
+concrete sampler type (`"nuts"`, `"hmc"`, or `"adaptive_metropolis"`)
+and sets defaults for tuning parameters (`target_accept`,
+`nuts_max_depth`, `hmc_num_leapfrogs`). It detects the number of
+available cores and resolves the progress display type.
+
+### Edge prior validation (`validate_model.R`)
+
+`validate_edge_prior()` and `validate_difference_prior()` map string
+names (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) to
+validated prior configurations. For the SBM prior, the six
+hyperparameters (`beta_bernoulli_alpha`, `beta_bernoulli_beta`,
+`beta_bernoulli_alpha_between`, `beta_bernoulli_beta_between`,
+`dirichlet_alpha`, `lambda`) are checked and defaults applied.
+
+## Spec construction (`bgm_spec.R`)
+
+`bgm_spec()` is the user-facing constructor. It calls all validators,
+then delegates to one of four model-specific builders:
+
+| Model type | Builder | Key additions |
+|-----------|---------|---------------|
+| `"ggm"` | `build_spec_ggm()` | Sufficient statistics (`X'X`), precision scale |
+| `"omrf"` | `build_spec_omrf()` | Category counts, ordinal/BC flags, scaling factors |
+| `"mixed_mrf"` | `build_spec_mixed_mrf()` | Separate discrete/continuous matrices, pseudolikelihood type |
+| `"compare"` | `build_spec_compare()` | Group indices, projection matrix, precomputed pairwise stats |
+
+Each builder assembles five sub-lists:
+
+- `$data` — observations, dimensions, variable names
+- `$variables` — variable types, ordinal flags, baseline categories
+- `$missing` — `na_action`, imputation flag, missing indices
+- `$prior` — prior type, hyperparameters, scaling factors
+- `$sampler` — algorithm, iterations, warmup, chains, seed
+
+The result passes through `new_bgm_spec()` (type assertions) and
+`validate_bgm_spec()` (cross-field invariants, such as: if
+`edge_selection = FALSE` then `edge_prior` must be `"Not applicable"`).
+
+## Sampler dispatch (`run_sampler.R`)
+
+`run_sampler()` reads `spec$model_type` and calls the corresponding
+C++ entry point:
+
+| `model_type` | C++ function | Entry file |
+|-------------|-------------|-----------|
+| `"ggm"` | `sample_ggm()` | `src/sample_ggm.cpp` |
+| `"omrf"` | `sample_omrf()` | `src/sample_omrf.cpp` |
+| `"mixed_mrf"` | `sample_mixed_mrf()` | `src/sample_mixed.cpp` |
+| `"compare"` | `run_bgmCompare_parallel()` | `src/bgmCompare_interface.cpp` |
+
+Each C++ function receives an R list of arguments, constructs model
+and prior objects, and calls `run_mcmc_sampler()` from the chain
+runner. The return value is a list of per-chain raw output.
+
+## Output assembly (`build_output.R`)
+
+`build_output()` transforms raw C++ output into the S3 objects
+returned to the user (`"bgms"` or `"bgmCompare"` class).
+
+### GGM and OMRF (`build_output_bgm()`)
+
+The GGM and OMRF paths share a unified builder. Key operations:
+
+1. **Normalize raw samples** — Split the flat parameter vector into main-effect
+   and pairwise-interaction matrices per chain
+2. **Compute posterior means** — Average across iterations and chains
+3. **Compute inclusion probabilities** — Average indicator samples (when
+   edge selection is active)
+4. **Assemble `$raw_samples`** — Per-chain lists of `main`, `pairwise`,
+   `indicator`, and `allocations` matrices
+5. **NUTS diagnostics** — When available, collect tree depth, divergence,
+   and energy samples into `$nuts_diagnostics`
+6. **Warmup check** — Collect `$warmup_check` from C++
+
+### Mixed MRF (`build_output_mixed_mrf()`)
+
+The mixed MRF builder handles the block structure: discrete-discrete,
+continuous-continuous, and cross-type interactions are stored in
+separate blocks by C++ and need to be mapped back to the original
+variable ordering.
+
+### Compare (`build_output_compare()`)
+
+The comparison builder splits posterior means into group-level
+(`$group_posterior_means`) and difference (`$difference_posterior_means`)
+components, and computes difference inclusion probabilities.

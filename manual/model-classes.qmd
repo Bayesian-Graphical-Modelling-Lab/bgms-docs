@@ -2,26 +2,187 @@
 title: "Model Classes"
 ---
 
-::: {.callout-note}
-This chapter is under development.
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
 :::
 
-The model hierarchy in bgms.
+All graphical models in bgms inherit from a single abstract base class,
+`BaseModel`, defined in `src/models/base_model.h`. The chain runner
+interacts with models exclusively through this interface, so adding a
+new model type requires implementing the relevant virtual methods
+without modifying the MCMC engine.
 
-## BaseModel
+## BaseModel interface
 
-Abstract interface defining:
+`BaseModel` declares over 30 virtual methods. The most important
+groups are:
 
-- `log_likelihood()`
-- `log_prior()` 
-- `gradient()`
+### Capability queries
 
-## OMRFModel
+These methods tell the sampler what the model supports. The chain
+runner and sampler factory use them to select the correct algorithm.
 
-Ordinal Markov random field implementation.
+| Method | Default | GGMModel | OMRFModel | MixedMRFModel |
+|--------|---------|----------|-----------|---------------|
+| `has_gradient()` | `false` | `false` | `true` | `true` |
+| `has_adaptive_metropolis()` | `false` | `true` | `true` | `true` |
+| `has_nuts()` | `false` | `false` | `true` | `true` |
+| `has_edge_selection()` | `false` | `true` | `true` | `true` |
+| `has_missing_data()` | `false` | `true` | `true` | `true` |
+
+### Sampling methods
+
+```cpp
+virtual void do_one_metropolis_step(int iteration) = 0;
+virtual vec gradient(vec parameters);
+virtual pair<double, vec> logp_and_gradient(vec parameters);
+```
+
+Every model must implement `do_one_metropolis_step()`. Models that
+support gradient-based samplers (NUTS, HMC) also override `gradient()`
+and `logp_and_gradient()`. The joint function is more efficient because
+the log-posterior and gradient share intermediate computations.
+
+### Parameter access
+
+```cpp
+virtual vec get_vectorized_parameters() const = 0;
+virtual void set_vectorized_parameters(const vec& params) = 0;
+virtual vec get_full_vectorized_parameters() const;
+virtual vec get_storage_vectorized_parameters() const;
+virtual size_t parameter_dimension() const = 0;
+virtual size_t full_parameter_dimension() const;
+virtual size_t storage_dimension() const;
+```
+
+`get_vectorized_parameters()` returns the parameters that the
+gradient-based sampler updates. `get_storage_vectorized_parameters()`
+returns all parameters that need to be saved (including those updated
+by Metropolis steps outside the NUTS block).
+
+The distinction matters for the mixed MRF, where the NUTS block
+contains thresholds, pairwise discrete interactions, means, and
+cross-type interactions, but the continuous-continuous precision
+elements are updated by a separate Metropolis step and only appear
+in the storage vector.
+
+### Edge selection
+
+```cpp
+virtual void update_edge_indicators();
+virtual void initialize_graph();
+virtual void set_edge_selection_active(bool active);
+```
+
+When edge selection is active, `update_edge_indicators()` performs a
+full scan over all edges, proposing inclusion/exclusion for each
+using the spike-and-slab prior. `initialize_graph()` sets starting
+edge indicators (all edges included by default).
+
+### Adaptation support
+
+```cpp
+virtual void init_metropolis_adaptation(WarmupSchedule& schedule);
+virtual void tune_proposal_sd(int iteration, WarmupSchedule& schedule);
+virtual void prepare_iteration();
+```
+
+Models with element-wise Metropolis proposals (GGM, OMRF, mixed MRF)
+implement these methods to tune proposal standard deviations during
+warmup using Robbins-Monro updates.
+
+### Infrastructure
+
+```cpp
+virtual void set_seed(int seed) = 0;
+virtual unique_ptr<BaseModel> clone() const = 0;
+```
+
+`clone()` produces an independent deep copy for parallel chain
+execution. Each clone gets its own RNG state via `set_seed()`.
 
 ## GGMModel
 
-Gaussian graphical model implementation.
+Defined in `src/models/ggm/ggm_model.h` and `ggm_model.cpp`.
 
-*Content to be added: class documentation, extension guide.*
+**Parameterization.** The GGM is parameterized by the precision matrix
+$\boldsymbol{\Omega}$ (inverse covariance). The model maintains an upper-triangular
+Cholesky factor $\mathbf{R}$ such that $\mathbf{R}^\top\mathbf{R} = \boldsymbol{\Omega}$.
+
+**Sampling.** Because the precision matrix must remain positive
+definite, the GGM does not support gradient-based samplers. Instead,
+it uses element-wise Metropolis-Hastings: each off-diagonal element
+$\omega_{ij}$ is proposed from a Gaussian centered on the current
+value. After each proposal, the Cholesky factor is updated via a
+rank-1 Givens rotation (or hyperbolic rotation for downdates),
+avoiding a full $O(p^3)$ decomposition.
+
+**Sufficient statistics.** For complete data, the GGM only needs the
+sufficient statistic $\mathbf{X}^\top\mathbf{X}$, not the raw data matrix.
+When missing data imputation is active, the sufficient statistics are
+recomputed after each imputation step.
+
+**Spike-and-slab.** Edge indicators $\gamma_{ij} \in \{0, 1\}$ control
+whether edge $(i,j)$ is included. When $\gamma_{ij} = 0$, the
+corresponding precision element is fixed at zero.
+
+## OMRFModel
+
+Defined in `src/models/omrf/omrf_model.h` and `omrf_model.cpp`.
+
+**Parameterization.** The ordinal MRF has two parameter types:
+main effects (category thresholds) and pairwise interactions. For
+ordinal variables, there is one threshold per category. For
+Blume-Capel variables, there are two parameters: a linear effect
+$\alpha$ and a quadratic effect $\beta$, with the category score
+$\mu_c = \alpha(c - b) + \beta(c - b)^2$ where $b$ is the reference
+category.
+
+**Gradient.** The OMRF supports `logp_and_gradient()`, enabling NUTS
+and HMC sampling. The gradient involves category probabilities
+computed by the [variable helpers](variable-helpers.qmd), which use
+a FAST/SAFE dual-path strategy for numerical stability.
+
+**Residual matrix.** The model maintains a precomputed residual matrix
+$\mathbf{R}_{ni} = \sum_{j \neq i} x_{nj} \sigma_{ij}$ that caches
+the contribution of pairwise interactions to each variable's
+conditional distribution. This matrix is updated incrementally when
+a single interaction changes.
+
+**Metropolis fallback.** Even when NUTS is the primary sampler, the
+OMRF uses element-wise Metropolis proposals for edge indicator
+updates during the edge selection phase.
+
+## MixedMRFModel
+
+Defined in `src/models/mixed/mixed_mrf_model.h` and four `.cpp` files.
+
+**Parameterization.** The mixed MRF handles $p$ discrete and $q$
+continuous variables jointly. The log-density has the form:
+
+$$
+\log f(\mathbf{x}, \mathbf{y}) = \sum_i \mu_i(x_i) + \mathbf{x}^\top \mathbf{K}_{xx} \mathbf{x} + \mathbf{y}^\top \mathbf{K}_{yy} \mathbf{y} + 2\mathbf{x}^\top \mathbf{K}_{xy} \mathbf{y}
+$$
+
+where $\mathbf{K}_{xx}$, $\mathbf{K}_{yy}$, and $\mathbf{K}_{xy}$
+are the discrete-discrete, continuous-continuous, and cross-type
+interaction matrices.
+
+**Hybrid sampling.** The NUTS block updates thresholds, discrete
+pairwise interactions ($\mathbf{K}_{xx}$), continuous means, and
+cross-type interactions ($\mathbf{K}_{xy}$). The continuous precision
+elements ($\mathbf{K}_{yy}$) are excluded from the NUTS block because
+the precision matrix must remain positive definite; they are updated
+by a separate element-wise Metropolis step
+(`do_pairwise_continuous_metropolis_step()`), analogous to the GGM.
+
+**Three dimension concepts.** The model distinguishes:
+
+- `parameter_dimension()` — Active NUTS parameters (excludes inactive edges and $\mathbf{K}_{yy}$)
+- `full_parameter_dimension()` — All NUTS-block parameters (includes inactive edges, excludes $\mathbf{K}_{yy}$)
+- `storage_dimension()` — All parameters including $\mathbf{K}_{yy}$ (what gets saved to output)
+
+**Pseudolikelihood options.** The `pseudolikelihood` argument controls
+whether the model uses conditional or marginal pseudolikelihood for
+the continuous block. See the [User's Guide](../guide/mixed-model.qmd)
+for the statistical distinction.

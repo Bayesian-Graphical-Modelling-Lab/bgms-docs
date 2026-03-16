@@ -1,0 +1,90 @@
+---
+title: "Edge Priors"
+---
+
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
+The edge prior framework controls which edges are included in the
+graph. All priors inherit from `BaseEdgePrior` in
+`src/priors/edge_prior.h`.
+
+## BaseEdgePrior interface
+
+```cpp
+class BaseEdgePrior {
+  virtual void update(imat edge_indicators, mat& inclusion_probability,
+                      int num_variables, int num_pairwise,
+                      SafeRNG& rng) = 0;
+  virtual unique_ptr<BaseEdgePrior> clone() const = 0;
+  virtual bool has_allocations() const { return false; }
+  virtual ivec get_allocations() const { return ivec(); }
+};
+```
+
+The `update()` method is called once per MCMC iteration (when edge
+selection is active). It receives the current edge indicators and
+updates the inclusion probability matrix in place. The updated
+probabilities are used by the model's `update_edge_indicators()`
+method for the next round of edge proposals.
+
+`clone()` produces an independent copy for parallel chain execution.
+
+## BernoulliEdgePrior
+
+The simplest prior: each edge has a fixed inclusion probability that
+does not change during sampling. The `update()` method is a no-op.
+
+This prior is used when the user specifies `edge_prior = "Bernoulli"`
+with a fixed inclusion probability matrix.
+
+## BetaBernoulliEdgePrior
+
+A conjugate prior that learns a shared inclusion probability from
+the data. At each iteration:
+
+1. Count the number of included edges: $k = \sum_{i<j} \gamma_{ij}$
+2. Count the total number of possible edges: $m = p(p-1)/2$
+3. Draw a new inclusion probability:
+   $\pi \sim \text{Beta}(\alpha + k,\; \beta + m - k)$
+4. Set all entries of the inclusion probability matrix to $\pi$
+
+The hyperparameters $\alpha$ and $\beta$ default to 1 (uniform prior
+on the inclusion probability).
+
+This is the default edge prior in bgms (`edge_prior = "Beta-Bernoulli"`).
+
+## StochasticBlockEdgePrior
+
+The stochastic block model (SBM) prior assigns variables to latent
+clusters and allows different inclusion probabilities for within-cluster
+and between-cluster edges. See [SBM Prior](sbm-prior.qmd) for the
+full formulation.
+
+The `StochasticBlockEdgePrior` class stores:
+
+- `cluster_allocations_` — Current cluster assignment for each variable
+- `cluster_prob_` — $K \times K$ matrix of block inclusion probabilities
+- `log_Vn_` — Log partition coefficients for the MFM prior on cluster count
+
+Its `update()` method runs collapsed Gibbs sampling to update cluster
+assignments and block probabilities (delegated to functions in
+`sbm_edge_prior.cpp`).
+
+`has_allocations()` returns `true`, and `get_allocations()` returns
+the current cluster assignment vector. These are stored in
+`ChainResult::allocation_samples` for post-hoc analysis.
+
+## Prior selection in R
+
+The `edge_prior` argument in `bgm()` maps to these classes:
+
+| R value | C++ class | Behavior |
+|---------|-----------|----------|
+| `"Bernoulli"` | `BernoulliEdgePrior` | Fixed inclusion probabilities |
+| `"Beta-Bernoulli"` | `BetaBernoulliEdgePrior` | Learns shared inclusion rate |
+| `"Stochastic-Block"` | `StochasticBlockEdgePrior` | Cluster-structured inclusion |
+
+When `edge_selection = FALSE`, no edge prior is instantiated and all
+edges remain included throughout sampling.
