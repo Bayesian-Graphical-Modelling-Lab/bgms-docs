@@ -143,6 +143,9 @@ summary(fit_ggm)
 #| include: false
 fit_ggm = bgm(marks, variable_type = "continuous", seed = 1234, chains = 2, display_progress = "none",
                verbose = TRUE)
+```
+
+```{r}
 summary(fit_ggm)
 ```
 
