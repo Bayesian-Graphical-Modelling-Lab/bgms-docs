@@ -21,7 +21,8 @@ jobs:
 
       - name: Install R packages
         run: |
-          Rscript -e 'install.packages(c("knitr", "rmarkdown", "bgms"))'
+          Rscript -e 'install.packages(c("knitr", "rmarkdown", "remotes"))'
+          Rscript -e 'remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")'
 
       - name: Render site
         run: quarto render
