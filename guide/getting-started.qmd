@@ -90,7 +90,7 @@ qgraph(median_probability_network,
   fade = FALSE,
   color = c("#f0ae0e"), vsize = 10, repulsion = .9,
   label.cex = 1, label.scale = "FALSE",
-  labels = colnames(Wenchuan)
+  labels = colnames(Wenchuan)[1:5]
 )
 ```
 
@@ -114,8 +114,6 @@ head(marks)
 fit_ggm = bgm(marks, variable_type = "continuous", seed = 1234)
 summary(fit_ggm)
 ```
-
-The pairwise effects are partial correlations (off-diagonal entries of the standardized precision matrix). Missing values can be imputed during sampling with `na_action = "impute"`.
 
 ## Next steps
 
