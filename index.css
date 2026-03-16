@@ -275,12 +275,17 @@ body.quarto-dark .feature p:first-of-type {
 }
 
 .get-started {
-   text-align: center;
+  text-align: left;
 }
 
 .get-started h3 {
    margin-top: 1rem;
    margin-bottom: 2rem;
+}
+
+.get-started blockquote {
+  max-width: 980px;
+  margin-left: 0;
 }
 
 nav.page-navigation {
