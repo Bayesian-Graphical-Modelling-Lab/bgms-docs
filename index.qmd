@@ -35,11 +35,11 @@ hide-description: true
 :::
 :::
 
+::::
+
 ::: {.hero-animation}
 ![](bgms_sticker.svg){width="250px"}
 :::
-
-::::
 
 :::::
 
