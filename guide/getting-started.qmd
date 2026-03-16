@@ -115,6 +115,14 @@ fit_ggm = bgm(marks, variable_type = "continuous", seed = 1234)
 summary(fit_ggm)
 ```
 
+```{r}
+#| include: false
+fit_ggm = bgm(marks, variable_type = "continuous", seed = 1234, chains = 2, display_progress = "none",
+               verbose = TRUE )
+summary(fit_ggm)
+```
+
+
 ## Next steps
 
 - Learn about the unified [graphical model framework](graphical-models.qmd) in bgms, with [ordinal](omrf.qmd) and [continuous](ggm.qmd) special cases
