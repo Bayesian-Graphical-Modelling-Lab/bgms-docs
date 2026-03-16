@@ -56,7 +56,7 @@ hide-description: true
 # Install from CRAN
 install.packages("bgms")
 
-# Fit an ordinal MRF to the Wenchuan earthquake data
+# Fit an ordinal Markov random field to the Wenchuan earthquake data
 library(bgms)
 data(Wenchuan)
 fit <- bgm(Wenchuan)
