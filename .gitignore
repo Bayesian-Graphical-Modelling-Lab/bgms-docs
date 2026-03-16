@@ -1,6 +1,7 @@
 # Quarto
 /.quarto/
 /_site/
+/docs/
 
 # R
 .Rproj.user
@@ -15,5 +16,7 @@ Thumbs.db
 # Editor
 *.swp
 *~
+.vscode/
+*.code-workspace
 
 **/*.quarto_ipynb

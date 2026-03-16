@@ -155,6 +155,9 @@ website:
         - examples/group-comparison.qmd
         - examples/clustering.qmd
 
+bibliography: references.bib
+csl: apa.csl
+
 format:
   html:
     respect-user-color-scheme: true
