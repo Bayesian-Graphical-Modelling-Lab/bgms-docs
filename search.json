@@ -1369,7 +1369,7 @@
     "href": "guide/bayesian-approach.html",
     "title": "The Bayesian Approach",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nbgms uses Bayesian inference to estimate graphical models. This means that all unknown quantities — interaction parameters, edge inclusion indicators, and model structure — are treated as random variables with probability distributions. The output is a posterior distribution, not a single point estimate.",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nbgms uses Bayesian inference to learn about the network structure and its parameters from data. This page describes the general framework; details about prior specifications are covered in Prior Basics and the mechanics of edge selection in Edge Selection. The posterior is estimated using Markov chain Monte Carlo; see MCMC Diagnostics for convergence checks and MCMC Output for the output structure.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1377,11 +1377,11 @@
     ]
   },
   {
-    "objectID": "guide/bayesian-approach.html#prior-likelihood-posterior",
-    "href": "guide/bayesian-approach.html#prior-likelihood-posterior",
+    "objectID": "guide/bayesian-approach.html#what-we-want-to-learn",
+    "href": "guide/bayesian-approach.html#what-we-want-to-learn",
     "title": "The Bayesian Approach",
-    "section": "Prior, likelihood, posterior",
-    "text": "Prior, likelihood, posterior\nBayesian inference combines a prior distribution with the likelihood of the observed data to produce a posterior distribution. For a parameter \\(\\theta\\) and data \\(\\mathbf{x}\\):\n\\[\np(\\theta \\mid \\mathbf{x}) \\propto p(\\mathbf{x} \\mid \\theta) \\; p(\\theta)\n\\]\n\nThe prior \\(p(\\theta)\\) encodes assumptions about the parameter before observing data. In bgms, priors are placed on interaction parameters, main effects, and edge indicators. See Prior Basics for details.\nThe likelihood \\(p(\\mathbf{x} \\mid \\theta)\\) measures how well the model with parameter value \\(\\theta\\) explains the observed data.\nThe posterior \\(p(\\theta \\mid \\mathbf{x})\\) is the updated distribution of \\(\\theta\\) after observing the data. All inference — point estimates, intervals, hypothesis tests — comes from this posterior.",
+    "section": "What we want to learn",
+    "text": "What we want to learn\nGiven a dataset of \\(p\\) variables, we want to learn two things: the network structure \\(\\mathcal{S}\\) — the collection of edges in the network — and the network parameters \\(\\boldsymbol{\\Phi}_\\mathcal{S}\\) — the partial associations for the edges in \\(\\mathcal{S}\\).1\nThere are many possible structures that could underlie the network. For each structure, there are also many possible values for the corresponding partial associations. Because we seek to learn about these quantities from the data, the specific configuration of edges and the exact parameter values are typically unknown.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1389,11 +1389,11 @@
     ]
   },
   {
-    "objectID": "guide/bayesian-approach.html#posterior-summaries",
-    "href": "guide/bayesian-approach.html#posterior-summaries",
+    "objectID": "guide/bayesian-approach.html#prior-distributions",
+    "href": "guide/bayesian-approach.html#prior-distributions",
     "title": "The Bayesian Approach",
-    "section": "Posterior summaries",
-    "text": "Posterior summaries\nbgms summarizes the posterior with several quantities:\n\nPosterior mean: the average of the posterior distribution. Reported by coef() and in the summary() output.\nPosterior standard deviation: the spread of the posterior. A small standard deviation indicates a precise estimate.\nCredible intervals: ranges that contain the parameter with a given posterior probability (e.g., a 95% credible interval). Unlike frequentist confidence intervals, credible intervals have a direct probability interpretation.",
+    "section": "Prior distributions",
+    "text": "Prior distributions\nTo account for this uncertainty, we assign prior distributions to the network structure \\(p(\\mathcal{S})\\) and to the parameters conditional on that structure \\(p(\\boldsymbol{\\Phi}_\\mathcal{S} \\mid \\mathcal{S})\\). A prior distribution assigns plausibility to different values of the parameters and structures before the data are observed.\nThe prior distribution on the structure \\(p(\\mathcal{S})\\) expresses which edge configurations we consider plausible a priori. The prior distribution on the parameters \\(p(\\boldsymbol{\\Phi}_\\mathcal{S} \\mid \\mathcal{S})\\) expresses, for a given structure, which values of the partial associations we consider plausible.\nThese prior distributions can formalize substantive knowledge — for example, results from previous research — or they can represent relative ignorance using default specifications. See Prior Basics for the prior distributions available in bgms.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1401,11 +1401,11 @@
     ]
   },
   {
-    "objectID": "guide/bayesian-approach.html#bayes-factors",
-    "href": "guide/bayesian-approach.html#bayes-factors",
+    "objectID": "guide/bayesian-approach.html#from-prior-to-posterior",
+    "href": "guide/bayesian-approach.html#from-prior-to-posterior",
     "title": "The Bayesian Approach",
-    "section": "Bayes factors",
-    "text": "Bayes factors\nFor edge selection, bgms uses Bayes factors to quantify evidence for the presence or absence of each edge. The inclusion Bayes factor for edge \\((i, j)\\) is:\n\\[\n\\text{BF}_{10} = \\frac{p(\\gamma_{ij} = 1 \\mid \\mathbf{x})}{p(\\gamma_{ij} = 0 \\mid \\mathbf{x})} \\bigg/ \\frac{p(\\gamma_{ij} = 1)}{p(\\gamma_{ij} = 0)}\n\\]\nwhere \\(\\gamma_{ij}\\) is the binary indicator for edge inclusion. When the prior inclusion probability is 0.5, this simplifies to the posterior odds:\n\\[\n\\text{BF}_{10} = \\frac{p(\\gamma_{ij} = 1 \\mid \\mathbf{x})}{1 - p(\\gamma_{ij} = 1 \\mid \\mathbf{x})}\n\\]\nA Bayes factor greater than 1 favors edge inclusion; less than 1 favors exclusion. The reciprocal \\(1 / \\text{BF}_{10}\\) gives the evidence for exclusion. See Edge Selection for interpretation guidelines.",
+    "section": "From prior to posterior",
+    "text": "From prior to posterior\nBayes’ rule combines the prior distributions with the information in the observed data to produce a joint posterior distribution over the structure and parameters:\n\\[\np(\\boldsymbol{\\Phi}_\\mathcal{S},\\, \\mathcal{S} \\mid \\text{data}) =\n\\frac{p(\\text{data} \\mid \\boldsymbol{\\Phi}_\\mathcal{S},\\, \\mathcal{S}) \\;\n      p(\\boldsymbol{\\Phi}_\\mathcal{S} \\mid \\mathcal{S}) \\;\n      p(\\mathcal{S})}\n     {p(\\text{data})}\n\\]\nThis joint posterior distribution expresses everything we know about the network structure and parameter values after observing the data. It is central to Bayesian graphical modeling because different inferential tasks — parameter estimation and structure learning — rely on different aspects of this distribution.\nTo make this explicit, we factor the joint posterior into two components:\n\\[\np(\\boldsymbol{\\Phi}_\\mathcal{S},\\, \\mathcal{S} \\mid \\text{data}) =\np(\\boldsymbol{\\Phi}_\\mathcal{S} \\mid \\mathcal{S},\\, \\text{data})\n\\times p(\\mathcal{S} \\mid \\text{data})\n\\]\nThe first factor, \\(p(\\boldsymbol{\\Phi}_\\mathcal{S} \\mid \\mathcal{S}, \\text{data})\\), is the conditional posterior distribution for the parameters under a specific structure — the posterior distribution of the partial associations given that the network has structure \\(\\mathcal{S}\\). This distribution is used for Bayesian parameter estimation.\nThe second factor, \\(p(\\mathcal{S} \\mid \\text{data})\\), is the marginal posterior distribution of the network structure, with the parameters integrated out. This distribution is used for Bayesian structure learning.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1413,11 +1413,35 @@
     ]
   },
   {
-    "objectID": "guide/bayesian-approach.html#how-bgms-uses-mcmc",
-    "href": "guide/bayesian-approach.html#how-bgms-uses-mcmc",
+    "objectID": "guide/bayesian-approach.html#bayesian-parameter-estimation",
+    "href": "guide/bayesian-approach.html#bayesian-parameter-estimation",
     "title": "The Bayesian Approach",
-    "section": "How bgms uses MCMC",
-    "text": "How bgms uses MCMC\nThe posterior distributions in bgms do not have closed-form solutions. Instead, bgms draws samples from the posterior using Markov chain Monte Carlo (MCMC) methods. The default sampler is the No-U-Turn Sampler (NUTS), an adaptive form of Hamiltonian Monte Carlo. bgms also supports fixed-length HMC and adaptive Metropolis-Hastings.\nMultiple chains run in parallel to diagnose convergence. Key diagnostics — effective sample size (ESS), R-hat, and energy diagnostics — are described in MCMC Diagnostics. The structure of the raw MCMC output is described in MCMC Output.",
+    "section": "Bayesian parameter estimation",
+    "text": "Bayesian parameter estimation\nFor a given structure \\(\\mathcal{S}\\), the conditional posterior \\(p(\\boldsymbol{\\Phi}_\\mathcal{S} \\mid \\mathcal{S}, \\text{data})\\) tells us what we know about each partial association after observing the data. The prior distribution assigns plausibility to each value of the parameter. The observed data update this distribution: parameter values that predict the data well become more plausible, whereas parameter values that predict the data poorly become less plausible.\nIn practice, the full posterior distribution for each element of \\(\\boldsymbol{\\Phi}_\\mathcal{S}\\) is usually summarized:\n\nThe posterior mean as a point estimate of the partial association.\nThe posterior standard deviation as a measure of estimation precision.\nA credible interval — a range that contains the parameter with a given posterior probability (e.g., 95%). Unlike frequentist confidence intervals, a 95% credible interval has a direct probability interpretation: there is a 95% posterior probability that the parameter lies within the interval.\n\nIn bgms, coef() and summary return the posterior mean of the partial associations, and summary() adds the posterior standard deviation alongside MCMC diagnostics.",
+    "crumbs": [
+      "Get Started",
+      "Background",
+      "The Bayesian Approach"
+    ]
+  },
+  {
+    "objectID": "guide/bayesian-approach.html#bayesian-structure-learning",
+    "href": "guide/bayesian-approach.html#bayesian-structure-learning",
+    "title": "The Bayesian Approach",
+    "section": "Bayesian structure learning",
+    "text": "Bayesian structure learning\nThe marginal posterior \\(p(\\mathcal{S} \\mid \\text{data})\\) assigns a posterior probability to each possible network structure. In practice, the correct structure is usually unknown to us. Instead of selecting a single structure outright, we therefore quantify the evidence for including or excluding individual edges while accounting for this structural uncertainty.\n\nPosterior inclusion probabilities\nThe posterior probability of including the edge between variables \\(i\\) and \\(j\\) is obtained by summing the posterior probabilities of all structures that contain that edge. Let \\(\\mathcal{S}^{(ij)}\\) denote the set of structures that include an edge between variables \\(i\\) and \\(j\\), then:\n\\[\np(\\gamma_{ij} = 1 \\mid \\text{data}) =\n\\sum_{\\mathcal{S} \\in \\mathcal{S}^{(ij)}}\np(\\mathcal{S} \\mid \\text{data})\n\\]\nThis posterior inclusion probability aggregates evidence across all possible network structures. In effect, it performs Bayesian model averaging and therefore accounts for our uncertainty about the remaining edges in the network.\nIn bgms, coef() and summary return the posterior mean of the inclusion probabilities, and summary() adds the posterior standard deviation alongside MCMC diagnostics.\n\n\nThe inclusion Bayes factor\nThe inclusion Bayes factor quantifies the change in evidence for including an edge from prior to posterior:\n\\[\n\\underbrace{\\frac{p(\\text{data} \\mid \\gamma_{ij} = 1)}\n                 {p(\\text{data} \\mid \\gamma_{ij} = 0)}}_{\\text{Inclusion Bayes factor}}\n= \\underbrace{\\frac{p(\\gamma_{ij} = 1 \\mid \\text{data})}\n                   {p(\\gamma_{ij} = 0 \\mid \\text{data})}}_{\\text{Posterior inclusion odds}}\n\\bigg/\n\\underbrace{\\frac{p(\\gamma_{ij} = 1)}\n                 {p(\\gamma_{ij} = 0)}}_{\\text{Prior inclusion odds}}\n\\]\nThe inclusion Bayes factor is the ratio of the posterior inclusion odds to the prior inclusion odds. Values greater than one indicate evidence for the presence of the edge (\\(\\Phi_{ij} \\neq 0\\)), whereas values less than one indicate evidence for its absence (\\(\\Phi_{ij} = 0\\)). When the prior inclusion probability is \\(\\frac{1}{2}\\), the prior inclusion odds equal one, and the inclusion Bayes factor simplifies to the posterior odds.\nBecause the inclusion Bayes factor averages over all possible network structures, it does not depend on assumptions about the remaining edges in the network. This property makes it a robust measure of the evidence for or against each individual edge. See Edge Selection for interpretation guidelines and the prior specifications used in bgms.",
+    "crumbs": [
+      "Get Started",
+      "Background",
+      "The Bayesian Approach"
+    ]
+  },
+  {
+    "objectID": "guide/bayesian-approach.html#footnotes",
+    "href": "guide/bayesian-approach.html#footnotes",
+    "title": "The Bayesian Approach",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nIn graphical modeling, the primary inferential targets are the pairwise interactions \\(\\boldsymbol{\\Phi}\\) and the network structure \\(\\mathcal{S}\\). The node potentials \\(\\mu_i(x_i)\\) are nuisance parameters: they are estimated but typically not of direct inferential interest.↩︎",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1657,7 +1681,7 @@
     "href": "guide/graphical-models.html#modeling-conditional-independence",
     "title": "Graphical Models",
     "section": "Modeling conditional independence",
-    "text": "Modeling conditional independence\nThe conditional independence structure — which edges are present — is typically unknown. bgms treats edge inclusion as a model selection problem, testing \\(\\phi_{ij} = 0\\) against \\(\\phi_{ij} \\neq 0\\) for each pair of variables using spike-and-slab priors. This produces posterior inclusion probabilities that quantify the evidence for each edge. See edge selection).",
+    "text": "Modeling conditional independence\nThe conditional independence structure — which edges are present — is typically unknown. bgms treats edge inclusion as a model selection problem, testing \\(\\phi_{ij} = 0\\) against \\(\\phi_{ij} \\neq 0\\) for each pair of variables using spike-and-slab priors. This produces posterior inclusion probabilities that quantify the evidence for each edge. See Edge Selection).",
     "crumbs": [
       "Get Started",
       "Background",
