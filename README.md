@@ -1,5 +1,7 @@
 # bgms Documentation
 
+**Live site:** <https://bayesian-graphical-modelling-lab.github.io/bgms-docs/>
+
 Documentation site for the [bgms](https://github.com/Bayesian-Graphical-Modelling-Lab/bgms) R package.
 
 ## Structure
