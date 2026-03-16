@@ -37,7 +37,7 @@ fit = bgm(data, seed = 1234)
 ## Posterior summaries
 
 `summary()` returns posterior means, standard deviations, R-hat, and
-effective sample sizes for all pairwise interaction and threshold
+effective sample sizes for all partial association and threshold
 parameters. `coef()` provides posterior means and inclusion
 probabilities.
 

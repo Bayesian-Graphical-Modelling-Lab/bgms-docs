@@ -16,8 +16,8 @@ analysis workflows, and MCMC output.
 
 ### Models
 
-- [Gaussian Graphical Model](ggm.qmd) — Continuous data, partial correlations, precision matrix
-- [Ordinal MRF](omrf.qmd) — Binary and ordinal data, category thresholds, pairwise interactions
+- [Gaussian Graphical Model](ggm.qmd) — Continuous data, partial associations, precision matrix
+- [Ordinal MRF](omrf.qmd) — Binary and ordinal data, category thresholds, partial associations
 - [Mixed MRF](mixed-model.qmd) — Datasets with both continuous and discrete variables
 
 ### Analyses

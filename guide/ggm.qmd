@@ -24,19 +24,26 @@ means that variables $i$ and $j$ are conditionally independent given all
 other variables — equivalently, the edge between nodes $i$ and $j$ is
 absent.
 
-## Partial correlations
+## Partial associations
 
-The off-diagonal entries of the standardized precision matrix are partial
-correlations:
+As described in [Graphical Models](graphical-models.qmd), bgms reports all
+pairwise effects on a unified partial association scale. For the GGM, the
+partial association between variables $i$ and $j$ is:
+
+$$
+\phi_{ij} = -\tfrac{1}{2}\, K_{ij}
+$$
+
+This is a linear rescaling of the precision off-diagonal. A positive
+$\phi_{ij}$ means that, holding all other variables constant, higher values
+of $x_i$ are associated with higher values of $x_j$.
+
+The standardized version of the precision off-diagonal gives the partial
+correlation:
 
 $$
 \rho_{ij \cdot \text{rest}} = -\frac{K_{ij}}{\sqrt{K_{ii} K_{jj}}}
 $$
-
-A positive partial correlation means that, holding all other variables
-constant, higher values of $x_i$ are associated with higher values of $x_j$.
-bgms reports these partial correlations as the pairwise interaction
-parameters.
 
 ## Fitting a GGM
 
@@ -47,15 +54,19 @@ fit = bgm(x = continuous_data, variable_type = "continuous", seed = 1234)
 ```
 
 The `summary()` and `coef()` methods work the same as for ordinal models.
-The pairwise effects in the output are partial correlations, and the
-diagonal of the pairwise matrix contains the precision matrix diagonal.
+`coef(fit)$pairwise` returns the partial associations $\phi_{ij}$.
+
+To obtain model-specific parameterizations, use the dedicated extractors:
+
+- `extract_precision(fit)` — returns the full precision matrix $\boldsymbol{K}$.
+- `extract_partial_correlations(fit)` — returns the partial correlation matrix.
 
 ## Edge selection
 
 When `edge_selection = TRUE` (the default), bgms applies spike-and-slab
-priors to the off-diagonal entries of the precision matrix. Edges with
-posterior inclusion probability above 0.5 have more evidence for presence
-than absence. See [Edge Selection](edge-selection.qmd) for details.
+priors to the partial associations $\phi_{ij}$. Edges with posterior
+inclusion probability above 0.5 have more evidence for presence than
+absence. See [Edge Selection](edge-selection.qmd) for details.
 
 ## Missing data
 

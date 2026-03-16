@@ -61,7 +61,7 @@ By default, `bgm()` runs four parallel MCMC chains using the No-U-Turn Sampler (
 summary(fit)
 ```
 
-The summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For pairwise interactions, it also reports posterior inclusion probabilities because we used edge selection.
+The summary shows posterior means, standard deviations, Monte Carlo standard errors (MCSE), effective sample sizes (ESS), and R-hat values for each parameter. For partial associations, it also reports posterior inclusion probabilities because we used edge selection.
 
 ## Posterior means
 
@@ -69,7 +69,7 @@ The summary shows posterior means, standard deviations, Monte Carlo standard err
 coef(fit)
 ```
 
-`coef()` returns posterior mean matrices: `$pairwise` contains the interaction strengths and `$indicator` contains edge inclusion probabilities.
+`coef()` returns posterior mean matrices: `$pairwise` contains the partial associations and `$indicator` contains edge inclusion probabilities.
 
 ## Network plot
 

@@ -6,29 +6,19 @@ title: "Prior Basics"
 This page has not yet passed technical or readability review.
 :::
 
-This chapter explains what priors are, how bgms uses them, and when
-the defaults should be changed. Analysis-specific prior guidance
-appears on the [Edge Selection](edge-selection.qmd),
-[Group Comparison](group-comparison.qmd), and
-[Edge Clustering](clustering.qmd) pages.
+This chapter explains what priors are, how `bgms` uses them, and when the defaults should be changed. Analysis-specific prior guidance appears on the [Edge Selection](edge-selection.qmd), [Group Comparison](group-comparison.qmd), and [Edge Clustering](clustering.qmd) pages.
 
 ## What is a prior?
 
-A prior distribution encodes assumptions about a parameter before
-observing data. In Bayesian inference, the prior is combined with the
-likelihood to produce the posterior distribution. The prior matters most
-when data are sparse; as data accumulate, the posterior is increasingly
-driven by the likelihood.
+A prior distribution encodes assumptions about a parameter before observing data. In Bayesian inference, the prior is combined with the likelihood to produce the posterior distribution. The prior matters most when data are sparse; as data accumulate, the posterior is increasingly driven by the likelihood.
 
 ## Priors in bgms
 
-bgms places priors on three types of quantities: pairwise interaction
-parameters, main effect parameters, and (when edge selection is active)
-edge inclusion indicators. Each has a distinct role.
+`bgms` places priors on three types of quantities: partial association parameters, main effect parameters, and (when edge selection is active) edge inclusion indicators. Each has a distinct role.
 
-### Pairwise interaction prior
+### Partial association prior
 
-The pairwise interactions $\sigma_{ij}$ receive a Cauchy prior (a
+The partial associations $\phi_{ij}$ receive a Cauchy prior (a
 Student-$t$ distribution with one degree of freedom) centered at zero. The
 scale is controlled by `pairwise_scale` (default: 2.5).
 

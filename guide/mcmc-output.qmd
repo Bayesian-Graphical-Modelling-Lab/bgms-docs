@@ -43,7 +43,7 @@ For pairwise effects under edge selection, two additional columns appear:
 Access specific summary tables with:
 
 ```r
-summary(fit)$pairwise   # pairwise interactions
+summary(fit)$pairwise   # partial associations
 summary(fit)$main        # category thresholds (ordinal) or means (GGM)
 summary(fit)$indicator   # inclusion indicators (if edge selection active)
 ```
@@ -53,7 +53,7 @@ summary(fit)$indicator   # inclusion indicators (if edge selection active)
 The `coef()` method returns posterior means in matrix form:
 
 ```r
-coef(fit)$pairwise   # p x p symmetric matrix of interaction strengths
+coef(fit)$pairwise   # p x p symmetric matrix of partial associations
 coef(fit)$indicator   # p x p symmetric matrix of inclusion probabilities
 ```
 
@@ -74,7 +74,7 @@ The structure is:
 
 - `$main`: list of matrices (one per chain), each with rows = iterations
   and columns = main effect parameters.
-- `$pairwise`: list of matrices (one per chain) for pairwise interactions.
+- `$pairwise`: list of matrices (one per chain) for partial associations.
 - `$indicator`: list of matrices for edge indicators (if edge selection
   was active).
 - `$allocations`: list of matrices for cluster assignments (if SBM prior
@@ -96,10 +96,13 @@ commonly used are:
 | Function | Returns |
 |----------|---------|
 | `extract_arguments()` | Arguments used when fitting the model |
-| `extract_pairwise_interactions()` | Raw pairwise interaction samples |
+| `extract_pairwise_interactions()` | Raw partial association samples |
 | `extract_main_effects()` | Raw main effect samples |
 | `extract_indicators()` | Raw indicator samples |
 | `extract_posterior_inclusion_probabilities()` | Posterior inclusion probabilities |
+| `extract_precision()` | Posterior mean precision matrix (GGM / continuous block) |
+| `extract_partial_correlations()` | Posterior mean partial correlation matrix (GGM / continuous block) |
+| `extract_log_odds()` | Posterior mean log-odds matrix (ordinal / discrete block) |
 | `extract_ess()` | Effective sample sizes |
 | `extract_rhat()` | Split R-hat values |
 | `extract_sbm()` | SBM cluster assignments and co-clustering matrix |

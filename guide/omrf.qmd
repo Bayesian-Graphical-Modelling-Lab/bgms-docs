@@ -17,17 +17,21 @@ distribution as:
 
 $$
 p(\mathbf{x}) \propto \exp\left(\sum_{i=1}^{p} \mu_{x_i}^{(i)} +
-\sum_{i<j} \sigma_{ij} \, x_i \, x_j\right)
+\sum_{i<j} \phi_{ij} \, x_i \, x_j\right)
 $$
 
 where $\mu_{x_i}^{(i)}$ are category threshold parameters for variable $i$
-(one per category above the lowest) and $\sigma_{ij}$ is the pairwise
-interaction between variables $i$ and $j$.
+(one per category above the lowest) and $\phi_{ij}$ is the partial
+association between variables $i$ and $j$.
 
-A positive interaction $\sigma_{ij} > 0$ means that higher categories of
-$x_i$ tend to co-occur with higher categories of $x_j$, conditional on all
-other variables. The category thresholds control the marginal distribution
-of each variable.
+A positive partial association $\phi_{ij} > 0$ means that higher categories
+of $x_i$ tend to co-occur with higher categories of $x_j$, conditional on
+all other variables. The category thresholds control the marginal
+distribution of each variable.
+
+The partial association is half the log adjacent-category odds ratio:
+$\phi_{ij} = \tfrac{1}{2}\,\log\text{OR}_{ij}$. To obtain the full
+log-odds, use `extract_log_odds(fit)`.
 
 ## Regular ordinal variables
 
@@ -57,7 +61,7 @@ toward or away from the baseline:
 - $\beta < 0$: the model favors responses near the baseline category
 - $\beta > 0$: the model favors extreme responses (far from the baseline)
 
-Pairwise interactions between Blume-Capel variables use centered scores
+Partial associations between Blume-Capel variables use centered scores
 $(c - b)$ rather than raw category values.
 
 To use Blume-Capel variables, set `variable_type = "blume-capel"` and
@@ -96,7 +100,7 @@ fit = bgm(x = data, variable_type = "blume-capel",
 ```
 
 The output contains posterior summaries for both threshold parameters
-(`posterior_summary_main`) and pairwise interactions
+(`posterior_summary_main`) and partial associations
 (`posterior_summary_pairwise`).
 
 ## References

@@ -29,7 +29,7 @@ Complete documentation for all exported functions in bgms.
 |----------|-------------|
 | [`extract_arguments()`](extractors.qmd#extract_arguments) | Retrieve the arguments used when fitting a model |
 | [`extract_main_effects()`](extractors.qmd#extract_main_effects) | Extract posterior samples of category threshold parameters |
-| [`extract_pairwise_interactions()`](extractors.qmd#extract_pairwise_interactions) | Extract posterior samples of pairwise interaction parameters |
+| [`extract_pairwise_interactions()`](extractors.qmd#extract_pairwise_interactions) | Extract posterior samples of partial association parameters |
 | [`extract_indicators()`](extractors.qmd#extract_indicators) | Extract posterior samples of edge or difference indicators |
 | [`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities) | Compute posterior inclusion probabilities from indicator samples |
 | [`extract_indicator_priors()`](extractors.qmd#extract_indicator_priors) | Retrieve prior inclusion probabilities for indicators |
@@ -37,6 +37,9 @@ Complete documentation for all exported functions in bgms.
 | [`extract_sbm()`](extractors.qmd#extract_sbm) | Extract stochastic block model assignments and probabilities |
 | [`extract_ess()`](extractors.qmd#extract_ess) | Compute effective sample sizes for model parameters |
 | [`extract_rhat()`](extractors.qmd#extract_rhat) | Compute split-R-hat convergence diagnostics |
+| [`extract_precision()`](extractors.qmd#extract_precision) | Extract posterior mean precision matrix (GGM / continuous block) |
+| [`extract_partial_correlations()`](extractors.qmd#extract_partial_correlations) | Extract posterior mean partial correlation matrix |
+| [`extract_log_odds()`](extractors.qmd#extract_log_odds) | Extract posterior mean log-odds matrix (OMRF / discrete block) |
 
 ## Datasets
 

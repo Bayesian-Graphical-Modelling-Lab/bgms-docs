@@ -12,7 +12,7 @@ Random Fields.
 ## Description
 
 The `bgmCompare` function estimates group differences in category threshold
-parameters (main effects) and pairwise interactions (pairwise effects) of a
+parameters (main effects) and partial associations (pairwise effects) of a
 Markov Random Field (MRF) for binary and ordinal variables. Groups can be
 defined either by supplying two separate datasets (`x` and `y`) or by a
 group membership vector. Optionally, Bayesian variable selection identifies
@@ -82,9 +82,9 @@ bgmCompare(
 
 | Argument | Description |
 |----------|-------------|
-| `pairwise_scale` | Scale of the Cauchy prior for baseline pairwise interactions. Default: `2.5`. |
+| `pairwise_scale` | Scale of the Cauchy prior for baseline partial associations. Default: `2.5`. |
 | `main_alpha`, `main_beta` | Shape parameters of the beta-prime prior for baseline threshold parameters. Defaults: `0.5`. |
-| `standardize` | Logical. If `TRUE`, the Cauchy prior scale for each pairwise interaction (both baseline and difference) is adjusted based on the range of response scores. Default: `FALSE`. |
+| `standardize` | Logical. If `TRUE`, the Cauchy prior scale for each partial association (both baseline and difference) is adjusted based on the range of response scores. Default: `FALSE`. |
 
 ### Sampler settings
 
@@ -109,9 +109,9 @@ A list of class `"bgmCompare"` containing posterior summaries, posterior mean
 matrices, and raw MCMC samples:
 
 - `posterior_summary_main_baseline`, `posterior_summary_pairwise_baseline` ---
-  Summaries of baseline thresholds and pairwise interactions.
+  Summaries of baseline thresholds and partial associations.
 - `posterior_summary_main_differences`, `posterior_summary_pairwise_differences`
-  --- Summaries of group differences in thresholds and pairwise interactions.
+  --- Summaries of group differences in thresholds and partial associations.
 - `posterior_summary_indicator` --- Summaries of inclusion indicators (if
   `difference_selection = TRUE`).
 - `posterior_mean_main_baseline`, `posterior_mean_pairwise_baseline` ---
@@ -126,9 +126,10 @@ posterior means. NUTS diagnostics are available in `fit$nuts_diag` when
 
 ## Details
 
-### Pairwise interactions
+### Partial associations
 
-For variables $i$ and $j$, the group-specific interaction is represented as:
+For variables $i$ and $j$, the group-specific partial association is
+represented as:
 
 $$\theta_{ij}^{(g)} = \phi_{ij} + \delta_{ij}^{(g)}$$
 

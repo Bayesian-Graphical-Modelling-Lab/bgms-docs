@@ -7,7 +7,7 @@ This page has not yet passed technical or readability review.
 :::
 
 Bayesian edge selection determines which edges are present in the network
-by placing spike-and-slab priors on the pairwise interaction parameters.
+by placing spike-and-slab priors on the partial association parameters.
 When `edge_selection = TRUE` (the default), `bgm()` estimates both the
 edge structure and the effect sizes simultaneously.
 
@@ -16,11 +16,11 @@ edge structure and the effect sizes simultaneously.
 For each edge $(i, j)$, an indicator variable $\gamma_{ij} \in \{0, 1\}$
 governs whether the interaction is included in the model:
 
-- When $\gamma_{ij} = 0$ (spike), the interaction $\sigma_{ij}$ is set to
-  exactly zero — the edge is absent.
-- When $\gamma_{ij} = 1$ (slab), the interaction receives a Cauchy prior
-  with scale `pairwise_scale` — the edge is present and the effect size is
-  estimated.
+- When $\gamma_{ij} = 0$ (spike), the partial association $\phi_{ij}$ is
+  set to exactly zero — the edge is absent.
+- When $\gamma_{ij} = 1$ (slab), the partial association receives a Cauchy
+  prior with scale `pairwise_scale` — the edge is present and the effect
+  size is estimated.
 
 The prior probability of inclusion is controlled by the `edge_prior`
 argument. See [Prior Basics](prior-basics.qmd) for the available options

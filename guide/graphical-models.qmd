@@ -44,4 +44,4 @@ and $\boldsymbol{\Phi}$ is a symmetric pairwise interaction matrix. The off-diag
 
 ## Modeling conditional independence
 
-The conditional independence structure — which edges are present — is typically unknown. `bgms` treats edge inclusion as a model selection problem, testing $\phi_{ij} = 0$ against $\phi_{ij} \neq 0$ for each pair of variables using spike-and-slab priors. This produces posterior inclusion probabilities that quantify the evidence for each edge. See [Edge Selection](edge-selection.qmd)).
+The conditional independence structure — which edges are present — is typically unknown. `bgms` treats edge inclusion as a model selection problem, testing $\phi_{ij} = 0$ against $\phi_{ij} \neq 0$ for each pair of variables using spike-and-slab priors. This produces posterior inclusion probabilities that quantify the evidence for each edge. See [Edge Selection](edge-selection.qmd).

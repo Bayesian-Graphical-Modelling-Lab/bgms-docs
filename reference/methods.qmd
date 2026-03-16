@@ -90,8 +90,9 @@ Returns a list with:
   For OMRF models: a numeric matrix (p x max_categories) of category
   thresholds. For mixed MRF models: a list with `$discrete` (threshold
   matrix) and `$continuous` (means matrix).
-- `pairwise` --- Posterior mean pairwise interaction matrix. For GGM and
-  mixed MRF models the precision matrix diagonal is included on the diagonal.
+- `pairwise` --- Posterior mean partial association matrix. The diagonal is
+  zero. For model-specific scales, use `extract_precision()`,
+  `extract_partial_correlations()`, or `extract_log_odds()`.
 - `indicator` --- Posterior mean edge inclusion indicators (if available).
 
 ### bgmCompare
@@ -250,7 +251,7 @@ simulate_mrf(
 | `num_states` | Number of observations to generate. |
 | `num_variables` | Number of variables in the MRF. |
 | `num_categories` | Integer or integer vector. Number of response categories on top of the base category (`1` = binary). |
-| `pairwise` | Symmetric matrix of pairwise interactions. For continuous variables, this is the precision matrix (must be positive definite). |
+| `pairwise` | Symmetric matrix of partial associations. For continuous variables, this is the precision matrix (must be positive definite). |
 | `main` | Main-effect parameters. For ordinal variables: a matrix of category thresholds. For continuous variables: a means vector. |
 | `variable_type` | `"ordinal"`, `"blume-capel"`, or `"continuous"`. Can be a vector for mixed types (ordinal/Blume-Capel only). |
 | `baseline_category` | Integer vector of baseline categories for Blume--Capel variables. |

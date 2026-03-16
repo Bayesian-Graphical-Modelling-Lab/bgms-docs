@@ -7,7 +7,7 @@ This page has not yet passed technical or readability review.
 :::
 
 The `bgmCompare()` function tests for differences in network structure
-between groups. It estimates whether pairwise interactions and category
+between groups. It estimates whether partial associations and category
 thresholds differ across groups in an ordinal Markov Random Field.
 
 ## The model
@@ -49,7 +49,7 @@ placed on the difference parameters $\delta_{ij}^{(g)}$. The posterior
 inclusion probability for each difference indicates how plausible it is
 that the groups differ on that parameter.
 
-By default, only pairwise interaction differences are selected
+By default, only partial association differences are selected
 (`main_difference_selection = FALSE`). Main effect (threshold) differences
 are always included. This default reflects that main effects are often
 nuisance parameters, and their selection can interfere with pairwise
@@ -66,8 +66,8 @@ The `summary()` method reports:
 
 The `coef()` method returns:
 
-- `$pairwise_effects_groups`: group-specific posterior mean pairwise
-  interactions (baseline + difference).
+- `$pairwise_effects_groups`: group-specific posterior mean partial
+  associations (baseline + difference).
 - `$main_effects_groups`: group-specific posterior mean thresholds.
 - `$indicator`: posterior inclusion probabilities for differences.
 

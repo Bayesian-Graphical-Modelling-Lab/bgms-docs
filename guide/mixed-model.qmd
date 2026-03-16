@@ -23,15 +23,21 @@ to its measurement scale.
 
 The mixed MRF combines the ordinal MRF (for discrete variables) and the
 GGM (for continuous variables) into a single joint distribution. The model
-includes three types of pairwise interactions:
+includes three types of partial associations:
 
-- **Discrete–discrete**: interactions between ordinal/binary variables,
-  as in the ordinal MRF.
-- **Continuous–continuous**: partial correlations between continuous
-  variables, as in the GGM (encoded in a precision-like matrix $K_{yy}$).
-- **Cross-type**: interactions between discrete and continuous variables,
-  capturing how a change in an ordinal variable's category is associated
-  with a shift in a continuous variable's conditional mean.
+- **Discrete–discrete**: partial associations between ordinal/binary
+  variables, as in the ordinal MRF.
+- **Continuous–continuous**: partial associations between continuous
+  variables, related to the precision matrix as in the GGM.
+- **Cross-type**: partial associations between discrete and continuous
+  variables, capturing how a change in an ordinal variable's category is
+  associated with a shift in a continuous variable's conditional mean.
+
+All three types are reported on the same partial association scale in
+`coef(fit)$pairwise`. To obtain model-specific parameterizations for the
+continuous block, use `extract_precision(fit)` or
+`extract_partial_correlations(fit)`. For the discrete block, use
+`extract_log_odds(fit)`.
 
 ## Data requirements
 
@@ -71,10 +77,9 @@ full conditional distributions are approximated:
 ## Interpreting the output
 
 The `coef()` method returns a single `$pairwise` matrix that contains all
-three types of interactions. The diagonal entries correspond to the $K_{yy}$
-diagonal (for continuous variables) or are zero (for discrete variables).
-The off-diagonal entries are pairwise interactions regardless of variable
-type.
+three types of partial associations on the same scale. The off-diagonal
+entries are partial associations regardless of variable type; the diagonal
+is zero.
 
 The `$indicator` matrix (when edge selection is active) reports posterior
 inclusion probabilities for all edges, including cross-type edges.

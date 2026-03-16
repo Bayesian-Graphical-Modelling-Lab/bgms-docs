@@ -69,7 +69,7 @@ bgm(
 
 | Argument | Description |
 |----------|-------------|
-| `pairwise_scale` | Scale of the Cauchy prior for pairwise interaction parameters. Default: `2.5`. |
+| `pairwise_scale` | Scale of the Cauchy prior for partial association parameters. Default: `2.5`. |
 | `main_alpha`, `main_beta` | Shape parameters of the beta-prime prior for threshold parameters. Must be positive. Defaults: `0.5`. |
 | `edge_selection` | Logical. Whether to perform Bayesian edge selection. If `FALSE`, the model estimates all edges. Default: `TRUE`. |
 | `edge_prior` | Prior for edge inclusion: `"Bernoulli"`, `"Beta-Bernoulli"`, or `"Stochastic-Block"`. Default: `"Bernoulli"`. |
@@ -78,7 +78,7 @@ bgm(
 | `beta_bernoulli_alpha_between`, `beta_bernoulli_beta_between` | Shape parameters for between-cluster edge inclusion probabilities in the Stochastic-Block prior. Defaults: `1`. |
 | `dirichlet_alpha` | Concentration parameter of the Dirichlet prior on block assignments (Stochastic Block model). Default: `1`. |
 | `lambda` | Rate of the zero-truncated Poisson prior on the number of clusters (Stochastic Block model). Default: `1`. |
-| `standardize` | Logical. If `TRUE`, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products, so standardization ensures equivalent relative shrinkage across all pairs. Default: `FALSE`. |
+| `standardize` | Logical. If `TRUE`, the Cauchy prior scale for each partial association is adjusted based on the range of response scores. Variables with more response categories have larger score products, so standardization ensures equivalent relative shrinkage across all pairs. Default: `FALSE`. |
 
 ### Sampler settings
 
@@ -113,13 +113,12 @@ Main components:
 - `posterior_summary_quadratic` --- Data frame with posterior summaries for
   the precision matrix diagonal (GGM and mixed MRF). `NULL` for OMRF models.
 - `posterior_summary_pairwise` --- Data frame with posterior summaries for
-  pairwise interaction parameters.
+  partial association parameters.
 - `posterior_summary_indicator` --- Data frame with posterior summaries for
   edge inclusion indicators (if `edge_selection = TRUE`).
 - `posterior_mean_main` --- Posterior mean of main-effect parameters.
-- `posterior_mean_pairwise` --- Symmetric matrix of posterior mean pairwise
-  interaction strengths. For GGM and mixed MRF models, the precision matrix
-  diagonal is on the matrix diagonal.
+- `posterior_mean_associations` --- Symmetric matrix of posterior mean partial
+  associations. The diagonal is zero.
 - `posterior_mean_indicator` --- Symmetric matrix of posterior mean inclusion
   probabilities (if edge selection was enabled).
 - `raw_samples` --- A list of raw MCMC draws per chain, with sublists for
@@ -163,7 +162,7 @@ and $b$ is the baseline category.
 ### Edge selection
 
 When `edge_selection = TRUE`, the function performs Bayesian variable
-selection on pairwise interactions using spike-and-slab priors:
+selection on partial associations using spike-and-slab priors:
 
 - **Bernoulli** --- Fixed inclusion probability across edges.
 - **Beta-Bernoulli** --- Inclusion probability is given a Beta prior.
@@ -210,7 +209,7 @@ fit = bgm(x = Wenchuan[, 1:5], chains = 2)
 # Posterior inclusion probabilities
 summary(fit)$indicator
 
-# Posterior pairwise effects
+# Posterior partial associations
 summary(fit)$pairwise
 ```
 

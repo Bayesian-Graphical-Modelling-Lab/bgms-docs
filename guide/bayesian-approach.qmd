@@ -10,7 +10,7 @@ This page has not yet passed technical or readability review.
 
 ## What we want to learn
 
-Given a dataset of $p$ variables, we want to learn two things: the network structure $\mathcal{S}$ — the collection of edges in the network — and the network parameters $\boldsymbol{\Phi}_\mathcal{S}$ — the partial associations for the edges in $\mathcal{S}$.^[In graphical modeling, the primary inferential targets are the pairwise interactions $\boldsymbol{\Phi}$ and the network structure $\mathcal{S}$. The node potentials $\mu_i(x_i)$ are nuisance parameters: they are estimated but typically not of direct inferential interest.]
+Given a dataset of $p$ variables, we want to learn two things: the network structure $\mathcal{S}$ — the collection of edges in the network — and the network parameters $\boldsymbol{\Phi}_\mathcal{S}$ — the partial associations for the edges in $\mathcal{S}$.^[In graphical modeling, the primary inferential targets are the partial associations $\boldsymbol{\Phi}$ and the network structure $\mathcal{S}$. The node potentials $\mu_i(x_i)$ are nuisance parameters: they are estimated but typically not of direct inferential interest.]
 
 There are many possible structures that could underlie the network. For each structure, there are also many possible values for the corresponding partial associations. Because we seek to learn about these quantities from the data, the specific configuration of edges and the exact parameter values are typically unknown.
 
@@ -62,7 +62,7 @@ In practice, the full posterior distribution for each element of $\boldsymbol{\P
   interpretation: there is a 95% posterior probability that the parameter
   lies within the interval.
 
-In `bgms`, `coef()` and `summary` return the posterior mean of the partial associations, and `summary()` adds the posterior standard deviation alongside MCMC diagnostics.
+In `bgms`, `coef(fit)$pairwise` returns the posterior means of the partial associations, and `summary(fit)$pairwise` adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.
 
 ## Bayesian structure learning
 
@@ -80,7 +80,7 @@ $$
 
 This posterior inclusion probability aggregates evidence across all possible network structures. In effect, it performs Bayesian model averaging and therefore accounts for our uncertainty about the remaining edges in the network.
 
-In `bgms`, `coef()` and `summary` return the posterior mean of the inclusion probabilities, and `summary()` adds the posterior standard deviation alongside MCMC diagnostics.
+In `bgms`, `coef(fit)$indicator` returns the posterior means of the inclusion probabilities, and `summary(fit)$indicator` adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.
 
 
 ### The inclusion Bayes factor
