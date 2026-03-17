@@ -1970,18 +1970,6 @@
     ]
   },
   {
-    "objectID": "guide/prior-basics.html#default-choices-and-when-to-change-them",
-    "href": "guide/prior-basics.html#default-choices-and-when-to-change-them",
-    "title": "Prior Basics",
-    "section": "Default choices and when to change them",
-    "text": "Default choices and when to change them\nThe defaults are a reasonable starting point for most analyses:\n\npairwise_scale = 2.5: Appropriate for standardized ordinal data. Consider increasing it if effects are expected to be large, or decreasing it for stronger shrinkage in dense networks.\ninclusion_probability = 0.5: Assigns equal prior weight to edge presence and absence. This is a standard noninformative choice. Lowering it encodes a prior expectation of sparser networks.\nbeta_bernoulli_alpha = 1, beta_bernoulli_beta = 1: A uniform prior over complexity levels. Changing these is useful when there is prior information about overall network density.\nmain_alpha = 0.5, main_beta = 0.5: A weakly informative symmetric prior. Changing these is rarely necessary unless there is strong prior information about threshold magnitudes.\nstandardize = FALSE: Turned off by default. Set to TRUE when variables have different numbers of response categories and comparable shrinkage across pairs is desired.",
-    "crumbs": [
-      "Get Started",
-      "Background",
-      "Prior Basics"
-    ]
-  },
-  {
     "objectID": "guide/clustering.html",
     "href": "guide/clustering.html",
     "title": "Edge Clustering",

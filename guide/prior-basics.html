@@ -651,17 +651,6 @@ p(\mathcal{S}) = \frac{B(\alpha + \gamma_{++},\; \beta + k - \gamma_{++})}{B(\al
 </tbody>
 </table>
 <p>For the category thresholds and Blume-Capel parameters, when the two shape parameters are equal the induced prior on <span class="math inline">\(\mu\)</span> is symmetric around zero. The GGM and mixed MRF priors are not user-configurable.</p>
-</section>
-<section id="default-choices-and-when-to-change-them" class="level2">
-<h2 class="anchored" data-anchor-id="default-choices-and-when-to-change-them">Default choices and when to change them</h2>
-<p>The defaults are a reasonable starting point for most analyses:</p>
-<ul>
-<li><p><strong><code>pairwise_scale = 2.5</code></strong>: Appropriate for standardized ordinal data. Consider increasing it if effects are expected to be large, or decreasing it for stronger shrinkage in dense networks.</p></li>
-<li><p><strong><code>inclusion_probability = 0.5</code></strong>: Assigns equal prior weight to edge presence and absence. This is a standard noninformative choice. Lowering it encodes a prior expectation of sparser networks.</p></li>
-<li><p><strong><code>beta_bernoulli_alpha = 1</code>, <code>beta_bernoulli_beta = 1</code></strong>: A uniform prior over complexity levels. Changing these is useful when there is prior information about overall network density.</p></li>
-<li><p><strong><code>main_alpha = 0.5</code>, <code>main_beta = 0.5</code></strong>: A weakly informative symmetric prior. Changing these is rarely necessary unless there is strong prior information about threshold magnitudes.</p></li>
-<li><p><strong><code>standardize = FALSE</code></strong>: Turned off by default. Set to <code>TRUE</code> when variables have different numbers of response categories and comparable shrinkage across pairs is desired.</p></li>
-</ul>
 
 
 
