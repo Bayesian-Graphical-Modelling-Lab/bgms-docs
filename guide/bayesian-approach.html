@@ -538,7 +538,7 @@ Warning
 <p>Bayes’ rule combines the prior distributions with the information in the observed data to produce a joint posterior distribution over the structure and parameters:</p>
 <p><span class="math display">\[
 p(\boldsymbol{\Phi}_\mathcal{S},\, \mathcal{S} \mid \text{data}) =
-\frac{p(\text{data} \mid \boldsymbol{\Phi}_\mathcal{S},\, \mathcal{S}) \;
+\frac{p(\text{data} \mid \boldsymbol{\Phi}_\mathcal{S}) \;
       p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}) \;
       p(\mathcal{S})}
      {p(\text{data})}
@@ -555,7 +555,7 @@ p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S},\, \text{data})
 </section>
 <section id="bayesian-parameter-estimation" class="level2">
 <h2 class="anchored" data-anchor-id="bayesian-parameter-estimation">Bayesian parameter estimation</h2>
-<p>For a given structure <span class="math inline">\(\mathcal{S}\)</span>, the conditional posterior <span class="math inline">\(p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}, \text{data})\)</span> tells us what we know about each partial association after observing the data. The prior distribution assigns plausibility to each value of the parameter. The observed data update this distribution: parameter values that predict the data well become more plausible, whereas parameter values that predict the data poorly become less plausible.</p>
+<p>For a given structure <span class="math inline">\(\mathcal{S}\)</span>, the conditional posterior <span class="math inline">\(p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}, \text{data})\)</span> tells us what we know about each partial association after observing the data. The prior distribution assigns plausibility to each value of the parameter. The distribution is updated by the observed data: parameter values that predict the data well gain plausibility, while those that predict it poorly lose it.</p>
 <p>In practice, the full posterior distribution for each element of <span class="math inline">\(\boldsymbol{\Phi}_\mathcal{S}\)</span> is usually summarized:</p>
 <ul>
 <li>The <strong>posterior mean</strong> as a point estimate of the partial association.</li>
