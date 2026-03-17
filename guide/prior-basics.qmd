@@ -6,88 +6,109 @@ title: "Prior Basics"
 This page has not yet passed technical or readability review.
 :::
 
-This chapter explains what priors are, how `bgms` uses them, and when the defaults should be changed. Analysis-specific prior guidance appears on the [Edge Selection](edge-selection.qmd), [Group Comparison](group-comparison.qmd), and [Edge Clustering](clustering.qmd) pages.
+This page explains the prior distributions used in `bgms` and how they connect to the Bayesian graphical modeling framework introduced on the [Bayesian Approach](bayesian-approach.qmd) page. Analysis-specific guidance appears on the [Edge Selection](edge-selection.qmd), [Group Comparison](group-comparison.qmd), and [Edge Clustering](clustering.qmd) pages.
 
 ## What is a prior?
 
 A prior distribution encodes assumptions about a parameter before observing data. In Bayesian inference, the prior is combined with the likelihood to produce the posterior distribution. The prior matters most when data are sparse; as data accumulate, the posterior is increasingly driven by the likelihood.
 
-## Priors in bgms
+## The spike-and-slab prior
 
-`bgms` places priors on three types of quantities: partial association parameters, main effect parameters, and (when edge selection is active) edge inclusion indicators. Each has a distinct role.
+The [Bayesian Approach](bayesian-approach.qmd) page introduced two prior distributions: one for the network structure, $p(\mathcal{S})$, and one for the partial associations conditional on that structure, $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})$. In `bgms`, these two priors are linked through a spike-and-slab prior on each partial association $\phi_{ij}$.
 
-### Partial association prior
+The idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero ($\phi_{ij = 0$). When the edge is present, the partial association is free to take any nonzero value ($\phi_{ij \in \mathbb{R}_{\setminus 0}}$). A binary indicator $\gamma_{ij}$ tracks the state of each edge: $\gamma_{ij} = 0$ means the edge is absent and $\gamma_{ij} = 1$ means it is present. Together, the collection of indicators forms the network structure $\mathcal{S}$.
 
-The partial associations $\phi_{ij}$ receive a Cauchy prior (a
-Student-$t$ distribution with one degree of freedom) centered at zero. The
-scale is controlled by `pairwise_scale` (default: 2.5).
+We use the *mixtures of mutually singular distributions* formulation of the spike-and-slab prior [@GottardoRaftery_2008], which designates a mixture of two mutually exclusive components:
 
-The Cauchy distribution has heavy tails, allowing large effects when supported
-by the data, while the peak at zero provides moderate shrinkage. In models
-with many variables and limited data, this regularization prevents extreme
-estimates.
+$$
+p(\phi_{ij} \mid \gamma_{ij})
+= (1 - \gamma_{ij})\;\mathbf{1}_{\{0\}}(\phi_{ij})
+\;+\; \gamma_{ij}\;p_{\text{slab}}(\phi_{ij})\;\mathbf{1}_{\mathbb{R}\setminus\{0\}}(\phi_{ij})
+$$
 
-When `standardize = TRUE`, the prior scale is adjusted based on the range
-of response scores. Variables with more categories have larger score
-products, which typically correspond to smaller interaction effects. Without
-standardization, a fixed scale is relatively wide for high-category pairs
-and narrow for low-category pairs. The adjustment ensures equivalent
-relative shrinkage across all variable pairs.
+Here $\mathbf{1}_{A}(\phi_{ij})$ is the indicator function that equals one when $\phi_{ij} \in A$ and zero otherwise. The two indicator functions make the disjoint support of the components explicit: the first component assigns all probability to $\phi_{ij} \in \{0\}$, the second to $\phi_{ij} \in \mathbb{R}\setminus\{0\}$.
 
-### Main effect prior
+The first component is the **spike**: when $\gamma_{ij} = 0$, all prior probability is concentrated on the value $\phi_{ij} = 0$, enforcing the absence of the edge. The second component is the **slab**: when $\gamma_{ij} = 1$, the partial association receives a continuous distribution over nonzero values, which determines what effect sizes are considered plausible for present edges.
 
-Main effects (category threshold parameters for ordinal models) receive
-a beta-prime prior with shape parameters `main_alpha` and `main_beta`
-(both default to 0.5). When the two shape parameters are equal, the prior is
-symmetric. The beta-prime distribution is defined on the positive reals and
-provides light regularization of the threshold parameters.
+The spike-and-slab above is specified for a single edge. The joint prior on all partial associations is the product of independent spike-and-slab priors across edges:
 
-### Edge inclusion prior
+$$
+p(\boldsymbol{\Phi} \mid \mathcal{S})
+= \prod_{i < j} p(\phi_{ij} \mid \gamma_{ij})
+$$
 
-When `edge_selection = TRUE`, each edge has a binary indicator
-$\gamma_{ij} \in \{0, 1\}$ governing whether the interaction is included.
-The prior on these indicators is controlled by `edge_prior`:
+This is the prior $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})$ from the [Bayesian Approach](bayesian-approach.qmd) page. For a given structure $\mathcal{S}$, the spike components fix all excluded edges to zero, and the slab components provide independent priors on the partial associations of the included edges. The joint prior therefore reduces to a product of slab distributions over the edges in $\mathcal{S}$.
 
-| Prior | Parameters | Behavior |
-|-------|-----------|----------|
-| `"Bernoulli"` | `inclusion_probability` (default 0.5) | Fixed inclusion probability, same for all edges |
-| `"Beta-Bernoulli"` | `beta_bernoulli_alpha`, `beta_bernoulli_beta` (both default 1) | Inclusion probability given a Beta prior, learned from data |
-| `"Stochastic-Block"` | Multiple (see [Clustering](clustering.qmd)) | Cluster-based inclusion probabilities with separate within/between rates |
+The spike-and-slab prior decomposes inference into two questions. The first is a structural question: *is the edge present?* This is governed by $\gamma_{ij}$ and its prior, which together define $p(\mathcal{S})$. The second is a question about effect size: *given that the edge is present, how strong is it?* This is governed by the slab distribution, which defines $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})$ for the nonzero entries. When `edge_selection = TRUE` (the default), both questions are answered simultaneously during estimation. When `edge_selection = FALSE`, the structural question is bypassed: all edges are present, and only the slab prior is active.
 
-## Edge priors vs. parameter priors
+The sections below describe each component: the slab distribution that regularizes effect sizes, and the edge priors that govern which edges are included.
 
-These two types of priors serve different purposes:
+## The slab: prior on effect sizes
 
-- **Edge inclusion priors** determine how likely each edge is to be present
-  _a priori_. They control the sparsity of the estimated network.
+The slab distribution determines the prior plausibility of different effect sizes for edges that are present. In `bgms`, the slab is a Cauchy distribution centered at zero, with a scale parameter controlled by `pairwise_scale` (default: 2.5).
 
-- **Parameter priors** (Cauchy for interactions, beta-prime for thresholds)
-  control the regularization of effect sizes. They determine how much
-  shrinkage is applied to nonzero effects.
+The Cauchy distribution has heavy tails, which means it allows large effects when the data support them, while the peak at zero provides moderate shrinkage toward small effects. In models with many variables and limited data, this regularization prevents extreme estimates.
 
-In a spike-and-slab framework, the "spike" is the prior mass at zero (edge
-excluded), and the "slab" is the Cauchy prior over effect sizes (edge
-included). Both matter for the posterior, but they answer different
-questions: the inclusion prior affects _whether_ an edge is present, while
-the parameter prior affects _how large_ the estimated effect is.
+The scale parameter controls the width of the slab. A wider slab spreads prior probability over a larger range of effect sizes. This has a direct consequence for edge selection: because the slab is also the alternative hypothesis for the inclusion Bayes factor, a wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small. The default of 2.5 balances sensitivity to small effects against specificity.
+
+When `standardize = TRUE`, the prior scale is adjusted based on the range of response scores. Variables with more categories have larger score products, which typically correspond to smaller interaction effects. Without standardization, a fixed scale is relatively wide for high-category pairs and narrow for low-category pairs. The adjustment ensures equivalent relative shrinkage across all variable pairs.
+
+## The spike: priors on the edge indicators
+
+The spike side of the mixture is controlled by the prior on the edge indicators $\gamma_{ij}$. This prior determines, before seeing the data, how likely each edge is to be present. It governs the overall sparsity and structure of the network.
+
+`bgms` provides three edge priors, each encoding a different type of structural assumption. They are selected with the `edge_prior` argument.
+
+### Bernoulli prior
+
+The simplest edge prior treats each edge independently: the indicator $\gamma_{ij}$ follows a Bernoulli distribution with inclusion probability $\pi_{ij}$. Across all edges, this gives
+
+$$
+p(\mathcal{S}) = \prod_{i < j} \pi_{ij}^{\gamma_{ij}}\,(1 - \pi_{ij})^{1 - \gamma_{ij}}
+$$
+
+The inclusion probability can be set to the same value for all edges (a scalar) or specified per edge (a matrix). The default is $\pi_{ij} = 0.5$ for all edges, which assigns equal prior weight to edge presence and absence. A classic choice due to @ErdosRenyi_1959, this treats every possible network structure as equally likely.
+
+Lowering $\pi_{ij}$ encodes a prior expectation that the network is sparse. Raising it encodes a prior expectation of a dense network. Setting different values for different edges allows prior information about specific relationships to be incorporated.
+
+### Beta-Bernoulli prior
+
+The Beta-Bernoulli prior extends the Bernoulli prior by treating the inclusion probability as unknown and learning it from the data. All edges share a single inclusion probability $\pi$, which receives a Beta prior with shape parameters $\alpha$ and $\beta$:
+
+$$
+p(\mathcal{S}) = \frac{B(\alpha + \gamma_{++},\; \beta + k - \gamma_{++})}{B(\alpha,\; \beta)}
+$$
+
+where $\gamma_{++}$ is the total number of included edges, $k = \binom{p}{2}$ is the number of possible edges, and $B(\cdot, \cdot)$ is the beta function.
+
+Because the inclusion probability is integrated out, the edges are no longer independent a priori: the inclusion of one edge makes others slightly more likely. In practice, this means the prior adapts to the overall complexity of the network. If the data suggest a sparse network, the learned inclusion probability decreases; if they suggest a dense network, it increases.
+
+An important special case arises when $\alpha = \beta = 1$ (the default). The prior then places a uniform distribution over different levels of network complexity — one edge, two edges, and so on are all equally likely a priori — and, within each complexity level, all structures of the same size are equally likely.
+
+### Stochastic block model prior
+
+The Bernoulli and Beta-Bernoulli priors treat all edges the same way: either each edge has a fixed inclusion probability, or all edges share a single learned inclusion probability. Neither prior can express the expectation that some groups of variables are more densely connected than others.
+
+The stochastic block model (SBM) prior addresses this by assigning variables to latent blocks. Edges between two variables in the same block share a within-block inclusion probability, while edges between variables in different blocks share a between-block inclusion probability. Each block pair effectively has its own Beta-Bernoulli prior, so the model can learn different levels of density within and between clusters.
+
+When there is only one block, the SBM reduces to the standard Beta-Bernoulli prior. With multiple blocks, it can capture a common pattern in psychological networks: clusters of strongly related variables (e.g., symptoms of the same disorder) connected by sparser bridges to variables in other clusters.
+
+The SBM prior introduces additional parameters: the number of blocks, the assignment of variables to blocks, and the within- and between-block Beta hyperparameters. These are estimated from the data by default. See [Edge Clustering](clustering.qmd) for the full specification, hyperparameter guidance, and interpretation of results.
+
+## Main effect prior
+
+The main effects (category thresholds and Blume-Capel parameters) are nuisance parameters: they are estimated but are typically not of direct inferential interest. Their prior is specified through an exponential transform: $\exp(\mu)$ receives a beta-prime distribution with shape parameters `main_alpha` and `main_beta` (both default to 0.5). When the two shape parameters are equal, the induced prior on $\mu$ is symmetric around zero. This provides light regularization of the threshold parameters.
 
 ## Default choices and when to change them
 
-The defaults are designed for moderate-sized networks (5–30 variables) with
-ordinal data and are a reasonable starting point for most analyses:
+The defaults are a reasonable starting point for most analyses:
 
-- **`pairwise_scale = 2.5`**: Appropriate for standardized ordinal data.
-  Consider increasing it if effects are expected to be large, or decreasing
-  it for stronger shrinkage in dense networks.
+- **`pairwise_scale = 2.5`**: Appropriate for standardized ordinal data. Consider increasing it if effects are expected to be large, or decreasing it for stronger shrinkage in dense networks.
 
-- **`inclusion_probability = 0.5`**: Assigns equal prior weight to edge
-  presence and absence. This is a standard noninformative choice. Lowering
-  it encodes a prior expectation of sparser networks.
+- **`inclusion_probability = 0.5`**: Assigns equal prior weight to edge presence and absence. This is a standard noninformative choice. Lowering it encodes a prior expectation of sparser networks.
 
-- **`main_alpha = 0.5`, `main_beta = 0.5`**: A weakly informative symmetric
-  prior. Changing these is rarely necessary unless there is strong prior
-  information about threshold magnitudes.
+- **`beta_bernoulli_alpha = 1`, `beta_bernoulli_beta = 1`**: A uniform prior over complexity levels. Changing these is useful when there is prior information about overall network density.
 
-- **`standardize = FALSE`**: Turned off by default. Set to `TRUE` when
-  variables have different numbers of response categories and comparable
-  shrinkage across pairs is desired.
+- **`main_alpha = 0.5`, `main_beta = 0.5`**: A weakly informative symmetric prior. Changing these is rarely necessary unless there is strong prior information about threshold magnitudes.
+
+- **`standardize = FALSE`**: Turned off by default. Set to `TRUE` when variables have different numbers of response categories and comparable shrinkage across pairs is desired.
