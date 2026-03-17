@@ -12,10 +12,10 @@ Source: `src/models/ggm/ggm_model.h` and `ggm_model.cpp`.
 ## Precision matrix parameterization
 
 The GGM is parameterized by the $p \times p$ precision matrix
-$\boldsymbol{\Omega}$ (inverse covariance). The off-diagonal elements
-$\omega_{ij}$ are the negative partial correlations (up to scaling).
+$\boldsymbol{\Theta}$ (inverse covariance). The off-diagonal elements
+$\theta_{ij}$ are the negative partial correlations (up to scaling).
 The model maintains an upper-triangular Cholesky factor $\mathbf{R}$
-such that $\mathbf{R}^\top \mathbf{R} = \boldsymbol{\Omega}$
+such that $\mathbf{R}^\top \mathbf{R} = \boldsymbol{\Theta}$
 throughout sampling.
 
 For complete data, the likelihood depends on the data only through
@@ -28,9 +28,9 @@ sufficient statistics.
 The GGM does not support gradient-based samplers because the
 precision matrix must remain positive definite — a constraint that
 is difficult to enforce in a global HMC step. Instead, each
-off-diagonal element $\omega_{ij}$ is updated individually:
+off-diagonal element $\theta_{ij}$ is updated individually:
 
-1. Propose $\omega_{ij}^* \sim \mathcal{N}(\omega_{ij}, \sigma_{ij}^2)$
+1. Propose $\theta_{ij}^* \sim \mathcal{N}(\theta_{ij}, \sigma_{ij}^2)$
 2. Compute the log-acceptance ratio using the Cholesky factor
 3. Accept or reject via Metropolis-Hastings
 
@@ -40,15 +40,15 @@ warmup by Robbins-Monro updates targeting an acceptance rate of
 
 ## Cholesky rank-1 updates
 
-When a single element $\omega_{ij}$ changes by $\delta$, the
+When a single element $\theta_{ij}$ changes by $\delta$, the
 precision matrix changes by a rank-1 update:
-$\boldsymbol{\Omega}' = \boldsymbol{\Omega} + \delta (\mathbf{e}_i \mathbf{e}_j^\top + \mathbf{e}_j \mathbf{e}_i^\top)$.
+$\boldsymbol{\Theta}' = \boldsymbol{\Theta} + \delta (\mathbf{e}_i \mathbf{e}_j^\top + \mathbf{e}_j \mathbf{e}_i^\top)$.
 Rather than recomputing the full Cholesky decomposition in $O(p^3)$,
 bgms applies a rank-1 update to $\mathbf{R}$ in $O(p^2)$.
 
 ### Givens rotation update
 
-For an increase in $\omega_{ij}$ (adding a positive-semidefinite
+For an increase in $\theta_{ij}$ (adding a positive-semidefinite
 term), the Cholesky factor is updated using Givens rotations. The
 update satisfies $\mathbf{R}'^{\!\top}\mathbf{R}' = \mathbf{R}^\top\mathbf{R} + \mathbf{u}\mathbf{u}^\top$.
 
@@ -71,9 +71,9 @@ indicator $\gamma_{ij}$. The update cycle for a single edge:
 1. **Propose inclusion/exclusion** — Compute the Bayes factor for
    including vs. excluding the edge, using the change in
    log-likelihood and the prior inclusion probability
-2. **If included** ($\gamma_{ij} = 1$) — Sample $\omega_{ij}$ from
+2. **If included** ($\gamma_{ij} = 1$) — Sample $\theta_{ij}$ from
    its full conditional via the Metropolis proposal
-3. **If excluded** ($\gamma_{ij} = 0$) — Set $\omega_{ij} = 0$
+3. **If excluded** ($\gamma_{ij} = 0$) — Set $\theta_{ij} = 0$
 
 The order of edge updates is randomized at each iteration to avoid
 systematic sweep artifacts.
@@ -83,11 +83,11 @@ systematic sweep artifacts.
 The GGM log-likelihood for $n$ observations is:
 
 $$
-\ell(\boldsymbol{\Omega}) = \frac{n}{2} \log |\boldsymbol{\Omega}| - \frac{1}{2} \text{tr}(\mathbf{S}\boldsymbol{\Omega})
+\ell(\boldsymbol{\Theta}) = \frac{n}{2} \log |\boldsymbol{\Theta}| - \frac{1}{2} \text{tr}(\mathbf{S}\boldsymbol{\Theta})
 $$
 
 The log-determinant is computed from the Cholesky factor as
-$\log|\boldsymbol{\Omega}| = 2\sum_i \log R_{ii}$. The trace term
+$\log|\boldsymbol{\Theta}| = 2\sum_i \log R_{ii}$. The trace term
 uses the precomputed sufficient statistic $\mathbf{S}$.
 
 ## Missing data imputation

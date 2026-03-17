@@ -101,9 +101,9 @@ Beyond the spike-and-slab, `bgms` places priors on several nuisance parameters t
 
 | Parameter | Model | Prior | Control |
 |-----------|-------|-------|---------|
-| Category thresholds | Ordinal MRF | Beta-prime (via $\exp(\mu)$) | `main_alpha`, `main_beta` (default 0.5) |
-| Blume-Capel parameters | Ordinal MRF | Beta-prime (via $\exp(\mu)$) | `main_alpha`, `main_beta` (default 0.5) |
-| Diagonal of precision matrix | GGM, Mixed MRF | Gamma(1, 1) | Fixed |
-| Continuous variable means | Mixed MRF | Normal(0, 1) | Fixed |
+| Category thresholds | Ordinal MRF, Mixed MRF  | Beta-prime (via $\exp(\mu)$) | `main_alpha`, `main_beta` (default 0.5) |
+| Blume-Capel parameters | Ordinal MRF, Mixed MRF  | Beta-prime (via $\exp(\mu)$) | `main_alpha`, `main_beta` (default 0.5) |
+| Diagonal of precision matrix | GGM, Mixed MRF | Gamma$(1, 1)$ | Fixed |
+| Continuous variable means | Mixed MRF | Normal$(0, 1)$ | Fixed |
 
 For the category thresholds and Blume-Capel parameters, when the two shape parameters are equal the induced prior on $\mu$ is symmetric around zero. The GGM and mixed MRF priors are not user-configurable.

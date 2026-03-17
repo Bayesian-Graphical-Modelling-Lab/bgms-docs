@@ -6,47 +6,114 @@ title: "Mixed Markov Random Field"
 This page has not yet passed technical or readability review.
 :::
 
-The mixed MRF is a graphical model for datasets containing both discrete
-(binary or ordinal) and continuous variables. bgms fits a mixed MRF
-automatically when `variable_type` includes both discrete and continuous
-types.
-
-## When to use a mixed MRF
-
-Use a mixed MRF when the dataset contains a mix of variable types —
-for example, ordinal symptom ratings alongside continuous physiological
-measurements. Rather than discretizing continuous variables or treating
-ordinal scores as continuous, the mixed MRF models each variable according
-to its measurement scale.
+The mixed Markov random field (MRF) is a graphical model for networks containing both discrete (binary or ordinal) and continuous variables. It unites the [Ordinal MRF](omrf.qmd) and the [GGM](ggm.qmd) into a single joint distribution through the conditional Gaussian framework [@LauritzenWermuth_1989; @Lauritzen1996]. To fit a mixed MRF, provide a `variable_type` vector that includes both discrete and continuous types.
 
 ## The model
 
-The mixed MRF combines the ordinal MRF (for discrete variables) and the
-GGM (for continuous variables) into a single joint distribution. The model
-includes three types of partial associations:
+For $p$ discrete variables $\mathbf{x} = (x_1, \ldots, x_p)$ and $q$ continuous variables $\mathbf{y} = (y_1, \ldots, y_q)$, the mixed MRF specifies the joint distribution as:
 
-- **Discrete–discrete**: partial associations between ordinal/binary
-  variables, as in the ordinal MRF.
-- **Continuous–continuous**: partial associations between continuous
-  variables, related to the precision matrix as in the GGM.
-- **Cross-type**: partial associations between discrete and continuous
-  variables, capturing how a change in an ordinal variable's category is
-  associated with a shift in a continuous variable's conditional mean.
+$$
+p(\mathbf{x}, \mathbf{y}) \propto \exp\!\left(
+\sum_{i=1}^{p} \sum_{c=1}^{m_i}\mathcal{I}(x_i = c)\,\mu_{ic} +
+\mathbf{x}^{\sf T}\boldsymbol{\Phi}_{xx}\,\mathbf{x} +
+(\mathbf{y} - \boldsymbol{\mu}_y)^{\sf T}\boldsymbol{\Phi}_{yy}\,(\mathbf{y} - \boldsymbol{\mu}_y) +
+2\,\mathbf{x}^{\sf T}\boldsymbol{\Phi}_{xy}\,\mathbf{y}\right)
+$$
 
-All three types are reported on the same partial association scale in
-`coef(fit)$pairwise`. To obtain model-specific parameterizations for the
-continuous block, use `extract_precision(fit)` or
-`extract_partial_correlations(fit)`. For the discrete block, use
-`extract_log_odds(fit)`.
+where:
 
-## Data requirements
+- $\mu_{ic}$ are category thresholds for discrete variable $i$, category $c$ (with baseline $\mu_{i0} = 0$), as in the [Ordinal MRF](omrf.qmd)
+- $\boldsymbol{\mu}_y$ is the $q$-vector of continuous means
+- $\boldsymbol{\Phi}_{xx}$ is a $p \times p$ symmetric matrix of discrete–discrete interactions
+- $\boldsymbol{\Phi}_{yy}$ is a $q \times q$ symmetric negative semi-definite matrix, related to the precision matrix by $\boldsymbol{\Theta} = -2\,\boldsymbol{\Phi}_{yy}$
+- $\boldsymbol{\Phi}_{xy}$ is a $p \times q$ matrix of cross-type interactions
 
-Each column in the data frame must have a corresponding entry in
-`variable_type`. Allowed types are `"ordinal"`, `"blume-capel"`, and
-`"continuous"`. A per-variable vector is required when the types differ:
+The three interaction blocks ($\boldsymbol{\Phi}_{xx}$, $\boldsymbol{\Phi}_{yy}$, $\boldsymbol{\Phi}_{xy}$) enter the density on the same scale.
+
+## Conditional Gaussian structure
+
+The mixed MRF belongs to the class of conditional Gaussian (CG) distributions [@LauritzenWermuth_1989]: given the discrete variables, the continuous variables follow a multivariate normal distribution:
+
+$$
+\mathbf{y} \mid \mathbf{x} \sim \mathcal{N}\!\left(\boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Phi}_{xy}^{\sf T}\,\mathbf{x},\;\boldsymbol{\Sigma}\right)
+$$
+
+where $\boldsymbol{\Sigma} = \boldsymbol{\Theta}^{-1} = (-2\,\boldsymbol{\Phi}_{yy})^{-1}$ is the conditional covariance. The conditional mean $\boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Phi}_{xy}^{\sf T}\,\mathbf{x}$ shifts linearly with the discrete scores: each discrete variable $x_i$ contributes to the conditional mean of continuous variable $y_j$ in proportion to $\phi_{ij}^{xy}$. The conditional covariance $\boldsymbol{\Sigma}$ does not depend on $\mathbf{x}$ — the discrete variables affect the location of the continuous distribution but not its spread.
+
+In the pure GGM, `bgms` centers the continuous data so that the mean vector is zero and drops out of the model (see [GGM](ggm.qmd)). In the mixed MRF, this centering is not possible: the cross-type interactions couple the continuous means to the discrete variables, so $\boldsymbol{\mu}_y$ remains a free parameter.
+
+The marginal distribution of $\mathbf{x}$, obtained by integrating out $\mathbf{y}$, is an ordinal MRF whose effective interactions absorb the indirect associations between discrete variables mediated through the continuous block.
+
+## Connection to the MRF framework
+
+The [Graphical Models](graphical-models.qmd) page introduced the general pairwise MRF:
+
+$$
+p(\mathbf{z}) \propto \exp\!\left(\sum_{i} \mu_i(z_i) +
+\mathbf{z}^{\sf T}\boldsymbol{\Phi}\, \mathbf{z}\right)
+$$
+
+The mixed MRF extends this framework to a mixed variable vector $\mathbf{z} = (\mathbf{x}, \mathbf{y})$. The interaction matrix $\boldsymbol{\Phi}$ decomposes into three blocks — $\boldsymbol{\Phi}_{xx}$, $\boldsymbol{\Phi}_{yy}$, and $\boldsymbol{\Phi}_{xy}$ — corresponding to the three types of edges in the graph. When all variables are discrete ($q = 0$), the continuous blocks vanish and the model reduces to the ordinal MRF. When all variables are continuous ($p = 0$), the discrete blocks vanish and the model reduces to the GGM with precision matrix $\boldsymbol{\Theta} = -2\,\boldsymbol{\Phi}_{yy}$.
+
+## Partial associations
+
+The mixed MRF has three types of partial associations, all reported on the same scale in `coef(fit)$pairwise`:
+
+**Discrete–discrete.** The off-diagonal entries of $\boldsymbol{\Phi}_{xx}$ have the same interpretation as in the ordinal MRF: each $\phi_{ij}^{xx}$ is half the log adjacent-category odds ratio, constant across all category pairs. See [Ordinal MRF](omrf.qmd).
+
+**Continuous–continuous.** The off-diagonal entries of $\boldsymbol{\Phi}_{yy}$ are related to the precision element by $\phi_{ij}^{yy} = -\tfrac{1}{2}\,\theta_{ij}$, the same relationship as in the GGM. See [GGM](ggm.qmd).
+
+**Cross-type.** The entries of $\boldsymbol{\Phi}_{xy}$ capture the direct association between a discrete variable $x_i$ and a continuous variable $y_j$, after accounting for all other variables. A cross-type partial association enters both the full conditional of $x_i$ (through the rest score) and the conditional mean of $y_j$.
+
+When $\phi_{ij} = 0$ for any of the three types, the two variables are conditionally independent and the corresponding edge is absent from the graph. The spike-and-slab prior operates on partial associations regardless of type, so edge selection works uniformly across all three blocks.
+
+To obtain model-specific parameterizations: `extract_precision(fit)` returns $\boldsymbol{\Theta}$, `extract_partial_correlations(fit)` returns partial correlations for the continuous block, and `extract_log_odds(fit)` returns the log adjacent-category odds ratios $2\phi_{ij}^{xx}$ for the discrete block.
+
+## Pseudolikelihood
+
+The continuous conditional $p(\mathbf{y} \mid \mathbf{x})$ is a multivariate normal with a closed-form likelihood. For $n$ observations:
+
+$$
+\log p(\mathbf{Y} \mid \mathbf{X}) = \frac{n}{2}\left(\log|\boldsymbol{\Theta}| - q\log(2\pi)\right) - \frac{1}{2}\sum_{i=1}^{n}(\mathbf{y}_i - \mathbf{M}_i)^{\sf T}\boldsymbol{\Theta}\,(\mathbf{y}_i - \mathbf{M}_i)
+$$
+
+where $\mathbf{M}_i = \boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Phi}_{xy}^{\sf T}\,\mathbf{x}_i$ is the conditional mean for observation $i$. This expression is computed exactly — no pseudolikelihood approximation is needed for the continuous block.
+
+The discrete conditionals require a pseudolikelihood approximation, as in the ordinal MRF. The full conditional for discrete variable $x_i$ given all other variables is:
+
+$$
+p(x_i = c \mid \mathbf{x}_{-i}, \mathbf{y}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i}\exp\!\left(\mu_{ik} + k \cdot r_i\right)}
+$$
+
+where the rest score now includes contributions from both discrete and continuous variables:
+
+$$
+r_i = 2\sum_{j \neq i} x_j\, \phi_{ij}^{xx} + 2\sum_{j=1}^{q} y_j\, \phi_{ij}^{xy}
+$$
+
+The `pseudolikelihood` argument controls how these discrete full conditionals are constructed:
+
+- **`"conditional"`** (default): conditions on the observed continuous variables when computing the discrete full conditionals. The rest score uses $\boldsymbol{\Phi}_{xx}$ and $\boldsymbol{\Phi}_{xy}$ directly.
+
+- **`"marginal"`**: integrates out the continuous variables, so the discrete full conditionals use effective interactions that account for indirect discrete–discrete associations mediated through the continuous block.
+
+## Edge selection
+
+When `edge_selection = TRUE` (the default), `bgms` applies spike-and-slab priors to all three types of partial associations. The spike sets $\phi_{ij} = 0$, enforcing the absence of the edge. The slab places a Cauchy prior on $\phi_{ij}$, allowing the effect size to be estimated from the data. See [Prior Basics](prior-basics.qmd) for the spike-and-slab specification.
+
+The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See [Edge Selection](edge-selection.qmd).
+
+## Missing data
+
+Missing values can be imputed within the MCMC sampler by setting `na_action = "impute"`. At each iteration, missing discrete entries are drawn from their full conditional categorical distribution and missing continuous entries from their full conditional normal distribution, given the current parameter values and the observed data. Because the imputation is embedded in the MCMC chain, the posterior summaries account for the uncertainty introduced by missing data.
+
+The default behavior is `na_action = "listwise"`, which removes rows with any missing values before fitting.
+
+## Fitting a mixed MRF
+
+Each column in the data must have a corresponding entry in `variable_type`. Allowed types are `"ordinal"`, `"blume-capel"`, and `"continuous"`:
 
 ```r
-# Example: first 3 variables ordinal, last 2 continuous
 fit = bgm(
   x = data,
   variable_type = c("ordinal", "ordinal", "ordinal",
@@ -55,46 +122,23 @@ fit = bgm(
 )
 ```
 
-bgms validates that ordinal variables contain integer-valued responses and
-that continuous variables are numeric. Missing values are handled by
-`na_action` (`"listwise"` or `"impute"`), just as for single-type models.
-
-## Pseudolikelihood options
-
-For mixed MRFs, the `pseudolikelihood` argument controls how the discrete
-full conditional distributions are approximated:
-
-- **`"conditional"`** (default): conditions on the observed continuous
-  variables when computing the discrete full conditionals. This is faster
-  because the discrete pseudolikelihood does not depend on the continuous
-  interaction matrix $K_{yy}$.
-
-- **`"marginal"`**: integrates out the continuous variables, so the discrete
-  full conditionals account for indirect associations induced through the
-  continuous block. This is more expensive per iteration but may be more
-  appropriate when discrete-continuous coupling is strong.
-
-## Interpreting the output
-
-The `coef()` method returns a single `$pairwise` matrix that contains all
-three types of partial associations on the same scale. The off-diagonal
-entries are partial associations regardless of variable type; the diagonal
-is zero.
-
-The `$indicator` matrix (when edge selection is active) reports posterior
-inclusion probabilities for all edges, including cross-type edges.
-
-## Fitting a mixed MRF
+For Blume-Capel variables in the discrete block, provide `baseline_category`:
 
 ```r
 fit = bgm(
   x = data,
-  variable_type = c("ordinal", "ordinal", "continuous", "continuous"),
+  variable_type = c("blume-capel", "blume-capel",
+                     "continuous", "continuous"),
+  baseline_category = c(2, 2, NA, NA),
   seed = 1234
 )
-summary(fit)
-coef(fit)
 ```
 
-The workflow — fitting, summarizing, extracting coefficients, checking
-diagnostics — is the same as for pure ordinal or pure continuous models.
+The `summary()` and `coef()` methods work the same as for single-type models. `coef(fit)$pairwise` returns all partial associations on a unified scale, and `coef(fit)$indicator` returns the posterior inclusion probabilities.
+
+To obtain model-specific parameterizations, use the dedicated extractors:
+
+- `extract_main_effects(fit)` — returns category thresholds (discrete) and continuous means.
+- `extract_precision(fit)` — returns the precision matrix $\boldsymbol{\Theta}$ for the continuous block.
+- `extract_partial_correlations(fit)` — returns partial correlations for the continuous block.
+- `extract_log_odds(fit)` — returns log adjacent-category odds ratios $2\phi_{ij}^{xx}$ for the discrete block.
