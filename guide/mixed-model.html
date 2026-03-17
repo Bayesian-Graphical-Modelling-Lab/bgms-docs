@@ -55,7 +55,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -556,61 +576,124 @@ Warning
 <p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The mixed MRF is a graphical model for datasets containing both discrete (binary or ordinal) and continuous variables. bgms fits a mixed MRF automatically when <code>variable_type</code> includes both discrete and continuous types.</p>
-<section id="when-to-use-a-mixed-mrf" class="level2">
-<h2 class="anchored" data-anchor-id="when-to-use-a-mixed-mrf">When to use a mixed MRF</h2>
-<p>Use a mixed MRF when the dataset contains a mix of variable types — for example, ordinal symptom ratings alongside continuous physiological measurements. Rather than discretizing continuous variables or treating ordinal scores as continuous, the mixed MRF models each variable according to its measurement scale.</p>
-</section>
+<p>The mixed Markov random field (MRF) is a graphical model for networks containing both discrete (binary or ordinal) and continuous variables. It unites the <a href="../guide/omrf.html">Ordinal MRF</a> and the <a href="../guide/ggm.html">GGM</a> into a single joint distribution through the conditional Gaussian framework <span class="citation" data-cites="LauritzenWermuth_1989 Lauritzen1996">(<a href="#ref-Lauritzen1996" role="doc-biblioref">Lauritzen, 1996</a>; <a href="#ref-LauritzenWermuth_1989" role="doc-biblioref">Lauritzen &amp; Wermuth, 1989</a>)</span>. To fit a mixed MRF, provide a <code>variable_type</code> vector that includes both discrete and continuous types.</p>
 <section id="the-model" class="level2">
 <h2 class="anchored" data-anchor-id="the-model">The model</h2>
-<p>The mixed MRF combines the ordinal MRF (for discrete variables) and the GGM (for continuous variables) into a single joint distribution. The model includes three types of partial associations:</p>
+<p>For <span class="math inline">\(p\)</span> discrete variables <span class="math inline">\(\mathbf{x} = (x_1, \ldots, x_p)\)</span> and <span class="math inline">\(q\)</span> continuous variables <span class="math inline">\(\mathbf{y} = (y_1, \ldots, y_q)\)</span>, the mixed MRF specifies the joint distribution as:</p>
+<p><span class="math display">\[
+p(\mathbf{x}, \mathbf{y}) \propto \exp\!\left(
+\sum_{i=1}^{p} \sum_{c=1}^{m_i}\mathcal{I}(x_i = c)\,\mu_{ic} +
+\mathbf{x}^{\sf T}\boldsymbol{\Phi}_{xx}\,\mathbf{x} +
+(\mathbf{y} - \boldsymbol{\mu}_y)^{\sf T}\boldsymbol{\Phi}_{yy}\,(\mathbf{y} - \boldsymbol{\mu}_y) +
+2\,\mathbf{x}^{\sf T}\boldsymbol{\Phi}_{xy}\,\mathbf{y}\right)
+\]</span></p>
+<p>where:</p>
 <ul>
-<li><strong>Discrete–discrete</strong>: partial associations between ordinal/binary variables, as in the ordinal MRF.</li>
-<li><strong>Continuous–continuous</strong>: partial associations between continuous variables, related to the precision matrix as in the GGM.</li>
-<li><strong>Cross-type</strong>: partial associations between discrete and continuous variables, capturing how a change in an ordinal variable’s category is associated with a shift in a continuous variable’s conditional mean.</li>
+<li><span class="math inline">\(\mu_{ic}\)</span> are category thresholds for discrete variable <span class="math inline">\(i\)</span>, category <span class="math inline">\(c\)</span> (with baseline <span class="math inline">\(\mu_{i0} = 0\)</span>), as in the <a href="../guide/omrf.html">Ordinal MRF</a></li>
+<li><span class="math inline">\(\boldsymbol{\mu}_y\)</span> is the <span class="math inline">\(q\)</span>-vector of continuous means</li>
+<li><span class="math inline">\(\boldsymbol{\Phi}_{xx}\)</span> is a <span class="math inline">\(p \times p\)</span> symmetric matrix of discrete–discrete interactions</li>
+<li><span class="math inline">\(\boldsymbol{\Phi}_{yy}\)</span> is a <span class="math inline">\(q \times q\)</span> symmetric negative semi-definite matrix, related to the precision matrix by <span class="math inline">\(\boldsymbol{\Theta} = -2\,\boldsymbol{\Phi}_{yy}\)</span></li>
+<li><span class="math inline">\(\boldsymbol{\Phi}_{xy}\)</span> is a <span class="math inline">\(p \times q\)</span> matrix of cross-type interactions</li>
 </ul>
-<p>All three types are reported on the same partial association scale in <code>coef(fit)$pairwise</code>. To obtain model-specific parameterizations for the continuous block, use <code>extract_precision(fit)</code> or <code>extract_partial_correlations(fit)</code>. For the discrete block, use <code>extract_log_odds(fit)</code>.</p>
+<p>The three interaction blocks (<span class="math inline">\(\boldsymbol{\Phi}_{xx}\)</span>, <span class="math inline">\(\boldsymbol{\Phi}_{yy}\)</span>, <span class="math inline">\(\boldsymbol{\Phi}_{xy}\)</span>) enter the density on the same scale.</p>
 </section>
-<section id="data-requirements" class="level2">
-<h2 class="anchored" data-anchor-id="data-requirements">Data requirements</h2>
-<p>Each column in the data frame must have a corresponding entry in <code>variable_type</code>. Allowed types are <code>"ordinal"</code>, <code>"blume-capel"</code>, and <code>"continuous"</code>. A per-variable vector is required when the types differ:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example: first 3 variables ordinal, last 2 continuous</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="fu">c</span>(<span class="st">"ordinal"</span>, <span class="st">"ordinal"</span>, <span class="st">"ordinal"</span>,</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"continuous"</span>, <span class="st">"continuous"</span>),</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>bgms validates that ordinal variables contain integer-valued responses and that continuous variables are numeric. Missing values are handled by <code>na_action</code> (<code>"listwise"</code> or <code>"impute"</code>), just as for single-type models.</p>
+<section id="conditional-gaussian-structure" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-gaussian-structure">Conditional Gaussian structure</h2>
+<p>The mixed MRF belongs to the class of conditional Gaussian (CG) distributions <span class="citation" data-cites="LauritzenWermuth_1989">(<a href="#ref-LauritzenWermuth_1989" role="doc-biblioref">Lauritzen &amp; Wermuth, 1989</a>)</span>: given the discrete variables, the continuous variables follow a multivariate normal distribution:</p>
+<p><span class="math display">\[
+\mathbf{y} \mid \mathbf{x} \sim \mathcal{N}\!\left(\boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Phi}_{xy}^{\sf T}\,\mathbf{x},\;\boldsymbol{\Sigma}\right)
+\]</span></p>
+<p>where <span class="math inline">\(\boldsymbol{\Sigma} = \boldsymbol{\Theta}^{-1} = (-2\,\boldsymbol{\Phi}_{yy})^{-1}\)</span> is the conditional covariance. The conditional mean <span class="math inline">\(\boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Phi}_{xy}^{\sf T}\,\mathbf{x}\)</span> shifts linearly with the discrete scores: each discrete variable <span class="math inline">\(x_i\)</span> contributes to the conditional mean of continuous variable <span class="math inline">\(y_j\)</span> in proportion to <span class="math inline">\(\phi_{ij}^{xy}\)</span>. The conditional covariance <span class="math inline">\(\boldsymbol{\Sigma}\)</span> does not depend on <span class="math inline">\(\mathbf{x}\)</span> — the discrete variables affect the location of the continuous distribution but not its spread.</p>
+<p>In the pure GGM, <code>bgms</code> centers the continuous data so that the mean vector is zero and drops out of the model (see <a href="../guide/ggm.html">GGM</a>). In the mixed MRF, this centering is not possible: the cross-type interactions couple the continuous means to the discrete variables, so <span class="math inline">\(\boldsymbol{\mu}_y\)</span> remains a free parameter.</p>
+<p>The marginal distribution of <span class="math inline">\(\mathbf{x}\)</span>, obtained by integrating out <span class="math inline">\(\mathbf{y}\)</span>, is an ordinal MRF whose effective interactions absorb the indirect associations between discrete variables mediated through the continuous block.</p>
 </section>
-<section id="pseudolikelihood-options" class="level2">
-<h2 class="anchored" data-anchor-id="pseudolikelihood-options">Pseudolikelihood options</h2>
-<p>For mixed MRFs, the <code>pseudolikelihood</code> argument controls how the discrete full conditional distributions are approximated:</p>
+<section id="connection-to-the-mrf-framework" class="level2">
+<h2 class="anchored" data-anchor-id="connection-to-the-mrf-framework">Connection to the MRF framework</h2>
+<p>The <a href="../guide/graphical-models.html">Graphical Models</a> page introduced the general pairwise MRF:</p>
+<p><span class="math display">\[
+p(\mathbf{z}) \propto \exp\!\left(\sum_{i} \mu_i(z_i) +
+\mathbf{z}^{\sf T}\boldsymbol{\Phi}\, \mathbf{z}\right)
+\]</span></p>
+<p>The mixed MRF extends this framework to a mixed variable vector <span class="math inline">\(\mathbf{z} = (\mathbf{x}, \mathbf{y})\)</span>. The interaction matrix <span class="math inline">\(\boldsymbol{\Phi}\)</span> decomposes into three blocks — <span class="math inline">\(\boldsymbol{\Phi}_{xx}\)</span>, <span class="math inline">\(\boldsymbol{\Phi}_{yy}\)</span>, and <span class="math inline">\(\boldsymbol{\Phi}_{xy}\)</span> — corresponding to the three types of edges in the graph. When all variables are discrete (<span class="math inline">\(q = 0\)</span>), the continuous blocks vanish and the model reduces to the ordinal MRF. When all variables are continuous (<span class="math inline">\(p = 0\)</span>), the discrete blocks vanish and the model reduces to the GGM with precision matrix <span class="math inline">\(\boldsymbol{\Theta} = -2\,\boldsymbol{\Phi}_{yy}\)</span>.</p>
+</section>
+<section id="partial-associations" class="level2">
+<h2 class="anchored" data-anchor-id="partial-associations">Partial associations</h2>
+<p>The mixed MRF has three types of partial associations, all reported on the same scale in <code>coef(fit)$pairwise</code>:</p>
+<p><strong>Discrete–discrete.</strong> The off-diagonal entries of <span class="math inline">\(\boldsymbol{\Phi}_{xx}\)</span> have the same interpretation as in the ordinal MRF: each <span class="math inline">\(\phi_{ij}^{xx}\)</span> is half the log adjacent-category odds ratio, constant across all category pairs. See <a href="../guide/omrf.html">Ordinal MRF</a>.</p>
+<p><strong>Continuous–continuous.</strong> The off-diagonal entries of <span class="math inline">\(\boldsymbol{\Phi}_{yy}\)</span> are related to the precision element by <span class="math inline">\(\phi_{ij}^{yy} = -\tfrac{1}{2}\,\theta_{ij}\)</span>, the same relationship as in the GGM. See <a href="../guide/ggm.html">GGM</a>.</p>
+<p><strong>Cross-type.</strong> The entries of <span class="math inline">\(\boldsymbol{\Phi}_{xy}\)</span> capture the direct association between a discrete variable <span class="math inline">\(x_i\)</span> and a continuous variable <span class="math inline">\(y_j\)</span>, after accounting for all other variables. A cross-type partial association enters both the full conditional of <span class="math inline">\(x_i\)</span> (through the rest score) and the conditional mean of <span class="math inline">\(y_j\)</span>.</p>
+<p>When <span class="math inline">\(\phi_{ij} = 0\)</span> for any of the three types, the two variables are conditionally independent and the corresponding edge is absent from the graph. The spike-and-slab prior operates on partial associations regardless of type, so edge selection works uniformly across all three blocks.</p>
+<p>To obtain model-specific parameterizations: <code>extract_precision(fit)</code> returns <span class="math inline">\(\boldsymbol{\Theta}\)</span>, <code>extract_partial_correlations(fit)</code> returns partial correlations for the continuous block, and <code>extract_log_odds(fit)</code> returns the log adjacent-category odds ratios <span class="math inline">\(2\phi_{ij}^{xx}\)</span> for the discrete block.</p>
+</section>
+<section id="pseudolikelihood" class="level2">
+<h2 class="anchored" data-anchor-id="pseudolikelihood">Pseudolikelihood</h2>
+<p>The continuous conditional <span class="math inline">\(p(\mathbf{y} \mid \mathbf{x})\)</span> is a multivariate normal with a closed-form likelihood. For <span class="math inline">\(n\)</span> observations:</p>
+<p><span class="math display">\[
+\log p(\mathbf{Y} \mid \mathbf{X}) = \frac{n}{2}\left(\log|\boldsymbol{\Theta}| - q\log(2\pi)\right) - \frac{1}{2}\sum_{i=1}^{n}(\mathbf{y}_i - \mathbf{M}_i)^{\sf T}\boldsymbol{\Theta}\,(\mathbf{y}_i - \mathbf{M}_i)
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{M}_i = \boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Phi}_{xy}^{\sf T}\,\mathbf{x}_i\)</span> is the conditional mean for observation <span class="math inline">\(i\)</span>. This expression is computed exactly — no pseudolikelihood approximation is needed for the continuous block.</p>
+<p>The discrete conditionals require a pseudolikelihood approximation, as in the ordinal MRF. The full conditional for discrete variable <span class="math inline">\(x_i\)</span> given all other variables is:</p>
+<p><span class="math display">\[
+p(x_i = c \mid \mathbf{x}_{-i}, \mathbf{y}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i}\exp\!\left(\mu_{ik} + k \cdot r_i\right)}
+\]</span></p>
+<p>where the rest score now includes contributions from both discrete and continuous variables:</p>
+<p><span class="math display">\[
+r_i = 2\sum_{j \neq i} x_j\, \phi_{ij}^{xx} + 2\sum_{j=1}^{q} y_j\, \phi_{ij}^{xy}
+\]</span></p>
+<p>The <code>pseudolikelihood</code> argument controls how these discrete full conditionals are constructed:</p>
 <ul>
-<li><p><strong><code>"conditional"</code></strong> (default): conditions on the observed continuous variables when computing the discrete full conditionals. This is faster because the discrete pseudolikelihood does not depend on the continuous interaction matrix <span class="math inline">\(K_{yy}\)</span>.</p></li>
-<li><p><strong><code>"marginal"</code></strong>: integrates out the continuous variables, so the discrete full conditionals account for indirect associations induced through the continuous block. This is more expensive per iteration but may be more appropriate when discrete-continuous coupling is strong.</p></li>
+<li><p><strong><code>"conditional"</code></strong> (default): conditions on the observed continuous variables when computing the discrete full conditionals. The rest score uses <span class="math inline">\(\boldsymbol{\Phi}_{xx}\)</span> and <span class="math inline">\(\boldsymbol{\Phi}_{xy}\)</span> directly.</p></li>
+<li><p><strong><code>"marginal"</code></strong>: integrates out the continuous variables, so the discrete full conditionals use effective interactions that account for indirect discrete–discrete associations mediated through the continuous block.</p></li>
 </ul>
 </section>
-<section id="interpreting-the-output" class="level2">
-<h2 class="anchored" data-anchor-id="interpreting-the-output">Interpreting the output</h2>
-<p>The <code>coef()</code> method returns a single <code>$pairwise</code> matrix that contains all three types of partial associations on the same scale. The off-diagonal entries are partial associations regardless of variable type; the diagonal is zero.</p>
-<p>The <code>$indicator</code> matrix (when edge selection is active) reports posterior inclusion probabilities for all edges, including cross-type edges.</p>
+<section id="edge-selection" class="level2">
+<h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>
+<p>When <code>edge_selection = TRUE</code> (the default), <code>bgms</code> applies spike-and-slab priors to all three types of partial associations. The spike sets <span class="math inline">\(\phi_{ij} = 0\)</span>, enforcing the absence of the edge. The slab places a Cauchy prior on <span class="math inline">\(\phi_{ij}\)</span>, allowing the effect size to be estimated from the data. See <a href="../guide/prior-basics.html">Prior Basics</a> for the spike-and-slab specification.</p>
+<p>The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See <a href="../guide/edge-selection.html">Edge Selection</a>.</p>
+</section>
+<section id="missing-data" class="level2">
+<h2 class="anchored" data-anchor-id="missing-data">Missing data</h2>
+<p>Missing values can be imputed within the MCMC sampler by setting <code>na_action = "impute"</code>. At each iteration, missing discrete entries are drawn from their full conditional categorical distribution and missing continuous entries from their full conditional normal distribution, given the current parameter values and the observed data. Because the imputation is embedded in the MCMC chain, the posterior summaries account for the uncertainty introduced by missing data.</p>
+<p>The default behavior is <code>na_action = "listwise"</code>, which removes rows with any missing values before fitting.</p>
 </section>
 <section id="fitting-a-mixed-mrf" class="level2">
 <h2 class="anchored" data-anchor-id="fitting-a-mixed-mrf">Fitting a mixed MRF</h2>
+<p>Each column in the data must have a corresponding entry in <code>variable_type</code>. Allowed types are <code>"ordinal"</code>, <code>"blume-capel"</code>, and <code>"continuous"</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="fu">c</span>(<span class="st">"ordinal"</span>, <span class="st">"ordinal"</span>, <span class="st">"ordinal"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"continuous"</span>, <span class="st">"continuous"</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For Blume-Capel variables in the discrete block, provide <code>baseline_category</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="fu">c</span>(<span class="st">"ordinal"</span>, <span class="st">"ordinal"</span>, <span class="st">"continuous"</span>, <span class="st">"continuous"</span>),</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The workflow — fitting, summarizing, extracting coefficients, checking diagnostics — is the same as for pure ordinal or pure continuous models.</p>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="fu">c</span>(<span class="st">"blume-capel"</span>, <span class="st">"blume-capel"</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"continuous"</span>, <span class="st">"continuous"</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">baseline_category =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="cn">NA</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>summary()</code> and <code>coef()</code> methods work the same as for single-type models. <code>coef(fit)$pairwise</code> returns all partial associations on a unified scale, and <code>coef(fit)$indicator</code> returns the posterior inclusion probabilities.</p>
+<p>To obtain model-specific parameterizations, use the dedicated extractors:</p>
+<ul>
+<li><code>extract_main_effects(fit)</code> — returns category thresholds (discrete) and continuous means.</li>
+<li><code>extract_precision(fit)</code> — returns the precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span> for the continuous block.</li>
+<li><code>extract_partial_correlations(fit)</code> — returns partial correlations for the continuous block.</li>
+<li><code>extract_log_odds(fit)</code> — returns log adjacent-category odds ratios <span class="math inline">\(2\phi_{ij}^{xx}\)</span> for the discrete block.</li>
+</ul>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-Lauritzen1996" class="csl-entry" role="listitem">
+Lauritzen, S. L. (1996). <em>Graphical models</em>. Oxford University Press.
+</div>
+<div id="ref-LauritzenWermuth_1989" class="csl-entry" role="listitem">
+Lauritzen, S. L., &amp; Wermuth, N. (1989). Graphical models for associations between variables, some of which are qualitative and some quantitative. <em>The Annals of Statistics</em>, <em>17</em>(1), 31–57. <a href="https://doi.org/10.1214/aos/1176347003">https://doi.org/10.1214/aos/1176347003</a>
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms

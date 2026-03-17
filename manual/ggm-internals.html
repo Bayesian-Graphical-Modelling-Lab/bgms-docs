@@ -564,14 +564,14 @@ Warning
 <p>Implementation details of the Gaussian graphical model in bgms. Source: <code>src/models/ggm/ggm_model.h</code> and <code>ggm_model.cpp</code>.</p>
 <section id="precision-matrix-parameterization" class="level2">
 <h2 class="anchored" data-anchor-id="precision-matrix-parameterization">Precision matrix parameterization</h2>
-<p>The GGM is parameterized by the <span class="math inline">\(p \times p\)</span> precision matrix <span class="math inline">\(\boldsymbol{\Omega}\)</span> (inverse covariance). The off-diagonal elements <span class="math inline">\(\omega_{ij}\)</span> are the negative partial correlations (up to scaling). The model maintains an upper-triangular Cholesky factor <span class="math inline">\(\mathbf{R}\)</span> such that <span class="math inline">\(\mathbf{R}^\top \mathbf{R} = \boldsymbol{\Omega}\)</span> throughout sampling.</p>
+<p>The GGM is parameterized by the <span class="math inline">\(p \times p\)</span> precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span> (inverse covariance). The off-diagonal elements <span class="math inline">\(\theta_{ij}\)</span> are the negative partial correlations (up to scaling). The model maintains an upper-triangular Cholesky factor <span class="math inline">\(\mathbf{R}\)</span> such that <span class="math inline">\(\mathbf{R}^\top \mathbf{R} = \boldsymbol{\Theta}\)</span> throughout sampling.</p>
 <p>For complete data, the likelihood depends on the data only through the sufficient statistic <span class="math inline">\(\mathbf{S} = \mathbf{X}^\top \mathbf{X}\)</span>. The <code>GGMModel</code> constructor accepts either raw data or precomputed sufficient statistics.</p>
 </section>
 <section id="element-wise-metropolis" class="level2">
 <h2 class="anchored" data-anchor-id="element-wise-metropolis">Element-wise Metropolis</h2>
-<p>The GGM does not support gradient-based samplers because the precision matrix must remain positive definite — a constraint that is difficult to enforce in a global HMC step. Instead, each off-diagonal element <span class="math inline">\(\omega_{ij}\)</span> is updated individually:</p>
+<p>The GGM does not support gradient-based samplers because the precision matrix must remain positive definite — a constraint that is difficult to enforce in a global HMC step. Instead, each off-diagonal element <span class="math inline">\(\theta_{ij}\)</span> is updated individually:</p>
 <ol type="1">
-<li>Propose <span class="math inline">\(\omega_{ij}^* \sim \mathcal{N}(\omega_{ij}, \sigma_{ij}^2)\)</span></li>
+<li>Propose <span class="math inline">\(\theta_{ij}^* \sim \mathcal{N}(\theta_{ij}, \sigma_{ij}^2)\)</span></li>
 <li>Compute the log-acceptance ratio using the Cholesky factor</li>
 <li>Accept or reject via Metropolis-Hastings</li>
 </ol>
@@ -579,10 +579,10 @@ Warning
 </section>
 <section id="cholesky-rank-1-updates" class="level2">
 <h2 class="anchored" data-anchor-id="cholesky-rank-1-updates">Cholesky rank-1 updates</h2>
-<p>When a single element <span class="math inline">\(\omega_{ij}\)</span> changes by <span class="math inline">\(\delta\)</span>, the precision matrix changes by a rank-1 update: <span class="math inline">\(\boldsymbol{\Omega}' = \boldsymbol{\Omega} + \delta (\mathbf{e}_i \mathbf{e}_j^\top + \mathbf{e}_j \mathbf{e}_i^\top)\)</span>. Rather than recomputing the full Cholesky decomposition in <span class="math inline">\(O(p^3)\)</span>, bgms applies a rank-1 update to <span class="math inline">\(\mathbf{R}\)</span> in <span class="math inline">\(O(p^2)\)</span>.</p>
+<p>When a single element <span class="math inline">\(\theta_{ij}\)</span> changes by <span class="math inline">\(\delta\)</span>, the precision matrix changes by a rank-1 update: <span class="math inline">\(\boldsymbol{\Theta}' = \boldsymbol{\Theta} + \delta (\mathbf{e}_i \mathbf{e}_j^\top + \mathbf{e}_j \mathbf{e}_i^\top)\)</span>. Rather than recomputing the full Cholesky decomposition in <span class="math inline">\(O(p^3)\)</span>, bgms applies a rank-1 update to <span class="math inline">\(\mathbf{R}\)</span> in <span class="math inline">\(O(p^2)\)</span>.</p>
 <section id="givens-rotation-update" class="level3">
 <h3 class="anchored" data-anchor-id="givens-rotation-update">Givens rotation update</h3>
-<p>For an increase in <span class="math inline">\(\omega_{ij}\)</span> (adding a positive-semidefinite term), the Cholesky factor is updated using Givens rotations. The update satisfies <span class="math inline">\(\mathbf{R}'^{\!\top}\mathbf{R}' = \mathbf{R}^\top\mathbf{R} + \mathbf{u}\mathbf{u}^\top\)</span>.</p>
+<p>For an increase in <span class="math inline">\(\theta_{ij}\)</span> (adding a positive-semidefinite term), the Cholesky factor is updated using Givens rotations. The update satisfies <span class="math inline">\(\mathbf{R}'^{\!\top}\mathbf{R}' = \mathbf{R}^\top\mathbf{R} + \mathbf{u}\mathbf{u}^\top\)</span>.</p>
 </section>
 <section id="hyperbolic-rotation-downdate" class="level3">
 <h3 class="anchored" data-anchor-id="hyperbolic-rotation-downdate">Hyperbolic rotation downdate</h3>
@@ -595,8 +595,8 @@ Warning
 <p>When edge selection is active, each edge <span class="math inline">\((i,j)\)</span> has a binary indicator <span class="math inline">\(\gamma_{ij}\)</span>. The update cycle for a single edge:</p>
 <ol type="1">
 <li><strong>Propose inclusion/exclusion</strong> — Compute the Bayes factor for including vs.&nbsp;excluding the edge, using the change in log-likelihood and the prior inclusion probability</li>
-<li><strong>If included</strong> (<span class="math inline">\(\gamma_{ij} = 1\)</span>) — Sample <span class="math inline">\(\omega_{ij}\)</span> from its full conditional via the Metropolis proposal</li>
-<li><strong>If excluded</strong> (<span class="math inline">\(\gamma_{ij} = 0\)</span>) — Set <span class="math inline">\(\omega_{ij} = 0\)</span></li>
+<li><strong>If included</strong> (<span class="math inline">\(\gamma_{ij} = 1\)</span>) — Sample <span class="math inline">\(\theta_{ij}\)</span> from its full conditional via the Metropolis proposal</li>
+<li><strong>If excluded</strong> (<span class="math inline">\(\gamma_{ij} = 0\)</span>) — Set <span class="math inline">\(\theta_{ij} = 0\)</span></li>
 </ol>
 <p>The order of edge updates is randomized at each iteration to avoid systematic sweep artifacts.</p>
 </section>
@@ -604,9 +604,9 @@ Warning
 <h2 class="anchored" data-anchor-id="log-likelihood-computation">Log-likelihood computation</h2>
 <p>The GGM log-likelihood for <span class="math inline">\(n\)</span> observations is:</p>
 <p><span class="math display">\[
-\ell(\boldsymbol{\Omega}) = \frac{n}{2} \log |\boldsymbol{\Omega}| - \frac{1}{2} \text{tr}(\mathbf{S}\boldsymbol{\Omega})
+\ell(\boldsymbol{\Theta}) = \frac{n}{2} \log |\boldsymbol{\Theta}| - \frac{1}{2} \text{tr}(\mathbf{S}\boldsymbol{\Theta})
 \]</span></p>
-<p>The log-determinant is computed from the Cholesky factor as <span class="math inline">\(\log|\boldsymbol{\Omega}| = 2\sum_i \log R_{ii}\)</span>. The trace term uses the precomputed sufficient statistic <span class="math inline">\(\mathbf{S}\)</span>.</p>
+<p>The log-determinant is computed from the Cholesky factor as <span class="math inline">\(\log|\boldsymbol{\Theta}| = 2\sum_i \log R_{ii}\)</span>. The trace term uses the precomputed sufficient statistic <span class="math inline">\(\mathbf{S}\)</span>.</p>
 </section>
 <section id="missing-data-imputation" class="level2">
 <h2 class="anchored" data-anchor-id="missing-data-imputation">Missing data imputation</h2>
