@@ -28,7 +28,7 @@ Bayes' rule combines the prior distributions with the information in the observe
 
 $$
 p(\boldsymbol{\Phi}_\mathcal{S},\, \mathcal{S} \mid \text{data}) =
-\frac{p(\text{data} \mid \boldsymbol{\Phi}_\mathcal{S},\, \mathcal{S}) \;
+\frac{p(\text{data} \mid \boldsymbol{\Phi}_\mathcal{S}) \;
       p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}) \;
       p(\mathcal{S})}
      {p(\text{data})}
@@ -50,7 +50,7 @@ The second factor, $p(\mathcal{S} \mid \text{data})$, is the marginal posterior 
 
 ## Bayesian parameter estimation
 
-For a given structure $\mathcal{S}$, the conditional posterior $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}, \text{data})$ tells us what we know about each partial association after observing the data. The prior distribution assigns plausibility to each value of the parameter. The observed data update this distribution: parameter values that predict the data well become more plausible, whereas parameter values that predict the data poorly become less plausible.
+For a given structure $\mathcal{S}$, the conditional posterior $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}, \text{data})$ tells us what we know about each partial association after observing the data. The prior distribution assigns plausibility to each value of the parameter. The distribution is updated by the observed data: parameter values that predict the data well gain plausibility, while those that predict it poorly lose it.
 
 In practice, the full posterior distribution for each element of $\boldsymbol{\Phi}_\mathcal{S}$ is usually summarized:
 
@@ -81,7 +81,6 @@ $$
 This posterior inclusion probability aggregates evidence across all possible network structures. In effect, it performs Bayesian model averaging and therefore accounts for our uncertainty about the remaining edges in the network.
 
 In `bgms`, `coef(fit)$indicator` returns the posterior means of the inclusion probabilities, and `summary(fit)$indicator` adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.
-
 
 ### The inclusion Bayes factor
 

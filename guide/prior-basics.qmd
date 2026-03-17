@@ -39,7 +39,7 @@ $$
 
 This is the prior $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})$ from the [Bayesian Approach](bayesian-approach.qmd) page. For a given structure $\mathcal{S}$, the spike components fix all excluded edges to zero, and the slab components provide independent priors on the partial associations of the included edges. The joint prior therefore reduces to a product of slab distributions over the edges in $\mathcal{S}$.
 
-The spike-and-slab prior decomposes inference into two questions. The first is a structural question: *is the edge present?* This is governed by $\gamma_{ij}$ and its prior, which together define $p(\mathcal{S})$. The second is a question about effect size: *given that the edge is present, how strong is it?* This is governed by the slab distribution, which defines $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})$ for the nonzero entries. When `edge_selection = TRUE` (the default), both questions are answered simultaneously during estimation. When `edge_selection = FALSE`, the structural question is bypassed: all edges are present, and only the slab prior is active.
+The spike-and-slab prior decomposes inference into two questions.^[When `edge_selection = TRUE` (the default), both questions are answered simultaneously during estimation. When `edge_selection = FALSE`, the structural question is bypassed: all edges are present, and only the slab prior is active.] The first is a structural question: *is the edge present?* This is governed by $\gamma_{ij}$ and its prior, which together define $p(\mathcal{S})$. The second is a question about effect size: *given that the edge is present, how strong is it?* This is governed by the slab distribution, which defines $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})$ for the nonzero entries.
 
 The sections below describe each component: the slab distribution that regularizes effect sizes, and the edge priors that govern which edges are included.
 
@@ -103,7 +103,7 @@ Beyond the spike-and-slab, `bgms` places priors on several nuisance parameters t
 |-----------|-------|-------|---------|
 | Category thresholds | Ordinal MRF | Beta-prime (via $\exp(\mu)$) | `main_alpha`, `main_beta` (default 0.5) |
 | Blume-Capel parameters | Ordinal MRF | Beta-prime (via $\exp(\mu)$) | `main_alpha`, `main_beta` (default 0.5) |
-| Diagonal of precision matrix | GGM | Gamma(1, 1) | Fixed |
+| Diagonal of precision matrix | GGM, Mixed MRF | Gamma(1, 1) | Fixed |
 | Continuous variable means | Mixed MRF | Normal(0, 1) | Fixed |
 
 For the category thresholds and Blume-Capel parameters, when the two shape parameters are equal the induced prior on $\mu$ is symmetric around zero. The GGM and mixed MRF priors are not user-configurable.
