@@ -16,7 +16,7 @@ A prior distribution encodes assumptions about a parameter before observing data
 
 The [Bayesian Approach](bayesian-approach.qmd) page introduced two prior distributions: one for the network structure, $p(\mathcal{S})$, and one for the partial associations conditional on that structure, $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})$. In `bgms`, these two priors are linked through a spike-and-slab prior on each partial association $\phi_{ij}$.
 
-The idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero ($\phi_{ij = 0$). When the edge is present, the partial association is free to take any nonzero value ($\phi_{ij \in \mathbb{R}_{\setminus 0}}$). A binary indicator $\gamma_{ij}$ tracks the state of each edge: $\gamma_{ij} = 0$ means the edge is absent and $\gamma_{ij} = 1$ means it is present. Together, the collection of indicators forms the network structure $\mathcal{S}$.
+The idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero ($\phi_{ij} = 0$). When the edge is present, the partial association is free to take any nonzero value ($\phi_{ij \in \mathbb{R}_{\setminus 0}}$). A binary indicator $\gamma_{ij}$ tracks the state of each edge: $\gamma_{ij} = 0$ means the edge is absent and $\gamma_{ij} = 1$ means it is present. Together, the collection of indicators forms the network structure $\mathcal{S}$.
 
 We use the *mixtures of mutually singular distributions* formulation of the spike-and-slab prior [@GottardoRaftery_2008], which designates a mixture of two mutually exclusive components:
 
@@ -95,9 +95,18 @@ When there is only one block, the SBM reduces to the standard Beta-Bernoulli pri
 
 The SBM prior introduces additional parameters: the number of blocks, the assignment of variables to blocks, and the within- and between-block Beta hyperparameters. These are estimated from the data by default. See [Edge Clustering](clustering.qmd) for the full specification, hyperparameter guidance, and interpretation of results.
 
-## Main effect prior
+## Nuisance parameter priors
 
-The main effects (category thresholds and Blume-Capel parameters) are nuisance parameters: they are estimated but are typically not of direct inferential interest. Their prior is specified through an exponential transform: $\exp(\mu)$ receives a beta-prime distribution with shape parameters `main_alpha` and `main_beta` (both default to 0.5). When the two shape parameters are equal, the induced prior on $\mu$ is symmetric around zero. This provides light regularization of the threshold parameters.
+Beyond the spike-and-slab, `bgms` places priors on several nuisance parameters that are estimated but typically not of direct inferential interest:
+
+| Parameter | Model | Prior | Control |
+|-----------|-------|-------|---------|
+| Category thresholds | Ordinal MRF | Beta-prime (via $\exp(\mu)$) | `main_alpha`, `main_beta` (default 0.5) |
+| Blume-Capel parameters | Ordinal MRF | Beta-prime (via $\exp(\mu)$) | `main_alpha`, `main_beta` (default 0.5) |
+| Diagonal of precision matrix | GGM | Gamma(1, 1) | Fixed |
+| Continuous variable means | Mixed MRF | Normal(0, 1) | Fixed |
+
+For the category thresholds and Blume-Capel parameters, when the two shape parameters are equal the induced prior on $\mu$ is symmetric around zero. The GGM and mixed MRF priors are not user-configurable.
 
 ## Default choices and when to change them
 
