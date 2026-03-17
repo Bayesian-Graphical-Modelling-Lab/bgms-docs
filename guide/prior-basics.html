@@ -549,7 +549,7 @@ Warning
 <section id="the-spike-and-slab-prior" class="level2">
 <h2 class="anchored" data-anchor-id="the-spike-and-slab-prior">The spike-and-slab prior</h2>
 <p>The <a href="../guide/bayesian-approach.html">Bayesian Approach</a> page introduced two prior distributions: one for the network structure, <span class="math inline">\(p(\mathcal{S})\)</span>, and one for the partial associations conditional on that structure, <span class="math inline">\(p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})\)</span>. In <code>bgms</code>, these two priors are linked through a spike-and-slab prior on each partial association <span class="math inline">\(\phi_{ij}\)</span>.</p>
-<p>The idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero (<span class="math inline">\(\phi_{ij = 0\)</span>). When the edge is present, the partial association is free to take any nonzero value (<span class="math inline">\(\phi_{ij \in \mathbb{R}_{\setminus 0}}\)</span>). A binary indicator <span class="math inline">\(\gamma_{ij}\)</span> tracks the state of each edge: <span class="math inline">\(\gamma_{ij} = 0\)</span> means the edge is absent and <span class="math inline">\(\gamma_{ij} = 1\)</span> means it is present. Together, the collection of indicators forms the network structure <span class="math inline">\(\mathcal{S}\)</span>.</p>
+<p>The idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero (<span class="math inline">\(\phi_{ij} = 0\)</span>). When the edge is present, the partial association is free to take any nonzero value (<span class="math inline">\(\phi_{ij \in \mathbb{R}_{\setminus 0}}\)</span>). A binary indicator <span class="math inline">\(\gamma_{ij}\)</span> tracks the state of each edge: <span class="math inline">\(\gamma_{ij} = 0\)</span> means the edge is absent and <span class="math inline">\(\gamma_{ij} = 1\)</span> means it is present. Together, the collection of indicators forms the network structure <span class="math inline">\(\mathcal{S}\)</span>.</p>
 <p>We use the <em>mixtures of mutually singular distributions</em> formulation of the spike-and-slab prior <span class="citation" data-cites="GottardoRaftery_2008">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>)</span>, which designates a mixture of two mutually exclusive components:</p>
 <p><span class="math display">\[
 p(\phi_{ij} \mid \gamma_{ij})
@@ -605,9 +605,52 @@ p(\mathcal{S}) = \frac{B(\alpha + \gamma_{++},\; \beta + k - \gamma_{++})}{B(\al
 <p>The SBM prior introduces additional parameters: the number of blocks, the assignment of variables to blocks, and the within- and between-block Beta hyperparameters. These are estimated from the data by default. See <a href="../guide/clustering.html">Edge Clustering</a> for the full specification, hyperparameter guidance, and interpretation of results.</p>
 </section>
 </section>
-<section id="main-effect-prior" class="level2">
-<h2 class="anchored" data-anchor-id="main-effect-prior">Main effect prior</h2>
-<p>The main effects (category thresholds and Blume-Capel parameters) are nuisance parameters: they are estimated but are typically not of direct inferential interest. Their prior is specified through an exponential transform: <span class="math inline">\(\exp(\mu)\)</span> receives a beta-prime distribution with shape parameters <code>main_alpha</code> and <code>main_beta</code> (both default to 0.5). When the two shape parameters are equal, the induced prior on <span class="math inline">\(\mu\)</span> is symmetric around zero. This provides light regularization of the threshold parameters.</p>
+<section id="nuisance-parameter-priors" class="level2">
+<h2 class="anchored" data-anchor-id="nuisance-parameter-priors">Nuisance parameter priors</h2>
+<p>Beyond the spike-and-slab, <code>bgms</code> places priors on several nuisance parameters that are estimated but typically not of direct inferential interest:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Model</th>
+<th>Prior</th>
+<th>Control</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Category thresholds</td>
+<td>Ordinal MRF</td>
+<td>Beta-prime (via <span class="math inline">\(\exp(\mu)\)</span>)</td>
+<td><code>main_alpha</code>, <code>main_beta</code> (default 0.5)</td>
+</tr>
+<tr class="even">
+<td>Blume-Capel parameters</td>
+<td>Ordinal MRF</td>
+<td>Beta-prime (via <span class="math inline">\(\exp(\mu)\)</span>)</td>
+<td><code>main_alpha</code>, <code>main_beta</code> (default 0.5)</td>
+</tr>
+<tr class="odd">
+<td>Diagonal of precision matrix</td>
+<td>GGM</td>
+<td>Gamma(1, 1)</td>
+<td>Fixed</td>
+</tr>
+<tr class="even">
+<td>Continuous variable means</td>
+<td>Mixed MRF</td>
+<td>Normal(0, 1)</td>
+<td>Fixed</td>
+</tr>
+</tbody>
+</table>
+<p>For the category thresholds and Blume-Capel parameters, when the two shape parameters are equal the induced prior on <span class="math inline">\(\mu\)</span> is symmetric around zero. The GGM and mixed MRF priors are not user-configurable.</p>
 </section>
 <section id="default-choices-and-when-to-change-them" class="level2">
 <h2 class="anchored" data-anchor-id="default-choices-and-when-to-change-them">Default choices and when to change them</h2>
