@@ -55,7 +55,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -568,29 +588,37 @@ Warning
 </section>
 <section id="posterior-inclusion-probabilities" class="level2">
 <h2 class="anchored" data-anchor-id="posterior-inclusion-probabilities">Posterior inclusion probabilities</h2>
-<p>The posterior inclusion probability for edge <span class="math inline">\((i, j)\)</span> is the posterior mean of <span class="math inline">\(\gamma_{ij}\)</span>: the proportion of MCMC iterations in which the edge was included. It ranges from 0 to 1:</p>
+<p>The posterior inclusion probability for edge <span class="math inline">\((i, j)\)</span> is the posterior mean of <span class="math inline">\(\gamma_{ij}\)</span>: it is estimates as the proportion of MCMC iterations in which the edge was included. It ranges from 0 to 1:</p>
 <ul>
-<li>Values near 1.0: strong evidence that the edge is present</li>
-<li>Values near 0.0: strong evidence that the edge is absent</li>
-<li>Values near 0.5: inconclusive (neither inclusion nor exclusion is strongly supported)</li>
+<li>Values near 1.0: strong evidence that the edge is present.</li>
+<li>Values near 0.0: strong evidence that the edge is absent.</li>
+<li>Values near 0.5: the data are uninformative — there is not enough evidence to decide whether the edge is present or absent.</li>
 </ul>
 <p>These are reported by <code>coef(fit)$indicator</code> and in the <code>summary()</code> output.</p>
 </section>
 <section id="bayes-factors-for-edges" class="level2">
 <h2 class="anchored" data-anchor-id="bayes-factors-for-edges">Bayes factors for edges</h2>
-<p>When the prior inclusion probability is 0.5, the posterior inclusion probability can be directly transformed into a Bayes factor:</p>
+<p>When the prior inclusion probability is <span class="math inline">\(\frac{1}{2}\)</span>, the posterior inclusion probability can be directly transformed into a Bayes factor <span class="citation" data-cites="KassRaftery_1995">(<a href="#ref-KassRaftery_1995" role="doc-biblioref">Kass &amp; Raftery, 1995</a>)</span>:</p>
 <p><span class="math display">\[
 \text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{1 - p(\gamma_{ij} = 1 \mid \mathbf{x})}
 \]</span></p>
 <p>For other prior inclusion probabilities, the Bayes factor accounts for the prior odds:</p>
 <p><span class="math display">\[
-\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x}) / p(\gamma_{ij} = 0 \mid \mathbf{x})}{p(\gamma_{ij} = 1) / p(\gamma_{ij} = 0)}
+\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x}) \;/\; p(\gamma_{ij} = 0 \mid \mathbf{x})}{p(\gamma_{ij} = 1) \;/\; p(\gamma_{ij} = 0)}
 \]</span></p>
-<p>The reciprocal <span class="math inline">\(1 / \text{BF}_{10}\)</span> quantifies the evidence for edge absence.</p>
+<p>The reciprocal <span class="math inline">\(1 / \text{BF}_{10}\)</span> quantifies the evidence for edge absence, i.e., conditional independence <span class="citation" data-cites="SekulovskiEtAl_2024">(<a href="#ref-SekulovskiEtAl_2024" role="doc-biblioref">Sekulovski et al., 2024</a>)</span>. Values of <span class="math inline">\(\text{BF}_{10}\)</span> close to one indicate that the data do not discriminate between the two hypotheses — absence of evidence rather than evidence of absence.</p>
+</section>
+<section id="why-the-inclusion-bayes-factor" class="level2">
+<h2 class="anchored" data-anchor-id="why-the-inclusion-bayes-factor">Why the inclusion Bayes factor</h2>
+<p>The inclusion Bayes factor used in <code>bgms</code> is not the only Bayesian approach to testing conditional independence. <span class="citation" data-cites="SekulovskiEtAl_2024">Sekulovski et al. (<a href="#ref-SekulovskiEtAl_2024" role="doc-biblioref">2024</a>)</span> provide a detailed comparison of three methods, revealing important differences in their foundations and performance.</p>
+<p><strong>Credible intervals.</strong> Testing whether the posterior credible interval for a partial association excludes zero is analogous to a classical significance test. This approach conditions on a structure that includes the edge from the outset, and can therefore only reject the hypothesis of absence. It cannot provide evidence <em>for</em> absence — it cannot distinguish absence of evidence from evidence of absence.</p>
+<p><strong>Single-model Bayes factor.</strong> A Bayes factor can be computed by comparing two specific structures that differ only in the edge of interest. This addresses the one-sidedness of the credible interval, but introduces a new problem: the result depends on which structure is assumed for the remaining edges. Since partial associations change when the surrounding structure changes, different structural assumptions yield different Bayes factors for the same edge. <span class="citation" data-cites="SekulovskiEtAl_2024">Sekulovski et al. (<a href="#ref-SekulovskiEtAl_2024" role="doc-biblioref">2024</a>)</span> illustrate how the same edge can receive weak or strong evidence for absence depending on which edges are assumed present elsewhere in the network.</p>
+<p><strong>Inclusion Bayes factor.</strong> The inclusion Bayes factor overcomes this sensitivity through Bayesian model averaging. Rather than conditioning on a single structure for the remaining edges, it aggregates the evidence across all possible structures, weighting each by its posterior plausibility. See <a href="../guide/bayesian-approach.html">The Bayesian Approach</a> for the formal derivation.</p>
+<p>In practice, we do not know the network structure — learning it is the goal of the analysis. The inclusion Bayes factor accounts for this structural uncertainty, and its conclusions therefore hold regardless of which structure generated the data. This makes it the appropriate tool for testing conditional independence in networks.</p>
 </section>
 <section id="evidence-categories" class="level2">
 <h2 class="anchored" data-anchor-id="evidence-categories">Evidence categories</h2>
-<p>The following classification, based on Kass and Raftery (1995), is a common convention:</p>
+<p>The following classification, based on <span class="citation" data-cites="KassRaftery_1995">Kass &amp; Raftery (<a href="#ref-KassRaftery_1995" role="doc-biblioref">1995</a>)</span>, is a common convention:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -601,11 +629,11 @@ Warning
 <tbody>
 <tr class="odd">
 <td>1–3</td>
-<td>Weak</td>
+<td>Not worth more than a bare mention</td>
 </tr>
 <tr class="even">
 <td>3–10</td>
-<td>Moderate</td>
+<td>Substantial</td>
 </tr>
 <tr class="odd">
 <td>10–100</td>
@@ -617,7 +645,12 @@ Warning
 </tr>
 </tbody>
 </table>
-<p>The same scale applies for evidence of absence using <span class="math inline">\(1 / \text{BF}_{10}\)</span>.</p>
+<p>The same scale applies for evidence of absence using <span class="math inline">\(1 / \text{BF}_{10}\)</span>. These thresholds are conventions, not absolute standards — the Bayes factor is a continuous measure of evidence and does not require strict cutoffs.</p>
+</section>
+<section id="evidence-in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="evidence-in-practice">Evidence in practice</h2>
+<p>How much evidence do published psychological networks actually provide? <span class="citation" data-cites="HuthEtAl_2026_evidence">Huth et al. (<a href="#ref-HuthEtAl_2026_evidence" role="doc-biblioref">2026</a>)</span> reanalyzed 293 networks from 126 studies and found that the network structure is highly uncertain: for the majority of edges, the data do not clearly decide whether the edge should be present or absent. Only about one in five edges was supported by strong evidence; for the rest, the evidence was weak or inconclusive. The exact proportions depend on the evidence thresholds used, but the overall picture is clear — uncertainty about individual edges is the norm, not the exception.</p>
+<p>This is precisely why a Bayesian approach matters. Without it, a missing edge in an estimated network is ambiguous: did the method find evidence that the edge is absent, or was there simply not enough data to detect it? The Bayes factor makes this distinction explicit. When the evidence is inconclusive, it says so — and that information is just as valuable as a decisive result, because it prevents conclusions that the data cannot support.</p>
 </section>
 <section id="median-probability-model" class="level2">
 <h2 class="anchored" data-anchor-id="median-probability-model">Median probability model</h2>
@@ -637,9 +670,20 @@ Warning
 <p>The <code>pairwise_scale</code> parameter controls the slab width. A wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small, because the prior spreads probability over a wide range. The default of 2.5 balances sensitivity to small effects against specificity.</p>
 
 
+
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-HuthEtAl_2026_evidence" class="csl-entry" role="listitem">
+Huth, K. B. S., Haslbeck, J. M. B., Keetelaar, S., van Holst, R. J., &amp; Marsman, M. (2026). Statistical evidence in psychological networks. <em>Nature Human Behaviour</em>, <em>10</em>, 333–346. <a href="https://doi.org/10.1038/s41562-025-02314-2">https://doi.org/10.1038/s41562-025-02314-2</a>
+</div>
+<div id="ref-KassRaftery_1995" class="csl-entry" role="listitem">
+Kass, R. E., &amp; Raftery, A. E. (1995). Bayes factors. <em>Journal of the American Statistical Association</em>, <em>90</em>(430), 773–795. <a href="https://doi.org/10.2307/2291091">https://doi.org/10.2307/2291091</a>
+</div>
+<div id="ref-SekulovskiEtAl_2024" class="csl-entry" role="listitem">
+Sekulovski, N., Keetelaar, S., Huth, K. B. S., Wagenmakers, E.-J., van Bork, R., van den Bergh, D., &amp; Marsman, M. (2024). Testing conditional independence in psychometric networks: <span>A</span>n analysis of three <span>B</span>ayesian methods. <em>Multivariate Behavioral Research</em>, <em>59</em>, 913–933. <a href="https://doi.org/10.1080/00273171.2024.2345915">https://doi.org/10.1080/00273171.2024.2345915</a>
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
