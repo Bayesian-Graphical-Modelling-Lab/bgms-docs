@@ -91,7 +91,7 @@ The Bernoulli and Beta-Bernoulli priors treat all edges the same way: either eac
 
 The stochastic block model (SBM) prior addresses this by assigning variables to latent blocks. Edges between two variables in the same block share a within-block inclusion probability, while edges between variables in different blocks share a between-block inclusion probability. Each block pair effectively has its own Beta-Bernoulli prior, so the model can learn different levels of density within and between clusters.
 
-When there is only one block, the SBM reduces to the standard Beta-Bernoulli prior. With multiple blocks, it can capture a common pattern in psychological networks: clusters of strongly related variables (e.g., symptoms of the same disorder) connected by sparser bridges to variables in other clusters.
+When there is only one block, the SBM reduces to the standard Beta-Bernoulli prior. With multiple blocks, it can capture a common pattern in applied networks: clusters of densely connected variables with sparser connections between clusters.
 
 The SBM prior introduces additional parameters: the number of blocks, the assignment of variables to blocks, and the within- and between-block Beta hyperparameters. These are estimated from the data by default. See [Edge Clustering](clustering.qmd) for the full specification, hyperparameter guidance, and interpretation of results.
 

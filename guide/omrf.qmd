@@ -94,7 +94,7 @@ For binary variables (two categories, coded 0 and 1), the model reduces to the I
 
 ### Blume-Capel variables
 
-The Blume-Capel model originates in statistical physics, where @Blume_1966 and @Capel_1966 independently developed it to study phase transitions in ternary spin systems. @VanDerMaasBorsboomWaldorp_2026 introduced the model in psychology, applying it to attitudes, depression, and intelligence.
+The Blume-Capel model originates in statistical physics, where @Blume_1966 and @Capel_1966 independently developed it to study phase transitions in ternary spin systems. As an application to psychology, @VanDerMaasBorsboomWaldorp_2026 used the model to study attitudes, depression, and intelligence.
 
 For ordinal variables with a natural baseline or reference category (e.g., a "neutral" response), the Blume-Capel parameterization models category thresholds as a quadratic function of distance from the baseline:
 

@@ -70,7 +70,7 @@ The same scale applies for evidence of absence using $1 / \text{BF}_{10}$. These
 
 ## Evidence in practice
 
-How much evidence do published psychological networks actually provide? @HuthEtAl_2026_evidence reanalyzed 293 networks from 126 studies and found that the network structure is highly uncertain: for the majority of edges, the data do not clearly decide whether the edge should be present or absent. Only about one in five edges was supported by strong evidence; for the rest, the evidence was weak or inconclusive. The exact proportions depend on the evidence thresholds used, but the overall picture is clear — uncertainty about individual edges is the norm, not the exception.
+As an illustration from psychology, @HuthEtAl_2026_evidence reanalyzed 293 networks from 126 studies and found that the network structure is highly uncertain: for the majority of edges, the data do not clearly decide whether the edge should be present or absent. Only about one in five edges was supported by strong evidence; for the rest, the evidence was weak or inconclusive. The exact proportions depend on the evidence thresholds used, but the overall picture is clear — uncertainty about individual edges is the norm, not the exception.
 
 This is precisely why a Bayesian approach matters. Without it, a missing edge in an estimated network is ambiguous: did the method find evidence that the edge is absent, or was there simply not enough data to detect it? The Bayes factor makes this distinction explicit. When the evidence is inconclusive, it says so — and that information is just as valuable as a decisive result, because it prevents conclusions that the data cannot support.
 
