@@ -55,7 +55,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -556,10 +576,37 @@ Warning
 <p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The stochastic block model (SBM) prior in bgms discovers clusters of edges in the network. Nodes are assigned to latent blocks, and edge inclusion probabilities depend on whether the two endpoints belong to the same block or different blocks.</p>
-<section id="what-is-edge-clustering" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-edge-clustering">What is edge clustering?</h2>
-<p>In many applied networks, edges are not exchangeable: some groups of variables are densely connected while connections between groups are sparse. The SBM prior captures this structure by learning block assignments from the data. Nodes within the same block share a within-cluster inclusion probability, and edges between blocks share a (typically lower) between-cluster inclusion probability.</p>
+<p>In many networks, nodes can be organized in clusters or communities, and edges are not exchangeable. Standard edge priors (Bernoulli, Beta-Bernoulli) cannot encode such structure because they assign the same inclusion probability to every edge. The stochastic block model (SBM) prior embeds the assumption of clustering directly into the graphical model, so that cluster assignments, the number of clusters, and the evidence for clustering are all estimated as part of the analysis <span class="citation" data-cites="SekulovskiEtAl_2025_sbm">(<a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">Sekulovski et al., 2025</a>)</span>.</p>
+<section id="the-stochastic-block-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-stochastic-block-model">The stochastic block model</h2>
+<p>The SBM <span class="citation" data-cites="HollandEtAl_1983">(<a href="#ref-HollandEtAl_1983" role="doc-biblioref">Holland et al., 1983</a>)</span> assumes that each node belongs to one of <span class="math inline">\(B\)</span> latent blocks and that the probability of an edge depends on the block membership of its two endpoints. Let <span class="math inline">\(z_i \in \{1, \dots, B\}\)</span> denote the block assignment of node <span class="math inline">\(i\)</span>. The edge indicators then follow</p>
+<p><span class="math display">\[
+\gamma_{ij} \mid \boldsymbol{\pi}, \mathbf{z} \sim \text{Bernoulli}(\pi_{z_i z_j})
+\]</span></p>
+<p>where <span class="math inline">\(\pi_{ab}\)</span> is the inclusion probability for edges connecting blocks <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>. The prior distinguishes within-block edges (<span class="math inline">\(a = b\)</span>) from between-block edges (<span class="math inline">\(a \neq b\)</span>), assigning independent Beta priors to each:</p>
+<p><span class="math display">\[
+\pi_{ab} \sim
+\begin{cases}
+\text{Beta}(\alpha_w, \beta_w) &amp; a = b \\[4pt]
+\text{Beta}(\alpha_b, \beta_b) &amp; a \neq b
+\end{cases}
+\]</span></p>
+<p>Setting <span class="math inline">\(\alpha_w &gt; \beta_w\)</span> and <span class="math inline">\(\alpha_b &lt; \beta_b\)</span> encodes the expectation that within-cluster connections are dense and between-cluster connections are sparse. When <span class="math inline">\(B = 1\)</span>, the SBM reduces to the standard Beta-Bernoulli prior with hyperparameters <span class="math inline">\(\alpha_w\)</span> and <span class="math inline">\(\beta_w\)</span>.</p>
+<p>The block assignments are modeled using a categorical distribution with prior probability <span class="math inline">\(P(z_i = b \mid \boldsymbol{\delta}, B) = \delta_b\)</span>, where the assignment probabilities <span class="math inline">\(\boldsymbol{\delta}\)</span> receive a Dirichlet<span class="math inline">\((\epsilon_1, \dots, \epsilon_B)\)</span> prior with default <span class="math inline">\(\epsilon_b = 1\)</span>. The number of blocks <span class="math inline">\(B\)</span> is itself a parameter and receives a zero-truncated Poisson prior,</p>
+<p><span class="math display">\[
+P(B) = \frac{\lambda^B}{B!\,(\exp(\lambda) - 1)}, \quad B \geq 1
+\]</span></p>
+<p>with rate <span class="math inline">\(\lambda\)</span> controlling the expected number of clusters. The rate parameter <span class="math inline">\(\lambda\)</span> does not exactly equal the expected number of clusters but approximates it: <span class="math inline">\(\lambda = 1.59\)</span> corresponds to approximately 2 clusters, <span class="math inline">\(\lambda = 2.82\)</span> to 3, <span class="math inline">\(\lambda = 3.92\)</span> to 4, and <span class="math inline">\(\lambda = 4.96\)</span> to 5. For 6 or more expected clusters, <span class="math inline">\(\lambda\)</span> can be set equal to the expected number of clusters.</p>
+<p>In summary, the full hierarchical specification is:</p>
+<ul>
+<li><span class="math inline">\(B \sim \text{Poisson}^+(\lambda)\)</span></li>
+<li><span class="math inline">\(\boldsymbol{\delta} \mid B \sim \text{Dirichlet}(\epsilon_1, \dots, \epsilon_B)\)</span></li>
+<li><span class="math inline">\(z_i \mid \boldsymbol{\delta}, B \sim \text{Categorical}(\boldsymbol{\delta})\)</span></li>
+<li><span class="math inline">\(\pi_{ab} \mid B \sim \text{Beta}(\alpha_w, \beta_w)\)</span> for <span class="math inline">\(a = b\)</span> (within-cluster)</li>
+<li><span class="math inline">\(\pi_{ab} \mid B \sim \text{Beta}(\alpha_b, \beta_b)\)</span> for <span class="math inline">\(a \neq b\)</span> (between-cluster)</li>
+<li><span class="math inline">\(\gamma_{ij} \mid \boldsymbol{\pi}, \mathbf{z}, B \sim \text{Bernoulli}(\pi_{z_i z_j})\)</span></li>
+</ul>
+<p>Both <span class="math inline">\(B\)</span> and <span class="math inline">\(\boldsymbol{\delta}\)</span> are analytically marginalized out using the Mixtures of Finite Mixtures (MFM) framework <span class="citation" data-cites="MillerHarrison_2018">(<a href="#ref-MillerHarrison_2018" role="doc-biblioref">Miller &amp; Harrison, 2018</a>)</span>, following the implementation of <span class="citation" data-cites="GengEtAl_2019">Geng et al. (<a href="#ref-GengEtAl_2019" role="doc-biblioref">2019</a>)</span> for the SBM. This avoids transdimensional sampling while providing consistent estimation of the number of clusters. For details, see <span class="citation" data-cites="SekulovskiEtAl_2025_sbm">Sekulovski et al. (<a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">2025</a>)</span>.</p>
 </section>
 <section id="setting-up-the-sbm-prior" class="level2">
 <h2 class="anchored" data-anchor-id="setting-up-the-sbm-prior">Setting up the SBM prior</h2>
@@ -569,7 +616,7 @@ Warning
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="st">"Stochastic-Block"</span>,</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The SBM prior has several hyperparameters:</p>
+<p>The SBM prior has the following hyperparameters:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 42%">
@@ -587,12 +634,12 @@ Warning
 <tr class="odd">
 <td><code>beta_bernoulli_alpha</code>, <code>beta_bernoulli_beta</code></td>
 <td>1, 1</td>
-<td>Shape parameters of the Beta prior on within-cluster inclusion probability</td>
+<td>Beta prior on within-cluster inclusion probability (<span class="math inline">\(\alpha_w\)</span>, <span class="math inline">\(\beta_w\)</span>)</td>
 </tr>
 <tr class="even">
 <td><code>beta_bernoulli_alpha_between</code>, <code>beta_bernoulli_beta_between</code></td>
 <td>1, 1</td>
-<td>Shape parameters of the Beta prior on between-cluster inclusion probability</td>
+<td>Beta prior on between-cluster inclusion probability (<span class="math inline">\(\alpha_b\)</span>, <span class="math inline">\(\beta_b\)</span>)</td>
 </tr>
 <tr class="odd">
 <td><code>dirichlet_alpha</code></td>
@@ -606,37 +653,69 @@ Warning
 </tr>
 </tbody>
 </table>
-<p>With the defaults, the prior is symmetric (within and between clusters have the same Beta(1, 1) prior on inclusion probability) and the number of clusters is determined by the data.</p>
+</section>
+<section id="testing-for-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="testing-for-clustering">Testing for clustering</h2>
+<p>Since <span class="math inline">\(B\)</span> is analytically marginalized out, the MCMC sampler does not produce direct samples of <span class="math inline">\(B\)</span>. Instead, the posterior probability of each number of clusters is computed from the sampled block allocations <span class="math inline">\(\mathbf{z}\)</span> using the conditional posterior <span class="math inline">\(P(B = b \mid |\mathcal{C}|)\)</span>, where <span class="math inline">\(|\mathcal{C}|\)</span> is the number of non-empty clusters implied by <span class="math inline">\(\mathbf{z}\)</span> <span class="citation" data-cites="MillerHarrison_2018">(see <a href="#ref-MillerHarrison_2018" role="doc-biblioref">Miller &amp; Harrison, 2018</a>, Eq. 3.7)</span>. These posterior cluster probabilities support two types of Bayes factor tests.</p>
+<p><strong>Clustering vs.&nbsp;no clustering.</strong> The first test compares <span class="math inline">\(\mathcal{H}_1\!: B &gt; 1\)</span> against <span class="math inline">\(\mathcal{H}_0\!: B = 1\)</span>. The posterior probability of clustering is obtained by summing the posterior probabilities for all <span class="math inline">\(B &gt; 1\)</span>, and the prior odds follow directly from the truncated Poisson: <span class="math inline">\(\lambda / (\exp(\lambda) - 1 - \lambda)\)</span>. A Bayes factor greater than one indicates that the data favor a clustered structure; a Bayes factor less than one indicates evidence for a single-cluster solution. Values near one mean the data do not discriminate — absence of evidence rather than evidence of absence.</p>
+<p><strong>Comparing specific cluster counts.</strong> The second test compares two point hypotheses — for example <span class="math inline">\(\mathcal{H}_1\!: B = b_1\)</span> versus <span class="math inline">\(\mathcal{H}_2\!: B = b_2\)</span> — with prior odds <span class="math inline">\(\lambda^{b_1 - b_2} \cdot b_2! \,/\, b_1!\)</span>. This allows a finer-grained assessment of the evidence for a particular clustering solution.</p>
+<p>Both tests are computed from the posterior cluster probabilities returned by <code>extract_sbm()</code> (see below). For the simulation performance and practical recommendations for both Bayes factors, see <span class="citation" data-cites="SekulovskiEtAl_2025_sbm">Sekulovski et al. (<a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">2025</a>)</span>.</p>
 </section>
 <section id="interpreting-block-structure" class="level2">
 <h2 class="anchored" data-anchor-id="interpreting-block-structure">Interpreting block structure</h2>
-<p>The <code>extract_sbm()</code> function retrieves the SBM results:</p>
+<p>The <code>extract_sbm()</code> function retrieves the clustering results:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sbm <span class="ot">=</span> <span class="fu">extract_sbm</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This returns:</p>
 <ul>
-<li><strong><code>posterior_mean_allocations</code></strong>: the estimated cluster assignment for each node, computed using the method of Dahl (2006).</li>
-<li><strong><code>posterior_mode_allocations</code></strong>: the most frequent cluster assignment across iterations.</li>
-<li><strong><code>posterior_coclustering_matrix</code></strong>: a symmetric matrix where entry <span class="math inline">\((i, j)\)</span> is the proportion of iterations in which nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> were assigned to the same cluster. Plotting this matrix reveals the block structure.</li>
-<li><strong><code>posterior_num_blocks</code></strong>: a table of posterior probabilities for each possible number of clusters.</li>
+<li><strong><code>posterior_num_blocks</code></strong>: a data frame of posterior probabilities for each number of clusters. These probabilities serve as the basis for computing clustering Bayes factors.</li>
+<li><strong><code>posterior_mean_allocations</code></strong>: the estimated cluster assignment for each node, obtained by selecting the allocation that best approximates the average co-clustering structure across MCMC iterations.</li>
+<li><strong><code>posterior_mode_allocations</code></strong>: the most frequently occurring cluster assignment across MCMC iterations.</li>
+<li><strong><code>posterior_mean_coclustering_matrix</code></strong>: a symmetric matrix where entry <span class="math inline">\((i, j)\)</span> is the proportion of iterations in which nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> were assigned to the same cluster. Coherent blocks indicate stable clusters; diffuse patterns indicate nodes with uncertain membership.</li>
 </ul>
 </section>
-<section id="prior-choices-for-clustering" class="level2">
-<h2 class="anchored" data-anchor-id="prior-choices-for-clustering">Prior choices for clustering</h2>
-<ul>
-<li><p><strong><code>lambda</code></strong> controls the expected number of clusters. A small <code>lambda</code> favors fewer clusters; a larger <code>lambda</code> allows more. The zero-truncated Poisson prior ensures at least one cluster.</p></li>
-<li><p><strong><code>dirichlet_alpha</code></strong> controls how evenly nodes are distributed across clusters. A value of 1 gives a uniform prior over partitions. Smaller values favor uneven cluster sizes (a few large clusters and several small ones).</p></li>
-<li><p>The <strong>within-cluster</strong> Beta parameters control how dense within-cluster connectivity is <em>a priori</em>. Setting <code>beta_bernoulli_alpha &gt; beta_bernoulli_beta</code> favors dense within-cluster connections.</p></li>
-<li><p>The <strong>between-cluster</strong> Beta parameters control between-cluster connectivity. Setting <code>beta_bernoulli_beta_between &gt; beta_bernoulli_alpha_between</code> favors sparse between-cluster connections.</p></li>
-</ul>
+<section id="choosing-hyperparameters" class="level2">
+<h2 class="anchored" data-anchor-id="choosing-hyperparameters">Choosing hyperparameters</h2>
+<p>The choice of hyperparameters encodes how strongly the prior favors a clustered solution and the expected shape of that solution. <span class="citation" data-cites="SekulovskiEtAl_2025_sbm">Sekulovski et al. (<a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">2025</a>)</span> provide simulation-based recommendations.</p>
+<p><strong>When clustering is expected</strong> — set the within-cluster Beta prior to favor dense connections and the between-cluster prior to favor sparse connections:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="st">"Stochastic-Block"</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha =</span> <span class="dv">8</span>, <span class="at">beta_bernoulli_beta =</span> <span class="dv">1</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha_between =</span> <span class="dv">1</span>, <span class="at">beta_bernoulli_beta_between =</span> <span class="dv">8</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="fl">1.59</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Here <code>lambda = 1.59</code> corresponds to a prior expectation of approximately two clusters. Higher values of <code>lambda</code> shift the expectation toward more clusters (2.82 <span class="math inline">\(\approx\)</span> 3 clusters, 3.92 <span class="math inline">\(\approx\)</span> 4 clusters).</p>
+<p><strong>When no clustering is expected</strong>, or the goal is conservative inference that protects against false positive clustering, an informative between-cluster prior combined with flat within-cluster settings provides the best performance:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="st">"Stochastic-Block"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha =</span> <span class="dv">1</span>, <span class="at">beta_bernoulli_beta =</span> <span class="dv">1</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha_between =</span> <span class="dv">1</span>, <span class="at">beta_bernoulli_beta_between =</span> <span class="dv">8</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="dv">1</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This configuration discourages between-cluster edges (<span class="math inline">\(\beta_b = 8\)</span>), which protects against inferring multiple clusters when only one exists, without imposing strong assumptions about within-cluster density.</p>
+<p>The <code>dirichlet_alpha</code> parameter controls how evenly nodes are distributed across clusters. The default of 1 gives a uniform prior over partitions.</p>
+
+
+
 </section>
-<section id="references" class="level2">
-<h2 class="anchored" data-anchor-id="references">References</h2>
-<p>Sekulovski, N., Keetelaar, S., Haslbeck, J. M. B., &amp; Marsman, M. (2025). Bayesian variable selection in multilevel and multi-group graphical models using a stochastic block model. <em>Manuscript submitted for publication</em>.</p>
 
-
-</section>
-
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-GengEtAl_2019" class="csl-entry" role="listitem">
+Geng, J., Bhattacharya, A., &amp; Pati, D. (2019). Probabilistic community detection with unknown number of communities. <em>Journal of the American Statistical Association</em>, <em>114</em>(526), 893–905. <a href="https://doi.org/10.1080/01621459.2018.1458618">https://doi.org/10.1080/01621459.2018.1458618</a>
+</div>
+<div id="ref-HollandEtAl_1983" class="csl-entry" role="listitem">
+Holland, P. W., Laskey, K. B., &amp; Leinhardt, S. (1983). Stochastic blockmodels: <span>F</span>irst steps. <em>Social Networks</em>, <em>5</em>(2), 109–137. <a href="https://doi.org/10.1016/0378-8733(83)90021-7">https://doi.org/10.1016/0378-8733(83)90021-7</a>
+</div>
+<div id="ref-MillerHarrison_2018" class="csl-entry" role="listitem">
+Miller, J. W., &amp; Harrison, M. T. (2018). Mixture models with a prior on the number of components. <em>Journal of the American Statistical Association</em>, <em>113</em>(521), 340–356. <a href="https://doi.org/10.1080/01621459.2016.1255636">https://doi.org/10.1080/01621459.2016.1255636</a>
+</div>
+<div id="ref-SekulovskiEtAl_2025_sbm" class="csl-entry" role="listitem">
+Sekulovski, N., Arena, G., Haslbeck, J. M. B., Huth, K. B. S., Friel, N., &amp; Marsman, M. (2025). A stochastic block prior for clustering in graphical models. <em>Manuscript Submitted for Publication</em>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
