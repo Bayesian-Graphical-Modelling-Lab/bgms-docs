@@ -48,29 +48,35 @@ The first factor, $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}, \text{data}
 
 The second factor, $p(\mathcal{S} \mid \text{data})$, is the marginal posterior distribution of the network structure, with the parameters integrated out. This distribution is used for Bayesian structure learning.
 
-## Bayesian parameter estimation
+## Model uncertainty
+
+For a network with $p$ variables there are $\binom{p}{2} = p(p-1)/2$ possible edges, and each can independently be present or absent. The total number of possible network structures is therefore $2^{p(p-1)/2}$. Even for a modest network of 10 variables this gives $2^{45} \approx 3.5 \times 10^{13}$ possible structures; for 20 variables the number exceeds $10^{57}$.
+
+In practice, it is very unlikely that any single structure completely dominates the posterior distribution. Many structures that differ by only a few edges will have comparable posterior probabilities. Ignoring this uncertainty and conditioning on a single structure — for instance the most probable one — amounts to acting as though that structure generated the data with certainty. This leads to overconfident inferences: parameter estimates that are too precise because they do not reflect uncertainty about which edges belong in the model, and conclusions about individual edges that may change depending on what is assumed about the remaining edges [@HoetingMadiganRafteryVolinsky_1999; @HinneGronauVanDenBerghWagenmakers_2020].
+
+## Bayesian model averaging
+
+Bayesian model averaging [BMA; @HoetingMadiganRafteryVolinsky_1999; @HinneGronauVanDenBerghWagenmakers_2020] provides the principled way to account for model uncertainty. Instead of conditioning on a single structure, BMA averages inferences across all possible structures, weighting each by its posterior probability $p(\mathcal{S} \mid \text{data})$. Structures that predict the data well gain plausibility; those that predict it poorly lose it. No structure is discarded entirely, and no structure is assumed to be true with certainty.
+
+In `bgms`, BMA is the default. The Markov chain Monte Carlo sampler explores the joint posterior over structures and parameters simultaneously. All reported quantities — parameter estimates, inclusion probabilities, and Bayes factors — automatically incorporate model averaging. Both parameter estimation and structure learning therefore account for structural uncertainty.
+
+### Parameter estimation
 
 For a given structure $\mathcal{S}$, the conditional posterior $p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}, \text{data})$ tells us what we know about each partial association after observing the data. The prior distribution assigns plausibility to each value of the parameter. The distribution is updated by the observed data: parameter values that predict the data well gain plausibility, while those that predict it poorly lose it.
 
-In practice, the full posterior distribution for each element of $\boldsymbol{\Phi}_\mathcal{S}$ is usually summarized:
+Because `bgms` averages over structures, the reported parameter estimates reflect both parameter uncertainty and structural uncertainty. In structures where an edge is absent, the corresponding partial association is zero; in structures where it is present, the partial association follows its conditional posterior. The model-averaged posterior mean is therefore automatically shrunk toward zero for edges that receive little structural support.
+
+In practice, the posterior distribution for each partial association is usually summarized:
 
 - The **posterior mean** as a point estimate of the partial association.
 - The **posterior standard deviation** as a measure of estimation precision.
-- A **credible interval** — a range that contains the parameter with a
-  given posterior probability (e.g., 95%). Unlike frequentist confidence
-  intervals, a 95% credible interval has a direct probability
-  interpretation: there is a 95% posterior probability that the parameter
-  lies within the interval.
+- A **credible interval** — a range that contains a given proportion of the posterior probability mass (e.g., 95%). Unlike frequentist confidence intervals, a 95% credible interval has a direct probability interpretation: given the prior and the observed data, there is a 95% posterior probability that the parameter lies within the interval.
 
 In `bgms`, `coef(fit)$pairwise` returns the posterior means of the partial associations, and `summary(fit)$pairwise` adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.
 
-## Bayesian structure learning
+### Structure learning
 
-The marginal posterior $p(\mathcal{S} \mid \text{data})$ assigns a posterior probability to each possible network structure. In practice, the correct structure is usually unknown to us. Instead of selecting a single structure outright, we therefore quantify the evidence for including or excluding individual edges while accounting for this structural uncertainty.
-
-### Posterior inclusion probabilities
-
-The posterior probability of including the edge between variables $i$ and $j$ is obtained by summing the posterior probabilities of all structures that contain that edge. Let $\mathcal{S}^{(ij)}$ denote the set of structures that include an edge between variables $i$ and $j$, then:
+The posterior inclusion probability of an edge is obtained by summing the posterior probabilities of all structures that contain that edge. Let $\mathcal{S}^{(ij)}$ denote the set of structures that include an edge between variables $i$ and $j$, then:
 
 $$
 p(\gamma_{ij} = 1 \mid \text{data}) =
@@ -78,13 +84,11 @@ p(\gamma_{ij} = 1 \mid \text{data}) =
 p(\mathcal{S} \mid \text{data})
 $$
 
-This posterior inclusion probability aggregates evidence across all possible network structures. In effect, it performs Bayesian model averaging and therefore accounts for our uncertainty about the remaining edges in the network.
+This posterior inclusion probability aggregates evidence across all possible network structures and therefore accounts for uncertainty about the remaining edges in the network.
 
 In `bgms`, `coef(fit)$indicator` returns the posterior means of the inclusion probabilities, and `summary(fit)$indicator` adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.
 
-### The inclusion Bayes factor
-
-The inclusion Bayes factor quantifies the change in evidence for including an edge from prior to posterior:
+The inclusion Bayes factor quantifies the change in evidence for including an edge from prior to posterior [@HinneGronauVanDenBerghWagenmakers_2020; @MarsmanHuthWaldorpNtzoufras_2022]:
 
 $$
 \underbrace{\frac{p(\text{data} \mid \gamma_{ij} = 1)}
@@ -96,6 +100,6 @@ $$
                  {p(\gamma_{ij} = 0)}}_{\text{Prior inclusion odds}}
 $$
 
-The inclusion Bayes factor is the ratio of the posterior inclusion odds to the prior inclusion odds. Values greater than one indicate evidence for the presence of the edge ($\Phi_{ij} \neq 0$), whereas values less than one indicate evidence for its absence ($\Phi_{ij} = 0$). When the prior inclusion probability is $\frac{1}{2}$, the prior inclusion odds equal one, and the inclusion Bayes factor simplifies to the posterior odds.
+The inclusion Bayes factor is the ratio of the posterior inclusion odds to the prior inclusion odds. Values greater than one indicate evidence for the presence of the edge ($\Phi_{ij} \neq 0$), values less than one indicate evidence for its absence ($\Phi_{ij} = 0$), and values close to one indicate that the data are uninformative — the evidence does not clearly favor either hypothesis. This three-way distinction is a key advantage of the Bayes factor: it separates evidence for presence, evidence for absence, and absence of evidence. When the prior inclusion probability is $\frac{1}{2}$, the prior inclusion odds equal one, and the inclusion Bayes factor simplifies to the posterior odds.
 
-Because the inclusion Bayes factor averages over all possible network structures, it does not depend on assumptions about the remaining edges in the network. This property makes it a robust measure of the evidence for or against each individual edge. See [Edge Selection](edge-selection.qmd) for interpretation guidelines and the prior specifications used in `bgms`.
+Because the inclusion Bayes factor averages over all possible network structures, it does not depend on assumptions about the remaining edges in the network. This property makes it a robust measure of the evidence for or against each individual edge [@SekulovskiEtAl_2024]. See [Edge Selection](edge-selection.qmd) for interpretation guidelines and the prior specifications used in `bgms`.
