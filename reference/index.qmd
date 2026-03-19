@@ -9,8 +9,8 @@ Complete documentation for all exported functions in bgms.
 
 | Function | Description |
 |----------|-------------|
-| [`bgm()`](bgm.qmd) | Bayesian estimation or edge selection for Markov Random Fields |
-| [`bgmCompare()`](bgmCompare.qmd) | Bayesian estimation and variable selection for group differences in MRFs |
+| [`bgm()`](bgm.qmd) | Estimates the main effects and pairwise interactions of a network using a Bayesian framework. |
+| [`bgmCompare()`](bgmCompare.qmd) | Estimates whether edge weights and category thresholds differ across networks of two different groups. |
 
 ## S3 Methods
 
