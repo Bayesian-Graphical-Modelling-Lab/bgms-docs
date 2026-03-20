@@ -22,4 +22,17 @@ fit_wenchuan = bgm(Wenchuan, chains = 2, seed = 1234)
 saveRDS(fit_wenchuan, file.path(fixtures_dir, "fit_wenchuan.rds"))
 cat("  Saved fixtures/fit_wenchuan.rds\n")
 
+# --- ADHD bgmCompare (binary, 18 items, 2 groups, 2 chains) ----------------
+
+cat("Fitting ADHD bgmCompare (18 items, 2 groups, 2 chains)...\n")
+fit_compare_adhd = bgmCompare(
+  x = ADHD[, -1],
+  group_indicator = ADHD$group,
+  variable_type = "ordinal",
+  chains = 2,
+  seed = 1234
+)
+saveRDS(fit_compare_adhd, file.path(fixtures_dir, "fit_compare_adhd.rds"))
+cat("  Saved fixtures/fit_compare_adhd.rds\n")
+
 cat("Done.\n")

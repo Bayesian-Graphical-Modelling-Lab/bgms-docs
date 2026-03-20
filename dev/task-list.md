@@ -199,6 +199,17 @@ Governance and traceability:
 - [ ] Record source map in `docs/attribution.md`: adapted elements vs original bgms work.
 - [ ] Add release checklist item: design de-risking pass completed before first public deployment.
 
+### P3 - Automated reference checking
+
+- [ ] Integrate `hallucinator-cli` (Rust) into a pre-render or pre-commit check for `.bib` files.
+  - Install: `curl --proto '=https' --tlsv1.2 -LsSf https://github.com/gianlucasb/hallucinator/releases/latest/download/hallucinator-cli-installer.sh | sh`
+  - Checks CrossRef, arXiv, DBLP, Semantic Scholar, ACL, Europe PMC, PubMed, OpenAlex in parallel.
+  - Flags: verified, author-mismatch, not-found (potential hallucination), retracted papers.
+  - Supports `.bib` files directly: `hallucinator-cli check references.bib`
+  - Known limitations: weak on books, old math papers, niche venues; DBLP rate-limits (consider offline DB).
+- [ ] Evaluate as part of a future quarto-based paper-writing suite for automated reference validation.
+- [ ] Consider complementing with `rcrossref` (R/CRAN) DOI-based metadata verification for entries that have DOIs.
+
 ## Open Decisions
 
 - None currently.
