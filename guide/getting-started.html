@@ -485,7 +485,7 @@ div.csl-indent {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Output &amp; Diagnostics</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -494,7 +494,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../guide/mcmc-output.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Model Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -749,19 +749,19 @@ physior      0.9705  0.026 1.000 1.0000  0.0000</code></pre>
 
 Precision matrix diagonal:
                         mean mcse    sd   n_eff  Rhat
-mechanics (precision)  0.005    0 0.001 168.736 1.026
-vectors (precision)    0.011    0 0.002 121.795 1.902
-algebra (precision)    0.033    0 0.004 133.224 1.376
-analysis (precision)   0.009    0 0.001 179.005 1.006
-statistics (precision) 0.006    0 0.001 372.387 1.000
+mechanics (precision)  0.005    0 0.001 121.876 1.005
+vectors (precision)    0.011    0 0.002  71.407 1.013
+algebra (precision)    0.032    0 0.004  74.119 1.046
+analysis (precision)   0.009    0 0.001 325.892 1.006
+statistics (precision) 0.006    0 0.001 219.919 1.007
 
 Pairwise interactions:
                        mean    sd  mcse   n_eff  Rhat
-mechanics-vectors    -0.002 0.002     0  30.474 2.215
-mechanics-algebra    -0.002 0.002 0.001  13.168 2.293
+mechanics-vectors    -0.003 0.002 0.001  10.203 1.045
+mechanics-algebra    -0.001 0.002     0  41.996 1.057
 mechanics-analysis    0.000                          
 mechanics-statistics  0.000                          
-vectors-algebra      -0.007 0.002     0 146.662     1
+vectors-algebra      -0.007 0.002     0 131.634 1.008
 vectors-analysis      0.000                          
 ... (use `summary(fit)$pairwise` to see full output)
 Note: NA values are suppressed in the print table. They occur here when an 
@@ -770,12 +770,12 @@ indicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;
 
 Inclusion probabilities:
                       mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1    n_eff  Rhat
-mechanics-vectors    0.448 0.497 0.091  1090    14    15   880   29.881 3.634
-mechanics-algebra    0.579 0.494  0.14   836     6     6  1151   12.388 4.117
-mechanics-analysis   0.000 0.022     0  1997     1     1     0 2002.003 1.291
-mechanics-statistics 0.000 0.000        1999     0     0     0               
-vectors-algebra      0.994 0.080 0.009    12     1     0  1986       80 1.296
-vectors-analysis     0.002 0.039 0.001  1993     3     3     0 2006.021 1.051
+mechanics-vectors    0.682 0.466 0.153   632     4     4  1359    9.267 1.107
+mechanics-algebra    0.339 0.473 0.073  1303    18    19   659   42.535  1.08
+mechanics-analysis   0.001 0.032 0.001  1995     2     2     0 2004.010      
+mechanics-statistics 0.002 0.039 0.001  1993     3     3     0 2006.021 1.051
+vectors-algebra      0.992 0.089 0.011    15     1     0  1983   64.516 1.298
+vectors-analysis     0.000 0.022 0.000  1997     1     1     0 2002.003 1.291
 ... (use `summary(fit)$indicator` to see full output)
 Note: NA values are suppressed in the print table. They occur when an indicator
 was constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat

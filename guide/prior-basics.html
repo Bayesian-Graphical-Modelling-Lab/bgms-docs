@@ -479,7 +479,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Output &amp; Diagnostics</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -488,7 +488,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../guide/mcmc-output.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Model Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -550,7 +550,7 @@ Warning
 <h2 class="anchored" data-anchor-id="the-spike-and-slab-prior">The spike-and-slab prior</h2>
 <p>The <a href="../guide/bayesian-approach.html">Bayesian Approach</a> page introduced two prior distributions: one for the network structure, <span class="math inline">\(p(\mathcal{S})\)</span>, and one for the partial associations conditional on that structure, <span class="math inline">\(p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})\)</span>. In <code>bgms</code>, these two priors are linked through a spike-and-slab prior on each partial association <span class="math inline">\(\phi_{ij}\)</span>.</p>
 <p>The idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero (<span class="math inline">\(\phi_{ij} = 0\)</span>). When the edge is present, the partial association is free to take any nonzero value (<span class="math inline">\(\phi_{ij \in \mathbb{R}_{\setminus 0}}\)</span>). A binary indicator <span class="math inline">\(\gamma_{ij}\)</span> tracks the state of each edge: <span class="math inline">\(\gamma_{ij} = 0\)</span> means the edge is absent and <span class="math inline">\(\gamma_{ij} = 1\)</span> means it is present. Together, the collection of indicators forms the network structure <span class="math inline">\(\mathcal{S}\)</span>.</p>
-<p>We use the <em>mixtures of mutually singular distributions</em> formulation of the spike-and-slab prior <span class="citation" data-cites="GottardoRaftery_2008">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>)</span>, which designates a mixture of two mutually exclusive components:</p>
+<p>We use the <em>mixtures of mutually singular distributions</em> formulation of the spike-and-slab prior <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref">van den Bergh et al., 2026</a>)</span>, which designates a mixture of two mutually exclusive components:</p>
 <p><span class="math display">\[
 p(\phi_{ij} \mid \gamma_{ij})
 = (1 - \gamma_{ij})\;\mathbf{1}_{\{0\}}(\phi_{ij})
@@ -663,6 +663,9 @@ Erdős, P., &amp; Rényi, A. (1959). On random graphs <span>I</span>. <em>Public
 </div>
 <div id="ref-GottardoRaftery_2008" class="csl-entry" role="listitem">
 Gottardo, R., &amp; Raftery, A. E. (2008). Markov chain <span>Monte Carlo</span> with mixtures of mutually singular distributions. <em>Journal of Computational and Graphical Statistics</em>, <em>17</em>(4), 949–975. <a href="https://doi.org/10.1198/106186008X386102">https://doi.org/10.1198/106186008X386102</a>
+</div>
+<div id="ref-VanDenBerghEtAl_2026_moms" class="csl-entry" role="listitem">
+van den Bergh, D., Clyde, M. A., Raftery, A. E., &amp; Marsman, M. (2026). Reversible jump <span>MCMC</span> with no regrets: <span>B</span>ayesian variable selection using mixtures of mutually singular distributions. <em>Manuscript in Preparation</em>.
 </div>
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 

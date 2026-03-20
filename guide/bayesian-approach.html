@@ -479,7 +479,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Output &amp; Diagnostics</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -488,7 +488,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../guide/mcmc-output.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Model Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -581,7 +581,7 @@ p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S},\, \text{data})
 <section id="bayesian-model-averaging" class="level2">
 <h2 class="anchored" data-anchor-id="bayesian-model-averaging">Bayesian model averaging</h2>
 <p>Bayesian model averaging [BMA; <span class="citation" data-cites="HoetingMadiganRafteryVolinsky_1999">Hoeting et al. (<a href="#ref-HoetingMadiganRafteryVolinsky_1999" role="doc-biblioref">1999</a>)</span>; <span class="citation" data-cites="HinneGronauVanDenBerghWagenmakers_2020">Hinne et al. (<a href="#ref-HinneGronauVanDenBerghWagenmakers_2020" role="doc-biblioref">2020</a>)</span>] provides the principled way to account for model uncertainty. Instead of conditioning on a single structure, BMA averages inferences across all possible structures, weighting each by its posterior probability <span class="math inline">\(p(\mathcal{S} \mid \text{data})\)</span>. Structures that predict the data well gain plausibility; those that predict it poorly lose it. No structure is discarded entirely, and no structure is assumed to be true with certainty.</p>
-<p>In <code>bgms</code>, BMA is the default. The Markov chain Monte Carlo sampler explores the joint posterior over structures and parameters simultaneously. All reported quantities — parameter estimates, inclusion probabilities, and Bayes factors — automatically incorporate model averaging. Both parameter estimation and structure learning therefore account for structural uncertainty.</p>
+<p>In <code>bgms</code>, BMA is the default. The Markov chain Monte Carlo sampler explores the joint posterior over structures and parameters simultaneously using the mixtures of mutually singular distributions (MoMS) framework <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref">van den Bergh et al., 2026</a>)</span>. All reported quantities — parameter estimates, inclusion probabilities, and Bayes factors — automatically incorporate model averaging. Both parameter estimation and structure learning therefore account for structural uncertainty.</p>
 <section id="parameter-estimation" class="level3">
 <h3 class="anchored" data-anchor-id="parameter-estimation">Parameter estimation</h3>
 <p>For a given structure <span class="math inline">\(\mathcal{S}\)</span>, the conditional posterior <span class="math inline">\(p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}, \text{data})\)</span> tells us what we know about each partial association after observing the data. The prior distribution assigns plausibility to each value of the parameter. The distribution is updated by the observed data: parameter values that predict the data well gain plausibility, while those that predict it poorly lose it.</p>
@@ -624,6 +624,9 @@ p(\mathcal{S} \mid \text{data})
 
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-GottardoRaftery_2008" class="csl-entry" role="listitem">
+Gottardo, R., &amp; Raftery, A. E. (2008). Markov chain <span>Monte Carlo</span> with mixtures of mutually singular distributions. <em>Journal of Computational and Graphical Statistics</em>, <em>17</em>(4), 949–975. <a href="https://doi.org/10.1198/106186008X386102">https://doi.org/10.1198/106186008X386102</a>
+</div>
 <div id="ref-HinneGronauVanDenBerghWagenmakers_2020" class="csl-entry" role="listitem">
 Hinne, M., Gronau, Q. F., van den Bergh, D., &amp; Wagenmakers, E.-J. (2020). A conceptual introduction to <span>B</span>ayesian model averaging. <em>Advances in Methods and Practices in Psychological Science</em>, <em>3</em>(2), 200–215. <a href="https://doi.org/10.1177/2515245919898657">https://doi.org/10.1177/2515245919898657</a>
 </div>
@@ -635,6 +638,9 @@ Marsman, M., Huth, K. B. S., Waldorp, L. J., &amp; Ntzoufras, I. (2022). Objecti
 </div>
 <div id="ref-SekulovskiEtAl_2024" class="csl-entry" role="listitem">
 Sekulovski, N., Keetelaar, S., Huth, K. B. S., Wagenmakers, E.-J., van Bork, R., van den Bergh, D., &amp; Marsman, M. (2024). Testing conditional independence in psychometric networks: <span>A</span>n analysis of three <span>B</span>ayesian methods. <em>Multivariate Behavioral Research</em>, <em>59</em>, 913–933. <a href="https://doi.org/10.1080/00273171.2024.2345915">https://doi.org/10.1080/00273171.2024.2345915</a>
+</div>
+<div id="ref-VanDenBerghEtAl_2026_moms" class="csl-entry" role="listitem">
+van den Bergh, D., Clyde, M. A., Raftery, A. E., &amp; Marsman, M. (2026). Reversible jump <span>MCMC</span> with no regrets: <span>B</span>ayesian variable selection using mixtures of mutually singular distributions. <em>Manuscript in Preparation</em>.
 </div>
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 

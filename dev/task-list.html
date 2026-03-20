@@ -881,6 +881,21 @@ ul.task-list li input[type="checkbox"] {
 <li><label><input type="checkbox">Add release checklist item: design de-risking pass completed before first public deployment.</label></li>
 </ul>
 </section>
+<section id="p3---automated-reference-checking" class="level3">
+<h3 class="anchored" data-anchor-id="p3---automated-reference-checking">P3 - Automated reference checking</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Integrate <code>hallucinator-cli</code> (Rust) into a pre-render or pre-commit check for <code>.bib</code> files.</label>
+<ul>
+<li>Install: <code>curl --proto '=https' --tlsv1.2 -LsSf https://github.com/gianlucasb/hallucinator/releases/latest/download/hallucinator-cli-installer.sh | sh</code></li>
+<li>Checks CrossRef, arXiv, DBLP, Semantic Scholar, ACL, Europe PMC, PubMed, OpenAlex in parallel.</li>
+<li>Flags: verified, author-mismatch, not-found (potential hallucination), retracted papers.</li>
+<li>Supports <code>.bib</code> files directly: <code>hallucinator-cli check references.bib</code></li>
+<li>Known limitations: weak on books, old math papers, niche venues; DBLP rate-limits (consider offline DB).</li>
+</ul></li>
+<li><label><input type="checkbox">Evaluate as part of a future quarto-based paper-writing suite for automated reference validation.</label></li>
+<li><label><input type="checkbox">Consider complementing with <code>rcrossref</code> (R/CRAN) DOI-based metadata verification for entries that have DOIs.</label></li>
+</ul>
+</section>
 </section>
 <section id="open-decisions" class="level2">
 <h2 class="anchored" data-anchor-id="open-decisions">Open Decisions</h2>

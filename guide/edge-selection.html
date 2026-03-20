@@ -514,7 +514,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Output &amp; Diagnostics</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -523,7 +523,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../guide/mcmc-output.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Model Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -584,6 +584,7 @@ Warning
 <li>When <span class="math inline">\(\gamma_{ij} = 0\)</span> (spike), the partial association <span class="math inline">\(\phi_{ij}\)</span> is set to exactly zero — the edge is absent.</li>
 <li>When <span class="math inline">\(\gamma_{ij} = 1\)</span> (slab), the partial association receives a Cauchy prior with scale <code>pairwise_scale</code> — the edge is present and the effect size is estimated.</li>
 </ul>
+<p>This is the <em>mixtures of mutually singular distributions</em> (MoMS) formulation of the spike-and-slab prior <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref">van den Bergh et al., 2026</a>)</span>. Because each edge is either exactly zero or follows a continuous distribution — with no overlap between the two components — the sampler moves between mutually exclusive subspaces rather than gradually shrinking toward zero. This discrete formulation provides model-selection consistency and avoids the need for transdimensional (reversible-jump) MCMC proposals.</p>
 <p>The prior probability of inclusion is controlled by the <code>edge_prior</code> argument. See <a href="../guide/prior-basics.html">Prior Basics</a> for the available options (Bernoulli, Beta-Bernoulli, Stochastic-Block).</p>
 </section>
 <section id="posterior-inclusion-probabilities" class="level2">
@@ -674,6 +675,9 @@ Warning
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-GottardoRaftery_2008" class="csl-entry" role="listitem">
+Gottardo, R., &amp; Raftery, A. E. (2008). Markov chain <span>Monte Carlo</span> with mixtures of mutually singular distributions. <em>Journal of Computational and Graphical Statistics</em>, <em>17</em>(4), 949–975. <a href="https://doi.org/10.1198/106186008X386102">https://doi.org/10.1198/106186008X386102</a>
+</div>
 <div id="ref-HuthEtAl_2026_evidence" class="csl-entry" role="listitem">
 Huth, K. B. S., Haslbeck, J. M. B., Keetelaar, S., van Holst, R. J., &amp; Marsman, M. (2026). Statistical evidence in psychological networks. <em>Nature Human Behaviour</em>, <em>10</em>, 333–346. <a href="https://doi.org/10.1038/s41562-025-02314-2">https://doi.org/10.1038/s41562-025-02314-2</a>
 </div>
@@ -682,6 +686,9 @@ Kass, R. E., &amp; Raftery, A. E. (1995). Bayes factors. <em>Journal of the Amer
 </div>
 <div id="ref-SekulovskiEtAl_2024" class="csl-entry" role="listitem">
 Sekulovski, N., Keetelaar, S., Huth, K. B. S., Wagenmakers, E.-J., van Bork, R., van den Bergh, D., &amp; Marsman, M. (2024). Testing conditional independence in psychometric networks: <span>A</span>n analysis of three <span>B</span>ayesian methods. <em>Multivariate Behavioral Research</em>, <em>59</em>, 913–933. <a href="https://doi.org/10.1080/00273171.2024.2345915">https://doi.org/10.1080/00273171.2024.2345915</a>
+</div>
+<div id="ref-VanDenBerghEtAl_2026_moms" class="csl-entry" role="listitem">
+van den Bergh, D., Clyde, M. A., Raftery, A. E., &amp; Marsman, M. (2026). Reversible jump <span>MCMC</span> with no regrets: <span>B</span>ayesian variable selection using mixtures of mutually singular distributions. <em>Manuscript in Preparation</em>.
 </div>
 </div></section></div></main> <!-- /main -->
 <script type="text/javascript">
