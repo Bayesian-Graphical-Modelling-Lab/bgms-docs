@@ -133,7 +133,7 @@ fit = bgm(Wenchuan, chains = 2, seed = 1234)
 ```{r}
 #| label: load-fixture
 #| echo: false
-fit = readRDS("fixtures/fit_wenchuan.rds")
+fit = readRDS("../fixtures/fit_wenchuan.rds")
 ```
 
 ```{r}
