@@ -3,6 +3,9 @@
 /_site/
 /docs/
 
+# Development
+dev/
+
 # R
 .Rproj.user
 .Rhistory
@@ -20,3 +23,6 @@ Thumbs.db
 *.code-workspace
 
 **/*.quarto_ipynb
+
+# Fixtures (large, regenerated via scripts/generate_fixtures.R)
+fixtures/*.rds

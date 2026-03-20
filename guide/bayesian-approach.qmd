@@ -58,7 +58,7 @@ In practice, it is very unlikely that any single structure completely dominates 
 
 Bayesian model averaging [BMA; @HoetingMadiganRafteryVolinsky_1999; @HinneGronauVanDenBerghWagenmakers_2020] provides the principled way to account for model uncertainty. Instead of conditioning on a single structure, BMA averages inferences across all possible structures, weighting each by its posterior probability $p(\mathcal{S} \mid \text{data})$. Structures that predict the data well gain plausibility; those that predict it poorly lose it. No structure is discarded entirely, and no structure is assumed to be true with certainty.
 
-In `bgms`, BMA is the default. The Markov chain Monte Carlo sampler explores the joint posterior over structures and parameters simultaneously. All reported quantities — parameter estimates, inclusion probabilities, and Bayes factors — automatically incorporate model averaging. Both parameter estimation and structure learning therefore account for structural uncertainty.
+In `bgms`, BMA is the default. The Markov chain Monte Carlo sampler explores the joint posterior over structures and parameters simultaneously using the mixtures of mutually singular distributions (MoMS) framework [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms]. All reported quantities — parameter estimates, inclusion probabilities, and Bayes factors — automatically incorporate model averaging. Both parameter estimation and structure learning therefore account for structural uncertainty.
 
 ### Parameter estimation
 
