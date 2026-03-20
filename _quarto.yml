@@ -4,6 +4,9 @@ project:
   resources:
     - icons/
 
+execute:
+  freeze: auto
+
 highlight-style: a11y
 
 website:
