@@ -24,7 +24,10 @@ hide-description: true
   - Quantify evidence for **including or excluding edges**
   - Detect **group differences** in network parameters 
 - Discover **communities of related edges** with Bayesian edge clustering
-- Scale to large datasets with **efficient MCMC algorithms** and a **C++ backend**
+- Fast posterior inference with:
+  - **No-U-Turn sampler**
+  - **Parallel multi-chain sampling**  
+  - **C++ backend**
 
 ### Explore structure in your network with principled Bayesian inference.
 
