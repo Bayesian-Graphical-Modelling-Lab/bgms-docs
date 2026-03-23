@@ -2,10 +2,6 @@
 title: "Gaussian Graphical Model"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 The Gaussian graphical model (GGM) is a Markov random field for continuous variables. It is the most widely studied undirected graphical model [@Lauritzen1996] and forms the continuous component of the [Mixed MRF](mixed-model.qmd) in `bgms`. To fit a GGM, set `variable_type = "continuous"`.
 
 ## The model

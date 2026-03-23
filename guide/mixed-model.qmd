@@ -2,10 +2,6 @@
 title: "Mixed Markov Random Field"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 The mixed Markov random field (MRF) is a graphical model for networks containing both discrete (binary or ordinal) and continuous variables. It unites the [Ordinal MRF](omrf.qmd) and the [GGM](ggm.qmd) into a single joint distribution through the conditional Gaussian framework [@LauritzenWermuth_1989; @Lauritzen1996]. To fit a mixed MRF, provide a `variable_type` vector that includes both discrete and continuous types.
 
 ## The model
