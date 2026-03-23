@@ -10,13 +10,13 @@ In many networks, nodes can be organized in clusters or communities, and edges a
 
 ## The stochastic block model
 
-The SBM [@HollandEtAl_1983] assumes that each node belongs to one of $B$ latent blocks and that the probability of an edge depends on the block membership of its two endpoints. Let $z_i \in \{1, \dots, B\}$ denote the block assignment of node $i$. The edge indicators then follow
+The SBM [@HollandEtAl_1983] assumes that each node belongs to one of $B$ blocks and that the probability of an edge depends on the block membership of its two endpoints. Let $z_i \in \{1, \dots, B\}$ denote the block assignment of node $i$. The edge indicators then follow
 
 $$
 \gamma_{ij} \mid \boldsymbol{\pi}, \mathbf{z} \sim \text{Bernoulli}(\pi_{z_i z_j})
 $$
 
-where $\pi_{ab}$ is the inclusion probability for edges connecting blocks $a$ and $b$. The prior distinguishes within-block edges ($a = b$) from between-block edges ($a \neq b$), assigning independent Beta priors to each:
+where $\pi_{ab}$ is the inclusion probability for edges connecting blocks $a$ and $b$. The SBM prior in `bgms` distinguishes within-block edge probabilities ($a = b$) from between-block edge probabilities ($a \neq b$), assigning independent Beta priors to each:
 
 $$
 \pi_{ab} \sim
