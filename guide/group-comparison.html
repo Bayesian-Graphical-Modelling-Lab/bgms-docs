@@ -565,20 +565,7 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>The <a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a> function tests whether the network structure and its parameters differ between groups in networks of binary or ordinal variables <span class="citation" data-cites="MarsmanEtAl_2025_ttest">(<a href="#ref-MarsmanEtAl_2025_ttest" role="doc-biblioref">Marsman et al., 2025</a>)</span>. It estimates both the shared network — the overall partial associations and category thresholds — and the group differences, using the same Bayesian framework as <a href="../reference/bgm.html"><code>bgm()</code></a>. A key advantage of this approach is its ability to distinguish three outcomes for each parameter: evidence that the groups differ, evidence that they are equivalent, and absence of evidence — the data are simply not informative enough to decide.</p>
+<p>The <a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a> function tests whether the network parameters differ between groups in networks of binary or ordinal variables <span class="citation" data-cites="MarsmanEtAl_2025_ttest">(<a href="#ref-MarsmanEtAl_2025_ttest" role="doc-biblioref">Marsman et al., 2025</a>)</span>. It estimates both the shared network — the overall partial associations and category thresholds — and the group differences, using the same Bayesian framework as <a href="../reference/bgm.html"><code>bgm()</code></a>. A key advantage of this approach is its ability to distinguish three outcomes for each parameter: evidence that a parameter differs across groups, evidence that it is invariant, and absence of evidence — the data are simply not informative enough to decide.</p>
 <section id="the-model" class="level2">
 <h2 class="anchored" data-anchor-id="the-model">The model</h2>
 <p>The group comparison model separates overall effects from group differences. For each pair of variables <span class="math inline">\((i, j)\)</span>, the group-specific partial association in group <span class="math inline">\(g\)</span> is constructed as</p>
@@ -612,7 +599,7 @@ Warning
 \text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \text{data})}{p(\gamma_{ij} = 0 \mid \text{data})} \bigg/
 \frac{p(\gamma_{ij} = 1)}{p(\gamma_{ij} = 0)}
 \]</span></p>
-<p>Values greater than one indicate evidence that the groups differ on the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>. Values less than one — equivalently, <span class="math inline">\(1/\text{BF}_{10}\)</span> greater than one — indicate evidence that the groups are equivalent. Values close to one indicate that the data are uninformative: there is not enough evidence to decide whether the groups differ or not. This three-way distinction — evidence for a difference, evidence for equivalence, and absence of evidence — is the central advantage of the Bayesian approach to group comparison.</p>
+<p>Values greater than one indicate evidence that the groups differ on the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>. Values less than one — equivalently, <span class="math inline">\(1/\text{BF}_{10}\)</span> greater than one — indicate evidence that the parameter is invariant. Values close to one indicate that the data are uninformative: there is not enough evidence to decide whether the parameter differs between groups or not. This three-way distinction — evidence for a difference, evidence for equivalence, and absence of evidence — is the central advantage of the Bayesian approach to group comparison.</p>
 <p>As with edge selection, the inclusion Bayes factor averages over all possible configurations of the remaining group differences. Testing whether the interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> differs across groups does not require assumptions about which other interactions differ — the test integrates over this uncertainty. See <a href="../guide/edge-selection.html#why-the-inclusion-bayes-factor">Why the inclusion Bayes factor</a> and <a href="../guide/bayesian-approach.html">The Bayesian Approach</a> for the formal derivation.</p>
 </section>
 <section id="interpreting-the-output" class="level2">

@@ -565,19 +565,6 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
 <p>Bayesian edge selection determines which edges are present in the network by placing spike-and-slab priors on the partial association parameters. When <code>edge_selection = TRUE</code> (the default), <a href="../reference/bgm.html"><code>bgm()</code></a> estimates both the edge structure and the effect sizes simultaneously.</p>
 <section id="spike-and-slab-priors" class="level2">
 <h2 class="anchored" data-anchor-id="spike-and-slab-priors">Spike-and-slab priors</h2>
@@ -617,7 +604,7 @@ Warning
 <p><strong>Credible intervals.</strong> Testing whether the posterior credible interval for a partial association excludes zero is analogous to a classical significance test. This approach conditions on a structure that includes the edge from the outset, and can therefore only reject the hypothesis of absence. It cannot provide evidence <em>for</em> absence — it cannot distinguish absence of evidence from evidence of absence.</p>
 <p><strong>Single-model Bayes factor.</strong> A Bayes factor can be computed by comparing two specific structures that differ only in the edge of interest. This addresses the one-sidedness of the credible interval, but introduces a new problem: the result depends on which structure is assumed for the remaining edges. Since partial associations change when the surrounding structure changes, different structural assumptions yield different Bayes factors for the same edge. <span class="citation" data-cites="SekulovskiEtAl_2024"><span class="nocase">Sekulovski et al.</span> (<a href="#ref-SekulovskiEtAl_2024" role="doc-biblioref">2024</a>)</span> illustrate how the same edge can receive weak or strong evidence for absence depending on which edges are assumed present elsewhere in the network.</p>
 <p><strong>Inclusion Bayes factor.</strong> The inclusion Bayes factor overcomes this sensitivity through Bayesian model averaging. Rather than conditioning on a single structure for the remaining edges, it aggregates the evidence across all possible structures, weighting each by its posterior plausibility. See <a href="../guide/bayesian-approach.html">The Bayesian Approach</a> for the formal derivation.</p>
-<p>In practice, we do not know the network structure — learning it is the goal of the analysis. The inclusion Bayes factor accounts for this structural uncertainty, and its conclusions therefore hold regardless of which structure generated the data. This makes it the appropriate tool for testing conditional independence in networks.</p>
+<p>In practice, we do not know the network structure — learning it is the goal of the analysis. The inclusion Bayes factor accounts for this structural uncertainty, and its conclusions therefore hold regardless of which structure generated the data. This makes it the appropriate tool for testing conditional independence in graphical models.</p>
 </section>
 <section id="evidence-categories" class="level2">
 <h2 class="anchored" data-anchor-id="evidence-categories">Evidence categories</h2>
