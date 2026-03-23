@@ -2,9 +2,6 @@
 title: "Graphical Models"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
 
 A graphical model represents relationships among a set of variables as a graph. `bgms` estimates a class of undirected graphical models: pairwise Markov random fields.
 
