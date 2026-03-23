@@ -66,8 +66,8 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | guide/edge-selection.qmd | Medium | Scaffolded | No | No | - |
 | guide/group-comparison.qmd | Medium | Scaffolded | No | No | - |
 | guide/clustering.qmd | Medium | Not started | No | No | - |
-| guide/mcmc-output.qmd | Medium | Not started | No | No | - |
-| guide/mcmc-diagnostics.qmd | Medium | Not started | No | No | - |
+| guide/mcmc-output.qmd | Medium | Populated | No | No | - |
+| guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | - |
 | **Reference** | | | | | |
 | reference/index.qmd | Low | Scaffolded | No | No | - |
 | reference/bgm.qmd | High | Scaffolded | No | No | - |

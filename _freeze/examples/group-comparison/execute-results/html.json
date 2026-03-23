@@ -1,0 +1,15 @@
+{
+  "hash": "a81d5f4807aac67e1fdb00b52f9392a0",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Group Comparison\"\n---\n\n::: {.callout-warning}\nThis page has not yet passed technical or readability review.\n:::\n\nComparing networks across two independent groups using `bgmCompare()`.\nThis example uses the ADHD dataset bundled with bgms.\n\n## Data\n\nThe `ADHD` dataset contains binary symptom ratings for 355 children.\nColumn 1 is a group indicator: 1 = ADHD diagnosis (n = 146),\n0 = no diagnosis (n = 209). We split on this column and analyze the\nfirst five Inattentive items in each group.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(bgms)\n\ndata_adhd = ADHD[ADHD$group == 1, -1]\ndata_adhd = data_adhd[, 1:5]\n\ndata_no_adhd = ADHD[ADHD$group == 0, -1]\ndata_no_adhd = data_no_adhd[, 1:5]\n```\n:::\n\n\n## Fit the comparison model\n\n`bgmCompare()` estimates whether edge weights and category thresholds\ndiffer between the two groups.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfit = bgmCompare(x = data_adhd, y = data_no_adhd, seed = 1234)\n```\n:::\n\n\n## Posterior summaries\n\nThe summary shows baseline effects and group differences. `coef()`\nprovides posterior means and inclusion probabilities for both.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsummary(fit)\ncoef(fit)\n```\n:::\n\n\n## Identifying network differences\n\nPosterior inclusion probabilities indicate how plausible it is that a\ngiven parameter differs between groups. These convert to Bayes factors\nin the same way as for single-group models.\n\n## Interpretation\n\nExtract the group-specific pairwise effects and plot the network for\nthe ADHD group.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(qgraph)\n\nadhd_network = matrix(0, 5, 5)\nadhd_network[lower.tri(adhd_network)] = coef(fit)$pairwise_effects_groups[, 1]\nadhd_network = adhd_network + t(adhd_network)\ncolnames(adhd_network) = colnames(data_adhd)\nrownames(adhd_network) = colnames(data_adhd)\n\nqgraph(adhd_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data_adhd)\n)\n```\n:::\n\n\n## Diagnostics\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsummary(fit)$pairwise\n```\n:::\n\n\nSee the [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) guide for\ninterpretation.\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

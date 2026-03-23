@@ -5,7 +5,7 @@ project:
     - icons/
 
 execute:
-  freeze: false
+  freeze: auto
 
 highlight-style: a11y
 
