@@ -565,19 +565,6 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
 <p>In many networks, nodes can be organized in clusters or communities, and edges are not exchangeable. Standard edge priors (Bernoulli, Beta-Bernoulli) cannot encode such structure because they assign the same inclusion probability to every edge. The stochastic block model (SBM) prior embeds the assumption of clustering directly into the graphical model, so that cluster assignments, the number of clusters, and the evidence for clustering are all estimated as part of the analysis <span class="citation" data-cites="SekulovskiEtAl_2025_sbm">(<a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">Sekulovski et al., 2025</a>)</span>.</p>
 <section id="the-stochastic-block-model" class="level2">
 <h2 class="anchored" data-anchor-id="the-stochastic-block-model">The stochastic block model</h2>
@@ -699,6 +686,19 @@ P(B) = \frac{\lambda^B}{B!\,(\exp(\lambda) - 1)}, \quad B \geq 1
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This configuration discourages between-cluster edges (<span class="math inline">\(\beta_b = 8\)</span>), which protects against inferring multiple clusters when only one exists, without imposing strong assumptions about within-cluster density.</p>
 <p>The <code>dirichlet_alpha</code> parameter controls how evenly nodes are distributed across clusters. The default of 1 gives a uniform prior over partitions.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Tutorial
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><span class="citation" data-cites="SekulovskiEtAl_2025_sbm">Sekulovski et al. (<a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">2025</a>)</span> provides a step-by-step tutorial on fitting the SBM prior in <code>bgms</code>, including guidance on hyperparameter selection and result interpretation. It is available at <a href="https://www.nikolasekulovski.com/blog/post2/" class="uri">https://www.nikolasekulovski.com/blog/post2/</a>.</p>
+</div>
+</div>
 
 
 
@@ -715,7 +715,7 @@ Holland, P. W., Laskey, K. B., &amp; Leinhardt, S. (1983). Stochastic blockmodel
 Miller, J. W., &amp; Harrison, M. T. (2018). Mixture models with a prior on the number of components. <em>Journal of the American Statistical Association</em>, <em>113</em>(521), 340–356. <a href="https://doi.org/10.1080/01621459.2016.1255636">https://doi.org/10.1080/01621459.2016.1255636</a>
 </div>
 <div id="ref-SekulovskiEtAl_2025_sbm" class="csl-entry" role="listitem">
-Sekulovski, N., Arena, G., Haslbeck, J. M. B., Huth, K. B. S., Friel, N., &amp; Marsman, M. (2025). A stochastic block prior for clustering in graphical models. <em>Manuscript Submitted for Publication</em>.
+Sekulovski, N., Arena, G., Haslbeck, J. M. B., Huth, K. B. S., Friel, N., &amp; Marsman, M. (2025). A stochastic block prior for clustering in graphical models. <em>Manuscript Submitted for Publication</em>. <a href="https://osf.io/preprints/psyarxiv/29p3m_v3">https://osf.io/preprints/psyarxiv/29p3m_v3</a>
 </div>
 </div></section></div></main> <!-- /main -->
 <script type="text/javascript">
