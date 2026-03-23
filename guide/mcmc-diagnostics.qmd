@@ -2,16 +2,12 @@
 title: "MCMC Diagnostics"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
-Before interpreting results from `bgm()` or `bgmCompare()`, check that the
+Before interpreting results from [`bgm()`](../reference/bgm.qmd) or
+[`bgmCompare()`](../reference/bgmCompare.qmd), check that the
 MCMC sampler has converged and that posterior estimates are reliable. This
-chapter covers the diagnostic tools available in bgms. For a comprehensive
-treatment of MCMC convergence diagnostics, including guidance on choosing
-the number of iterations, chains, and warmup length, see
-@MargossianGelman_2024.
+chapter describes how to do so with the diagnostic tools in bgms. For
+background on MCMC convergence diagnostics and choosing the number of
+iterations, chains, and warmup length, see @MargossianGelman_2024.
 
 ## Effective sample size (ESS)
 
@@ -76,7 +72,7 @@ well determined even without switching.
 When transitions are observed but rare, the ESS estimate itself becomes
 imprecise. The transition probability estimates $\hat{a}$ and $\hat{b}$
 are each based on only a few events, giving them high relative error.
-Because the ESS formula $T \cdot (a + b) / (2 - a - b)$ depends on their
+Because the ESS formula $T (a + b) / (2 - a - b)$ depends on their
 sum, small fluctuations in the transition counts can produce large
 swings in the ESS. In these cases, plotting the cumulative inclusion
 probability across iterations provides a more informative check on
@@ -106,7 +102,7 @@ estimates; a large MCSE suggests that more iterations are needed.
 ## R-hat
 
 R-hat (split R-hat) compares the between-chain and within-chain variance
-[@MargossianGelman_2024]. Values close to 1.0 indicate that the chains
+[@GelmanRubin_1992]. Values close to 1.0 indicate that the chains
 have converged to the same distribution. Earlier guidance recommended
 thresholds of 1.1 or 1.2; @VehtariEtAl_2021 tightened this to 1.01
 based on experience with rank-normalized split-R-hat. Values above 1.01
@@ -195,7 +191,7 @@ and compare results.
 
 NUTS builds trajectories by repeatedly doubling their length until a
 U-turn criterion is satisfied. If the trajectory frequently reaches the
-maximum allowed depth (`nuts_max_depth`, default 10), the sampler may
+maximum allowed depth (`nuts_max_depth`), the sampler may
 benefit from longer trajectories. Hitting the maximum depth occasionally is
 normal; hitting it on most iterations may indicate challenging posterior
 geometry. Consider increasing `nuts_max_depth`.
