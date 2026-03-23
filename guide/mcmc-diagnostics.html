@@ -564,20 +564,7 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>Before interpreting results from <code>bgm()</code> or <code>bgmCompare()</code>, check that the MCMC sampler has converged and that posterior estimates are reliable. This chapter covers the diagnostic tools available in bgms. For a comprehensive treatment of MCMC convergence diagnostics, including guidance on choosing the number of iterations, chains, and warmup length, see <span class="citation" data-cites="MargossianGelman_2024">Margossian &amp; Gelman (<a href="#ref-MargossianGelman_2024" role="doc-biblioref">2024</a>)</span>.</p>
+<p>Before interpreting results from <a href="../reference/bgm.html"><code>bgm()</code></a> or <a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a>, check that the MCMC sampler has converged and that posterior estimates are reliable. This chapter describes how to do so with the diagnostic tools in bgms. For background on MCMC convergence diagnostics and choosing the number of iterations, chains, and warmup length, see <span class="citation" data-cites="MargossianGelman_2024">Margossian &amp; Gelman (<a href="#ref-MargossianGelman_2024" role="doc-biblioref">2024</a>)</span>.</p>
 <section id="effective-sample-size-ess" class="level2">
 <h2 class="anchored" data-anchor-id="effective-sample-size-ess">Effective sample size (ESS)</h2>
 <p>The effective sample size estimates how many independent draws the MCMC chain is equivalent to. Correlated draws reduce the effective information per sample. A larger ESS means more precise posterior estimates <span class="citation" data-cites="MargossianGelman_2024">(<a href="#ref-MargossianGelman_2024" role="doc-biblioref">Margossian &amp; Gelman, 2024</a>)</span>.</p>
@@ -596,7 +583,7 @@ n_{1 \to 0}\)</span>) is below 5, though still computed and stored.</li>
 <h4 class="anchored" data-anchor-id="limitations-near-the-boundary">Limitations near the boundary</h4>
 <p>The two-state Markov chain ESS has known limitations when the inclusion probability is near 0 or 1. In these cases the indicator is almost always in the same state, so transitions are rare and the estimates <span class="math inline">\(\hat{a}\)</span> and <span class="math inline">\(\hat{b}\)</span> are based on very few events. A single extra transition can change the ESS estimate substantially, making it unreliable as a precision diagnostic. For this reason, <code>n_eff_mixt</code> is suppressed in printed output when the total number of transitions is below 5.</p>
 <p>At the extreme — when the indicator never switches — there are no transitions to estimate from. This does not necessarily indicate a problem: if the posterior strongly favors inclusion or exclusion, there is little uncertainty about the indicator and the inclusion probability is well determined even without switching.</p>
-<p>When transitions are observed but rare, the ESS estimate itself becomes imprecise. The transition probability estimates <span class="math inline">\(\hat{a}\)</span> and <span class="math inline">\(\hat{b}\)</span> are each based on only a few events, giving them high relative error. Because the ESS formula <span class="math inline">\(T \cdot (a + b) / (2 - a - b)\)</span> depends on their sum, small fluctuations in the transition counts can produce large swings in the ESS. In these cases, plotting the cumulative inclusion probability across iterations provides a more informative check on stability: a flat trajectory indicates the estimate has settled, while a drifting one suggests the chain needs more iterations.</p>
+<p>When transitions are observed but rare, the ESS estimate itself becomes imprecise. The transition probability estimates <span class="math inline">\(\hat{a}\)</span> and <span class="math inline">\(\hat{b}\)</span> are each based on only a few events, giving them high relative error. Because the ESS formula <span class="math inline">\(T (a + b) / (2 - a - b)\)</span> depends on their sum, small fluctuations in the transition counts can produce large swings in the ESS. In these cases, plotting the cumulative inclusion probability across iterations provides a more informative check on stability: a flat trajectory indicates the estimate has settled, while a drifting one suggests the chain needs more iterations.</p>
 </section>
 </section>
 </section>
@@ -613,7 +600,7 @@ n_{1 \to 0}\)</span>) is below 5, though still computed and stored.</li>
 </section>
 <section id="r-hat" class="level2">
 <h2 class="anchored" data-anchor-id="r-hat">R-hat</h2>
-<p>R-hat (split R-hat) compares the between-chain and within-chain variance <span class="citation" data-cites="MargossianGelman_2024">(<a href="#ref-MargossianGelman_2024" role="doc-biblioref">Margossian &amp; Gelman, 2024</a>)</span>. Values close to 1.0 indicate that the chains have converged to the same distribution. Earlier guidance recommended thresholds of 1.1 or 1.2; <span class="citation" data-cites="VehtariEtAl_2021">Vehtari et al. (<a href="#ref-VehtariEtAl_2021" role="doc-biblioref">2021</a>)</span> tightened this to 1.01 based on experience with rank-normalized split-R-hat. Values above 1.01 suggest that the chains have not mixed and should be run longer.</p>
+<p>R-hat (split R-hat) compares the between-chain and within-chain variance <span class="citation" data-cites="GelmanRubin_1992">(<a href="#ref-GelmanRubin_1992" role="doc-biblioref">Gelman &amp; Rubin, 1992</a>)</span>. Values close to 1.0 indicate that the chains have converged to the same distribution. Earlier guidance recommended thresholds of 1.1 or 1.2; <span class="citation" data-cites="VehtariEtAl_2021">Vehtari et al. (<a href="#ref-VehtariEtAl_2021" role="doc-biblioref">2021</a>)</span> tightened this to 1.01 based on experience with rank-normalized split-R-hat. Values above 1.01 suggest that the chains have not mixed and should be run longer.</p>
 <p>bgms reports R-hat in <code>summary()</code> output and through <code>extract_rhat()</code>.</p>
 </section>
 <section id="trace-plots" class="level2">
@@ -669,7 +656,7 @@ Figure&nbsp;1: Trace plot for the first pairwise interaction parameter across tw
 </section>
 <section id="tree-depth" class="level3">
 <h3 class="anchored" data-anchor-id="tree-depth">Tree depth</h3>
-<p>NUTS builds trajectories by repeatedly doubling their length until a U-turn criterion is satisfied. If the trajectory frequently reaches the maximum allowed depth (<code>nuts_max_depth</code>, default 10), the sampler may benefit from longer trajectories. Hitting the maximum depth occasionally is normal; hitting it on most iterations may indicate challenging posterior geometry. Consider increasing <code>nuts_max_depth</code>.</p>
+<p>NUTS builds trajectories by repeatedly doubling their length until a U-turn criterion is satisfied. If the trajectory frequently reaches the maximum allowed depth (<code>nuts_max_depth</code>), the sampler may benefit from longer trajectories. Hitting the maximum depth occasionally is normal; hitting it on most iterations may indicate challenging posterior geometry. Consider increasing <code>nuts_max_depth</code>.</p>
 </section>
 </section>
 <section id="warmup-equilibration-check" class="level2">
@@ -736,6 +723,9 @@ Betancourt, M. (2016). Diagnosing suboptimal cotangent disintegrations in <span>
 </div>
 <div id="ref-Betancourt_2017_hmc" class="csl-entry" role="listitem">
 Betancourt, M. (2017). A conceptual introduction to <span>H</span>amiltonian <span>M</span>onte <span>C</span>arlo. <em>arXiv Preprint</em>. <a href="https://arxiv.org/abs/1701.02434">https://arxiv.org/abs/1701.02434</a>
+</div>
+<div id="ref-GelmanRubin_1992" class="csl-entry" role="listitem">
+Gelman, A., &amp; Rubin, D. B. (1992). Inference from iterative simulation using multiple sequences. <em>Statistical Science</em>, <em>7</em>(4), 457–472. <a href="https://doi.org/10.1214/ss/1177011136">https://doi.org/10.1214/ss/1177011136</a>
 </div>
 <div id="ref-MargossianGelman_2024" class="csl-entry" role="listitem">
 Margossian, C. C., &amp; Gelman, A. (2024). For how many iterations should we run <span>M</span>arkov chain <span>M</span>onte <span>C</span>arlo? <em>arXiv Preprint</em>. <a href="https://doi.org/10.48550/arXiv.2311.02726">https://doi.org/10.48550/arXiv.2311.02726</a>

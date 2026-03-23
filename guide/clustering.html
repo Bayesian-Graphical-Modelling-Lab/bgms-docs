@@ -581,11 +581,11 @@ Warning
 <p>In many networks, nodes can be organized in clusters or communities, and edges are not exchangeable. Standard edge priors (Bernoulli, Beta-Bernoulli) cannot encode such structure because they assign the same inclusion probability to every edge. The stochastic block model (SBM) prior embeds the assumption of clustering directly into the graphical model, so that cluster assignments, the number of clusters, and the evidence for clustering are all estimated as part of the analysis <span class="citation" data-cites="SekulovskiEtAl_2025_sbm">(<a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">Sekulovski et al., 2025</a>)</span>.</p>
 <section id="the-stochastic-block-model" class="level2">
 <h2 class="anchored" data-anchor-id="the-stochastic-block-model">The stochastic block model</h2>
-<p>The SBM <span class="citation" data-cites="HollandEtAl_1983">(<a href="#ref-HollandEtAl_1983" role="doc-biblioref">Holland et al., 1983</a>)</span> assumes that each node belongs to one of <span class="math inline">\(B\)</span> latent blocks and that the probability of an edge depends on the block membership of its two endpoints. Let <span class="math inline">\(z_i \in \{1, \dots, B\}\)</span> denote the block assignment of node <span class="math inline">\(i\)</span>. The edge indicators then follow</p>
+<p>The SBM <span class="citation" data-cites="HollandEtAl_1983">(<a href="#ref-HollandEtAl_1983" role="doc-biblioref">Holland et al., 1983</a>)</span> assumes that each node belongs to one of <span class="math inline">\(B\)</span> blocks and that the probability of an edge depends on the block membership of its two endpoints. Let <span class="math inline">\(z_i \in \{1, \dots, B\}\)</span> denote the block assignment of node <span class="math inline">\(i\)</span>. The edge indicators then follow</p>
 <p><span class="math display">\[
 \gamma_{ij} \mid \boldsymbol{\pi}, \mathbf{z} \sim \text{Bernoulli}(\pi_{z_i z_j})
 \]</span></p>
-<p>where <span class="math inline">\(\pi_{ab}\)</span> is the inclusion probability for edges connecting blocks <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>. The prior distinguishes within-block edges (<span class="math inline">\(a = b\)</span>) from between-block edges (<span class="math inline">\(a \neq b\)</span>), assigning independent Beta priors to each:</p>
+<p>where <span class="math inline">\(\pi_{ab}\)</span> is the inclusion probability for edges connecting blocks <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>. The SBM prior in <code>bgms</code> distinguishes within-block edge probabilities (<span class="math inline">\(a = b\)</span>) from between-block edge probabilities (<span class="math inline">\(a \neq b\)</span>), assigning independent Beta priors to each:</p>
 <p><span class="math display">\[
 \pi_{ab} \sim
 \begin{cases}
@@ -612,7 +612,7 @@ P(B) = \frac{\lambda^B}{B!\,(\exp(\lambda) - 1)}, \quad B \geq 1
 </section>
 <section id="setting-up-the-sbm-prior" class="level2">
 <h2 class="anchored" data-anchor-id="setting-up-the-sbm-prior">Setting up the SBM prior</h2>
-<p>To use the SBM prior, set <code>edge_prior = "Stochastic-Block"</code> in <code>bgm()</code>:</p>
+<p>To use the SBM prior, set <code>edge_prior = "Stochastic-Block"</code> in <a href="../reference/bgm.html"><code>bgm()</code></a>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="st">"Stochastic-Block"</span>,</span>

@@ -685,7 +685,7 @@ p(x_i = c \mid \mathbf{x}_{-i}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right
 </section>
 <section id="fitting-an-ordinal-mrf" class="level2">
 <h2 class="anchored" data-anchor-id="fitting-an-ordinal-mrf">Fitting an ordinal MRF</h2>
-<p>The ordinal MRF is the default model type. Call <code>bgm()</code> directly:</p>
+<p>The ordinal MRF is the default model type. Call <a href="../reference/bgm.html"><code>bgm()</code></a> directly:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>For Blume-Capel variables:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">variable_type =</span> <span class="st">"blume-capel"</span>,</span>

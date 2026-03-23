@@ -566,7 +566,7 @@ Warning
 </section>
 <section id="fitting-a-model" class="level2">
 <h2 class="anchored" data-anchor-id="fitting-a-model">Fitting a model</h2>
-<p>The main entry point is <code>bgm()</code>. It accepts a data frame or matrix of mixed binary, ordinal, and continuous variables and estimates a Markov Random Field.</p>
+<p>The main entry point is <a href="../reference/bgm.html"><code>bgm()</code></a>. It accepts a data frame or matrix of mixed binary, ordinal, and continuous variables and estimates a Markov Random Field.</p>
 <p>The Wenchuan dataset is included in the package, and contains ordinal measures of symptoms of posttraumatic stress from 362 survivors of the 2008 Wenchuan earthquake.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bgms)</span>
@@ -594,7 +594,7 @@ Warning
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(Wenchuan[, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>By default, <code>bgm()</code> runs four parallel MCMC chains using the No-U-Turn Sampler (NUTS), in combination with Bayesian edge selection. Here we use <code>seed = 1234</code> for reproducibility.</p>
+<p>By default, <a href="../reference/bgm.html"><code>bgm()</code></a> runs four parallel MCMC chains using the No-U-Turn Sampler (NUTS), in combination with Bayesian edge selection. Here we use <code>seed = 1234</code> for reproducibility.</p>
 </section>
 <section id="posterior-summaries" class="level2">
 <h2 class="anchored" data-anchor-id="posterior-summaries">Posterior summaries</h2>
@@ -605,22 +605,22 @@ Warning
 
 Category thresholds: 
                 mean  mcse    sd    n_eff  Rhat
-intrusion (1)  0.493 0.010 0.235  608.711 1.001
-intrusion (2) -1.867 0.019 0.362  352.495 1.002
-intrusion (3) -4.776 0.041 0.597  212.756 1.002
-intrusion (4) -9.419 0.056 0.967  298.267 1.002
-dreams (1)    -0.603 0.006 0.201 1049.614 1.002
-dreams (2)    -3.809 0.013 0.363  827.265 1.006
+intrusion (1)  0.489 0.009 0.239  660.046 1.003
+intrusion (2) -1.877 0.020 0.357  332.439 1.008
+intrusion (3) -4.794 0.036 0.584  257.224 1.010
+intrusion (4) -9.433 0.052 0.929  314.189 1.010
+dreams (1)    -0.590 0.006 0.192 1041.781 1.003
+dreams (2)    -3.795 0.013 0.347  725.364 1.006
 ... (use `summary(fit)$main` to see full output)
 
 Pairwise interactions:
                    mean    sd  mcse    n_eff  Rhat
-intrusion-dreams  0.317 0.001 0.035 1173.359 1.003
-intrusion-flash   0.168 0.001 0.032 1210.151 1.005
-intrusion-upset   0.089 0.044 0.006   60.228 1.018
-intrusion-physior 0.102 0.034 0.002  185.928 1.007
-dreams-flash      0.250 0.001 0.030 1364.041 1.003
-dreams-upset      0.118 0.001 0.028  425.029 1.004
+intrusion-dreams  0.316 0.001 0.033 1056.386 1.001
+intrusion-flash   0.171 0.001 0.032 1053.432 1.005
+intrusion-upset   0.101 0.039 0.004   87.846 1.011
+intrusion-physior 0.086 0.046 0.008   34.222 1.049
+dreams-flash      0.250 0.001 0.029 1504.585 1.000
+dreams-upset      0.115 0.001 0.028  724.553 1.010
 ... (use `summary(fit)$pairwise` to see full output)
 Note: NA values are suppressed in the print table. They occur here when an 
 indicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;
@@ -630,8 +630,8 @@ Inclusion probabilities:
                    mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1  n_eff  Rhat
 intrusion-dreams  1.000 0.000           0     0     0  1999             
 intrusion-flash   1.000 0.000           0     0     0  1999             
-intrusion-upset   0.865 0.342 0.054   261     9    10  1719 39.897 1.114
-intrusion-physior 0.971 0.169  0.02    55     4     4  1936 72.387 1.262
+intrusion-upset   0.933 0.249 0.036   127     6     5  1861 48.962 1.084
+intrusion-physior 0.828 0.377 0.076   337     7     7  1648 24.884 1.195
 dreams-flash      1.000 0.000           0     0     0  1999             
 dreams-upset      1.000 0.000           0     0     0  1999             
 ... (use `summary(fit)$indicator` to see full output)
@@ -651,28 +651,28 @@ See the `easybgm` package for other summary and plotting tools.</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$main
-              cat (1)   cat (2)   cat (3)    cat (4)
-intrusion  0.49326700 -1.867211 -4.776173  -9.419060
-dreams    -0.60296934 -3.809193 -7.157296 -11.619584
-flash     -0.08231884 -2.521328 -5.294346  -9.549557
-upset      0.43646983 -1.273984 -3.316790  -6.947837
-physior   -0.60903137 -3.170420 -6.221435 -10.578263
+             cat (1)   cat (2)   cat (3)    cat (4)
+intrusion  0.4885190 -1.877258 -4.793556  -9.432700
+dreams    -0.5904029 -3.794823 -7.127903 -11.557409
+flash     -0.1075356 -2.579162 -5.388528  -9.727483
+upset      0.3954468 -1.342811 -3.430583  -7.123592
+physior   -0.5878958 -3.107193 -6.110767 -10.378638
 
 $pairwise
-           intrusion      dreams       flash       upset     physior
-intrusion 0.00000000 0.316707142 0.167709696 0.088672349 0.101880020
-dreams    0.31670714 0.000000000 0.249884872 0.118073148 0.001072865
-flash     0.16770970 0.249884872 0.000000000 0.001168627 0.152192873
-upset     0.08867235 0.118073148 0.001168627 0.000000000 0.355534822
-physior   0.10188002 0.001072865 0.152192873 0.355534822 0.000000000
+           intrusion     dreams       flash       upset    physior
+intrusion 0.00000000 0.31635248 0.171001677 0.101237895 0.08555373
+dreams    0.31635248 0.00000000 0.249671171 0.114855839 0.00147912
+flash     0.17100168 0.24967117 0.000000000 0.002828044 0.15589279
+upset     0.10123789 0.11485584 0.002828044 0.000000000 0.35641185
+physior   0.08555373 0.00147912 0.155892794 0.356411846 0.00000000
 
 $indicator
-          intrusion dreams flash  upset physior
-intrusion    0.0000  1.000 1.000 0.8645  0.9705
-dreams       1.0000  0.000 1.000 1.0000  0.0260
-flash        1.0000  1.000 0.000 0.0230  1.0000
-upset        0.8645  1.000 0.023 0.0000  1.0000
-physior      0.9705  0.026 1.000 1.0000  0.0000</code></pre>
+          intrusion dreams  flash  upset physior
+intrusion    0.0000  1.000 1.0000 0.9335   0.828
+dreams       1.0000  0.000 1.0000 1.0000   0.031
+flash        1.0000  1.000 0.0000 0.0515   1.000
+upset        0.9335  1.000 0.0515 0.0000   1.000
+physior      0.8280  0.031 1.0000 1.0000   0.000</code></pre>
 </div>
 </div>
 <p><code>coef()</code> returns posterior mean matrices: <code>$pairwise</code> contains the partial associations and <code>$indicator</code> contains edge inclusion probabilities.</p>
@@ -750,20 +750,20 @@ physior      0.9705  0.026 1.000 1.0000  0.0000</code></pre>
 <pre><code>Posterior summaries from Bayesian estimation:
 
 Precision matrix diagonal:
-                        mean mcse    sd   n_eff  Rhat
-mechanics (precision)  0.005    0 0.001 168.736 1.026
-vectors (precision)    0.011    0 0.002 121.795 1.902
-algebra (precision)    0.033    0 0.004 133.224 1.376
-analysis (precision)   0.009    0 0.001 179.005 1.006
-statistics (precision) 0.006    0 0.001 372.387 1.000
+                        mean  mcse    sd   n_eff  Rhat
+mechanics (precision)  0.005 0.000 0.001 176.296 1.003
+vectors (precision)    0.010 0.000 0.002  73.612 1.108
+algebra (precision)    0.033 0.001 0.005  60.324 1.006
+analysis (precision)   0.009 0.000 0.001 194.690 1.012
+statistics (precision) 0.006 0.000 0.001 328.174 1.002
 
 Pairwise interactions:
                        mean    sd  mcse   n_eff  Rhat
-mechanics-vectors    -0.002 0.002     0  30.474 2.215
-mechanics-algebra    -0.002 0.002 0.001  13.168 2.293
+mechanics-vectors    -0.001 0.002     0  30.401  1.17
+mechanics-algebra    -0.003 0.002 0.001    6.51 1.167
 mechanics-analysis    0.000                          
 mechanics-statistics  0.000                          
-vectors-algebra      -0.007 0.002     0 146.662     1
+vectors-algebra      -0.007 0.002     0 160.738 1.005
 vectors-analysis      0.000                          
 ... (use `summary(fit)$pairwise` to see full output)
 Note: NA values are suppressed in the print table. They occur here when an 
@@ -771,13 +771,13 @@ indicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;
 `summary(fit)$pairwise` still contains the NA values.
 
 Inclusion probabilities:
-                      mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1    n_eff  Rhat
-mechanics-vectors    0.448 0.497 0.091  1090    14    15   880   29.881 3.634
-mechanics-algebra    0.579 0.494  0.14   836     6     6  1151   12.388 4.117
-mechanics-analysis   0.000 0.022     0  1997     1     1     0 2002.003 1.291
-mechanics-statistics 0.000 0.000        1999     0     0     0               
-vectors-algebra      0.994 0.080 0.009    12     1     0  1986       80 1.296
-vectors-analysis     0.002 0.039 0.001  1993     3     3     0 2006.021 1.051
+                      mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1   n_eff  Rhat
+mechanics-vectors    0.282 0.450 0.082  1423    12    12   552  30.085 1.382
+mechanics-algebra    0.739 0.439 0.181   518     2     3  1476   5.892 1.512
+mechanics-analysis   0.000 0.000        1999     0     0     0              
+mechanics-statistics 0.000 0.000        1999     0     0     0              
+vectors-algebra      0.987 0.115 0.009    23     4     3  1969 161.776 1.303
+vectors-analysis     0.004 0.059 0.003  1989     3     3     4 547.896 1.187
 ... (use `summary(fit)$indicator` to see full output)
 Note: NA values are suppressed in the print table. They occur when an indicator
 was constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat
