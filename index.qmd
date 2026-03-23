@@ -29,7 +29,7 @@ hide-description: true
   - **Parallel multi-chain sampling**  
   - **C++ backend**
 
-### Explore structure in your network with principled Bayesian inference.
+### Explore structure in your network with Bayesian inference.
 
 ::: {.grid .gap-3 .pb-3 .pt-4}
 ::: {.g-col-12 .g-col-sm-4}
