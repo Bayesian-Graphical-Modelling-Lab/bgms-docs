@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Prior Basics – bgms</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -55,19 +58,18 @@ div.csl-indent {
 <link href="../bgms_sticker.svg" rel="icon" type="image/svg+xml">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-de8274a4d1ecc1e6aaeaf6e5564b5074.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-3ff4805f19b0085abba01199065d0a21.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-8a9d6b8e492df61c245adf37faf86101.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-e6057a134f0d111b58dfd49f1d11c2a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-8a9d6b8e492df61c245adf37faf86101.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-70262cc0151f9fee4ff553044a70224b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-bd021a2326262b374c58059a39c4b22e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-70262cc0151f9fee4ff553044a70224b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -97,7 +99,7 @@ div.csl-indent {
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -550,7 +552,7 @@ Warning
 <h2 class="anchored" data-anchor-id="the-spike-and-slab-prior">The spike-and-slab prior</h2>
 <p>The <a href="../guide/bayesian-approach.html">Bayesian Approach</a> page introduced two prior distributions: one for the network structure, <span class="math inline">\(p(\mathcal{S})\)</span>, and one for the partial associations conditional on that structure, <span class="math inline">\(p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})\)</span>. In <code>bgms</code>, these two priors are linked through a spike-and-slab prior on each partial association <span class="math inline">\(\phi_{ij}\)</span>.</p>
 <p>The idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero (<span class="math inline">\(\phi_{ij} = 0\)</span>). When the edge is present, the partial association is free to take any nonzero value (<span class="math inline">\(\phi_{ij \in \mathbb{R}_{\setminus 0}}\)</span>). A binary indicator <span class="math inline">\(\gamma_{ij}\)</span> tracks the state of each edge: <span class="math inline">\(\gamma_{ij} = 0\)</span> means the edge is absent and <span class="math inline">\(\gamma_{ij} = 1\)</span> means it is present. Together, the collection of indicators forms the network structure <span class="math inline">\(\mathcal{S}\)</span>.</p>
-<p>We use the <em>mixtures of mutually singular distributions</em> formulation of the spike-and-slab prior <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref">van den Bergh et al., 2026</a>)</span>, which designates a mixture of two mutually exclusive components:</p>
+<p>We use the <em>mixtures of mutually singular distributions</em> formulation of the spike-and-slab prior <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>, which designates a mixture of two mutually exclusive components:</p>
 <p><span class="math display">\[
 p(\phi_{ij} \mid \gamma_{ij})
 = (1 - \gamma_{ij})\;\mathbf{1}_{\{0\}}(\phi_{ij})
@@ -665,7 +667,7 @@ Erdős, P., &amp; Rényi, A. (1959). On random graphs <span>I</span>. <em>Public
 Gottardo, R., &amp; Raftery, A. E. (2008). Markov chain <span>Monte Carlo</span> with mixtures of mutually singular distributions. <em>Journal of Computational and Graphical Statistics</em>, <em>17</em>(4), 949–975. <a href="https://doi.org/10.1198/106186008X386102">https://doi.org/10.1198/106186008X386102</a>
 </div>
 <div id="ref-VanDenBerghEtAl_2026_moms" class="csl-entry" role="listitem">
-van den Bergh, D., Clyde, M. A., Raftery, A. E., &amp; Marsman, M. (2026). Reversible jump <span>MCMC</span> with no regrets: <span>B</span>ayesian variable selection using mixtures of mutually singular distributions. <em>Manuscript in Preparation</em>.
+<span class="nocase">van den Bergh, D., Clyde, M. A., Raftery, A. E., &amp; Marsman, M.</span> (2026). Reversible jump <span>MCMC</span> with no regrets: <span>B</span>ayesian variable selection using mixtures of mutually singular distributions. <em>Manuscript in Preparation</em>.
 </div>
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 

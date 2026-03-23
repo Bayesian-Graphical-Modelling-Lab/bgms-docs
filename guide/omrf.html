@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Ordinal Markov Random Field – bgms</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -90,19 +93,18 @@ div.csl-indent {
 <link href="../bgms_sticker.svg" rel="icon" type="image/svg+xml">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-de8274a4d1ecc1e6aaeaf6e5564b5074.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-3ff4805f19b0085abba01199065d0a21.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-8a9d6b8e492df61c245adf37faf86101.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-e6057a134f0d111b58dfd49f1d11c2a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-8a9d6b8e492df61c245adf37faf86101.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-70262cc0151f9fee4ff553044a70224b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-bd021a2326262b374c58059a39c4b22e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-70262cc0151f9fee4ff553044a70224b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -132,7 +134,7 @@ div.csl-indent {
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -609,7 +611,7 @@ p(x = c) = \frac{\exp\!\left( \sum_{k=c}^{m} \eta_k \right)}{1 + \sum_{j=1}^{m} 
 \]</span></p>
 <p>where <span class="math inline">\(\alpha_c\)</span> are category-specific intercepts and <span class="math inline">\(\beta_j\)</span> are common slopes. Crucially, the model depends on the ordinal variables only through the sufficient statistics <span class="math inline">\(\mathcal{I}(x_i \geq c)\)</span> and the interaction terms <span class="math inline">\(x_i\, x_j = \sum_c \sum_{c'} \mathcal{I}(x_i \geq c)\, \mathcal{I}(x_j \geq c')\)</span>. Because these terms are computed from cumulative indicators, the model captures only the ordering of the categories, without relying on any numeric interpretation or spacing of the labels. It is therefore invariant under monotonic recodings and does not assume interval-scale measurement.</p>
 <p>Other ordinal regression models, such as the cumulative logit and continuation ratio models <span class="citation" data-cites="Agresti_2010">(<a href="#ref-Agresti_2010" role="doc-biblioref">Agresti, 2010</a>)</span>, do not share this property. As shown by <span class="citation" data-cites="SuggalaYangRavikumar_2017">Suggala et al. (<a href="#ref-SuggalaYangRavikumar_2017" role="doc-biblioref">2017</a>)</span>, these models do not correspond to full conditionals of a joint distribution, and are therefore incompatible with a multivariate MRF formulation.</p>
-<p>The adjacent category model does yield consistent full conditionals, and the joint distribution that generates them is the ordinal MRF <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref">Marsman et al., 2025</a>)</span>.</p>
+<p>The adjacent category model does yield consistent full conditionals, and the joint distribution that generates them is the ordinal MRF <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref"><span class="nocase">Marsman et al.</span>, 2025</a>)</span>.</p>
 </section>
 </section>
 <section id="connection-to-the-mrf-framework" class="level2">
@@ -644,7 +646,7 @@ p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
 </section>
 <section id="blume-capel-variables" class="level3">
 <h3 class="anchored" data-anchor-id="blume-capel-variables">Blume-Capel variables</h3>
-<p>The Blume-Capel model originates in statistical physics, where <span class="citation" data-cites="Blume_1966">Blume (<a href="#ref-Blume_1966" role="doc-biblioref">1966</a>)</span> and <span class="citation" data-cites="Capel_1966">Capel (<a href="#ref-Capel_1966" role="doc-biblioref">1966</a>)</span> independently developed it to study phase transitions in ternary spin systems. As an application to psychology, <span class="citation" data-cites="VanDerMaasBorsboomWaldorp_2026">van der Maas et al. (<a href="#ref-VanDerMaasBorsboomWaldorp_2026" role="doc-biblioref">2026</a>)</span> used the model to study attitudes, depression, and intelligence.</p>
+<p>The Blume-Capel model originates in statistical physics, where <span class="citation" data-cites="Blume_1966">Blume (<a href="#ref-Blume_1966" role="doc-biblioref">1966</a>)</span> and <span class="citation" data-cites="Capel_1966">Capel (<a href="#ref-Capel_1966" role="doc-biblioref">1966</a>)</span> independently developed it to study phase transitions in ternary spin systems. As an application to psychology, <span class="citation" data-cites="VanDerMaasBorsboomWaldorp_2026"><span class="nocase">van der Maas et al.</span> (<a href="#ref-VanDerMaasBorsboomWaldorp_2026" role="doc-biblioref">2026</a>)</span> used the model to study attitudes, depression, and intelligence.</p>
 <p>For ordinal variables with a natural baseline or reference category (e.g., a “neutral” response), the Blume-Capel parameterization models category thresholds as a quadratic function of distance from the baseline:</p>
 <p><span class="math display">\[
 \mu_c = \alpha \cdot (c - b) + \beta \cdot (c - b)^2
@@ -664,7 +666,7 @@ p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
 </section>
 <section id="pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="pseudolikelihood">Pseudolikelihood</h2>
-<p>The normalizing constant of the ordinal MRF involves a sum over all possible configurations of <span class="math inline">\(p\)</span> ordinal variables, which is intractable for all but the smallest networks. <code>bgms</code> uses a pseudolikelihood approximation <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref">Marsman et al., 2025</a>)</span>: the product of full conditional distributions replaces the joint distribution.</p>
+<p>The normalizing constant of the ordinal MRF involves a sum over all possible configurations of <span class="math inline">\(p\)</span> ordinal variables, which is intractable for all but the smallest networks. <code>bgms</code> uses a pseudolikelihood approximation <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref"><span class="nocase">Marsman et al.</span>, 2025</a>)</span>: the product of full conditional distributions replaces the joint distribution.</p>
 <p>The full conditional distribution for variable <span class="math inline">\(i\)</span> given all other variables is:</p>
 <p><span class="math display">\[
 p(x_i = c \mid \mathbf{x}_{-i}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i} \exp\!\left(\mu_{ik} + k \cdot r_i\right)}
@@ -716,13 +718,13 @@ Capel, H. W. (1966). On the possibility of first-order phase transitions in <spa
 Ising, E. (1925). Beitrag zur <span>T</span>heorie des <span>F</span>erromagnetismus. <em>Zeitschrift f<span>ü</span>r Physik</em>, <em>31</em>(1), 253–258. <a href="https://doi.org/10.1007/BF02980577">https://doi.org/10.1007/BF02980577</a>
 </div>
 <div id="ref-MarsmanVandenBerghHaslbeck_2025" class="csl-entry" role="listitem">
-Marsman, M., van den Bergh, D., &amp; Haslbeck, J. M. B. (2025). Bayesian analysis of the ordinal <span>M</span>arkov random field. <em>Psychometrika</em>, <em>90</em>(1), 146–182. <a href="https://doi.org/10.1017/psy.2024.4">https://doi.org/10.1017/psy.2024.4</a>
+<span class="nocase">Marsman, M., van den Bergh, D., &amp; Haslbeck, J. M. B.</span> (2025). Bayesian analysis of the ordinal <span>M</span>arkov random field. <em>Psychometrika</em>, <em>90</em>(1), 146–182. <a href="https://doi.org/10.1017/psy.2024.4">https://doi.org/10.1017/psy.2024.4</a>
 </div>
 <div id="ref-SuggalaYangRavikumar_2017" class="csl-entry" role="listitem">
 Suggala, A. S., Yang, E., &amp; Ravikumar, P. (2017). Ordinal graphical models: A tale of two approaches. In D. Precup &amp; Y. W. Teh (Eds.), <em>Proceedings of the 34th international conference on machine learning</em> (Vol. 70, pp. 3260–3269). PMLR.
 </div>
 <div id="ref-VanDerMaasBorsboomWaldorp_2026" class="csl-entry" role="listitem">
-van der Maas, H. L. J., Borsboom, D., &amp; Waldorp, L. (2026). The statistical physics of psychological networks: <span>Z</span>ero matters. <em>Psychological Review</em>. <a href="https://doi.org/10.1037/rev0000611">https://doi.org/10.1037/rev0000611</a>
+<span class="nocase">van der Maas, H. L. J., Borsboom, D., &amp; Waldorp, L.</span> (2026). The statistical physics of psychological networks: <span>Z</span>ero matters. <em>Psychological Review</em>. <a href="https://doi.org/10.1037/rev0000611">https://doi.org/10.1037/rev0000611</a>
 </div>
 </div></section></div></main> <!-- /main -->
 <script type="text/javascript">
