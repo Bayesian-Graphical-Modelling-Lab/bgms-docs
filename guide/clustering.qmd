@@ -2,9 +2,6 @@
 title: "Edge Clustering"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
 
 In many networks, nodes can be organized in clusters or communities, and edges are not exchangeable. Standard edge priors (Bernoulli, Beta-Bernoulli) cannot encode such structure because they assign the same inclusion probability to every edge. The stochastic block model (SBM) prior embeds the assumption of clustering directly into the graphical model, so that cluster assignments, the number of clusters, and the evidence for clustering are all estimated as part of the analysis [@SekulovskiEtAl_2025_sbm].
 
@@ -128,3 +125,8 @@ fit = bgm(
 This configuration discourages between-cluster edges ($\beta_b = 8$), which protects against inferring multiple clusters when only one exists, without imposing strong assumptions about within-cluster density.
 
 The `dirichlet_alpha` parameter controls how evenly nodes are distributed across clusters. The default of 1 gives a uniform prior over partitions.
+
+::: {.callout-tip}
+## Tutorial
+@SekulovskiEtAl_2025_sbm provides a step-by-step tutorial on fitting the SBM prior in `bgms`, including guidance on hyperparameter selection and result interpretation. It is available at <https://www.nikolasekulovski.com/blog/post2/>.
+:::
