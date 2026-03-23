@@ -82,7 +82,7 @@ Learn bgms from the ground up: installation, basic usage, and statistical concep
 
 :::: {.feature}
 ### Reference
-Complete documentation for all R functions: `bgm()`, `bgmCompare()`, S3 methods, and extractor functions.
+Complete documentation for all R functions: [`bgm()`](reference/bgm.qmd), [`bgmCompare()`](reference/bgmCompare.qmd), S3 methods, and extractor functions.
 
 [Reference →](reference/index.qmd)
 ::::

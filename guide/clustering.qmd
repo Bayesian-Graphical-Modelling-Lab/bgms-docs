@@ -49,7 +49,7 @@ Both $B$ and $\boldsymbol{\delta}$ are analytically marginalized out using the M
 
 ## Setting up the SBM prior
 
-To use the SBM prior, set `edge_prior = "Stochastic-Block"` in `bgm()`:
+To use the SBM prior, set `edge_prior = "Stochastic-Block"` in [`bgm()`](../reference/bgm.qmd):
 
 ```r
 fit = bgm(

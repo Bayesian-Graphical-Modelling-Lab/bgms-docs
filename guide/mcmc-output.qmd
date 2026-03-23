@@ -2,9 +2,6 @@
 title: "Model Output"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
 
 ```{r}
 #| echo: false
@@ -14,10 +11,12 @@ fit = readRDS("../fixtures/fit_wenchuan.rds")
 fit_compare = readRDS("../fixtures/fit_compare_adhd.rds")
 ```
 
-bgms uses Markov chain Monte Carlo (MCMC) to sample from the posterior
-distribution of the model parameters. The output of `bgm()` and
-`bgmCompare()` contains posterior summaries computed from these samples,
-posterior mean matrices, the raw MCMC draws themselves, and sampler
+`bgms` uses Markov chain Monte Carlo (MCMC) to sample from the posterior
+distribution of the model parameters. The output of
+[`bgm()`](../reference/bgm.qmd) and
+[`bgmCompare()`](../reference/bgmCompare.qmd) contains posterior summaries
+computed from these samples, posterior mean matrices, the raw MCMC draws
+themselves, and sampler
 diagnostics. This chapter describes how to access and interpret each of
 these components. For diagnostics related to the sampler itself, see [MCMC Diagnostics](mcmc-diagnostics.qmd).
 
@@ -31,7 +30,7 @@ fit = bgm(Wenchuan, chains = 2, seed = 1234)
 
 ## The fit object
 
-`bgm()` returns a list of class `"bgms"`.
+[`bgm()`](../reference/bgm.qmd) returns a list of class `"bgms"`.
 
 ```{r}
 names(fit)
@@ -63,12 +62,12 @@ that appear depend on which model was fitted:
 | Pairwise interactions | yes | yes | yes |
 | Inclusion indicators | if edge selection | if edge selection | if edge selection |
 
-**Category thresholds** report the posterior distribution of the ordinal
+**Category thresholds** report the posterior estimates of the ordinal
 threshold parameters. These define the boundary between adjacent response
 categories on the log-odds scale. Negative values indicate that higher
 categories are less probable.
 
-**Residual variances** report the posterior distribution of the residual
+**Residual variances** report the posterior estimates of the residual
 variance $1 / \Theta_{ii}$ for each continuous variable, where
 $\Theta_{ii}$ is the corresponding diagonal element of the precision
 matrix. Use `extract_precision()` to obtain the full precision matrix.
@@ -215,10 +214,10 @@ divergences, and energy. The `warmup_check` field reports whether warmup
 equilibration was sufficient. These are described in detail in
 [MCMC Diagnostics](mcmc-diagnostics.qmd).
 
-## Output from `bgmCompare()`
+## Output from [`bgmCompare()`](../reference/bgmCompare.qmd)
 
-`bgmCompare()` returns a list of class `"bgmCompare"` with the same
-structure as `bgm()`, plus additional components for group differences.
+[`bgmCompare()`](../reference/bgmCompare.qmd) returns a list of class `"bgmCompare"` with the same
+structure as [`bgm()`](../reference/bgm.qmd), plus additional components for group differences.
 The examples use the ADHD data (18 binary items, two groups):
 
 ```r
@@ -235,7 +234,7 @@ fit_compare = bgmCompare(
 summary(fit_compare)
 ```
 
-The summary includes two additional tables beyond what `bgm()` produces:
+The summary includes two additional tables beyond what [`bgm()`](../reference/bgm.qmd) produces:
 
 - **Group differences (main effects)** — posterior estimates of how
   category thresholds differ between the two groups. Large positive or

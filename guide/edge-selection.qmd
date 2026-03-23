@@ -6,7 +6,7 @@ title: "Edge Selection"
 This page has not yet passed technical or readability review.
 :::
 
-Bayesian edge selection determines which edges are present in the network by placing spike-and-slab priors on the partial association parameters. When `edge_selection = TRUE` (the default), `bgm()` estimates both the edge structure and the effect sizes simultaneously.
+Bayesian edge selection determines which edges are present in the network by placing spike-and-slab priors on the partial association parameters. When `edge_selection = TRUE` (the default), [`bgm()`](../reference/bgm.qmd) estimates both the edge structure and the effect sizes simultaneously.
 
 ## Spike-and-slab priors
 

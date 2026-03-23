@@ -146,7 +146,7 @@ The default behavior is `na_action = "listwise"`, which removes rows with any mi
 
 ## Fitting an ordinal MRF
 
-The ordinal MRF is the default model type. Call `bgm()` directly:
+The ordinal MRF is the default model type. Call [`bgm()`](../reference/bgm.qmd) directly:
 
 ```r
 fit = bgm(x = data, seed = 1234)

@@ -6,7 +6,7 @@ title: "Group Comparison"
 This page has not yet passed technical or readability review.
 :::
 
-The `bgmCompare()` function tests whether the network structure and its parameters differ between groups in networks of binary or ordinal variables [@MarsmanEtAl_2025_ttest]. It estimates both the shared network — the overall partial associations and category thresholds — and the group differences, using the same Bayesian framework as `bgm()`. A key advantage of this approach is its ability to distinguish three outcomes for each parameter: evidence that the groups differ, evidence that they are equivalent, and absence of evidence — the data are simply not informative enough to decide.
+The [`bgmCompare()`](../reference/bgmCompare.qmd) function tests whether the network structure and its parameters differ between groups in networks of binary or ordinal variables [@MarsmanEtAl_2025_ttest]. It estimates both the shared network — the overall partial associations and category thresholds — and the group differences, using the same Bayesian framework as [`bgm()`](../reference/bgm.qmd). A key advantage of this approach is its ability to distinguish three outcomes for each parameter: evidence that the groups differ, evidence that they are equivalent, and absence of evidence — the data are simply not informative enough to decide.
 
 ## The model
 
