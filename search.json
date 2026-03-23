@@ -1426,7 +1426,7 @@
     "href": "guide/bayesian-approach.html",
     "title": "The Bayesian Approach",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nbgms uses Bayesian inference to learn about the network structure and its parameters from data. This page describes the general framework; details about prior specifications are covered in Prior Basics and the mechanics of edge selection in Edge Selection. The posterior is estimated using Markov chain Monte Carlo; see MCMC Diagnostics for convergence checks and MCMC Output for the output structure.",
+    "text": "bgms uses Bayesian inference to learn about the network structure and its parameters from data. This page describes the general framework; details about prior specifications are covered in Prior Basics and the mechanics of edge selection in Edge Selection. The posterior is estimated using Markov chain Monte Carlo; see MCMC Diagnostics for convergence checks and MCMC Output for the output structure.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -1510,7 +1510,7 @@
     "href": "guide/ggm.html",
     "title": "Gaussian Graphical Model",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe Gaussian graphical model (GGM) is a Markov random field for continuous variables. It is the most widely studied undirected graphical model (Lauritzen, 1996) and forms the continuous component of the Mixed MRF in bgms. To fit a GGM, set variable_type = \"continuous\".",
+    "text": "The Gaussian graphical model (GGM) is a Markov random field for continuous variables. It is the most widely studied undirected graphical model (Lauritzen, 1996) and forms the continuous component of the Mixed MRF in bgms. To fit a GGM, set variable_type = \"continuous\".",
     "crumbs": [
       "Get Started",
       "Models",
@@ -1962,7 +1962,7 @@
     "href": "guide/prior-basics.html",
     "title": "Prior Basics",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThis page explains the prior distributions used in bgms and how they connect to the Bayesian graphical modeling framework introduced on the Bayesian Approach page. Analysis-specific guidance appears on the Edge Selection, Group Comparison, and Edge Clustering pages.",
+    "text": "This page explains the prior distributions used in bgms and how they connect to the Bayesian graphical modeling framework introduced on the Bayesian Approach page. Analysis-specific guidance appears on the Edge Selection, Group Comparison, and Edge Clustering pages.",
     "crumbs": [
       "Get Started",
       "Background",
@@ -2118,7 +2118,7 @@
     "href": "guide/mixed-model.html",
     "title": "Mixed Markov Random Field",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe mixed Markov random field (MRF) is a graphical model for networks containing both discrete (binary or ordinal) and continuous variables. It unites the Ordinal MRF and the GGM into a single joint distribution through the conditional Gaussian framework (Lauritzen, 1996; Lauritzen & Wermuth, 1989). To fit a mixed MRF, provide a variable_type vector that includes both discrete and continuous types.",
+    "text": "The mixed Markov random field (MRF) is a graphical model for networks containing both discrete (binary or ordinal) and continuous variables. It unites the Ordinal MRF and the GGM into a single joint distribution through the conditional Gaussian framework (Lauritzen, 1996; Lauritzen & Wermuth, 1989). To fit a mixed MRF, provide a variable_type vector that includes both discrete and continuous types.",
     "crumbs": [
       "Get Started",
       "Models",
@@ -2322,7 +2322,7 @@
     "href": "guide/omrf.html",
     "title": "Ordinal Markov Random Field",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe ordinal Markov random field (MRF) is a graphical model for networks of binary and ordinal variables (Anderson & Vermunt, 2000; Suggala et al., 2017). It is the default model in bgms and forms the discrete component of the Mixed MRF. To fit an ordinal MRF, use the default variable_type = \"ordinal\".",
+    "text": "The ordinal Markov random field (MRF) is a graphical model for networks of binary and ordinal variables (Anderson & Vermunt, 2000; Suggala et al., 2017). It is the default model in bgms and forms the discrete component of the Mixed MRF. To fit an ordinal MRF, use the default variable_type = \"ordinal\".",
     "crumbs": [
       "Get Started",
       "Models",
