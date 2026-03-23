@@ -1714,7 +1714,7 @@
     "href": "guide/graphical-models.html",
     "title": "Graphical Models",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nA graphical model represents relationships among a set of variables as a graph. bgms estimates a class of undirected graphical models: pairwise Markov random fields.",
+    "text": "A graphical model represents relationships among a set of variables as a graph. bgms estimates a class of undirected graphical models: pairwise Markov random fields.",
     "crumbs": [
       "Get Started",
       "Background",
