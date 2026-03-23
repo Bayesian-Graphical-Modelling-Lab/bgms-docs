@@ -2,11 +2,8 @@
 title: "Group Comparison"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
 
-The [`bgmCompare()`](../reference/bgmCompare.qmd) function tests whether the network structure and its parameters differ between groups in networks of binary or ordinal variables [@MarsmanEtAl_2025_ttest]. It estimates both the shared network — the overall partial associations and category thresholds — and the group differences, using the same Bayesian framework as [`bgm()`](../reference/bgm.qmd). A key advantage of this approach is its ability to distinguish three outcomes for each parameter: evidence that the groups differ, evidence that they are equivalent, and absence of evidence — the data are simply not informative enough to decide.
+The [`bgmCompare()`](../reference/bgmCompare.qmd) function tests whether the network parameters differ between groups in networks of binary or ordinal variables [@MarsmanEtAl_2025_ttest]. It estimates both the shared network — the overall partial associations and category thresholds — and the group differences, using the same Bayesian framework as [`bgm()`](../reference/bgm.qmd). A key advantage of this approach is its ability to distinguish three outcomes for each parameter: evidence that a parameter differs across groups, evidence that it is invariant, and absence of evidence — the data are simply not informative enough to decide.
 
 ## The model
 
@@ -54,7 +51,7 @@ $$
 \frac{p(\gamma_{ij} = 1)}{p(\gamma_{ij} = 0)}
 $$
 
-Values greater than one indicate evidence that the groups differ on the partial association between variables $i$ and $j$. Values less than one — equivalently, $1/\text{BF}_{10}$ greater than one — indicate evidence that the groups are equivalent. Values close to one indicate that the data are uninformative: there is not enough evidence to decide whether the groups differ or not. This three-way distinction — evidence for a difference, evidence for equivalence, and absence of evidence — is the central advantage of the Bayesian approach to group comparison.
+Values greater than one indicate evidence that the groups differ on the partial association between variables $i$ and $j$. Values less than one — equivalently, $1/\text{BF}_{10}$ greater than one — indicate evidence that the parameter is invariant. Values close to one indicate that the data are uninformative: there is not enough evidence to decide whether the parameter differs between groups or not. This three-way distinction — evidence for a difference, evidence for equivalence, and absence of evidence — is the central advantage of the Bayesian approach to group comparison.
 
 As with edge selection, the inclusion Bayes factor averages over all possible configurations of the remaining group differences. Testing whether the interaction between variables $i$ and $j$ differs across groups does not require assumptions about which other interactions differ — the test integrates over this uncertainty. See [Why the inclusion Bayes factor](edge-selection.qmd#why-the-inclusion-bayes-factor) and [The Bayesian Approach](bayesian-approach.qmd) for the formal derivation.
 

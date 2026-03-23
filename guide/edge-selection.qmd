@@ -2,10 +2,6 @@
 title: "Edge Selection"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 Bayesian edge selection determines which edges are present in the network by placing spike-and-slab priors on the partial association parameters. When `edge_selection = TRUE` (the default), [`bgm()`](../reference/bgm.qmd) estimates both the edge structure and the effect sizes simultaneously.
 
 ## Spike-and-slab priors
@@ -55,7 +51,7 @@ The inclusion Bayes factor used in `bgms` is not the only Bayesian approach to t
 
 **Inclusion Bayes factor.** The inclusion Bayes factor overcomes this sensitivity through Bayesian model averaging. Rather than conditioning on a single structure for the remaining edges, it aggregates the evidence across all possible structures, weighting each by its posterior plausibility. See [The Bayesian Approach](bayesian-approach.qmd) for the formal derivation.
 
-In practice, we do not know the network structure — learning it is the goal of the analysis. The inclusion Bayes factor accounts for this structural uncertainty, and its conclusions therefore hold regardless of which structure generated the data. This makes it the appropriate tool for testing conditional independence in networks.
+In practice, we do not know the network structure — learning it is the goal of the analysis. The inclusion Bayes factor accounts for this structural uncertainty, and its conclusions therefore hold regardless of which structure generated the data. This makes it the appropriate tool for testing conditional independence in graphical models.
 
 ## Evidence categories
 
