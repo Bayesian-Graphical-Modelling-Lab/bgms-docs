@@ -34,7 +34,7 @@ bgmCompare(
   difference_probability = 0.5,
   beta_bernoulli_alpha = 1,
   beta_bernoulli_beta = 1,
-  pairwise_scale = 2.5,
+  pairwise_scale = 1,
   main_alpha = 0.5,
   main_beta = 0.5,
   iter = 1000,
@@ -82,7 +82,7 @@ bgmCompare(
 
 | Argument | Description |
 |----------|-------------|
-| `pairwise_scale` | Scale of the Cauchy prior for baseline partial associations. Default: `2.5`. |
+| `pairwise_scale` | Scale of the Cauchy prior for baseline partial associations. Default: `1`. |
 | `main_alpha`, `main_beta` | Shape parameters of the beta-prime prior for baseline threshold parameters. Defaults: `0.5`. |
 | `standardize` | Logical. If `TRUE`, the Cauchy prior scale for each partial association (both baseline and difference) is adjusted based on the range of response scores. Default: `FALSE`. |
 
