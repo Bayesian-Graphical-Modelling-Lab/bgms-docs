@@ -670,15 +670,15 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>update_method</code></td>
-<td>Sampling algorithm: <code>"nuts"</code>, <code>"adaptive-metropolis"</code>, or <code>"hamiltonian-mc"</code>. Default: <code>"nuts"</code>.</td>
+<td>Sampling algorithm: <code>"nuts"</code> or <code>"adaptive-metropolis"</code>. <code>"hamiltonian-mc"</code> is accepted but <strong>deprecated</strong>; use <code>"nuts"</code> instead. Default: <code>"nuts"</code>.</td>
 </tr>
 <tr class="even">
 <td><code>target_accept</code></td>
-<td>Target acceptance rate. Defaults: <code>0.44</code> (Metropolis), <code>0.65</code> (HMC), <code>0.80</code> (NUTS).</td>
+<td>Target acceptance rate. Defaults: <code>0.44</code> (Metropolis), <code>0.80</code> (NUTS).</td>
 </tr>
 <tr class="odd">
 <td><code>hmc_num_leapfrogs</code></td>
-<td>Leapfrog steps for HMC. Default: <code>100</code>.</td>
+<td><strong>Deprecated.</strong> Leapfrog steps for HMC. Only relevant when <code>update_method = "hamiltonian-mc"</code>, which is deprecated. Default: <code>100</code>.</td>
 </tr>
 <tr class="even">
 <td><code>nuts_max_depth</code></td>
@@ -686,7 +686,7 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>learn_mass_matrix</code></td>
-<td>Logical. If <code>TRUE</code>, adapts a diagonal mass matrix during warmup (HMC/NUTS only). Default: <code>TRUE</code>.</td>
+<td>Logical. If <code>TRUE</code>, adapts a diagonal mass matrix during warmup (NUTS only). Default: <code>TRUE</code>.</td>
 </tr>
 <tr class="even">
 <td><code>chains</code></td>
@@ -748,7 +748,20 @@ Warning
 </section>
 <section id="sampling-algorithms-and-warmup" class="level3">
 <h3 class="anchored" data-anchor-id="sampling-algorithms-and-warmup">Sampling algorithms and warmup</h3>
-<p>Parameters are updated within a Gibbs framework, using the same sampling algorithms and staged warmup scheme described in <a href="../reference/bgm.html">bgm()</a>: adaptive Metropolis–Hastings, Hamiltonian Monte Carlo, or the No-U-Turn Sampler. When <code>difference_selection = TRUE</code>, indicator updates are delayed until late warmup.</p>
+<p>Parameters are updated within a Gibbs framework, using the same sampling algorithms and staged warmup scheme described in <a href="../reference/bgm.html">bgm()</a>: adaptive Metropolis–Hastings or the No-U-Turn Sampler (NUTS). When <code>difference_selection = TRUE</code>, indicator updates are delayed until late warmup.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>update_method = "hamiltonian-mc"</code> (fixed-length HMC) is deprecated. Use <code>"nuts"</code> instead.</p>
+</div>
+</div>
 </section>
 </section>
 <section id="examples" class="level2">

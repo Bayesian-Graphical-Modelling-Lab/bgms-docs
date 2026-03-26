@@ -650,15 +650,15 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>update_method</code></td>
-<td>Character. Specifies how the MCMC sampler updates the model parameters: <code>\"adaptive-metropolis\"</code> (Componentwise adaptive Metropolis–Hastings with Robbins–Monro proposal adaptation), <code>\"hamiltonian-mc\"</code> (Hamiltonian Monte Carlo with fixed path length, number of leapfrog steps set by <code>hmc_num_leapfrogs</code>), or <code>\"nuts\"</code> (The No-U-Turn Sampler, an adaptive form of HMC with dynamically chosen trajectory lengths). Default: <code>\"nuts\"</code>.</td>
+<td>Character. Specifies how the MCMC sampler updates the model parameters: <code>\"adaptive-metropolis\"</code> (Componentwise adaptive Metropolis–Hastings with Robbins–Monro proposal adaptation), <code>\"hamiltonian-mc\"</code> (<strong>Deprecated.</strong> Use <code>\"nuts\"</code> instead. Will be removed in a future release.), or <code>\"nuts\"</code> (The No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: <code>\"nuts\"</code>.</td>
 </tr>
 <tr class="even">
 <td><code>target_accept</code></td>
-<td>Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: <code>0.44</code> for adaptive Metropolis, <code>0.65</code> for HMC, and <code>0.80</code> for NUTS.</td>
+<td>Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: <code>0.44</code> for adaptive Metropolis and <code>0.80</code> for NUTS.</td>
 </tr>
 <tr class="odd">
 <td><code>hmc_num_leapfrogs</code></td>
-<td>Integer. Number of leapfrog steps for Hamiltonian Monte Carlo. Must be positive. Default: <code>100</code>.</td>
+<td><strong>Deprecated.</strong> Integer. Number of leapfrog steps for Hamiltonian Monte Carlo. Only relevant when <code>update_method = \"hamiltonian-mc\"</code>, which is deprecated. Default: <code>100</code>.</td>
 </tr>
 <tr class="even">
 <td><code>nuts_max_depth</code></td>
@@ -666,7 +666,7 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>learn_mass_matrix</code></td>
-<td>Logical. If <code>TRUE</code>, adapt a diagonal mass matrix during warmup (HMC/NUTS only). If <code>FALSE</code>, use the identity matrix. Default: <code>TRUE</code>.</td>
+<td>Logical. If <code>TRUE</code>, adapt a diagonal mass matrix during warmup (NUTS only). If <code>FALSE</code>, use the identity matrix. Default: <code>TRUE</code>.</td>
 </tr>
 <tr class="even">
 <td><code>chains</code></td>
@@ -760,12 +760,24 @@ Warning
 </section>
 <section id="sampling-algorithms-and-warmup" class="level3">
 <h3 class="anchored" data-anchor-id="sampling-algorithms-and-warmup">Sampling algorithms and warmup</h3>
-<p>Parameters are updated within a Gibbs framework using one of three algorithms:</p>
+<p>Parameters are updated within a Gibbs framework using one of two algorithms:</p>
 <ul>
 <li><strong>Adaptive Metropolis–Hastings</strong> — Componentwise random-walk updates with Robbins–Monro proposal adaptation.</li>
-<li><strong>Hamiltonian Monte Carlo</strong> — Joint updates using fixed-length leapfrog trajectories. Step size is tuned during warmup via dual averaging; the diagonal mass matrix can also be adapted.</li>
-<li><strong>No-U-Turn Sampler</strong> — Adaptive extension of HMC with dynamically chosen trajectory lengths. Warmup uses a staged fast–slow–fast schedule.</li>
+<li><strong>No-U-Turn Sampler (NUTS)</strong> — Joint updates using Hamiltonian dynamics with adaptively chosen trajectory lengths. Warmup uses a staged fast–slow–fast schedule for step-size and mass-matrix adaptation.</li>
 </ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>update_method = "hamiltonian-mc"</code> (fixed-length HMC) is deprecated. Use <code>"nuts"</code> instead.</p>
+</div>
+</div>
 <p>When <code>edge_selection = TRUE</code>, edge-inclusion indicator updates are delayed until after the core warmup phase. The warmup schedule appends additional stages for proposal-SD tuning (Stage 3b) and graph initialization (Stage 3c), so the total warmup exceeds the user-specified value.</p>
 </section>
 <section id="missing-data" class="level3">

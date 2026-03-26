@@ -566,7 +566,7 @@ Warning
 <p>How <code>bgmCompare()</code> works under the hood: multi-group posterior, difference parameterization, and sampler implementation. Source: <code>src/bgmCompare/</code> directory.</p>
 <section id="differences-from-single-group-bgm" class="level2">
 <h2 class="anchored" data-anchor-id="differences-from-single-group-bgm">Differences from single-group bgm</h2>
-<p>The <code>bgmCompare</code> engine shares the same OMRF likelihood (pseudolikelihood over ordinal/Blume-Capel variables) and the same NUTS/HMC/Metropolis sampler options, but differs in three key ways:</p>
+<p>The <code>bgmCompare</code> engine shares the same OMRF likelihood (pseudolikelihood over ordinal/Blume-Capel variables) and the same NUTS/Metropolis sampler options (HMC is deprecated), but differs in three key ways:</p>
 <ol type="1">
 <li><strong>Parameter decomposition</strong> — Group-specific parameters <span class="math inline">\(\boldsymbol{\theta}^{(g)}\)</span> are decomposed into a shared baseline <span class="math inline">\(\boldsymbol{\varphi}\)</span> and group differences <span class="math inline">\(\boldsymbol{\delta}^{(g)}\)</span>, linked through a contrast matrix.</li>
 <li><strong>Separate sampler</strong> — The bgmCompare engine uses its own chain runner (<code>run_gibbs_sampler_bgmCompare()</code>) rather than the general <code>run_mcmc_chain()</code>, because the multi-group structure requires group-specific likelihood evaluations and difference selection.</li>
@@ -602,7 +602,7 @@ Warning
 <h2 class="anchored" data-anchor-id="sampler-implementation">Sampler implementation</h2>
 <p><code>run_gibbs_sampler_bgmCompare()</code> orchestrates one MCMC chain. Each iteration:</p>
 <ol type="1">
-<li><strong>NUTS/HMC/Metropolis step</strong> — Update all active parameters (baseline + differences) using the joint log-pseudoposterior</li>
+<li><strong>NUTS/Metropolis step</strong> — Update all active parameters (baseline + differences) using the joint log-pseudoposterior</li>
 <li><strong>Difference selection</strong> (if active) — For each edge, decide whether the group-difference parameters are included or set to zero. Uses a spike-and-slab mechanism analogous to edge selection in the single-group model.</li>
 <li><strong>Main-effect difference selection</strong> (optional) — Separately select which main-effect parameters differ between groups</li>
 <li><strong>Edge prior update</strong> — Update inclusion probabilities (Bernoulli, Beta-Bernoulli, or SBM)</li>

@@ -576,7 +576,7 @@ build_output(spec, raw) ← normalizes raw C++ output into S3 object</code></pre
 </section>
 <section id="sampler-validation-validate_sampler.r" class="level3">
 <h3 class="anchored" data-anchor-id="sampler-validation-validate_sampler.r">Sampler validation (<code>validate_sampler.R</code>)</h3>
-<p><code>validate_sampler()</code> resolves the <code>interaction_scale</code> argument into a concrete sampler type (<code>"nuts"</code>, <code>"hmc"</code>, or <code>"adaptive_metropolis"</code>) and sets defaults for tuning parameters (<code>target_accept</code>, <code>nuts_max_depth</code>, <code>hmc_num_leapfrogs</code>). It detects the number of available cores and resolves the progress display type.</p>
+<p><code>validate_sampler()</code> resolves the <code>interaction_scale</code> argument into a concrete sampler type (<code>"nuts"</code> or <code>"adaptive_metropolis"</code>; <code>"hmc"</code> is accepted but deprecated) and sets defaults for tuning parameters (<code>target_accept</code>, <code>nuts_max_depth</code>, <code>hmc_num_leapfrogs</code>). It detects the number of available cores and resolves the progress display type.</p>
 </section>
 <section id="edge-prior-validation-validate_model.r" class="level3">
 <h3 class="anchored" data-anchor-id="edge-prior-validation-validate_model.r">Edge prior validation (<code>validate_model.R</code>)</h3>

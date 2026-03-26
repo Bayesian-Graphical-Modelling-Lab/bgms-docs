@@ -604,7 +604,7 @@ Warning
 <pre><code>SamplerBase                       (abstract)
 ├── MetropolisSampler             — element-wise Metropolis-Hastings
 └── GradientSamplerBase           (abstract, owns HMCAdaptationController)
-    ├── HMCSampler                — fixed-length leapfrog
+    ├── HMCSampler                — fixed-length leapfrog (deprecated)
     └── NUTSSampler               — adaptive tree depth</code></pre>
 <p>The <code>HybridNUTSSampler</code> variant exists for the mixed MRF, combining a NUTS step for the main parameter block with a Metropolis step for the continuous precision elements.</p>
 </section>
@@ -643,8 +643,21 @@ Warning
 </ol>
 <p>After warmup, the adaptation controller freezes and returns the smoothed step size from dual averaging.</p>
 </section>
-<section id="hmcsampler" class="level2">
-<h2 class="anchored" data-anchor-id="hmcsampler">HMCSampler</h2>
+<section id="hmcsampler-deprecated" class="level2">
+<h2 class="anchored" data-anchor-id="hmcsampler-deprecated">HMCSampler (deprecated)</h2>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>HMCSampler</code> is deprecated. The R-level <code>update_method = "hamiltonian-mc"</code> option still dispatches to this class, but it will be removed in a future release. Use NUTS instead.</p>
+</div>
+</div>
 <p>Performs fixed-length leapfrog integration. The number of leapfrog steps is set at construction from <code>config.num_leapfrogs</code>. Each call to <code>do_gradient_step()</code> invokes <code>hmc_step()</code> from <code>mcmc/algorithms/hmc.h</code>.</p>
 </section>
 <section id="nutssampler" class="level2">
