@@ -53,5 +53,5 @@ Prior specification and edge inclusion machinery.
 ## Prerequisites
 
 This manual assumes familiarity with C++ programming, MCMC methods,
-and Hamiltonian Monte Carlo. The [User's Guide](../guide/index.qmd)
+and the No-U-Turn Sampler. The [User's Guide](../guide/index.qmd)
 covers the statistical background at a conceptual level.

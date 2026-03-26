@@ -39,7 +39,7 @@ virtual pair<double, vec> logp_and_gradient(vec parameters);
 ```
 
 Every model must implement `do_one_metropolis_step()`. Models that
-support gradient-based samplers (NUTS, HMC) also override `gradient()`
+support gradient-based samplers (NUTS) also override `gradient()`
 and `logp_and_gradient()`. The joint function is more efficient because
 the log-posterior and gradient share intermediate computations.
 
@@ -139,7 +139,7 @@ $\mu_c = \alpha(c - b) + \beta(c - b)^2$ where $b$ is the reference
 category.
 
 **Gradient.** The OMRF supports `logp_and_gradient()`, enabling NUTS
-and HMC sampling. The gradient involves category probabilities
+sampling. The gradient involves category probabilities
 computed by the [variable helpers](variable-helpers.qmd), which use
 a FAST/SAFE dual-path strategy for numerical stability.
 

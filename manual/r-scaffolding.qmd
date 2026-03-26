@@ -66,7 +66,8 @@ lowest observed category.
 ### Sampler validation (`validate_sampler.R`)
 
 `validate_sampler()` resolves the `interaction_scale` argument into a
-concrete sampler type (`"nuts"`, `"hmc"`, or `"adaptive_metropolis"`)
+concrete sampler type (`"nuts"` or `"adaptive_metropolis"`;
+`"hmc"` is accepted but deprecated)
 and sets defaults for tuning parameters (`target_accept`,
 `nuts_max_depth`, `hmc_num_leapfrogs`). It detects the number of
 available cores and resolves the progress display type.

@@ -88,11 +88,11 @@ bgm(
 |----------|-------------|
 | `iter` | Integer. Number of post-warmup iterations (per chain). Default: `1e3`. |
 | `warmup` | Integer. Number of warmup iterations before collecting samples. A minimum of 1000 iterations is enforced, with a warning if a smaller value is requested. Default: `1e3`. |
-| `update_method` | Character. Specifies how the MCMC sampler updates the model parameters: `\"adaptive-metropolis\"` (Componentwise adaptive Metropolis--Hastings with Robbins--Monro proposal adaptation), `\"hamiltonian-mc\"` (Hamiltonian Monte Carlo with fixed path length, number of leapfrog steps set by `hmc_num_leapfrogs`), or `\"nuts\"` (The No-U-Turn Sampler, an adaptive form of HMC with dynamically chosen trajectory lengths). Default: `\"nuts\"`. |
-| `target_accept` | Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: `0.44` for adaptive Metropolis, `0.65` for HMC, and `0.80` for NUTS. |
-| `hmc_num_leapfrogs` | Integer. Number of leapfrog steps for Hamiltonian Monte Carlo. Must be positive. Default: `100`. |
+| `update_method` | Character. Specifies how the MCMC sampler updates the model parameters: `\"adaptive-metropolis\"` (Componentwise adaptive Metropolis--Hastings with Robbins--Monro proposal adaptation), `\"hamiltonian-mc\"` (**Deprecated.** Use `\"nuts\"` instead. Will be removed in a future release.), or `\"nuts\"` (The No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: `\"nuts\"`. |
+| `target_accept` | Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: `0.44` for adaptive Metropolis and `0.80` for NUTS. |
+| `hmc_num_leapfrogs` | **Deprecated.** Integer. Number of leapfrog steps for Hamiltonian Monte Carlo. Only relevant when `update_method = \"hamiltonian-mc\"`, which is deprecated. Default: `100`. |
 | `nuts_max_depth` | Integer. Maximum tree depth in NUTS. Must be positive. Default: `10`. |
-| `learn_mass_matrix` | Logical. If `TRUE`, adapt a diagonal mass matrix during warmup (HMC/NUTS only). If `FALSE`, use the identity matrix. Default: `TRUE`. |
+| `learn_mass_matrix` | Logical. If `TRUE`, adapt a diagonal mass matrix during warmup (NUTS only). If `FALSE`, use the identity matrix. Default: `TRUE`. |
 | `chains` | Integer. Number of parallel chains to run. Default: `4`. |
 | `cores` | Integer. Number of CPU cores for parallel execution. Default: `parallel::detectCores()`. |
 | `display_progress` | Character. Controls progress reporting during sampling. Options: `"per-chain"` (separate bar per chain), `"total"` (single combined bar), or `"none"` (no progress). Default: `"per-chain"`. |
@@ -183,15 +183,18 @@ selection on partial associations using spike-and-slab priors:
 
 ### Sampling algorithms and warmup
 
-Parameters are updated within a Gibbs framework using one of three algorithms:
+Parameters are updated within a Gibbs framework using one of two algorithms:
 
 - **Adaptive Metropolis--Hastings** --- Componentwise random-walk updates with
   Robbins--Monro proposal adaptation.
-- **Hamiltonian Monte Carlo** --- Joint updates using fixed-length leapfrog
-  trajectories. Step size is tuned during warmup via dual averaging; the
-  diagonal mass matrix can also be adapted.
-- **No-U-Turn Sampler** --- Adaptive extension of HMC with dynamically chosen
-  trajectory lengths. Warmup uses a staged fast--slow--fast schedule.
+- **No-U-Turn Sampler (NUTS)** --- Joint updates using Hamiltonian dynamics
+  with adaptively chosen trajectory lengths. Warmup uses a staged
+  fast--slow--fast schedule for step-size and mass-matrix adaptation.
+
+::: {.callout-note}
+`update_method = "hamiltonian-mc"` (fixed-length HMC) is deprecated. Use
+`"nuts"` instead.
+:::
 
 When `edge_selection = TRUE`, edge-inclusion indicator updates are delayed
 until after the core warmup phase. The warmup schedule appends additional

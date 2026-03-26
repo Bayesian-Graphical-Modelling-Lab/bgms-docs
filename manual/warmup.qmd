@@ -22,7 +22,7 @@ only apply when edge selection is enabled.
 | 2 | Adaptation windows | Tune step size (dual averaging) and mass matrix (Welford) |
 | 3a | Terminal window | Final mass matrix and step-size adaptation |
 | 3b | Proposal SD learning | Tune element-wise Metropolis proposal SDs with edge selection active |
-| 3c | Step-size re-adaptation | Re-adapt the NUTS/HMC step size after edge selection changes the geometry |
+| 3c | Step-size re-adaptation | Re-adapt the NUTS step size after edge selection changes the geometry |
 
 ### Stage 1: Initial exploration
 
@@ -65,7 +65,7 @@ $[0.001, 2.0]$.
 ### Stage 3c: Step-size re-adaptation
 
 After edge selection changes the effective posterior geometry (many
-edges may be set to zero), the NUTS/HMC step size needs readjustment.
+edges may be set to zero), the NUTS step size needs readjustment.
 Stage 3c runs dual averaging one more time with the final mass
 matrix and active edge selection.
 

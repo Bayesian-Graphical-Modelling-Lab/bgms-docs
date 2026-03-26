@@ -17,7 +17,7 @@ samplers through the `SamplerBase` interface.
 SamplerBase                       (abstract)
 ├── MetropolisSampler             — element-wise Metropolis-Hastings
 └── GradientSamplerBase           (abstract, owns HMCAdaptationController)
-    ├── HMCSampler                — fixed-length leapfrog
+    ├── HMCSampler                — fixed-length leapfrog (deprecated)
     └── NUTSSampler               — adaptive tree depth
 ```
 
@@ -75,7 +75,13 @@ The `step()` method in `GradientSamplerBase`:
 After warmup, the adaptation controller freezes and returns the
 smoothed step size from dual averaging.
 
-## HMCSampler
+## HMCSampler (deprecated)
+
+::: {.callout-warning}
+`HMCSampler` is deprecated. The R-level `update_method = "hamiltonian-mc"`
+option still dispatches to this class, but it will be removed in a future
+release. Use NUTS instead.
+:::
 
 Performs fixed-length leapfrog integration. The number of leapfrog
 steps is set at construction from `config.num_leapfrogs`. Each call

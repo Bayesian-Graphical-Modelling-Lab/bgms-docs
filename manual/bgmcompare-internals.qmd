@@ -14,7 +14,7 @@ difference parameterization, and sampler implementation. Source:
 
 The `bgmCompare` engine shares the same OMRF likelihood
 (pseudolikelihood over ordinal/Blume-Capel variables) and the same
-NUTS/HMC/Metropolis sampler options, but differs in three key ways:
+NUTS/Metropolis sampler options (HMC is deprecated), but differs in three key ways:
 
 1. **Parameter decomposition** — Group-specific parameters
    $\boldsymbol{\theta}^{(g)}$ are decomposed into a shared baseline
@@ -77,7 +77,7 @@ difference pairwise parameters.
 `run_gibbs_sampler_bgmCompare()` orchestrates one MCMC chain. Each
 iteration:
 
-1. **NUTS/HMC/Metropolis step** — Update all active parameters
+1. **NUTS/Metropolis step** — Update all active parameters
    (baseline + differences) using the joint log-pseudoposterior
 2. **Difference selection** (if active) — For each edge, decide
    whether the group-difference parameters are included or set to

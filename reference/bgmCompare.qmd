@@ -92,11 +92,11 @@ bgmCompare(
 |----------|-------------|
 | `iter` | Number of post-warmup iterations per chain. Default: `1000`. |
 | `warmup` | Number of warmup iterations before sampling. Default: `1000`. |
-| `update_method` | Sampling algorithm: `"nuts"`, `"adaptive-metropolis"`, or `"hamiltonian-mc"`. Default: `"nuts"`. |
-| `target_accept` | Target acceptance rate. Defaults: `0.44` (Metropolis), `0.65` (HMC), `0.80` (NUTS). |
-| `hmc_num_leapfrogs` | Leapfrog steps for HMC. Default: `100`. |
+| `update_method` | Sampling algorithm: `"nuts"` or `"adaptive-metropolis"`. `"hamiltonian-mc"` is accepted but **deprecated**; use `"nuts"` instead. Default: `"nuts"`. |
+| `target_accept` | Target acceptance rate. Defaults: `0.44` (Metropolis), `0.80` (NUTS). |
+| `hmc_num_leapfrogs` | **Deprecated.** Leapfrog steps for HMC. Only relevant when `update_method = "hamiltonian-mc"`, which is deprecated. Default: `100`. |
 | `nuts_max_depth` | Maximum tree depth for NUTS. Default: `10`. |
-| `learn_mass_matrix` | Logical. If `TRUE`, adapts a diagonal mass matrix during warmup (HMC/NUTS only). Default: `TRUE`. |
+| `learn_mass_matrix` | Logical. If `TRUE`, adapts a diagonal mass matrix during warmup (NUTS only). Default: `TRUE`. |
 | `chains` | Number of parallel chains. Default: `4`. |
 | `cores` | Number of CPU cores. Default: `parallel::detectCores()`. |
 | `display_progress` | Progress reporting: `"per-chain"`, `"total"`, or `"none"`. Default: `"per-chain"`. |
@@ -157,9 +157,14 @@ difference parameters:
 
 Parameters are updated within a Gibbs framework, using the same sampling
 algorithms and staged warmup scheme described in [bgm()](bgm.qmd):
-adaptive Metropolis--Hastings, Hamiltonian Monte Carlo, or the No-U-Turn
-Sampler. When `difference_selection = TRUE`, indicator updates are delayed
-until late warmup.
+adaptive Metropolis--Hastings or the No-U-Turn Sampler (NUTS). When
+`difference_selection = TRUE`, indicator updates are delayed until late
+warmup.
+
+::: {.callout-note}
+`update_method = "hamiltonian-mc"` (fixed-length HMC) is deprecated. Use
+`"nuts"` instead.
+:::
 
 ## Examples
 
