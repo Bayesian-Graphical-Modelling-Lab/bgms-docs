@@ -51,11 +51,11 @@ The inclusion Bayes factor is not the only Bayesian approach to testing conditio
 
 **Inclusion Bayes factor.** When `edge_selection = TRUE`, the inclusion Bayes factor averages over all possible structures for the remaining edges, weighting each by its posterior plausibility. This accounts for structural uncertainty but requires the spike-and-slab model selection framework. See [The Bayesian Approach](bayesian-approach.qmd) for the formal derivation.
 
-Each method rests on different assumptions and answers a slightly different question. The choice depends on the goals of the analysis.
 
 ## Evidence categories
 
-The following classification, based on @KassRaftery_1995, is a common convention:
+The following classification, based on @KassRaftery_1995, is a common convention
+for interpreting Bayes factors:
 
 | Bayes factor | Evidence |
 |-------------|----------|
