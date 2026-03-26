@@ -604,11 +604,10 @@ window.Quarto = {
 <p><strong>Credible intervals.</strong> With <code>edge_selection = FALSE</code>, posterior credible intervals for each partial association <span class="math inline">\(\phi_{ij}\)</span> can be constructed from the MCMC samples (available in <code>fit$raw_samples</code>). If the interval excludes zero, this is taken as evidence that the edge is present. This approach conditions on the full model, so it can reject absence but cannot provide direct evidence <em>for</em> absence.</p>
 <p><strong>Savage–Dickey Bayes factor.</strong> With <code>edge_selection = FALSE</code>, the posterior samples from the full model can be used to compute a Savage–Dickey density ratio for each edge, testing whether <span class="math inline">\(\phi_{ij} = 0\)</span>. This addresses the one-sidedness of the credible interval, but the result conditions on a single structure (the full model) for all remaining edges.</p>
 <p><strong>Inclusion Bayes factor.</strong> When <code>edge_selection = TRUE</code>, the inclusion Bayes factor averages over all possible structures for the remaining edges, weighting each by its posterior plausibility. This accounts for structural uncertainty but requires the spike-and-slab model selection framework. See <a href="../guide/bayesian-approach.html">The Bayesian Approach</a> for the formal derivation.</p>
-<p>Each method rests on different assumptions and answers a slightly different question. The choice depends on the goals of the analysis.</p>
 </section>
 <section id="evidence-categories" class="level2">
 <h2 class="anchored" data-anchor-id="evidence-categories">Evidence categories</h2>
-<p>The following classification, based on <span class="citation" data-cites="KassRaftery_1995">Kass &amp; Raftery (<a href="#ref-KassRaftery_1995" role="doc-biblioref">1995</a>)</span>, is a common convention:</p>
+<p>The following classification, based on <span class="citation" data-cites="KassRaftery_1995">Kass &amp; Raftery (<a href="#ref-KassRaftery_1995" role="doc-biblioref">1995</a>)</span>, is a common convention for interpreting Bayes factors:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
