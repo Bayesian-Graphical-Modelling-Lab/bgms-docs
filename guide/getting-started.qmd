@@ -2,7 +2,7 @@
 title: "Getting Started"
 ---
 
-`bgms` implements Bayesian estimation and selection for graphical models of mixed binary, ordinal, and continuous variables. Networks are estimated at the level of conditional associations: an edge between two variables indicates a direct relationship that persists after accounting for all other variables in the model.
+`bgms` implements Bayesian estimation and edge selection for graphical models of mixed binary, ordinal, and continuous variables. Networks are estimated at the level of conditional associations: an edge between two variables indicates a direct relationship that persists after accounting for all other variables in the model.
 
 The package has two main entry points:
 
