@@ -7,8 +7,16 @@ title: "Model Output"
 #| echo: false
 #| message: false
 library(bgms)
-fit = readRDS("../fixtures/fit_wenchuan.rds")
-fit_compare = readRDS("../fixtures/fit_compare_adhd.rds")
+
+resolve_fixture = function(name) {
+  candidates = c(file.path("fixtures", name), file.path("..", "fixtures", name))
+  hit = candidates[file.exists(candidates)][1]
+  if (is.na(hit)) stop("Fixture not found: ", name)
+  hit
+}
+
+fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
+fit_compare = readRDS(resolve_fixture("fit_compare_adhd.rds"))
 ```
 
 `bgms` uses Markov chain Monte Carlo (MCMC) to sample from the posterior

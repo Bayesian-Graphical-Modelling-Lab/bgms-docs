@@ -96,6 +96,25 @@ qgraph(median_probability_network,
 )
 ```
 
+```{r}
+#| echo: false
+#| fig-width: 7
+#| fig-height: 7
+library(qgraph)
+
+median_probability_network = coef(fit)$pairwise
+median_probability_network[coef(fit)$indicator < 0.5] = 0.0
+
+qgraph(median_probability_network,
+  theme = "TeamFortress",
+  maximum = 1,
+  fade = FALSE,
+  color = c("#f0ae0e"), vsize = 10, repulsion = .9,
+  label.cex = 1, label.scale = "FALSE",
+  labels = colnames(Wenchuan)[1:5]
+)
+```
+
 In this plot, edges with posterior inclusion probability below 0.5 are set to zero, so only edges with minimum **evidence for inclusion** appear in the plot.
 
 ## Continuous data
