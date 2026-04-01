@@ -580,23 +580,23 @@ window.Quarto = {
 <p>The <a href="../guide/graphical-models.html">Graphical Models</a> page introduced the general pairwise MRF:</p>
 <p><span class="math display">\[
 p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
-\mathbf{x}^{\sf T}\boldsymbol{\Phi}\, \mathbf{x}\right)
+\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
 \]</span></p>
 <p>The GGM is a special case of this form. In <code>bgms</code>, continuous variables are centered before estimation, so <span class="math inline">\(\boldsymbol{\mu} = \mathbf{0}\)</span> and the node potentials vanish. The multivariate normal density then reduces to:</p>
 <p><span class="math display">\[
 p(\mathbf{x}) \propto \exp\!\left(
 - \tfrac{1}{2}\,\mathbf{x}^{\sf T} \boldsymbol{\Theta}\, \mathbf{x}\right)
 \]</span></p>
-<p>Comparing this with the general MRF identifies the interaction matrix as <span class="math inline">\(\boldsymbol{\Phi} = -\tfrac{1}{2}\,\boldsymbol{\Theta}\)</span>. The off-diagonal entry <span class="math inline">\(\phi_{ij} = -\tfrac{1}{2}\,\theta_{ij}\)</span> is the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and when <span class="math inline">\(\theta_{ij} = 0\)</span> the partial association is zero and the edge is absent.</p>
+<p>Comparing this with the general MRF identifies the interaction matrix as <span class="math inline">\(\boldsymbol{\Omega} = -\tfrac{1}{2}\,\boldsymbol{\Theta}\)</span>. The off-diagonal entry <span class="math inline">\(\omega_{ij} = -\tfrac{1}{2}\,\theta_{ij}\)</span> is the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and when <span class="math inline">\(\theta_{ij} = 0\)</span> the partial association is zero and the edge is absent.</p>
 </section>
 <section id="partial-associations" class="level2">
 <h2 class="anchored" data-anchor-id="partial-associations">Partial associations</h2>
 <p>As described in <a href="../guide/graphical-models.html">Graphical Models</a>, bgms reports all pairwise effects on a unified partial association scale. For the GGM, the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is:</p>
 <p><span class="math display">\[
-\phi_{ij} = -\tfrac{1}{2}\, \theta_{ij}
+\omega_{ij} = -\tfrac{1}{2}\, \theta_{ij}
 \]</span></p>
-<p>A positive <span class="math inline">\(\phi_{ij}\)</span> means that, holding all other variables constant, higher values of <span class="math inline">\(x_i\)</span> are associated with higher values of <span class="math inline">\(x_j\)</span>.</p>
-<p>The partial association and the precision element carry the same information — one is a linear rescaling of the other. The rescaling ensures that the GGM partial association occupies the same structural role as the partial association in the ordinal MRF, where <span class="math inline">\(\phi_{ij}\)</span> is half the log adjacent-category odds ratio (see <a href="../guide/omrf.html">Ordinal MRF</a>). This unified scale means that <code>coef(fit)$pairwise</code> returns partial associations regardless of model type, and the spike-and-slab prior (<a href="../guide/prior-basics.html">Prior Basics</a>) operates on the same quantity across models. To obtain the precision matrix directly, use <code>extract_precision(fit)</code>.</p>
+<p>A positive <span class="math inline">\(\omega_{ij}\)</span> means that, holding all other variables constant, higher values of <span class="math inline">\(x_i\)</span> are associated with higher values of <span class="math inline">\(x_j\)</span>.</p>
+<p>The partial association and the precision element carry the same information — one is a linear rescaling of the other. The rescaling ensures that the GGM partial association occupies the same structural role as the partial association in the ordinal MRF, where <span class="math inline">\(\omega_{ij}\)</span> is half the log adjacent-category odds ratio (see <a href="../guide/omrf.html">Ordinal MRF</a>). This unified scale means that <code>coef(fit)$pairwise</code> returns partial associations regardless of model type, and the spike-and-slab prior (<a href="../guide/prior-basics.html">Prior Basics</a>) operates on the same quantity across models. To obtain the precision matrix directly, use <code>extract_precision(fit)</code>.</p>
 </section>
 <section id="partial-correlations" class="level2">
 <h2 class="anchored" data-anchor-id="partial-correlations">Partial correlations</h2>
@@ -607,7 +607,7 @@ p(\mathbf{x}) \propto \exp\!\left(
 <p>Because the partial correlation standardizes the off-diagonal precision element by the conditional standard deviations of both variables, it is invariant to rescaling. Two datasets that differ only in their units of measurement produce the same partial correlations.</p>
 <p>The partial correlation is related to the partial association by:</p>
 <p><span class="math display">\[
-\rho_{ij \cdot \text{rest}} = \frac{2\,\phi_{ij}}{\sqrt{\theta_{ii}\, \theta_{jj}}}
+\rho_{ij \cdot \text{rest}} = \frac{2\,\omega_{ij}}{\sqrt{\theta_{ii}\, \theta_{jj}}}
 \]</span></p>
 <p>When comparing the strength of associations across variable pairs — identifying which edges are strongest relative to each variable’s conditional variability — partial correlations are the natural summary. When the goal is edge selection or comparison with discrete network models, the partial associations are more appropriate. To obtain the partial correlation matrix directly, use <code>extract_partial_correlations(fit)</code>.</p>
 </section>
@@ -627,7 +627,7 @@ p(\mathbf{x}) \propto \exp\!\left(
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>
-<p>When <code>edge_selection = TRUE</code> (the default), <code>bgms</code> applies spike-and-slab priors to the partial associations <span class="math inline">\(\phi_{ij}\)</span>. The spike sets <span class="math inline">\(\phi_{ij} = 0\)</span> (and therefore <span class="math inline">\(\theta_{ij} = 0\)</span>), enforcing the absence of the edge. The slab places a Cauchy prior on <span class="math inline">\(\phi_{ij}\)</span>, allowing the effect size to be estimated from the data. See <a href="../guide/prior-basics.html">Prior Basics</a> for the spike-and-slab specification.</p>
+<p>When <code>edge_selection = TRUE</code> (the default), <code>bgms</code> applies spike-and-slab priors to the partial associations <span class="math inline">\(\omega_{ij}\)</span>. The spike sets <span class="math inline">\(\omega_{ij} = 0\)</span> (and therefore <span class="math inline">\(\theta_{ij} = 0\)</span>), enforcing the absence of the edge. The slab places a Cauchy prior on <span class="math inline">\(\omega_{ij}\)</span>, allowing the effect size to be estimated from the data. See <a href="../guide/prior-basics.html">Prior Basics</a> for the spike-and-slab specification.</p>
 <p>The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See <a href="../guide/edge-selection.html">Edge Selection</a>.</p>
 </section>
 <section id="missing-data" class="level2">
@@ -639,7 +639,7 @@ p(\mathbf{x}) \propto \exp\!\left(
 <h2 class="anchored" data-anchor-id="fitting-a-ggm">Fitting a GGM</h2>
 <p>To fit a GGM, set <code>variable_type = "continuous"</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">variable_type =</span> <span class="st">"continuous"</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The <code>summary()</code> and <code>coef()</code> methods work the same as for ordinal and mixed models. <code>coef(fit)$pairwise</code> returns the posterior means of the partial associations <span class="math inline">\(\phi_{ij}\)</span>, and <code>coef(fit)$indicator</code> returns the posterior inclusion probabilities.</p>
+<p>The <code>summary()</code> and <code>coef()</code> methods work the same as for ordinal and mixed models. <code>coef(fit)$pairwise</code> returns the posterior means of the partial associations <span class="math inline">\(\omega_{ij}\)</span>, and <code>coef(fit)$indicator</code> returns the posterior inclusion probabilities.</p>
 <p>To obtain model-specific parameterizations, use the dedicated extractors:</p>
 <ul>
 <li><code>extract_precision(fit)</code> — returns the full precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span>.</li>

@@ -533,33 +533,33 @@ window.Quarto = {
 <p><code>bgms</code> uses Bayesian inference to learn about the network structure and its parameters from data. This page describes the general framework; details about prior specifications are covered in <a href="../guide/prior-basics.html">Prior Basics</a> and the mechanics of edge selection in <a href="../guide/edge-selection.html">Edge Selection</a>. The posterior is estimated using Markov chain Monte Carlo; see <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a> for convergence checks and <a href="../guide/mcmc-output.html">MCMC Output</a> for the output structure.</p>
 <section id="what-we-want-to-learn" class="level2">
 <h2 class="anchored" data-anchor-id="what-we-want-to-learn">What we want to learn</h2>
-<p>Given a dataset of <span class="math inline">\(p\)</span> variables, we want to learn two things: the network structure <span class="math inline">\(\mathcal{S}\)</span> — the collection of edges in the network — and the network parameters <span class="math inline">\(\boldsymbol{\Phi}_\mathcal{S}\)</span> — the partial associations for the edges in <span class="math inline">\(\mathcal{S}\)</span>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>Given a dataset of <span class="math inline">\(p\)</span> variables, we want to learn two things: the network structure <span class="math inline">\(\mathcal{S}\)</span> — the collection of edges in the network — and the network parameters <span class="math inline">\(\boldsymbol{\Omega}_\mathcal{S}\)</span> — the partial associations for the edges in <span class="math inline">\(\mathcal{S}\)</span>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
 <p>There are many possible structures that could underlie the network. For each structure, there are also many possible values for the corresponding partial associations. Because we seek to learn about these quantities from the data, the specific configuration of edges and the exact parameter values are typically unknown.</p>
 </section>
 <section id="prior-distributions" class="level2">
 <h2 class="anchored" data-anchor-id="prior-distributions">Prior distributions</h2>
-<p>To account for this uncertainty, we assign prior distributions to the network structure <span class="math inline">\(p(\mathcal{S})\)</span> and to the parameters conditional on that structure <span class="math inline">\(p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})\)</span>. A prior distribution assigns plausibility to different values of the parameters and structures before the data are observed.</p>
-<p>The prior distribution on the structure <span class="math inline">\(p(\mathcal{S})\)</span> expresses which edge configurations we consider plausible a priori. The prior distribution on the parameters <span class="math inline">\(p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S})\)</span> expresses, for a given structure, which values of the partial associations we consider plausible.</p>
+<p>To account for this uncertainty, we assign prior distributions to the network structure <span class="math inline">\(p(\mathcal{S})\)</span> and to the parameters conditional on that structure <span class="math inline">\(p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S})\)</span>. A prior distribution assigns plausibility to different values of the parameters and structures before the data are observed.</p>
+<p>The prior distribution on the structure <span class="math inline">\(p(\mathcal{S})\)</span> expresses which edge configurations we consider plausible a priori. The prior distribution on the parameters <span class="math inline">\(p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S})\)</span> expresses, for a given structure, which values of the partial associations we consider plausible.</p>
 <p>These prior distributions can formalize substantive knowledge — for example, results from previous research — or they can represent relative ignorance using default specifications. See <a href="../guide/prior-basics.html">Prior Basics</a> for the prior distributions available in <code>bgms</code>.</p>
 </section>
 <section id="from-prior-to-posterior" class="level2">
 <h2 class="anchored" data-anchor-id="from-prior-to-posterior">From prior to posterior</h2>
 <p>Bayes’ rule combines the prior distributions with the information in the observed data to produce a joint posterior distribution over the structure and parameters:</p>
 <p><span class="math display">\[
-p(\boldsymbol{\Phi}_\mathcal{S},\, \mathcal{S} \mid \text{data}) =
-\frac{p(\text{data} \mid \boldsymbol{\Phi}_\mathcal{S}) \;
-      p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}) \;
+p(\boldsymbol{\Omega}_\mathcal{S},\, \mathcal{S} \mid \text{data}) =
+\frac{p(\text{data} \mid \boldsymbol{\Omega}_\mathcal{S}) \;
+      p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S}) \;
       p(\mathcal{S})}
      {p(\text{data})}
 \]</span></p>
 <p>This joint posterior distribution expresses everything we know about the network structure and parameter values after observing the data. It is central to Bayesian graphical modeling because different inferential tasks — parameter estimation and structure learning — rely on different aspects of this distribution.</p>
 <p>To make this explicit, we factor the joint posterior into two components:</p>
 <p><span class="math display">\[
-p(\boldsymbol{\Phi}_\mathcal{S},\, \mathcal{S} \mid \text{data}) =
-p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S},\, \text{data})
+p(\boldsymbol{\Omega}_\mathcal{S},\, \mathcal{S} \mid \text{data}) =
+p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S},\, \text{data})
 \times p(\mathcal{S} \mid \text{data})
 \]</span></p>
-<p>The first factor, <span class="math inline">\(p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}, \text{data})\)</span>, is the conditional posterior distribution for the parameters under a specific structure — the posterior distribution of the partial associations given that the network has structure <span class="math inline">\(\mathcal{S}\)</span>. This distribution is used for Bayesian parameter estimation.</p>
+<p>The first factor, <span class="math inline">\(p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S}, \text{data})\)</span>, is the conditional posterior distribution for the parameters under a specific structure — the posterior distribution of the partial associations given that the network has structure <span class="math inline">\(\mathcal{S}\)</span>. This distribution is used for Bayesian parameter estimation.</p>
 <p>The second factor, <span class="math inline">\(p(\mathcal{S} \mid \text{data})\)</span>, is the marginal posterior distribution of the network structure, with the parameters integrated out. This distribution is used for Bayesian structure learning.</p>
 </section>
 <section id="model-uncertainty" class="level2">
@@ -573,7 +573,7 @@ p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S},\, \text{data})
 <p>In <code>bgms</code>, BMA is the default. The Markov chain Monte Carlo sampler explores the joint posterior over structures and parameters simultaneously using the mixtures of mutually singular distributions (MoMS) framework <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>. All reported quantities — parameter estimates, inclusion probabilities, and Bayes factors — automatically incorporate model averaging. Both parameter estimation and structure learning therefore account for structural uncertainty.</p>
 <section id="parameter-estimation" class="level3">
 <h3 class="anchored" data-anchor-id="parameter-estimation">Parameter estimation</h3>
-<p>For a given structure <span class="math inline">\(\mathcal{S}\)</span>, the conditional posterior <span class="math inline">\(p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S}, \text{data})\)</span> tells us what we know about each partial association after observing the data. The prior distribution assigns plausibility to each value of the parameter. The distribution is updated by the observed data: parameter values that predict the data well gain plausibility, while those that predict it poorly lose it.</p>
+<p>For a given structure <span class="math inline">\(\mathcal{S}\)</span>, the conditional posterior <span class="math inline">\(p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S}, \text{data})\)</span> tells us what we know about each partial association after observing the data. The prior distribution assigns plausibility to each value of the parameter. The distribution is updated by the observed data: parameter values that predict the data well gain plausibility, while those that predict it poorly lose it.</p>
 <p>Because <code>bgms</code> averages over structures, the reported parameter estimates reflect both parameter uncertainty and structural uncertainty. In structures where an edge is absent, the corresponding partial association is zero; in structures where it is present, the partial association follows its conditional posterior. The model-averaged posterior mean is therefore automatically shrunk toward zero for edges that receive little structural support.</p>
 <p>In practice, the posterior distribution for each partial association is usually summarized:</p>
 <ul>
@@ -603,7 +603,7 @@ p(\mathcal{S} \mid \text{data})
 \underbrace{\frac{p(\gamma_{ij} = 1)}
                  {p(\gamma_{ij} = 0)}}_{\text{Prior inclusion odds}}
 \]</span></p>
-<p>The inclusion Bayes factor is the ratio of the posterior inclusion odds to the prior inclusion odds. Values greater than one indicate evidence for the presence of the edge (<span class="math inline">\(\Phi_{ij} \neq 0\)</span>), values less than one indicate evidence for its absence (<span class="math inline">\(\Phi_{ij} = 0\)</span>), and values close to one indicate that the data are uninformative — the evidence does not clearly favor either hypothesis. This three-way distinction is a key advantage of the Bayes factor: it separates evidence for presence, evidence for absence, and absence of evidence. When the prior inclusion probability is <span class="math inline">\(\frac{1}{2}\)</span>, the prior inclusion odds equal one, and the inclusion Bayes factor simplifies to the posterior odds.</p>
+<p>The inclusion Bayes factor is the ratio of the posterior inclusion odds to the prior inclusion odds. Values greater than one indicate evidence for the presence of the edge (<span class="math inline">\(\Omega_{ij} \neq 0\)</span>), values less than one indicate evidence for its absence (<span class="math inline">\(\Omega_{ij} = 0\)</span>), and values close to one indicate that the data are uninformative — the evidence does not clearly favor either hypothesis. This three-way distinction is a key advantage of the Bayes factor: it separates evidence for presence, evidence for absence, and absence of evidence. When the prior inclusion probability is <span class="math inline">\(\frac{1}{2}\)</span>, the prior inclusion odds equal one, and the inclusion Bayes factor simplifies to the posterior odds.</p>
 <p>Because the inclusion Bayes factor averages over all possible network structures, it does not depend on assumptions about the remaining edges in the network. This property makes it a robust measure of the evidence for or against each individual edge <span class="citation" data-cites="SekulovskiEtAl_2024">(<a href="#ref-SekulovskiEtAl_2024" role="doc-biblioref"><span class="nocase">Sekulovski et al.</span>, 2024</a>)</span>. See <a href="../guide/edge-selection.html">Edge Selection</a> for interpretation guidelines and the prior specifications used in <code>bgms</code>.</p>
 
 
@@ -634,7 +634,7 @@ Marsman, M., Huth, K. B. S., Waldorp, L. J., &amp; Ntzoufras, I. (2022). Objecti
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>In graphical modeling, the primary inferential targets are the partial associations <span class="math inline">\(\boldsymbol{\Phi}\)</span> and the network structure <span class="math inline">\(\mathcal{S}\)</span>. The node potentials <span class="math inline">\(\mu_i(x_i)\)</span> are nuisance parameters: they are estimated but typically not of direct inferential interest.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>In graphical modeling, the primary inferential targets are the partial associations <span class="math inline">\(\boldsymbol{\Omega}\)</span> and the network structure <span class="math inline">\(\mathcal{S}\)</span>. The node potentials <span class="math inline">\(\mu_i(x_i)\)</span> are nuisance parameters: they are estimated but typically not of direct inferential interest.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script type="text/javascript">

@@ -526,13 +526,13 @@ window.Quarto = {
 <p>A Markov random field (MRF) is an undirected graphical model in which the joint distribution factorizes according to the graph structure. For <span class="math inline">\(p\)</span> variables with observations <span class="math inline">\(\mathbf{x} = (x_1, \ldots, x_p)\)</span>, the MRF specifies:</p>
 <p><span class="math display">\[
 p(\mathbf{x}) \propto \exp\left(\sum_{i} \mu_i(x_i) +
-\mathbf{x}^{\sf T}\boldsymbol{\Phi}\, \mathbf{x}\right)
+\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
 \]</span></p>
-<p>where <span class="math inline">\(\mu_i(x_i)\)</span> are node potentials that capture the univariate properties of variable <span class="math inline">\(i\)</span>, and <span class="math inline">\(\boldsymbol{\Phi}\)</span> is a symmetric pairwise interaction matrix. The off-diagonal entry <span class="math inline">\(\phi_{ij}\)</span> is the partial association between variables <span class="math inline">\(x_i\)</span> and <span class="math inline">\(x_j\)</span>. When <span class="math inline">\(\phi_{ij} = 0\)</span>, the two variables are conditionally independent and the corresponding edge is absent from the graph. Thus, the primary inferential targets are the partial associations in <span class="math inline">\(\boldsymbol{\Phi}\)</span> and the network structure that they imply.</p>
+<p>where <span class="math inline">\(\mu_i(x_i)\)</span> are node potentials that capture the univariate properties of variable <span class="math inline">\(i\)</span>, and <span class="math inline">\(\boldsymbol{\Omega}\)</span> is a symmetric pairwise interaction matrix. The off-diagonal entry <span class="math inline">\(\omega_{ij}\)</span> is the partial association between variables <span class="math inline">\(x_i\)</span> and <span class="math inline">\(x_j\)</span>. When <span class="math inline">\(\omega_{ij} = 0\)</span>, the two variables are conditionally independent and the corresponding edge is absent from the graph. Thus, the primary inferential targets are the partial associations in <span class="math inline">\(\boldsymbol{\Omega}\)</span> and the network structure that they imply.</p>
 </section>
 <section id="model-families-in-bgms" class="level2">
 <h2 class="anchored" data-anchor-id="model-families-in-bgms">Model families in bgms</h2>
-<p><code>bgms</code> estimates one general MRF. The variable types in the data determine the form of the node potentials <span class="math inline">\(\mu_i(x_i)\)</span> and the interpretation of the pairwise interactions <span class="math inline">\(\phi_{ij}\)</span>:</p>
+<p><code>bgms</code> estimates one general MRF. The variable types in the data determine the form of the node potentials <span class="math inline">\(\mu_i(x_i)\)</span> and the interpretation of the pairwise interactions <span class="math inline">\(\omega_{ij}\)</span>:</p>
 <ul>
 <li><p><strong>Ordinal MRF</strong> — all variables are binary or ordinal. Node potentials are category thresholds, and partial associations are proportional to log adjacent-category odds ratios. See <a href="../guide/omrf.html">Ordinal MRF</a>.</p></li>
 <li><p><strong>Gaussian graphical model (GGM)</strong> — all variables are continuous. The partial associations are directly related to the precision matrix (inverse covariance matrix), whose standardized off-diagonal entries are partial correlations. See <a href="../guide/ggm.html">GGM</a>.</p></li>
@@ -541,7 +541,7 @@ p(\mathbf{x}) \propto \exp\left(\sum_{i} \mu_i(x_i) +
 </section>
 <section id="modeling-conditional-independence" class="level2">
 <h2 class="anchored" data-anchor-id="modeling-conditional-independence">Modeling conditional independence</h2>
-<p>The conditional independence structure — which edges are present — is typically unknown. <code>bgms</code> treats edge inclusion as a model selection problem, testing <span class="math inline">\(\phi_{ij} = 0\)</span> against <span class="math inline">\(\phi_{ij} \neq 0\)</span> for each pair of variables using spike-and-slab priors. This produces posterior inclusion probabilities that quantify the evidence for each edge. See <a href="../guide/edge-selection.html">Edge Selection</a>.</p>
+<p>The conditional independence structure — which edges are present — is typically unknown. <code>bgms</code> treats edge inclusion as a model selection problem, testing <span class="math inline">\(\omega_{ij} = 0\)</span> against <span class="math inline">\(\omega_{ij} \neq 0\)</span> for each pair of variables using spike-and-slab priors. This produces posterior inclusion probabilities that quantify the evidence for each edge. See <a href="../guide/edge-selection.html">Edge Selection</a>.</p>
 
 
 </section>

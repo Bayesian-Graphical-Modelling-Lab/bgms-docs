@@ -572,27 +572,27 @@ window.Quarto = {
 <p><span class="math display">\[
 p(\mathbf{x}, \mathbf{y}) \propto \exp\!\left(
 \sum_{i=1}^{p} \sum_{c=1}^{m_i}\mathcal{I}(x_i = c)\,\mu_{ic} +
-\mathbf{x}^{\sf T}\boldsymbol{\Phi}_{xx}\,\mathbf{x} +
-(\mathbf{y} - \boldsymbol{\mu}_y)^{\sf T}\boldsymbol{\Phi}_{yy}\,(\mathbf{y} - \boldsymbol{\mu}_y) +
-2\,\mathbf{x}^{\sf T}\boldsymbol{\Phi}_{xy}\,\mathbf{y}\right)
+\mathbf{x}^{\sf T}\boldsymbol{\Omega}_{xx}\,\mathbf{x} +
+(\mathbf{y} - \boldsymbol{\mu}_y)^{\sf T}\boldsymbol{\Omega}_{yy}\,(\mathbf{y} - \boldsymbol{\mu}_y) +
+2\,\mathbf{x}^{\sf T}\boldsymbol{\Omega}_{xy}\,\mathbf{y}\right)
 \]</span></p>
 <p>where:</p>
 <ul>
 <li><span class="math inline">\(\mu_{ic}\)</span> are category thresholds for discrete variable <span class="math inline">\(i\)</span>, category <span class="math inline">\(c\)</span> (with baseline <span class="math inline">\(\mu_{i0} = 0\)</span>), as in the <a href="../guide/omrf.html">Ordinal MRF</a></li>
 <li><span class="math inline">\(\boldsymbol{\mu}_y\)</span> is the <span class="math inline">\(q\)</span>-vector of continuous means</li>
-<li><span class="math inline">\(\boldsymbol{\Phi}_{xx}\)</span> is a <span class="math inline">\(p \times p\)</span> symmetric matrix of discrete–discrete interactions</li>
-<li><span class="math inline">\(\boldsymbol{\Phi}_{yy}\)</span> is a <span class="math inline">\(q \times q\)</span> symmetric negative semi-definite matrix, related to the precision matrix by <span class="math inline">\(\boldsymbol{\Theta} = -2\,\boldsymbol{\Phi}_{yy}\)</span></li>
-<li><span class="math inline">\(\boldsymbol{\Phi}_{xy}\)</span> is a <span class="math inline">\(p \times q\)</span> matrix of cross-type interactions</li>
+<li><span class="math inline">\(\boldsymbol{\Omega}_{xx}\)</span> is a <span class="math inline">\(p \times p\)</span> symmetric matrix of discrete–discrete interactions</li>
+<li><span class="math inline">\(\boldsymbol{\Omega}_{yy}\)</span> is a <span class="math inline">\(q \times q\)</span> symmetric negative semi-definite matrix, related to the precision matrix by <span class="math inline">\(\boldsymbol{\Theta} = -2\,\boldsymbol{\Omega}_{yy}\)</span></li>
+<li><span class="math inline">\(\boldsymbol{\Omega}_{xy}\)</span> is a <span class="math inline">\(p \times q\)</span> matrix of cross-type interactions</li>
 </ul>
-<p>The three interaction blocks (<span class="math inline">\(\boldsymbol{\Phi}_{xx}\)</span>, <span class="math inline">\(\boldsymbol{\Phi}_{yy}\)</span>, <span class="math inline">\(\boldsymbol{\Phi}_{xy}\)</span>) enter the density on the same scale.</p>
+<p>The three interaction blocks (<span class="math inline">\(\boldsymbol{\Omega}_{xx}\)</span>, <span class="math inline">\(\boldsymbol{\Omega}_{yy}\)</span>, <span class="math inline">\(\boldsymbol{\Omega}_{xy}\)</span>) enter the density on the same scale.</p>
 </section>
 <section id="conditional-gaussian-structure" class="level2">
 <h2 class="anchored" data-anchor-id="conditional-gaussian-structure">Conditional Gaussian structure</h2>
 <p>The mixed MRF belongs to the class of conditional Gaussian (CG) distributions <span class="citation" data-cites="LauritzenWermuth_1989">(<a href="#ref-LauritzenWermuth_1989" role="doc-biblioref">Lauritzen &amp; Wermuth, 1989</a>)</span>: given the discrete variables, the continuous variables follow a multivariate normal distribution:</p>
 <p><span class="math display">\[
-\mathbf{y} \mid \mathbf{x} \sim \mathcal{N}\!\left(\boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Phi}_{xy}^{\sf T}\,\mathbf{x},\;\boldsymbol{\Sigma}\right)
+\mathbf{y} \mid \mathbf{x} \sim \mathcal{N}\!\left(\boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}\,\mathbf{x},\;\boldsymbol{\Sigma}\right)
 \]</span></p>
-<p>where <span class="math inline">\(\boldsymbol{\Sigma} = \boldsymbol{\Theta}^{-1} = (-2\,\boldsymbol{\Phi}_{yy})^{-1}\)</span> is the conditional covariance. The conditional mean <span class="math inline">\(\boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Phi}_{xy}^{\sf T}\,\mathbf{x}\)</span> shifts linearly with the discrete scores: each discrete variable <span class="math inline">\(x_i\)</span> contributes to the conditional mean of continuous variable <span class="math inline">\(y_j\)</span> in proportion to <span class="math inline">\(\phi_{ij}^{xy}\)</span>. The conditional covariance <span class="math inline">\(\boldsymbol{\Sigma}\)</span> does not depend on <span class="math inline">\(\mathbf{x}\)</span> — the discrete variables affect the location of the continuous distribution but not its spread.</p>
+<p>where <span class="math inline">\(\boldsymbol{\Sigma} = \boldsymbol{\Theta}^{-1} = (-2\,\boldsymbol{\Omega}_{yy})^{-1}\)</span> is the conditional covariance. The conditional mean <span class="math inline">\(\boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}\,\mathbf{x}\)</span> shifts linearly with the discrete scores: each discrete variable <span class="math inline">\(x_i\)</span> contributes to the conditional mean of continuous variable <span class="math inline">\(y_j\)</span> in proportion to <span class="math inline">\(\omega_{ij}^{xy}\)</span>. The conditional covariance <span class="math inline">\(\boldsymbol{\Sigma}\)</span> does not depend on <span class="math inline">\(\mathbf{x}\)</span> — the discrete variables affect the location of the continuous distribution but not its spread.</p>
 <p>In the pure GGM, <code>bgms</code> centers the continuous data so that the mean vector is zero and drops out of the model (see <a href="../guide/ggm.html">GGM</a>). In the mixed MRF, this centering is not possible: the cross-type interactions couple the continuous means to the discrete variables, so <span class="math inline">\(\boldsymbol{\mu}_y\)</span> remains a free parameter.</p>
 <p>The marginal distribution of <span class="math inline">\(\mathbf{x}\)</span>, obtained by integrating out <span class="math inline">\(\mathbf{y}\)</span>, is an ordinal MRF whose effective interactions absorb the indirect associations between discrete variables mediated through the continuous block.</p>
 </section>
@@ -601,18 +601,18 @@ p(\mathbf{x}, \mathbf{y}) \propto \exp\!\left(
 <p>The <a href="../guide/graphical-models.html">Graphical Models</a> page introduced the general pairwise MRF:</p>
 <p><span class="math display">\[
 p(\mathbf{z}) \propto \exp\!\left(\sum_{i} \mu_i(z_i) +
-\mathbf{z}^{\sf T}\boldsymbol{\Phi}\, \mathbf{z}\right)
+\mathbf{z}^{\sf T}\boldsymbol{\Omega}\, \mathbf{z}\right)
 \]</span></p>
-<p>The mixed MRF extends this framework to a mixed variable vector <span class="math inline">\(\mathbf{z} = (\mathbf{x}, \mathbf{y})\)</span>. The interaction matrix <span class="math inline">\(\boldsymbol{\Phi}\)</span> decomposes into three blocks — <span class="math inline">\(\boldsymbol{\Phi}_{xx}\)</span>, <span class="math inline">\(\boldsymbol{\Phi}_{yy}\)</span>, and <span class="math inline">\(\boldsymbol{\Phi}_{xy}\)</span> — corresponding to the three types of edges in the graph. When all variables are discrete (<span class="math inline">\(q = 0\)</span>), the continuous blocks vanish and the model reduces to the ordinal MRF. When all variables are continuous (<span class="math inline">\(p = 0\)</span>), the discrete blocks vanish and the model reduces to the GGM with precision matrix <span class="math inline">\(\boldsymbol{\Theta} = -2\,\boldsymbol{\Phi}_{yy}\)</span>.</p>
+<p>The mixed MRF extends this framework to a mixed variable vector <span class="math inline">\(\mathbf{z} = (\mathbf{x}, \mathbf{y})\)</span>. The interaction matrix <span class="math inline">\(\boldsymbol{\Omega}\)</span> decomposes into three blocks — <span class="math inline">\(\boldsymbol{\Omega}_{xx}\)</span>, <span class="math inline">\(\boldsymbol{\Omega}_{yy}\)</span>, and <span class="math inline">\(\boldsymbol{\Omega}_{xy}\)</span> — corresponding to the three types of edges in the graph. When all variables are discrete (<span class="math inline">\(q = 0\)</span>), the continuous blocks vanish and the model reduces to the ordinal MRF. When all variables are continuous (<span class="math inline">\(p = 0\)</span>), the discrete blocks vanish and the model reduces to the GGM with precision matrix <span class="math inline">\(\boldsymbol{\Theta} = -2\,\boldsymbol{\Omega}_{yy}\)</span>.</p>
 </section>
 <section id="partial-associations" class="level2">
 <h2 class="anchored" data-anchor-id="partial-associations">Partial associations</h2>
 <p>The mixed MRF has three types of partial associations, all reported on the same scale in <code>coef(fit)$pairwise</code>:</p>
-<p><strong>Discrete–discrete.</strong> The off-diagonal entries of <span class="math inline">\(\boldsymbol{\Phi}_{xx}\)</span> have the same interpretation as in the ordinal MRF: each <span class="math inline">\(\phi_{ij}^{xx}\)</span> is half the log adjacent-category odds ratio, constant across all category pairs. See <a href="../guide/omrf.html">Ordinal MRF</a>.</p>
-<p><strong>Continuous–continuous.</strong> The off-diagonal entries of <span class="math inline">\(\boldsymbol{\Phi}_{yy}\)</span> are related to the precision element by <span class="math inline">\(\phi_{ij}^{yy} = -\tfrac{1}{2}\,\theta_{ij}\)</span>, the same relationship as in the GGM. See <a href="../guide/ggm.html">GGM</a>.</p>
-<p><strong>Cross-type.</strong> The entries of <span class="math inline">\(\boldsymbol{\Phi}_{xy}\)</span> capture the direct association between a discrete variable <span class="math inline">\(x_i\)</span> and a continuous variable <span class="math inline">\(y_j\)</span>, after accounting for all other variables. A cross-type partial association enters both the full conditional of <span class="math inline">\(x_i\)</span> (through the rest score) and the conditional mean of <span class="math inline">\(y_j\)</span>.</p>
-<p>When <span class="math inline">\(\phi_{ij} = 0\)</span> for any of the three types, the two variables are conditionally independent and the corresponding edge is absent from the graph. The spike-and-slab prior operates on partial associations regardless of type, so edge selection works uniformly across all three blocks.</p>
-<p>To obtain model-specific parameterizations: <code>extract_precision(fit)</code> returns <span class="math inline">\(\boldsymbol{\Theta}\)</span>, <code>extract_partial_correlations(fit)</code> returns partial correlations for the continuous block, and <code>extract_log_odds(fit)</code> returns the log adjacent-category odds ratios <span class="math inline">\(2\phi_{ij}^{xx}\)</span> for the discrete block.</p>
+<p><strong>Discrete–discrete.</strong> The off-diagonal entries of <span class="math inline">\(\boldsymbol{\Omega}_{xx}\)</span> have the same interpretation as in the ordinal MRF: each <span class="math inline">\(\omega_{ij}^{xx}\)</span> is half the log adjacent-category odds ratio, constant across all category pairs. See <a href="../guide/omrf.html">Ordinal MRF</a>.</p>
+<p><strong>Continuous–continuous.</strong> The off-diagonal entries of <span class="math inline">\(\boldsymbol{\Omega}_{yy}\)</span> are related to the precision element by <span class="math inline">\(\omega_{ij}^{yy} = -\tfrac{1}{2}\,\theta_{ij}\)</span>, the same relationship as in the GGM. See <a href="../guide/ggm.html">GGM</a>.</p>
+<p><strong>Cross-type.</strong> The entries of <span class="math inline">\(\boldsymbol{\Omega}_{xy}\)</span> capture the direct association between a discrete variable <span class="math inline">\(x_i\)</span> and a continuous variable <span class="math inline">\(y_j\)</span>, after accounting for all other variables. A cross-type partial association enters both the full conditional of <span class="math inline">\(x_i\)</span> (through the rest score) and the conditional mean of <span class="math inline">\(y_j\)</span>.</p>
+<p>When <span class="math inline">\(\omega_{ij} = 0\)</span> for any of the three types, the two variables are conditionally independent and the corresponding edge is absent from the graph. The spike-and-slab prior operates on partial associations regardless of type, so edge selection works uniformly across all three blocks.</p>
+<p>To obtain model-specific parameterizations: <code>extract_precision(fit)</code> returns <span class="math inline">\(\boldsymbol{\Theta}\)</span>, <code>extract_partial_correlations(fit)</code> returns partial correlations for the continuous block, and <code>extract_log_odds(fit)</code> returns the log adjacent-category odds ratios <span class="math inline">\(2\omega_{ij}^{xx}\)</span> for the discrete block.</p>
 </section>
 <section id="pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="pseudolikelihood">Pseudolikelihood</h2>
@@ -620,24 +620,24 @@ p(\mathbf{z}) \propto \exp\!\left(\sum_{i} \mu_i(z_i) +
 <p><span class="math display">\[
 \log p(\mathbf{Y} \mid \mathbf{X}) = \frac{n}{2}\left(\log|\boldsymbol{\Theta}| - q\log(2\pi)\right) - \frac{1}{2}\sum_{i=1}^{n}(\mathbf{y}_i - \mathbf{M}_i)^{\sf T}\boldsymbol{\Theta}\,(\mathbf{y}_i - \mathbf{M}_i)
 \]</span></p>
-<p>where <span class="math inline">\(\mathbf{M}_i = \boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Phi}_{xy}^{\sf T}\,\mathbf{x}_i\)</span> is the conditional mean for observation <span class="math inline">\(i\)</span>. This expression is computed exactly — no pseudolikelihood approximation is needed for the continuous block.</p>
+<p>where <span class="math inline">\(\mathbf{M}_i = \boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}\,\mathbf{x}_i\)</span> is the conditional mean for observation <span class="math inline">\(i\)</span>. This expression is computed exactly — no pseudolikelihood approximation is needed for the continuous block.</p>
 <p>The discrete conditionals require a pseudolikelihood approximation, as in the ordinal MRF. The full conditional for discrete variable <span class="math inline">\(x_i\)</span> given all other variables is:</p>
 <p><span class="math display">\[
 p(x_i = c \mid \mathbf{x}_{-i}, \mathbf{y}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i}\exp\!\left(\mu_{ik} + k \cdot r_i\right)}
 \]</span></p>
 <p>where the rest score now includes contributions from both discrete and continuous variables:</p>
 <p><span class="math display">\[
-r_i = 2\sum_{j \neq i} x_j\, \phi_{ij}^{xx} + 2\sum_{j=1}^{q} y_j\, \phi_{ij}^{xy}
+r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}^{xx} + 2\sum_{j=1}^{q} y_j\, \omega_{ij}^{xy}
 \]</span></p>
 <p>The <code>pseudolikelihood</code> argument controls how these discrete full conditionals are constructed:</p>
 <ul>
-<li><p><strong><code>"conditional"</code></strong> (default): conditions on the observed continuous variables when computing the discrete full conditionals. The rest score uses <span class="math inline">\(\boldsymbol{\Phi}_{xx}\)</span> and <span class="math inline">\(\boldsymbol{\Phi}_{xy}\)</span> directly.</p></li>
+<li><p><strong><code>"conditional"</code></strong> (default): conditions on the observed continuous variables when computing the discrete full conditionals. The rest score uses <span class="math inline">\(\boldsymbol{\Omega}_{xx}\)</span> and <span class="math inline">\(\boldsymbol{\Omega}_{xy}\)</span> directly.</p></li>
 <li><p><strong><code>"marginal"</code></strong>: integrates out the continuous variables, so the discrete full conditionals use effective interactions that account for indirect discrete–discrete associations mediated through the continuous block.</p></li>
 </ul>
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>
-<p>When <code>edge_selection = TRUE</code> (the default), <code>bgms</code> applies spike-and-slab priors to all three types of partial associations. The spike sets <span class="math inline">\(\phi_{ij} = 0\)</span>, enforcing the absence of the edge. The slab places a Cauchy prior on <span class="math inline">\(\phi_{ij}\)</span>, allowing the effect size to be estimated from the data. See <a href="../guide/prior-basics.html">Prior Basics</a> for the spike-and-slab specification.</p>
+<p>When <code>edge_selection = TRUE</code> (the default), <code>bgms</code> applies spike-and-slab priors to all three types of partial associations. The spike sets <span class="math inline">\(\omega_{ij} = 0\)</span>, enforcing the absence of the edge. The slab places a Cauchy prior on <span class="math inline">\(\omega_{ij}\)</span>, allowing the effect size to be estimated from the data. See <a href="../guide/prior-basics.html">Prior Basics</a> for the spike-and-slab specification.</p>
 <p>The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See <a href="../guide/edge-selection.html">Edge Selection</a>.</p>
 </section>
 <section id="missing-data" class="level2">
@@ -668,7 +668,7 @@ r_i = 2\sum_{j \neq i} x_j\, \phi_{ij}^{xx} + 2\sum_{j=1}^{q} y_j\, \phi_{ij}^{x
 <li><code>extract_main_effects(fit)</code> — returns category thresholds (discrete) and continuous means.</li>
 <li><code>extract_precision(fit)</code> — returns the precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span> for the continuous block.</li>
 <li><code>extract_partial_correlations(fit)</code> — returns partial correlations for the continuous block.</li>
-<li><code>extract_log_odds(fit)</code> — returns log adjacent-category odds ratios <span class="math inline">\(2\phi_{ij}^{xx}\)</span> for the discrete block.</li>
+<li><code>extract_log_odds(fit)</code> — returns log adjacent-category odds ratios <span class="math inline">\(2\omega_{ij}^{xx}\)</span> for the discrete block.</li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
