@@ -23,7 +23,7 @@ jobs:
         env:
           GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          Rscript -e 'install.packages(c("knitr", "rmarkdown", "remotes"))'
+          Rscript -e 'install.packages(c("knitr", "rmarkdown", "remotes", "qgraph"))'
           Rscript -e 'remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")'
 
       - name: Render site
