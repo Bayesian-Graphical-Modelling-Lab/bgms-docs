@@ -79,8 +79,8 @@ To visualize the estimated network, we select the edges with posterior inclusion
 
 ```{r}
 #| eval: false
-#| fig-width: 7
-#| fig-height: 7
+#| fig-width: 5.25
+#| fig-height: 5.25
 library(qgraph)
 
 median_probability_network = coef(fit)$pairwise
@@ -98,8 +98,8 @@ qgraph(median_probability_network,
 
 ```{r}
 #| echo: false
-#| fig-width: 7
-#| fig-height: 7
+#| fig-width: 5.25
+#| fig-height: 5.25
 if (requireNamespace("qgraph", quietly = TRUE)) {
   median_probability_network = coef(fit)$pairwise
   median_probability_network[coef(fit)$indicator < 0.5] = 0.0
@@ -174,8 +174,8 @@ summary(fit_ggm)
 
 ```{r}
 #| eval: false
-#| fig-width: 7
-#| fig-height: 7
+#| fig-width: 5.25
+#| fig-height: 5.25
 library(qgraph)
 
 ggm_network = coef(fit_ggm)$pairwise
@@ -193,8 +193,8 @@ qgraph(ggm_network,
 
 ```{r}
 #| echo: false
-#| fig-width: 7
-#| fig-height: 7
+#| fig-width: 5.25
+#| fig-height: 5.25
 if (requireNamespace("qgraph", quietly = TRUE)) {
   ggm_network = coef(fit_ggm)$pairwise
   ggm_network[coef(fit_ggm)$indicator < 0.5] = 0.0
