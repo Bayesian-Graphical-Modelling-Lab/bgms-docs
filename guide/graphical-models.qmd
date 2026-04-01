@@ -27,7 +27,8 @@ p(\mathbf{x}) \propto \exp\left(\sum_{i} \mu_i(x_i) +
 $$
 
 where $\mu_i(x_i)$ are node potentials that capture the univariate properties of variable $i$,
-and $\boldsymbol{\Phi}$ is a symmetric pairwise interaction matrix. The off-diagonal entry $\phi_{ij}$ is the partial association between variables $x_i$ and $x_j$; when $\phi_{ij} = 0$, the two variables are conditionally independent and the corresponding edge is absent from the graph.
+and $\boldsymbol{\Phi}$ is a symmetric pairwise interaction matrix.
+The off-diagonal entry $\phi_{ij}$ is the partial association between variables $x_i$ and $x_j$. When $\phi_{ij} = 0$, the two variables are conditionally independent and the corresponding edge is absent from the graph. Thus, the primary inferential targets are the partial associations in $\boldsymbol{\Phi}$ and the network structure that they imply.
 
 ## Model families in bgms
 
