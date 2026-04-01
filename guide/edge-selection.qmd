@@ -43,14 +43,28 @@ The reciprocal $1 / \text{BF}_{10}$ quantifies the evidence for edge absence, i.
 
 ## Other approaches to testing conditional independence
 
-The inclusion Bayes factor is not the only Bayesian approach to testing conditional independence. Two common alternatives can also be computed from `bgms` output when `edge_selection = FALSE`. @SekulovskiEtAl_2024 provide a detailed comparison of all three methods.
+The inclusion Bayes factor is not the only Bayesian approach to testing 
+conditional independence. Two common alternatives can also be computed from 
+`bgms` output when `edge_selection = FALSE`. @SekulovskiEtAl_2024 provide a 
+detailed comparison of all three methods.
 
-**Credible intervals.** With `edge_selection = FALSE`, posterior credible intervals for each partial association $\phi_{ij}$ can be constructed from the MCMC samples (available in `fit$raw_samples`). If the interval excludes zero, this is taken as evidence that the edge is present. This approach conditions on the full model, so it can reject absence but cannot provide direct evidence *for* absence.
+**Credible intervals.** With `edge_selection = FALSE`, posterior credible 
+intervals for each partial association $\phi_{ij}$ can be constructed from the 
+MCMC samples (available in `fit$raw_samples`). If the interval excludes zero, 
+this is sometimes taken as evidence *against* the absence of an edge. 
 
-**Savage--Dickey Bayes factor.** With `edge_selection = FALSE`, the posterior samples from the full model can be used to compute a Savage--Dickey density ratio for each edge, testing whether $\phi_{ij} = 0$. This addresses the one-sidedness of the credible interval, but the result conditions on a single structure (the full model) for all remaining edges.
+**Savage--Dickey Bayes factor.** With `edge_selection = FALSE`, the posterior 
+samples from the full model can be used to compute a Savage--Dickey density 
+ratio for each edge, testing whether $\phi_{ij} = 0$. This approach assumes 
+that the rest of the network is fully connected.
 
-**Inclusion Bayes factor.** When `edge_selection = TRUE`, the inclusion Bayes factor averages over all possible structures for the remaining edges, weighting each by its posterior plausibility. This accounts for structural uncertainty but requires the spike-and-slab model selection framework. See [The Bayesian Approach](bayesian-approach.qmd) for the formal derivation.
-
+**Inclusion Bayes factor.** When `edge_selection = TRUE`, the edge indicator 
+samples can be used to compute an inclusion Bayes factor for each edge, testing 
+whether $\phi_{ij} = 0$. Opposed to the Savage--Dickey approach, this method 
+does not assume that the rest of the network is fully connected, but weighs each 
+possible structure by its posterior plausibility. It thus tests each edge while 
+accounting for structural uncertainty. See 
+[The Bayesian Approach](bayesian-approach.qmd).
 
 ## Evidence categories
 
