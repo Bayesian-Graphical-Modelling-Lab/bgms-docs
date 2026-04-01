@@ -26,8 +26,13 @@ jobs:
           Rscript -e 'install.packages(c("knitr", "rmarkdown", "remotes", "qgraph"))'
           Rscript -e 'remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")'
 
+      - name: Verify qgraph is available
+        run: Rscript -e 'stopifnot(requireNamespace("qgraph", quietly = TRUE)); cat("qgraph version:", as.character(utils::packageVersion("qgraph")), "\n")'
+
       - name: Render site
-        run: quarto render
+        run: |
+          rm -rf _freeze
+          quarto render
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
