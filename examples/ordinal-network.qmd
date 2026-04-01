@@ -80,7 +80,7 @@ The reciprocal gives the Bayes factor in favor of exclusion:
 ## Interpretation
 
 Threshold the inclusion probabilities at 0.5 to obtain the median
-probability network, then plot with `qgraph`.
+probability network, then plot with `qgraph` [@EpskampEtAl_2012_qgraph].
 
 ```{r}
 #| eval: false

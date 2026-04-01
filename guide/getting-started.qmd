@@ -75,7 +75,7 @@ coef(fit)
 
 ## Network plot
 
-To visualize the estimated network, we select the edges with posterior inclusion probabilities 0.5 or up, and plot the result using the `qgraph` package.
+To visualize the estimated network, we select the edges with posterior inclusion probabilities 0.5 or up, and plot the result using the `qgraph` package [@EpskampEtAl_2012_qgraph].
 
 ```{r}
 #| eval: false

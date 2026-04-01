@@ -65,7 +65,7 @@ BF_10 = p / (1 - p)       # evidence for inclusion
 
 ## Interpretation
 
-Threshold the inclusion probabilities at 0.5 and plot.
+Threshold the inclusion probabilities at 0.5 and plot with `qgraph` [@EpskampEtAl_2012_qgraph].
 
 ```{r}
 #| eval: false
