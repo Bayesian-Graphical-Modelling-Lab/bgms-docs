@@ -9,9 +9,17 @@ title: "Model Output"
 library(bgms)
 
 resolve_fixture = function(name) {
-  candidates = c(file.path("fixtures", name), file.path("..", "fixtures", name))
+  input_dir = dirname(knitr::current_input(dir = TRUE))
+  candidates = c(
+    file.path(input_dir, "..", "fixtures", name),
+    file.path(input_dir, "fixtures", name),
+    file.path("fixtures", name),
+    file.path("..", "fixtures", name)
+  )
   hit = candidates[file.exists(candidates)][1]
-  if (is.na(hit)) stop("Fixture not found: ", name)
+  if (is.na(hit)) {
+    stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+  }
   hit
 }
 
