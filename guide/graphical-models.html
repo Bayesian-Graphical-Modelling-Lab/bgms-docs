@@ -528,7 +528,7 @@ window.Quarto = {
 p(\mathbf{x}) \propto \exp\left(\sum_{i} \mu_i(x_i) +
 \mathbf{x}^{\sf T}\boldsymbol{\Phi}\, \mathbf{x}\right)
 \]</span></p>
-<p>where <span class="math inline">\(\mu_i(x_i)\)</span> are node potentials that capture the univariate properties of variable <span class="math inline">\(i\)</span>, and <span class="math inline">\(\boldsymbol{\Phi}\)</span> is a symmetric pairwise interaction matrix. The off-diagonal entry <span class="math inline">\(\phi_{ij}\)</span> is the partial association between variables <span class="math inline">\(x_i\)</span> and <span class="math inline">\(x_j\)</span>; when <span class="math inline">\(\phi_{ij} = 0\)</span>, the two variables are conditionally independent and the corresponding edge is absent from the graph.</p>
+<p>where <span class="math inline">\(\mu_i(x_i)\)</span> are node potentials that capture the univariate properties of variable <span class="math inline">\(i\)</span>, and <span class="math inline">\(\boldsymbol{\Phi}\)</span> is a symmetric pairwise interaction matrix. The off-diagonal entry <span class="math inline">\(\phi_{ij}\)</span> is the partial association between variables <span class="math inline">\(x_i\)</span> and <span class="math inline">\(x_j\)</span>. When <span class="math inline">\(\phi_{ij} = 0\)</span>, the two variables are conditionally independent and the corresponding edge is absent from the graph. Thus, the primary inferential targets are the partial associations in <span class="math inline">\(\boldsymbol{\Phi}\)</span> and the network structure that they imply.</p>
 </section>
 <section id="model-families-in-bgms" class="level2">
 <h2 class="anchored" data-anchor-id="model-families-in-bgms">Model families in bgms</h2>
