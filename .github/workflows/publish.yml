@@ -19,12 +19,18 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Install R packages
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::knitr
+            any::rmarkdown
+            any::remotes
+            any::qgraph
+
+      - name: Install bgms from GitHub
         env:
           GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          Rscript -e 'install.packages(c("knitr", "rmarkdown", "remotes", "qgraph"))'
-          Rscript -e 'remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")'
+        run: Rscript -e 'remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")'
 
       - name: Verify qgraph is available
         run: Rscript -e 'stopifnot(requireNamespace("qgraph", quietly = TRUE)); cat("qgraph version:", as.character(utils::packageVersion("qgraph")), "\n")'
