@@ -738,7 +738,7 @@
     "href": "guide/getting-started.html#network-plot",
     "title": "Getting Started",
     "section": "Network plot",
-    "text": "Network plot\nTo visualize the estimated network, we select the edges with posterior inclusion probabilities 0.5 or up, and plot the result using the qgraph package.\n\nlibrary(qgraph)\n\nmedian_probability_network = coef(fit)$pairwise\nmedian_probability_network[coef(fit)$indicator &lt; 0.5] = 0.0\n\nqgraph(median_probability_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(Wenchuan)[1:5]\n)\n\n\n\n\n\n\n\n\n\n\nIn this plot, edges with posterior inclusion probability below 0.5 are set to zero. Practically, this means that a shown edge indicates evidence for a direct conditional association between two symptoms after accounting for the others in the network, whereas a missing edge indicates evidence that this direct association is absent at the selected threshold. Because the cutoff is 0.5, this reflects minimum evidence for inclusion (i.e., an inclusion Bayes factor threshold of 1 when prior inclusion probability is 0.5); higher posterior inclusion probabilities indicate stronger evidence for inclusion.",
+    "text": "Network plot\nTo visualize the estimated network, we select the edges with posterior inclusion probabilities 0.5 or up, and plot the result using the qgraph package (Epskamp et al., 2012).\n\nlibrary(qgraph)\n\nmedian_probability_network = coef(fit)$pairwise\nmedian_probability_network[coef(fit)$indicator &lt; 0.5] = 0.0\n\nqgraph(median_probability_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(Wenchuan)[1:5]\n)\n\n\n\n\n\n\n\n\n\n\nIn this plot, edges with posterior inclusion probability below 0.5 are set to zero. Practically, this means that a shown edge indicates evidence for a direct conditional association between two symptoms after accounting for the others in the network, whereas a missing edge indicates evidence that this direct association is absent at the selected threshold. Because the cutoff is 0.5, this reflects minimum evidence for inclusion (i.e., an inclusion Bayes factor threshold of 1 when prior inclusion probability is 0.5); higher posterior inclusion probabilities indicate stronger evidence for inclusion.",
     "crumbs": [
       "Get Started",
       "Getting Started"
@@ -898,7 +898,7 @@
     "href": "examples/ordinal-network.html#interpretation",
     "title": "Ordinal Network",
     "section": "Interpretation",
-    "text": "Interpretation\nThreshold the inclusion probabilities at 0.5 to obtain the median probability network, then plot with qgraph.\n\nlibrary(qgraph)\n\nmedian_probability_network = coef(fit)$pairwise\nmedian_probability_network[coef(fit)$indicator &lt; 0.5] = 0.0\n\nqgraph(median_probability_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data)\n)",
+    "text": "Interpretation\nThreshold the inclusion probabilities at 0.5 to obtain the median probability network, then plot with qgraph (Epskamp et al., 2012).\n\nlibrary(qgraph)\n\nmedian_probability_network = coef(fit)$pairwise\nmedian_probability_network[coef(fit)$indicator &lt; 0.5] = 0.0\n\nqgraph(median_probability_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data)\n)",
     "crumbs": [
       "Examples",
       "Ordinal Network"
@@ -1051,7 +1051,7 @@
     "href": "examples/binary-network.html#interpretation",
     "title": "Binary Network",
     "section": "Interpretation",
-    "text": "Interpretation\nThreshold the inclusion probabilities at 0.5 and plot.\n\nlibrary(qgraph)\n\nmedian_probability_network = coef(fit)$pairwise\nmedian_probability_network[coef(fit)$indicator &lt; 0.5] = 0.0\n\nqgraph(median_probability_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data)\n)",
+    "text": "Interpretation\nThreshold the inclusion probabilities at 0.5 and plot with qgraph (Epskamp et al., 2012).\n\nlibrary(qgraph)\n\nmedian_probability_network = coef(fit)$pairwise\nmedian_probability_network[coef(fit)$indicator &lt; 0.5] = 0.0\n\nqgraph(median_probability_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data)\n)",
     "crumbs": [
       "Examples",
       "Binary Network"
@@ -1194,7 +1194,7 @@
     "href": "examples/group-comparison.html#interpretation",
     "title": "Group Comparison",
     "section": "Interpretation",
-    "text": "Interpretation\nExtract the group-specific pairwise effects and plot the network for the ADHD group.\n\nlibrary(qgraph)\n\nadhd_network = matrix(0, 5, 5)\nadhd_network[lower.tri(adhd_network)] = coef(fit)$pairwise_effects_groups[, 1]\nadhd_network = adhd_network + t(adhd_network)\ncolnames(adhd_network) = colnames(data_adhd)\nrownames(adhd_network) = colnames(data_adhd)\n\nqgraph(adhd_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data_adhd)\n)",
+    "text": "Interpretation\nExtract the group-specific pairwise effects and plot the network for the ADHD group using qgraph (Epskamp et al., 2012).\n\nlibrary(qgraph)\n\nadhd_network = matrix(0, 5, 5)\nadhd_network[lower.tri(adhd_network)] = coef(fit)$pairwise_effects_groups[, 1]\nadhd_network = adhd_network + t(adhd_network)\ncolnames(adhd_network) = colnames(data_adhd)\nrownames(adhd_network) = colnames(data_adhd)\n\nqgraph(adhd_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data_adhd)\n)",
     "crumbs": [
       "Examples",
       "Group Comparison"
