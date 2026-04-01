@@ -115,28 +115,28 @@ if(bgms_doc_version == "") {
   bgms_doc_version = "0.2.0.0"
 }
 
-cat(sprintf('::: {.citation-picker data-cite-picker="bgms"}
+cat(sprintf('<div class="citation-picker" data-cite-picker="bgms">
 
-::: {.citation-picker-tabs role="tablist" aria-label="Citation format"}
+<div class="citation-picker-tabs" role="tablist" aria-label="Citation format">
 <button class="citation-tab is-active" type="button" data-citation-tab="apa" role="tab" aria-selected="true">APA</button>
 <button class="citation-tab" type="button" data-citation-tab="chicago" role="tab" aria-selected="false">Chicago</button>
 <button class="citation-tab" type="button" data-citation-tab="bibtex" role="tab" aria-selected="false">BibTeX</button>
 <button class="citation-tab" type="button" data-citation-tab="ris" role="tab" aria-selected="false">RIS</button>
-:::
+</div>
 
-::: {.citation-panel is-active data-citation-panel="apa" role="tabpanel"}
+<div class="citation-panel is-active" data-citation-panel="apa" role="tabpanel">
 Marsman, M., & van den Bergh, D. (2026). bgms: Bayesian analysis of graphical
 models (R package, version %s). https://CRAN.R-project.org/package=bgms
-:::
+</div>
 
-::: {.citation-panel data-citation-panel="chicago" role="tabpanel" hidden="hidden"}
+<div class="citation-panel" data-citation-panel="chicago" role="tabpanel" hidden="hidden">
 Marsman, Maarten, and Don van den Bergh. 2026. bgms: Bayesian Analysis of
 Graphical Models. R package, version %s.
 https://CRAN.R-project.org/package=bgms.
-:::
+</div>
 
-::: {.citation-panel data-citation-panel="bibtex" role="tabpanel" hidden="hidden"}
-```bibtex
+<div class="citation-panel" data-citation-panel="bibtex" role="tabpanel" hidden="hidden">
+<pre><code class="language-bibtex">
 @Manual{bgms-package,
   title   = {bgms: Bayesian Analysis of Graphical Models},
   author  = {Marsman, Maarten and van den Bergh, Don},
@@ -144,11 +144,11 @@ https://CRAN.R-project.org/package=bgms.
   note    = {R package version %s},
   url     = {https://CRAN.R-project.org/package=bgms}
 }
-```
-:::
+</code></pre>
+</div>
 
-::: {.citation-panel data-citation-panel="ris" role="tabpanel" hidden="hidden"}
-```text
+<div class="citation-panel" data-citation-panel="ris" role="tabpanel" hidden="hidden">
+<pre><code class="language-text">
 TY  - COMP
 TI  - bgms: Bayesian Analysis of Graphical Models
 AU  - Marsman, Maarten
@@ -157,10 +157,10 @@ PY  - 2026
 N1  - R package version %s
 UR  - https://CRAN.R-project.org/package=bgms
 ER  -
-```
-:::
+</code></pre>
+</div>
 
-:::
+</div>
 ', bgms_doc_version, bgms_doc_version, bgms_doc_version, bgms_doc_version))
 ```
 
