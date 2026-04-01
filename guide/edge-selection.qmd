@@ -104,4 +104,4 @@ The default `inclusion_probability = 0.5` with a Bernoulli prior is a standard n
 - **Learned inclusion probability**: use `edge_prior = "Beta-Bernoulli"` to let the data inform the overall sparsity level.
 - **Structured sparsity**: use `edge_prior = "Stochastic-Block"` when edges are expected to cluster (see [Edge Clustering](clustering.qmd)).
 
-The `pairwise_scale` parameter controls the slab width. A wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small, because the prior spreads probability over a wide range. The default of 2.5 balances sensitivity to small effects against specificity.
+The `pairwise_scale` parameter controls the slab width. A wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small, because the prior spreads probability over a wide range. The default value is `1`.

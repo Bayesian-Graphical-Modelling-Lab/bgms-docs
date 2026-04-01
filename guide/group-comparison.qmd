@@ -67,6 +67,6 @@ The `coef()` method returns:
 
 ## Prior guidance
 
-- **`difference_scale = 1`** (default): scale of the Cauchy prior for the difference parameters. This is smaller than the default `pairwise_scale` (2.5) because group differences are typically smaller than the partial associations themselves.
+- **`difference_scale = 1`** (default): scale of the Cauchy prior for the difference parameters. This matches the current default `pairwise_scale` (`1`) for baseline partial associations.
 - **`difference_prior = "Bernoulli"`** (default): each difference has a fixed prior inclusion probability. Set to `"Beta-Bernoulli"` to place a beta hyperprior on the inclusion probability, which provides automatic multiplicity correction — important when the number of potential group differences is large [@MarsmanEtAl_2025_ttest].
 - **`difference_probability = 0.5`** (default): prior probability that any given difference is nonzero. When `difference_probability = 0.5`, the prior odds equal one and the Bayes factor simplifies to the posterior odds.

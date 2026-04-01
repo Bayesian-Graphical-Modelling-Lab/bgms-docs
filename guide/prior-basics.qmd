@@ -42,11 +42,11 @@ The sections below describe each component: the slab distribution that regulariz
 
 ## The slab: prior on effect sizes
 
-The slab distribution determines the prior plausibility of different effect sizes for edges that are present. In `bgms`, the slab is a Cauchy distribution centered at zero, with a scale parameter controlled by `pairwise_scale` (default: 2.5).
+The slab distribution determines the prior plausibility of different effect sizes for edges that are present. In `bgms`, the slab is a Cauchy distribution centered at zero, with a scale parameter controlled by `pairwise_scale` (default: 1).
 
 The Cauchy distribution has heavy tails, which means it allows large effects when the data support them, while the peak at zero provides moderate shrinkage toward small effects. In models with many variables and limited data, this regularization prevents extreme estimates.
 
-The scale parameter controls the width of the slab. A wider slab spreads prior probability over a larger range of effect sizes. This has a direct consequence for edge selection: because the slab is also the alternative hypothesis for the inclusion Bayes factor, a wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small. The default of 2.5 balances sensitivity to small effects against specificity.
+The scale parameter controls the width of the slab. A wider slab spreads prior probability over a larger range of effect sizes. This has a direct consequence for edge selection: because the slab is also the alternative hypothesis for the inclusion Bayes factor, a wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small.
 
 When `standardize = TRUE`, the prior scale is adjusted based on the range of response scores. Variables with more categories have larger score products, which typically correspond to smaller interaction effects. Without standardization, a fixed scale is relatively wide for high-category pairs and narrow for low-category pairs. The adjustment ensures equivalent relative shrinkage across all variable pairs.
 
