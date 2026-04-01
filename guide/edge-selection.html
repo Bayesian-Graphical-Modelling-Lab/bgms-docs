@@ -643,7 +643,7 @@ window.Quarto = {
 </section>
 <section id="median-probability-model" class="level2">
 <h2 class="anchored" data-anchor-id="median-probability-model">Median probability model</h2>
-<p>A common summary of the posterior network is the median probability model: retain all edges with posterior inclusion probability above 0.5. This corresponds to including edges for which there is more evidence for presence than absence.</p>
+<p>A common summary of the posterior network is the median probability model <span class="citation" data-cites="BarbieriBerger_2004">(<a href="#ref-BarbieriBerger_2004" role="doc-biblioref">Barbieri &amp; Berger, 2004</a>)</span>: retain all edges with posterior inclusion probability above 0.5. This corresponds to including edges for which there is more evidence for presence than absence.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>network <span class="ot">=</span> <span class="fu">coef</span>(fit)<span class="sc">$</span>pairwise</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>network[<span class="fu">coef</span>(fit)<span class="sc">$</span>indicator <span class="sc">&lt;</span> <span class="fl">0.5</span>] <span class="ot">=</span> <span class="dv">0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
@@ -663,6 +663,9 @@ window.Quarto = {
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-BarbieriBerger_2004" class="csl-entry" role="listitem">
+Barbieri, M. M., &amp; Berger, J. O. (2004). Optimal predictive model selection. <em>The Annals of Statistics</em>, <em>32</em>(3), 870–897. <a href="https://doi.org/10.1214/009053604000000238">https://doi.org/10.1214/009053604000000238</a>
+</div>
 <div id="ref-GottardoRaftery_2008" class="csl-entry" role="listitem">
 Gottardo, R., &amp; Raftery, A. E. (2008). Markov chain <span>Monte Carlo</span> with mixtures of mutually singular distributions. <em>Journal of Computational and Graphical Statistics</em>, <em>17</em>(4), 949–975. <a href="https://doi.org/10.1198/106186008X386102">https://doi.org/10.1198/106186008X386102</a>
 </div>
@@ -695,6 +698,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

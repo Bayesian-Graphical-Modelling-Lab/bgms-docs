@@ -581,7 +581,7 @@ p(\boldsymbol{\Phi}_\mathcal{S} \mid \mathcal{S},\, \text{data})
 <li>The <strong>posterior standard deviation</strong> as a measure of estimation precision.</li>
 <li>A <strong>credible interval</strong> — a range that contains a given proportion of the posterior probability mass (e.g., 95%). Unlike frequentist confidence intervals, a 95% credible interval has a direct probability interpretation: given the prior and the observed data, there is a 95% posterior probability that the parameter lies within the interval.</li>
 </ul>
-<p>In <code>bgms</code>, <code>coef(fit)$pairwise</code> returns the posterior means of the partial associations, and <code>summary(fit)$pairwise</code> adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.</p>
+<p>In <code>bgms</code>, <code>coef(fit)$pairwise</code> returns the posterior means of the partial associations, and <code>summary(fit)$pairwise</code> adds the posterior standard deviation, <a href="../guide/mcmc-diagnostics.html#sec-mcse">Monte Carlo standard error</a>, <a href="../guide/mcmc-diagnostics.html#sec-ess">effective sample size</a>, and <a href="../guide/mcmc-diagnostics.html#sec-rhat">R-hat</a>.</p>
 </section>
 <section id="structure-learning" class="level3">
 <h3 class="anchored" data-anchor-id="structure-learning">Structure learning</h3>
@@ -592,7 +592,7 @@ p(\gamma_{ij} = 1 \mid \text{data}) =
 p(\mathcal{S} \mid \text{data})
 \]</span></p>
 <p>This posterior inclusion probability aggregates evidence across all possible network structures and therefore accounts for uncertainty about the remaining edges in the network.</p>
-<p>In <code>bgms</code>, <code>coef(fit)$indicator</code> returns the posterior means of the inclusion probabilities, and <code>summary(fit)$indicator</code> adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.</p>
+<p>In <code>bgms</code>, <code>coef(fit)$indicator</code> returns the posterior means of the inclusion probabilities, and <code>summary(fit)$indicator</code> adds the posterior standard deviation, <a href="../guide/mcmc-diagnostics.html#sec-mcse">Monte Carlo standard error</a>, <a href="../guide/mcmc-diagnostics.html#sec-ess">effective sample size</a>, and <a href="../guide/mcmc-diagnostics.html#sec-rhat">R-hat</a>.</p>
 <p>The inclusion Bayes factor quantifies the change in evidence for including an edge from prior to posterior <span class="citation" data-cites="HinneGronauVanDenBerghWagenmakers_2020 MarsmanHuthWaldorpNtzoufras_2022">(<a href="#ref-HinneGronauVanDenBerghWagenmakers_2020" role="doc-biblioref"><span class="nocase">Hinne et al.</span>, 2020</a>; <a href="#ref-MarsmanHuthWaldorpNtzoufras_2022" role="doc-biblioref">Marsman et al., 2022</a>)</span>:</p>
 <p><span class="math display">\[
 \underbrace{\frac{p(\text{data} \mid \gamma_{ij} = 1)}
@@ -653,6 +653,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

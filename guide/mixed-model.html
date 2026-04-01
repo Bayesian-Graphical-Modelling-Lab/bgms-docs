@@ -670,6 +670,24 @@ r_i = 2\sum_{j \neq i} x_j\, \phi_{ij}^{xx} + 2\sum_{j=1}^{q} y_j\, \phi_{ij}^{x
 <li><code>extract_partial_correlations(fit)</code> — returns partial correlations for the continuous block.</li>
 <li><code>extract_log_odds(fit)</code> — returns log adjacent-category odds ratios <span class="math inline">\(2\phi_{ij}^{xx}\)</span> for the discrete block.</li>
 </ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Extractor requirements
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Some extractors require at least two variables of the corresponding type:</p>
+<ul>
+<li><code>extract_precision()</code> and <code>extract_partial_correlations()</code> require at least two continuous variables.</li>
+<li><code>extract_log_odds()</code> requires at least two discrete variables (binary/ordinal or Blume-Capel).</li>
+</ul>
+<p>If a model does not meet these requirements, these quantities are not defined for that fit.</p>
+</div>
+</div>
 
 
 
@@ -699,6 +717,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

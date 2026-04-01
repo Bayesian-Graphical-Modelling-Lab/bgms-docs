@@ -752,6 +752,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    }
 });
 
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
+});
+
 </script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {

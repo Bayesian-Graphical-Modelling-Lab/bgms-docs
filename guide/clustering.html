@@ -652,7 +652,7 @@ P(B) = \frac{\lambda^B}{B!\,(\exp(\lambda) - 1)}, \quad B \geq 1
 </section>
 <section id="interpreting-block-structure" class="level2">
 <h2 class="anchored" data-anchor-id="interpreting-block-structure">Interpreting block structure</h2>
-<p>The <code>extract_sbm()</code> function retrieves the clustering results:</p>
+<p>The <code>extract_sbm()</code> function retrieves the clustering results for models fitted with <code>edge_prior = "Stochastic-Block"</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sbm <span class="ot">=</span> <span class="fu">extract_sbm</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This returns:</p>
 <ul>
@@ -734,6 +734,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

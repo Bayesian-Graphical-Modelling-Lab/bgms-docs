@@ -430,10 +430,56 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="get-started alt-background">
 <section id="citation" class="content-block">
 <h3>Citation</h3>
-<p>If you use bgms in your research, please cite:</p>
-<blockquote class="blockquote">
-<p>Marsman, M., van den Bergh, D., &amp; Haslbeck, J. M. B. (2025). Bayesian analysis of the ordinal Markov random field. <em>Psychometrika</em>, 90(1), 146–182. https://doi.org/10.1017/psy.2024.4</p>
-</blockquote>
+<p>If you use bgms in your research, please cite the software package.</p>
+<p>Choose a citation format (version is set to the documented release):</p>
+<div class="citation-picker" data-cite-picker="bgms">
+<div class="citation-picker-tabs" role="tablist" aria-label="Citation format">
+<button class="citation-tab is-active" type="button" data-citation-tab="apa" role="tab" aria-selected="true">
+APA
+</button>
+<button class="citation-tab" type="button" data-citation-tab="chicago" role="tab" aria-selected="false">
+Chicago
+</button>
+<button class="citation-tab" type="button" data-citation-tab="bibtex" role="tab" aria-selected="false">
+BibTeX
+</button>
+<button class="citation-tab" type="button" data-citation-tab="ris" role="tab" aria-selected="false">
+RIS
+</button>
+</div>
+<div class="citation-panel is-active" data-citation-panel="apa" role="tabpanel">
+<p>Marsman, M., &amp; van den Bergh, D. (2026). bgms: Bayesian analysis of graphical models (R package, version 0.2.0.0). https://CRAN.R-project.org/package=bgms</p>
+</div>
+<div class="citation-panel" data-citation-panel="chicago" role="tabpanel" hidden="hidden">
+<p>Marsman, Maarten, and Don van den Bergh. 2026. bgms: Bayesian Analysis of Graphical Models. R package, version 0.2.0.0. https://CRAN.R-project.org/package=bgms.</p>
+</div>
+<div class="citation-panel" data-citation-panel="bibtex" role="tabpanel" hidden="hidden">
+<pre><code class="language-bibtex">
+@Manual{bgms-package,
+  title   = {bgms: Bayesian Analysis of Graphical Models},
+  author  = {Marsman, Maarten and van den Bergh, Don},
+  year    = {2026},
+  note    = {R package version 0.2.0.0},
+  url     = {https://CRAN.R-project.org/package=bgms}
+}
+</code></pre>
+</div>
+<div class="citation-panel" data-citation-panel="ris" role="tabpanel" hidden="hidden">
+<pre><code class="language-text">
+TY  - COMP
+TI  - bgms: Bayesian Analysis of Graphical Models
+AU  - Marsman, Maarten
+AU  - van den Bergh, Don
+PY  - 2026
+N1  - R package version 0.2.0.0
+UR  - https://CRAN.R-project.org/package=bgms
+ER  -
+</code></pre>
+</div>
+</div>
+<p>To generate citations directly from your installed package in R:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">"bgms"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">toBibtex</span>(<span class="fu">citation</span>(<span class="st">"bgms"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </div>
 
@@ -456,6 +502,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

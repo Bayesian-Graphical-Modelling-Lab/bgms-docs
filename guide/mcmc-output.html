@@ -592,7 +592,7 @@ intrusion-avoidth  0.000 0.000 0.000  84.121 1.000
 intrusion-avoidact 0.000 0.001 0.000 146.722 1.000
 ... (use `summary(fit)$pairwise` to see full output)
 Note: NA values are suppressed in the print table. They occur here when an 
-indicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;
+indicator was zero across all iterations, so mcse/n_eff/n_eff_mixt/Rhat are undefined;
 `summary(fit)$pairwise` still contains the NA values.
 
 Inclusion probabilities:
@@ -605,10 +605,11 @@ intrusion-avoidth  0.008 0.089 0.002  1969    14    14     2  1578.01  1.03
 intrusion-avoidact 0.012 0.109 0.003  1957    18    18     6 1223.503  1.03
 ... (use `summary(fit)$indicator` to see full output)
 Note: NA values are suppressed in the print table. They occur when an indicator
-was constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat
-are undefined; `summary(fit)$indicator` still contains the NA values.
+was constant or had fewer than 5 transitions, so n_eff_mixt is unreliable;
+`summary(fit)$indicator` still contains all computed values.
 
 Use `summary(fit)$&lt;component&gt;` to access full results.
+Use `extract_log_odds(fit)` for log odds ratios.
 See the `easybgm` package for other summary and plotting tools.</code></pre>
 </div>
 </div>
@@ -879,7 +880,7 @@ upset      0.06981198 -2.197320 -5.173231 -10.07425</code></pre>
 </tr>
 <tr class="even">
 <td><code>extract_sbm()</code></td>
-<td>SBM cluster assignments and co-clustering matrix</td>
+<td>SBM cluster assignments and co-clustering matrix (when <code>edge_prior = "Stochastic-Block"</code>)</td>
 </tr>
 <tr class="odd">
 <td><code>extract_arguments()</code></td>
@@ -903,7 +904,7 @@ upset      0.06981198 -2.197320 -5.173231 -10.07425</code></pre>
  $ summary     :List of 4</code></pre>
 </div>
 </div>
-<p>The <code>summary</code> field contains per-chain summaries of tree depth, divergences, and energy. The <code>warmup_check</code> field reports whether warmup equilibration was sufficient. These are described in detail in <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>.</p>
+<p>The <code>summary</code> field contains per-chain summaries of tree depth, divergences, and energy. The <code>warmup_check</code> field reports whether warmup equilibration was sufficient. These are described in detail in <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>. If these diagnostics remain problematic after tuning, refit with <code>update_method = "adaptive-metropolis"</code>.</p>
 </section>
 <section id="output-from-bgmcompare" class="level2">
 <h2 class="anchored" data-anchor-id="output-from-bgmcompare">Output from <a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a></h2>
@@ -957,8 +958,8 @@ Inclusion probabilities:
      1
 ... (use `summary(fit)$indicator` to see full output)
 Note: NA values are suppressed in the print table. They occur when an indicator
-was constant (all 0 or all 1) across all iterations, so sd/mcse/n_eff/Rhat
-are undefined; `summary(fit)$indicator` still contains the NA values.
+was constant or had fewer than 5 transitions, so n_eff_mixt is unreliable;
+`summary(fit)$indicator` still contains all computed values.
 
 Group differences (main effects):
            parameter  mean    sd mcse n_eff  Rhat
@@ -970,7 +971,7 @@ Group differences (main effects):
    listen (diff1; 1) 3.921 1.310            1.000
 ... (use `summary(fit)$main_diff` to see full output)
 Note: NA values are suppressed in the print table. They occur here when an
-indicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;
+indicator was zero across all iterations, so mcse/n_eff/n_eff_mixt/Rhat are undefined;
 `summary(fit)$main_diff` still contains the NA values.
 
 Group differences (pairwise effects):
@@ -983,7 +984,7 @@ Group differences (pairwise effects):
     avoid-loses (diff1) -0.303 0.467 0.015 955.778 1.000
 ... (use `summary(fit)$pairwise_diff` to see full output)
 Note: NA values are suppressed in the print table. They occur here when an
-indicator was zero across all iterations, so mcse/n_eff/Rhat are undefined;
+indicator was zero across all iterations, so mcse/n_eff/n_eff_mixt/Rhat are undefined;
 `summary(fit)$pairwise_diff` still contains the NA values.
 
 Use `summary(fit)$&lt;component&gt;` to access full results.
@@ -1017,6 +1018,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>
