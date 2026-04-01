@@ -656,7 +656,7 @@ window.Quarto = {
 <li><strong>Learned inclusion probability</strong>: use <code>edge_prior = "Beta-Bernoulli"</code> to let the data inform the overall sparsity level.</li>
 <li><strong>Structured sparsity</strong>: use <code>edge_prior = "Stochastic-Block"</code> when edges are expected to cluster (see <a href="../guide/clustering.html">Edge Clustering</a>).</li>
 </ul>
-<p>The <code>pairwise_scale</code> parameter controls the slab width. A wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small, because the prior spreads probability over a wide range. The default of 2.5 balances sensitivity to small effects against specificity.</p>
+<p>The <code>pairwise_scale</code> parameter controls the slab width. A wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small, because the prior spreads probability over a wide range. The default value is <code>1</code>.</p>
 
 
 
