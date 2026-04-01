@@ -1,0 +1,19 @@
+project:
+  render:
+    - "**/*.qmd"
+    - "!manual/"
+    - "!dev/"
+
+website:
+  navbar:
+    left:
+      - text: "Overview"
+        href: index.qmd
+      - text: "Get Started"
+        href: guide/getting-started.qmd
+      - text: "Guide"
+        href: guide/index.qmd
+      - text: "Reference"
+        href: reference/index.qmd
+      - text: "Examples"
+        href: examples/index.qmd

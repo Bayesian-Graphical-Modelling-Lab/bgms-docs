@@ -24,21 +24,11 @@ jobs:
           packages: |
             any::knitr
             any::rmarkdown
-            any::remotes
             any::qgraph
-
-      - name: Install bgms from GitHub
-        env:
-          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-        run: Rscript -e 'remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")'
-
-      - name: Verify qgraph is available
-        run: Rscript -e 'stopifnot(requireNamespace("qgraph", quietly = TRUE)); cat("qgraph version:", as.character(utils::packageVersion("qgraph")), "\n")'
+            github::Bayesian-Graphical-Modelling-Lab/bgms
 
       - name: Render site
-        run: |
-          rm -rf _freeze
-          quarto render
+        run: quarto render --profile ci
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
