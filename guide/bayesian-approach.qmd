@@ -68,7 +68,7 @@ In practice, the posterior distribution for each partial association is usually 
 - The **posterior standard deviation** as a measure of estimation precision.
 - A **credible interval** — a range that contains a given proportion of the posterior probability mass (e.g., 95%). Unlike frequentist confidence intervals, a 95% credible interval has a direct probability interpretation: given the prior and the observed data, there is a 95% posterior probability that the parameter lies within the interval.
 
-In `bgms`, `coef(fit)$pairwise` returns the posterior means of the partial associations, and `summary(fit)$pairwise` adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.
+In `bgms`, `coef(fit)$pairwise` returns the posterior means of the partial associations, and `summary(fit)$pairwise` adds the posterior standard deviation, [Monte Carlo standard error](mcmc-diagnostics.qmd#sec-mcse), [effective sample size](mcmc-diagnostics.qmd#sec-ess), and [R-hat](mcmc-diagnostics.qmd#sec-rhat).
 
 ### Structure learning
 
@@ -82,7 +82,7 @@ $$
 
 This posterior inclusion probability aggregates evidence across all possible network structures and therefore accounts for uncertainty about the remaining edges in the network.
 
-In `bgms`, `coef(fit)$indicator` returns the posterior means of the inclusion probabilities, and `summary(fit)$indicator` adds the posterior standard deviation, Monte Carlo standard error, effective sample size, and R-hat.
+In `bgms`, `coef(fit)$indicator` returns the posterior means of the inclusion probabilities, and `summary(fit)$indicator` adds the posterior standard deviation, [Monte Carlo standard error](mcmc-diagnostics.qmd#sec-mcse), [effective sample size](mcmc-diagnostics.qmd#sec-ess), and [R-hat](mcmc-diagnostics.qmd#sec-rhat).
 
 The inclusion Bayes factor quantifies the change in evidence for including an edge from prior to posterior [@HinneGronauVanDenBerghWagenmakers_2020; @MarsmanHuthWaldorpNtzoufras_2022]:
 
