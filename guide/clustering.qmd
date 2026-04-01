@@ -77,7 +77,7 @@ Both tests are computed from the posterior cluster probabilities returned by `ex
 
 ## Interpreting block structure
 
-The `extract_sbm()` function retrieves the clustering results:
+The `extract_sbm()` function retrieves the clustering results for models fitted with `edge_prior = "Stochastic-Block"`:
 
 ```r
 sbm = extract_sbm(fit)

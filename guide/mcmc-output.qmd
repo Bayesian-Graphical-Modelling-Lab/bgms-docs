@@ -197,7 +197,7 @@ commonly used are:
 | `extract_log_odds()` | Posterior mean log-odds matrix (ordinal / discrete block) |
 | `extract_ess()` | Effective sample sizes |
 | `extract_rhat()` | Split $\hat{R}$ values |
-| `extract_sbm()` | SBM cluster assignments and co-clustering matrix |
+| `extract_sbm()` | SBM cluster assignments and co-clustering matrix (when `edge_prior = "Stochastic-Block"`) |
 | `extract_arguments()` | Arguments used when fitting the model |
 
 ## NUTS diagnostics
