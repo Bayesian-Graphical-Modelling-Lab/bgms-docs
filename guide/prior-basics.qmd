@@ -52,7 +52,7 @@ When `standardize = TRUE`, the prior scale is adjusted based on the range of res
 
 ## The spike: priors on the edge indicators
 
-The spike side of the mixture is controlled by the prior on the edge indicators $\gamma_{ij}$. This prior determines, before seeing the data, how likely each edge is to be present. It governs the overall sparsity and structure of the network.
+Edge indicators $\gamma_{ij}$ govern edge inclusion in the spike-and-slab prior. Their prior determines, before seeing the data, how likely each edge is to be excluded ($\gamma_{ij}=0$) or included ($\gamma_{ij}=1$), and therefore governs overall sparsity and structure.
 
 `bgms` provides three edge priors, each encoding a different type of structural assumption. They are selected with the `edge_prior` argument.
 
