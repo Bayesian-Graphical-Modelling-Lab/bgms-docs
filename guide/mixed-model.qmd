@@ -138,3 +138,14 @@ To obtain model-specific parameterizations, use the dedicated extractors:
 - `extract_precision(fit)` — returns the precision matrix $\boldsymbol{\Theta}$ for the continuous block.
 - `extract_partial_correlations(fit)` — returns partial correlations for the continuous block.
 - `extract_log_odds(fit)` — returns log adjacent-category odds ratios $2\phi_{ij}^{xx}$ for the discrete block.
+
+::: {.callout-note}
+## Extractor requirements
+
+Some extractors require at least two variables of the corresponding type:
+
+- `extract_precision()` and `extract_partial_correlations()` require at least two continuous variables.
+- `extract_log_odds()` requires at least two discrete variables (binary/ordinal or Blume-Capel).
+
+If a model does not meet these requirements, these quantities are not defined for that fit.
+:::
