@@ -131,9 +131,9 @@ posterior means. NUTS diagnostics are available in `fit$nuts_diag` when
 For variables $i$ and $j$, the group-specific partial association is
 represented as:
 
-$$\theta_{ij}^{(g)} = \phi_{ij} + \delta_{ij}^{(g)}$$
+$$\theta_{ij}^{(g)} = \omega_{ij} + \delta_{ij}^{(g)}$$
 
-where $\phi_{ij}$ is the baseline effect and $\delta_{ij}^{(g)}$ are group
+where $\omega_{ij}$ is the baseline effect and $\delta_{ij}^{(g)}$ are group
 differences constrained to sum to zero.
 
 ### Ordinal variables

@@ -243,7 +243,7 @@ extract_log_odds(bgms_object)
 | `bgms_object` | A fitted `bgms` object (OMRF or mixed MRF). |
 
 Returns a symmetric matrix of log adjacent-category odds ratios. For the
-ordinal MRF, $\text{log-odds}_{ij} = 2 \phi_{ij}$.
+ordinal MRF, $\text{log-odds}_{ij} = 2 \omega_{ij}$.
 
 ## See also
 

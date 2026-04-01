@@ -23,16 +23,16 @@ A Markov random field (MRF) is an undirected graphical model in which the joint 
 
 $$
 p(\mathbf{x}) \propto \exp\left(\sum_{i} \mu_i(x_i) +
-\mathbf{x}^{\sf T}\boldsymbol{\Phi}\, \mathbf{x}\right)
+\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
 $$
 
 where $\mu_i(x_i)$ are node potentials that capture the univariate properties of variable $i$,
-and $\boldsymbol{\Phi}$ is a symmetric pairwise interaction matrix.
-The off-diagonal entry $\phi_{ij}$ is the partial association between variables $x_i$ and $x_j$. When $\phi_{ij} = 0$, the two variables are conditionally independent and the corresponding edge is absent from the graph. Thus, the primary inferential targets are the partial associations in $\boldsymbol{\Phi}$ and the network structure that they imply.
+and $\boldsymbol{\Omega}$ is a symmetric pairwise interaction matrix.
+The off-diagonal entry $\omega_{ij}$ is the partial association between variables $x_i$ and $x_j$. When $\omega_{ij} = 0$, the two variables are conditionally independent and the corresponding edge is absent from the graph. Thus, the primary inferential targets are the partial associations in $\boldsymbol{\Omega}$ and the network structure that they imply.
 
 ## Model families in bgms
 
-`bgms` estimates one general MRF. The variable types in the data determine the form of the node potentials $\mu_i(x_i)$ and the interpretation of the pairwise interactions $\phi_{ij}$:
+`bgms` estimates one general MRF. The variable types in the data determine the form of the node potentials $\mu_i(x_i)$ and the interpretation of the pairwise interactions $\omega_{ij}$:
 
 - **Ordinal MRF** — all variables are binary or ordinal. Node potentials are category thresholds, and partial associations are proportional to log adjacent-category odds ratios. See [Ordinal MRF](omrf.qmd).
 
@@ -42,4 +42,4 @@ The off-diagonal entry $\phi_{ij}$ is the partial association between variables 
 
 ## Modeling conditional independence
 
-The conditional independence structure — which edges are present — is typically unknown. `bgms` treats edge inclusion as a model selection problem, testing $\phi_{ij} = 0$ against $\phi_{ij} \neq 0$ for each pair of variables using spike-and-slab priors. This produces posterior inclusion probabilities that quantify the evidence for each edge. See [Edge Selection](edge-selection.qmd).
+The conditional independence structure — which edges are present — is typically unknown. `bgms` treats edge inclusion as a model selection problem, testing $\omega_{ij} = 0$ against $\omega_{ij} \neq 0$ for each pair of variables using spike-and-slab priors. This produces posterior inclusion probabilities that quantify the evidence for each edge. See [Edge Selection](edge-selection.qmd).

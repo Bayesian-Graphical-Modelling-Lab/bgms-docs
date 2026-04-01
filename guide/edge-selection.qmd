@@ -8,7 +8,7 @@ Bayesian edge selection determines which edges are present in the network by pla
 
 For each edge $(i, j)$, an indicator variable $\gamma_{ij} \in \{0, 1\}$ governs whether the interaction is included in the model:
 
-- When $\gamma_{ij} = 0$ (spike), the partial association $\phi_{ij}$ is set to exactly zero — the edge is absent.
+- When $\gamma_{ij} = 0$ (spike), the partial association $\omega_{ij}$ is set to exactly zero — the edge is absent.
 - When $\gamma_{ij} = 1$ (slab), the partial association receives a Cauchy prior with scale `pairwise_scale` — the edge is present and the effect size is estimated.
 
 This is the *mixtures of mutually singular distributions* (MoMS) formulation of the spike-and-slab prior [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms]. Because each edge is either exactly zero or follows a continuous distribution — with no overlap between the two components — the sampler moves between mutually exclusive subspaces rather than gradually shrinking toward zero. This discrete formulation provides model-selection consistency and avoids the need for transdimensional (reversible-jump) MCMC proposals.
@@ -49,18 +49,18 @@ conditional independence. Two common alternatives can also be computed from
 detailed comparison of all three methods.
 
 **Credible intervals.** With `edge_selection = FALSE`, posterior credible 
-intervals for each partial association $\phi_{ij}$ can be constructed from the 
+intervals for each partial association $\omega_{ij}$ can be constructed from the 
 MCMC samples (available in `fit$raw_samples`). If the interval excludes zero, 
 this is sometimes taken as evidence *against* the absence of an edge. 
 
 **Savage--Dickey Bayes factor.** With `edge_selection = FALSE`, the posterior 
 samples from the full model can be used to compute a Savage--Dickey density 
-ratio for each edge, testing whether $\phi_{ij} = 0$. This approach assumes 
+ratio for each edge, testing whether $\omega_{ij} = 0$. This approach assumes 
 that the rest of the network is fully connected.
 
 **Inclusion Bayes factor.** When `edge_selection = TRUE`, the edge indicator 
 samples can be used to compute an inclusion Bayes factor for each edge, testing 
-whether $\phi_{ij} = 0$. Opposed to the Savage--Dickey approach, this method 
+whether $\omega_{ij} = 0$. Opposed to the Savage--Dickey approach, this method 
 does not assume that the rest of the network is fully connected, but weighs each 
 possible structure by its posterior plausibility. It thus tests each edge while 
 accounting for structural uncertainty. See 

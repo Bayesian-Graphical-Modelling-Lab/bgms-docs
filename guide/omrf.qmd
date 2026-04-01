@@ -11,10 +11,10 @@ For $p$ ordinal variables with observations $\mathbf{x} = (x_1, \ldots, x_p)$, t
 
 $$
 p(\mathbf{x}) \propto \exp\!\left(\sum_{i=1}^{p} \sum_{c=1}^{m_i} \mathcal{I}(x_i = c)\,\mu_{ic} +
-\mathbf{x}^{\sf T}\boldsymbol{\Phi}\, \mathbf{x}\right)
+\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
 $$
 
-where $\mu_{ic}$ is the category threshold parameter for category $c$ of variable $i$ (one per category above the baseline $c = 0$, which is fixed at $\mu_{i0} = 0$) and $\boldsymbol{\Phi}$ is a symmetric interaction matrix whose off-diagonal entry $\phi_{ij}$ is the partial association between variables $i$ and $j$.
+where $\mu_{ic}$ is the category threshold parameter for category $c$ of variable $i$ (one per category above the baseline $c = 0$, which is fixed at $\mu_{i0} = 0$) and $\boldsymbol{\Omega}$ is a symmetric interaction matrix whose off-diagonal entry $\omega_{ij}$ is the partial association between variables $i$ and $j$.
 
 ## Why the adjacent category model?
 
@@ -56,28 +56,28 @@ The [Graphical Models](graphical-models.qmd) page introduced the general pairwis
 
 $$
 p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
-\mathbf{x}^{\sf T}\boldsymbol{\Phi}\, \mathbf{x}\right)
+\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
 $$
 
-The ordinal MRF is the discrete special case. The node potentials $\mu_i(x_i)$ are the category thresholds $\mu_{ic}$, and the interaction matrix $\boldsymbol{\Phi}$ has off-diagonal entries $\phi_{ij}$. The bilinear form $\mathbf{x}^{\sf T}\boldsymbol{\Phi}\,\mathbf{x}$ reduces to $2\sum_{i < j} \phi_{ij}\, x_i\, x_j$ because $\boldsymbol{\Phi}$ is symmetric (the diagonal terms are not identifiable, and absorbed by the thresholds).
+The ordinal MRF is the discrete special case. The node potentials $\mu_i(x_i)$ are the category thresholds $\mu_{ic}$, and the interaction matrix $\boldsymbol{\Omega}$ has off-diagonal entries $\omega_{ij}$. The bilinear form $\mathbf{x}^{\sf T}\boldsymbol{\Omega}\,\mathbf{x}$ reduces to $2\sum_{i < j} \omega_{ij}\, x_i\, x_j$ because $\boldsymbol{\Omega}$ is symmetric (the diagonal terms are not identifiable, and absorbed by the thresholds).
 
 ## Partial associations
 
-As described in [Graphical Models](graphical-models.qmd), `bgms` reports all pairwise effects on a unified partial association scale. For the ordinal MRF, the partial association $\phi_{ij}$ is half the log adjacent-category odds ratio. The adjacent-category odds ratio compares, for two variables $x_i$ and $x_j$, how the odds of being in category $h+1$ versus $h$ for one variable change when the other variable moves from category $q$ to $q+1$:
+As described in [Graphical Models](graphical-models.qmd), `bgms` reports all pairwise effects on a unified partial association scale. For the ordinal MRF, the partial association $\omega_{ij}$ is half the log adjacent-category odds ratio. The adjacent-category odds ratio compares, for two variables $x_i$ and $x_j$, how the odds of being in category $h+1$ versus $h$ for one variable change when the other variable moves from category $q$ to $q+1$:
 
 $$
-\text{OR}_{ij} = \frac{P(x_i = h,\; x_j = q)\; P(x_i = h+1,\; x_j = q+1)}{P(x_i = h+1,\; x_j = q)\; P(x_i = h,\; x_j = q+1)} = \exp(2\phi_{ij})
+\text{OR}_{ij} = \frac{P(x_i = h,\; x_j = q)\; P(x_i = h+1,\; x_j = q+1)}{P(x_i = h+1,\; x_j = q)\; P(x_i = h,\; x_j = q+1)} = \exp(2\omega_{ij})
 $$
 
 This ratio is constant across all category pairs $(h, q)$ and does not depend on the values of the remaining variables. The partial association is therefore:
 
 $$
-\phi_{ij} = \tfrac{1}{2}\,\log\text{OR}_{ij}
+\omega_{ij} = \tfrac{1}{2}\,\log\text{OR}_{ij}
 $$
 
-A positive $\phi_{ij}$ means that the odds of observing one variable in a higher adjacent category increase when the other variable is also in a higher adjacent category.
+A positive $\omega_{ij}$ means that the odds of observing one variable in a higher adjacent category increase when the other variable is also in a higher adjacent category.
 
-To obtain the full log adjacent-category odds ratios, use `extract_log_odds(fit)`, which returns $2\phi_{ij}$ for each pair. The `coef(fit)$pairwise` method returns the partial associations $\phi_{ij}$.
+To obtain the full log adjacent-category odds ratios, use `extract_log_odds(fit)`, which returns $2\omega_{ij}$ for each pair. The `coef(fit)$pairwise` method returns the partial associations $\omega_{ij}$.
 
 ## Category thresholds
 
@@ -104,7 +104,7 @@ where $c$ is the response category, $b$ is the baseline category, $\alpha$ captu
 - $\beta < 0$: the model favors responses near the baseline category
 - $\beta > 0$: the model favors responses away from the baseline category
 
-Partial associations between Blume-Capel variables use centered scores: the interaction term in the joint distribution becomes $2(x_i - b_i)(x_j - b_j)\,\phi_{ij}$ instead of $2\,x_i\,x_j\,\phi_{ij}$. The partial association $\phi_{ij}$ remains the same; the centering is absorbed by the thresholds. For binary variables, the Blume-Capel parameterization reduces to the Ising model, just as the regular ordinal parameterization does.
+Partial associations between Blume-Capel variables use centered scores: the interaction term in the joint distribution becomes $2(x_i - b_i)(x_j - b_j)\,\omega_{ij}$ instead of $2\,x_i\,x_j\,\omega_{ij}$. The partial association $\omega_{ij}$ remains the same; the centering is absorbed by the thresholds. For binary variables, the Blume-Capel parameterization reduces to the Ising model, just as the regular ordinal parameterization does.
 
 To use Blume-Capel variables, set `variable_type = "blume-capel"` and provide the `baseline_category` argument:
 
@@ -127,11 +127,11 @@ $$
 p(x_i = c \mid \mathbf{x}_{-i}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i} \exp\!\left(\mu_{ik} + k \cdot r_i\right)}
 $$
 
-where $r_i = 2\sum_{j \neq i} x_j\, \phi_{ij}$ is the residual score — a sufficient reduction that summarizes the influence of all other variables on $x_i$. The pseudolikelihood is the product of these conditionals across all observations and variables.
+where $r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}$ is the residual score — a sufficient reduction that summarizes the influence of all other variables on $x_i$. The pseudolikelihood is the product of these conditionals across all observations and variables.
 
 ## Edge selection
 
-When `edge_selection = TRUE` (the default), `bgms` applies spike-and-slab priors to the partial associations $\phi_{ij}$. The spike sets $\phi_{ij} = 0$, enforcing the absence of the edge. The slab places a Cauchy prior on $\phi_{ij}$, allowing the effect size to be estimated from the data. See [Prior Basics](prior-basics.qmd) for the spike-and-slab specification.
+When `edge_selection = TRUE` (the default), `bgms` applies spike-and-slab priors to the partial associations $\omega_{ij}$. The spike sets $\omega_{ij} = 0$, enforcing the absence of the edge. The slab places a Cauchy prior on $\omega_{ij}$, allowing the effect size to be estimated from the data. See [Prior Basics](prior-basics.qmd) for the spike-and-slab specification.
 
 The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See [Edge Selection](edge-selection.qmd).
 
@@ -156,9 +156,9 @@ fit = bgm(x = data, variable_type = "blume-capel",
           baseline_category = 3, seed = 1234)
 ```
 
-The `summary()` and `coef()` methods work the same as for GGM and mixed models. `coef(fit)$pairwise` returns the posterior means of the partial associations $\phi_{ij}$, and `coef(fit)$indicator` returns the posterior inclusion probabilities.
+The `summary()` and `coef()` methods work the same as for GGM and mixed models. `coef(fit)$pairwise` returns the posterior means of the partial associations $\omega_{ij}$, and `coef(fit)$indicator` returns the posterior inclusion probabilities.
 
 To obtain model-specific parameterizations, use the dedicated extractors:
 
 - `extract_main_effects(fit)` — returns the category threshold parameters.
-- `extract_log_odds(fit)` — returns the log adjacent-category odds ratios $2\phi_{ij}$.
+- `extract_log_odds(fit)` — returns the log adjacent-category odds ratios $2\omega_{ij}$.

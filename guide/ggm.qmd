@@ -22,7 +22,7 @@ The [Graphical Models](graphical-models.qmd) page introduced the general pairwis
 
 $$
 p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
-\mathbf{x}^{\sf T}\boldsymbol{\Phi}\, \mathbf{x}\right)
+\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
 $$
 
 The GGM is a special case of this form. In `bgms`, continuous variables are centered before estimation, so $\boldsymbol{\mu} = \mathbf{0}$ and the node potentials vanish. The multivariate normal density then reduces to:
@@ -32,19 +32,19 @@ p(\mathbf{x}) \propto \exp\!\left(
 - \tfrac{1}{2}\,\mathbf{x}^{\sf T} \boldsymbol{\Theta}\, \mathbf{x}\right)
 $$
 
-Comparing this with the general MRF identifies the interaction matrix as $\boldsymbol{\Phi} = -\tfrac{1}{2}\,\boldsymbol{\Theta}$. The off-diagonal entry $\phi_{ij} = -\tfrac{1}{2}\,\theta_{ij}$ is the partial association between variables $i$ and $j$, and when $\theta_{ij} = 0$ the partial association is zero and the edge is absent.
+Comparing this with the general MRF identifies the interaction matrix as $\boldsymbol{\Omega} = -\tfrac{1}{2}\,\boldsymbol{\Theta}$. The off-diagonal entry $\omega_{ij} = -\tfrac{1}{2}\,\theta_{ij}$ is the partial association between variables $i$ and $j$, and when $\theta_{ij} = 0$ the partial association is zero and the edge is absent.
 
 ## Partial associations
 
 As described in [Graphical Models](graphical-models.qmd), bgms reports all pairwise effects on a unified partial association scale. For the GGM, the partial association between variables $i$ and $j$ is:
 
 $$
-\phi_{ij} = -\tfrac{1}{2}\, \theta_{ij}
+\omega_{ij} = -\tfrac{1}{2}\, \theta_{ij}
 $$
 
-A positive $\phi_{ij}$ means that, holding all other variables constant, higher values of $x_i$ are associated with higher values of $x_j$.
+A positive $\omega_{ij}$ means that, holding all other variables constant, higher values of $x_i$ are associated with higher values of $x_j$.
 
-The partial association and the precision element carry the same information — one is a linear rescaling of the other. The rescaling ensures that the GGM partial association occupies the same structural role as the partial association in the ordinal MRF, where $\phi_{ij}$ is half the log adjacent-category odds ratio (see [Ordinal MRF](omrf.qmd)). This unified scale means that `coef(fit)$pairwise` returns partial associations regardless of model type, and the spike-and-slab prior ([Prior Basics](prior-basics.qmd)) operates on the same quantity across models. To obtain the precision matrix directly, use `extract_precision(fit)`.
+The partial association and the precision element carry the same information — one is a linear rescaling of the other. The rescaling ensures that the GGM partial association occupies the same structural role as the partial association in the ordinal MRF, where $\omega_{ij}$ is half the log adjacent-category odds ratio (see [Ordinal MRF](omrf.qmd)). This unified scale means that `coef(fit)$pairwise` returns partial associations regardless of model type, and the spike-and-slab prior ([Prior Basics](prior-basics.qmd)) operates on the same quantity across models. To obtain the precision matrix directly, use `extract_precision(fit)`.
 
 ## Partial correlations
 
@@ -59,7 +59,7 @@ Because the partial correlation standardizes the off-diagonal precision element 
 The partial correlation is related to the partial association by:
 
 $$
-\rho_{ij \cdot \text{rest}} = \frac{2\,\phi_{ij}}{\sqrt{\theta_{ii}\, \theta_{jj}}}
+\rho_{ij \cdot \text{rest}} = \frac{2\,\omega_{ij}}{\sqrt{\theta_{ii}\, \theta_{jj}}}
 $$
 
 When comparing the strength of associations across variable pairs — identifying which edges are strongest relative to each variable's conditional variability — partial correlations are the natural summary. When the goal is edge selection or comparison with discrete network models, the partial associations are more appropriate. To obtain the partial correlation matrix directly, use `extract_partial_correlations(fit)`.
@@ -83,7 +83,7 @@ The likelihood depends on the data only through $\mathbf{S}$ and $n$, not throug
 
 ## Edge selection
 
-When `edge_selection = TRUE` (the default), `bgms` applies spike-and-slab priors to the partial associations $\phi_{ij}$. The spike sets $\phi_{ij} = 0$ (and therefore $\theta_{ij} = 0$), enforcing the absence of the edge. The slab places a Cauchy prior on $\phi_{ij}$, allowing the effect size to be estimated from the data. See [Prior Basics](prior-basics.qmd) for the spike-and-slab specification.
+When `edge_selection = TRUE` (the default), `bgms` applies spike-and-slab priors to the partial associations $\omega_{ij}$. The spike sets $\omega_{ij} = 0$ (and therefore $\theta_{ij} = 0$), enforcing the absence of the edge. The slab places a Cauchy prior on $\omega_{ij}$, allowing the effect size to be estimated from the data. See [Prior Basics](prior-basics.qmd) for the spike-and-slab specification.
 
 The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See [Edge Selection](edge-selection.qmd).
 
@@ -101,7 +101,7 @@ To fit a GGM, set `variable_type = "continuous"`:
 fit = bgm(x = data, variable_type = "continuous", seed = 1234)
 ```
 
-The `summary()` and `coef()` methods work the same as for ordinal and mixed models. `coef(fit)$pairwise` returns the posterior means of the partial associations $\phi_{ij}$, and `coef(fit)$indicator` returns the posterior inclusion probabilities.
+The `summary()` and `coef()` methods work the same as for ordinal and mixed models. `coef(fit)$pairwise` returns the posterior means of the partial associations $\omega_{ij}$, and `coef(fit)$indicator` returns the posterior inclusion probabilities.
 
 To obtain model-specific parameterizations, use the dedicated extractors:
 
