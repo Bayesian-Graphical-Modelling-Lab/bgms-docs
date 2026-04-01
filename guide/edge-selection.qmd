@@ -88,7 +88,7 @@ This is precisely why a Bayesian approach matters. Without it, a missing edge in
 
 ## Median probability model
 
-A common summary of the posterior network is the median probability model: retain all edges with posterior inclusion probability above 0.5. This corresponds to including edges for which there is more evidence for presence than absence.
+A common summary of the posterior network is the median probability model [@BarbieriBerger_2004]: retain all edges with posterior inclusion probability above 0.5. This corresponds to including edges for which there is more evidence for presence than absence.
 
 ```r
 network = coef(fit)$pairwise
