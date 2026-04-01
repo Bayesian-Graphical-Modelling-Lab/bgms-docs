@@ -28,22 +28,6 @@ if(!requireNamespace("remotes")) {
 remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")
 ```
 
-## How to cite bgms
-
-If you use `bgms` in scientific work, please cite the software. The most
-up-to-date package citation can be retrieved directly from R:
-
-```r
-citation("bgms")
-```
-
-For analyses that rely on specific methods (for example ordinal MRFs,
-group-comparison Bayes factor tests, or stochastic block priors), please also
-cite the corresponding methodological papers.
-
-Citations help document scientific impact and support ongoing maintenance and
-development of `bgms`.
-
 ## Fitting a model
 
 The main entry point is [`bgm()`](../reference/bgm.qmd). It accepts a data frame or matrix of mixed binary, ordinal, and continuous variables and estimates a Markov random field.

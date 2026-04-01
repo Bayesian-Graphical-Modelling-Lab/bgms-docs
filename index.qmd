@@ -103,11 +103,73 @@ Technical documentation for contributors: C++ architecture, MCMC algorithms, and
 
 ### Citation
 
-If you use bgms in your research, please cite:
+If you use bgms in your research, please cite the software package.
 
-> Marsman, M., van den Bergh, D., & Haslbeck, J. M. B. (2025). Bayesian analysis
-> of the ordinal Markov random field. *Psychometrika*, 90(1), 146–182.
-> https://doi.org/10.1017/psy.2024.4
+Choose a citation format (version is set to the documented release):
+
+```{r}
+#| echo: false
+#| results: asis
+bgms_doc_version = Sys.getenv("BGMS_DOC_VERSION", unset = "")
+if(bgms_doc_version == "") {
+  bgms_doc_version = "0.2.0.0"
+}
+
+cat(sprintf('::: {.citation-picker data-cite-picker="bgms"}
+
+::: {.citation-picker-tabs role="tablist" aria-label="Citation format"}
+<button class="citation-tab is-active" type="button" data-citation-tab="apa" role="tab" aria-selected="true">APA</button>
+<button class="citation-tab" type="button" data-citation-tab="chicago" role="tab" aria-selected="false">Chicago</button>
+<button class="citation-tab" type="button" data-citation-tab="bibtex" role="tab" aria-selected="false">BibTeX</button>
+<button class="citation-tab" type="button" data-citation-tab="ris" role="tab" aria-selected="false">RIS</button>
+:::
+
+::: {.citation-panel is-active data-citation-panel="apa" role="tabpanel"}
+Marsman, M., & van den Bergh, D. (2026). bgms: Bayesian analysis of graphical
+models (R package, version %s). https://CRAN.R-project.org/package=bgms
+:::
+
+::: {.citation-panel data-citation-panel="chicago" role="tabpanel" hidden="hidden"}
+Marsman, Maarten, and Don van den Bergh. 2026. bgms: Bayesian Analysis of
+Graphical Models. R package, version %s.
+https://CRAN.R-project.org/package=bgms.
+:::
+
+::: {.citation-panel data-citation-panel="bibtex" role="tabpanel" hidden="hidden"}
+```bibtex
+@Manual{bgms-package,
+  title   = {bgms: Bayesian Analysis of Graphical Models},
+  author  = {Marsman, Maarten and van den Bergh, Don},
+  year    = {2026},
+  note    = {R package version %s},
+  url     = {https://CRAN.R-project.org/package=bgms}
+}
+```
+:::
+
+::: {.citation-panel data-citation-panel="ris" role="tabpanel" hidden="hidden"}
+```text
+TY  - COMP
+TI  - bgms: Bayesian Analysis of Graphical Models
+AU  - Marsman, Maarten
+AU  - van den Bergh, Don
+PY  - 2026
+N1  - R package version %s
+UR  - https://CRAN.R-project.org/package=bgms
+ER  -
+```
+:::
+
+:::
+', bgms_doc_version, bgms_doc_version, bgms_doc_version, bgms_doc_version))
+```
+
+To generate citations directly from your installed package in R:
+
+```r
+citation("bgms")
+toBibtex(citation("bgms"))
+```
 
 :::::
 ::::::
