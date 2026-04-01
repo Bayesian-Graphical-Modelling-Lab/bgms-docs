@@ -2735,6 +2735,17 @@
     ]
   },
   {
+    "objectID": "guide/getting-started.html#how-to-cite-bgms",
+    "href": "guide/getting-started.html#how-to-cite-bgms",
+    "title": "Getting Started",
+    "section": "How to cite bgms",
+    "text": "How to cite bgms\nIf you use bgms in scientific work, please cite the software. The most up-to-date package citation can be retrieved directly from R:\ncitation(\"bgms\")\nFor analyses that rely on specific methods (for example ordinal MRFs, group-comparison Bayes factor tests, or stochastic block priors), please also cite the corresponding methodological papers.\nCitations help document scientific impact and support ongoing maintenance and development of bgms.",
+    "crumbs": [
+      "Get Started",
+      "Getting Started"
+    ]
+  },
+  {
     "objectID": "guide/getting-started.html#fitting-a-model",
     "href": "guide/getting-started.html#fitting-a-model",
     "title": "Getting Started",
