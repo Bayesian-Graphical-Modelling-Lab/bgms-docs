@@ -30,7 +30,7 @@ remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")
 
 ## Fitting a model
 
-The main entry point is [`bgm()`](../reference/bgm.qmd). It accepts a data frame or matrix of mixed binary, ordinal, and continuous variables and estimates a Markov random field.
+The main function is [`bgm()`](../reference/bgm.qmd). It accepts a data frame or matrix of mixed binary, ordinal, and continuous variables and estimates a Markov random field.
 
 The Wenchuan dataset is included in the package, and contains ordinal measures of symptoms of posttraumatic stress from 362 survivors of the 2008 Wenchuan earthquake. 
 
