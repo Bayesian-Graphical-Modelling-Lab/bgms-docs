@@ -119,5 +119,6 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "docs: update exp/log benchmark results"
+            git pull --rebase
             git push
           fi
