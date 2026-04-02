@@ -2,21 +2,20 @@
 title: "bgmCompare()"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
-Bayesian estimation and variable selection for group differences in Markov
-Random Fields.
+Compares group differences in networks for discrete (binary and ordinal)
+variables using Bayesian estimation and optional difference selection.
 
 ## Description
 
-The `bgmCompare` function estimates group differences in category threshold
-parameters (main effects) and partial associations (pairwise effects) of a
-Markov Random Field (MRF) for binary and ordinal variables. Groups can be
-defined either by supplying two separate datasets (`x` and `y`) or by a
-group membership vector. Optionally, Bayesian variable selection identifies
-differences across groups.
+`bgmCompare()` extends `bgm()` to test group differences in threshold and
+partial-association parameters for discrete MRFs. Groups can be supplied as
+two datasets (`x` and `y`) or through a grouping vector in `group_indicator`.
+This page is the technical reference for arguments and return values. For
+workflow and interpretation, see [Group Comparison](../guide/group-comparison.qmd),
+[Edge Selection](../guide/edge-selection.qmd),
+[MCMC Output](../guide/mcmc-output.qmd), and
+[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd). Methodological background
+is provided in @MarsmanEtAl_2025_ttest.
 
 ## Usage
 
@@ -65,7 +64,7 @@ bgmCompare(
 | `group_indicator` | Optional integer vector of group memberships for rows of `x` (multi-group designs). Ignored if `y` is supplied. |
 | `variable_type` | Character vector specifying the type of each variable: `"ordinal"` (default) or `"blume-capel"`. |
 | `baseline_category` | Integer or vector giving the baseline category for Blume--Capel variables. |
-| `na_action` | How to handle missing data: `"listwise"` (drop rows) or `"impute"` (impute within Gibbs). Default: `"listwise"`. |
+| `na_action` | How to handle missing data: `"listwise"` (drop rows) or `"impute"` (impute within Gibbs sampler, propagating uncertainty). Default: `"listwise"`. See [Missing Data](../guide/missing-data.qmd) for details. |
 
 ### Difference selection
 
@@ -105,65 +104,55 @@ bgmCompare(
 
 ## Value
 
-A list of class `"bgmCompare"` containing posterior summaries, posterior mean
-matrices, and raw MCMC samples:
+An S7 object of class `bgmCompare` with posterior summaries, posterior mean
+matrices, and raw MCMC samples. Standard methods such as `print()`,
+`summary()`, and `coef()` work through S3 dispatch for compatibility.
+
+Main components:
 
 - `posterior_summary_main_baseline`, `posterior_summary_pairwise_baseline` ---
-  Summaries of baseline thresholds and partial associations.
+  Data frames with posterior summaries (mean, sd, MCSE, ESS, Rhat) for
+  baseline threshold and partial association parameters.
 - `posterior_summary_main_differences`, `posterior_summary_pairwise_differences`
-  --- Summaries of group differences in thresholds and partial associations.
-- `posterior_summary_indicator` --- Summaries of inclusion indicators (if
-  `difference_selection = TRUE`).
-- `posterior_mean_main_baseline`, `posterior_mean_pairwise_baseline` ---
-  Posterior mean matrices (legacy style).
-- `raw_samples` --- List of raw draws per chain for main, pairwise, and
-  indicator parameters.
+  --- Data frames with posterior summaries for group differences in 
+  thresholds and partial associations. Includes posterior inclusion
+  probabilities when `difference_selection = TRUE`.
+- `posterior_summary_indicator` --- Data frame with posterior summaries for
+  difference inclusion indicators (if `difference_selection = TRUE`).
+- `posterior_mean_main_baseline` --- Matrix of posterior mean baseline
+  thresholds (p x max_categories).
+- `posterior_mean_associations_baseline` --- Symmetric matrix of posterior
+  mean baseline partial associations.
+- `posterior_mean_main_differences` --- Matrix of posterior mean threshold
+  differences.
+- `posterior_mean_associations_differences` --- Symmetric matrix of posterior
+  mean partial association differences.
+- `posterior_mean_indicator` --- Symmetric matrix of posterior inclusion
+  probabilities for differences (if `difference_selection = TRUE`).
+- `raw_samples` --- List of raw MCMC draws per chain with sublists:
+  - `main_baseline`, `pairwise_baseline` — Baseline parameter samples.
+  - `main_differences`, `pairwise_differences` — Difference parameter samples.
+  - `indicator` — Difference indicator samples (if enabled).
+  - `nchains`, `niter` — Number of chains and iterations per chain.
 - `arguments` --- List of function call arguments and metadata.
 
-The `summary()` method prints formatted summaries, and `coef()` extracts
-posterior means. NUTS diagnostics are available in `fit$nuts_diag` when
+NUTS diagnostics are available in `fit$nuts_diag` when
 `update_method = "nuts"`.
 
 ## Details
 
-### Partial associations
+For full explanations, see the guide. The modeling setup for cross-group
+contrasts is explained in
+[Group Comparison](../guide/group-comparison.qmd), with related background in
+[Graphical Models](../guide/graphical-models.qmd). Prior choices for
+difference selection are discussed in [Edge Selection](../guide/edge-selection.qmd),
+and output interpretation and convergence checks are covered in
+[MCMC Output](../guide/mcmc-output.qmd) and
+[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
 
-For variables $i$ and $j$, the group-specific partial association is
-represented as:
-
-$$\theta_{ij}^{(g)} = \omega_{ij} + \delta_{ij}^{(g)}$$
-
-where $\omega_{ij}$ is the baseline effect and $\delta_{ij}^{(g)}$ are group
-differences constrained to sum to zero.
-
-### Ordinal variables
-
-**Regular ordinal variables**: category thresholds are decomposed into a
-baseline plus group differences for each category.
-
-**Blume--Capel variables**: category thresholds are quadratic in the category
-index, with both the linear and quadratic terms split into a baseline plus
-group differences.
-
-### Variable selection
-
-When `difference_selection = TRUE`, spike-and-slab priors are applied to
-difference parameters:
-
-- **Bernoulli** --- Fixed prior inclusion probability.
-- **Beta-Bernoulli** --- Inclusion probability given a Beta prior.
-
-### Sampling algorithms and warmup
-
-Parameters are updated within a Gibbs framework, using the same sampling
-algorithms and staged warmup scheme described in [bgm()](bgm.qmd):
-adaptive Metropolis--Hastings or the No-U-Turn Sampler (NUTS). When
-`difference_selection = TRUE`, indicator updates are delayed until late
-warmup.
-
-::: {.callout-note}
-`update_method = "hamiltonian-mc"` (fixed-length HMC) is deprecated. Use
-`"nuts"` instead.
+::: {.callout-warning}
+`update_method = "hamiltonian-mc"` is deprecated and will be removed in a
+future release. Prefer `update_method = "nuts"`.
 :::
 
 ## Examples
@@ -188,12 +177,7 @@ coef(fit)$pairwise_effects_groups
 
 ## See also
 
-[bgm()](bgm.qmd) for single-group models, [S3 methods](methods.qmd)
-for `print`, `summary`, and `coef`, [extractor functions](extractors.qmd) for
-accessing specific model components.
-
-## References
-
-Marsman, M., Waldorp, L. J., Sekulovski, N., & Haslbeck, J. M. B. (2025).
-Bayes factor tests for group differences in ordinal and binary graphical
-models. *Psychometrika*, 90(5), 1809--1842.
+[bgm()](bgm.qmd),
+[Methods](methods.qmd),
+[Extractor Functions](extractors.qmd),
+and [Group Comparison](../guide/group-comparison.qmd).

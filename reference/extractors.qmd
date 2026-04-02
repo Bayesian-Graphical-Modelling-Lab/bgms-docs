@@ -2,12 +2,12 @@
 title: "Extractor Functions"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 Functions to extract specific components from fitted `bgms` and `bgmCompare`
 objects.
+
+Unless noted otherwise, extractor functions use one argument:
+
+- `bgms_object`: a fitted `bgms` or `bgmCompare` object.
 
 ## extract_arguments {#extract_arguments}
 
@@ -17,10 +17,6 @@ Retrieve the arguments used when fitting a model with `bgm()` or
 ```r
 extract_arguments(bgms_object)
 ```
-
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` or `bgmCompare` object. |
 
 Returns a named list containing all arguments passed to the fitting
 function, including data dimensions, prior settings, and MCMC configuration.
@@ -32,10 +28,6 @@ Retrieve posterior mean main-effect parameters.
 ```r
 extract_main_effects(bgms_object)
 ```
-
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` or `bgmCompare` object. |
 
 The structure depends on the model type:
 
@@ -56,10 +48,6 @@ Retrieve posterior samples of partial association parameters.
 extract_pairwise_interactions(bgms_object)
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` or `bgmCompare` object. |
-
 Returns a matrix with one row per post-warmup iteration and one column per
 edge. For `bgmCompare`, columns correspond to baseline partial association
 parameters.
@@ -71,10 +59,6 @@ Retrieve posterior samples of inclusion indicators.
 ```r
 extract_indicators(bgms_object)
 ```
-
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` or `bgmCompare` object. |
 
 Returns a matrix with one row per post-warmup iteration and one column per
 indicator, containing binary (0/1) samples:
@@ -91,10 +75,6 @@ Compute posterior inclusion probabilities.
 extract_posterior_inclusion_probabilities(bgms_object)
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` or `bgmCompare` object. |
-
 Returns a symmetric p x p matrix of posterior inclusion probabilities:
 
 - **`bgms`**: Off-diagonal entries are edge inclusion probabilities. Requires
@@ -110,10 +90,6 @@ Retrieve the prior specification used for inclusion indicators.
 ```r
 extract_indicator_priors(bgms_object)
 ```
-
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` or `bgmCompare` object. |
 
 Returns a named list describing the prior structure, including the prior type
 and hyperparameters:
@@ -133,9 +109,7 @@ and group differences.
 extract_group_params(bgms_object)
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgmCompare` object. |
+`bgms_object` must be a fitted `bgmCompare` object.
 
 Returns a list with `main_effects_groups` (main effects per group) and
 `pairwise_effects_groups` (pairwise effects per group).
@@ -149,9 +123,7 @@ prior.
 extract_sbm(bgms_object)
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` object. |
+`bgms_object` must be a fitted `bgms` object.
 
 Requires `edge_selection = TRUE` and `edge_prior = "Stochastic-Block"`.
 Returns a list with:
@@ -170,12 +142,10 @@ Retrieve effective sample size estimates for all parameters.
 extract_ess(bgms_object)
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` or `bgmCompare` object. |
-
 Returns a named list with ESS values for each parameter type present in the
-model (e.g., `main`, `pairwise`, `indicator`).
+model (e.g., `main`, `pairwise`, `indicator`). ESS is computed in C++ using
+the AR spectral density method, matching `coda::effectiveSize`. For
+implementation details, see the [Technical Manual](../manual/diagnostics.qmd).
 
 ## extract_rhat {#extract_rhat}
 
@@ -185,12 +155,10 @@ Retrieve R-hat convergence diagnostics for all parameters.
 extract_rhat(bgms_object)
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` or `bgmCompare` object. |
-
 Returns a named list with R-hat values for each parameter type present in
-the model (e.g., `main`, `pairwise`, `indicator`).
+the model (e.g., `main`, `pairwise`, `indicator`). R-hat is computed in C++
+using the Gelman-Rubin formula, matching `coda::gelman.diag`. For
+implementation details, see the [Technical Manual](../manual/diagnostics.qmd).
 
 ## Deprecated functions
 
@@ -206,9 +174,7 @@ Retrieve the posterior mean precision matrix.
 extract_precision(bgms_object)
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` object (GGM or mixed MRF). |
+`bgms_object` must be a fitted `bgms` object (GGM or mixed MRF).
 
 Returns a symmetric p x p matrix (or the continuous block submatrix for
 mixed MRFs) containing the posterior mean precision matrix
@@ -222,9 +188,7 @@ Retrieve the posterior mean partial correlation matrix.
 extract_partial_correlations(bgms_object)
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` object (GGM or mixed MRF). |
+`bgms_object` must be a fitted `bgms` object (GGM or mixed MRF).
 
 Returns a symmetric matrix of partial correlations, computed by
 standardizing the precision matrix: $\rho_{ij} = -K_{ij} / \sqrt{K_{ii}
@@ -238,9 +202,7 @@ Retrieve the posterior mean log-odds matrix.
 extract_log_odds(bgms_object)
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `bgms_object` | A fitted `bgms` object (OMRF or mixed MRF). |
+`bgms_object` must be a fitted `bgms` object (OMRF or mixed MRF).
 
 Returns a symmetric matrix of log adjacent-category odds ratios. For the
 ordinal MRF, $\text{log-odds}_{ij} = 2 \omega_{ij}$.
@@ -248,4 +210,4 @@ ordinal MRF, $\text{log-odds}_{ij} = 2 \omega_{ij}$.
 ## See also
 
 [bgm()](bgm.qmd), [bgmCompare()](bgmCompare.qmd),
-[S3 methods](methods.qmd)
+[Methods](methods.qmd)

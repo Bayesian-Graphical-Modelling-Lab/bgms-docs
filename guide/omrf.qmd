@@ -137,9 +137,7 @@ The posterior inclusion probability for each edge quantifies the evidence for a 
 
 ## Missing data
 
-For discrete data, missing values can be imputed within the MCMC sampler by setting `na_action = "impute"`. At each iteration, missing entries are drawn from their full conditional distribution given the current parameter values and the observed data. Because the imputation is embedded in the MCMC chain, the posterior summaries account for the uncertainty introduced by missing data.
-
-The default behavior is `na_action = "listwise"`, which removes rows with any missing values before fitting.
+Missing values can be handled via listwise deletion (the default) or imputed within the Gibbs sampler by setting `na_action = "impute"`. For discrete data, missing entries are drawn from their full conditional categorical distribution at each MCMC iteration. See [Missing Data](missing-data.qmd) for details on both approaches and recommendations.
 
 ## Fitting an ordinal MRF
 

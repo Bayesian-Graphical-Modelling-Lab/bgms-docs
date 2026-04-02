@@ -25,6 +25,7 @@ analysis workflows, and MCMC output.
 - [Edge Selection](edge-selection.qmd) — Spike-and-slab priors for structure learning
 - [Group Comparison](group-comparison.qmd) — Comparing networks across groups with [`bgmCompare()`](../reference/bgmCompare.qmd)
 - [Edge Clustering](clustering.qmd) — Stochastic block model prior for discovering edge clusters
+- [Missing Data](missing-data.qmd) — Handling missing values via listwise deletion or MCMC imputation
 
 ### MCMC Output
 

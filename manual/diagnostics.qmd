@@ -1,0 +1,112 @@
+---
+title: "Convergence Diagnostics"
+---
+
+This page documents the C++ implementation of convergence diagnostics in `bgms`. The ESS and R-hat computations are implemented in C++ for speed, enabling fast diagnostics even with long chains and many parameters.
+
+## Overview
+
+After sampling, `bgms` computes convergence diagnostics for all parameters:
+
+- **Effective sample size (ESS)** — equivalent number of independent draws
+- **R-hat** — between-chain vs within-chain variance ratio
+- **Monte Carlo standard error (MCSE)** — precision of the posterior mean estimate
+
+The C++ implementation matches `coda::effectiveSize` for ESS and `coda::gelman.diag` for R-hat, but runs in parallel across parameters for speed.
+
+## C++ implementation
+
+The diagnostic computations are in `src/mcmc_diagnostics.cpp`. The main entry points are:
+
+### ESS via AR spectral density
+
+```cpp
+// [[Rcpp::export(.compute_ess_cpp)]]
+Rcpp::NumericVector compute_ess_cpp(Rcpp::NumericVector array3d);
+```
+
+Computes ESS for a 3D array `[niter x nchains x nparam]`. Multi-chain ESS is the sum of per-chain ESS values.
+
+The per-chain algorithm follows @PlummerEtAl_2006_coda:
+
+1. Compute biased autocovariance $c[0..L]$ where $L = \lfloor 10 \log_{10}(n) \rfloor$
+2. Levinson-Durbin recursion for AR orders $1..L$
+3. AIC order selection: $\arg\min_k \{ n \log(v_k) + 2k \}$
+4. Spectral density at 0: $\text{spec}_0 = v_{\text{best}} / (1 - \sum a_{\text{best}})^2$
+5. ESS = $n \cdot \text{var}_{\text{unbiased}} / \text{spec}_0$
+
+This matches `coda::spectrum0.ar` + `coda::effectiveSize`.
+
+### Gelman-Rubin R-hat
+
+```cpp
+// [[Rcpp::export(.compute_rhat_cpp)]]
+Rcpp::NumericVector compute_rhat_cpp(Rcpp::NumericVector array3d);
+```
+
+Computes R-hat for a 3D array `[niter x nchains x nparam]`. Returns `NA` for single-chain input.
+
+The algorithm follows @GelmanRubin_1992 with the degrees-of-freedom adjustment from `coda::gelman.diag`:
+
+1. Compute per-chain means $\bar{x}_c$ and variances $s^2_c$
+2. Within-chain variance: $W = \frac{1}{m} \sum_c s^2_c$
+3. Between-chain variance: $B = \frac{n}{m-1} \sum_c (\bar{x}_c - \bar{x})^2$
+4. Pooled variance estimate: $\hat{V} = \frac{n-1}{n} W + \frac{1}{n} B$
+5. Degrees-of-freedom adjustment via estimated variance of $\hat{V}$
+6. R-hat = $\sqrt{\frac{df + 3}{df + 1} \cdot \hat{R}^2}$
+
+### Mixture ESS for indicators
+
+```cpp
+// [[Rcpp::export(.compute_indicator_ess_cpp)]]
+Rcpp::NumericMatrix compute_indicator_ess_cpp(Rcpp::NumericVector array3d);
+```
+
+Computes ESS for binary indicator sequences using the two-state Markov chain approach:
+
+1. Counts transitions: $n_{01}$ (off→on), $n_{10}$ (on→off), $n_{00}$, $n_{11}$
+2. Estimates transition probabilities: $\hat{a} = n_{01} / (n_{00} + n_{01})$, $\hat{b} = n_{10} / (n_{10} + n_{11})$
+3. Returns ESS = $T \cdot (a + b) / (2 - a - b)$
+
+This formula derives from the integrated autocorrelation time of a two-state Markov chain where $\rho(k) = (1-a-b)^k$ [@VanDenBerghEtAl_2026_moms].
+
+When the total number of transitions ($n_{01} + n_{10}$) is below 5, the estimate is unreliable and flagged in the output.
+
+## Parallelization
+
+Diagnostics are computed in parallel across parameters using RcppParallel (TBB). Each parameter's ESS and R-hat can be computed independently:
+
+```cpp
+struct ESSWorker : public RcppParallel::Worker {
+  void operator()(std::size_t begin, std::size_t end) {
+    for(std::size_t j = begin; j < end; j++) {
+      double total_ess = 0.0;
+      for(int c = 0; c < nchains; c++) {
+        const double* col = data + c * niter + j * niter * nchains;
+        total_ess += compute_column_ess(col, niter, max_order);
+      }
+      ess[j] = total_ess;
+    }
+  }
+};
+```
+
+## R interface
+
+The diagnostics are exposed to R through:
+- `.compute_ess_cpp()` — batch ESS for all parameters
+- `.compute_rhat_cpp()` — batch R-hat for all parameters
+- `.compute_indicator_ess_cpp()` — batch indicator ESS with transition counts
+
+These are called from `R/mcmc_summary.R` which assembles the summary tables.
+
+User-facing extractors:
+- `extract_ess(fit)` — returns ESS for all parameters
+- `extract_rhat(fit)` — returns R-hat for all parameters
+- `summary(fit)` — includes ESS, R-hat, and MCSE in tabular output
+
+## References
+
+- @PlummerEtAl_2006_coda — AR spectral density ESS (coda package)
+- @GelmanRubin_1992 — original R-hat formulation
+- @VanDenBerghEtAl_2026_moms — mixture ESS for spike-and-slab models

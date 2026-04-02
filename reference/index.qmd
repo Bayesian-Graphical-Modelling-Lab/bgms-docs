@@ -3,7 +3,9 @@ title: "Function Reference"
 toc: false
 ---
 
-Complete documentation for all exported functions in bgms.
+Complete documentation for all exported functions in `bgms`.
+
+`bgm()` and `bgmCompare()` return S7 objects (classes `bgms` and `bgmCompare`). Standard methods like `print()`, `summary()`, and `coef()` work through S3 dispatch for compatibility with base R generics.
 
 ## Core Functions
 
@@ -12,7 +14,7 @@ Complete documentation for all exported functions in bgms.
 | [`bgm()`](bgm.qmd) | Estimates the main effects and pairwise interactions of a network using a Bayesian framework. |
 | [`bgmCompare()`](bgmCompare.qmd) | Estimates whether edge weights and category thresholds differ across networks of two different groups. |
 
-## S3 Methods
+## Methods
 
 | Method | Description |
 |--------|-------------|
@@ -43,8 +45,8 @@ Complete documentation for all exported functions in bgms.
 
 ## Datasets
 
-| Dataset | Description |
-|---------|-------------|
-| [`ADHD`](datasets.qmd#adhd) | Binary ADHD symptom ratings for 355 children (18 items) |
-| [`Boredom`](datasets.qmd#boredom) | Ordinal boredom proneness scores for 986 participants (9 items) |
-| [`Wenchuan`](datasets.qmd#wenchuan) | Ordinal PTSD symptom ratings for 362 survivors (17 items) |
+| Dataset | N | Items | Type | Description |
+|---------|--:|------:|------|-------------|
+| [`ADHD`](datasets.qmd#adhd) | 355 | 18 | Binary | ADHD symptom ratings for children |
+| [`Boredom`](datasets.qmd#boredom) | 986 | 8 | Ordinal | Boredom proneness scores (7-point Likert) |
+| [`Wenchuan`](datasets.qmd#wenchuan) | 362 | 17 | Ordinal | PTSD symptom ratings (5-point Likert) |

@@ -1,0 +1,68 @@
+---
+title: "Missing Data"
+---
+
+Missing data is common in empirical research, and how it is handled can substantially affect inference. `bgms` provides two options for handling missing values through the `na_action` argument: listwise deletion and MCMC-based imputation.
+
+## Listwise deletion
+
+The default behavior (`na_action = "listwise"`) removes all rows that contain any missing values. This is the simplest approach and is appropriate when missingness is minimal and the missing-completely-at-random (MCAR) assumption is plausible. A message reports how many rows were removed:
+```r
+fit = bgm(data, na_action = "listwise")
+```
+
+Listwise deletion discards partial information from incomplete cases. When a large proportion of observations have missing values, or when the data are not MCAR, this can lead to biased estimates and loss of statistical power.
+
+## Imputation within the Gibbs sampler
+
+Setting `na_action = "impute"` embeds missing data imputation directly in the MCMC algorithm. At each iteration, missing entries are drawn from their full conditional distribution given the current parameter values and observed data:
+
+```r
+fit = bgm(data, na_action = "impute")
+```
+
+This approach has several advantages:
+
+- **Uses all available data.** Observations with partial missing values contribute their observed components to the likelihood.
+- **Propagates uncertainty.** Because imputed values are resampled at each iteration, the posterior summaries automatically account for uncertainty introduced by missing data.
+- **Assumes MAR.** The method is valid under the missing-at-random (MAR) assumption, where missingness may depend on observed values but not on the missing values themselves.
+
+### How it works
+
+The imputation step occurs within the Gibbs sampler, before updating model parameters at each iteration:
+
+- **Discrete variables**: Missing entries are drawn from their full conditional categorical distribution. For a variable $x_i$, the full conditional is a multinomial over categories $0, 1, \ldots, m_i$, with probabilities determined by the current threshold parameters and the rest score from neighboring variables.
+
+- **Continuous variables**: Missing entries are drawn from their full conditional normal distribution. For a variable $y_j$, the conditional mean depends on the current precision matrix and the observed values of other variables, while the conditional variance comes from the diagonal of the precision matrix.
+
+- **Mixed models**: In mixed MRFs, both mechanisms operate simultaneously. Missing discrete values are imputed from categorical full conditionals that include contributions from continuous neighbors, and missing continuous values are imputed from normal conditionals that include contributions from discrete neighbors.
+
+### No separate imputed dataset
+
+The imputation is internal to the MCMC chain. Unlike multiple imputation workflows that produce $m$ completed datasets, `bgms` does not return the imputed values. Each MCMC draw reflects one plausible completion of the data, and averaging over draws integrates over the missing-data uncertainty. If you need the imputed values themselves, consider external multiple imputation packages such as `mice` or `Amelia`.
+
+## Group comparison
+
+Missing data handling also applies to [`bgmCompare()`](../reference/bgmCompare.qmd). The same `na_action` argument controls whether rows with missing values are dropped or imputed:
+
+```r
+fit = bgmCompare(x = group1, y = group2, na_action = "impute")
+```
+
+When using `na_action = "impute"`, missing values are imputed separately within each group, using the group-specific parameter values at each iteration. This preserves group-level structure while propagating missing-data uncertainty into the group comparison.
+
+## Recommendations
+
+| Scenario | Recommendation |
+|----------|----------------|
+| Few missing values, MCAR plausible | `na_action = "listwise"` (default) |
+| Moderate missingness, MAR plausible | `na_action = "impute"` |
+| High missingness or MNAR suspected | Consider sensitivity analyses or specialized missing-data models |
+
+When missingness is substantial (e.g., >10% of observations affected), imputation typically outperforms listwise deletion in terms of bias and efficiency. However, no imputation method can correct for missing-not-at-random (MNAR) patterns, where the probability of missingness depends on the unobserved values themselves. In such cases, results should be interpreted cautiously, and sensitivity analyses may be warranted.
+
+## Technical notes
+
+- The imputation step adds minimal computational overhead because the full conditionals are already computed for parameter updates in the Gibbs sampler.
+- Imputation respects the ordinal structure of discrete variables: imputed values are drawn from the full category set, not interpolated.
+- Convergence diagnostics (ESS, R-hat) apply to the combined chain of parameter updates and imputations. Poor mixing in parameters may indicate issues with the imputation model or high rates of missingness.

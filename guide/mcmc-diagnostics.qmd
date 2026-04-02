@@ -9,6 +9,11 @@ chapter describes how to do so with the diagnostic tools in `bgms`. For
 background on MCMC convergence diagnostics and choosing the number of
 iterations, chains, and warmup length, see @MargossianGelman_2024.
 
+All diagnostics are computed in C++ for speed. ESS uses the AR spectral
+density method [@PlummerEtAl_2006_coda] and R-hat uses the Gelman-Rubin
+formula [@GelmanRubin_1992]. For implementation details, see the
+[Technical Manual](../manual/diagnostics.qmd).
+
 ## Effective sample size (ESS)
 
 The effective sample size estimates how many independent draws the MCMC
@@ -99,14 +104,14 @@ $$
 A small MCSE relative to the posterior standard deviation indicates stable
 estimates; a large MCSE suggests that more iterations are needed.
 
-## R-hat
+## R-hat {#sec-rhat}
 
-R-hat (split R-hat) compares the between-chain and within-chain variance
+R-hat compares the between-chain and within-chain variance
 [@GelmanRubin_1992]. Values close to 1.0 indicate that the chains
 have converged to the same distribution. Earlier guidance recommended
-thresholds of 1.1 or 1.2; @VehtariEtAl_2021 tightened this to 1.01
-based on experience with rank-normalized split-R-hat. Values above 1.01
-suggest that the chains have not mixed and should be run longer.
+thresholds of 1.1 or 1.2; more recent recommendations suggest 1.01
+as a stricter threshold. Values above 1.01 suggest that the chains have not
+mixed and should be run longer.
 
 `bgms` reports R-hat in `summary()` output and through `extract_rhat()`.
 

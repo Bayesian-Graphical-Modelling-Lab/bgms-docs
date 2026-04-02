@@ -217,5 +217,6 @@ This plot shows the estimated conditional association network for the continuous
 
 - Learn about the unified [graphical model framework](graphical-models.qmd) in `bgms`, with [ordinal](omrf.qmd) and [continuous](ggm.qmd) special cases
 - Understand [edge selection](edge-selection.qmd) with spike-and-slab priors
+- Handle [missing data](missing-data.qmd) via listwise deletion or MCMC imputation
 - Compare groups with [`bgmCompare()`](group-comparison.qmd)
 - Discover edge communities with [Bayesian edge clustering](clustering.qmd)
