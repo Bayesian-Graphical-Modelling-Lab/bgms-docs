@@ -121,32 +121,33 @@ website:
             - manual/architecture.qmd
             - manual/r-scaffolding.qmd
             - manual/model-classes.qmd
-        - section: "MCMC Engine"
+            - manual/parallel-chains.qmd
+        - section: "MCMC Algorithms"
           contents:
-            - manual/samplers.qmd
+            - manual/metropolis.qmd
             - manual/nuts.qmd
             - manual/hmc.qmd
-            - manual/metropolis.qmd
             - manual/rattle.qmd
+        - section: "Sampler Infrastructure"
+          contents:
+            - manual/samplers.qmd
             - manual/warmup.qmd
-            - manual/parallel-chains.qmd
-        - section: "Models"
+            - manual/diagnostics.qmd
+        - section: "Model Internals"
           contents:
             - manual/ggm-internals.qmd
             - manual/omrf-internals.qmd
             - manual/mixed-internals.qmd
-        - section: "Priors & Edge Selection"
+            - manual/pseudolikelihood.qmd
+            - manual/variable-helpers.qmd
+        - section: "Edge Priors"
           contents:
             - manual/edge-priors.qmd
             - manual/sbm-prior.qmd
         - section: "Group Comparison"
           contents:
             - manual/bgmcompare-internals.qmd
-        - section: "Numerical Methods"
-          contents:
-            - manual/numerical.qmd
-            - manual/pseudolikelihood.qmd
-            - manual/variable-helpers.qmd
+        - manual/numerical.qmd
 
     - id: examples
       title: "Examples"
