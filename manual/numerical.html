@@ -68,6 +68,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../manual/pseudolikelihood.html" rel="next">
 <link href="../manual/bgmcompare-internals.html" rel="prev">
 <link href="../bgms_sticker.svg" rel="icon" type="image/svg+xml">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
@@ -451,6 +452,24 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">HMC Algorithm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Adaptive Metropolis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Warmup Schedule</span></a>
   </div>
@@ -482,12 +501,6 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">OMRF Internals</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -533,7 +546,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Group Comparison Engine</span></a>
+ <span class="menu-text">bgmCompare Internals</span></a>
   </div>
 </li>
       </ul>
@@ -551,6 +564,18 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/numerical.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Numerical Considerations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pseudolikelihood</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
       </ul>
@@ -584,47 +609,56 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
+<p>Custom exp/log for Windows performance in <code>bgms</code>. Source: <code>src/math/custom_explog.h</code>, <code>custom_explog.cpp</code>, <code>custom_arma_explog.h</code>, and <code>explog_macros.h</code>.</p>
+<section id="the-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem">The problem</h2>
+<p>The <code>std::exp()</code> and <code>std::log()</code> that ship with the Windows toolchain R uses (Rtools / UCRT) are much slower than their macOS and Linux counterparts. Because MCMC samplers call <code>exp()</code> and <code>log()</code> millions of times per run, the difference makes <code>bgms</code> prohibitively slow on Windows without intervention.</p>
+<!-- bench:start -->
+<p><em>Run the <code>Benchmark exp/log</code> workflow to populate this table.</em> <!-- bench:end --></p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Reproduce locally">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Warning
+<span class="screen-reader-only">Tip</span>Reproduce locally
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bgms)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>bgms<span class="sc">:::</span><span class="fu">get_explog_switch</span>()</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="fl">1e6</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>n <span class="ot">=</span> <span class="dv">100</span>L</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(<span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_len</span>(n)) <span class="fu">exp</span>(x))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(<span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_len</span>(n)) bgms<span class="sc">:::</span><span class="fu">rcpp_ieee754_exp</span>(x))</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(<span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_len</span>(n)) <span class="fu">log</span>(<span class="fu">abs</span>(x)))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(<span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_len</span>(n)) bgms<span class="sc">:::</span><span class="fu">rcpp_ieee754_log</span>(<span class="fu">abs</span>(x)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-<p>Cross-platform numerical consistency in bgms. Source: <code>src/math/custom_explog.h</code>, <code>custom_explog.cpp</code>, <code>custom_arma_explog.h</code>, and <code>explog_macros.h</code>.</p>
-<section id="the-problem" class="level2">
-<h2 class="anchored" data-anchor-id="the-problem">The problem</h2>
-<p>Standard library implementations of <code>exp()</code> and <code>log()</code> differ across platforms. The GNU C Library (glibc, used on Linux), macOS libm, and MSVC’s C runtime produce slightly different results for the same input, especially near boundary values. These differences are small (last-bit-of-precision level) but compound across thousands of MCMC iterations, causing:</p>
-<ul>
-<li>Different platforms to produce different posterior samples from the same seed</li>
-<li>CRAN check failures when comparing numerical output across architectures</li>
-<li>Occasional test failures when expected values are computed on one platform and checked on another</li>
-</ul>
+</div>
 </section>
 <section id="openlibm-solution" class="level2">
 <h2 class="anchored" data-anchor-id="openlibm-solution">OpenLibM solution</h2>
-<p>bgms ships a copy of the <code>__ieee754_exp()</code> and <code>__ieee754_log()</code> implementations from OpenLibM (the FreeBSD/Sun math library). These are self-contained C functions that follow IEEE 754 exactly and produce identical results on all platforms.</p>
+<p><code>bgms</code> ships a copy of the <code>__ieee754_exp()</code> and <code>__ieee754_log()</code> implementations from OpenLibM (the FreeBSD/Sun math library). These are self-contained C functions that bypass the toolchain’s standard library, bringing Windows performance much closer to macOS and Linux.</p>
 <p>The implementation in <code>custom_explog.cpp</code> (approximately 800 lines) is the original Sun/FreeBSD code, lightly adapted to compile as C++ within an R package.</p>
 </section>
 <section id="platform-detection" class="level2">
 <h2 class="anchored" data-anchor-id="platform-detection">Platform detection</h2>
 <p>The macro system in <code>explog_macros.h</code> controls when custom exp/log is used:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#if (defined(_WIN32) &amp;&amp; (!defined(CUSTOM_EXP_LOG) || CUSTOM_EXP_LOG == 0)) \</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">  || (!defined(_WIN32) &amp;&amp; defined(CUSTOM_EXP_LOG) &amp;&amp; CUSTOM_EXP_LOG != 0)</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">#define USE_CUSTOM_LOG </span><span class="dv">1</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#endif</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#if (defined(_WIN32) &amp;&amp; (!defined(CUSTOM_EXP_LOG) || CUSTOM_EXP_LOG == 0)) \</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="pp">  || (!defined(_WIN32) &amp;&amp; defined(CUSTOM_EXP_LOG) &amp;&amp; CUSTOM_EXP_LOG != 0)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">#define USE_CUSTOM_LOG </span><span class="dv">1</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#endif</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The logic:</p>
 <ul>
-<li><strong>Windows</strong> — Uses custom exp/log by default because MSVC’s <code>std::exp</code>/<code>std::log</code> differ from POSIX implementations and are slower</li>
-<li><strong>Linux/macOS</strong> — Uses the system libm by default (which is fast and POSIX-compliant). Custom exp/log can be enabled by setting <code>CUSTOM_EXP_LOG=1</code></li>
+<li><strong>Windows</strong> — Uses custom exp/log by default because the Rtools toolchain’s <code>std::exp</code>/<code>std::log</code> are much slower</li>
+<li><strong>Linux/macOS</strong> — Uses the system libm by default (which is fast). Custom exp/log can be enabled by setting <code>CUSTOM_EXP_LOG=1</code></li>
 </ul>
-<p>The <code>configure</code> and <code>configure.win</code> scripts set the appropriate compiler flag in <code>Makevars</code>.</p>
+<p>The <code>configure</code> and <code>configure.win</code> scripts do not control this flag. Platform detection is handled entirely by the C++ preprocessor via <code>_WIN32</code>. Users can override the default by adding <code>-DCUSTOM_EXP_LOG=1</code> (to enable custom on non-Windows) or by omitting the flag (to keep the platform default).</p>
 </section>
 <section id="usage-in-c-code" class="level2">
 <h2 class="anchored" data-anchor-id="usage-in-c-code">Usage in C++ code</h2>
@@ -644,9 +678,19 @@ Warning
 <td><code>std::exp(x)</code></td>
 </tr>
 <tr class="even">
+<td><code>MY_LOG(x)</code></td>
+<td><code>__ieee754_log(x)</code></td>
+<td><code>std::log(x)</code></td>
+</tr>
+<tr class="odd">
 <td><code>ARMA_MY_EXP(X)</code></td>
 <td><code>custom_arma_exp(X)</code></td>
 <td><code>arma::exp(X)</code></td>
+</tr>
+<tr class="even">
+<td><code>ARMA_MY_LOG(X)</code></td>
+<td><code>custom_arma_log(X)</code></td>
+<td><code>arma::log(X)</code></td>
 </tr>
 </tbody>
 </table>
@@ -654,8 +698,8 @@ Warning
 </section>
 <section id="performance" class="level2">
 <h2 class="anchored" data-anchor-id="performance">Performance</h2>
-<p>On macOS and Linux, the system <code>exp()</code> and <code>log()</code> are highly optimized (hardware-accelerated on some architectures). The custom versions are slightly slower but guarantee cross-platform reproducibility.</p>
-<p>On Windows with MSVC, the custom implementations are often 2–5× <em>faster</em> than <code>std::exp</code>/<code>std::log</code>, making the custom path beneficial for both correctness and speed.</p>
+<p>On Windows, the Rtools <code>std::exp</code>/<code>std::log</code> are much slower than the OpenLibM replacements, making the custom path essential for acceptable MCMC runtimes. <code>bgms</code> enables the custom path on Windows by default.</p>
+<p>On macOS and Linux, the system libm is already fast, so <code>bgms</code> uses the system implementations by default. The custom path can be enabled for cross-platform reproducibility, at the cost of slightly slower scalar operations.</p>
 </section>
 <section id="exp_bound-and-overflow-prevention" class="level2">
 <h2 class="anchored" data-anchor-id="exp_bound-and-overflow-prevention">EXP_BOUND and overflow prevention</h2>
@@ -670,6 +714,34 @@ Warning
 </section>
 <section id="r-interface" class="level2">
 <h2 class="anchored" data-anchor-id="r-interface">R interface</h2>
+<p><code>explog_interface.cpp</code> (in <code>src/</code>, not <code>src/math/</code>) exposes three functions to R:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 57%">
+<col style="width: 42%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>R function</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>get_explog_switch()</code></td>
+<td>Returns <code>"custom"</code> or <code>"standard"</code> depending on compile-time <code>USE_CUSTOM_LOG</code></td>
+</tr>
+<tr class="even">
+<td><code>rcpp_ieee754_exp(x)</code></td>
+<td>Vectorised exp via <code>MY_EXP</code></td>
+</tr>
+<tr class="odd">
+<td><code>rcpp_ieee754_log(x)</code></td>
+<td>Vectorised log via <code>MY_LOG</code></td>
+</tr>
+</tbody>
+</table>
+<p>On the standard path, <code>rcpp_ieee754_exp()</code> and <code>rcpp_ieee754_log()</code> call <code>std::exp</code> and <code>std::log</code> despite the <code>ieee754</code> naming.</p>
 <p>The <code>explog_interface.cpp</code> file exposes the custom exp/log functions to R for testing purposes. This allows verification that the custom implementations match expected values in R-level unit tests.</p>
 
 
@@ -692,6 +764,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>
@@ -1110,11 +1210,14 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../manual/bgmcompare-internals.html" class="pagination-link" aria-label="Group Comparison Engine">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Group Comparison Engine</span>
+      <a href="../manual/bgmcompare-internals.html" class="pagination-link" aria-label="bgmCompare Internals">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">bgmCompare Internals</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="../manual/pseudolikelihood.html" class="pagination-link" aria-label="Pseudolikelihood">
+        <span class="nav-page-text">Pseudolikelihood</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->

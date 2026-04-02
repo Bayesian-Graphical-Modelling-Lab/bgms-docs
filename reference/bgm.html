@@ -494,10 +494,10 @@ Warning
 <p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>Bayesian estimation or edge selection for Markov Random Fields.</p>
+<p>Estimates the main effects and pairwise interactions of a network using a Bayesian framework.</p>
 <section id="description" class="level2">
 <h2 class="anchored" data-anchor-id="description">Description</h2>
-<p>The <code>bgm</code> function estimates the pseudoposterior distribution of the parameters of a Markov Random Field (MRF) for binary, ordinal, continuous, or mixed (discrete and continuous) variables. Depending on the variable types, the model is an ordinal MRF, a Gaussian graphical model (GGM), or a mixed MRF. Optionally, it performs Bayesian edge selection using spike-and-slab priors to infer the network structure.</p>
+<p>This function models the joint distribution of binary, ordinal, continuous, or mixed variables using a Markov Random Field, with support for edge selection through Bayesian variable selection. The statistical foundation of the model is described in Marsman et al.&nbsp;(2025), where the ordinal MRF model and its Bayesian estimation procedure were first introduced. While the implementation in bgms has since been extended and updated (e.g., alternative priors, parallel chains, HMC/NUTS warmup), it builds on that original framework.</p>
 </section>
 <section id="usage" class="level2">
 <h2 class="anchored" data-anchor-id="usage">Usage</h2>
@@ -507,7 +507,7 @@ Warning
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  baseline_category,</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">1000</span>,</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">pairwise_scale =</span> <span class="fl">2.5</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">pairwise_scale =</span> <span class="dv">1</span>,</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">main_alpha =</span> <span class="fl">0.5</span>,</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">main_beta =</span> <span class="fl">0.5</span>,</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_selection =</span> <span class="cn">TRUE</span>,</span>
@@ -556,15 +556,15 @@ Warning
 </tr>
 <tr class="even">
 <td><code>variable_type</code></td>
-<td>Character or character vector specifying the type of each variable. Allowed values: <code>"ordinal"</code>, <code>"blume-capel"</code>, or <code>"continuous"</code>. A single string applies to all variables. A per-variable vector that mixes discrete (<code>"ordinal"</code> / <code>"blume-capel"</code>) and <code>"continuous"</code> types fits a mixed MRF. Binary variables are automatically treated as <code>"ordinal"</code>. Default: <code>"ordinal"</code>.</td>
+<td>Character or character vector. Specifies the type of each variable in <code>x</code>. Allowed values: <code>\"ordinal\"</code>, <code>\"blume-capel\"</code>, or <code>\"continuous\"</code>. A single string applies to all variables. A per-variable vector that mixes discrete (<code>\"ordinal\"</code> / <code>\"blume-capel\"</code>) and <code>\"continuous\"</code> types fits a mixed MRF. Binary variables are automatically treated as <code>\"ordinal\"</code>. Default: <code>\"ordinal\"</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>baseline_category</code></td>
-<td>Integer or vector. Baseline category for Blume–Capel variables. Can be a single integer (applied to all) or a vector of length <code>p</code>. Required if at least one variable is of type <code>"blume-capel"</code>.</td>
+<td>Integer or vector. Baseline category used in Blume–Capel variables. Can be a single integer (applied to all) or a vector of length <code>p</code>. Required if at least one variable is of type <code>"blume-capel"</code>.</td>
 </tr>
 <tr class="even">
 <td><code>na_action</code></td>
-<td>How to handle missing data: <code>"listwise"</code> (drop rows with missing values) or <code>"impute"</code> (single imputation during sampling). Default: <code>"listwise"</code>.</td>
+<td>Character. Specifies missing data handling. Either <code>\"listwise\"</code> (drop rows with missing values) or <code>\"impute\"</code> (perform single imputation during sampling). Default: <code>\"listwise\"</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -585,11 +585,11 @@ Warning
 <tbody>
 <tr class="odd">
 <td><code>pairwise_scale</code></td>
-<td>Scale of the Cauchy prior for pairwise interaction parameters. Default: <code>2.5</code>.</td>
+<td>Double. Scale of the Cauchy prior for pairwise interaction parameters. Default: <code>1</code>.</td>
 </tr>
 <tr class="even">
 <td><code>main_alpha</code>, <code>main_beta</code></td>
-<td>Shape parameters of the beta-prime prior for threshold parameters. Must be positive. Defaults: <code>0.5</code>.</td>
+<td>Double. Shape parameters of the beta-prime prior for threshold parameters. Must be positive. If equal, the prior is symmetric. Defaults: <code>main_alpha = 0.5</code> and <code>main_beta = 0.5</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>edge_selection</code></td>
@@ -597,31 +597,31 @@ Warning
 </tr>
 <tr class="even">
 <td><code>edge_prior</code></td>
-<td>Prior for edge inclusion: <code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, or <code>"Stochastic-Block"</code>. Default: <code>"Bernoulli"</code>.</td>
+<td>Character. Specifies the prior for edge inclusion. Options: <code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, or <code>"Stochastic-Block"</code>. Default: <code>"Bernoulli"</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>inclusion_probability</code></td>
-<td>Prior inclusion probability of each edge (Bernoulli prior). Default: <code>0.5</code>.</td>
+<td>Numeric scalar. Prior inclusion probability of each edge (used with the Bernoulli prior). Default: <code>0.5</code>.</td>
 </tr>
 <tr class="even">
 <td><code>beta_bernoulli_alpha</code>, <code>beta_bernoulli_beta</code></td>
-<td>Shape parameters for the beta distribution in the Beta–Bernoulli and Stochastic-Block priors. For the Stochastic-Block prior these are the within-cluster parameters. Defaults: <code>1</code>.</td>
+<td>Double. Shape parameters for the beta distribution in the Beta–Bernoulli and Stochastic-Block priors. Must be positive. For the Stochastic-Block prior these are the shape parameters for the within-cluster edge inclusion probabilities. Defaults: <code>beta_bernoulli_alpha = 1</code> and <code>beta_bernoulli_beta = 1</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>beta_bernoulli_alpha_between</code>, <code>beta_bernoulli_beta_between</code></td>
-<td>Shape parameters for between-cluster edge inclusion probabilities in the Stochastic-Block prior. Defaults: <code>1</code>.</td>
+<td>Double. Shape parameters for the between-cluster edge inclusion probabilities in the Stochastic-Block prior. Must be positive. Defaults: <code>beta_bernoulli_alpha_between = 1</code> and <code>beta_bernoulli_beta_between = 1</code>.</td>
 </tr>
 <tr class="even">
 <td><code>dirichlet_alpha</code></td>
-<td>Concentration parameter of the Dirichlet prior on block assignments (Stochastic Block model). Default: <code>1</code>.</td>
+<td>Double. Concentration parameter of the Dirichlet prior on block assignments (used with the Stochastic Block model). Default: <code>1</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>lambda</code></td>
-<td>Rate of the zero-truncated Poisson prior on the number of clusters (Stochastic Block model). Default: <code>1</code>.</td>
+<td>Double. Rate of the zero-truncated Poisson prior on the number of clusters in the Stochastic Block Model. Default: <code>1</code>.</td>
 </tr>
 <tr class="even">
 <td><code>standardize</code></td>
-<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products, so standardization ensures equivalent relative shrinkage across all pairs. Default: <code>FALSE</code>.</td>
+<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products <span class="math inline">\((x_i \cdot x_j)\)</span>, which typically correspond to smaller interaction effects <span class="math inline">\((\sigma_{ij})\)</span>. Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores <span class="math inline">\(0, 1, \ldots, m\)</span>. The adjusted scale for the interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is <code>pairwise_scale * m_i * m_j</code>, so that <code>pairwise_scale</code> itself applies to the unit interval case (binary variables where <span class="math inline">\(m_i = m_j = 1\)</span>). For Blume-Capel variables with reference category <span class="math inline">\(b\)</span>, scores are centered as <span class="math inline">\(-b, \ldots, m-b\)</span>, and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints <span class="math inline">\((0, m)\)</span> and Blume-Capel variables use centered score endpoints <span class="math inline">\((-b, m-b)\)</span>. Default: <code>FALSE</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -642,55 +642,55 @@ Warning
 <tbody>
 <tr class="odd">
 <td><code>iter</code></td>
-<td>Number of post-warmup iterations per chain. Default: <code>1000</code>.</td>
+<td>Integer. Number of post-warmup iterations (per chain). Default: <code>1e3</code>.</td>
 </tr>
 <tr class="even">
 <td><code>warmup</code></td>
-<td>Number of warmup iterations before collecting samples. A minimum of 1000 is enforced. Default: <code>1000</code>.</td>
+<td>Integer. Number of warmup iterations before collecting samples. A minimum of 1000 iterations is enforced, with a warning if a smaller value is requested. Default: <code>1e3</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>update_method</code></td>
-<td>Sampling algorithm: <code>"nuts"</code> (No-U-Turn Sampler), <code>"adaptive-metropolis"</code> (componentwise Metropolis–Hastings with Robbins–Monro adaptation), or <code>"hamiltonian-mc"</code> (HMC with fixed path length). Default: <code>"nuts"</code>.</td>
+<td>Character. Specifies how the MCMC sampler updates the model parameters: <code>\"adaptive-metropolis\"</code> (Componentwise adaptive Metropolis–Hastings with Robbins–Monro proposal adaptation), <code>\"hamiltonian-mc\"</code> (<strong>Deprecated.</strong> Use <code>\"nuts\"</code> instead. Will be removed in a future release.), or <code>\"nuts\"</code> (The No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: <code>\"nuts\"</code>.</td>
 </tr>
 <tr class="even">
 <td><code>target_accept</code></td>
-<td>Target acceptance rate (0 to 1). Defaults: <code>0.44</code> for adaptive Metropolis, <code>0.65</code> for HMC, <code>0.80</code> for NUTS.</td>
+<td>Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: <code>0.44</code> for adaptive Metropolis and <code>0.80</code> for NUTS.</td>
 </tr>
 <tr class="odd">
 <td><code>hmc_num_leapfrogs</code></td>
-<td>Number of leapfrog steps for HMC. Default: <code>100</code>.</td>
+<td><strong>Deprecated.</strong> Integer. Number of leapfrog steps for Hamiltonian Monte Carlo. Only relevant when <code>update_method = \"hamiltonian-mc\"</code>, which is deprecated. Default: <code>100</code>.</td>
 </tr>
 <tr class="even">
 <td><code>nuts_max_depth</code></td>
-<td>Maximum tree depth in NUTS. Default: <code>10</code>.</td>
+<td>Integer. Maximum tree depth in NUTS. Must be positive. Default: <code>10</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>learn_mass_matrix</code></td>
-<td>Logical. If <code>TRUE</code>, adapt a diagonal mass matrix during warmup (HMC/NUTS only). Default: <code>TRUE</code>.</td>
+<td>Logical. If <code>TRUE</code>, adapt a diagonal mass matrix during warmup (NUTS only). If <code>FALSE</code>, use the identity matrix. Default: <code>TRUE</code>.</td>
 </tr>
 <tr class="even">
 <td><code>chains</code></td>
-<td>Number of parallel chains. Default: <code>4</code>.</td>
+<td>Integer. Number of parallel chains to run. Default: <code>4</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>cores</code></td>
-<td>Number of CPU cores for parallel execution. Default: <code>parallel::detectCores()</code>.</td>
+<td>Integer. Number of CPU cores for parallel execution. Default: <code>parallel::detectCores()</code>.</td>
 </tr>
 <tr class="even">
 <td><code>display_progress</code></td>
-<td>Progress reporting: <code>"per-chain"</code>, <code>"total"</code>, or <code>"none"</code>. Default: <code>"per-chain"</code>.</td>
+<td>Character. Controls progress reporting during sampling. Options: <code>"per-chain"</code> (separate bar per chain), <code>"total"</code> (single combined bar), or <code>"none"</code> (no progress). Default: <code>"per-chain"</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>seed</code></td>
-<td>Optional integer seed for reproducibility.</td>
+<td>Optional integer. Random seed for reproducibility. Must be a single non-negative integer.</td>
 </tr>
 <tr class="even">
 <td><code>pseudolikelihood</code></td>
-<td>For mixed MRF models: <code>"conditional"</code> (conditions on continuous variables for discrete updates; faster) or <code>"marginal"</code> (integrates out continuous variables; more expensive). Ignored for pure ordinal or pure continuous data. Default: <code>"conditional"</code>.</td>
+<td>Character. Specifies the pseudo-likelihood approximation used for mixed MRF models (ignored for pure ordinal or pure continuous data). Options: <code>"conditional"</code> (conditions on the observed continuous variables when computing the discrete full conditionals; faster because the discrete pseudo-likelihood does not depend on the continuous precision matrix) or <code>"marginal"</code> (integrates out the continuous variables, giving discrete full conditionals that account for induced interactions through the continuous block; more expensive per iteration). Default: <code>"conditional"</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>verbose</code></td>
-<td>Logical. Print informational messages during data processing. Default: <code>getOption("bgms.verbose", TRUE)</code>.</td>
+<td>Logical. If <code>TRUE</code>, prints informational messages during data processing (e.g., missing data handling, variable recoding). Defaults to <code>getOption("bgms.verbose", TRUE)</code>. Set <code>options(bgms.verbose = FALSE)</code> to suppress messages globally.</td>
 </tr>
 </tbody>
 </table>
@@ -703,21 +703,31 @@ Warning
 <ul>
 <li><code>posterior_summary_main</code> — Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for main-effect parameters. For OMRF models these are category thresholds; for mixed MRF models these are discrete thresholds and continuous means. <code>NULL</code> for GGM models.</li>
 <li><code>posterior_summary_quadratic</code> — Data frame with posterior summaries for the precision matrix diagonal (GGM and mixed MRF). <code>NULL</code> for OMRF models.</li>
-<li><code>posterior_summary_pairwise</code> — Data frame with posterior summaries for pairwise interaction parameters.</li>
+<li><code>posterior_summary_pairwise</code> — Data frame with posterior summaries for partial association parameters.</li>
 <li><code>posterior_summary_indicator</code> — Data frame with posterior summaries for edge inclusion indicators (if <code>edge_selection = TRUE</code>).</li>
-<li><code>posterior_mean_main</code> — Posterior mean of main-effect parameters.</li>
-<li><code>posterior_mean_pairwise</code> — Symmetric matrix of posterior mean pairwise interaction strengths. For GGM and mixed MRF models, the precision matrix diagonal is on the matrix diagonal.</li>
+<li><code>posterior_mean_main</code> — Posterior mean of main-effect parameters. <code>NULL</code> for GGM models. For OMRF: a matrix (p x max_categories) of category thresholds. For mixed MRF: a list with <code>$discrete</code> (threshold matrix) and <code>$continuous</code> (q x 1 matrix of means).</li>
+<li><code>posterior_mean_associations</code> — Symmetric matrix of posterior mean partial associations (zero diagonal). For continuous variables these are unstandardized partial correlations; for discrete variables these are half the log adjacent-category odds ratio. Use <code>extract_precision()</code>, <code>extract_partial_correlations()</code>, or <code>extract_log_odds()</code> to convert to interpretable scales.</li>
+<li><code>posterior_mean_residual_variance</code> — Named numeric vector of posterior mean residual variances <span class="math inline">\(1/\Theta_{ii}\)</span>. Present for GGM and mixed MRF models; <code>NULL</code> for OMRF.</li>
 <li><code>posterior_mean_indicator</code> — Symmetric matrix of posterior mean inclusion probabilities (if edge selection was enabled).</li>
-<li><code>raw_samples</code> — A list of raw MCMC draws per chain, with sublists for <code>main</code>, <code>pairwise</code>, <code>indicator</code>, and <code>allocations</code> (SBM prior).</li>
+<li><code>raw_samples</code> — A list of raw MCMC draws per chain with the following sublists:
+<ul>
+<li><code>main</code> — List of main effect samples.</li>
+<li><code>pairwise</code> — List of pairwise effect samples.</li>
+<li><code>indicator</code> — List of indicator samples (if edge selection enabled).</li>
+<li><code>allocations</code> — List of cluster allocations (if SBM prior used).</li>
+<li><code>nchains</code> — Number of chains.</li>
+<li><code>niter</code> — Number of post-warmup iterations per chain.</li>
+<li><code>parameter_names</code> — Named lists of parameter labels.</li>
+</ul></li>
 <li><code>arguments</code> — A list of function call arguments and metadata.</li>
 </ul>
-<p>Additional summaries when <code>edge_prior = "Stochastic-Block"</code>:</p>
+<p>Additional summaries when <code>edge_prior = "Stochastic-Block"</code>. For more details about this prior see Sekulovski et al.&nbsp;(2025):</p>
 <ul>
-<li><code>posterior_summary_pairwise_allocations</code> — Data frame with posterior summaries for pairwise cluster co-occurrence.</li>
-<li><code>posterior_coclustering_matrix</code> — Symmetric co-clustering proportion matrix.</li>
-<li><code>posterior_mean_allocations</code> — Posterior mean cluster allocations.</li>
-<li><code>posterior_mode_allocations</code> — Posterior mode cluster allocations.</li>
-<li><code>posterior_num_blocks</code> — Posterior probabilities for each possible number of clusters.</li>
+<li><code>posterior_summary_pairwise_allocations</code> — Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for the pairwise cluster co-occurrence of the nodes. This serves to indicate whether the estimated posterior allocations, co-clustering matrix and posterior cluster probabilities have converged.</li>
+<li><code>posterior_coclustering_matrix</code> — Symmetric matrix of pairwise proportions of occurrence of every variable. This matrix can be plotted to visually inspect the estimated number of clusters and visually inspect nodes that tend to switch clusters.</li>
+<li><code>posterior_mean_allocations</code> — A vector with the posterior mean of the cluster allocations of the nodes. This is calculated using the method proposed in Dahl (2009).</li>
+<li><code>posterior_mode_allocations</code> — A vector with the posterior mode of the cluster allocations of the nodes.</li>
+<li><code>posterior_num_blocks</code> — A data frame with the estimated posterior inclusion probabilities for all the possible number of clusters.</li>
 </ul>
 <p>NUTS diagnostics (tree depth, divergences, energy, E-BFMI) are available in <code>fit$nuts_diag</code> when <code>update_method = "nuts"</code>.</p>
 </section>
@@ -733,7 +743,7 @@ Warning
 </section>
 <section id="edge-selection" class="level3">
 <h3 class="anchored" data-anchor-id="edge-selection">Edge selection</h3>
-<p>When <code>edge_selection = TRUE</code>, the function performs Bayesian variable selection on pairwise interactions using spike-and-slab priors:</p>
+<p>When <code>edge_selection = TRUE</code>, the function performs Bayesian variable selection on partial associations using spike-and-slab priors:</p>
 <ul>
 <li><strong>Bernoulli</strong> — Fixed inclusion probability across edges.</li>
 <li><strong>Beta-Bernoulli</strong> — Inclusion probability is given a Beta prior.</li>
@@ -750,12 +760,24 @@ Warning
 </section>
 <section id="sampling-algorithms-and-warmup" class="level3">
 <h3 class="anchored" data-anchor-id="sampling-algorithms-and-warmup">Sampling algorithms and warmup</h3>
-<p>Parameters are updated within a Gibbs framework using one of three algorithms:</p>
+<p>Parameters are updated within a Gibbs framework using one of two algorithms:</p>
 <ul>
 <li><strong>Adaptive Metropolis–Hastings</strong> — Componentwise random-walk updates with Robbins–Monro proposal adaptation.</li>
-<li><strong>Hamiltonian Monte Carlo</strong> — Joint updates using fixed-length leapfrog trajectories. Step size is tuned during warmup via dual averaging; the diagonal mass matrix can also be adapted.</li>
-<li><strong>No-U-Turn Sampler</strong> — Adaptive extension of HMC with dynamically chosen trajectory lengths. Warmup uses a staged fast–slow–fast schedule.</li>
+<li><strong>No-U-Turn Sampler (NUTS)</strong> — Joint updates using Hamiltonian dynamics with adaptively chosen trajectory lengths. Warmup uses a staged fast–slow–fast schedule for step-size and mass-matrix adaptation.</li>
 </ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>update_method = "hamiltonian-mc"</code> (fixed-length HMC) is deprecated. Use <code>"nuts"</code> instead.</p>
+</div>
+</div>
 <p>When <code>edge_selection = TRUE</code>, edge-inclusion indicator updates are delayed until after the core warmup phase. The warmup schedule appends additional stages for proposal-SD tuning (Stage 3b) and graph initialization (Stage 3c), so the total warmup exceeds the user-specified value.</p>
 </section>
 <section id="missing-data" class="level3">
@@ -772,7 +794,7 @@ Warning
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior inclusion probabilities</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>indicator</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior pairwise effects</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior partial associations</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>pairwise</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
@@ -804,6 +826,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

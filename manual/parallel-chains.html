@@ -452,6 +452,24 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">HMC Algorithm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Adaptive Metropolis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Warmup Schedule</span></a>
   </div>
@@ -483,12 +501,6 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">OMRF Internals</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -534,7 +546,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Group Comparison Engine</span></a>
+ <span class="menu-text">bgmCompare Internals</span></a>
   </div>
 </li>
       </ul>
@@ -552,6 +564,18 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/numerical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Numerical Considerations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pseudolikelihood</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
       </ul>
@@ -585,20 +609,7 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>bgms runs multiple MCMC chains in parallel using Intel TBB (Threading Building Blocks), accessed through the RcppParallel package. The implementation is in <code>src/mcmc/execution/chain_runner.h</code> and <code>chain_runner.cpp</code>.</p>
+<p><code>bgms</code> runs multiple MCMC chains in parallel using Intel TBB (Threading Building Blocks), accessed through the RcppParallel package. The implementation is in <code>src/mcmc/execution/chain_runner.h</code> and <code>chain_runner.cpp</code>.</p>
 <section id="design" class="level2">
 <h2 class="anchored" data-anchor-id="design">Design</h2>
 <p>The entry point is <code>run_mcmc_sampler()</code>, which takes a prototype model, a prototype edge prior, and a sampler configuration. It follows a clone-and-dispatch pattern:</p>
@@ -616,7 +627,7 @@ Warning
 </section>
 <section id="tbb-thread-control" class="level2">
 <h2 class="anchored" data-anchor-id="tbb-thread-control">TBB thread control</h2>
-<p>Before dispatching, bgms sets the maximum parallelism via TBB’s global control:</p>
+<p>Before dispatching, <code>bgms</code> sets the maximum parallelism via TBB’s global control:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tbb<span class="op">::</span>global_control gc<span class="op">(</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    tbb<span class="op">::</span>global_control<span class="op">::</span>max_allowed_parallelism<span class="op">,</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    no_threads</span>
@@ -636,7 +647,7 @@ Warning
 </section>
 <section id="sequential-fallback" class="level2">
 <h2 class="anchored" data-anchor-id="sequential-fallback">Sequential fallback</h2>
-<p>When <code>no_threads = 1</code> or <code>no_chains = 1</code>, bgms skips TBB and runs chains sequentially in a simple loop. This avoids TBB overhead for single-chain runs and simplifies debugging.</p>
+<p>When <code>no_threads == 1</code>, <code>bgms</code> skips TBB and runs chains sequentially in a simple loop. This avoids TBB overhead for single-chain runs and simplifies debugging. The branch condition checks threads, not chain count, so multiple chains with <code>no_threads = 1</code> still run sequentially.</p>
 </section>
 <section id="per-chain-rng-seeding" class="level2">
 <h2 class="anchored" data-anchor-id="per-chain-rng-seeding">Per-chain RNG seeding</h2>
@@ -652,7 +663,7 @@ Warning
 <ul>
 <li><strong>Progress bar</strong> — Updated by each chain independently. The manager aggregates progress across chains and displays a single bar (or per-chain bars, depending on <code>progress_type</code>).</li>
 <li><strong>User interrupts</strong> — Each chain checks <code>pm.shouldExit()</code> between iterations. If the user presses Ctrl-C, the flag is set and all chains exit their sampling loops. The partial results are still returned (with a warning) rather than discarded.</li>
-<li><strong>Thread safety</strong> — Progress updates and interrupt checks use a shared <code>print_mutex</code> to prevent garbled console output.</li>
+<li><strong>Thread safety</strong> — Progress updates and interrupt checks use <code>ProgressManager</code>’s internal <code>std::mutex</code> to prevent garbled console output.</li>
 </ul>
 </section>
 <section id="chainresult-storage" class="level2">
@@ -698,6 +709,11 @@ Warning
 <td>Divergence flags (if NUTS)</td>
 </tr>
 <tr class="even">
+<td><code>non_reversible_samples</code></td>
+<td>n_iter</td>
+<td>Non-reversible step flags (if NUTS)</td>
+</tr>
+<tr class="odd">
 <td><code>energy_samples</code></td>
 <td>n_iter</td>
 <td>Hamiltonian energy (if NUTS)</td>
@@ -726,6 +742,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

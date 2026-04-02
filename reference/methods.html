@@ -622,7 +622,7 @@ Warning
 <p>Returns a list with:</p>
 <ul>
 <li><code>main</code> — Posterior mean main-effect parameters. <code>NULL</code> for GGM models. For OMRF models: a numeric matrix (p x max_categories) of category thresholds. For mixed MRF models: a list with <code>$discrete</code> (threshold matrix) and <code>$continuous</code> (means matrix).</li>
-<li><code>pairwise</code> — Posterior mean pairwise interaction matrix. For GGM and mixed MRF models the precision matrix diagonal is included on the diagonal.</li>
+<li><code>pairwise</code> — Posterior mean partial association matrix. The diagonal is zero. For model-specific scales, use <code>extract_precision()</code>, <code>extract_partial_correlations()</code>, or <code>extract_log_odds()</code>.</li>
 <li><code>indicator</code> — Posterior mean edge inclusion indicators (if available).</li>
 </ul>
 </section>
@@ -902,7 +902,7 @@ Warning
 </tr>
 <tr class="even">
 <td><code>pairwise</code></td>
-<td>Symmetric matrix of pairwise interactions. For continuous variables, this is the precision matrix (must be positive definite).</td>
+<td>Symmetric matrix of partial associations. For continuous variables, this is the precision matrix (must be positive definite).</td>
 </tr>
 <tr class="odd">
 <td><code>main</code></td>
@@ -953,6 +953,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

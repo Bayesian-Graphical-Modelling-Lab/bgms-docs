@@ -23,7 +23,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -461,7 +481,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Output &amp; Diagnostics</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -470,7 +490,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../guide/mcmc-output.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Model Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -510,62 +530,113 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>bgms uses Bayesian inference to estimate graphical models. This means that all unknown quantities — interaction parameters, edge inclusion indicators, and model structure — are treated as random variables with probability distributions. The output is a posterior distribution, not a single point estimate.</p>
-<section id="prior-likelihood-posterior" class="level2">
-<h2 class="anchored" data-anchor-id="prior-likelihood-posterior">Prior, likelihood, posterior</h2>
-<p>Bayesian inference combines a prior distribution with the likelihood of the observed data to produce a posterior distribution. For a parameter <span class="math inline">\(\theta\)</span> and data <span class="math inline">\(\mathbf{x}\)</span>:</p>
+<p><code>bgms</code> uses Bayesian inference to learn about the network structure and its parameters from data. This page describes the general framework; details about prior specifications are covered in <a href="../guide/prior-basics.html">Prior Basics</a> and the mechanics of edge selection in <a href="../guide/edge-selection.html">Edge Selection</a>. The posterior is estimated using Markov chain Monte Carlo; see <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a> for convergence checks and <a href="../guide/mcmc-output.html">MCMC Output</a> for the output structure.</p>
+<section id="what-we-want-to-learn" class="level2">
+<h2 class="anchored" data-anchor-id="what-we-want-to-learn">What we want to learn</h2>
+<p>Given a dataset of <span class="math inline">\(p\)</span> variables, we want to learn two things: the network structure <span class="math inline">\(\mathcal{S}\)</span> — the collection of edges in the network — and the network parameters <span class="math inline">\(\boldsymbol{\Omega}_\mathcal{S}\)</span> — the partial associations for the edges in <span class="math inline">\(\mathcal{S}\)</span>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>There are many possible structures that could underlie the network. For each structure, there are also many possible values for the corresponding partial associations. Because we seek to learn about these quantities from the data, the specific configuration of edges and the exact parameter values are typically unknown.</p>
+</section>
+<section id="prior-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="prior-distributions">Prior distributions</h2>
+<p>To account for this uncertainty, we assign prior distributions to the network structure <span class="math inline">\(p(\mathcal{S})\)</span> and to the parameters conditional on that structure <span class="math inline">\(p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S})\)</span>. A prior distribution assigns plausibility to different values of the parameters and structures before the data are observed.</p>
+<p>The prior distribution on the structure <span class="math inline">\(p(\mathcal{S})\)</span> expresses which edge configurations we consider plausible a priori. The prior distribution on the parameters <span class="math inline">\(p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S})\)</span> expresses, for a given structure, which values of the partial associations we consider plausible.</p>
+<p>These prior distributions can formalize substantive knowledge — for example, results from previous research — or they can represent relative ignorance using default specifications. See <a href="../guide/prior-basics.html">Prior Basics</a> for the prior distributions available in <code>bgms</code>.</p>
+</section>
+<section id="from-prior-to-posterior" class="level2">
+<h2 class="anchored" data-anchor-id="from-prior-to-posterior">From prior to posterior</h2>
+<p>Bayes’ rule combines the prior distributions with the information in the observed data to produce a joint posterior distribution over the structure and parameters:</p>
 <p><span class="math display">\[
-p(\theta \mid \mathbf{x}) \propto p(\mathbf{x} \mid \theta) \; p(\theta)
+p(\boldsymbol{\Omega}_\mathcal{S},\, \mathcal{S} \mid \text{data}) =
+\frac{p(\text{data} \mid \boldsymbol{\Omega}_\mathcal{S}) \;
+      p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S}) \;
+      p(\mathcal{S})}
+     {p(\text{data})}
 \]</span></p>
+<p>This joint posterior distribution expresses everything we know about the network structure and parameter values after observing the data. It is central to Bayesian graphical modeling because different inferential tasks — parameter estimation and structure learning — rely on different aspects of this distribution.</p>
+<p>To make this explicit, we factor the joint posterior into two components:</p>
+<p><span class="math display">\[
+p(\boldsymbol{\Omega}_\mathcal{S},\, \mathcal{S} \mid \text{data}) =
+p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S},\, \text{data})
+\times p(\mathcal{S} \mid \text{data})
+\]</span></p>
+<p>The first factor, <span class="math inline">\(p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S}, \text{data})\)</span>, is the conditional posterior distribution for the parameters under a specific structure — the posterior distribution of the partial associations given that the network has structure <span class="math inline">\(\mathcal{S}\)</span>. This distribution is used for Bayesian parameter estimation.</p>
+<p>The second factor, <span class="math inline">\(p(\mathcal{S} \mid \text{data})\)</span>, is the marginal posterior distribution of the network structure, with the parameters integrated out. This distribution is used for Bayesian structure learning.</p>
+</section>
+<section id="model-uncertainty" class="level2">
+<h2 class="anchored" data-anchor-id="model-uncertainty">Model uncertainty</h2>
+<p>For a network with <span class="math inline">\(p\)</span> variables there are <span class="math inline">\(\binom{p}{2} = p(p-1)/2\)</span> possible edges, and each can independently be present or absent. The total number of possible network structures is therefore <span class="math inline">\(2^{p(p-1)/2}\)</span>. Even for a modest network of 10 variables this gives <span class="math inline">\(2^{45} \approx 3.5 \times 10^{13}\)</span> possible structures; for 20 variables the number exceeds <span class="math inline">\(10^{57}\)</span>.</p>
+<p>In practice, it is very unlikely that any single structure completely dominates the posterior distribution. Many structures that differ by only a few edges will have comparable posterior probabilities. Ignoring this uncertainty and conditioning on a single structure — for instance the most probable one — amounts to acting as though that structure generated the data with certainty. This leads to overconfident inferences: parameter estimates that are too precise because they do not reflect uncertainty about which edges belong in the model, and conclusions about individual edges that may change depending on what is assumed about the remaining edges <span class="citation" data-cites="HoetingMadiganRafteryVolinsky_1999 HinneGronauVanDenBerghWagenmakers_2020">(<a href="#ref-HinneGronauVanDenBerghWagenmakers_2020" role="doc-biblioref"><span class="nocase">Hinne et al.</span>, 2020</a>; <a href="#ref-HoetingMadiganRafteryVolinsky_1999" role="doc-biblioref">Hoeting et al., 1999</a>)</span>.</p>
+</section>
+<section id="bayesian-model-averaging" class="level2">
+<h2 class="anchored" data-anchor-id="bayesian-model-averaging">Bayesian model averaging</h2>
+<p>Bayesian model averaging [BMA; <span class="citation" data-cites="HoetingMadiganRafteryVolinsky_1999">Hoeting et al. (<a href="#ref-HoetingMadiganRafteryVolinsky_1999" role="doc-biblioref">1999</a>)</span>; <span class="citation" data-cites="HinneGronauVanDenBerghWagenmakers_2020"><span class="nocase">Hinne et al.</span> (<a href="#ref-HinneGronauVanDenBerghWagenmakers_2020" role="doc-biblioref">2020</a>)</span>] provides the principled way to account for model uncertainty. Instead of conditioning on a single structure, BMA averages inferences across all possible structures, weighting each by its posterior probability <span class="math inline">\(p(\mathcal{S} \mid \text{data})\)</span>. Structures that predict the data well gain plausibility; those that predict it poorly lose it. No structure is discarded entirely, and no structure is assumed to be true with certainty.</p>
+<p>In <code>bgms</code>, BMA is the default. The Markov chain Monte Carlo sampler explores the joint posterior over structures and parameters simultaneously using the mixtures of mutually singular distributions (MoMS) framework <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>. All reported quantities — parameter estimates, inclusion probabilities, and Bayes factors — automatically incorporate model averaging. Both parameter estimation and structure learning therefore account for structural uncertainty.</p>
+<section id="parameter-estimation" class="level3">
+<h3 class="anchored" data-anchor-id="parameter-estimation">Parameter estimation</h3>
+<p>For a given structure <span class="math inline">\(\mathcal{S}\)</span>, the conditional posterior <span class="math inline">\(p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S}, \text{data})\)</span> tells us what we know about each partial association after observing the data. The prior distribution assigns plausibility to each value of the parameter. The distribution is updated by the observed data: parameter values that predict the data well gain plausibility, while those that predict it poorly lose it.</p>
+<p>Because <code>bgms</code> averages over structures, the reported parameter estimates reflect both parameter uncertainty and structural uncertainty. In structures where an edge is absent, the corresponding partial association is zero; in structures where it is present, the partial association follows its conditional posterior. The model-averaged posterior mean is therefore automatically shrunk toward zero for edges that receive little structural support.</p>
+<p>In practice, the posterior distribution for each partial association is usually summarized:</p>
 <ul>
-<li><p>The <strong>prior</strong> <span class="math inline">\(p(\theta)\)</span> encodes assumptions about the parameter before observing data. In bgms, priors are placed on interaction parameters, main effects, and edge indicators. See <a href="../guide/prior-basics.html">Prior Basics</a> for details.</p></li>
-<li><p>The <strong>likelihood</strong> <span class="math inline">\(p(\mathbf{x} \mid \theta)\)</span> measures how well the model with parameter value <span class="math inline">\(\theta\)</span> explains the observed data.</p></li>
-<li><p>The <strong>posterior</strong> <span class="math inline">\(p(\theta \mid \mathbf{x})\)</span> is the updated distribution of <span class="math inline">\(\theta\)</span> after observing the data. All inference — point estimates, intervals, hypothesis tests — comes from this posterior.</p></li>
+<li>The <strong>posterior mean</strong> as a point estimate of the partial association.</li>
+<li>The <strong>posterior standard deviation</strong> as a measure of estimation precision.</li>
+<li>A <strong>credible interval</strong> — a range that contains a given proportion of the posterior probability mass (e.g., 95%). Unlike frequentist confidence intervals, a 95% credible interval has a direct probability interpretation: given the prior and the observed data, there is a 95% posterior probability that the parameter lies within the interval.</li>
 </ul>
+<p>In <code>bgms</code>, <code>coef(fit)$pairwise</code> returns the posterior means of the partial associations, and <code>summary(fit)$pairwise</code> adds the posterior standard deviation, <a href="../guide/mcmc-diagnostics.html#sec-mcse">Monte Carlo standard error</a>, <a href="../guide/mcmc-diagnostics.html#sec-ess">effective sample size</a>, and <a href="../guide/mcmc-diagnostics.html#sec-rhat">R-hat</a>.</p>
 </section>
-<section id="posterior-summaries" class="level2">
-<h2 class="anchored" data-anchor-id="posterior-summaries">Posterior summaries</h2>
-<p>bgms summarizes the posterior with several quantities:</p>
-<ul>
-<li><p><strong>Posterior mean</strong>: the average of the posterior distribution. Reported by <code>coef()</code> and in the <code>summary()</code> output.</p></li>
-<li><p><strong>Posterior standard deviation</strong>: the spread of the posterior. A small standard deviation indicates a precise estimate.</p></li>
-<li><p><strong>Credible intervals</strong>: ranges that contain the parameter with a given posterior probability (e.g., a 95% credible interval). Unlike frequentist confidence intervals, credible intervals have a direct probability interpretation.</p></li>
-</ul>
-</section>
-<section id="bayes-factors" class="level2">
-<h2 class="anchored" data-anchor-id="bayes-factors">Bayes factors</h2>
-<p>For edge selection, bgms uses Bayes factors to quantify evidence for the presence or absence of each edge. The inclusion Bayes factor for edge <span class="math inline">\((i, j)\)</span> is:</p>
+<section id="structure-learning" class="level3">
+<h3 class="anchored" data-anchor-id="structure-learning">Structure learning</h3>
+<p>The posterior inclusion probability of an edge is obtained by summing the posterior probabilities of all structures that contain that edge. Let <span class="math inline">\(\mathcal{S}^{(ij)}\)</span> denote the set of structures that include an edge between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, then:</p>
 <p><span class="math display">\[
-\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{p(\gamma_{ij} = 0 \mid \mathbf{x})} \bigg/ \frac{p(\gamma_{ij} = 1)}{p(\gamma_{ij} = 0)}
+p(\gamma_{ij} = 1 \mid \text{data}) =
+\sum_{\mathcal{S} \in \mathcal{S}^{(ij)}}
+p(\mathcal{S} \mid \text{data})
 \]</span></p>
-<p>where <span class="math inline">\(\gamma_{ij}\)</span> is the binary indicator for edge inclusion. When the prior inclusion probability is 0.5, this simplifies to the posterior odds:</p>
+<p>This posterior inclusion probability aggregates evidence across all possible network structures and therefore accounts for uncertainty about the remaining edges in the network.</p>
+<p>In <code>bgms</code>, <code>coef(fit)$indicator</code> returns the posterior means of the inclusion probabilities, and <code>summary(fit)$indicator</code> adds the posterior standard deviation, <a href="../guide/mcmc-diagnostics.html#sec-mcse">Monte Carlo standard error</a>, <a href="../guide/mcmc-diagnostics.html#sec-ess">effective sample size</a>, and <a href="../guide/mcmc-diagnostics.html#sec-rhat">R-hat</a>.</p>
+<p>The inclusion Bayes factor quantifies the change in evidence for including an edge from prior to posterior <span class="citation" data-cites="HinneGronauVanDenBerghWagenmakers_2020 MarsmanHuthWaldorpNtzoufras_2022">(<a href="#ref-HinneGronauVanDenBerghWagenmakers_2020" role="doc-biblioref"><span class="nocase">Hinne et al.</span>, 2020</a>; <a href="#ref-MarsmanHuthWaldorpNtzoufras_2022" role="doc-biblioref">Marsman et al., 2022</a>)</span>:</p>
 <p><span class="math display">\[
-\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{1 - p(\gamma_{ij} = 1 \mid \mathbf{x})}
+\underbrace{\frac{p(\text{data} \mid \gamma_{ij} = 1)}
+                 {p(\text{data} \mid \gamma_{ij} = 0)}}_{\text{Inclusion Bayes factor}}
+= \underbrace{\frac{p(\gamma_{ij} = 1 \mid \text{data})}
+                   {p(\gamma_{ij} = 0 \mid \text{data})}}_{\text{Posterior inclusion odds}}
+\bigg/
+\underbrace{\frac{p(\gamma_{ij} = 1)}
+                 {p(\gamma_{ij} = 0)}}_{\text{Prior inclusion odds}}
 \]</span></p>
-<p>A Bayes factor greater than 1 favors edge inclusion; less than 1 favors exclusion. The reciprocal <span class="math inline">\(1 / \text{BF}_{10}\)</span> gives the evidence for exclusion. See <a href="../guide/edge-selection.html">Edge Selection</a> for interpretation guidelines.</p>
-</section>
-<section id="how-bgms-uses-mcmc" class="level2">
-<h2 class="anchored" data-anchor-id="how-bgms-uses-mcmc">How bgms uses MCMC</h2>
-<p>The posterior distributions in bgms do not have closed-form solutions. Instead, bgms draws samples from the posterior using Markov chain Monte Carlo (MCMC) methods. The default sampler is the No-U-Turn Sampler (NUTS), an adaptive form of Hamiltonian Monte Carlo. bgms also supports fixed-length HMC and adaptive Metropolis-Hastings.</p>
-<p>Multiple chains run in parallel to diagnose convergence. Key diagnostics — effective sample size (ESS), R-hat, and energy diagnostics — are described in <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>. The structure of the raw MCMC output is described in <a href="../guide/mcmc-output.html">MCMC Output</a>.</p>
+<p>The inclusion Bayes factor is the ratio of the posterior inclusion odds to the prior inclusion odds. Values greater than one indicate evidence for the presence of the edge (<span class="math inline">\(\Omega_{ij} \neq 0\)</span>), values less than one indicate evidence for its absence (<span class="math inline">\(\Omega_{ij} = 0\)</span>), and values close to one indicate that the data are uninformative — the evidence does not clearly favor either hypothesis. This three-way distinction is a key advantage of the Bayes factor: it separates evidence for presence, evidence for absence, and absence of evidence. When the prior inclusion probability is <span class="math inline">\(\frac{1}{2}\)</span>, the prior inclusion odds equal one, and the inclusion Bayes factor simplifies to the posterior odds.</p>
+<p>Because the inclusion Bayes factor averages over all possible network structures, it does not depend on assumptions about the remaining edges in the network. This property makes it a robust measure of the evidence for or against each individual edge <span class="citation" data-cites="SekulovskiEtAl_2024">(<a href="#ref-SekulovskiEtAl_2024" role="doc-biblioref"><span class="nocase">Sekulovski et al.</span>, 2024</a>)</span>. See <a href="../guide/edge-selection.html">Edge Selection</a> for interpretation guidelines and the prior specifications used in <code>bgms</code>.</p>
+
 
 
 </section>
+</section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-GottardoRaftery_2008" class="csl-entry" role="listitem">
+Gottardo, R., &amp; Raftery, A. E. (2008). Markov chain <span>Monte Carlo</span> with mixtures of mutually singular distributions. <em>Journal of Computational and Graphical Statistics</em>, <em>17</em>(4), 949–975. <a href="https://doi.org/10.1198/106186008X386102">https://doi.org/10.1198/106186008X386102</a>
+</div>
+<div id="ref-HinneGronauVanDenBerghWagenmakers_2020" class="csl-entry" role="listitem">
+<span class="nocase">Hinne, M., Gronau, Q. F., van den Bergh, D., &amp; Wagenmakers, E.-J.</span> (2020). A conceptual introduction to <span>B</span>ayesian model averaging. <em>Advances in Methods and Practices in Psychological Science</em>, <em>3</em>(2), 200–215. <a href="https://doi.org/10.1177/2515245919898657">https://doi.org/10.1177/2515245919898657</a>
+</div>
+<div id="ref-HoetingMadiganRafteryVolinsky_1999" class="csl-entry" role="listitem">
+Hoeting, J. A., Madigan, D., Raftery, A. E., &amp; Volinsky, C. T. (1999). Bayesian model averaging: A tutorial. <em>Statistical Science</em>, <em>14</em>(4), 382–417. <a href="https://doi.org/10.1214/ss/1009212519">https://doi.org/10.1214/ss/1009212519</a>
+</div>
+<div id="ref-MarsmanHuthWaldorpNtzoufras_2022" class="csl-entry" role="listitem">
+Marsman, M., Huth, K. B. S., Waldorp, L. J., &amp; Ntzoufras, I. (2022). Objective <span>B</span>ayesian edge screening and structure selection for <span>I</span>sing networks. <em>Psychometrika</em>, <em>87</em>(1), 47–82. <a href="https://doi.org/10.1007/s11336-022-09848-8">https://doi.org/10.1007/s11336-022-09848-8</a>
+</div>
+<div id="ref-SekulovskiEtAl_2024" class="csl-entry" role="listitem">
+<span class="nocase">Sekulovski, N., Keetelaar, S., Huth, K. B. S., Wagenmakers, E.-J., van Bork, R., van den Bergh, D., &amp; Marsman, M.</span> (2024). Testing conditional independence in psychometric networks: <span>A</span>n analysis of three <span>B</span>ayesian methods. <em>Multivariate Behavioral Research</em>, <em>59</em>, 913–933. <a href="https://doi.org/10.1080/00273171.2024.2345915">https://doi.org/10.1080/00273171.2024.2345915</a>
+</div>
+<div id="ref-VanDenBerghEtAl_2026_moms" class="csl-entry" role="listitem">
+<span class="nocase">van den Bergh, D., Clyde, M. A., Raftery, A. E., &amp; Marsman, M.</span> (2026). Reversible jump <span>MCMC</span> with no regrets: <span>B</span>ayesian variable selection using mixtures of mutually singular distributions. <em>Manuscript in Preparation</em>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>In graphical modeling, the primary inferential targets are the partial associations <span class="math inline">\(\boldsymbol{\Omega}\)</span> and the network structure <span class="math inline">\(\mathcal{S}\)</span>. The node potentials <span class="math inline">\(\mu_i(x_i)\)</span> are nuisance parameters: they are estimated but typically not of direct inferential interest.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
@@ -582,6 +653,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

@@ -23,7 +23,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -33,7 +53,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../manual/variable-helpers.html" rel="next">
+<link href="../manual/mixed-internals.html" rel="next">
 <link href="../manual/ggm-internals.html" rel="prev">
 <link href="../bgms_sticker.svg" rel="icon" type="image/svg+xml">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
@@ -417,6 +437,24 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">HMC Algorithm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Adaptive Metropolis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Warmup Schedule</span></a>
   </div>
@@ -448,12 +486,6 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">OMRF Internals</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -499,7 +531,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Group Comparison Engine</span></a>
+ <span class="menu-text">bgmCompare Internals</span></a>
   </div>
 </li>
       </ul>
@@ -517,6 +549,18 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/numerical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Numerical Considerations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pseudolikelihood</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
       </ul>
@@ -550,27 +594,14 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>Implementation details of the ordinal Markov random field in bgms. Source: <code>src/models/omrf/omrf_model.h</code> and <code>omrf_model.cpp</code>.</p>
+<p>Implementation details of the ordinal Markov random field in <code>bgms</code>. Source: <code>src/models/omrf/omrf_model.h</code> and <code>omrf_model.cpp</code>.</p>
 <section id="ordinal-threshold-parameterization" class="level2">
 <h2 class="anchored" data-anchor-id="ordinal-threshold-parameterization">Ordinal threshold parameterization</h2>
-<p>For an ordinal variable <span class="math inline">\(X_i\)</span> with <span class="math inline">\(K_i\)</span> categories <span class="math inline">\((0, 1, \ldots, K_i - 1)\)</span>, the model assigns one threshold parameter <span class="math inline">\(\mu_i(c)\)</span> per category <span class="math inline">\(c\)</span>. The category <span class="math inline">\(c = 0\)</span> serves as the reference with <span class="math inline">\(\mu_i(0) = 0\)</span>. The conditional probability of observing category <span class="math inline">\(c\)</span> for person <span class="math inline">\(n\)</span> is:</p>
+<p>For an ordinal variable <span class="math inline">\(X_i\)</span> with <span class="math inline">\(K_i + 1\)</span> categories <span class="math inline">\((0, 1, \ldots, K_i)\)</span>, the model assigns <span class="math inline">\(K_i\)</span> threshold parameters <span class="math inline">\(\mu_i(1), \ldots, \mu_i(K_i)\)</span>. Category <span class="math inline">\(c = 0\)</span> serves as the reference with <span class="math inline">\(\mu_i(0) = 0\)</span>. The conditional probability of observing category <span class="math inline">\(c\)</span> for person <span class="math inline">\(n\)</span> is:</p>
 <p><span class="math display">\[
-P(X_{ni} = c \mid \text{rest}) = \frac{\exp\!\bigl(\mu_i(c) + c \cdot r_{ni}\bigr)}{\sum_{k=0}^{K_i - 1} \exp\!\bigl(\mu_i(k) + k \cdot r_{ni}\bigr)}
+P(X_{ni} = c \mid \text{rest}) = \frac{\exp\!\bigl(\mu_i(c) + c \cdot r_{ni}\bigr)}{\sum_{k=0}^{K_i} \exp\!\bigl(\mu_i(k) + k \cdot r_{ni}\bigr)}
 \]</span></p>
-<p>where <span class="math inline">\(r_{ni} = \sum_{j \neq i} x_{nj}\, \sigma_{ij}\)</span> is the residual score summarizing the pairwise interactions with all other variables.</p>
+<p>where <span class="math inline">\(r_{ni} = 2\sum_{j \neq i} x_{nj}\, \omega_{ij}\)</span> is the residual score summarizing the pairwise interactions with all other variables.</p>
 </section>
 <section id="blume-capel-model" class="level2">
 <h2 class="anchored" data-anchor-id="blume-capel-model">Blume-Capel model</h2>
@@ -584,50 +615,68 @@ P(X_{ni} = c \mid \text{rest}) = \frac{\exp\!\bigl(\mu_i(c) + c \cdot r_{ni}\big
 <h2 class="anchored" data-anchor-id="residual-matrix">Residual matrix</h2>
 <p>The model maintains a precomputed <span class="math inline">\(n \times p\)</span> residual matrix where entry <span class="math inline">\((n, i)\)</span> stores:</p>
 <p><span class="math display">\[
-r_{ni} = \sum_{j \neq i} x_{nj}\, \sigma_{ij}
+r_{ni} = 2\sum_{j \neq i} x_{nj}\, \omega_{ij}
 \]</span></p>
-<p>When a single interaction <span class="math inline">\(\sigma_{ij}\)</span> changes by <span class="math inline">\(\delta\)</span>, the residual matrix is updated incrementally:</p>
+<p>When a single interaction <span class="math inline">\(\omega_{ij}\)</span> changes by <span class="math inline">\(\delta\)</span>, the residual matrix is updated incrementally:</p>
 <ul>
-<li>Column <span class="math inline">\(i\)</span>: <span class="math inline">\(r_{ni} \leftarrow r_{ni} + \delta \cdot x_{nj}\)</span> for all <span class="math inline">\(n\)</span></li>
-<li>Column <span class="math inline">\(j\)</span>: <span class="math inline">\(r_{nj} \leftarrow r_{nj} + \delta \cdot x_{ni}\)</span> for all <span class="math inline">\(n\)</span></li>
+<li>Column <span class="math inline">\(i\)</span>: <span class="math inline">\(r_{ni} \leftarrow r_{ni} + 2\delta \cdot x_{nj}\)</span> for all <span class="math inline">\(n\)</span></li>
+<li>Column <span class="math inline">\(j\)</span>: <span class="math inline">\(r_{nj} \leftarrow r_{nj} + 2\delta \cdot x_{ni}\)</span> for all <span class="math inline">\(n\)</span></li>
 </ul>
 <p>This avoids recomputing the full matrix product after each parameter update.</p>
 </section>
 <section id="pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="pseudolikelihood">Pseudolikelihood</h2>
 <p>The OMRF uses a pseudolikelihood approximation: the product of full conditional distributions rather than the intractable joint distribution. The log-pseudolikelihood is:</p>
+<p>For a cross-model overview, see <a href="../manual/pseudolikelihood.html">Pseudolikelihood</a>.</p>
 <p><span class="math display">\[
 \text{PL}(\boldsymbol{\theta}) = \sum_{i=1}^{p} \sum_{n=1}^{N} \log P(X_{ni} = x_{ni} \mid \text{rest})
 \]</span></p>
-<p>The gradient of the log-pseudolikelihood with respect to each parameter involves the expected category values under the current conditionals, computed by the <a href="../manual/variable-helpers.html">variable helpers</a>.</p>
+<p>The gradient of the log-pseudolikelihood with respect to each parameter involves the expected category values under the current conditionals, computed by the <a href="../manual/variable-helpers.html">Variable Helpers</a>.</p>
 </section>
 <section id="gradient-computation" class="level2">
 <h2 class="anchored" data-anchor-id="gradient-computation">Gradient computation</h2>
-<p>The <code>logp_and_gradient()</code> method computes both the log-pseudoposterior and its gradient in a single pass. The gradient for a pairwise interaction <span class="math inline">\(\sigma_{ij}\)</span> accumulates over all persons:</p>
+<p>The <code>logp_and_gradient()</code> method computes both the log-pseudoposterior and its gradient in a single pass. The observed contribution to the gradient for a pairwise interaction <span class="math inline">\(\omega_{ij}\)</span> is <span class="math inline">\(4 \sum_{n} x_{ni} x_{nj}\)</span> (from the sufficient statistic <span class="math inline">\(\mathbf{X}^\top\mathbf{X}\)</span>). The expected contribution accumulates over both variables:</p>
 <p><span class="math display">\[
-\frac{\partial \text{PL}}{\partial \sigma_{ij}} = \sum_{n=1}^{N} \bigl(x_{ni} - E[X_i \mid \text{rest}]\bigr)\, x_{nj} + \bigl(x_{nj} - E[X_j \mid \text{rest}]\bigr)\, x_{ni}
+\frac{\partial \text{PL}}{\partial \omega_{ij}} = 4\sum_{n=1}^{N} x_{ni}\, x_{nj} - 2\sum_{n=1}^{N} \bigl(E[X_i \mid \text{rest}]\, x_{nj} + E[X_j \mid \text{rest}]\, x_{ni}\bigr)
 \]</span></p>
-<p>The expected values <span class="math inline">\(E[X_i \mid \text{rest}]\)</span> are computed from the category probabilities, which are obtained via the numerically stable FAST/SAFE paths in <code>variable_helpers.cpp</code>.</p>
+<p>The expected values <span class="math inline">\(E[X_i \mid \text{rest}]\)</span> are computed from the category probabilities, which are obtained via the numerically stable FAST/SAFE paths in <code>variable_helpers.cpp</code>. The pairwise gradient is vectorized using BLAS matrix products: <span class="math inline">\(\mathbf{X}^\top \mathbf{E}\)</span> where <span class="math inline">\(\mathbf{E}\)</span> is the matrix of conditional expected values.</p>
 </section>
 <section id="edge-indicator-updates" class="level2">
 <h2 class="anchored" data-anchor-id="edge-indicator-updates">Edge indicator updates</h2>
+<p>Edge selection uses a Metropolis-Hastings sampler based on the mixtures of mutually singular (MoMS) distributions framework <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>. All interaction parameters live in a fixed-dimensional space; excluded edges are represented as parameters fixed at zero rather than removed from the model.</p>
 <p>When edge selection is active, the model performs a full scan over all <span class="math inline">\(p(p-1)/2\)</span> edges after each gradient-based step. For each edge <span class="math inline">\((i, j)\)</span>:</p>
-<ol type="1">
-<li>Compute the pseudolikelihood ratio for inclusion vs.&nbsp;exclusion</li>
-<li>Combine with the prior inclusion probability to get the posterior inclusion probability</li>
-<li>Sample the indicator <span class="math inline">\(\gamma_{ij} \sim \text{Bernoulli}(p_{ij})\)</span></li>
-<li>If the indicator changes, update the residual matrix accordingly</li>
-</ol>
+<p><strong>Add move</strong> (<span class="math inline">\(\gamma_{ij} = 0 \to 1\)</span>). Propose a new interaction value <span class="math inline">\(\omega_{ij}^\star \sim \mathcal{N}(\omega_{ij},\, \sigma_{ij}^2)\)</span> and accept with probability <span class="math display">\[
+\alpha = \min\!\left\{1,\;
+  \frac{p(\boldsymbol{\gamma}^\star, \boldsymbol{\omega}^\star \mid \mathbf{X})}
+       {p(\boldsymbol{\gamma},\, \boldsymbol{\omega} \mid \mathbf{X})}
+  \;\frac{1}{q(\omega_{ij}^\star \mid \omega_{ij})}
+\right\}
+\]</span> where the posterior ratio includes the pseudolikelihood ratio, the Cauchy slab prior on <span class="math inline">\(\omega_{ij}^\star\)</span>, and the prior inclusion odds.</p>
+<p><strong>Delete move</strong> (<span class="math inline">\(\gamma_{ij} = 1 \to 0\)</span>). Set <span class="math inline">\(\omega_{ij}^\star = 0\)</span> and accept with probability <span class="math display">\[
+\alpha = \min\!\left\{1,\;
+  \frac{p(\boldsymbol{\gamma}^\star, \boldsymbol{\omega}^\star \mid \mathbf{X})}
+       {p(\boldsymbol{\gamma},\, \boldsymbol{\omega} \mid \mathbf{X})}
+  \;\frac{q(\omega_{ij} \mid \omega_{ij}^\star)}{1}
+\right\}
+\]</span></p>
 <p>The scan order is randomized at each iteration via <code>prepare_iteration()</code>, which calls <code>arma_randperm()</code>.</p>
 </section>
 <section id="adaptive-metropolis-fallback" class="level2">
 <h2 class="anchored" data-anchor-id="adaptive-metropolis-fallback">Adaptive Metropolis fallback</h2>
-<p>Even when NUTS is the primary sampler, the OMRF implements element-wise adaptive Metropolis proposals for use during warmup stage 3b (proposal SD learning) and as a user-selectable alternative via <code>interaction_scale = "fixed"</code>. The proposal SDs are tuned by Robbins-Monro targeting 0.234 acceptance, clamped to <span class="math inline">\([0.001, 2.0]\)</span>.</p>
+<p>Even when NUTS is the primary sampler, the OMRF implements element-wise adaptive Metropolis proposals for use during warmup stage 3b (proposal SD learning) and as a user-selectable alternative via <code>update_method = "adaptive-metropolis"</code>. The proposal SDs are tuned by Robbins-Monro targeting 0.44 acceptance, clamped to <span class="math inline">\([0.001, 2.0]\)</span>.</p>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-GottardoRaftery_2008" class="csl-entry" role="listitem">
+Gottardo, R., &amp; Raftery, A. E. (2008). Markov chain <span>Monte Carlo</span> with mixtures of mutually singular distributions. <em>Journal of Computational and Graphical Statistics</em>, <em>17</em>(4), 949–975. <a href="https://doi.org/10.1198/106186008X386102">https://doi.org/10.1198/106186008X386102</a>
+</div>
+<div id="ref-VanDenBerghEtAl_2026_moms" class="csl-entry" role="listitem">
+<span class="nocase">van den Bergh, D., Clyde, M. A., Raftery, A. E., &amp; Marsman, M.</span> (2026). Reversible jump <span>MCMC</span> with no regrets: <span>B</span>ayesian variable selection using mixtures of mutually singular distributions. <em>Manuscript in Preparation</em>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
@@ -644,6 +693,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>
@@ -1067,8 +1144,8 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../manual/variable-helpers.html" class="pagination-link" aria-label="Variable Helpers">
-        <span class="nav-page-text">Variable Helpers</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../manual/mixed-internals.html" class="pagination-link" aria-label="Mixed MRF Internals">
+        <span class="nav-page-text">Mixed MRF Internals</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
