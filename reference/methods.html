@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>S3 Methods – bgms</title>
+<title>Methods – bgms</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -382,7 +382,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/methods.html">Methods</a></li><li class="breadcrumb-item"><a href="../reference/methods.html">S3 Methods</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/methods.html">Methods</a></li><li class="breadcrumb-item"><a href="../reference/methods.html">Methods</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -435,7 +435,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/methods.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">S3 Methods</span></a>
+ <span class="menu-text">Methods</span></a>
   </div>
 </li>
       </ul>
@@ -462,9 +462,9 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/methods.html">Methods</a></li><li class="breadcrumb-item"><a href="../reference/methods.html">S3 Methods</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/methods.html">Methods</a></li><li class="breadcrumb-item"><a href="../reference/methods.html">Methods</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">S3 Methods</h1>
+<h1 class="title">Methods</h1>
 </div>
 
 
@@ -481,25 +481,9 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>S3 methods for inspecting, summarizing, and using <code>bgms</code> and <code>bgmCompare</code> model fits.</p>
+<p>Methods for inspecting, summarizing, and using <code>bgms</code> and <code>bgmCompare</code> model fits. Both are S7 classes; methods use S3 dispatch for compatibility with base R generics.</p>
 <section id="print" class="level2">
 <h2 class="anchored" data-anchor-id="print">print</h2>
-<p>Minimal console output for a fitted model.</p>
-<section id="bgms" class="level3">
-<h3 class="anchored" data-anchor-id="bgms">bgms</h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(x, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top table">
 <thead>
@@ -511,7 +495,7 @@ Warning
 <tbody>
 <tr class="odd">
 <td><code>x</code></td>
-<td>An object of class <code>bgms</code>.</td>
+<td>An object of class <code>bgms</code> or <code>bgmCompare</code>.</td>
 </tr>
 <tr class="even">
 <td><code>...</code></td>
@@ -520,37 +504,10 @@ Warning
 </tbody>
 </table>
 <p>Returns <code>x</code> invisibly.</p>
-</section>
-<section id="bgmcompare" class="level3">
-<h3 class="anchored" data-anchor-id="bgmcompare">bgmCompare</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(x, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>x</code></td>
-<td>An object of class <code>bgmCompare</code>.</td>
-</tr>
-<tr class="even">
-<td><code>...</code></td>
-<td>Ignored.</td>
-</tr>
-</tbody>
-</table>
-<p>Returns <code>x</code> invisibly.</p>
-</section>
 </section>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">summary</h2>
-<p>Posterior summaries and diagnostics for a fitted model.</p>
-<section id="bgms-1" class="level3">
-<h3 class="anchored" data-anchor-id="bgms-1">bgms</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(object, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(object, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -561,7 +518,7 @@ Warning
 <tbody>
 <tr class="odd">
 <td><code>object</code></td>
-<td>An object of class <code>bgms</code>.</td>
+<td>An object of class <code>bgms</code> or <code>bgmCompare</code>.</td>
 </tr>
 <tr class="even">
 <td><code>...</code></td>
@@ -569,38 +526,18 @@ Warning
 </tr>
 </tbody>
 </table>
-<p>Returns an object of class <code>summary.bgms</code> with posterior summaries.</p>
-</section>
-<section id="bgmcompare-1" class="level3">
-<h3 class="anchored" data-anchor-id="bgmcompare-1">bgmCompare</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(object, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>object</code></td>
-<td>An object of class <code>bgmCompare</code>.</td>
-</tr>
-<tr class="even">
-<td><code>...</code></td>
-<td>Currently ignored.</td>
-</tr>
-</tbody>
-</table>
-<p>Returns an object of class <code>summary.bgmCompare</code> with posterior summaries.</p>
-</section>
+<p>Returns a summary object containing:</p>
+<ul>
+<li><code>main</code> — Data frame of main-effect summaries (mean, sd, MCSE, ESS, Rhat).</li>
+<li><code>pairwise</code> — Data frame of partial association summaries.</li>
+<li><code>indicator</code> — Data frame of inclusion indicator summaries (if edge/difference selection enabled).</li>
+</ul>
+<p>For <code>bgmCompare</code>, summaries are split into baseline and difference components.</p>
 </section>
 <section id="coef" class="level2">
 <h2 class="anchored" data-anchor-id="coef">coef</h2>
 <p>Extract posterior mean coefficients.</p>
-<section id="bgms-2" class="level3">
-<h3 class="anchored" data-anchor-id="bgms-2">bgms</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(object, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(object, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -611,7 +548,7 @@ Warning
 <tbody>
 <tr class="odd">
 <td><code>object</code></td>
-<td>An object of class <code>bgms</code>.</td>
+<td>An object of class <code>bgms</code> or <code>bgmCompare</code>.</td>
 </tr>
 <tr class="even">
 <td><code>...</code></td>
@@ -619,53 +556,23 @@ Warning
 </tr>
 </tbody>
 </table>
-<p>Returns a list with:</p>
+<p>Returns (by class):</p>
 <ul>
-<li><code>main</code> — Posterior mean main-effect parameters. <code>NULL</code> for GGM models. For OMRF models: a numeric matrix (p x max_categories) of category thresholds. For mixed MRF models: a list with <code>$discrete</code> (threshold matrix) and <code>$continuous</code> (means matrix).</li>
-<li><code>pairwise</code> — Posterior mean partial association matrix. The diagonal is zero. For model-specific scales, use <code>extract_precision()</code>, <code>extract_partial_correlations()</code>, or <code>extract_log_odds()</code>.</li>
-<li><code>indicator</code> — Posterior mean edge inclusion indicators (if available).</li>
+<li><code>bgms</code>: <code>main</code>, <code>pairwise</code>, and (if available) <code>indicator</code>.</li>
+<li><code>bgmCompare</code>: <code>main_effects_raw</code>, <code>pairwise_effects_raw</code>, <code>main_effects_groups</code>, <code>pairwise_effects_groups</code>, and <code>indicators</code>.</li>
 </ul>
-</section>
-<section id="bgmcompare-2" class="level3">
-<h3 class="anchored" data-anchor-id="bgmcompare-2">bgmCompare</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(object, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>object</code></td>
-<td>An object of class <code>bgmCompare</code>.</td>
-</tr>
-<tr class="even">
-<td><code>...</code></td>
-<td>Ignored.</td>
-</tr>
-</tbody>
-</table>
-<p>Returns a list with:</p>
-<ul>
-<li><code>main_effects_raw</code> — Posterior means of raw main-effect parameters (variables x (baseline + differences)).</li>
-<li><code>pairwise_effects_raw</code> — Posterior means of raw pairwise-effect parameters (pairs x (baseline + differences)).</li>
-<li><code>main_effects_groups</code> — Posterior means of group-specific main effects (variables x groups), computed as baseline plus projected differences.</li>
-<li><code>pairwise_effects_groups</code> — Posterior means of group-specific pairwise effects (pairs x groups), computed as baseline plus projected differences.</li>
-<li><code>indicators</code> — Posterior mean inclusion probabilities as a symmetric matrix, with diagonals for main effects and off-diagonals for pairwise effects.</li>
-</ul>
-</section>
 </section>
 <section id="predict" class="level2">
 <h2 class="anchored" data-anchor-id="predict">predict</h2>
 <p>Compute conditional probability distributions for one or more variables given the observed values of other variables in the data.</p>
-<section id="bgms-3" class="level3">
-<h3 class="anchored" data-anchor-id="bgms-3">bgms</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(object, newdata, <span class="at">variables =</span> <span class="cn">NULL</span>,</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"probabilities"</span>, <span class="st">"response"</span>),</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"posterior-mean"</span>, <span class="st">"posterior-sample"</span>),</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">ndraws =</span> <span class="cn">NULL</span>, <span class="at">seed =</span> <span class="cn">NULL</span>, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(object, newdata, <span class="at">variables =</span> <span class="cn">NULL</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"probabilities"</span>, <span class="st">"response"</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"posterior-mean"</span>, <span class="st">"posterior-sample"</span>),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">ndraws =</span> <span class="cn">NULL</span>, <span class="at">seed =</span> <span class="cn">NULL</span>, ...)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(object, newdata, group, <span class="at">variables =</span> <span class="cn">NULL</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"probabilities"</span>, <span class="st">"response"</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"posterior-mean"</span>), ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 43%">
@@ -680,71 +587,19 @@ Warning
 <tbody>
 <tr class="odd">
 <td><code>object</code></td>
-<td>An object of class <code>bgms</code>.</td>
+<td>An object of class <code>bgms</code> or <code>bgmCompare</code>.</td>
 </tr>
 <tr class="even">
 <td><code>newdata</code></td>
-<td>A matrix or data frame with <code>n</code> rows and <code>p</code> columns. Must match the variables used in fitting.</td>
-</tr>
-<tr class="odd">
-<td><code>variables</code></td>
-<td>Character vector of names, integer vector of column indices, or <code>NULL</code> (all variables).</td>
-</tr>
-<tr class="even">
-<td><code>type</code></td>
-<td><code>"probabilities"</code> (full conditional distribution) or <code>"response"</code> (predicted category).</td>
-</tr>
-<tr class="odd">
-<td><code>method</code></td>
-<td><code>"posterior-mean"</code> (use posterior means) or <code>"posterior-sample"</code> (average over draws).</td>
-</tr>
-<tr class="even">
-<td><code>ndraws</code></td>
-<td>Number of posterior draws for <code>"posterior-sample"</code>. <code>NULL</code> uses all draws.</td>
-</tr>
-<tr class="odd">
-<td><code>seed</code></td>
-<td>Optional random seed.</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Ordinal models</strong>: For <code>type = "probabilities"</code>, returns a named list with one matrix per variable (n rows x (num_categories + 1) columns). For <code>type = "response"</code>, returns a matrix of predicted categories.</p>
-<p><strong>GGM models</strong>: For <code>type = "probabilities"</code>, returns a list with one matrix per variable (n rows x 2 columns: <code>"mean"</code> and <code>"sd"</code>). For <code>type = "response"</code>, returns conditional means.</p>
-<p><strong>Mixed MRF models</strong>: Returns a list combining both formats for discrete and continuous variables.</p>
-<p>When <code>method = "posterior-sample"</code>, predictions include an <code>"sd"</code> attribute with the standard deviation across draws.</p>
-</section>
-<section id="bgmcompare-3" class="level3">
-<h3 class="anchored" data-anchor-id="bgmcompare-3">bgmCompare</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(object, newdata, group, <span class="at">variables =</span> <span class="cn">NULL</span>,</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"probabilities"</span>, <span class="st">"response"</span>),</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"posterior-mean"</span>), ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 56%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>object</code></td>
-<td>An object of class <code>bgmCompare</code>.</td>
-</tr>
-<tr class="even">
-<td><code>newdata</code></td>
-<td>A matrix or data frame matching the original variables.</td>
+<td>A matrix or data frame matching the variables used in fitting.</td>
 </tr>
 <tr class="odd">
 <td><code>group</code></td>
-<td>Integer specifying which group’s parameters to use (1 to number of groups). Required.</td>
+<td>Integer group index for <code>bgmCompare</code> only (required there).</td>
 </tr>
 <tr class="even">
 <td><code>variables</code></td>
-<td>Which variables to predict (character, integer, or <code>NULL</code> for all).</td>
+<td>Character names, integer indices, or <code>NULL</code> (all variables).</td>
 </tr>
 <tr class="odd">
 <td><code>type</code></td>
@@ -752,23 +607,58 @@ Warning
 </tr>
 <tr class="even">
 <td><code>method</code></td>
-<td><code>"posterior-mean"</code> (posterior mean parameters).</td>
+<td><code>bgms</code>: <code>"posterior-mean"</code> or <code>"posterior-sample"</code>; <code>bgmCompare</code>: <code>"posterior-mean"</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>ndraws</code></td>
+<td>For <code>bgms</code> with <code>method = "posterior-sample"</code>.</td>
+</tr>
+<tr class="even">
+<td><code>seed</code></td>
+<td>Optional random seed.</td>
 </tr>
 </tbody>
 </table>
-<p>Returns the same structure as <code>predict.bgms</code>, using group-specific parameters obtained by combining baseline parameters and group differences.</p>
+<p>Return shape depends on model type:</p>
+<ul>
+<li>Ordinal: probabilities per category or predicted categories.</li>
+<li>GGM: conditional means/sds or conditional means.</li>
+<li>Mixed: combined discrete and continuous outputs.</li>
+</ul>
+<p>For <code>bgmCompare</code>, outputs use group-specific parameters (baseline plus group differences).</p>
+<section id="example" class="level3">
+<h3 class="anchored" data-anchor-id="example">Example</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict probabilities for the first observation's variable 1</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># given its observed values on variables 2-17</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit, <span class="at">newdata =</span> Wenchuan[<span class="dv">1</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>], <span class="at">variables =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$intrusion
+         cat_0     cat_1      cat_2       cat_3        cat_4
+[1,] 0.3683497 0.5816389 0.04811667 0.001882903 1.181429e-05</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict responses (most likely category) for first 3 observations</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit, <span class="at">newdata =</span> Wenchuan[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, ], <span class="at">variables =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">type =</span> <span class="st">"response"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     intrusion dreams flash
+[1,]         1      0     0
+[2,]         1      0     0
+[3,]         2      1     1</code></pre>
+</div>
+</div>
 </section>
 </section>
 <section id="simulate" class="level2">
 <h2 class="anchored" data-anchor-id="simulate">simulate</h2>
 <p>Generate new observations from a fitted model.</p>
-<section id="bgms-4" class="level3">
-<h3 class="anchored" data-anchor-id="bgms-4">bgms</h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate</span>(object, <span class="at">nsim =</span> <span class="dv">500</span>, <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"posterior-mean"</span>, <span class="st">"posterior-sample"</span>),</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">ndraws =</span> <span class="cn">NULL</span>, <span class="at">iter =</span> <span class="dv">1000</span>,</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>(),</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>), ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>), ...)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate</span>(object, <span class="at">nsim =</span> <span class="dv">500</span>, <span class="at">seed =</span> <span class="cn">NULL</span>, group,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"posterior-mean"</span>), <span class="at">iter =</span> <span class="dv">1000</span>, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 43%">
@@ -783,59 +673,7 @@ Warning
 <tbody>
 <tr class="odd">
 <td><code>object</code></td>
-<td>An object of class <code>bgms</code>.</td>
-</tr>
-<tr class="even">
-<td><code>nsim</code></td>
-<td>Number of observations to simulate. Default: <code>500</code>.</td>
-</tr>
-<tr class="odd">
-<td><code>seed</code></td>
-<td>Optional random seed.</td>
-</tr>
-<tr class="even">
-<td><code>method</code></td>
-<td><code>"posterior-mean"</code> (single simulation) or <code>"posterior-sample"</code> (one dataset per draw, parallel).</td>
-</tr>
-<tr class="odd">
-<td><code>ndraws</code></td>
-<td>Number of posterior draws for <code>"posterior-sample"</code>. <code>NULL</code> uses all.</td>
-</tr>
-<tr class="even">
-<td><code>iter</code></td>
-<td>Gibbs iterations for equilibration. Default: <code>1000</code>.</td>
-</tr>
-<tr class="odd">
-<td><code>cores</code></td>
-<td>CPU cores for parallel execution with <code>"posterior-sample"</code>.</td>
-</tr>
-<tr class="even">
-<td><code>display_progress</code></td>
-<td>Progress bar style: <code>"per-chain"</code>, <code>"total"</code>, or <code>"none"</code>.</td>
-</tr>
-</tbody>
-</table>
-<p>If <code>method = "posterior-mean"</code>: a matrix (nsim x p). If <code>method = "posterior-sample"</code>: a list of matrices, one per posterior draw. For mixed MRF models, discrete columns contain integers and continuous columns contain real values.</p>
-</section>
-<section id="bgmcompare-4" class="level3">
-<h3 class="anchored" data-anchor-id="bgmcompare-4">bgmCompare</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate</span>(object, <span class="at">nsim =</span> <span class="dv">500</span>, <span class="at">seed =</span> <span class="cn">NULL</span>, group,</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"posterior-mean"</span>), <span class="at">iter =</span> <span class="dv">1000</span>, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 56%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>object</code></td>
-<td>An object of class <code>bgmCompare</code>.</td>
+<td>An object of class <code>bgms</code> or <code>bgmCompare</code>.</td>
 </tr>
 <tr class="even">
 <td><code>nsim</code></td>
@@ -847,35 +685,75 @@ Warning
 </tr>
 <tr class="even">
 <td><code>group</code></td>
-<td>Integer specifying which group to simulate from (1 to number of groups). Required.</td>
+<td>Integer group index for <code>bgmCompare</code> only (required there).</td>
 </tr>
 <tr class="odd">
 <td><code>method</code></td>
-<td><code>"posterior-mean"</code>.</td>
+<td><code>bgms</code>: <code>"posterior-mean"</code> or <code>"posterior-sample"</code>; <code>bgmCompare</code>: <code>"posterior-mean"</code>.</td>
 </tr>
 <tr class="even">
+<td><code>ndraws</code></td>
+<td>For <code>bgms</code> with <code>method = "posterior-sample"</code>.</td>
+</tr>
+<tr class="odd">
 <td><code>iter</code></td>
 <td>Gibbs iterations for equilibration. Default: <code>1000</code>.</td>
 </tr>
+<tr class="even">
+<td><code>cores</code>, <code>display_progress</code></td>
+<td>Used for <code>bgms</code> with <code>method = "posterior-sample"</code>.</td>
+</tr>
 </tbody>
 </table>
-<p>Returns a matrix (nsim x p) of simulated observations for the specified group.</p>
+<p>Returns:</p>
+<ul>
+<li><code>bgms</code>, <code>posterior-mean</code>: matrix (<code>nsim x p</code>).</li>
+<li><code>bgms</code>, <code>posterior-sample</code>: list of matrices (one per draw).</li>
+<li><code>bgmCompare</code>: matrix (<code>nsim x p</code>) for the selected group.</li>
+</ul>
+<section id="example-1" class="level3">
+<h3 class="anchored" data-anchor-id="example-1">Example</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit a model</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(Wenchuan, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulate 100 new observations from the posterior mean network</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>sim_data <span class="ot">=</span> <span class="fu">simulate</span>(fit, <span class="at">nsim =</span> <span class="dv">100</span>, <span class="at">seed =</span> <span class="dv">42</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sim_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     intrusion dreams flash upset physior avoidth avoidact amnesia lossint
+[1,]         2      2     3     2       4       2        1       3       1
+[2,]         3      3     2     1       1       2        1       0       1
+[3,]         1      1     1     0       0       1        1       0       0
+[4,]         1      0     0     0       0       0        1       0       3
+[5,]         2      1     1     2       1       3        3       1       1
+[6,]         1      0     1     3       2       2        1       0       0
+     distant numb future sleep anger concen hyper startle
+[1,]       1    0      1     3     2      3     1       3
+[2,]       1    1      2     3     2      1     1       1
+[3,]       0    0      0     0     1      0     0       0
+[4,]       1    0      1     1     1      1     1       1
+[5,]       1    1      0     1     2      1     1       1
+[6,]       0    0      1     2     3      0     0       2</code></pre>
+</div>
+</div>
 </section>
 </section>
 <section id="simulate_mrf" class="level2">
 <h2 class="anchored" data-anchor-id="simulate_mrf">simulate_mrf</h2>
 <p>Simulate observations from a Markov Random Field using user-specified parameters (no fitted model needed).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate_mrf</span>(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  num_states,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  num_variables,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  num_categories,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  pairwise,</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  main,</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="st">"ordinal"</span>,</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  baseline_category,</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">1000</span>,</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate_mrf</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  num_states,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  num_variables,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  num_categories,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  pairwise,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  main,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="st">"ordinal"</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  baseline_category,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">1000</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 43%">
@@ -928,6 +806,38 @@ Warning
 </table>
 <p>Returns a (num_states x num_variables) matrix of simulated observations.</p>
 <p>For ordinal and Blume-Capel variables, the Gibbs sampler generates observations from full conditional distributions. For continuous variables, observations are drawn directly from <span class="math inline">\(N(\mu, \Omega^{-1})\)</span>.</p>
+<section id="example-2" class="level3">
+<h3 class="anchored" data-anchor-id="example-2">Example</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulate from a 3-variable binary MRF with specified parameters</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>pairwise <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>   <span class="fl">0.0</span>,  <span class="fl">0.5</span>, <span class="sc">-</span><span class="fl">0.3</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>   <span class="fl">0.5</span>,  <span class="fl">0.0</span>,  <span class="fl">0.4</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span><span class="fl">0.3</span>,  <span class="fl">0.4</span>,  <span class="fl">0.0</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.0</span>, <span class="sc">-</span><span class="fl">0.5</span>, <span class="fl">0.2</span>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>sim_data <span class="ot">=</span> <span class="fu">simulate_mrf</span>(</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a> <span class="at">num_states =</span> <span class="dv">500</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a> <span class="at">num_variables =</span> <span class="dv">3</span>,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a> <span class="at">num_categories =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a> <span class="at">pairwise =</span> pairwise,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a> <span class="at">main =</span> main,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a> <span class="at">seed =</span> <span class="dv">123</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sim_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3]
+[1,]    1    1    0
+[2,]    1    1    1
+[3,]    1    1    1
+[4,]    1    1    1
+[5,]    0    1    1
+[6,]    1    0    0</code></pre>
+</div>
+</div>
+</section>
 </section>
 <section id="see-also" class="level2">
 <h2 class="anchored" data-anchor-id="see-also">See also</h2>

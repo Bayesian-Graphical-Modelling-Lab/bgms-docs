@@ -435,7 +435,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/methods.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">S3 Methods</span></a>
+ <span class="menu-text">Methods</span></a>
   </div>
 </li>
       </ul>
@@ -481,58 +481,21 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
 <p>Functions to extract specific components from fitted <code>bgms</code> and <code>bgmCompare</code> objects.</p>
+<p>Unless noted otherwise, extractor functions use one argument:</p>
+<ul>
+<li><code>bgms_object</code>: a fitted <code>bgms</code> or <code>bgmCompare</code> object.</li>
+</ul>
 <section id="extract_arguments" class="level2">
 <h2 class="anchored" data-anchor-id="extract_arguments">extract_arguments</h2>
 <p>Retrieve the arguments used when fitting a model with <code>bgm()</code> or <code>bgmCompare()</code>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_arguments</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
-</tr>
-</tbody>
-</table>
 <p>Returns a named list containing all arguments passed to the fitting function, including data dimensions, prior settings, and MCMC configuration.</p>
 </section>
 <section id="extract_main_effects" class="level2">
 <h2 class="anchored" data-anchor-id="extract_main_effects">extract_main_effects</h2>
 <p>Retrieve posterior mean main-effect parameters.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_main_effects</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
-</tr>
-</tbody>
-</table>
 <p>The structure depends on the model type:</p>
 <ul>
 <li><strong>GGM</strong> (<code>bgms</code>): <code>NULL</code>. GGM models have no main effects.</li>
@@ -545,40 +508,12 @@ Warning
 <h2 class="anchored" data-anchor-id="extract_pairwise_interactions">extract_pairwise_interactions</h2>
 <p>Retrieve posterior samples of partial association parameters.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_pairwise_interactions</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
-</tr>
-</tbody>
-</table>
 <p>Returns a matrix with one row per post-warmup iteration and one column per edge. For <code>bgmCompare</code>, columns correspond to baseline partial association parameters.</p>
 </section>
 <section id="extract_indicators" class="level2">
 <h2 class="anchored" data-anchor-id="extract_indicators">extract_indicators</h2>
 <p>Retrieve posterior samples of inclusion indicators.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_indicators</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
-</tr>
-</tbody>
-</table>
 <p>Returns a matrix with one row per post-warmup iteration and one column per indicator, containing binary (0/1) samples:</p>
 <ul>
 <li><strong><code>bgms</code></strong>: One column per edge. Requires <code>edge_selection = TRUE</code>.</li>
@@ -589,20 +524,6 @@ Warning
 <h2 class="anchored" data-anchor-id="extract_posterior_inclusion_probabilities">extract_posterior_inclusion_probabilities</h2>
 <p>Compute posterior inclusion probabilities.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_posterior_inclusion_probabilities</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
-</tr>
-</tbody>
-</table>
 <p>Returns a symmetric p x p matrix of posterior inclusion probabilities:</p>
 <ul>
 <li><strong><code>bgms</code></strong>: Off-diagonal entries are edge inclusion probabilities. Requires <code>edge_selection = TRUE</code>.</li>
@@ -613,20 +534,6 @@ Warning
 <h2 class="anchored" data-anchor-id="extract_indicator_priors">extract_indicator_priors</h2>
 <p>Retrieve the prior specification used for inclusion indicators.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_indicator_priors</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
-</tr>
-</tbody>
-</table>
 <p>Returns a named list describing the prior structure, including the prior type and hyperparameters:</p>
 <ul>
 <li><strong><code>bgms</code></strong>: Requires <code>edge_selection = TRUE</code>. Returns the prior type (<code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, or <code>"Stochastic-Block"</code>) and associated hyperparameters.</li>
@@ -637,40 +544,14 @@ Warning
 <h2 class="anchored" data-anchor-id="extract_group_params">extract_group_params</h2>
 <p>Compute group-specific parameter estimates by combining baseline parameters and group differences.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_group_params</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgmCompare</code> object.</td>
-</tr>
-</tbody>
-</table>
+<p><code>bgms_object</code> must be a fitted <code>bgmCompare</code> object.</p>
 <p>Returns a list with <code>main_effects_groups</code> (main effects per group) and <code>pairwise_effects_groups</code> (pairwise effects per group).</p>
 </section>
 <section id="extract_sbm" class="level2">
 <h2 class="anchored" data-anchor-id="extract_sbm">extract_sbm</h2>
 <p>Retrieve posterior summaries from a model fitted with the Stochastic Block prior.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_sbm</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> object.</td>
-</tr>
-</tbody>
-</table>
+<p><code>bgms_object</code> must be a fitted <code>bgms</code> object.</p>
 <p>Requires <code>edge_selection = TRUE</code> and <code>edge_prior = "Stochastic-Block"</code>. Returns a list with:</p>
 <ul>
 <li><code>posterior_num_blocks</code> — Posterior probabilities for each possible number of clusters.</li>
@@ -683,41 +564,13 @@ Warning
 <h2 class="anchored" data-anchor-id="extract_ess">extract_ess</h2>
 <p>Retrieve effective sample size estimates for all parameters.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_ess</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
-</tr>
-</tbody>
-</table>
-<p>Returns a named list with ESS values for each parameter type present in the model (e.g., <code>main</code>, <code>pairwise</code>, <code>indicator</code>).</p>
+<p>Returns a named list with ESS values for each parameter type present in the model (e.g., <code>main</code>, <code>pairwise</code>, <code>indicator</code>). ESS is computed in C++ using the AR spectral density method, matching <code>coda::effectiveSize</code>. For implementation details, see the <a href="../manual/diagnostics.html">Technical Manual</a>.</p>
 </section>
 <section id="extract_rhat" class="level2">
 <h2 class="anchored" data-anchor-id="extract_rhat">extract_rhat</h2>
 <p>Retrieve R-hat convergence diagnostics for all parameters.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_rhat</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> or <code>bgmCompare</code> object.</td>
-</tr>
-</tbody>
-</table>
-<p>Returns a named list with R-hat values for each parameter type present in the model (e.g., <code>main</code>, <code>pairwise</code>, <code>indicator</code>).</p>
+<p>Returns a named list with R-hat values for each parameter type present in the model (e.g., <code>main</code>, <code>pairwise</code>, <code>indicator</code>). R-hat is computed in C++ using the Gelman-Rubin formula, matching <code>coda::gelman.diag</code>. For implementation details, see the <a href="../manual/diagnostics.html">Technical Manual</a>.</p>
 </section>
 <section id="deprecated-functions" class="level2">
 <h2 class="anchored" data-anchor-id="deprecated-functions">Deprecated functions</h2>
@@ -731,40 +584,14 @@ Warning
 <h2 class="anchored" data-anchor-id="extract_precision">extract_precision</h2>
 <p>Retrieve the posterior mean precision matrix.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_precision</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> object (GGM or mixed MRF).</td>
-</tr>
-</tbody>
-</table>
+<p><code>bgms_object</code> must be a fitted <code>bgms</code> object (GGM or mixed MRF).</p>
 <p>Returns a symmetric p x p matrix (or the continuous block submatrix for mixed MRFs) containing the posterior mean precision matrix <span class="math inline">\(\boldsymbol{K}\)</span>.</p>
 </section>
 <section id="extract_partial_correlations" class="level2">
 <h2 class="anchored" data-anchor-id="extract_partial_correlations">extract_partial_correlations</h2>
 <p>Retrieve the posterior mean partial correlation matrix.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_partial_correlations</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> object (GGM or mixed MRF).</td>
-</tr>
-</tbody>
-</table>
+<p><code>bgms_object</code> must be a fitted <code>bgms</code> object (GGM or mixed MRF).</p>
 <p>Returns a symmetric matrix of partial correlations, computed by standardizing the precision matrix: <span class="math inline">\(\rho_{ij} = -K_{ij} / \sqrt{K_{ii}
 K_{jj}}\)</span>.</p>
 </section>
@@ -772,25 +599,12 @@ K_{jj}}\)</span>.</p>
 <h2 class="anchored" data-anchor-id="extract_log_odds">extract_log_odds</h2>
 <p>Retrieve the posterior mean log-odds matrix.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_log_odds</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bgms_object</code></td>
-<td>A fitted <code>bgms</code> object (OMRF or mixed MRF).</td>
-</tr>
-</tbody>
-</table>
+<p><code>bgms_object</code> must be a fitted <code>bgms</code> object (OMRF or mixed MRF).</p>
 <p>Returns a symmetric matrix of log adjacent-category odds ratios. For the ordinal MRF, <span class="math inline">\(\text{log-odds}_{ij} = 2 \omega_{ij}\)</span>.</p>
 </section>
 <section id="see-also" class="level2">
 <h2 class="anchored" data-anchor-id="see-also">See also</h2>
-<p><a href="../reference/bgm.html">bgm()</a>, <a href="../reference/bgmCompare.html">bgmCompare()</a>, <a href="../reference/methods.html">S3 methods</a></p>
+<p><a href="../reference/bgm.html">bgm()</a>, <a href="../reference/bgmCompare.html">bgmCompare()</a>, <a href="../reference/methods.html">Methods</a></p>
 
 
 </section>
@@ -1258,8 +1072,8 @@ document.querySelectorAll("[data-cite-picker]").forEach(picker => {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../reference/methods.html" class="pagination-link" aria-label="S3 Methods">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">S3 Methods</span>
+      <a href="../reference/methods.html" class="pagination-link" aria-label="Methods">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Methods</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

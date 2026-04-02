@@ -547,54 +547,65 @@ ul.task-list li input[type="checkbox"] {
 <p>Technical documentation for the <code>bgms</code> C++ backend, MCMC algorithms, and R scaffolding layer. This manual targets contributors to <code>bgms</code> development, users who need to understand implementation details, and researchers extending <code>bgms</code> for new model types.</p>
 <section id="architecture" class="level2">
 <h2 class="anchored" data-anchor-id="architecture">Architecture</h2>
-<p>How the R front-end and C++ back-end are organized, and how they communicate.</p>
+<p>How the R front-end and C++ back-end fit together.</p>
 <ul>
 <li><a href="../manual/architecture.html">C++ Architecture</a> — Source layout, layer separation, design principles</li>
 <li><a href="../manual/r-scaffolding.html">R Scaffolding</a> — Validation, spec construction, sampler dispatch, output assembly</li>
-<li><a href="../manual/model-classes.html">Model Classes</a> — <code>BaseModel</code> hierarchy and virtual interface</li>
+<li><a href="../manual/model-classes.html">Model Classes</a> — <code>BaseModel</code> hierarchy and the virtual interface that all models implement</li>
+<li><a href="../manual/parallel-chains.html">Parallel Chains</a> — TBB threading, model cloning, per-chain RNG seeding</li>
 </ul>
 </section>
-<section id="mcmc-engine" class="level2">
-<h2 class="anchored" data-anchor-id="mcmc-engine">MCMC Engine</h2>
-<p>The sampling machinery shared by all models.</p>
+<section id="mcmc-algorithms" class="level2">
+<h2 class="anchored" data-anchor-id="mcmc-algorithms">MCMC Algorithms</h2>
+<p>The sampling algorithms available in <code>bgms</code>.</p>
 <ul>
-<li><a href="../manual/samplers.html">Sampler Hierarchy</a> — <code>SamplerBase</code>, gradient-based samplers, factory dispatch</li>
-<li><a href="../manual/nuts.html">NUTS Algorithm</a> — Binary tree construction, U-turn criterion, divergence detection</li>
-<li><a href="../manual/hmc.html">HMC Algorithm</a> — Fixed-length leapfrog, Metropolis correction (deprecated)</li>
-<li><a href="../manual/metropolis.html">Adaptive Metropolis</a> — Scalar random-walk MH, Robbins–Monro adaptation</li>
-<li><a href="../manual/rattle.html">Constrained Leapfrog (RATTLE)</a> — Position/momentum projection, reversibility check, Memoizer</li>
-<li><a href="../manual/warmup.html">Warmup Schedule</a> — Five-stage adaptation, dual averaging, mass matrix tuning</li>
-<li><a href="../manual/parallel-chains.html">Parallel Chains</a> — TBB threading, model cloning, per-chain RNG</li>
+<li><a href="../manual/metropolis.html">Adaptive Metropolis</a> — Scalar random-walk Metropolis–Hastings with Robbins–Monro step-size adaptation. Used for discrete parameters (thresholds, interactions) in OMRF and mixed models.</li>
+<li><a href="../manual/nuts.html">NUTS</a> — No-U-Turn Sampler: adaptive-length Hamiltonian Monte Carlo with binary tree expansion and U-turn termination. The default sampler for continuous parameters in mixed models.</li>
+<li><a href="../manual/hmc.html">HMC</a> — Fixed-trajectory Hamiltonian Monte Carlo. Deprecated; NUTS is preferred.</li>
+<li><a href="../manual/rattle.html">Constrained Leapfrog</a> — RATTLE integrator for Hamiltonian dynamics under precision-matrix constraints. Required for mixed models where the precision matrix must remain positive definite.</li>
 </ul>
 </section>
-<section id="models" class="level2">
-<h2 class="anchored" data-anchor-id="models">Models</h2>
-<p>Model-specific sampling and likelihood computation.</p>
+<section id="sampler-infrastructure" class="level2">
+<h2 class="anchored" data-anchor-id="sampler-infrastructure">Sampler Infrastructure</h2>
+<p>Shared machinery that supports all samplers.</p>
 <ul>
-<li><a href="../manual/ggm-internals.html">GGM Internals</a> — Precision matrix Metropolis, Cholesky rank-1 updates</li>
-<li><a href="../manual/omrf-internals.html">OMRF Internals</a> — Ordinal thresholds, Blume-Capel, pseudolikelihood</li>
-<li><a href="../manual/variable-helpers.html">Variable Helpers</a> — Numerically stable probability computation (FAST/SAFE)</li>
-<li><a href="../manual/mixed-internals.html">Mixed MRF Internals</a> — NUTS + precision Metropolis, block parameter layout, RATTLE</li>
+<li><a href="../manual/samplers.html">Sampler Classes</a> — The <code>SamplerBase</code> interface, gradient-based sampler hierarchy, and factory dispatch</li>
+<li><a href="../manual/warmup.html">Warmup Schedule</a> — Five-stage adaptation: step-size search, mass matrix estimation, dual averaging</li>
+<li><a href="../manual/diagnostics.html">Convergence Diagnostics</a> — C++ implementation of ESS (AR spectral) and R-hat (Gelman–Rubin)</li>
 </ul>
 </section>
-<section id="priors-edge-selection" class="level2">
-<h2 class="anchored" data-anchor-id="priors-edge-selection">Priors &amp; Edge Selection</h2>
-<p>Prior specification and edge inclusion machinery.</p>
+<section id="model-internals" class="level2">
+<h2 class="anchored" data-anchor-id="model-internals">Model Internals</h2>
+<p>How each model type computes likelihoods, gradients, and parameter updates.</p>
 <ul>
-<li><a href="../manual/edge-priors.html">Edge Priors</a> — Bernoulli, Beta-Bernoulli, and SBM prior classes</li>
-<li><a href="../manual/sbm-prior.html">SBM Prior</a> — MFM-SBM formulation, collapsed Gibbs, cluster allocation</li>
+<li><a href="../manual/ggm-internals.html">GGM</a> — Precision matrix sampling via element-wise Metropolis with Cholesky rank-1 updates</li>
+<li><a href="../manual/omrf-internals.html">OMRF</a> — Ordinal thresholds, Blume–Capel parameterization, pseudolikelihood gradients</li>
+<li><a href="../manual/mixed-internals.html">Mixed MRF</a> — Joint discrete-continuous models: NUTS for interactions, Metropolis for precision, RATTLE constraints</li>
+</ul>
+<p>Supporting pages:</p>
+<ul>
+<li><a href="../manual/pseudolikelihood.html">Pseudolikelihood</a> — Why <code>bgms</code> uses pseudolikelihood instead of the full likelihood, and how this affects inference. Relevant for OMRF and mixed models.</li>
+<li><a href="../manual/variable-helpers.html">Fast Probability Computation</a> — Recursive accumulation of MRF category probabilities that avoids per-category <code>exp()</code> calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.</li>
+</ul>
+</section>
+<section id="edge-priors" class="level2">
+<h2 class="anchored" data-anchor-id="edge-priors">Edge Priors</h2>
+<p>Prior distributions over graph structure for edge selection.</p>
+<ul>
+<li><a href="../manual/edge-priors.html">Edge Priors</a> — Overview of the edge prior framework: Bernoulli (fixed), Beta-Bernoulli (learned), and Stochastic Block Model</li>
+<li><a href="../manual/sbm-prior.html">SBM Prior</a> — Mixture-of-finite-mixtures SBM formulation, collapsed Gibbs updates, cluster allocation sampling</li>
 </ul>
 </section>
 <section id="group-comparison" class="level2">
 <h2 class="anchored" data-anchor-id="group-comparison">Group Comparison</h2>
 <ul>
-<li><a href="../manual/bgmcompare-internals.html">bgmCompare Engine</a> — Multi-group posterior, difference selection</li>
+<li><a href="../manual/bgmcompare-internals.html">bgmCompare Internals</a> — Multi-group parameterization (baseline plus differences), group-specific gradients, difference-edge selection</li>
 </ul>
 </section>
-<section id="numerical-methods" class="level2">
-<h2 class="anchored" data-anchor-id="numerical-methods">Numerical Methods</h2>
+<section id="cross-platform-math" class="level2">
+<h2 class="anchored" data-anchor-id="cross-platform-math">Cross-Platform Math</h2>
 <ul>
-<li><a href="../manual/numerical.html">Numerical Considerations</a> — Cross-platform exp/log, OpenLibM, IEEE 754 compliance</li>
+<li><a href="../manual/numerical.html">OpenLibM Integration</a> — Ships a portable math library because the Windows C runtime <code>exp()</code> produces inconsistent results. Ensures identical output across operating systems.</li>
 </ul>
 </section>
 <section id="prerequisites" class="level2">

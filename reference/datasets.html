@@ -58,7 +58,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -405,7 +425,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/methods.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">S3 Methods</span></a>
+ <span class="menu-text">Methods</span></a>
   </div>
 </li>
       </ul>
@@ -451,23 +471,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
 <p>Example datasets included in bgms.</p>
 <section id="adhd" class="level2">
 <h2 class="anchored" data-anchor-id="adhd">ADHD</h2>
-<p>ADHD symptom ratings for 355 children aged 6 to 8 years from the Children’s Attention Project (CAP) cohort (Silk et al., 2019). The sample consists of 146 children diagnosed with ADHD and 209 without a diagnosis. Symptoms were assessed through structured interviews with parents using the NIMH Diagnostic Interview Schedule for Children IV (DISC-IV; Shaffer et al., 2000). The checklist includes 18 items: 9 Inattentive (I) and 9 Hyperactive/Impulsive (HI). Each item is binary (1 = present, 0 = absent).</p>
+<p>ADHD symptom ratings for 355 children aged 6 to 8 years from the Children’s Attention Project (CAP) cohort <span class="citation" data-cites="SilkEtAl_2019_adhd">Silk et al. (<a href="#ref-SilkEtAl_2019_adhd" role="doc-biblioref">2019</a>)</span>. The sample consists of 146 children diagnosed with ADHD and 209 without a diagnosis. Symptoms were assessed through structured interviews with parents using the NIMH Diagnostic Interview Schedule for Children IV (DISC-IV; <span class="citation" data-cites="ShafferEtAl_2000_disc">Shaffer et al. (<a href="#ref-ShafferEtAl_2000_disc" role="doc-biblioref">2000</a>)</span>). The checklist includes 18 items: 9 Inattentive (I) and 9 Hyperactive/Impulsive (HI). Each item is binary (1 = present, 0 = absent).</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"ADHD"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A matrix with 355 rows and 19 columns:</p>
 <table class="caption-top table">
@@ -560,11 +567,11 @@ Warning
 </tr>
 </tbody>
 </table>
-<p><strong>Source</strong>: Silk et al.&nbsp;(2019). Data retrieved from <a href="https://doi.org/10.1371/journal.pone.0211053.s004">doi:10.1371/journal.pone.0211053.s004</a>. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>.</p>
+<p><strong>Source</strong>: <span class="citation" data-cites="SilkEtAl_2019_adhd">Silk et al. (<a href="#ref-SilkEtAl_2019_adhd" role="doc-biblioref">2019</a>)</span>. Data retrieved from <a href="https://doi.org/10.1371/journal.pone.0211053.s004">doi:10.1371/journal.pone.0211053.s004</a>. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>.</p>
 </section>
 <section id="boredom" class="level2">
 <h2 class="anchored" data-anchor-id="boredom">Boredom</h2>
-<p>Responses to the 8-item Short Boredom Proneness Scale (SBPS), a self-report measure of susceptibility to boredom (Martarelli et al., 2023). Items were rated on a 7-point Likert scale from 1 (“strongly disagree”) to 7 (“strongly agree”). The scale was administered in either English (Struk et al., 2015) or French (Martarelli et al., 2023).</p>
+<p>Responses to the 8-item Short Boredom Proneness Scale (SBPS), a self-report measure of susceptibility to boredom <span class="citation" data-cites="MartarelliEtAl_2023_boredom">Martarelli et al. (<a href="#ref-MartarelliEtAl_2023_boredom" role="doc-biblioref">2023</a>)</span>. Items were rated on a 7-point Likert scale from 1 (“strongly disagree”) to 7 (“strongly agree”). The scale was administered in either English <span class="citation" data-cites="StrukEtAl_2015_bps">Struk et al. (<a href="#ref-StrukEtAl_2015_bps" role="doc-biblioref">2017</a>)</span> or French <span class="citation" data-cites="MartarelliEtAl_2023_boredom">Martarelli et al. (<a href="#ref-MartarelliEtAl_2023_boredom" role="doc-biblioref">2023</a>)</span>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Boredom"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A matrix with 986 rows and 9 columns:</p>
 <table class="caption-top table">
@@ -617,11 +624,11 @@ Warning
 </tr>
 </tbody>
 </table>
-<p><strong>Source</strong>: Martarelli et al.&nbsp;(2023). Data retrieved from <a href="https://osf.io/qhux8">osf.io/qhux8</a>. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>.</p>
+<p><strong>Source</strong>: <span class="citation" data-cites="MartarelliEtAl_2023_boredom">Martarelli et al. (<a href="#ref-MartarelliEtAl_2023_boredom" role="doc-biblioref">2023</a>)</span>. Data retrieved from <a href="https://osf.io/qhux8">osf.io/qhux8</a>. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>.</p>
 </section>
 <section id="wenchuan" class="level2">
 <h2 class="anchored" data-anchor-id="wenchuan">Wenchuan</h2>
-<p>Responses to 17 items assessing PTSD symptoms in Chinese adults who survived the 2008 Wenchuan earthquake and lost at least one child in the disaster (McNally et al., 2015). Participants completed the civilian version of the Posttraumatic Checklist, with each item corresponding to a DSM-IV PTSD symptom. Items were rated on a 5-point Likert scale from “not at all” to “extremely.”</p>
+<p>Responses to 17 items assessing PTSD symptoms in Chinese adults who survived the 2008 Wenchuan earthquake and lost at least one child in the disaster <span class="citation" data-cites="McNallyEtAl_2015_ptsd">McNally et al. (<a href="#ref-McNallyEtAl_2015_ptsd" role="doc-biblioref">2015</a>)</span>. Participants completed the civilian version of the Posttraumatic Checklist, with each item corresponding to a DSM-IV PTSD symptom. Items were rated on a 5-point Likert scale from “not at all” to “extremely.”</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Wenchuan"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A matrix with 362 rows and 17 columns:</p>
 <table class="caption-top table">
@@ -706,22 +713,29 @@ Warning
 </tr>
 </tbody>
 </table>
-<p><strong>Source</strong>: McNally et al.&nbsp;(2015). Data retrieved from <a href="https://psychosystems.org/wp-content/uploads/2014/10/Wenchuan.csv">psychosystems.org</a>.</p>
-</section>
-<section id="references" class="level2">
-<h2 class="anchored" data-anchor-id="references">References</h2>
-<ul>
-<li>Martarelli, C. S., et al.&nbsp;(2023). Boredom proneness predicts self-assessed decision errors in everyday life. <em>Psychological Research</em>, 87, 440–452.</li>
-<li>McNally, R. J., et al.&nbsp;(2015). Mental disorders as causal systems: A network approach to posttraumatic stress disorder. <em>Clinical Psychological Science</em>, 3(6), 836–849.</li>
-<li>Shaffer, D., et al.&nbsp;(2000). NIMH Diagnostic Interview Schedule for Children Version IV. <em>Journal of the American Academy of Child and Adolescent Psychiatry</em>, 39, 28–38.</li>
-<li>Silk, T. J., et al.&nbsp;(2019). A network analysis approach to ADHD symptoms in early adolescence. <em>PLoS ONE</em>, 14(1), e0211053.</li>
-<li>Struk, A. A., et al.&nbsp;(2015). A short Boredom Proneness Scale. <em>Assessment</em>, 24(3), 346–359.</li>
-</ul>
+<p><strong>Source</strong>: <span class="citation" data-cites="McNallyEtAl_2015_ptsd">McNally et al. (<a href="#ref-McNallyEtAl_2015_ptsd" role="doc-biblioref">2015</a>)</span>. Data retrieved from <a href="https://psychosystems.org/wp-content/uploads/2014/10/Wenchuan.csv">psychosystems.org</a>.</p>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-MartarelliEtAl_2023_boredom" class="csl-entry" role="listitem">
+Martarelli, C. S., Wolff, W., &amp; Wolff, W. (2023). Boredom proneness predicts self-assessed decision errors in everyday life. <em>Psychological Research</em>, <em>87</em>, 440–452. <a href="https://doi.org/10.1007/s00426-022-01667-7">https://doi.org/10.1007/s00426-022-01667-7</a>
+</div>
+<div id="ref-McNallyEtAl_2015_ptsd" class="csl-entry" role="listitem">
+McNally, R. J., Robinaugh, D. J., Wu, G. W. Y., Wang, L., Deserno, M. K., &amp; Borsboom, D. (2015). Mental disorders as causal systems: A network approach to posttraumatic stress disorder. <em>Clinical Psychological Science</em>, <em>3</em>(6), 836–849. <a href="https://doi.org/10.1177/2167702614553230">https://doi.org/10.1177/2167702614553230</a>
+</div>
+<div id="ref-ShafferEtAl_2000_disc" class="csl-entry" role="listitem">
+Shaffer, D., Fisher, P., Lucas, C. P., Dulcan, M. K., &amp; Schwab-Stone, M. E. (2000). <span>NIMH</span> diagnostic interview schedule for children version <span>IV</span> (<span>NIMH DISC-IV</span>): Description, differences from previous versions, and reliability of some common diagnoses. <em>Journal of the American Academy of Child &amp; Adolescent Psychiatry</em>, <em>39</em>(1), 28–38. <a href="https://doi.org/10.1097/00004583-200001000-00014">https://doi.org/10.1097/00004583-200001000-00014</a>
+</div>
+<div id="ref-SilkEtAl_2019_adhd" class="csl-entry" role="listitem">
+Silk, T. J., Vilgis, V., Vance, A., &amp; Bellgrove, M. A. (2019). A network analysis approach to <span>ADHD</span> symptoms in early adolescence. <em>PLOS ONE</em>, <em>14</em>(1), e0211053. <a href="https://doi.org/10.1371/journal.pone.0211053">https://doi.org/10.1371/journal.pone.0211053</a>
+</div>
+<div id="ref-StrukEtAl_2015_bps" class="csl-entry" role="listitem">
+Struk, A. A., Carriere, J. S. A., Cheyne, J. A., &amp; Danckert, J. (2017). A short boredom proneness scale: Development and psychometric properties. <em>Assessment</em>, <em>24</em>(3), 346–359. <a href="https://doi.org/10.1177/1073191115609996">https://doi.org/10.1177/1073191115609996</a>
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms

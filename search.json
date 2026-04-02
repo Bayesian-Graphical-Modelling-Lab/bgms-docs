@@ -2,97 +2,97 @@
   {
     "objectID": "reference/methods.html",
     "href": "reference/methods.html",
-    "title": "S3 Methods",
+    "title": "Methods",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nS3 methods for inspecting, summarizing, and using bgms and bgmCompare model fits.",
+    "text": "Methods for inspecting, summarizing, and using bgms and bgmCompare model fits. Both are S7 classes; methods use S3 dispatch for compatibility with base R generics.",
     "crumbs": [
       "Reference",
       "Methods",
-      "S3 Methods"
+      "Methods"
     ]
   },
   {
     "objectID": "reference/methods.html#print",
     "href": "reference/methods.html#print",
-    "title": "S3 Methods",
+    "title": "Methods",
     "section": "print",
-    "text": "print\nMinimal console output for a fitted model.\n\nbgms\nprint(x, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nx\nAn object of class bgms.\n\n\n...\nIgnored.\n\n\n\nReturns x invisibly.\n\n\nbgmCompare\nprint(x, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nx\nAn object of class bgmCompare.\n\n\n...\nIgnored.\n\n\n\nReturns x invisibly.",
+    "text": "print\nprint(x, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nx\nAn object of class bgms or bgmCompare.\n\n\n...\nIgnored.\n\n\n\nReturns x invisibly.",
     "crumbs": [
       "Reference",
       "Methods",
-      "S3 Methods"
+      "Methods"
     ]
   },
   {
     "objectID": "reference/methods.html#summary",
     "href": "reference/methods.html#summary",
-    "title": "S3 Methods",
+    "title": "Methods",
     "section": "summary",
-    "text": "summary\nPosterior summaries and diagnostics for a fitted model.\n\nbgms\nsummary(object, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms.\n\n\n...\nCurrently ignored.\n\n\n\nReturns an object of class summary.bgms with posterior summaries.\n\n\nbgmCompare\nsummary(object, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgmCompare.\n\n\n...\nCurrently ignored.\n\n\n\nReturns an object of class summary.bgmCompare with posterior summaries.",
+    "text": "summary\nsummary(object, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms or bgmCompare.\n\n\n...\nCurrently ignored.\n\n\n\nReturns a summary object containing:\n\nmain — Data frame of main-effect summaries (mean, sd, MCSE, ESS, Rhat).\npairwise — Data frame of partial association summaries.\nindicator — Data frame of inclusion indicator summaries (if edge/difference selection enabled).\n\nFor bgmCompare, summaries are split into baseline and difference components.",
     "crumbs": [
       "Reference",
       "Methods",
-      "S3 Methods"
+      "Methods"
     ]
   },
   {
     "objectID": "reference/methods.html#coef",
     "href": "reference/methods.html#coef",
-    "title": "S3 Methods",
+    "title": "Methods",
     "section": "coef",
-    "text": "coef\nExtract posterior mean coefficients.\n\nbgms\ncoef(object, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms.\n\n\n...\nIgnored.\n\n\n\nReturns a list with:\n\nmain — Posterior mean main-effect parameters. NULL for GGM models. For OMRF models: a numeric matrix (p x max_categories) of category thresholds. For mixed MRF models: a list with $discrete (threshold matrix) and $continuous (means matrix).\npairwise — Posterior mean partial association matrix. The diagonal is zero. For model-specific scales, use extract_precision(), extract_partial_correlations(), or extract_log_odds().\nindicator — Posterior mean edge inclusion indicators (if available).\n\n\n\nbgmCompare\ncoef(object, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgmCompare.\n\n\n...\nIgnored.\n\n\n\nReturns a list with:\n\nmain_effects_raw — Posterior means of raw main-effect parameters (variables x (baseline + differences)).\npairwise_effects_raw — Posterior means of raw pairwise-effect parameters (pairs x (baseline + differences)).\nmain_effects_groups — Posterior means of group-specific main effects (variables x groups), computed as baseline plus projected differences.\npairwise_effects_groups — Posterior means of group-specific pairwise effects (pairs x groups), computed as baseline plus projected differences.\nindicators — Posterior mean inclusion probabilities as a symmetric matrix, with diagonals for main effects and off-diagonals for pairwise effects.",
+    "text": "coef\nExtract posterior mean coefficients.\ncoef(object, ...)\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms or bgmCompare.\n\n\n...\nIgnored.\n\n\n\nReturns (by class):\n\nbgms: main, pairwise, and (if available) indicator.\nbgmCompare: main_effects_raw, pairwise_effects_raw, main_effects_groups, pairwise_effects_groups, and indicators.",
     "crumbs": [
       "Reference",
       "Methods",
-      "S3 Methods"
+      "Methods"
     ]
   },
   {
     "objectID": "reference/methods.html#predict",
     "href": "reference/methods.html#predict",
-    "title": "S3 Methods",
+    "title": "Methods",
     "section": "predict",
-    "text": "predict\nCompute conditional probability distributions for one or more variables given the observed values of other variables in the data.\n\nbgms\npredict(object, newdata, variables = NULL,\n        type = c(\"probabilities\", \"response\"),\n        method = c(\"posterior-mean\", \"posterior-sample\"),\n        ndraws = NULL, seed = NULL, ...)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms.\n\n\nnewdata\nA matrix or data frame with n rows and p columns. Must match the variables used in fitting.\n\n\nvariables\nCharacter vector of names, integer vector of column indices, or NULL (all variables).\n\n\ntype\n\"probabilities\" (full conditional distribution) or \"response\" (predicted category).\n\n\nmethod\n\"posterior-mean\" (use posterior means) or \"posterior-sample\" (average over draws).\n\n\nndraws\nNumber of posterior draws for \"posterior-sample\". NULL uses all draws.\n\n\nseed\nOptional random seed.\n\n\n\nOrdinal models: For type = \"probabilities\", returns a named list with one matrix per variable (n rows x (num_categories + 1) columns). For type = \"response\", returns a matrix of predicted categories.\nGGM models: For type = \"probabilities\", returns a list with one matrix per variable (n rows x 2 columns: \"mean\" and \"sd\"). For type = \"response\", returns conditional means.\nMixed MRF models: Returns a list combining both formats for discrete and continuous variables.\nWhen method = \"posterior-sample\", predictions include an \"sd\" attribute with the standard deviation across draws.\n\n\nbgmCompare\npredict(object, newdata, group, variables = NULL,\n        type = c(\"probabilities\", \"response\"),\n        method = c(\"posterior-mean\"), ...)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgmCompare.\n\n\nnewdata\nA matrix or data frame matching the original variables.\n\n\ngroup\nInteger specifying which group’s parameters to use (1 to number of groups). Required.\n\n\nvariables\nWhich variables to predict (character, integer, or NULL for all).\n\n\ntype\n\"probabilities\" or \"response\".\n\n\nmethod\n\"posterior-mean\" (posterior mean parameters).\n\n\n\nReturns the same structure as predict.bgms, using group-specific parameters obtained by combining baseline parameters and group differences.",
+    "text": "predict\nCompute conditional probability distributions for one or more variables given the observed values of other variables in the data.\npredict(object, newdata, variables = NULL,\n        type = c(\"probabilities\", \"response\"),\n        method = c(\"posterior-mean\", \"posterior-sample\"),\n        ndraws = NULL, seed = NULL, ...)\n\npredict(object, newdata, group, variables = NULL,\n        type = c(\"probabilities\", \"response\"),\n        method = c(\"posterior-mean\"), ...)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms or bgmCompare.\n\n\nnewdata\nA matrix or data frame matching the variables used in fitting.\n\n\ngroup\nInteger group index for bgmCompare only (required there).\n\n\nvariables\nCharacter names, integer indices, or NULL (all variables).\n\n\ntype\n\"probabilities\" or \"response\".\n\n\nmethod\nbgms: \"posterior-mean\" or \"posterior-sample\"; bgmCompare: \"posterior-mean\".\n\n\nndraws\nFor bgms with method = \"posterior-sample\".\n\n\nseed\nOptional random seed.\n\n\n\nReturn shape depends on model type:\n\nOrdinal: probabilities per category or predicted categories.\nGGM: conditional means/sds or conditional means.\nMixed: combined discrete and continuous outputs.\n\nFor bgmCompare, outputs use group-specific parameters (baseline plus group differences).\n\nExample\n\n# Predict probabilities for the first observation's variable 1\n# given its observed values on variables 2-17\npredict(fit, newdata = Wenchuan[1, , drop = FALSE], variables = 1)\n\n$intrusion\n         cat_0     cat_1      cat_2       cat_3        cat_4\n[1,] 0.3683497 0.5816389 0.04811667 0.001882903 1.181429e-05\n\n# Predict responses (most likely category) for first 3 observations\npredict(fit, newdata = Wenchuan[1:3, ], variables = 1:3, type = \"response\")\n\n     intrusion dreams flash\n[1,]         1      0     0\n[2,]         1      0     0\n[3,]         2      1     1",
     "crumbs": [
       "Reference",
       "Methods",
-      "S3 Methods"
+      "Methods"
     ]
   },
   {
     "objectID": "reference/methods.html#simulate",
     "href": "reference/methods.html#simulate",
-    "title": "S3 Methods",
+    "title": "Methods",
     "section": "simulate",
-    "text": "simulate\nGenerate new observations from a fitted model.\n\nbgms\nsimulate(object, nsim = 500, seed = NULL,\n         method = c(\"posterior-mean\", \"posterior-sample\"),\n         ndraws = NULL, iter = 1000,\n         cores = parallel::detectCores(),\n         display_progress = c(\"per-chain\", \"total\", \"none\"), ...)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms.\n\n\nnsim\nNumber of observations to simulate. Default: 500.\n\n\nseed\nOptional random seed.\n\n\nmethod\n\"posterior-mean\" (single simulation) or \"posterior-sample\" (one dataset per draw, parallel).\n\n\nndraws\nNumber of posterior draws for \"posterior-sample\". NULL uses all.\n\n\niter\nGibbs iterations for equilibration. Default: 1000.\n\n\ncores\nCPU cores for parallel execution with \"posterior-sample\".\n\n\ndisplay_progress\nProgress bar style: \"per-chain\", \"total\", or \"none\".\n\n\n\nIf method = \"posterior-mean\": a matrix (nsim x p). If method = \"posterior-sample\": a list of matrices, one per posterior draw. For mixed MRF models, discrete columns contain integers and continuous columns contain real values.\n\n\nbgmCompare\nsimulate(object, nsim = 500, seed = NULL, group,\n         method = c(\"posterior-mean\"), iter = 1000, ...)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgmCompare.\n\n\nnsim\nNumber of observations to simulate. Default: 500.\n\n\nseed\nOptional random seed.\n\n\ngroup\nInteger specifying which group to simulate from (1 to number of groups). Required.\n\n\nmethod\n\"posterior-mean\".\n\n\niter\nGibbs iterations for equilibration. Default: 1000.\n\n\n\nReturns a matrix (nsim x p) of simulated observations for the specified group.",
+    "text": "simulate\nGenerate new observations from a fitted model.\nsimulate(object, nsim = 500, seed = NULL,\n         method = c(\"posterior-mean\", \"posterior-sample\"),\n         ndraws = NULL, iter = 1000,\n         cores = parallel::detectCores(),\n         display_progress = c(\"per-chain\", \"total\", \"none\"), ...)\n\nsimulate(object, nsim = 500, seed = NULL, group,\n         method = c(\"posterior-mean\"), iter = 1000, ...)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nobject\nAn object of class bgms or bgmCompare.\n\n\nnsim\nNumber of observations to simulate. Default: 500.\n\n\nseed\nOptional random seed.\n\n\ngroup\nInteger group index for bgmCompare only (required there).\n\n\nmethod\nbgms: \"posterior-mean\" or \"posterior-sample\"; bgmCompare: \"posterior-mean\".\n\n\nndraws\nFor bgms with method = \"posterior-sample\".\n\n\niter\nGibbs iterations for equilibration. Default: 1000.\n\n\ncores, display_progress\nUsed for bgms with method = \"posterior-sample\".\n\n\n\nReturns:\n\nbgms, posterior-mean: matrix (nsim x p).\nbgms, posterior-sample: list of matrices (one per draw).\nbgmCompare: matrix (nsim x p) for the selected group.\n\n\nExample\n\n# Fit a model\nfit = bgm(Wenchuan, seed = 1234)\n\n\n# Simulate 100 new observations from the posterior mean network\nsim_data = simulate(fit, nsim = 100, seed = 42)\nhead(sim_data)\n\n     intrusion dreams flash upset physior avoidth avoidact amnesia lossint\n[1,]         2      2     3     2       4       2        1       3       1\n[2,]         3      3     2     1       1       2        1       0       1\n[3,]         1      1     1     0       0       1        1       0       0\n[4,]         1      0     0     0       0       0        1       0       3\n[5,]         2      1     1     2       1       3        3       1       1\n[6,]         1      0     1     3       2       2        1       0       0\n     distant numb future sleep anger concen hyper startle\n[1,]       1    0      1     3     2      3     1       3\n[2,]       1    1      2     3     2      1     1       1\n[3,]       0    0      0     0     1      0     0       0\n[4,]       1    0      1     1     1      1     1       1\n[5,]       1    1      0     1     2      1     1       1\n[6,]       0    0      1     2     3      0     0       2",
     "crumbs": [
       "Reference",
       "Methods",
-      "S3 Methods"
+      "Methods"
     ]
   },
   {
     "objectID": "reference/methods.html#simulate_mrf",
     "href": "reference/methods.html#simulate_mrf",
-    "title": "S3 Methods",
+    "title": "Methods",
     "section": "simulate_mrf",
-    "text": "simulate_mrf\nSimulate observations from a Markov Random Field using user-specified parameters (no fitted model needed).\nsimulate_mrf(\n  num_states,\n  num_variables,\n  num_categories,\n  pairwise,\n  main,\n  variable_type = \"ordinal\",\n  baseline_category,\n  iter = 1000,\n  seed = NULL\n)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nnum_states\nNumber of observations to generate.\n\n\nnum_variables\nNumber of variables in the MRF.\n\n\nnum_categories\nInteger or integer vector. Number of response categories on top of the base category (1 = binary).\n\n\npairwise\nSymmetric matrix of partial associations. For continuous variables, this is the precision matrix (must be positive definite).\n\n\nmain\nMain-effect parameters. For ordinal variables: a matrix of category thresholds. For continuous variables: a means vector.\n\n\nvariable_type\n\"ordinal\", \"blume-capel\", or \"continuous\". Can be a vector for mixed types (ordinal/Blume-Capel only).\n\n\nbaseline_category\nInteger vector of baseline categories for Blume–Capel variables.\n\n\niter\nGibbs iterations for equilibration (ordinal only). Default: 1000.\n\n\nseed\nOptional random seed.\n\n\n\nReturns a (num_states x num_variables) matrix of simulated observations.\nFor ordinal and Blume-Capel variables, the Gibbs sampler generates observations from full conditional distributions. For continuous variables, observations are drawn directly from \\(N(\\mu, \\Omega^{-1})\\).",
+    "text": "simulate_mrf\nSimulate observations from a Markov Random Field using user-specified parameters (no fitted model needed).\nsimulate_mrf(\n  num_states,\n  num_variables,\n  num_categories,\n  pairwise,\n  main,\n  variable_type = \"ordinal\",\n  baseline_category,\n  iter = 1000,\n  seed = NULL\n)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nnum_states\nNumber of observations to generate.\n\n\nnum_variables\nNumber of variables in the MRF.\n\n\nnum_categories\nInteger or integer vector. Number of response categories on top of the base category (1 = binary).\n\n\npairwise\nSymmetric matrix of partial associations. For continuous variables, this is the precision matrix (must be positive definite).\n\n\nmain\nMain-effect parameters. For ordinal variables: a matrix of category thresholds. For continuous variables: a means vector.\n\n\nvariable_type\n\"ordinal\", \"blume-capel\", or \"continuous\". Can be a vector for mixed types (ordinal/Blume-Capel only).\n\n\nbaseline_category\nInteger vector of baseline categories for Blume–Capel variables.\n\n\niter\nGibbs iterations for equilibration (ordinal only). Default: 1000.\n\n\nseed\nOptional random seed.\n\n\n\nReturns a (num_states x num_variables) matrix of simulated observations.\nFor ordinal and Blume-Capel variables, the Gibbs sampler generates observations from full conditional distributions. For continuous variables, observations are drawn directly from \\(N(\\mu, \\Omega^{-1})\\).\n\nExample\n\n# Simulate from a 3-variable binary MRF with specified parameters\npairwise = matrix(c(\n   0.0,  0.5, -0.3,\n   0.5,  0.0,  0.4,\n  -0.3,  0.4,  0.0\n), nrow = 3, byrow = TRUE)\n\nmain = matrix(c(0.0, -0.5, 0.2), nrow = 3, ncol = 1)\n\nsim_data = simulate_mrf(\n num_states = 500,\n num_variables = 3,\n num_categories = c(1, 1, 1),\n pairwise = pairwise,\n main = main,\n seed = 123\n)\nhead(sim_data)\n\n     [,1] [,2] [,3]\n[1,]    1    1    0\n[2,]    1    1    1\n[3,]    1    1    1\n[4,]    1    1    1\n[5,]    0    1    1\n[6,]    1    0    0",
     "crumbs": [
       "Reference",
       "Methods",
-      "S3 Methods"
+      "Methods"
     ]
   },
   {
     "objectID": "reference/methods.html#see-also",
     "href": "reference/methods.html#see-also",
-    "title": "S3 Methods",
+    "title": "Methods",
     "section": "See also",
     "text": "See also\nbgm(), bgmCompare(), extractor functions",
     "crumbs": [
       "Reference",
       "Methods",
-      "S3 Methods"
+      "Methods"
     ]
   },
   {
@@ -100,7 +100,7 @@
     "href": "reference/extractors.html",
     "title": "Extractor Functions",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nFunctions to extract specific components from fitted bgms and bgmCompare objects.",
+    "text": "Functions to extract specific components from fitted bgms and bgmCompare objects.\nUnless noted otherwise, extractor functions use one argument:",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -111,7 +111,7 @@
     "href": "reference/extractors.html#extract_arguments",
     "title": "Extractor Functions",
     "section": "extract_arguments",
-    "text": "extract_arguments\nRetrieve the arguments used when fitting a model with bgm() or bgmCompare().\nextract_arguments(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a named list containing all arguments passed to the fitting function, including data dimensions, prior settings, and MCMC configuration.",
+    "text": "extract_arguments\nRetrieve the arguments used when fitting a model with bgm() or bgmCompare().\nextract_arguments(bgms_object)\nReturns a named list containing all arguments passed to the fitting function, including data dimensions, prior settings, and MCMC configuration.",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -122,7 +122,7 @@
     "href": "reference/extractors.html#extract_main_effects",
     "title": "Extractor Functions",
     "section": "extract_main_effects",
-    "text": "extract_main_effects\nRetrieve posterior mean main-effect parameters.\nextract_main_effects(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nThe structure depends on the model type:\n\nGGM (bgms): NULL. GGM models have no main effects.\nOMRF (bgms): A numeric matrix (p x max_categories) of posterior mean category thresholds. Columns beyond the number of categories for a variable are NA.\nMixed MRF (bgms): A list with $discrete (threshold matrix) and $continuous (means matrix).\nbgmCompare: A matrix with one row per post-warmup iteration, containing posterior samples of baseline main-effect parameters.",
+    "text": "extract_main_effects\nRetrieve posterior mean main-effect parameters.\nextract_main_effects(bgms_object)\nThe structure depends on the model type:\n\nGGM (bgms): NULL. GGM models have no main effects.\nOMRF (bgms): A numeric matrix (p x max_categories) of posterior mean category thresholds. Columns beyond the number of categories for a variable are NA.\nMixed MRF (bgms): A list with $discrete (threshold matrix) and $continuous (means matrix).\nbgmCompare: A matrix with one row per post-warmup iteration, containing posterior samples of baseline main-effect parameters.",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -133,7 +133,7 @@
     "href": "reference/extractors.html#extract_pairwise_interactions",
     "title": "Extractor Functions",
     "section": "extract_pairwise_interactions",
-    "text": "extract_pairwise_interactions\nRetrieve posterior samples of partial association parameters.\nextract_pairwise_interactions(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a matrix with one row per post-warmup iteration and one column per edge. For bgmCompare, columns correspond to baseline partial association parameters.",
+    "text": "extract_pairwise_interactions\nRetrieve posterior samples of partial association parameters.\nextract_pairwise_interactions(bgms_object)\nReturns a matrix with one row per post-warmup iteration and one column per edge. For bgmCompare, columns correspond to baseline partial association parameters.",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -144,7 +144,7 @@
     "href": "reference/extractors.html#extract_indicators",
     "title": "Extractor Functions",
     "section": "extract_indicators",
-    "text": "extract_indicators\nRetrieve posterior samples of inclusion indicators.\nextract_indicators(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a matrix with one row per post-warmup iteration and one column per indicator, containing binary (0/1) samples:\n\nbgms: One column per edge. Requires edge_selection = TRUE.\nbgmCompare: Columns for main-effect and pairwise difference indicators. Requires difference_selection = TRUE.",
+    "text": "extract_indicators\nRetrieve posterior samples of inclusion indicators.\nextract_indicators(bgms_object)\nReturns a matrix with one row per post-warmup iteration and one column per indicator, containing binary (0/1) samples:\n\nbgms: One column per edge. Requires edge_selection = TRUE.\nbgmCompare: Columns for main-effect and pairwise difference indicators. Requires difference_selection = TRUE.",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -155,7 +155,7 @@
     "href": "reference/extractors.html#extract_posterior_inclusion_probabilities",
     "title": "Extractor Functions",
     "section": "extract_posterior_inclusion_probabilities",
-    "text": "extract_posterior_inclusion_probabilities\nCompute posterior inclusion probabilities.\nextract_posterior_inclusion_probabilities(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a symmetric p x p matrix of posterior inclusion probabilities:\n\nbgms: Off-diagonal entries are edge inclusion probabilities. Requires edge_selection = TRUE.\nbgmCompare: Diagonal entries are main-effect inclusion probabilities; off-diagonal entries are pairwise difference inclusion probabilities. Requires difference_selection = TRUE.",
+    "text": "extract_posterior_inclusion_probabilities\nCompute posterior inclusion probabilities.\nextract_posterior_inclusion_probabilities(bgms_object)\nReturns a symmetric p x p matrix of posterior inclusion probabilities:\n\nbgms: Off-diagonal entries are edge inclusion probabilities. Requires edge_selection = TRUE.\nbgmCompare: Diagonal entries are main-effect inclusion probabilities; off-diagonal entries are pairwise difference inclusion probabilities. Requires difference_selection = TRUE.",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -166,7 +166,7 @@
     "href": "reference/extractors.html#extract_indicator_priors",
     "title": "Extractor Functions",
     "section": "extract_indicator_priors",
-    "text": "extract_indicator_priors\nRetrieve the prior specification used for inclusion indicators.\nextract_indicator_priors(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a named list describing the prior structure, including the prior type and hyperparameters:\n\nbgms: Requires edge_selection = TRUE. Returns the prior type (\"Bernoulli\", \"Beta-Bernoulli\", or \"Stochastic-Block\") and associated hyperparameters.\nbgmCompare: Requires difference_selection = TRUE. Returns the difference prior specification.",
+    "text": "extract_indicator_priors\nRetrieve the prior specification used for inclusion indicators.\nextract_indicator_priors(bgms_object)\nReturns a named list describing the prior structure, including the prior type and hyperparameters:\n\nbgms: Requires edge_selection = TRUE. Returns the prior type (\"Bernoulli\", \"Beta-Bernoulli\", or \"Stochastic-Block\") and associated hyperparameters.\nbgmCompare: Requires difference_selection = TRUE. Returns the difference prior specification.",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -177,7 +177,7 @@
     "href": "reference/extractors.html#extract_group_params",
     "title": "Extractor Functions",
     "section": "extract_group_params",
-    "text": "extract_group_params\nCompute group-specific parameter estimates by combining baseline parameters and group differences.\nextract_group_params(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgmCompare object.\n\n\n\nReturns a list with main_effects_groups (main effects per group) and pairwise_effects_groups (pairwise effects per group).",
+    "text": "extract_group_params\nCompute group-specific parameter estimates by combining baseline parameters and group differences.\nextract_group_params(bgms_object)\nbgms_object must be a fitted bgmCompare object.\nReturns a list with main_effects_groups (main effects per group) and pairwise_effects_groups (pairwise effects per group).",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -188,7 +188,7 @@
     "href": "reference/extractors.html#extract_sbm",
     "title": "Extractor Functions",
     "section": "extract_sbm",
-    "text": "extract_sbm\nRetrieve posterior summaries from a model fitted with the Stochastic Block prior.\nextract_sbm(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms object.\n\n\n\nRequires edge_selection = TRUE and edge_prior = \"Stochastic-Block\". Returns a list with:\n\nposterior_num_blocks — Posterior probabilities for each possible number of clusters.\nposterior_mean_allocations — Posterior mean cluster allocations.\nposterior_mode_allocations — Posterior mode cluster allocations.\nposterior_mean_coclustering_matrix — Co-clustering proportion matrix.",
+    "text": "extract_sbm\nRetrieve posterior summaries from a model fitted with the Stochastic Block prior.\nextract_sbm(bgms_object)\nbgms_object must be a fitted bgms object.\nRequires edge_selection = TRUE and edge_prior = \"Stochastic-Block\". Returns a list with:\n\nposterior_num_blocks — Posterior probabilities for each possible number of clusters.\nposterior_mean_allocations — Posterior mean cluster allocations.\nposterior_mode_allocations — Posterior mode cluster allocations.\nposterior_mean_coclustering_matrix — Co-clustering proportion matrix.",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -199,7 +199,7 @@
     "href": "reference/extractors.html#extract_ess",
     "title": "Extractor Functions",
     "section": "extract_ess",
-    "text": "extract_ess\nRetrieve effective sample size estimates for all parameters.\nextract_ess(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a named list with ESS values for each parameter type present in the model (e.g., main, pairwise, indicator).",
+    "text": "extract_ess\nRetrieve effective sample size estimates for all parameters.\nextract_ess(bgms_object)\nReturns a named list with ESS values for each parameter type present in the model (e.g., main, pairwise, indicator). ESS is computed in C++ using the AR spectral density method, matching coda::effectiveSize. For implementation details, see the Technical Manual.",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -210,7 +210,7 @@
     "href": "reference/extractors.html#extract_rhat",
     "title": "Extractor Functions",
     "section": "extract_rhat",
-    "text": "extract_rhat\nRetrieve R-hat convergence diagnostics for all parameters.\nextract_rhat(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms or bgmCompare object.\n\n\n\nReturns a named list with R-hat values for each parameter type present in the model (e.g., main, pairwise, indicator).",
+    "text": "extract_rhat\nRetrieve R-hat convergence diagnostics for all parameters.\nextract_rhat(bgms_object)\nReturns a named list with R-hat values for each parameter type present in the model (e.g., main, pairwise, indicator). R-hat is computed in C++ using the Gelman-Rubin formula, matching coda::gelman.diag. For implementation details, see the Technical Manual.",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -232,7 +232,7 @@
     "href": "reference/extractors.html#extract_precision",
     "title": "Extractor Functions",
     "section": "extract_precision",
-    "text": "extract_precision\nRetrieve the posterior mean precision matrix.\nextract_precision(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms object (GGM or mixed MRF).\n\n\n\nReturns a symmetric p x p matrix (or the continuous block submatrix for mixed MRFs) containing the posterior mean precision matrix \\(\\boldsymbol{K}\\).",
+    "text": "extract_precision\nRetrieve the posterior mean precision matrix.\nextract_precision(bgms_object)\nbgms_object must be a fitted bgms object (GGM or mixed MRF).\nReturns a symmetric p x p matrix (or the continuous block submatrix for mixed MRFs) containing the posterior mean precision matrix \\(\\boldsymbol{K}\\).",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -243,7 +243,7 @@
     "href": "reference/extractors.html#extract_partial_correlations",
     "title": "Extractor Functions",
     "section": "extract_partial_correlations",
-    "text": "extract_partial_correlations\nRetrieve the posterior mean partial correlation matrix.\nextract_partial_correlations(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms object (GGM or mixed MRF).\n\n\n\nReturns a symmetric matrix of partial correlations, computed by standardizing the precision matrix: \\(\\rho_{ij} = -K_{ij} / \\sqrt{K_{ii}\nK_{jj}}\\).",
+    "text": "extract_partial_correlations\nRetrieve the posterior mean partial correlation matrix.\nextract_partial_correlations(bgms_object)\nbgms_object must be a fitted bgms object (GGM or mixed MRF).\nReturns a symmetric matrix of partial correlations, computed by standardizing the precision matrix: \\(\\rho_{ij} = -K_{ij} / \\sqrt{K_{ii}\nK_{jj}}\\).",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -254,7 +254,7 @@
     "href": "reference/extractors.html#extract_log_odds",
     "title": "Extractor Functions",
     "section": "extract_log_odds",
-    "text": "extract_log_odds\nRetrieve the posterior mean log-odds matrix.\nextract_log_odds(bgms_object)\n\n\n\nArgument\nDescription\n\n\n\n\nbgms_object\nA fitted bgms object (OMRF or mixed MRF).\n\n\n\nReturns a symmetric matrix of log adjacent-category odds ratios. For the ordinal MRF, \\(\\text{log-odds}_{ij} = 2 \\omega_{ij}\\).",
+    "text": "extract_log_odds\nRetrieve the posterior mean log-odds matrix.\nextract_log_odds(bgms_object)\nbgms_object must be a fitted bgms object (OMRF or mixed MRF).\nReturns a symmetric matrix of log adjacent-category odds ratios. For the ordinal MRF, \\(\\text{log-odds}_{ij} = 2 \\omega_{ij}\\).",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -265,7 +265,7 @@
     "href": "reference/extractors.html#see-also",
     "title": "Extractor Functions",
     "section": "See also",
-    "text": "See also\nbgm(), bgmCompare(), S3 methods",
+    "text": "See also\nbgm(), bgmCompare(), Methods",
     "crumbs": [
       "Reference",
       "Extractor Functions"
@@ -1007,40 +1007,51 @@
     "href": "manual/index.html#architecture",
     "title": "Technical Manual",
     "section": "Architecture",
-    "text": "Architecture\nHow the R front-end and C++ back-end are organized, and how they communicate.\n\nC++ Architecture — Source layout, layer separation, design principles\nR Scaffolding — Validation, spec construction, sampler dispatch, output assembly\nModel Classes — BaseModel hierarchy and virtual interface",
+    "text": "Architecture\nHow the R front-end and C++ back-end fit together.\n\nC++ Architecture — Source layout, layer separation, design principles\nR Scaffolding — Validation, spec construction, sampler dispatch, output assembly\nModel Classes — BaseModel hierarchy and the virtual interface that all models implement\nParallel Chains — TBB threading, model cloning, per-chain RNG seeding",
     "crumbs": [
       "Manual",
       "Technical Manual"
     ]
   },
   {
-    "objectID": "manual/index.html#mcmc-engine",
-    "href": "manual/index.html#mcmc-engine",
+    "objectID": "manual/index.html#mcmc-algorithms",
+    "href": "manual/index.html#mcmc-algorithms",
     "title": "Technical Manual",
-    "section": "MCMC Engine",
-    "text": "MCMC Engine\nThe sampling machinery shared by all models.\n\nSampler Hierarchy — SamplerBase, gradient-based samplers, factory dispatch\nNUTS Algorithm — Binary tree construction, U-turn criterion, divergence detection\nHMC Algorithm — Fixed-length leapfrog, Metropolis correction (deprecated)\nAdaptive Metropolis — Scalar random-walk MH, Robbins–Monro adaptation\nConstrained Leapfrog (RATTLE) — Position/momentum projection, reversibility check, Memoizer\nWarmup Schedule — Five-stage adaptation, dual averaging, mass matrix tuning\nParallel Chains — TBB threading, model cloning, per-chain RNG",
+    "section": "MCMC Algorithms",
+    "text": "MCMC Algorithms\nThe sampling algorithms available in bgms.\n\nAdaptive Metropolis — Scalar random-walk Metropolis–Hastings with Robbins–Monro step-size adaptation. Used for discrete parameters (thresholds, interactions) in OMRF and mixed models.\nNUTS — No-U-Turn Sampler: adaptive-length Hamiltonian Monte Carlo with binary tree expansion and U-turn termination. The default sampler for continuous parameters in mixed models.\nHMC — Fixed-trajectory Hamiltonian Monte Carlo. Deprecated; NUTS is preferred.\nConstrained Leapfrog — RATTLE integrator for Hamiltonian dynamics under precision-matrix constraints. Required for mixed models where the precision matrix must remain positive definite.",
     "crumbs": [
       "Manual",
       "Technical Manual"
     ]
   },
   {
-    "objectID": "manual/index.html#models",
-    "href": "manual/index.html#models",
+    "objectID": "manual/index.html#sampler-infrastructure",
+    "href": "manual/index.html#sampler-infrastructure",
     "title": "Technical Manual",
-    "section": "Models",
-    "text": "Models\nModel-specific sampling and likelihood computation.\n\nGGM Internals — Precision matrix Metropolis, Cholesky rank-1 updates\nOMRF Internals — Ordinal thresholds, Blume-Capel, pseudolikelihood\nVariable Helpers — Numerically stable probability computation (FAST/SAFE)\nMixed MRF Internals — NUTS + precision Metropolis, block parameter layout, RATTLE",
+    "section": "Sampler Infrastructure",
+    "text": "Sampler Infrastructure\nShared machinery that supports all samplers.\n\nSampler Classes — The SamplerBase interface, gradient-based sampler hierarchy, and factory dispatch\nWarmup Schedule — Five-stage adaptation: step-size search, mass matrix estimation, dual averaging\nConvergence Diagnostics — C++ implementation of ESS (AR spectral) and R-hat (Gelman–Rubin)",
     "crumbs": [
       "Manual",
       "Technical Manual"
     ]
   },
   {
-    "objectID": "manual/index.html#priors-edge-selection",
-    "href": "manual/index.html#priors-edge-selection",
+    "objectID": "manual/index.html#model-internals",
+    "href": "manual/index.html#model-internals",
     "title": "Technical Manual",
-    "section": "Priors & Edge Selection",
-    "text": "Priors & Edge Selection\nPrior specification and edge inclusion machinery.\n\nEdge Priors — Bernoulli, Beta-Bernoulli, and SBM prior classes\nSBM Prior — MFM-SBM formulation, collapsed Gibbs, cluster allocation",
+    "section": "Model Internals",
+    "text": "Model Internals\nHow each model type computes likelihoods, gradients, and parameter updates.\n\nGGM — Precision matrix sampling via element-wise Metropolis with Cholesky rank-1 updates\nOMRF — Ordinal thresholds, Blume–Capel parameterization, pseudolikelihood gradients\nMixed MRF — Joint discrete-continuous models: NUTS for interactions, Metropolis for precision, RATTLE constraints\n\nSupporting pages:\n\nPseudolikelihood — Why bgms uses pseudolikelihood instead of the full likelihood, and how this affects inference. Relevant for OMRF and mixed models.\nFast Probability Computation — Recursive accumulation of MRF category probabilities that avoids per-category exp() calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#edge-priors",
+    "href": "manual/index.html#edge-priors",
+    "title": "Technical Manual",
+    "section": "Edge Priors",
+    "text": "Edge Priors\nPrior distributions over graph structure for edge selection.\n\nEdge Priors — Overview of the edge prior framework: Bernoulli (fixed), Beta-Bernoulli (learned), and Stochastic Block Model\nSBM Prior — Mixture-of-finite-mixtures SBM formulation, collapsed Gibbs updates, cluster allocation sampling",
     "crumbs": [
       "Manual",
       "Technical Manual"
@@ -1051,18 +1062,18 @@
     "href": "manual/index.html#group-comparison",
     "title": "Technical Manual",
     "section": "Group Comparison",
-    "text": "Group Comparison\n\nbgmCompare Engine — Multi-group posterior, difference selection",
+    "text": "Group Comparison\n\nbgmCompare Internals — Multi-group parameterization (baseline plus differences), group-specific gradients, difference-edge selection",
     "crumbs": [
       "Manual",
       "Technical Manual"
     ]
   },
   {
-    "objectID": "manual/index.html#numerical-methods",
-    "href": "manual/index.html#numerical-methods",
+    "objectID": "manual/index.html#cross-platform-math",
+    "href": "manual/index.html#cross-platform-math",
     "title": "Technical Manual",
-    "section": "Numerical Methods",
-    "text": "Numerical Methods\n\nNumerical Considerations — Cross-platform exp/log, OpenLibM, IEEE 754 compliance",
+    "section": "Cross-Platform Math",
+    "text": "Cross-Platform Math\n\nOpenLibM Integration — Ships a portable math library because the Windows C runtime exp() produces inconsistent results. Ensures identical output across operating systems.",
     "crumbs": [
       "Manual",
       "Technical Manual"
@@ -1176,207 +1187,297 @@
     ]
   },
   {
-    "objectID": "manual/bgmcompare-internals.html",
-    "href": "manual/bgmcompare-internals.html",
-    "title": "bgmCompare Internals",
+    "objectID": "manual/diagnostics.html",
+    "href": "manual/diagnostics.html",
+    "title": "Convergence Diagnostics",
     "section": "",
-    "text": "How bgmCompare() works under the hood: multi-group posterior, contrast parameterization, and sampler implementation. Source: src/bgmCompare/ directory.",
-    "crumbs": [
-      "Manual",
-      "Group Comparison",
-      "bgmCompare Internals"
-    ]
+    "text": "This page documents the C++ implementation of convergence diagnostics in bgms. The ESS and R-hat computations are implemented in C++ for speed, enabling fast diagnostics even with long chains and many parameters."
   },
   {
-    "objectID": "manual/bgmcompare-internals.html#differences-from-single-group-bgm",
-    "href": "manual/bgmcompare-internals.html#differences-from-single-group-bgm",
-    "title": "bgmCompare Internals",
-    "section": "Differences from single-group bgm",
-    "text": "Differences from single-group bgm\nThe bgmCompare engine shares the same OMRF likelihood (pseudolikelihood over ordinal/Blume-Capel variables) and the same NUTS/Metropolis sampler options (HMC is deprecated), but differs in three key ways:\n\nParameter decomposition — Group-specific parameters \\(\\boldsymbol{\\omega}^{(g)}\\) are decomposed into a shared baseline \\(\\boldsymbol{\\omega}\\) and contrast parameters \\(\\boldsymbol{\\delta}^{(k)}\\), linked through a contrast matrix.\nSeparate sampler — The bgmCompare engine uses its own chain runner (run_gibbs_sampler_bgmCompare()) rather than the general run_mcmc_chain(), because the multi-group structure requires group-specific likelihood evaluations and contrast selection.\nContrast selection — Instead of edge selection (which edges exist), bgmCompare performs contrast selection: for each parameter, the baseline component is always present, and the spike-and-slab mechanism decides whether contrast parameters are active or collapsed to zero.",
-    "crumbs": [
-      "Manual",
-      "Group Comparison",
-      "bgmCompare Internals"
-    ]
+    "objectID": "manual/diagnostics.html#overview",
+    "href": "manual/diagnostics.html#overview",
+    "title": "Convergence Diagnostics",
+    "section": "Overview",
+    "text": "Overview\nAfter sampling, bgms computes convergence diagnostics for all parameters:\n\nEffective sample size (ESS) — equivalent number of independent draws\nR-hat — between-chain vs within-chain variance ratio\nMonte Carlo standard error (MCSE) — precision of the posterior mean estimate\n\nThe C++ implementation matches coda::effectiveSize for ESS and coda::gelman.diag for R-hat, but runs in parallel across parameters for speed."
   },
   {
-    "objectID": "manual/bgmcompare-internals.html#contrast-matrix-parameterization",
-    "href": "manual/bgmcompare-internals.html#contrast-matrix-parameterization",
-    "title": "bgmCompare Internals",
-    "section": "Contrast-matrix parameterization",
-    "text": "Contrast-matrix parameterization\nFor \\(G\\) groups, the per-group parameter vector \\(\\boldsymbol{\\omega}^{(g)}\\) is expressed as:\n\\[\n\\omega_{ij}^{(g)} = \\omega_{ij} + \\sum_{k=1}^{G-1} c_{gk}\\, \\delta_{ij}^{(k)}\n\\]\nwhere \\(\\mathbf{C}\\) is a \\(G \\times (G-1)\\) projection (contrast) matrix. The baseline \\(\\omega_{ij}\\) captures the shared structure; the contrast parameters \\(\\delta_{ij}^{(k)}\\) are the projections onto the \\(G-1\\) orthogonal contrast directions. For two groups, the single contrast reduces to a scaled group difference. Category thresholds are decomposed in the same way.\nThe flat parameter vector (used by NUTS and HMC) groups by component type, not per effect:\n[ overall_mains | overall_pairs | active_main_diffs | active_pair_diffs ]\nContrast parameters appear only when their inclusion indicator is 1; inactive contrasts are excluded from the vector entirely.",
-    "crumbs": [
-      "Manual",
-      "Group Comparison",
-      "bgmCompare Internals"
-    ]
+    "objectID": "manual/diagnostics.html#c-implementation",
+    "href": "manual/diagnostics.html#c-implementation",
+    "title": "Convergence Diagnostics",
+    "section": "C++ implementation",
+    "text": "C++ implementation\nThe diagnostic computations are in src/mcmc_diagnostics.cpp. The main entry points are:\n\nESS via AR spectral density\n// [[Rcpp::export(.compute_ess_cpp)]]\nRcpp::NumericVector compute_ess_cpp(Rcpp::NumericVector array3d);\nComputes ESS for a 3D array [niter x nchains x nparam]. Multi-chain ESS is the sum of per-chain ESS values.\nThe per-chain algorithm follows Plummer et al. (2006):\n\nCompute biased autocovariance \\(c[0..L]\\) where \\(L = \\lfloor 10 \\log_{10}(n) \\rfloor\\)\nLevinson-Durbin recursion for AR orders \\(1..L\\)\nAIC order selection: \\(\\arg\\min_k \\{ n \\log(v_k) + 2k \\}\\)\nSpectral density at 0: \\(\\text{spec}_0 = v_{\\text{best}} / (1 - \\sum a_{\\text{best}})^2\\)\nESS = \\(n \\cdot \\text{var}_{\\text{unbiased}} / \\text{spec}_0\\)\n\nThis matches coda::spectrum0.ar + coda::effectiveSize.\n\n\nGelman-Rubin R-hat\n// [[Rcpp::export(.compute_rhat_cpp)]]\nRcpp::NumericVector compute_rhat_cpp(Rcpp::NumericVector array3d);\nComputes R-hat for a 3D array [niter x nchains x nparam]. Returns NA for single-chain input.\nThe algorithm follows Gelman & Rubin (1992) with the degrees-of-freedom adjustment from coda::gelman.diag:\n\nCompute per-chain means \\(\\bar{x}_c\\) and variances \\(s^2_c\\)\nWithin-chain variance: \\(W = \\frac{1}{m} \\sum_c s^2_c\\)\nBetween-chain variance: \\(B = \\frac{n}{m-1} \\sum_c (\\bar{x}_c - \\bar{x})^2\\)\nPooled variance estimate: \\(\\hat{V} = \\frac{n-1}{n} W + \\frac{1}{n} B\\)\nDegrees-of-freedom adjustment via estimated variance of \\(\\hat{V}\\)\nR-hat = \\(\\sqrt{\\frac{df + 3}{df + 1} \\cdot \\hat{R}^2}\\)\n\n\n\nMixture ESS for indicators\n// [[Rcpp::export(.compute_indicator_ess_cpp)]]\nRcpp::NumericMatrix compute_indicator_ess_cpp(Rcpp::NumericVector array3d);\nComputes ESS for binary indicator sequences using the two-state Markov chain approach:\n\nCounts transitions: \\(n_{01}\\) (off→on), \\(n_{10}\\) (on→off), \\(n_{00}\\), \\(n_{11}\\)\nEstimates transition probabilities: \\(\\hat{a} = n_{01} / (n_{00} + n_{01})\\), \\(\\hat{b} = n_{10} / (n_{10} + n_{11})\\)\nReturns ESS = \\(T \\cdot (a + b) / (2 - a - b)\\)\n\nThis formula derives from the integrated autocorrelation time of a two-state Markov chain where \\(\\rho(k) = (1-a-b)^k\\) (van den Bergh et al., 2026).\nWhen the total number of transitions (\\(n_{01} + n_{10}\\)) is below 5, the estimate is unreliable and flagged in the output."
   },
   {
-    "objectID": "manual/bgmcompare-internals.html#multi-group-log-posterior-and-gradient",
-    "href": "manual/bgmcompare-internals.html#multi-group-log-posterior-and-gradient",
-    "title": "bgmCompare Internals",
-    "section": "Multi-group log-posterior and gradient",
-    "text": "Multi-group log-posterior and gradient\nThe log-pseudoposterior sums over groups. For each group \\(g\\):\n\nReconstruct group-specific parameters via the contrast matrix\nCompute the pseudolikelihood using group \\(g\\)’s data (sufficient statistics: category counts, Blume-Capel stats, pairwise stats)\nEvaluate the gradient of the pseudolikelihood with respect to the active parameters\n\nThe gradient() function combines three components:\n\nObserved-data gradient (gradient_observed_active()) — projects group-level sufficient statistics into the active-parameter layout using the contrast matrix. Precomputed from counts_per_category, blume_capel_stats, and pairwise_stats.\nExpected-data gradient — computed inline within gradient() by building group-specific parameters via the contrast projection, evaluating softmax probabilities, and subtracting expected counts.\nPrior gradient — Cauchy penalties on both baseline and contrast pairwise parameters, with scale adjusted by the number of observations.",
-    "crumbs": [
-      "Manual",
-      "Group Comparison",
-      "bgmCompare Internals"
-    ]
+    "objectID": "manual/diagnostics.html#parallelization",
+    "href": "manual/diagnostics.html#parallelization",
+    "title": "Convergence Diagnostics",
+    "section": "Parallelization",
+    "text": "Parallelization\nDiagnostics are computed in parallel across parameters using RcppParallel (TBB). Each parameter’s ESS and R-hat can be computed independently:\nstruct ESSWorker : public RcppParallel::Worker {\n  void operator()(std::size_t begin, std::size_t end) {\n    for(std::size_t j = begin; j &lt; end; j++) {\n      double total_ess = 0.0;\n      for(int c = 0; c &lt; nchains; c++) {\n        const double* col = data + c * niter + j * niter * nchains;\n        total_ess += compute_column_ess(col, niter, max_order);\n      }\n      ess[j] = total_ess;\n    }\n  }\n};"
   },
   {
-    "objectID": "manual/bgmcompare-internals.html#sampler-implementation",
-    "href": "manual/bgmcompare-internals.html#sampler-implementation",
-    "title": "bgmCompare Internals",
-    "section": "Sampler implementation",
-    "text": "Sampler implementation\nrun_gibbs_sampler_bgmCompare() orchestrates one MCMC chain. Each iteration:\n\nMissing data imputation (if na_impute = TRUE) — Impute missing observations per group using the current parameters. Updates the observation matrix, category counts, Blume-Capel statistics, and pairwise statistics.\nContrast selection (if active) — A Metropolis step decides whether each contrast parameter is included or collapsed to zero (update_indicator_differences_metropolis_bgmcompare()).\nParameter updates — With adaptive Metropolis, main effects and pairwise effects are updated separately (update_main_effects_metropolis_bgmcompare(), then update_pairwise_effects_metropolis_bgmcompare()). With NUTS or HMC, all active parameters are updated jointly via the vectorized log-pseudoposterior.\nInclusion probability update (Beta-Bernoulli prior only) — Draw new inclusion probability from the conjugate Beta posterior.\n\nThe warmup schedule follows the same five-stage structure as the single-group model (see Warmup Schedule).",
-    "crumbs": [
-      "Manual",
-      "Group Comparison",
-      "bgmCompare Internals"
-    ]
+    "objectID": "manual/diagnostics.html#r-interface",
+    "href": "manual/diagnostics.html#r-interface",
+    "title": "Convergence Diagnostics",
+    "section": "R interface",
+    "text": "R interface\nThe diagnostics are exposed to R through: - .compute_ess_cpp() — batch ESS for all parameters - .compute_rhat_cpp() — batch R-hat for all parameters - .compute_indicator_ess_cpp() — batch indicator ESS with transition counts\nThese are called from R/mcmc_summary.R which assembles the summary tables.\nUser-facing extractors: - extract_ess(fit) — returns ESS for all parameters - extract_rhat(fit) — returns R-hat for all parameters - summary(fit) — includes ESS, R-hat, and MCSE in tabular output"
   },
   {
-    "objectID": "manual/bgmcompare-internals.html#active-parameter-tracking",
-    "href": "manual/bgmcompare-internals.html#active-parameter-tracking",
-    "title": "bgmCompare Internals",
-    "section": "Active parameter tracking",
-    "text": "Active parameter tracking\nBecause contrast selection can turn parameters on and off, the total_length() function recomputes the active parameter dimension at each iteration. Index maps (build_index_maps()) provide the mapping between the flat active-parameter vector and the structured (variable, group) parameter layout.\nWhen a contrast parameter is “off” (indicator = 0), it is excluded from the NUTS block. The step size and mass matrix adapt to the current active dimension.",
-    "crumbs": [
-      "Manual",
-      "Group Comparison",
-      "bgmCompare Internals"
-    ]
+    "objectID": "manual/diagnostics.html#references",
+    "href": "manual/diagnostics.html#references",
+    "title": "Convergence Diagnostics",
+    "section": "References",
+    "text": "References\n\nPlummer et al. (2006) — AR spectral density ESS (coda package)\nGelman & Rubin (1992) — original R-hat formulation\nvan den Bergh et al. (2026) — mixture ESS for spike-and-slab models"
   },
   {
-    "objectID": "manual/bgmcompare-internals.html#output-handling",
-    "href": "manual/bgmcompare-internals.html#output-handling",
-    "title": "bgmCompare Internals",
-    "section": "Output handling",
-    "text": "Output handling\nThe bgmCompareOutput struct stores:\n\n\n\n\n\n\n\nField\nContent\n\n\n\n\nmain_samples\nMain-effect posterior samples (iterations \\(\\times\\) thresholds \\(\\times\\) groups)\n\n\npairwise_samples\nPairwise-effect posterior samples (iterations \\(\\times\\) pairs \\(\\times\\) groups)\n\n\nindicator_samples\nContrast inclusion indicators (iterations \\(\\times\\) parameters)\n\n\ntreedepth_samples\nTree depth per iteration (NUTS only)\n\n\ndivergent_samples\nDivergent transition flags (NUTS only)\n\n\nenergy_samples\nHamiltonian energy per iteration (NUTS only)\n\n\n\nThe R output builder (build_output_compare()) splits the posterior means into:\n\n$group_posterior_means — Posterior means of the group-level parameters \\(\\boldsymbol{\\omega}^{(g)}\\), reconstructed from the baseline \\(\\omega_{ij}\\) and contrast parameters \\(\\delta_{ij}^{(k)}\\)\n$difference_posterior_means — Posterior means of the contrast parameters \\(\\delta_{ij}^{(k)}\\)\n$difference_inclusion_probabilities — Proportion of iterations where each contrast indicator was included",
-    "crumbs": [
-      "Manual",
-      "Group Comparison",
-      "bgmCompare Internals"
-    ]
-  },
-  {
-    "objectID": "guide/omrf.html",
-    "href": "guide/omrf.html",
-    "title": "Ordinal Markov Random Field",
+    "objectID": "manual/architecture.html",
+    "href": "manual/architecture.html",
+    "title": "C++ Architecture",
     "section": "",
-    "text": "The ordinal Markov random field (MRF) is a graphical model for networks of binary and ordinal variables (Anderson & Vermunt, 2000; Suggala et al., 2017). It is the default model in bgms and forms the discrete component of the Mixed MRF. To fit an ordinal MRF, use the default variable_type = \"ordinal\".",
+    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe bgms C++ backend is organized in five top-level directories under src/. Each directory has a distinct role, and dependencies flow downward: algorithms depend on math utilities but not on models, and the execution layer orchestrates everything.",
+    "crumbs": [
+      "Manual",
+      "Architecture",
+      "C++ Architecture"
+    ]
+  },
+  {
+    "objectID": "manual/architecture.html#source-layout",
+    "href": "manual/architecture.html#source-layout",
+    "title": "C++ Architecture",
+    "section": "Source layout",
+    "text": "Source layout\nsrc/\n├── mcmc/\n│   ├── algorithms/      # Stateless: nuts_step(), hmc_step(), leapfrog()\n│   ├── samplers/        # Stateful: NUTSSampler, HMCSampler, MetropolisSampler\n│   └── execution/       # Orchestration: chain_runner, warmup_schedule, chain_result\n├── models/\n│   ├── base_model.h     # Abstract interface (30+ virtual methods)\n│   ├── ggm/             # GGMModel — precision matrix, Metropolis-only\n│   ├── omrf/            # OMRFModel — ordinal MRF, gradient-based\n│   └── mixed/           # MixedMRFModel — mixed discrete-continuous MRF\n├── priors/\n│   ├── edge_prior.h     # BaseEdgePrior + Bernoulli, BetaBernoulli, SBM\n│   ├── sbm_edge_prior.h # MFM-SBM Gibbs updates\n│   └── sbm_edge_prior.cpp\n├── math/\n│   ├── cholupdate.h/cpp # Rank-1 Cholesky update/downdate (Givens/hyperbolic)\n│   ├── cholesky_helpers.h # Log-determinant, Schur complement\n│   ├── custom_explog.h/cpp # OpenLibM exp/log for cross-platform consistency\n│   ├── custom_arma_explog.h # Armadillo wrappers for custom exp/log\n│   └── explog_macros.h  # Platform detection macros (MY_EXP, ARMA_MY_EXP)\n├── utils/\n│   ├── variable_helpers.h/cpp # Numerically stable MRF probabilities\n│   ├── common_helpers.h # Enums (UpdateMethod, EdgePrior), counting helpers\n│   ├── progress_manager.h/cpp # Multi-chain progress bar\n│   └── print_mutex.h    # Thread-safe printing\n├── rng/\n│   └── rng_utils.h      # SafeRNG wrapper around dqrng::xoshiro256plusplus\n├── bgmCompare/          # Group comparison sampler and helpers\n│   ├── bgmCompare_sampler.h/cpp\n│   ├── bgmCompare_helper.h/cpp\n│   ├── bgmCompare_logp_and_grad.h/cpp\n│   └── bgmCompare_output.h\n└── [interface files]    # Rcpp entry points: sample_ggm.cpp, sample_omrf.cpp, etc.",
+    "crumbs": [
+      "Manual",
+      "Architecture",
+      "C++ Architecture"
+    ]
+  },
+  {
+    "objectID": "manual/architecture.html#layer-separation",
+    "href": "manual/architecture.html#layer-separation",
+    "title": "C++ Architecture",
+    "section": "Layer separation",
+    "text": "Layer separation\n\n\n\n\n\n\n\n\nLayer\nLocation\nResponsibility\n\n\n\n\nAlgorithms\nmcmc/algorithms/\nPure functions that perform one MCMC step. No state, no model knowledge.\n\n\nSamplers\nmcmc/samplers/\nStateful objects that own adaptation state and delegate to algorithms.\n\n\nExecution\nmcmc/execution/\nChain runner, warmup scheduling, sample storage.\n\n\nModels\nmodels/\nLog-posterior, gradient, Metropolis proposals. Each model implements BaseModel.\n\n\nPriors\npriors/\nEdge inclusion prior updates. Each prior implements BaseEdgePrior.\n\n\nMath\nmath/\nNumerical primitives: Cholesky updates, cross-platform exp/log.\n\n\nUtilities\nutils/\nShared helpers: stable probability computation, progress tracking, enums.",
+    "crumbs": [
+      "Manual",
+      "Architecture",
+      "C++ Architecture"
+    ]
+  },
+  {
+    "objectID": "manual/architecture.html#design-principles",
+    "href": "manual/architecture.html#design-principles",
+    "title": "C++ Architecture",
+    "section": "Design principles",
+    "text": "Design principles\nSeparation of concerns. Algorithms know nothing about models. A nuts_step() call receives a function logp_and_gradient(vec) → (double, vec) and returns a StepResult. The model provides the function; the algorithm does the math.\nVirtual dispatch for models. All models inherit from BaseModel and override a small set of virtual methods. The chain runner calls model.logp_and_gradient() without knowing whether it is sampling a GGM or an ordinal MRF. See Model Classes.\nCloning for parallelism. Both BaseModel and BaseEdgePrior expose a clone() method that produces an independent copy. The Rcpp entry point constructs a single model from R input and passes it to run_mcmc_sampler(). Inside C++, that prototype is cloned once per chain (each clone receiving its own RNG seed), and the clones are dispatched to TBB threads via RcppParallel::parallelFor(). R never interacts with the clones directly — parallelism is entirely C++-side. After all chains finish, the vector&lt;ChainResult&gt; is converted to an R list and returned. See Parallel Chains.\nHeader-only samplers. The sampler classes in mcmc/samplers/ are header-only. They are lightweight wrappers that hold adaptation state and call algorithm functions from mcmc/algorithms/.\nRcpp interface files. The top-level .cpp files in src/ (sample_ggm.cpp, sample_omrf.cpp, sample_mixed.cpp, bgmCompare_interface.cpp) are thin Rcpp entry points. They construct C++ objects from R lists and call run_mcmc_sampler().",
+    "crumbs": [
+      "Manual",
+      "Architecture",
+      "C++ Architecture"
+    ]
+  },
+  {
+    "objectID": "manual/architecture.html#build-system",
+    "href": "manual/architecture.html#build-system",
+    "title": "C++ Architecture",
+    "section": "Build system",
+    "text": "Build system\nsrc/Makevars.in (configured by configure/configure.win) sets compiler flags and links against RcppArmadillo, RcppParallel (TBB), and dqrng. The file src/sources.mk lists all .cpp translation units and is auto-generated by inst/generate_makevars_sources.R.\n\n\n\n\n\n\nWarning\n\n\n\nNever hand-edit src/sources.mk. Run Rscript inst/generate_makevars_sources.R after adding or removing .cpp files.",
+    "crumbs": [
+      "Manual",
+      "Architecture",
+      "C++ Architecture"
+    ]
+  },
+  {
+    "objectID": "guide/prior-basics.html",
+    "href": "guide/prior-basics.html",
+    "title": "Prior Basics",
+    "section": "",
+    "text": "This page explains the prior distributions used in bgms and how they connect to the Bayesian graphical modeling framework introduced on the Bayesian Approach page. Analysis-specific guidance appears on the Edge Selection, Group Comparison, and Edge Clustering pages.",
+    "crumbs": [
+      "Get Started",
+      "Background",
+      "Prior Basics"
+    ]
+  },
+  {
+    "objectID": "guide/prior-basics.html#what-is-a-prior",
+    "href": "guide/prior-basics.html#what-is-a-prior",
+    "title": "Prior Basics",
+    "section": "What is a prior?",
+    "text": "What is a prior?\nA prior distribution encodes assumptions about a parameter before observing data. In Bayesian inference, the prior is combined with the likelihood to produce the posterior distribution. The prior matters most when data are sparse; as data accumulate, the posterior is increasingly driven by the likelihood.",
+    "crumbs": [
+      "Get Started",
+      "Background",
+      "Prior Basics"
+    ]
+  },
+  {
+    "objectID": "guide/prior-basics.html#the-spike-and-slab-prior",
+    "href": "guide/prior-basics.html#the-spike-and-slab-prior",
+    "title": "Prior Basics",
+    "section": "The spike-and-slab prior",
+    "text": "The spike-and-slab prior\nThe Bayesian Approach page introduced two prior distributions: one for the network structure, \\(p(\\mathcal{S})\\), and one for the partial associations conditional on that structure, \\(p(\\boldsymbol{\\Omega}_\\mathcal{S} \\mid \\mathcal{S})\\). In bgms, these two priors are linked through a spike-and-slab prior on each partial association \\(\\omega_{ij}\\).\nThe idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero (\\(\\omega_{ij} = 0\\)). When the edge is present, the partial association is free to take any nonzero value (\\(\\omega_{ij} \\in \\mathbb{R} \\setminus \\{0\\}\\)). A binary indicator \\(\\gamma_{ij}\\) tracks the state of each edge: \\(\\gamma_{ij} = 0\\) means the edge is absent and \\(\\gamma_{ij} = 1\\) means it is present. Together, the collection of indicators forms the network structure \\(\\mathcal{S}\\).\nWe use the mixtures of mutually singular distributions formulation of the spike-and-slab prior (Gottardo & Raftery, 2008; van den Bergh et al., 2026), which designates a mixture of two mutually exclusive components:\n\\[\np(\\omega_{ij} \\mid \\gamma_{ij})\n= (1 - \\gamma_{ij})\\;\\mathbf{1}_{\\{0\\}}(\\omega_{ij})\n\\;+\\; \\gamma_{ij}\\;p_{\\text{slab}}(\\omega_{ij})\\;\\mathbf{1}_{\\mathbb{R}\\setminus\\{0\\}}(\\omega_{ij})\n\\]\nHere \\(\\mathbf{1}_{A}(\\omega_{ij})\\) is the indicator function that equals one when \\(\\omega_{ij} \\in A\\) and zero otherwise. The two indicator functions make the disjoint support of the components explicit: the first component assigns all probability to \\(\\omega_{ij} \\in \\{0\\}\\), the second to \\(\\omega_{ij} \\in \\mathbb{R}\\setminus\\{0\\}\\).\nThe first component is the spike: when \\(\\gamma_{ij} = 0\\), all prior probability is concentrated on the value \\(\\omega_{ij} = 0\\), enforcing the absence of the edge. The second component is the slab: when \\(\\gamma_{ij} = 1\\), the partial association receives a continuous distribution over nonzero values, which determines what effect sizes are considered plausible for present edges.\nThe spike-and-slab above is specified for a single edge. The joint prior on all partial associations is the product of independent spike-and-slab priors across edges:\n\\[\np(\\boldsymbol{\\Omega} \\mid \\mathcal{S})\n= \\prod_{i &lt; j} p(\\omega_{ij} \\mid \\gamma_{ij})\n\\]\nThis is the prior \\(p(\\boldsymbol{\\Omega}_\\mathcal{S} \\mid \\mathcal{S})\\) from the Bayesian Approach page. For a given structure \\(\\mathcal{S}\\), the spike components fix all excluded edges to zero, and the slab components provide independent priors on the partial associations of the included edges. The joint prior therefore reduces to a product of slab distributions over the edges in \\(\\mathcal{S}\\).\nThe spike-and-slab prior decomposes inference into two questions.1 The first is a structural question: is the edge present? This is governed by \\(\\gamma_{ij}\\) and its prior, which together define \\(p(\\mathcal{S})\\). The second is a question about effect size: given that the edge is present, how strong is it? This is governed by the slab distribution, which defines \\(p(\\boldsymbol{\\Omega}_\\mathcal{S} \\mid \\mathcal{S})\\) for the nonzero entries.\nThe sections below describe each component: the slab distribution that regularizes effect sizes, and the edge priors that govern which edges are included.",
+    "crumbs": [
+      "Get Started",
+      "Background",
+      "Prior Basics"
+    ]
+  },
+  {
+    "objectID": "guide/prior-basics.html#the-slab-prior-on-effect-sizes",
+    "href": "guide/prior-basics.html#the-slab-prior-on-effect-sizes",
+    "title": "Prior Basics",
+    "section": "The slab: prior on effect sizes",
+    "text": "The slab: prior on effect sizes\nThe slab distribution determines the prior plausibility of different effect sizes for edges that are present. In bgms, the slab is a Cauchy distribution centered at zero, with a scale parameter controlled by pairwise_scale (default: 1).\nThe Cauchy distribution has heavy tails, which means it allows large effects when the data support them, while the peak at zero provides moderate shrinkage toward small effects. In models with many variables and limited data, this regularization prevents extreme estimates.\nThe scale parameter controls the width of the slab. A wider slab spreads prior probability over a larger range of effect sizes. This has a direct consequence for edge selection: because the slab is also the alternative hypothesis for the inclusion Bayes factor, a wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small.\nWhen standardize = TRUE, the prior scale is adjusted based on the range of response scores. Variables with more categories have larger score products, which typically correspond to smaller interaction effects. Without standardization, a fixed scale is relatively wide for high-category pairs and narrow for low-category pairs. The adjustment ensures equivalent relative shrinkage across all variable pairs.",
+    "crumbs": [
+      "Get Started",
+      "Background",
+      "Prior Basics"
+    ]
+  },
+  {
+    "objectID": "guide/prior-basics.html#the-spike-priors-on-the-edge-indicators",
+    "href": "guide/prior-basics.html#the-spike-priors-on-the-edge-indicators",
+    "title": "Prior Basics",
+    "section": "The spike: priors on the edge indicators",
+    "text": "The spike: priors on the edge indicators\nEdge indicators \\(\\gamma_{ij}\\) govern edge inclusion in the spike-and-slab prior. Their prior determines, before seeing the data, how likely each edge is to be excluded (\\(\\gamma_{ij}=0\\)) or included (\\(\\gamma_{ij}=1\\)), and therefore governs overall sparsity and structure.\nbgms provides three edge priors, each encoding a different type of structural assumption. They are selected with the edge_prior argument.\n\nBernoulli prior\nThe simplest edge prior treats each edge independently: the indicator \\(\\gamma_{ij}\\) follows a Bernoulli distribution with inclusion probability \\(\\pi_{ij}\\). Across all edges, this gives\n\\[\np(\\mathcal{S}) = \\prod_{i &lt; j} \\pi_{ij}^{\\gamma_{ij}}\\,(1 - \\pi_{ij})^{1 - \\gamma_{ij}}\n\\]\nThe inclusion probability can be set to the same value for all edges (a scalar) or specified per edge (a matrix). The default is \\(\\pi_{ij} = 0.5\\) for all edges, which assigns equal prior weight to edge presence and absence. A classic choice due to Erdős & Rényi (1959), this treats every possible network structure as equally likely.\nLowering \\(\\pi_{ij}\\) encodes a prior expectation that the network is sparse. Raising it encodes a prior expectation of a dense network. Setting different values for different edges allows prior information about specific relationships to be incorporated.\n\n\nBeta-Bernoulli prior\nThe Beta-Bernoulli prior extends the Bernoulli prior by treating the inclusion probability as unknown and learning it from the data. All edges share a single inclusion probability \\(\\pi\\), which receives a Beta prior with shape parameters \\(\\alpha\\) and \\(\\beta\\):\n\\[\np(\\mathcal{S}) = \\frac{B(\\alpha + \\gamma_{++},\\; \\beta + k - \\gamma_{++})}{B(\\alpha,\\; \\beta)}\n\\]\nwhere \\(\\gamma_{++}\\) is the total number of included edges, \\(k = \\binom{p}{2}\\) is the number of possible edges, and \\(B(\\cdot, \\cdot)\\) is the beta function.\nBecause the inclusion probability is integrated out, the edges are no longer independent a priori: the inclusion of one edge makes others slightly more likely. In practice, this means the prior adapts to the overall complexity of the network. If the data suggest a sparse network, the learned inclusion probability decreases; if they suggest a dense network, it increases.\nAn important special case arises when \\(\\alpha = \\beta = 1\\) (the default). The prior then places a uniform distribution over different levels of network complexity — one edge, two edges, and so on are all equally likely a priori — and, within each complexity level, all structures of the same size are equally likely.\n\n\nStochastic block model prior\nThe Bernoulli and Beta-Bernoulli priors treat all edges the same way: either each edge has a fixed inclusion probability, or all edges share a single learned inclusion probability. Neither prior can express the expectation that some groups of variables are more densely connected than others.\nThe stochastic block model (SBM) prior addresses this by assigning variables to latent blocks. Edges between two variables in the same block share a within-block inclusion probability, while edges between variables in different blocks share a between-block inclusion probability. Each block pair effectively has its own Beta-Bernoulli prior, so the model can learn different levels of density within and between clusters.\nWhen there is only one block, the SBM reduces to the standard Beta-Bernoulli prior. With multiple blocks, it can capture a common pattern in applied networks: clusters of densely connected variables with sparser connections between clusters.\nThe SBM prior introduces additional parameters: the number of blocks, the assignment of variables to blocks, and the within- and between-block Beta hyperparameters. These are estimated from the data by default. See Edge Clustering for the full specification, hyperparameter guidance, and interpretation of results.",
+    "crumbs": [
+      "Get Started",
+      "Background",
+      "Prior Basics"
+    ]
+  },
+  {
+    "objectID": "guide/prior-basics.html#nuisance-parameter-priors",
+    "href": "guide/prior-basics.html#nuisance-parameter-priors",
+    "title": "Prior Basics",
+    "section": "Nuisance parameter priors",
+    "text": "Nuisance parameter priors\nBeyond the spike-and-slab, bgms places priors on several nuisance parameters that are estimated but typically not of direct inferential interest:\n\n\n\n\n\n\n\n\n\nParameter\nModel\nPrior\nControl\n\n\n\n\nCategory thresholds\nOrdinal MRF, Mixed MRF\nBeta-prime (via \\(\\exp(\\mu)\\))\nmain_alpha, main_beta (default 0.5)\n\n\nBlume-Capel parameters\nOrdinal MRF, Mixed MRF\nBeta-prime (via \\(\\exp(\\mu)\\))\nmain_alpha, main_beta (default 0.5)\n\n\nDiagonal of precision matrix\nGGM, Mixed MRF\nGamma\\((1, 1)\\)\nFixed\n\n\nContinuous variable means\nMixed MRF\nNormal\\((0, 1)\\)\nFixed\n\n\n\nFor the category thresholds and Blume-Capel parameters, when the two shape parameters are equal the induced prior on \\(\\mu\\) is symmetric around zero. The GGM and mixed MRF priors are not user-configurable.",
+    "crumbs": [
+      "Get Started",
+      "Background",
+      "Prior Basics"
+    ]
+  },
+  {
+    "objectID": "guide/prior-basics.html#footnotes",
+    "href": "guide/prior-basics.html#footnotes",
+    "title": "Prior Basics",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nWhen edge_selection = TRUE (the default), both questions are answered simultaneously during estimation. When edge_selection = FALSE, the structural question is bypassed: all edges are present, and only the slab prior is active.↩︎",
+    "crumbs": [
+      "Get Started",
+      "Background",
+      "Prior Basics"
+    ]
+  },
+  {
+    "objectID": "guide/mixed-model.html",
+    "href": "guide/mixed-model.html",
+    "title": "Mixed Markov Random Field",
+    "section": "",
+    "text": "The mixed Markov random field (MRF) is a graphical model for networks containing both discrete (binary or ordinal) and continuous variables. It unites the Ordinal MRF and the GGM into a single joint distribution through the conditional Gaussian framework (Lauritzen, 1996; Lauritzen & Wermuth, 1989). To fit a mixed MRF, provide a variable_type vector that includes both discrete and continuous types.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Ordinal Markov Random Field"
+      "Mixed Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/omrf.html#the-model",
-    "href": "guide/omrf.html#the-model",
-    "title": "Ordinal Markov Random Field",
+    "objectID": "guide/mixed-model.html#the-model",
+    "href": "guide/mixed-model.html#the-model",
+    "title": "Mixed Markov Random Field",
     "section": "The model",
-    "text": "The model\nFor \\(p\\) ordinal variables with observations \\(\\mathbf{x} = (x_1, \\ldots, x_p)\\), the ordinal MRF specifies the joint distribution as:\n\\[\np(\\mathbf{x}) \\propto \\exp\\!\\left(\\sum_{i=1}^{p} \\sum_{c=1}^{m_i} \\mathcal{I}(x_i = c)\\,\\mu_{ic} +\n\\mathbf{x}^{\\sf T}\\boldsymbol{\\Omega}\\, \\mathbf{x}\\right)\n\\]\nwhere \\(\\mu_{ic}\\) is the category threshold parameter for category \\(c\\) of variable \\(i\\) (one per category above the baseline \\(c = 0\\), which is fixed at \\(\\mu_{i0} = 0\\)) and \\(\\boldsymbol{\\Omega}\\) is a symmetric interaction matrix whose off-diagonal entry \\(\\omega_{ij}\\) is the partial association between variables \\(i\\) and \\(j\\).",
+    "text": "The model\nFor \\(p\\) discrete variables \\(\\mathbf{x} = (x_1, \\ldots, x_p)\\) and \\(q\\) continuous variables \\(\\mathbf{y} = (y_1, \\ldots, y_q)\\), the mixed MRF specifies the joint distribution as:\n\\[\np(\\mathbf{x}, \\mathbf{y}) \\propto \\exp\\!\\left(\n\\sum_{i=1}^{p} \\sum_{c=1}^{m_i}\\mathcal{I}(x_i = c)\\,\\mu_{ic} +\n\\mathbf{x}^{\\sf T}\\boldsymbol{\\Omega}_{xx}\\,\\mathbf{x} +\n(\\mathbf{y} - \\boldsymbol{\\mu}_y)^{\\sf T}\\boldsymbol{\\Omega}_{yy}\\,(\\mathbf{y} - \\boldsymbol{\\mu}_y) +\n2\\,\\mathbf{x}^{\\sf T}\\boldsymbol{\\Omega}_{xy}\\,\\mathbf{y}\\right)\n\\]\nwhere:\n\n\\(\\mu_{ic}\\) are category thresholds for discrete variable \\(i\\), category \\(c\\) (with baseline \\(\\mu_{i0} = 0\\)), as in the Ordinal MRF\n\\(\\boldsymbol{\\mu}_y\\) is the \\(q\\)-vector of continuous means\n\\(\\boldsymbol{\\Omega}_{xx}\\) is a \\(p \\times p\\) symmetric matrix of discrete–discrete interactions\n\\(\\boldsymbol{\\Omega}_{yy}\\) is a \\(q \\times q\\) symmetric negative semi-definite matrix, related to the precision matrix by \\(\\boldsymbol{\\Theta} = -2\\,\\boldsymbol{\\Omega}_{yy}\\)\n\\(\\boldsymbol{\\Omega}_{xy}\\) is a \\(p \\times q\\) matrix of cross-type interactions\n\nThe three interaction blocks (\\(\\boldsymbol{\\Omega}_{xx}\\), \\(\\boldsymbol{\\Omega}_{yy}\\), \\(\\boldsymbol{\\Omega}_{xy}\\)) enter the density on the same scale.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Ordinal Markov Random Field"
+      "Mixed Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/omrf.html#why-the-adjacent-category-model",
-    "href": "guide/omrf.html#why-the-adjacent-category-model",
-    "title": "Ordinal Markov Random Field",
-    "section": "Why the adjacent category model?",
-    "text": "Why the adjacent category model?\nThe ordinal MRF can be understood as a multivariate generalization of the adjacent category logit model for ordinal responses (Agresti, 2010).\n\nThe univariate case\nConsider a single ordinal variable \\(x \\in \\{0, \\dots, m\\}\\), where the category index reflects only the ordering of the response labels. The adjacent category model characterizes the log-odds between successive categories:\n\\[\n\\log\\!\\left( \\frac{p(x = c+1)}{p(x = c)} \\right) = \\eta_c, \\quad c = 0, \\dots, m-1\n\\]\nwith \\(\\eta_0 = 0\\) for identifiability. The resulting probability mass function,\n\\[\np(x = c) = \\frac{\\exp\\!\\left( \\sum_{k=c}^{m} \\eta_k \\right)}{1 + \\sum_{j=1}^{m} \\exp\\!\\left( \\sum_{k=j}^{m} \\eta_k \\right)}\n\\]\nis a member of the exponential family with canonical parameters \\(\\eta_c\\) and sufficient statistics \\(\\mathcal{I}(x \\geq c)\\).\n\n\nThe multivariate extension\nFor \\(p\\) ordinal variables, we regress each variable \\(x_i\\) on the others by modeling the canonical parameters as\n\\[\n\\eta_c = \\alpha_c + \\sum_{j \\neq i} \\beta_j\\, x_j\n\\]\nwhere \\(\\alpha_c\\) are category-specific intercepts and \\(\\beta_j\\) are common slopes. Crucially, the model depends on the ordinal variables only through the sufficient statistics \\(\\mathcal{I}(x_i \\geq c)\\) and the interaction terms \\(x_i\\, x_j = \\sum_c \\sum_{c'} \\mathcal{I}(x_i \\geq c)\\, \\mathcal{I}(x_j \\geq c')\\). Because these terms are computed from cumulative indicators, the model captures only the ordering of the categories, without relying on any numeric interpretation or spacing of the labels. It is therefore invariant under monotonic recodings and does not assume interval-scale measurement.\nOther ordinal regression models, such as the cumulative logit and continuation ratio models (Agresti, 2010), do not share this property. As shown by Suggala et al. (2017), these models do not correspond to full conditionals of a joint distribution, and are therefore incompatible with a multivariate MRF formulation.\nThe adjacent category model does yield consistent full conditionals, and the joint distribution that generates them is the ordinal MRF (Marsman et al., 2025).",
+    "objectID": "guide/mixed-model.html#conditional-gaussian-structure",
+    "href": "guide/mixed-model.html#conditional-gaussian-structure",
+    "title": "Mixed Markov Random Field",
+    "section": "Conditional Gaussian structure",
+    "text": "Conditional Gaussian structure\nThe mixed MRF belongs to the class of conditional Gaussian (CG) distributions (Lauritzen & Wermuth, 1989): given the discrete variables, the continuous variables follow a multivariate normal distribution:\n\\[\n\\mathbf{y} \\mid \\mathbf{x} \\sim \\mathcal{N}\\!\\left(\\boldsymbol{\\mu}_y + 2\\,\\boldsymbol{\\Sigma}\\,\\boldsymbol{\\Omega}_{xy}^{\\sf T}\\,\\mathbf{x},\\;\\boldsymbol{\\Sigma}\\right)\n\\]\nwhere \\(\\boldsymbol{\\Sigma} = \\boldsymbol{\\Theta}^{-1} = (-2\\,\\boldsymbol{\\Omega}_{yy})^{-1}\\) is the conditional covariance. The conditional mean \\(\\boldsymbol{\\mu}_y + 2\\,\\boldsymbol{\\Sigma}\\,\\boldsymbol{\\Omega}_{xy}^{\\sf T}\\,\\mathbf{x}\\) shifts linearly with the discrete scores: each discrete variable \\(x_i\\) contributes to the conditional mean of continuous variable \\(y_j\\) in proportion to \\(\\omega_{ij}^{xy}\\). The conditional covariance \\(\\boldsymbol{\\Sigma}\\) does not depend on \\(\\mathbf{x}\\) — the discrete variables affect the location of the continuous distribution but not its spread.\nIn the pure GGM, bgms centers the continuous data so that the mean vector is zero and drops out of the model (see GGM). In the mixed MRF, this centering is not possible: the cross-type interactions couple the continuous means to the discrete variables, so \\(\\boldsymbol{\\mu}_y\\) remains a free parameter.\nThe marginal distribution of \\(\\mathbf{x}\\), obtained by integrating out \\(\\mathbf{y}\\), is an ordinal MRF whose effective interactions absorb the indirect associations between discrete variables mediated through the continuous block.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Ordinal Markov Random Field"
+      "Mixed Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/omrf.html#connection-to-the-mrf-framework",
-    "href": "guide/omrf.html#connection-to-the-mrf-framework",
-    "title": "Ordinal Markov Random Field",
+    "objectID": "guide/mixed-model.html#connection-to-the-mrf-framework",
+    "href": "guide/mixed-model.html#connection-to-the-mrf-framework",
+    "title": "Mixed Markov Random Field",
     "section": "Connection to the MRF framework",
-    "text": "Connection to the MRF framework\nThe Graphical Models page introduced the general pairwise MRF:\n\\[\np(\\mathbf{x}) \\propto \\exp\\!\\left(\\sum_{i} \\mu_i(x_i) +\n\\mathbf{x}^{\\sf T}\\boldsymbol{\\Omega}\\, \\mathbf{x}\\right)\n\\]\nThe ordinal MRF is the discrete special case. The node potentials \\(\\mu_i(x_i)\\) are the category thresholds \\(\\mu_{ic}\\), and the interaction matrix \\(\\boldsymbol{\\Omega}\\) has off-diagonal entries \\(\\omega_{ij}\\). The bilinear form \\(\\mathbf{x}^{\\sf T}\\boldsymbol{\\Omega}\\,\\mathbf{x}\\) reduces to \\(2\\sum_{i &lt; j} \\omega_{ij}\\, x_i\\, x_j\\) because \\(\\boldsymbol{\\Omega}\\) is symmetric (the diagonal terms are not identifiable, and absorbed by the thresholds).",
+    "text": "Connection to the MRF framework\nThe Graphical Models page introduced the general pairwise MRF:\n\\[\np(\\mathbf{z}) \\propto \\exp\\!\\left(\\sum_{i} \\mu_i(z_i) +\n\\mathbf{z}^{\\sf T}\\boldsymbol{\\Omega}\\, \\mathbf{z}\\right)\n\\]\nThe mixed MRF extends this framework to a mixed variable vector \\(\\mathbf{z} = (\\mathbf{x}, \\mathbf{y})\\). The interaction matrix \\(\\boldsymbol{\\Omega}\\) decomposes into three blocks — \\(\\boldsymbol{\\Omega}_{xx}\\), \\(\\boldsymbol{\\Omega}_{yy}\\), and \\(\\boldsymbol{\\Omega}_{xy}\\) — corresponding to the three types of edges in the graph. When all variables are discrete (\\(q = 0\\)), the continuous blocks vanish and the model reduces to the ordinal MRF. When all variables are continuous (\\(p = 0\\)), the discrete blocks vanish and the model reduces to the GGM with precision matrix \\(\\boldsymbol{\\Theta} = -2\\,\\boldsymbol{\\Omega}_{yy}\\).",
     "crumbs": [
       "Get Started",
       "Models",
-      "Ordinal Markov Random Field"
+      "Mixed Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/omrf.html#partial-associations",
-    "href": "guide/omrf.html#partial-associations",
-    "title": "Ordinal Markov Random Field",
+    "objectID": "guide/mixed-model.html#partial-associations",
+    "href": "guide/mixed-model.html#partial-associations",
+    "title": "Mixed Markov Random Field",
     "section": "Partial associations",
-    "text": "Partial associations\nAs described in Graphical Models, bgms reports all pairwise effects on a unified partial association scale. For the ordinal MRF, the partial association \\(\\omega_{ij}\\) is half the log adjacent-category odds ratio. The adjacent-category odds ratio compares, for two variables \\(x_i\\) and \\(x_j\\), how the odds of being in category \\(h+1\\) versus \\(h\\) for one variable change when the other variable moves from category \\(q\\) to \\(q+1\\):\n\\[\n\\text{OR}_{ij} = \\frac{P(x_i = h,\\; x_j = q)\\; P(x_i = h+1,\\; x_j = q+1)}{P(x_i = h+1,\\; x_j = q)\\; P(x_i = h,\\; x_j = q+1)} = \\exp(2\\omega_{ij})\n\\]\nThis ratio is constant across all category pairs \\((h, q)\\) and does not depend on the values of the remaining variables. The partial association is therefore:\n\\[\n\\omega_{ij} = \\tfrac{1}{2}\\,\\log\\text{OR}_{ij}\n\\]\nA positive \\(\\omega_{ij}\\) means that the odds of observing one variable in a higher adjacent category increase when the other variable is also in a higher adjacent category.\nTo obtain the full log adjacent-category odds ratios, use extract_log_odds(fit), which returns \\(2\\omega_{ij}\\) for each pair. The coef(fit)$pairwise method returns the partial associations \\(\\omega_{ij}\\).",
+    "text": "Partial associations\nThe mixed MRF has three types of partial associations, all reported on the same scale in coef(fit)$pairwise:\nDiscrete–discrete. The off-diagonal entries of \\(\\boldsymbol{\\Omega}_{xx}\\) have the same interpretation as in the ordinal MRF: each \\(\\omega_{ij}^{xx}\\) is half the log adjacent-category odds ratio, constant across all category pairs. See Ordinal MRF.\nContinuous–continuous. The off-diagonal entries of \\(\\boldsymbol{\\Omega}_{yy}\\) are related to the precision element by \\(\\omega_{ij}^{yy} = -\\tfrac{1}{2}\\,\\theta_{ij}\\), the same relationship as in the GGM. See GGM.\nCross-type. The entries of \\(\\boldsymbol{\\Omega}_{xy}\\) capture the direct association between a discrete variable \\(x_i\\) and a continuous variable \\(y_j\\), after accounting for all other variables. A cross-type partial association enters both the full conditional of \\(x_i\\) (through the rest score) and the conditional mean of \\(y_j\\).\nWhen \\(\\omega_{ij} = 0\\) for any of the three types, the two variables are conditionally independent and the corresponding edge is absent from the graph. The spike-and-slab prior operates on partial associations regardless of type, so edge selection works uniformly across all three blocks.\nTo obtain model-specific parameterizations: extract_precision(fit) returns \\(\\boldsymbol{\\Theta}\\), extract_partial_correlations(fit) returns partial correlations for the continuous block, and extract_log_odds(fit) returns the log adjacent-category odds ratios \\(2\\omega_{ij}^{xx}\\) for the discrete block.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Ordinal Markov Random Field"
+      "Mixed Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/omrf.html#category-thresholds",
-    "href": "guide/omrf.html#category-thresholds",
-    "title": "Ordinal Markov Random Field",
-    "section": "Category thresholds",
-    "text": "Category thresholds\nThe thresholds \\(\\mu_{ic}\\) are the node potentials of the ordinal MRF. They control the marginal category distribution of each variable — how likely each response category is, apart from any associations with other variables.\n\nRegular ordinal variables\nBy default, bgms treats ordinal variables as “regular”: each category above the lowest receives its own threshold parameter. This imposes no constraint on the shape of the category distribution. Variables are internally recoded to consecutive integers starting at 0.\nFor binary variables (two categories, coded 0 and 1), the model reduces to the Ising model (Ising, 1925), a classical MRF for binary data. The single threshold parameter controls the probability of category 1 relative to category 0.\n\n\nBlume-Capel variables\nThe Blume-Capel model originates in statistical physics, where Blume (1966) and Capel (1966) independently developed it to study phase transitions in ternary spin systems. As an application to psychology, van der Maas et al. (2026) used the model to study attitudes, depression, and intelligence.\nFor ordinal variables with a natural baseline or reference category (e.g., a “neutral” response), the Blume-Capel parameterization models category thresholds as a quadratic function of distance from the baseline:\n\\[\n\\mu_c = \\alpha \\cdot (c - b) + \\beta \\cdot (c - b)^2\n\\]\nwhere \\(c\\) is the response category, \\(b\\) is the baseline category, \\(\\alpha\\) captures the linear trend across categories, and \\(\\beta\\) captures the preference toward or away from the baseline:\n\n\\(\\beta &lt; 0\\): the model favors responses near the baseline category\n\\(\\beta &gt; 0\\): the model favors responses away from the baseline category\n\nPartial associations between Blume-Capel variables use centered scores: the interaction term in the joint distribution becomes \\(2(x_i - b_i)(x_j - b_j)\\,\\omega_{ij}\\) instead of \\(2\\,x_i\\,x_j\\,\\omega_{ij}\\). The partial association \\(\\omega_{ij}\\) remains the same; the centering is absorbed by the thresholds. For binary variables, the Blume-Capel parameterization reduces to the Ising model, just as the regular ordinal parameterization does.\nTo use Blume-Capel variables, set variable_type = \"blume-capel\" and provide the baseline_category argument:\nfit = bgm(x = data, variable_type = \"blume-capel\",\n          baseline_category = 2, seed = 1234)\nThe baseline_category can be a single integer (applied to all variables) or a vector of length \\(p\\).\nThe thresholds are nuisance parameters — they are estimated during MCMC sampling but are typically not of direct inferential interest. To extract them, use extract_main_effects(fit).",
-    "crumbs": [
-      "Get Started",
-      "Models",
-      "Ordinal Markov Random Field"
-    ]
-  },
-  {
-    "objectID": "guide/omrf.html#pseudolikelihood",
-    "href": "guide/omrf.html#pseudolikelihood",
-    "title": "Ordinal Markov Random Field",
+    "objectID": "guide/mixed-model.html#pseudolikelihood",
+    "href": "guide/mixed-model.html#pseudolikelihood",
+    "title": "Mixed Markov Random Field",
     "section": "Pseudolikelihood",
-    "text": "Pseudolikelihood\nThe normalizing constant of the ordinal MRF involves a sum over all possible configurations of \\(p\\) ordinal variables, which is intractable for all but the smallest networks. bgms uses a pseudolikelihood approximation (Marsman et al., 2025): the product of full conditional distributions replaces the joint distribution.\nThe full conditional distribution for variable \\(i\\) given all other variables is:\n\\[\np(x_i = c \\mid \\mathbf{x}_{-i}) = \\frac{\\exp\\!\\left(\\mu_{ic} + c \\cdot r_i\\right)}{\\sum_{k=0}^{m_i} \\exp\\!\\left(\\mu_{ik} + k \\cdot r_i\\right)}\n\\]\nwhere \\(r_i = 2\\sum_{j \\neq i} x_j\\, \\omega_{ij}\\) is the residual score — a sufficient reduction that summarizes the influence of all other variables on \\(x_i\\). The pseudolikelihood is the product of these conditionals across all observations and variables.",
+    "text": "Pseudolikelihood\nThe continuous conditional \\(p(\\mathbf{y} \\mid \\mathbf{x})\\) is a multivariate normal with a closed-form likelihood. For \\(n\\) observations:\n\\[\n\\log p(\\mathbf{Y} \\mid \\mathbf{X}) = \\frac{n}{2}\\left(\\log|\\boldsymbol{\\Theta}| - q\\log(2\\pi)\\right) - \\frac{1}{2}\\sum_{i=1}^{n}(\\mathbf{y}_i - \\mathbf{M}_i)^{\\sf T}\\boldsymbol{\\Theta}\\,(\\mathbf{y}_i - \\mathbf{M}_i)\n\\]\nwhere \\(\\mathbf{M}_i = \\boldsymbol{\\mu}_y + 2\\,\\boldsymbol{\\Sigma}\\,\\boldsymbol{\\Omega}_{xy}^{\\sf T}\\,\\mathbf{x}_i\\) is the conditional mean for observation \\(i\\). This expression is computed exactly — no pseudolikelihood approximation is needed for the continuous block.\nThe discrete conditionals require a pseudolikelihood approximation, as in the ordinal MRF. The full conditional for discrete variable \\(x_i\\) given all other variables is:\n\\[\np(x_i = c \\mid \\mathbf{x}_{-i}, \\mathbf{y}) = \\frac{\\exp\\!\\left(\\mu_{ic} + c \\cdot r_i\\right)}{\\sum_{k=0}^{m_i}\\exp\\!\\left(\\mu_{ik} + k \\cdot r_i\\right)}\n\\]\nwhere the rest score now includes contributions from both discrete and continuous variables:\n\\[\nr_i = 2\\sum_{j \\neq i} x_j\\, \\omega_{ij}^{xx} + 2\\sum_{j=1}^{q} y_j\\, \\omega_{ij}^{xy}\n\\]\nThe pseudolikelihood argument controls how these discrete full conditionals are constructed:\n\n\"conditional\" (default): conditions on the observed continuous variables when computing the discrete full conditionals. The rest score uses \\(\\boldsymbol{\\Omega}_{xx}\\) and \\(\\boldsymbol{\\Omega}_{xy}\\) directly.\n\"marginal\": integrates out the continuous variables, so the discrete full conditionals use effective interactions that account for indirect discrete–discrete associations mediated through the continuous block.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Ordinal Markov Random Field"
+      "Mixed Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/omrf.html#edge-selection",
-    "href": "guide/omrf.html#edge-selection",
-    "title": "Ordinal Markov Random Field",
+    "objectID": "guide/mixed-model.html#edge-selection",
+    "href": "guide/mixed-model.html#edge-selection",
+    "title": "Mixed Markov Random Field",
     "section": "Edge selection",
-    "text": "Edge selection\nWhen edge_selection = TRUE (the default), bgms applies spike-and-slab priors to the partial associations \\(\\omega_{ij}\\). The spike sets \\(\\omega_{ij} = 0\\), enforcing the absence of the edge. The slab places a Cauchy prior on \\(\\omega_{ij}\\), allowing the effect size to be estimated from the data. See Prior Basics for the spike-and-slab specification.\nThe posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See Edge Selection.",
+    "text": "Edge selection\nWhen edge_selection = TRUE (the default), bgms applies spike-and-slab priors to all three types of partial associations. The spike sets \\(\\omega_{ij} = 0\\), enforcing the absence of the edge. The slab places a Cauchy prior on \\(\\omega_{ij}\\), allowing the effect size to be estimated from the data. See Prior Basics for the spike-and-slab specification.\nThe posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See Edge Selection.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Ordinal Markov Random Field"
+      "Mixed Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/omrf.html#missing-data",
-    "href": "guide/omrf.html#missing-data",
-    "title": "Ordinal Markov Random Field",
+    "objectID": "guide/mixed-model.html#missing-data",
+    "href": "guide/mixed-model.html#missing-data",
+    "title": "Mixed Markov Random Field",
     "section": "Missing data",
-    "text": "Missing data\nFor discrete data, missing values can be imputed within the MCMC sampler by setting na_action = \"impute\". At each iteration, missing entries are drawn from their full conditional distribution given the current parameter values and the observed data. Because the imputation is embedded in the MCMC chain, the posterior summaries account for the uncertainty introduced by missing data.\nThe default behavior is na_action = \"listwise\", which removes rows with any missing values before fitting.",
+    "text": "Missing data\nMissing values can be handled via listwise deletion (the default) or imputed within the Gibbs sampler by setting na_action = \"impute\". For mixed data, missing discrete entries are drawn from their full conditional categorical distribution and missing continuous entries from their conditional normal distribution at each MCMC iteration. See Missing Data for details on both approaches and recommendations.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Ordinal Markov Random Field"
+      "Mixed Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/omrf.html#fitting-an-ordinal-mrf",
-    "href": "guide/omrf.html#fitting-an-ordinal-mrf",
-    "title": "Ordinal Markov Random Field",
-    "section": "Fitting an ordinal MRF",
-    "text": "Fitting an ordinal MRF\nThe ordinal MRF is the default model type. Call bgm() directly:\nfit = bgm(x = data, seed = 1234)\nFor Blume-Capel variables:\nfit = bgm(x = data, variable_type = \"blume-capel\",\n          baseline_category = 3, seed = 1234)\nThe summary() and coef() methods work the same as for GGM and mixed models. coef(fit)$pairwise returns the posterior means of the partial associations \\(\\omega_{ij}\\), and coef(fit)$indicator returns the posterior inclusion probabilities.\nTo obtain model-specific parameterizations, use the dedicated extractors:\n\nextract_main_effects(fit) — returns the category threshold parameters.\nextract_log_odds(fit) — returns the log adjacent-category odds ratios \\(2\\omega_{ij}\\).",
+    "objectID": "guide/mixed-model.html#fitting-a-mixed-mrf",
+    "href": "guide/mixed-model.html#fitting-a-mixed-mrf",
+    "title": "Mixed Markov Random Field",
+    "section": "Fitting a mixed MRF",
+    "text": "Fitting a mixed MRF\nEach column in the data must have a corresponding entry in variable_type. Allowed types are \"ordinal\", \"blume-capel\", and \"continuous\":\nfit = bgm(\n  x = data,\n  variable_type = c(\"ordinal\", \"ordinal\", \"ordinal\",\n                     \"continuous\", \"continuous\"),\n  seed = 1234\n)\nFor Blume-Capel variables in the discrete block, provide baseline_category:\nfit = bgm(\n  x = data,\n  variable_type = c(\"blume-capel\", \"blume-capel\",\n                     \"continuous\", \"continuous\"),\n  baseline_category = c(2, 2, NA, NA),\n  seed = 1234\n)\nThe summary() and coef() methods work the same as for single-type models. coef(fit)$pairwise returns all partial associations on a unified scale, and coef(fit)$indicator returns the posterior inclusion probabilities.\nTo obtain model-specific parameterizations, use the dedicated extractors:\n\nextract_main_effects(fit) — returns category thresholds (discrete) and continuous means.\nextract_precision(fit) — returns the precision matrix \\(\\boldsymbol{\\Theta}\\) for the continuous block.\nextract_partial_correlations(fit) — returns partial correlations for the continuous block.\nextract_log_odds(fit) — returns log adjacent-category odds ratios \\(2\\omega_{ij}^{xx}\\) for the discrete block.\n\n\n\n\n\n\n\nNoteExtractor requirements\n\n\n\nSome extractors require at least two variables of the corresponding type:\n\nextract_precision() and extract_partial_correlations() require at least two continuous variables.\nextract_log_odds() requires at least two discrete variables (binary/ordinal or Blume-Capel).\n\nIf a model does not meet these requirements, these quantities are not defined for that fit.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Ordinal Markov Random Field"
+      "Mixed Markov Random Field"
     ]
   },
   {
@@ -1480,7 +1581,7 @@
     "href": "guide/index.html",
     "title": "User’s Guide",
     "section": "",
-    "text": "The User’s Guide covers conceptual background and practical tutorials for bgms. It is organized into four parts: background concepts, model types, analysis workflows, and MCMC output.\n\nBackground\n\nGetting Started — Installation and first model fit\nGraphical Models — Nodes, edges, and conditional independence\nThe Bayesian Approach — Priors, posteriors, and Bayes factors\nPrior Basics — How bgms uses priors and when to change defaults\n\n\n\nModels\n\nGaussian Graphical Model — Continuous data, partial associations, precision matrix\nOrdinal MRF — Binary and ordinal data, category thresholds, partial associations\nMixed MRF — Datasets with both continuous and discrete variables\n\n\n\nAnalyses\n\nEdge Selection — Spike-and-slab priors for structure learning\nGroup Comparison — Comparing networks across groups with bgmCompare()\nEdge Clustering — Stochastic block model prior for discovering edge clusters\n\n\n\nMCMC Output\n\nMCMC Output — What the sampler returns and how to access it\nMCMC Diagnostics — Convergence checks: ESS, R-hat, trace plots, divergences\n\n\n\nPrerequisites\nThis guide assumes basic familiarity with R programming and the goals of network analysis. The Background chapters introduce the necessary statistical concepts.",
+    "text": "The User’s Guide covers conceptual background and practical tutorials for bgms. It is organized into four parts: background concepts, model types, analysis workflows, and MCMC output.\n\nBackground\n\nGetting Started — Installation and first model fit\nGraphical Models — Nodes, edges, and conditional independence\nThe Bayesian Approach — Priors, posteriors, and Bayes factors\nPrior Basics — How bgms uses priors and when to change defaults\n\n\n\nModels\n\nGaussian Graphical Model — Continuous data, partial associations, precision matrix\nOrdinal MRF — Binary and ordinal data, category thresholds, partial associations\nMixed MRF — Datasets with both continuous and discrete variables\n\n\n\nAnalyses\n\nEdge Selection — Spike-and-slab priors for structure learning\nGroup Comparison — Comparing networks across groups with bgmCompare()\nEdge Clustering — Stochastic block model prior for discovering edge clusters\nMissing Data — Handling missing values via listwise deletion or MCMC imputation\n\n\n\nMCMC Output\n\nMCMC Output — What the sampler returns and how to access it\nMCMC Diagnostics — Convergence checks: ESS, R-hat, trace plots, divergences\n\n\n\nPrerequisites\nThis guide assumes basic familiarity with R programming and the goals of network analysis. The Background chapters introduce the necessary statistical concepts.",
     "crumbs": [
       "Get Started",
       "User's Guide"
@@ -2450,7 +2551,7 @@
     "href": "guide/ggm.html#missing-data",
     "title": "Gaussian Graphical Model",
     "section": "Missing data",
-    "text": "Missing data\nFor continuous data, missing values can be imputed within the MCMC sampler by setting na_action = \"impute\". At each iteration, missing entries are drawn from their conditional normal distribution given the current precision matrix and the observed values. Because the imputation is embedded in the MCMC chain, the posterior summaries account for the uncertainty introduced by missing data.\nThe default behavior is na_action = \"listwise\", which removes rows with any missing values before fitting.",
+    "text": "Missing data\nMissing values can be handled via listwise deletion (the default) or imputed within the Gibbs sampler by setting na_action = \"impute\". For continuous data, missing entries are drawn from their conditional normal distribution at each MCMC iteration. See Missing Data for details on both approaches and recommendations.",
     "crumbs": [
       "Get Started",
       "Models",
@@ -2650,255 +2751,249 @@
     ]
   },
   {
-    "objectID": "guide/mixed-model.html",
-    "href": "guide/mixed-model.html",
-    "title": "Mixed Markov Random Field",
+    "objectID": "guide/missing-data.html",
+    "href": "guide/missing-data.html",
+    "title": "Missing Data",
     "section": "",
-    "text": "The mixed Markov random field (MRF) is a graphical model for networks containing both discrete (binary or ordinal) and continuous variables. It unites the Ordinal MRF and the GGM into a single joint distribution through the conditional Gaussian framework (Lauritzen, 1996; Lauritzen & Wermuth, 1989). To fit a mixed MRF, provide a variable_type vector that includes both discrete and continuous types.",
+    "text": "Missing data is common in empirical research, and how it is handled can substantially affect inference. bgms provides two options for handling missing values through the na_action argument: listwise deletion and MCMC-based imputation."
+  },
+  {
+    "objectID": "guide/missing-data.html#listwise-deletion",
+    "href": "guide/missing-data.html#listwise-deletion",
+    "title": "Missing Data",
+    "section": "Listwise deletion",
+    "text": "Listwise deletion\nThe default behavior (na_action = \"listwise\") removes all rows that contain any missing values. This is the simplest approach and is appropriate when missingness is minimal and the missing-completely-at-random (MCAR) assumption is plausible. A message reports how many rows were removed:\nfit = bgm(data, na_action = \"listwise\")\nListwise deletion discards partial information from incomplete cases. When a large proportion of observations have missing values, or when the data are not MCAR, this can lead to biased estimates and loss of statistical power."
+  },
+  {
+    "objectID": "guide/missing-data.html#imputation-within-the-gibbs-sampler",
+    "href": "guide/missing-data.html#imputation-within-the-gibbs-sampler",
+    "title": "Missing Data",
+    "section": "Imputation within the Gibbs sampler",
+    "text": "Imputation within the Gibbs sampler\nSetting na_action = \"impute\" embeds missing data imputation directly in the MCMC algorithm. At each iteration, missing entries are drawn from their full conditional distribution given the current parameter values and observed data:\nfit = bgm(data, na_action = \"impute\")\nThis approach has several advantages:\n\nUses all available data. Observations with partial missing values contribute their observed components to the likelihood.\nPropagates uncertainty. Because imputed values are resampled at each iteration, the posterior summaries automatically account for uncertainty introduced by missing data.\nAssumes MAR. The method is valid under the missing-at-random (MAR) assumption, where missingness may depend on observed values but not on the missing values themselves.\n\n\nHow it works\nThe imputation step occurs within the Gibbs sampler, before updating model parameters at each iteration:\n\nDiscrete variables: Missing entries are drawn from their full conditional categorical distribution. For a variable \\(x_i\\), the full conditional is a multinomial over categories \\(0, 1, \\ldots, m_i\\), with probabilities determined by the current threshold parameters and the rest score from neighboring variables.\nContinuous variables: Missing entries are drawn from their full conditional normal distribution. For a variable \\(y_j\\), the conditional mean depends on the current precision matrix and the observed values of other variables, while the conditional variance comes from the diagonal of the precision matrix.\nMixed models: In mixed MRFs, both mechanisms operate simultaneously. Missing discrete values are imputed from categorical full conditionals that include contributions from continuous neighbors, and missing continuous values are imputed from normal conditionals that include contributions from discrete neighbors.\n\n\n\nNo separate imputed dataset\nThe imputation is internal to the MCMC chain. Unlike multiple imputation workflows that produce \\(m\\) completed datasets, bgms does not return the imputed values. Each MCMC draw reflects one plausible completion of the data, and averaging over draws integrates over the missing-data uncertainty. If you need the imputed values themselves, consider external multiple imputation packages such as mice or Amelia."
+  },
+  {
+    "objectID": "guide/missing-data.html#group-comparison",
+    "href": "guide/missing-data.html#group-comparison",
+    "title": "Missing Data",
+    "section": "Group comparison",
+    "text": "Group comparison\nMissing data handling also applies to bgmCompare(). The same na_action argument controls whether rows with missing values are dropped or imputed:\nfit = bgmCompare(x = group1, y = group2, na_action = \"impute\")\nWhen using na_action = \"impute\", missing values are imputed separately within each group, using the group-specific parameter values at each iteration. This preserves group-level structure while propagating missing-data uncertainty into the group comparison."
+  },
+  {
+    "objectID": "guide/missing-data.html#recommendations",
+    "href": "guide/missing-data.html#recommendations",
+    "title": "Missing Data",
+    "section": "Recommendations",
+    "text": "Recommendations\n\n\n\n\n\n\n\nScenario\nRecommendation\n\n\n\n\nFew missing values, MCAR plausible\nna_action = \"listwise\" (default)\n\n\nModerate missingness, MAR plausible\nna_action = \"impute\"\n\n\nHigh missingness or MNAR suspected\nConsider sensitivity analyses or specialized missing-data models\n\n\n\nWhen missingness is substantial (e.g., &gt;10% of observations affected), imputation typically outperforms listwise deletion in terms of bias and efficiency. However, no imputation method can correct for missing-not-at-random (MNAR) patterns, where the probability of missingness depends on the unobserved values themselves. In such cases, results should be interpreted cautiously, and sensitivity analyses may be warranted."
+  },
+  {
+    "objectID": "guide/missing-data.html#technical-notes",
+    "href": "guide/missing-data.html#technical-notes",
+    "title": "Missing Data",
+    "section": "Technical notes",
+    "text": "Technical notes\n\nThe imputation step adds minimal computational overhead because the full conditionals are already computed for parameter updates in the Gibbs sampler.\nImputation respects the ordinal structure of discrete variables: imputed values are drawn from the full category set, not interpolated.\nConvergence diagnostics (ESS, R-hat) apply to the combined chain of parameter updates and imputations. Poor mixing in parameters may indicate issues with the imputation model or high rates of missingness."
+  },
+  {
+    "objectID": "guide/omrf.html",
+    "href": "guide/omrf.html",
+    "title": "Ordinal Markov Random Field",
+    "section": "",
+    "text": "The ordinal Markov random field (MRF) is a graphical model for networks of binary and ordinal variables (Anderson & Vermunt, 2000; Suggala et al., 2017). It is the default model in bgms and forms the discrete component of the Mixed MRF. To fit an ordinal MRF, use the default variable_type = \"ordinal\".",
     "crumbs": [
       "Get Started",
       "Models",
-      "Mixed Markov Random Field"
+      "Ordinal Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/mixed-model.html#the-model",
-    "href": "guide/mixed-model.html#the-model",
-    "title": "Mixed Markov Random Field",
+    "objectID": "guide/omrf.html#the-model",
+    "href": "guide/omrf.html#the-model",
+    "title": "Ordinal Markov Random Field",
     "section": "The model",
-    "text": "The model\nFor \\(p\\) discrete variables \\(\\mathbf{x} = (x_1, \\ldots, x_p)\\) and \\(q\\) continuous variables \\(\\mathbf{y} = (y_1, \\ldots, y_q)\\), the mixed MRF specifies the joint distribution as:\n\\[\np(\\mathbf{x}, \\mathbf{y}) \\propto \\exp\\!\\left(\n\\sum_{i=1}^{p} \\sum_{c=1}^{m_i}\\mathcal{I}(x_i = c)\\,\\mu_{ic} +\n\\mathbf{x}^{\\sf T}\\boldsymbol{\\Omega}_{xx}\\,\\mathbf{x} +\n(\\mathbf{y} - \\boldsymbol{\\mu}_y)^{\\sf T}\\boldsymbol{\\Omega}_{yy}\\,(\\mathbf{y} - \\boldsymbol{\\mu}_y) +\n2\\,\\mathbf{x}^{\\sf T}\\boldsymbol{\\Omega}_{xy}\\,\\mathbf{y}\\right)\n\\]\nwhere:\n\n\\(\\mu_{ic}\\) are category thresholds for discrete variable \\(i\\), category \\(c\\) (with baseline \\(\\mu_{i0} = 0\\)), as in the Ordinal MRF\n\\(\\boldsymbol{\\mu}_y\\) is the \\(q\\)-vector of continuous means\n\\(\\boldsymbol{\\Omega}_{xx}\\) is a \\(p \\times p\\) symmetric matrix of discrete–discrete interactions\n\\(\\boldsymbol{\\Omega}_{yy}\\) is a \\(q \\times q\\) symmetric negative semi-definite matrix, related to the precision matrix by \\(\\boldsymbol{\\Theta} = -2\\,\\boldsymbol{\\Omega}_{yy}\\)\n\\(\\boldsymbol{\\Omega}_{xy}\\) is a \\(p \\times q\\) matrix of cross-type interactions\n\nThe three interaction blocks (\\(\\boldsymbol{\\Omega}_{xx}\\), \\(\\boldsymbol{\\Omega}_{yy}\\), \\(\\boldsymbol{\\Omega}_{xy}\\)) enter the density on the same scale.",
+    "text": "The model\nFor \\(p\\) ordinal variables with observations \\(\\mathbf{x} = (x_1, \\ldots, x_p)\\), the ordinal MRF specifies the joint distribution as:\n\\[\np(\\mathbf{x}) \\propto \\exp\\!\\left(\\sum_{i=1}^{p} \\sum_{c=1}^{m_i} \\mathcal{I}(x_i = c)\\,\\mu_{ic} +\n\\mathbf{x}^{\\sf T}\\boldsymbol{\\Omega}\\, \\mathbf{x}\\right)\n\\]\nwhere \\(\\mu_{ic}\\) is the category threshold parameter for category \\(c\\) of variable \\(i\\) (one per category above the baseline \\(c = 0\\), which is fixed at \\(\\mu_{i0} = 0\\)) and \\(\\boldsymbol{\\Omega}\\) is a symmetric interaction matrix whose off-diagonal entry \\(\\omega_{ij}\\) is the partial association between variables \\(i\\) and \\(j\\).",
     "crumbs": [
       "Get Started",
       "Models",
-      "Mixed Markov Random Field"
+      "Ordinal Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/mixed-model.html#conditional-gaussian-structure",
-    "href": "guide/mixed-model.html#conditional-gaussian-structure",
-    "title": "Mixed Markov Random Field",
-    "section": "Conditional Gaussian structure",
-    "text": "Conditional Gaussian structure\nThe mixed MRF belongs to the class of conditional Gaussian (CG) distributions (Lauritzen & Wermuth, 1989): given the discrete variables, the continuous variables follow a multivariate normal distribution:\n\\[\n\\mathbf{y} \\mid \\mathbf{x} \\sim \\mathcal{N}\\!\\left(\\boldsymbol{\\mu}_y + 2\\,\\boldsymbol{\\Sigma}\\,\\boldsymbol{\\Omega}_{xy}^{\\sf T}\\,\\mathbf{x},\\;\\boldsymbol{\\Sigma}\\right)\n\\]\nwhere \\(\\boldsymbol{\\Sigma} = \\boldsymbol{\\Theta}^{-1} = (-2\\,\\boldsymbol{\\Omega}_{yy})^{-1}\\) is the conditional covariance. The conditional mean \\(\\boldsymbol{\\mu}_y + 2\\,\\boldsymbol{\\Sigma}\\,\\boldsymbol{\\Omega}_{xy}^{\\sf T}\\,\\mathbf{x}\\) shifts linearly with the discrete scores: each discrete variable \\(x_i\\) contributes to the conditional mean of continuous variable \\(y_j\\) in proportion to \\(\\omega_{ij}^{xy}\\). The conditional covariance \\(\\boldsymbol{\\Sigma}\\) does not depend on \\(\\mathbf{x}\\) — the discrete variables affect the location of the continuous distribution but not its spread.\nIn the pure GGM, bgms centers the continuous data so that the mean vector is zero and drops out of the model (see GGM). In the mixed MRF, this centering is not possible: the cross-type interactions couple the continuous means to the discrete variables, so \\(\\boldsymbol{\\mu}_y\\) remains a free parameter.\nThe marginal distribution of \\(\\mathbf{x}\\), obtained by integrating out \\(\\mathbf{y}\\), is an ordinal MRF whose effective interactions absorb the indirect associations between discrete variables mediated through the continuous block.",
+    "objectID": "guide/omrf.html#why-the-adjacent-category-model",
+    "href": "guide/omrf.html#why-the-adjacent-category-model",
+    "title": "Ordinal Markov Random Field",
+    "section": "Why the adjacent category model?",
+    "text": "Why the adjacent category model?\nThe ordinal MRF can be understood as a multivariate generalization of the adjacent category logit model for ordinal responses (Agresti, 2010).\n\nThe univariate case\nConsider a single ordinal variable \\(x \\in \\{0, \\dots, m\\}\\), where the category index reflects only the ordering of the response labels. The adjacent category model characterizes the log-odds between successive categories:\n\\[\n\\log\\!\\left( \\frac{p(x = c+1)}{p(x = c)} \\right) = \\eta_c, \\quad c = 0, \\dots, m-1\n\\]\nwith \\(\\eta_0 = 0\\) for identifiability. The resulting probability mass function,\n\\[\np(x = c) = \\frac{\\exp\\!\\left( \\sum_{k=c}^{m} \\eta_k \\right)}{1 + \\sum_{j=1}^{m} \\exp\\!\\left( \\sum_{k=j}^{m} \\eta_k \\right)}\n\\]\nis a member of the exponential family with canonical parameters \\(\\eta_c\\) and sufficient statistics \\(\\mathcal{I}(x \\geq c)\\).\n\n\nThe multivariate extension\nFor \\(p\\) ordinal variables, we regress each variable \\(x_i\\) on the others by modeling the canonical parameters as\n\\[\n\\eta_c = \\alpha_c + \\sum_{j \\neq i} \\beta_j\\, x_j\n\\]\nwhere \\(\\alpha_c\\) are category-specific intercepts and \\(\\beta_j\\) are common slopes. Crucially, the model depends on the ordinal variables only through the sufficient statistics \\(\\mathcal{I}(x_i \\geq c)\\) and the interaction terms \\(x_i\\, x_j = \\sum_c \\sum_{c'} \\mathcal{I}(x_i \\geq c)\\, \\mathcal{I}(x_j \\geq c')\\). Because these terms are computed from cumulative indicators, the model captures only the ordering of the categories, without relying on any numeric interpretation or spacing of the labels. It is therefore invariant under monotonic recodings and does not assume interval-scale measurement.\nOther ordinal regression models, such as the cumulative logit and continuation ratio models (Agresti, 2010), do not share this property. As shown by Suggala et al. (2017), these models do not correspond to full conditionals of a joint distribution, and are therefore incompatible with a multivariate MRF formulation.\nThe adjacent category model does yield consistent full conditionals, and the joint distribution that generates them is the ordinal MRF (Marsman et al., 2025).",
     "crumbs": [
       "Get Started",
       "Models",
-      "Mixed Markov Random Field"
+      "Ordinal Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/mixed-model.html#connection-to-the-mrf-framework",
-    "href": "guide/mixed-model.html#connection-to-the-mrf-framework",
-    "title": "Mixed Markov Random Field",
+    "objectID": "guide/omrf.html#connection-to-the-mrf-framework",
+    "href": "guide/omrf.html#connection-to-the-mrf-framework",
+    "title": "Ordinal Markov Random Field",
     "section": "Connection to the MRF framework",
-    "text": "Connection to the MRF framework\nThe Graphical Models page introduced the general pairwise MRF:\n\\[\np(\\mathbf{z}) \\propto \\exp\\!\\left(\\sum_{i} \\mu_i(z_i) +\n\\mathbf{z}^{\\sf T}\\boldsymbol{\\Omega}\\, \\mathbf{z}\\right)\n\\]\nThe mixed MRF extends this framework to a mixed variable vector \\(\\mathbf{z} = (\\mathbf{x}, \\mathbf{y})\\). The interaction matrix \\(\\boldsymbol{\\Omega}\\) decomposes into three blocks — \\(\\boldsymbol{\\Omega}_{xx}\\), \\(\\boldsymbol{\\Omega}_{yy}\\), and \\(\\boldsymbol{\\Omega}_{xy}\\) — corresponding to the three types of edges in the graph. When all variables are discrete (\\(q = 0\\)), the continuous blocks vanish and the model reduces to the ordinal MRF. When all variables are continuous (\\(p = 0\\)), the discrete blocks vanish and the model reduces to the GGM with precision matrix \\(\\boldsymbol{\\Theta} = -2\\,\\boldsymbol{\\Omega}_{yy}\\).",
+    "text": "Connection to the MRF framework\nThe Graphical Models page introduced the general pairwise MRF:\n\\[\np(\\mathbf{x}) \\propto \\exp\\!\\left(\\sum_{i} \\mu_i(x_i) +\n\\mathbf{x}^{\\sf T}\\boldsymbol{\\Omega}\\, \\mathbf{x}\\right)\n\\]\nThe ordinal MRF is the discrete special case. The node potentials \\(\\mu_i(x_i)\\) are the category thresholds \\(\\mu_{ic}\\), and the interaction matrix \\(\\boldsymbol{\\Omega}\\) has off-diagonal entries \\(\\omega_{ij}\\). The bilinear form \\(\\mathbf{x}^{\\sf T}\\boldsymbol{\\Omega}\\,\\mathbf{x}\\) reduces to \\(2\\sum_{i &lt; j} \\omega_{ij}\\, x_i\\, x_j\\) because \\(\\boldsymbol{\\Omega}\\) is symmetric (the diagonal terms are not identifiable, and absorbed by the thresholds).",
     "crumbs": [
       "Get Started",
       "Models",
-      "Mixed Markov Random Field"
+      "Ordinal Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/mixed-model.html#partial-associations",
-    "href": "guide/mixed-model.html#partial-associations",
-    "title": "Mixed Markov Random Field",
+    "objectID": "guide/omrf.html#partial-associations",
+    "href": "guide/omrf.html#partial-associations",
+    "title": "Ordinal Markov Random Field",
     "section": "Partial associations",
-    "text": "Partial associations\nThe mixed MRF has three types of partial associations, all reported on the same scale in coef(fit)$pairwise:\nDiscrete–discrete. The off-diagonal entries of \\(\\boldsymbol{\\Omega}_{xx}\\) have the same interpretation as in the ordinal MRF: each \\(\\omega_{ij}^{xx}\\) is half the log adjacent-category odds ratio, constant across all category pairs. See Ordinal MRF.\nContinuous–continuous. The off-diagonal entries of \\(\\boldsymbol{\\Omega}_{yy}\\) are related to the precision element by \\(\\omega_{ij}^{yy} = -\\tfrac{1}{2}\\,\\theta_{ij}\\), the same relationship as in the GGM. See GGM.\nCross-type. The entries of \\(\\boldsymbol{\\Omega}_{xy}\\) capture the direct association between a discrete variable \\(x_i\\) and a continuous variable \\(y_j\\), after accounting for all other variables. A cross-type partial association enters both the full conditional of \\(x_i\\) (through the rest score) and the conditional mean of \\(y_j\\).\nWhen \\(\\omega_{ij} = 0\\) for any of the three types, the two variables are conditionally independent and the corresponding edge is absent from the graph. The spike-and-slab prior operates on partial associations regardless of type, so edge selection works uniformly across all three blocks.\nTo obtain model-specific parameterizations: extract_precision(fit) returns \\(\\boldsymbol{\\Theta}\\), extract_partial_correlations(fit) returns partial correlations for the continuous block, and extract_log_odds(fit) returns the log adjacent-category odds ratios \\(2\\omega_{ij}^{xx}\\) for the discrete block.",
+    "text": "Partial associations\nAs described in Graphical Models, bgms reports all pairwise effects on a unified partial association scale. For the ordinal MRF, the partial association \\(\\omega_{ij}\\) is half the log adjacent-category odds ratio. The adjacent-category odds ratio compares, for two variables \\(x_i\\) and \\(x_j\\), how the odds of being in category \\(h+1\\) versus \\(h\\) for one variable change when the other variable moves from category \\(q\\) to \\(q+1\\):\n\\[\n\\text{OR}_{ij} = \\frac{P(x_i = h,\\; x_j = q)\\; P(x_i = h+1,\\; x_j = q+1)}{P(x_i = h+1,\\; x_j = q)\\; P(x_i = h,\\; x_j = q+1)} = \\exp(2\\omega_{ij})\n\\]\nThis ratio is constant across all category pairs \\((h, q)\\) and does not depend on the values of the remaining variables. The partial association is therefore:\n\\[\n\\omega_{ij} = \\tfrac{1}{2}\\,\\log\\text{OR}_{ij}\n\\]\nA positive \\(\\omega_{ij}\\) means that the odds of observing one variable in a higher adjacent category increase when the other variable is also in a higher adjacent category.\nTo obtain the full log adjacent-category odds ratios, use extract_log_odds(fit), which returns \\(2\\omega_{ij}\\) for each pair. The coef(fit)$pairwise method returns the partial associations \\(\\omega_{ij}\\).",
     "crumbs": [
       "Get Started",
       "Models",
-      "Mixed Markov Random Field"
+      "Ordinal Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/mixed-model.html#pseudolikelihood",
-    "href": "guide/mixed-model.html#pseudolikelihood",
-    "title": "Mixed Markov Random Field",
+    "objectID": "guide/omrf.html#category-thresholds",
+    "href": "guide/omrf.html#category-thresholds",
+    "title": "Ordinal Markov Random Field",
+    "section": "Category thresholds",
+    "text": "Category thresholds\nThe thresholds \\(\\mu_{ic}\\) are the node potentials of the ordinal MRF. They control the marginal category distribution of each variable — how likely each response category is, apart from any associations with other variables.\n\nRegular ordinal variables\nBy default, bgms treats ordinal variables as “regular”: each category above the lowest receives its own threshold parameter. This imposes no constraint on the shape of the category distribution. Variables are internally recoded to consecutive integers starting at 0.\nFor binary variables (two categories, coded 0 and 1), the model reduces to the Ising model (Ising, 1925), a classical MRF for binary data. The single threshold parameter controls the probability of category 1 relative to category 0.\n\n\nBlume-Capel variables\nThe Blume-Capel model originates in statistical physics, where Blume (1966) and Capel (1966) independently developed it to study phase transitions in ternary spin systems. As an application to psychology, van der Maas et al. (2026) used the model to study attitudes, depression, and intelligence.\nFor ordinal variables with a natural baseline or reference category (e.g., a “neutral” response), the Blume-Capel parameterization models category thresholds as a quadratic function of distance from the baseline:\n\\[\n\\mu_c = \\alpha \\cdot (c - b) + \\beta \\cdot (c - b)^2\n\\]\nwhere \\(c\\) is the response category, \\(b\\) is the baseline category, \\(\\alpha\\) captures the linear trend across categories, and \\(\\beta\\) captures the preference toward or away from the baseline:\n\n\\(\\beta &lt; 0\\): the model favors responses near the baseline category\n\\(\\beta &gt; 0\\): the model favors responses away from the baseline category\n\nPartial associations between Blume-Capel variables use centered scores: the interaction term in the joint distribution becomes \\(2(x_i - b_i)(x_j - b_j)\\,\\omega_{ij}\\) instead of \\(2\\,x_i\\,x_j\\,\\omega_{ij}\\). The partial association \\(\\omega_{ij}\\) remains the same; the centering is absorbed by the thresholds. For binary variables, the Blume-Capel parameterization reduces to the Ising model, just as the regular ordinal parameterization does.\nTo use Blume-Capel variables, set variable_type = \"blume-capel\" and provide the baseline_category argument:\nfit = bgm(x = data, variable_type = \"blume-capel\",\n          baseline_category = 2, seed = 1234)\nThe baseline_category can be a single integer (applied to all variables) or a vector of length \\(p\\).\nThe thresholds are nuisance parameters — they are estimated during MCMC sampling but are typically not of direct inferential interest. To extract them, use extract_main_effects(fit).",
+    "crumbs": [
+      "Get Started",
+      "Models",
+      "Ordinal Markov Random Field"
+    ]
+  },
+  {
+    "objectID": "guide/omrf.html#pseudolikelihood",
+    "href": "guide/omrf.html#pseudolikelihood",
+    "title": "Ordinal Markov Random Field",
     "section": "Pseudolikelihood",
-    "text": "Pseudolikelihood\nThe continuous conditional \\(p(\\mathbf{y} \\mid \\mathbf{x})\\) is a multivariate normal with a closed-form likelihood. For \\(n\\) observations:\n\\[\n\\log p(\\mathbf{Y} \\mid \\mathbf{X}) = \\frac{n}{2}\\left(\\log|\\boldsymbol{\\Theta}| - q\\log(2\\pi)\\right) - \\frac{1}{2}\\sum_{i=1}^{n}(\\mathbf{y}_i - \\mathbf{M}_i)^{\\sf T}\\boldsymbol{\\Theta}\\,(\\mathbf{y}_i - \\mathbf{M}_i)\n\\]\nwhere \\(\\mathbf{M}_i = \\boldsymbol{\\mu}_y + 2\\,\\boldsymbol{\\Sigma}\\,\\boldsymbol{\\Omega}_{xy}^{\\sf T}\\,\\mathbf{x}_i\\) is the conditional mean for observation \\(i\\). This expression is computed exactly — no pseudolikelihood approximation is needed for the continuous block.\nThe discrete conditionals require a pseudolikelihood approximation, as in the ordinal MRF. The full conditional for discrete variable \\(x_i\\) given all other variables is:\n\\[\np(x_i = c \\mid \\mathbf{x}_{-i}, \\mathbf{y}) = \\frac{\\exp\\!\\left(\\mu_{ic} + c \\cdot r_i\\right)}{\\sum_{k=0}^{m_i}\\exp\\!\\left(\\mu_{ik} + k \\cdot r_i\\right)}\n\\]\nwhere the rest score now includes contributions from both discrete and continuous variables:\n\\[\nr_i = 2\\sum_{j \\neq i} x_j\\, \\omega_{ij}^{xx} + 2\\sum_{j=1}^{q} y_j\\, \\omega_{ij}^{xy}\n\\]\nThe pseudolikelihood argument controls how these discrete full conditionals are constructed:\n\n\"conditional\" (default): conditions on the observed continuous variables when computing the discrete full conditionals. The rest score uses \\(\\boldsymbol{\\Omega}_{xx}\\) and \\(\\boldsymbol{\\Omega}_{xy}\\) directly.\n\"marginal\": integrates out the continuous variables, so the discrete full conditionals use effective interactions that account for indirect discrete–discrete associations mediated through the continuous block.",
+    "text": "Pseudolikelihood\nThe normalizing constant of the ordinal MRF involves a sum over all possible configurations of \\(p\\) ordinal variables, which is intractable for all but the smallest networks. bgms uses a pseudolikelihood approximation (Marsman et al., 2025): the product of full conditional distributions replaces the joint distribution.\nThe full conditional distribution for variable \\(i\\) given all other variables is:\n\\[\np(x_i = c \\mid \\mathbf{x}_{-i}) = \\frac{\\exp\\!\\left(\\mu_{ic} + c \\cdot r_i\\right)}{\\sum_{k=0}^{m_i} \\exp\\!\\left(\\mu_{ik} + k \\cdot r_i\\right)}\n\\]\nwhere \\(r_i = 2\\sum_{j \\neq i} x_j\\, \\omega_{ij}\\) is the residual score — a sufficient reduction that summarizes the influence of all other variables on \\(x_i\\). The pseudolikelihood is the product of these conditionals across all observations and variables.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Mixed Markov Random Field"
+      "Ordinal Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/mixed-model.html#edge-selection",
-    "href": "guide/mixed-model.html#edge-selection",
-    "title": "Mixed Markov Random Field",
+    "objectID": "guide/omrf.html#edge-selection",
+    "href": "guide/omrf.html#edge-selection",
+    "title": "Ordinal Markov Random Field",
     "section": "Edge selection",
-    "text": "Edge selection\nWhen edge_selection = TRUE (the default), bgms applies spike-and-slab priors to all three types of partial associations. The spike sets \\(\\omega_{ij} = 0\\), enforcing the absence of the edge. The slab places a Cauchy prior on \\(\\omega_{ij}\\), allowing the effect size to be estimated from the data. See Prior Basics for the spike-and-slab specification.\nThe posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See Edge Selection.",
+    "text": "Edge selection\nWhen edge_selection = TRUE (the default), bgms applies spike-and-slab priors to the partial associations \\(\\omega_{ij}\\). The spike sets \\(\\omega_{ij} = 0\\), enforcing the absence of the edge. The slab places a Cauchy prior on \\(\\omega_{ij}\\), allowing the effect size to be estimated from the data. See Prior Basics for the spike-and-slab specification.\nThe posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See Edge Selection.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Mixed Markov Random Field"
+      "Ordinal Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/mixed-model.html#missing-data",
-    "href": "guide/mixed-model.html#missing-data",
-    "title": "Mixed Markov Random Field",
+    "objectID": "guide/omrf.html#missing-data",
+    "href": "guide/omrf.html#missing-data",
+    "title": "Ordinal Markov Random Field",
     "section": "Missing data",
-    "text": "Missing data\nMissing values can be imputed within the MCMC sampler by setting na_action = \"impute\". At each iteration, missing discrete entries are drawn from their full conditional categorical distribution and missing continuous entries from their full conditional normal distribution, given the current parameter values and the observed data. Because the imputation is embedded in the MCMC chain, the posterior summaries account for the uncertainty introduced by missing data.\nThe default behavior is na_action = \"listwise\", which removes rows with any missing values before fitting.",
+    "text": "Missing data\nMissing values can be handled via listwise deletion (the default) or imputed within the Gibbs sampler by setting na_action = \"impute\". For discrete data, missing entries are drawn from their full conditional categorical distribution at each MCMC iteration. See Missing Data for details on both approaches and recommendations.",
     "crumbs": [
       "Get Started",
       "Models",
-      "Mixed Markov Random Field"
+      "Ordinal Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/mixed-model.html#fitting-a-mixed-mrf",
-    "href": "guide/mixed-model.html#fitting-a-mixed-mrf",
-    "title": "Mixed Markov Random Field",
-    "section": "Fitting a mixed MRF",
-    "text": "Fitting a mixed MRF\nEach column in the data must have a corresponding entry in variable_type. Allowed types are \"ordinal\", \"blume-capel\", and \"continuous\":\nfit = bgm(\n  x = data,\n  variable_type = c(\"ordinal\", \"ordinal\", \"ordinal\",\n                     \"continuous\", \"continuous\"),\n  seed = 1234\n)\nFor Blume-Capel variables in the discrete block, provide baseline_category:\nfit = bgm(\n  x = data,\n  variable_type = c(\"blume-capel\", \"blume-capel\",\n                     \"continuous\", \"continuous\"),\n  baseline_category = c(2, 2, NA, NA),\n  seed = 1234\n)\nThe summary() and coef() methods work the same as for single-type models. coef(fit)$pairwise returns all partial associations on a unified scale, and coef(fit)$indicator returns the posterior inclusion probabilities.\nTo obtain model-specific parameterizations, use the dedicated extractors:\n\nextract_main_effects(fit) — returns category thresholds (discrete) and continuous means.\nextract_precision(fit) — returns the precision matrix \\(\\boldsymbol{\\Theta}\\) for the continuous block.\nextract_partial_correlations(fit) — returns partial correlations for the continuous block.\nextract_log_odds(fit) — returns log adjacent-category odds ratios \\(2\\omega_{ij}^{xx}\\) for the discrete block.\n\n\n\n\n\n\n\nNoteExtractor requirements\n\n\n\nSome extractors require at least two variables of the corresponding type:\n\nextract_precision() and extract_partial_correlations() require at least two continuous variables.\nextract_log_odds() requires at least two discrete variables (binary/ordinal or Blume-Capel).\n\nIf a model does not meet these requirements, these quantities are not defined for that fit.",
+    "objectID": "guide/omrf.html#fitting-an-ordinal-mrf",
+    "href": "guide/omrf.html#fitting-an-ordinal-mrf",
+    "title": "Ordinal Markov Random Field",
+    "section": "Fitting an ordinal MRF",
+    "text": "Fitting an ordinal MRF\nThe ordinal MRF is the default model type. Call bgm() directly:\nfit = bgm(x = data, seed = 1234)\nFor Blume-Capel variables:\nfit = bgm(x = data, variable_type = \"blume-capel\",\n          baseline_category = 3, seed = 1234)\nThe summary() and coef() methods work the same as for GGM and mixed models. coef(fit)$pairwise returns the posterior means of the partial associations \\(\\omega_{ij}\\), and coef(fit)$indicator returns the posterior inclusion probabilities.\nTo obtain model-specific parameterizations, use the dedicated extractors:\n\nextract_main_effects(fit) — returns the category threshold parameters.\nextract_log_odds(fit) — returns the log adjacent-category odds ratios \\(2\\omega_{ij}\\).",
     "crumbs": [
       "Get Started",
       "Models",
-      "Mixed Markov Random Field"
+      "Ordinal Markov Random Field"
     ]
   },
   {
-    "objectID": "guide/prior-basics.html",
-    "href": "guide/prior-basics.html",
-    "title": "Prior Basics",
+    "objectID": "manual/bgmcompare-internals.html",
+    "href": "manual/bgmcompare-internals.html",
+    "title": "bgmCompare Internals",
     "section": "",
-    "text": "This page explains the prior distributions used in bgms and how they connect to the Bayesian graphical modeling framework introduced on the Bayesian Approach page. Analysis-specific guidance appears on the Edge Selection, Group Comparison, and Edge Clustering pages.",
-    "crumbs": [
-      "Get Started",
-      "Background",
-      "Prior Basics"
-    ]
-  },
-  {
-    "objectID": "guide/prior-basics.html#what-is-a-prior",
-    "href": "guide/prior-basics.html#what-is-a-prior",
-    "title": "Prior Basics",
-    "section": "What is a prior?",
-    "text": "What is a prior?\nA prior distribution encodes assumptions about a parameter before observing data. In Bayesian inference, the prior is combined with the likelihood to produce the posterior distribution. The prior matters most when data are sparse; as data accumulate, the posterior is increasingly driven by the likelihood.",
-    "crumbs": [
-      "Get Started",
-      "Background",
-      "Prior Basics"
-    ]
-  },
-  {
-    "objectID": "guide/prior-basics.html#the-spike-and-slab-prior",
-    "href": "guide/prior-basics.html#the-spike-and-slab-prior",
-    "title": "Prior Basics",
-    "section": "The spike-and-slab prior",
-    "text": "The spike-and-slab prior\nThe Bayesian Approach page introduced two prior distributions: one for the network structure, \\(p(\\mathcal{S})\\), and one for the partial associations conditional on that structure, \\(p(\\boldsymbol{\\Omega}_\\mathcal{S} \\mid \\mathcal{S})\\). In bgms, these two priors are linked through a spike-and-slab prior on each partial association \\(\\omega_{ij}\\).\nThe idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero (\\(\\omega_{ij} = 0\\)). When the edge is present, the partial association is free to take any nonzero value (\\(\\omega_{ij} \\in \\mathbb{R} \\setminus \\{0\\}\\)). A binary indicator \\(\\gamma_{ij}\\) tracks the state of each edge: \\(\\gamma_{ij} = 0\\) means the edge is absent and \\(\\gamma_{ij} = 1\\) means it is present. Together, the collection of indicators forms the network structure \\(\\mathcal{S}\\).\nWe use the mixtures of mutually singular distributions formulation of the spike-and-slab prior (Gottardo & Raftery, 2008; van den Bergh et al., 2026), which designates a mixture of two mutually exclusive components:\n\\[\np(\\omega_{ij} \\mid \\gamma_{ij})\n= (1 - \\gamma_{ij})\\;\\mathbf{1}_{\\{0\\}}(\\omega_{ij})\n\\;+\\; \\gamma_{ij}\\;p_{\\text{slab}}(\\omega_{ij})\\;\\mathbf{1}_{\\mathbb{R}\\setminus\\{0\\}}(\\omega_{ij})\n\\]\nHere \\(\\mathbf{1}_{A}(\\omega_{ij})\\) is the indicator function that equals one when \\(\\omega_{ij} \\in A\\) and zero otherwise. The two indicator functions make the disjoint support of the components explicit: the first component assigns all probability to \\(\\omega_{ij} \\in \\{0\\}\\), the second to \\(\\omega_{ij} \\in \\mathbb{R}\\setminus\\{0\\}\\).\nThe first component is the spike: when \\(\\gamma_{ij} = 0\\), all prior probability is concentrated on the value \\(\\omega_{ij} = 0\\), enforcing the absence of the edge. The second component is the slab: when \\(\\gamma_{ij} = 1\\), the partial association receives a continuous distribution over nonzero values, which determines what effect sizes are considered plausible for present edges.\nThe spike-and-slab above is specified for a single edge. The joint prior on all partial associations is the product of independent spike-and-slab priors across edges:\n\\[\np(\\boldsymbol{\\Omega} \\mid \\mathcal{S})\n= \\prod_{i &lt; j} p(\\omega_{ij} \\mid \\gamma_{ij})\n\\]\nThis is the prior \\(p(\\boldsymbol{\\Omega}_\\mathcal{S} \\mid \\mathcal{S})\\) from the Bayesian Approach page. For a given structure \\(\\mathcal{S}\\), the spike components fix all excluded edges to zero, and the slab components provide independent priors on the partial associations of the included edges. The joint prior therefore reduces to a product of slab distributions over the edges in \\(\\mathcal{S}\\).\nThe spike-and-slab prior decomposes inference into two questions.1 The first is a structural question: is the edge present? This is governed by \\(\\gamma_{ij}\\) and its prior, which together define \\(p(\\mathcal{S})\\). The second is a question about effect size: given that the edge is present, how strong is it? This is governed by the slab distribution, which defines \\(p(\\boldsymbol{\\Omega}_\\mathcal{S} \\mid \\mathcal{S})\\) for the nonzero entries.\nThe sections below describe each component: the slab distribution that regularizes effect sizes, and the edge priors that govern which edges are included.",
-    "crumbs": [
-      "Get Started",
-      "Background",
-      "Prior Basics"
-    ]
-  },
-  {
-    "objectID": "guide/prior-basics.html#the-slab-prior-on-effect-sizes",
-    "href": "guide/prior-basics.html#the-slab-prior-on-effect-sizes",
-    "title": "Prior Basics",
-    "section": "The slab: prior on effect sizes",
-    "text": "The slab: prior on effect sizes\nThe slab distribution determines the prior plausibility of different effect sizes for edges that are present. In bgms, the slab is a Cauchy distribution centered at zero, with a scale parameter controlled by pairwise_scale (default: 1).\nThe Cauchy distribution has heavy tails, which means it allows large effects when the data support them, while the peak at zero provides moderate shrinkage toward small effects. In models with many variables and limited data, this regularization prevents extreme estimates.\nThe scale parameter controls the width of the slab. A wider slab spreads prior probability over a larger range of effect sizes. This has a direct consequence for edge selection: because the slab is also the alternative hypothesis for the inclusion Bayes factor, a wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small.\nWhen standardize = TRUE, the prior scale is adjusted based on the range of response scores. Variables with more categories have larger score products, which typically correspond to smaller interaction effects. Without standardization, a fixed scale is relatively wide for high-category pairs and narrow for low-category pairs. The adjustment ensures equivalent relative shrinkage across all variable pairs.",
-    "crumbs": [
-      "Get Started",
-      "Background",
-      "Prior Basics"
-    ]
-  },
-  {
-    "objectID": "guide/prior-basics.html#the-spike-priors-on-the-edge-indicators",
-    "href": "guide/prior-basics.html#the-spike-priors-on-the-edge-indicators",
-    "title": "Prior Basics",
-    "section": "The spike: priors on the edge indicators",
-    "text": "The spike: priors on the edge indicators\nEdge indicators \\(\\gamma_{ij}\\) govern edge inclusion in the spike-and-slab prior. Their prior determines, before seeing the data, how likely each edge is to be excluded (\\(\\gamma_{ij}=0\\)) or included (\\(\\gamma_{ij}=1\\)), and therefore governs overall sparsity and structure.\nbgms provides three edge priors, each encoding a different type of structural assumption. They are selected with the edge_prior argument.\n\nBernoulli prior\nThe simplest edge prior treats each edge independently: the indicator \\(\\gamma_{ij}\\) follows a Bernoulli distribution with inclusion probability \\(\\pi_{ij}\\). Across all edges, this gives\n\\[\np(\\mathcal{S}) = \\prod_{i &lt; j} \\pi_{ij}^{\\gamma_{ij}}\\,(1 - \\pi_{ij})^{1 - \\gamma_{ij}}\n\\]\nThe inclusion probability can be set to the same value for all edges (a scalar) or specified per edge (a matrix). The default is \\(\\pi_{ij} = 0.5\\) for all edges, which assigns equal prior weight to edge presence and absence. A classic choice due to Erdős & Rényi (1959), this treats every possible network structure as equally likely.\nLowering \\(\\pi_{ij}\\) encodes a prior expectation that the network is sparse. Raising it encodes a prior expectation of a dense network. Setting different values for different edges allows prior information about specific relationships to be incorporated.\n\n\nBeta-Bernoulli prior\nThe Beta-Bernoulli prior extends the Bernoulli prior by treating the inclusion probability as unknown and learning it from the data. All edges share a single inclusion probability \\(\\pi\\), which receives a Beta prior with shape parameters \\(\\alpha\\) and \\(\\beta\\):\n\\[\np(\\mathcal{S}) = \\frac{B(\\alpha + \\gamma_{++},\\; \\beta + k - \\gamma_{++})}{B(\\alpha,\\; \\beta)}\n\\]\nwhere \\(\\gamma_{++}\\) is the total number of included edges, \\(k = \\binom{p}{2}\\) is the number of possible edges, and \\(B(\\cdot, \\cdot)\\) is the beta function.\nBecause the inclusion probability is integrated out, the edges are no longer independent a priori: the inclusion of one edge makes others slightly more likely. In practice, this means the prior adapts to the overall complexity of the network. If the data suggest a sparse network, the learned inclusion probability decreases; if they suggest a dense network, it increases.\nAn important special case arises when \\(\\alpha = \\beta = 1\\) (the default). The prior then places a uniform distribution over different levels of network complexity — one edge, two edges, and so on are all equally likely a priori — and, within each complexity level, all structures of the same size are equally likely.\n\n\nStochastic block model prior\nThe Bernoulli and Beta-Bernoulli priors treat all edges the same way: either each edge has a fixed inclusion probability, or all edges share a single learned inclusion probability. Neither prior can express the expectation that some groups of variables are more densely connected than others.\nThe stochastic block model (SBM) prior addresses this by assigning variables to latent blocks. Edges between two variables in the same block share a within-block inclusion probability, while edges between variables in different blocks share a between-block inclusion probability. Each block pair effectively has its own Beta-Bernoulli prior, so the model can learn different levels of density within and between clusters.\nWhen there is only one block, the SBM reduces to the standard Beta-Bernoulli prior. With multiple blocks, it can capture a common pattern in applied networks: clusters of densely connected variables with sparser connections between clusters.\nThe SBM prior introduces additional parameters: the number of blocks, the assignment of variables to blocks, and the within- and between-block Beta hyperparameters. These are estimated from the data by default. See Edge Clustering for the full specification, hyperparameter guidance, and interpretation of results.",
-    "crumbs": [
-      "Get Started",
-      "Background",
-      "Prior Basics"
-    ]
-  },
-  {
-    "objectID": "guide/prior-basics.html#nuisance-parameter-priors",
-    "href": "guide/prior-basics.html#nuisance-parameter-priors",
-    "title": "Prior Basics",
-    "section": "Nuisance parameter priors",
-    "text": "Nuisance parameter priors\nBeyond the spike-and-slab, bgms places priors on several nuisance parameters that are estimated but typically not of direct inferential interest:\n\n\n\n\n\n\n\n\n\nParameter\nModel\nPrior\nControl\n\n\n\n\nCategory thresholds\nOrdinal MRF, Mixed MRF\nBeta-prime (via \\(\\exp(\\mu)\\))\nmain_alpha, main_beta (default 0.5)\n\n\nBlume-Capel parameters\nOrdinal MRF, Mixed MRF\nBeta-prime (via \\(\\exp(\\mu)\\))\nmain_alpha, main_beta (default 0.5)\n\n\nDiagonal of precision matrix\nGGM, Mixed MRF\nGamma\\((1, 1)\\)\nFixed\n\n\nContinuous variable means\nMixed MRF\nNormal\\((0, 1)\\)\nFixed\n\n\n\nFor the category thresholds and Blume-Capel parameters, when the two shape parameters are equal the induced prior on \\(\\mu\\) is symmetric around zero. The GGM and mixed MRF priors are not user-configurable.",
-    "crumbs": [
-      "Get Started",
-      "Background",
-      "Prior Basics"
-    ]
-  },
-  {
-    "objectID": "guide/prior-basics.html#footnotes",
-    "href": "guide/prior-basics.html#footnotes",
-    "title": "Prior Basics",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nWhen edge_selection = TRUE (the default), both questions are answered simultaneously during estimation. When edge_selection = FALSE, the structural question is bypassed: all edges are present, and only the slab prior is active.↩︎",
-    "crumbs": [
-      "Get Started",
-      "Background",
-      "Prior Basics"
-    ]
-  },
-  {
-    "objectID": "manual/architecture.html",
-    "href": "manual/architecture.html",
-    "title": "C++ Architecture",
-    "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe bgms C++ backend is organized in five top-level directories under src/. Each directory has a distinct role, and dependencies flow downward: algorithms depend on math utilities but not on models, and the execution layer orchestrates everything.",
+    "text": "How bgmCompare() works under the hood: multi-group posterior, contrast parameterization, and sampler implementation. Source: src/bgmCompare/ directory.",
     "crumbs": [
       "Manual",
-      "Architecture",
-      "C++ Architecture"
+      "Group Comparison",
+      "bgmCompare Internals"
     ]
   },
   {
-    "objectID": "manual/architecture.html#source-layout",
-    "href": "manual/architecture.html#source-layout",
-    "title": "C++ Architecture",
-    "section": "Source layout",
-    "text": "Source layout\nsrc/\n├── mcmc/\n│   ├── algorithms/      # Stateless: nuts_step(), hmc_step(), leapfrog()\n│   ├── samplers/        # Stateful: NUTSSampler, HMCSampler, MetropolisSampler\n│   └── execution/       # Orchestration: chain_runner, warmup_schedule, chain_result\n├── models/\n│   ├── base_model.h     # Abstract interface (30+ virtual methods)\n│   ├── ggm/             # GGMModel — precision matrix, Metropolis-only\n│   ├── omrf/            # OMRFModel — ordinal MRF, gradient-based\n│   └── mixed/           # MixedMRFModel — mixed discrete-continuous MRF\n├── priors/\n│   ├── edge_prior.h     # BaseEdgePrior + Bernoulli, BetaBernoulli, SBM\n│   ├── sbm_edge_prior.h # MFM-SBM Gibbs updates\n│   └── sbm_edge_prior.cpp\n├── math/\n│   ├── cholupdate.h/cpp # Rank-1 Cholesky update/downdate (Givens/hyperbolic)\n│   ├── cholesky_helpers.h # Log-determinant, Schur complement\n│   ├── custom_explog.h/cpp # OpenLibM exp/log for cross-platform consistency\n│   ├── custom_arma_explog.h # Armadillo wrappers for custom exp/log\n│   └── explog_macros.h  # Platform detection macros (MY_EXP, ARMA_MY_EXP)\n├── utils/\n│   ├── variable_helpers.h/cpp # Numerically stable MRF probabilities\n│   ├── common_helpers.h # Enums (UpdateMethod, EdgePrior), counting helpers\n│   ├── progress_manager.h/cpp # Multi-chain progress bar\n│   └── print_mutex.h    # Thread-safe printing\n├── rng/\n│   └── rng_utils.h      # SafeRNG wrapper around dqrng::xoshiro256plusplus\n├── bgmCompare/          # Group comparison sampler and helpers\n│   ├── bgmCompare_sampler.h/cpp\n│   ├── bgmCompare_helper.h/cpp\n│   ├── bgmCompare_logp_and_grad.h/cpp\n│   └── bgmCompare_output.h\n└── [interface files]    # Rcpp entry points: sample_ggm.cpp, sample_omrf.cpp, etc.",
+    "objectID": "manual/bgmcompare-internals.html#differences-from-single-group-bgm",
+    "href": "manual/bgmcompare-internals.html#differences-from-single-group-bgm",
+    "title": "bgmCompare Internals",
+    "section": "Differences from single-group bgm",
+    "text": "Differences from single-group bgm\nThe bgmCompare engine shares the same OMRF likelihood (pseudolikelihood over ordinal/Blume-Capel variables) and the same NUTS/Metropolis sampler options (HMC is deprecated), but differs in three key ways:\n\nParameter decomposition — Group-specific parameters \\(\\boldsymbol{\\omega}^{(g)}\\) are decomposed into a shared baseline \\(\\boldsymbol{\\omega}\\) and contrast parameters \\(\\boldsymbol{\\delta}^{(k)}\\), linked through a contrast matrix.\nSeparate sampler — The bgmCompare engine uses its own chain runner (run_gibbs_sampler_bgmCompare()) rather than the general run_mcmc_chain(), because the multi-group structure requires group-specific likelihood evaluations and contrast selection.\nContrast selection — Instead of edge selection (which edges exist), bgmCompare performs contrast selection: for each parameter, the baseline component is always present, and the spike-and-slab mechanism decides whether contrast parameters are active or collapsed to zero.",
     "crumbs": [
       "Manual",
-      "Architecture",
-      "C++ Architecture"
+      "Group Comparison",
+      "bgmCompare Internals"
     ]
   },
   {
-    "objectID": "manual/architecture.html#layer-separation",
-    "href": "manual/architecture.html#layer-separation",
-    "title": "C++ Architecture",
-    "section": "Layer separation",
-    "text": "Layer separation\n\n\n\n\n\n\n\n\nLayer\nLocation\nResponsibility\n\n\n\n\nAlgorithms\nmcmc/algorithms/\nPure functions that perform one MCMC step. No state, no model knowledge.\n\n\nSamplers\nmcmc/samplers/\nStateful objects that own adaptation state and delegate to algorithms.\n\n\nExecution\nmcmc/execution/\nChain runner, warmup scheduling, sample storage.\n\n\nModels\nmodels/\nLog-posterior, gradient, Metropolis proposals. Each model implements BaseModel.\n\n\nPriors\npriors/\nEdge inclusion prior updates. Each prior implements BaseEdgePrior.\n\n\nMath\nmath/\nNumerical primitives: Cholesky updates, cross-platform exp/log.\n\n\nUtilities\nutils/\nShared helpers: stable probability computation, progress tracking, enums.",
+    "objectID": "manual/bgmcompare-internals.html#contrast-matrix-parameterization",
+    "href": "manual/bgmcompare-internals.html#contrast-matrix-parameterization",
+    "title": "bgmCompare Internals",
+    "section": "Contrast-matrix parameterization",
+    "text": "Contrast-matrix parameterization\nFor \\(G\\) groups, the per-group parameter vector \\(\\boldsymbol{\\omega}^{(g)}\\) is expressed as:\n\\[\n\\omega_{ij}^{(g)} = \\omega_{ij} + \\sum_{k=1}^{G-1} c_{gk}\\, \\delta_{ij}^{(k)}\n\\]\nwhere \\(\\mathbf{C}\\) is a \\(G \\times (G-1)\\) projection (contrast) matrix. The baseline \\(\\omega_{ij}\\) captures the shared structure; the contrast parameters \\(\\delta_{ij}^{(k)}\\) are the projections onto the \\(G-1\\) orthogonal contrast directions. For two groups, the single contrast reduces to a scaled group difference. Category thresholds are decomposed in the same way.\nThe flat parameter vector (used by NUTS and HMC) groups by component type, not per effect:\n[ overall_mains | overall_pairs | active_main_diffs | active_pair_diffs ]\nContrast parameters appear only when their inclusion indicator is 1; inactive contrasts are excluded from the vector entirely.",
     "crumbs": [
       "Manual",
-      "Architecture",
-      "C++ Architecture"
+      "Group Comparison",
+      "bgmCompare Internals"
     ]
   },
   {
-    "objectID": "manual/architecture.html#design-principles",
-    "href": "manual/architecture.html#design-principles",
-    "title": "C++ Architecture",
-    "section": "Design principles",
-    "text": "Design principles\nSeparation of concerns. Algorithms know nothing about models. A nuts_step() call receives a function logp_and_gradient(vec) → (double, vec) and returns a StepResult. The model provides the function; the algorithm does the math.\nVirtual dispatch for models. All models inherit from BaseModel and override a small set of virtual methods. The chain runner calls model.logp_and_gradient() without knowing whether it is sampling a GGM or an ordinal MRF. See Model Classes.\nCloning for parallelism. Both BaseModel and BaseEdgePrior expose a clone() method that produces an independent copy. The Rcpp entry point constructs a single model from R input and passes it to run_mcmc_sampler(). Inside C++, that prototype is cloned once per chain (each clone receiving its own RNG seed), and the clones are dispatched to TBB threads via RcppParallel::parallelFor(). R never interacts with the clones directly — parallelism is entirely C++-side. After all chains finish, the vector&lt;ChainResult&gt; is converted to an R list and returned. See Parallel Chains.\nHeader-only samplers. The sampler classes in mcmc/samplers/ are header-only. They are lightweight wrappers that hold adaptation state and call algorithm functions from mcmc/algorithms/.\nRcpp interface files. The top-level .cpp files in src/ (sample_ggm.cpp, sample_omrf.cpp, sample_mixed.cpp, bgmCompare_interface.cpp) are thin Rcpp entry points. They construct C++ objects from R lists and call run_mcmc_sampler().",
+    "objectID": "manual/bgmcompare-internals.html#multi-group-log-posterior-and-gradient",
+    "href": "manual/bgmcompare-internals.html#multi-group-log-posterior-and-gradient",
+    "title": "bgmCompare Internals",
+    "section": "Multi-group log-posterior and gradient",
+    "text": "Multi-group log-posterior and gradient\nThe log-pseudoposterior sums over groups. For each group \\(g\\):\n\nReconstruct group-specific parameters via the contrast matrix\nCompute the pseudolikelihood using group \\(g\\)’s data (sufficient statistics: category counts, Blume-Capel stats, pairwise stats)\nEvaluate the gradient of the pseudolikelihood with respect to the active parameters\n\nThe gradient() function combines three components:\n\nObserved-data gradient (gradient_observed_active()) — projects group-level sufficient statistics into the active-parameter layout using the contrast matrix. Precomputed from counts_per_category, blume_capel_stats, and pairwise_stats.\nExpected-data gradient — computed inline within gradient() by building group-specific parameters via the contrast projection, evaluating softmax probabilities, and subtracting expected counts.\nPrior gradient — Cauchy penalties on both baseline and contrast pairwise parameters, with scale adjusted by the number of observations.",
     "crumbs": [
       "Manual",
-      "Architecture",
-      "C++ Architecture"
+      "Group Comparison",
+      "bgmCompare Internals"
     ]
   },
   {
-    "objectID": "manual/architecture.html#build-system",
-    "href": "manual/architecture.html#build-system",
-    "title": "C++ Architecture",
-    "section": "Build system",
-    "text": "Build system\nsrc/Makevars.in (configured by configure/configure.win) sets compiler flags and links against RcppArmadillo, RcppParallel (TBB), and dqrng. The file src/sources.mk lists all .cpp translation units and is auto-generated by inst/generate_makevars_sources.R.\n\n\n\n\n\n\nWarning\n\n\n\nNever hand-edit src/sources.mk. Run Rscript inst/generate_makevars_sources.R after adding or removing .cpp files.",
+    "objectID": "manual/bgmcompare-internals.html#sampler-implementation",
+    "href": "manual/bgmcompare-internals.html#sampler-implementation",
+    "title": "bgmCompare Internals",
+    "section": "Sampler implementation",
+    "text": "Sampler implementation\nrun_gibbs_sampler_bgmCompare() orchestrates one MCMC chain. Each iteration:\n\nMissing data imputation (if na_impute = TRUE) — Impute missing observations per group using the current parameters. Updates the observation matrix, category counts, Blume-Capel statistics, and pairwise statistics.\nContrast selection (if active) — A Metropolis step decides whether each contrast parameter is included or collapsed to zero (update_indicator_differences_metropolis_bgmcompare()).\nParameter updates — With adaptive Metropolis, main effects and pairwise effects are updated separately (update_main_effects_metropolis_bgmcompare(), then update_pairwise_effects_metropolis_bgmcompare()). With NUTS or HMC, all active parameters are updated jointly via the vectorized log-pseudoposterior.\nInclusion probability update (Beta-Bernoulli prior only) — Draw new inclusion probability from the conjugate Beta posterior.\n\nThe warmup schedule follows the same five-stage structure as the single-group model (see Warmup Schedule).",
     "crumbs": [
       "Manual",
-      "Architecture",
-      "C++ Architecture"
+      "Group Comparison",
+      "bgmCompare Internals"
+    ]
+  },
+  {
+    "objectID": "manual/bgmcompare-internals.html#active-parameter-tracking",
+    "href": "manual/bgmcompare-internals.html#active-parameter-tracking",
+    "title": "bgmCompare Internals",
+    "section": "Active parameter tracking",
+    "text": "Active parameter tracking\nBecause contrast selection can turn parameters on and off, the total_length() function recomputes the active parameter dimension at each iteration. Index maps (build_index_maps()) provide the mapping between the flat active-parameter vector and the structured (variable, group) parameter layout.\nWhen a contrast parameter is “off” (indicator = 0), it is excluded from the NUTS block. The step size and mass matrix adapt to the current active dimension.",
+    "crumbs": [
+      "Manual",
+      "Group Comparison",
+      "bgmCompare Internals"
+    ]
+  },
+  {
+    "objectID": "manual/bgmcompare-internals.html#output-handling",
+    "href": "manual/bgmcompare-internals.html#output-handling",
+    "title": "bgmCompare Internals",
+    "section": "Output handling",
+    "text": "Output handling\nThe bgmCompareOutput struct stores:\n\n\n\n\n\n\n\nField\nContent\n\n\n\n\nmain_samples\nMain-effect posterior samples (iterations \\(\\times\\) thresholds \\(\\times\\) groups)\n\n\npairwise_samples\nPairwise-effect posterior samples (iterations \\(\\times\\) pairs \\(\\times\\) groups)\n\n\nindicator_samples\nContrast inclusion indicators (iterations \\(\\times\\) parameters)\n\n\ntreedepth_samples\nTree depth per iteration (NUTS only)\n\n\ndivergent_samples\nDivergent transition flags (NUTS only)\n\n\nenergy_samples\nHamiltonian energy per iteration (NUTS only)\n\n\n\nThe R output builder (build_output_compare()) splits the posterior means into:\n\n$group_posterior_means — Posterior means of the group-level parameters \\(\\boldsymbol{\\omega}^{(g)}\\), reconstructed from the baseline \\(\\omega_{ij}\\) and contrast parameters \\(\\delta_{ij}^{(k)}\\)\n$difference_posterior_means — Posterior means of the contrast parameters \\(\\delta_{ij}^{(k)}\\)\n$difference_inclusion_probabilities — Proportion of iterations where each contrast indicator was included",
+    "crumbs": [
+      "Manual",
+      "Group Comparison",
+      "bgmCompare Internals"
     ]
   },
   {
@@ -3818,7 +3913,7 @@
     "href": "reference/datasets.html",
     "title": "Datasets",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nExample datasets included in bgms.",
+    "text": "Example datasets included in bgms.",
     "crumbs": [
       "Reference",
       "Datasets"
@@ -3829,7 +3924,7 @@
     "href": "reference/datasets.html#adhd",
     "title": "Datasets",
     "section": "ADHD",
-    "text": "ADHD\nADHD symptom ratings for 355 children aged 6 to 8 years from the Children’s Attention Project (CAP) cohort (Silk et al., 2019). The sample consists of 146 children diagnosed with ADHD and 209 without a diagnosis. Symptoms were assessed through structured interviews with parents using the NIMH Diagnostic Interview Schedule for Children IV (DISC-IV; Shaffer et al., 2000). The checklist includes 18 items: 9 Inattentive (I) and 9 Hyperactive/Impulsive (HI). Each item is binary (1 = present, 0 = absent).\ndata(\"ADHD\")\nA matrix with 355 rows and 19 columns:\n\n\n\n\n\n\n\nColumn\nDescription\n\n\n\n\ngroup\nADHD diagnosis: 1 = diagnosed, 0 = not diagnosed\n\n\navoid\nOften avoids tasks that require sustained mental effort (I)\n\n\ncloseatt\nOften fails to give close attention to details (I)\n\n\ndistract\nIs often easily distracted by extraneous stimuli (I)\n\n\nforget\nIs often forgetful in daily activities (I)\n\n\ninstruct\nOften does not follow through on instructions (I)\n\n\nlisten\nOften does not seem to listen when spoken to directly (I)\n\n\nloses\nOften loses things necessary for tasks (I)\n\n\norg\nOften has difficulty organizing tasks (I)\n\n\nsusatt\nOften has difficulty sustaining attention (I)\n\n\nblurts\nOften blurts out answers before questions are completed (HI)\n\n\nfidget\nOften fidgets with hands or feet (HI)\n\n\ninterrupt\nOften interrupts or intrudes on others (HI)\n\n\nmotor\nIs often “on the go” or acts as if “driven by a motor” (HI)\n\n\nquiet\nOften has difficulty playing quietly (HI)\n\n\nruns\nOften runs about or climbs excessively (HI)\n\n\nseat\nOften leaves seat when remaining seated is expected (HI)\n\n\ntalks\nOften talks excessively (HI)\n\n\nturn\nOften has difficulty awaiting turn (HI)\n\n\n\nSource: Silk et al. (2019). Data retrieved from doi:10.1371/journal.pone.0211053.s004. Licensed under CC-BY 4.0.",
+    "text": "ADHD\nADHD symptom ratings for 355 children aged 6 to 8 years from the Children’s Attention Project (CAP) cohort Silk et al. (2019). The sample consists of 146 children diagnosed with ADHD and 209 without a diagnosis. Symptoms were assessed through structured interviews with parents using the NIMH Diagnostic Interview Schedule for Children IV (DISC-IV; Shaffer et al. (2000)). The checklist includes 18 items: 9 Inattentive (I) and 9 Hyperactive/Impulsive (HI). Each item is binary (1 = present, 0 = absent).\ndata(\"ADHD\")\nA matrix with 355 rows and 19 columns:\n\n\n\n\n\n\n\nColumn\nDescription\n\n\n\n\ngroup\nADHD diagnosis: 1 = diagnosed, 0 = not diagnosed\n\n\navoid\nOften avoids tasks that require sustained mental effort (I)\n\n\ncloseatt\nOften fails to give close attention to details (I)\n\n\ndistract\nIs often easily distracted by extraneous stimuli (I)\n\n\nforget\nIs often forgetful in daily activities (I)\n\n\ninstruct\nOften does not follow through on instructions (I)\n\n\nlisten\nOften does not seem to listen when spoken to directly (I)\n\n\nloses\nOften loses things necessary for tasks (I)\n\n\norg\nOften has difficulty organizing tasks (I)\n\n\nsusatt\nOften has difficulty sustaining attention (I)\n\n\nblurts\nOften blurts out answers before questions are completed (HI)\n\n\nfidget\nOften fidgets with hands or feet (HI)\n\n\ninterrupt\nOften interrupts or intrudes on others (HI)\n\n\nmotor\nIs often “on the go” or acts as if “driven by a motor” (HI)\n\n\nquiet\nOften has difficulty playing quietly (HI)\n\n\nruns\nOften runs about or climbs excessively (HI)\n\n\nseat\nOften leaves seat when remaining seated is expected (HI)\n\n\ntalks\nOften talks excessively (HI)\n\n\nturn\nOften has difficulty awaiting turn (HI)\n\n\n\nSource: Silk et al. (2019). Data retrieved from doi:10.1371/journal.pone.0211053.s004. Licensed under CC-BY 4.0.",
     "crumbs": [
       "Reference",
       "Datasets"
@@ -3840,7 +3935,7 @@
     "href": "reference/datasets.html#boredom",
     "title": "Datasets",
     "section": "Boredom",
-    "text": "Boredom\nResponses to the 8-item Short Boredom Proneness Scale (SBPS), a self-report measure of susceptibility to boredom (Martarelli et al., 2023). Items were rated on a 7-point Likert scale from 1 (“strongly disagree”) to 7 (“strongly agree”). The scale was administered in either English (Struk et al., 2015) or French (Martarelli et al., 2023).\ndata(\"Boredom\")\nA matrix with 986 rows and 9 columns:\n\n\n\n\n\n\n\nColumn\nDescription\n\n\n\n\nlanguage\nLanguage: \"en\" = English, \"fr\" = French\n\n\nloose_ends\nI often find myself at “loose ends,” not knowing what to do.\n\n\nentertain\nI find it hard to entertain myself.\n\n\nrepetitive\nMany things I have to do are repetitive and monotonous.\n\n\nstimulation\nIt takes more stimulation to get me going than most people.\n\n\nmotivated\nI don’t feel motivated by most things that I do.\n\n\nkeep_interest\nIn most situations, it is hard for me to find something to keep me interested.\n\n\nsit_around\nMuch of the time, I just sit around doing nothing.\n\n\nhalf_dead_dull\nUnless I am doing something exciting, even dangerous, I feel half-dead and dull.\n\n\n\nSource: Martarelli et al. (2023). Data retrieved from osf.io/qhux8. Licensed under CC-BY 4.0.",
+    "text": "Boredom\nResponses to the 8-item Short Boredom Proneness Scale (SBPS), a self-report measure of susceptibility to boredom Martarelli et al. (2023). Items were rated on a 7-point Likert scale from 1 (“strongly disagree”) to 7 (“strongly agree”). The scale was administered in either English Struk et al. (2017) or French Martarelli et al. (2023).\ndata(\"Boredom\")\nA matrix with 986 rows and 9 columns:\n\n\n\n\n\n\n\nColumn\nDescription\n\n\n\n\nlanguage\nLanguage: \"en\" = English, \"fr\" = French\n\n\nloose_ends\nI often find myself at “loose ends,” not knowing what to do.\n\n\nentertain\nI find it hard to entertain myself.\n\n\nrepetitive\nMany things I have to do are repetitive and monotonous.\n\n\nstimulation\nIt takes more stimulation to get me going than most people.\n\n\nmotivated\nI don’t feel motivated by most things that I do.\n\n\nkeep_interest\nIn most situations, it is hard for me to find something to keep me interested.\n\n\nsit_around\nMuch of the time, I just sit around doing nothing.\n\n\nhalf_dead_dull\nUnless I am doing something exciting, even dangerous, I feel half-dead and dull.\n\n\n\nSource: Martarelli et al. (2023). Data retrieved from osf.io/qhux8. Licensed under CC-BY 4.0.",
     "crumbs": [
       "Reference",
       "Datasets"
@@ -3851,18 +3946,7 @@
     "href": "reference/datasets.html#wenchuan",
     "title": "Datasets",
     "section": "Wenchuan",
-    "text": "Wenchuan\nResponses to 17 items assessing PTSD symptoms in Chinese adults who survived the 2008 Wenchuan earthquake and lost at least one child in the disaster (McNally et al., 2015). Participants completed the civilian version of the Posttraumatic Checklist, with each item corresponding to a DSM-IV PTSD symptom. Items were rated on a 5-point Likert scale from “not at all” to “extremely.”\ndata(\"Wenchuan\")\nA matrix with 362 rows and 17 columns:\n\n\n\n\n\n\n\nColumn\nDescription\n\n\n\n\nintrusion\nRepeated, disturbing memories, thoughts, or images of a stressful experience?\n\n\ndreams\nRepeated, disturbing dreams of a stressful experience?\n\n\nflash\nSuddenly acting or feeling as if a stressful experience were happening again?\n\n\nupset\nFeeling very upset when something reminded you of a stressful experience?\n\n\nphysior\nHaving physical reactions when something reminded you of a stressful experience?\n\n\navoidth\nAvoiding thinking about or talking about a stressful experience?\n\n\navoidact\nAvoiding activities or situations because they reminded you of a stressful experience?\n\n\namnesia\nTrouble remembering important parts of a stressful experience?\n\n\nlossint\nLoss of interest in activities that you used to enjoy?\n\n\ndistant\nFeeling distant or cut off from other people?\n\n\nnumb\nFeeling emotionally numb or unable to have loving feelings?\n\n\nfuture\nFeeling as if your future will somehow be cut short?\n\n\nsleep\nTrouble falling or staying asleep?\n\n\nanger\nFeeling irritable or having angry outbursts?\n\n\nconcen\nHaving difficulty concentrating?\n\n\nhyper\nBeing “super-alert” or watchful or on guard?\n\n\nstartle\nFeeling jumpy or easily startled?\n\n\n\nSource: McNally et al. (2015). Data retrieved from psychosystems.org.",
-    "crumbs": [
-      "Reference",
-      "Datasets"
-    ]
-  },
-  {
-    "objectID": "reference/datasets.html#references",
-    "href": "reference/datasets.html#references",
-    "title": "Datasets",
-    "section": "References",
-    "text": "References\n\nMartarelli, C. S., et al. (2023). Boredom proneness predicts self-assessed decision errors in everyday life. Psychological Research, 87, 440–452.\nMcNally, R. J., et al. (2015). Mental disorders as causal systems: A network approach to posttraumatic stress disorder. Clinical Psychological Science, 3(6), 836–849.\nShaffer, D., et al. (2000). NIMH Diagnostic Interview Schedule for Children Version IV. Journal of the American Academy of Child and Adolescent Psychiatry, 39, 28–38.\nSilk, T. J., et al. (2019). A network analysis approach to ADHD symptoms in early adolescence. PLoS ONE, 14(1), e0211053.\nStruk, A. A., et al. (2015). A short Boredom Proneness Scale. Assessment, 24(3), 346–359.",
+    "text": "Wenchuan\nResponses to 17 items assessing PTSD symptoms in Chinese adults who survived the 2008 Wenchuan earthquake and lost at least one child in the disaster McNally et al. (2015). Participants completed the civilian version of the Posttraumatic Checklist, with each item corresponding to a DSM-IV PTSD symptom. Items were rated on a 5-point Likert scale from “not at all” to “extremely.”\ndata(\"Wenchuan\")\nA matrix with 362 rows and 17 columns:\n\n\n\n\n\n\n\nColumn\nDescription\n\n\n\n\nintrusion\nRepeated, disturbing memories, thoughts, or images of a stressful experience?\n\n\ndreams\nRepeated, disturbing dreams of a stressful experience?\n\n\nflash\nSuddenly acting or feeling as if a stressful experience were happening again?\n\n\nupset\nFeeling very upset when something reminded you of a stressful experience?\n\n\nphysior\nHaving physical reactions when something reminded you of a stressful experience?\n\n\navoidth\nAvoiding thinking about or talking about a stressful experience?\n\n\navoidact\nAvoiding activities or situations because they reminded you of a stressful experience?\n\n\namnesia\nTrouble remembering important parts of a stressful experience?\n\n\nlossint\nLoss of interest in activities that you used to enjoy?\n\n\ndistant\nFeeling distant or cut off from other people?\n\n\nnumb\nFeeling emotionally numb or unable to have loving feelings?\n\n\nfuture\nFeeling as if your future will somehow be cut short?\n\n\nsleep\nTrouble falling or staying asleep?\n\n\nanger\nFeeling irritable or having angry outbursts?\n\n\nconcen\nHaving difficulty concentrating?\n\n\nhyper\nBeing “super-alert” or watchful or on guard?\n\n\nstartle\nFeeling jumpy or easily startled?\n\n\n\nSource: McNally et al. (2015). Data retrieved from psychosystems.org.",
     "crumbs": [
       "Reference",
       "Datasets"
@@ -3873,7 +3957,7 @@
     "href": "reference/index.html",
     "title": "Function Reference",
     "section": "",
-    "text": "Complete documentation for all exported functions in bgms.",
+    "text": "Complete documentation for all exported functions in bgms.\nbgm() and bgmCompare() return S7 objects (classes bgms and bgmCompare). Standard methods like print(), summary(), and coef() work through S3 dispatch for compatibility with base R generics.",
     "crumbs": [
       "Reference",
       "Function Reference"
@@ -3891,11 +3975,11 @@
     ]
   },
   {
-    "objectID": "reference/index.html#s3-methods",
-    "href": "reference/index.html#s3-methods",
+    "objectID": "reference/index.html#methods",
+    "href": "reference/index.html#methods",
     "title": "Function Reference",
-    "section": "S3 Methods",
-    "text": "S3 Methods\n\n\n\nMethod\nDescription\n\n\n\n\nprint()\nMinimal console output for a fitted model\n\n\nsummary()\nSummary statistics for posterior samples\n\n\ncoef()\nExtract posterior means of model parameters\n\n\npredict()\nPredict new observations from a fitted model\n\n\nsimulate()\nSimulate datasets from the posterior distribution\n\n\nsimulate_mrf()\nSimulate observations from a Markov Random Field",
+    "section": "Methods",
+    "text": "Methods\n\n\n\nMethod\nDescription\n\n\n\n\nprint()\nMinimal console output for a fitted model\n\n\nsummary()\nSummary statistics for posterior samples\n\n\ncoef()\nExtract posterior means of model parameters\n\n\npredict()\nPredict new observations from a fitted model\n\n\nsimulate()\nSimulate datasets from the posterior distribution\n\n\nsimulate_mrf()\nSimulate observations from a Markov Random Field",
     "crumbs": [
       "Reference",
       "Function Reference"
@@ -3917,7 +4001,7 @@
     "href": "reference/index.html#datasets",
     "title": "Function Reference",
     "section": "Datasets",
-    "text": "Datasets\n\n\n\nDataset\nDescription\n\n\n\n\nADHD\nBinary ADHD symptom ratings for 355 children (18 items)\n\n\nBoredom\nOrdinal boredom proneness scores for 986 participants (9 items)\n\n\nWenchuan\nOrdinal PTSD symptom ratings for 362 survivors (17 items)",
+    "text": "Datasets\n\n\n\nDataset\nN\nItems\nType\nDescription\n\n\n\n\nADHD\n355\n18\nBinary\nADHD symptom ratings for children\n\n\nBoredom\n986\n8\nOrdinal\nBoredom proneness scores (7-point Likert)\n\n\nWenchuan\n362\n17\nOrdinal\nPTSD symptom ratings (5-point Likert)",
     "crumbs": [
       "Reference",
       "Function Reference"

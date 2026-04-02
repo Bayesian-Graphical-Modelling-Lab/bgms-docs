@@ -370,7 +370,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/methods.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">S3 Methods</span></a>
+ <span class="menu-text">Methods</span></a>
   </div>
 </li>
       </ul>
@@ -416,7 +416,8 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Complete documentation for all exported functions in bgms.</p>
+<p>Complete documentation for all exported functions in <code>bgms</code>.</p>
+<p><code>bgm()</code> and <code>bgmCompare()</code> return S7 objects (classes <code>bgms</code> and <code>bgmCompare</code>). Standard methods like <code>print()</code>, <code>summary()</code>, and <code>coef()</code> work through S3 dispatch for compatibility with base R generics.</p>
 <section id="core-functions" class="level2">
 <h2 class="anchored" data-anchor-id="core-functions">Core Functions</h2>
 <table class="caption-top table">
@@ -438,8 +439,8 @@ ul.task-list li input[type="checkbox"] {
 </tbody>
 </table>
 </section>
-<section id="s3-methods" class="level2">
-<h2 class="anchored" data-anchor-id="s3-methods">S3 Methods</h2>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">Methods</h2>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -546,21 +547,33 @@ ul.task-list li input[type="checkbox"] {
 <thead>
 <tr class="header">
 <th>Dataset</th>
+<th style="text-align: right;">N</th>
+<th style="text-align: right;">Items</th>
+<th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><a href="../reference/datasets.html#adhd"><code>ADHD</code></a></td>
-<td>Binary ADHD symptom ratings for 355 children (18 items)</td>
+<td style="text-align: right;">355</td>
+<td style="text-align: right;">18</td>
+<td>Binary</td>
+<td>ADHD symptom ratings for children</td>
 </tr>
 <tr class="even">
 <td><a href="../reference/datasets.html#boredom"><code>Boredom</code></a></td>
-<td>Ordinal boredom proneness scores for 986 participants (9 items)</td>
+<td style="text-align: right;">986</td>
+<td style="text-align: right;">8</td>
+<td>Ordinal</td>
+<td>Boredom proneness scores (7-point Likert)</td>
 </tr>
 <tr class="odd">
 <td><a href="../reference/datasets.html#wenchuan"><code>Wenchuan</code></a></td>
-<td>Ordinal PTSD symptom ratings for 362 survivors (17 items)</td>
+<td style="text-align: right;">362</td>
+<td style="text-align: right;">17</td>
+<td>Ordinal</td>
+<td>PTSD symptom ratings (5-point Likert)</td>
 </tr>
 </tbody>
 </table>
