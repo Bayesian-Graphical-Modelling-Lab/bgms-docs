@@ -75,7 +75,7 @@ summary(fit)
 
 :::: {.feature}
 ### User's Guide
-Learn bgms from the ground up: installation, basic usage, and statistical concepts behind Bayesian graphical models for mixed variable types.
+Learn `bgms` from the ground up: installation, basic usage, and statistical concepts behind Bayesian graphical models for mixed variable types.
 
 [Guide →](guide/index.qmd)
 ::::
@@ -103,7 +103,7 @@ Technical documentation for contributors: C++ architecture, MCMC algorithms, and
 
 ### Citation
 
-If you use bgms in your research, please cite the software package.
+If you use `bgms` in your research, please cite the software package.
 
 Choose a citation format (version is set to the documented release):
 

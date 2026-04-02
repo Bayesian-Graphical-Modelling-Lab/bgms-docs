@@ -2,13 +2,13 @@
 title: "Stochastic Block Model Prior"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 The MFM-SBM (mixture of finite mixtures – stochastic block model)
 edge prior assigns variables to latent clusters and uses
-cluster-structured inclusion probabilities. Source:
+cluster-structured inclusion probabilities. The implementation is a
+translation of the R code accompanying @GengEtAl_2019,
+adapted for the `bgms` sampler architecture. For the statistical
+background and usage guidance, see
+[Edge Clustering](../guide/clustering.qmd). Source:
 `src/priors/sbm_edge_prior.h` and `sbm_edge_prior.cpp`.
 
 ## MFM-SBM formulation
@@ -107,14 +107,17 @@ The six SBM hyperparameters are set via `bgm()`:
 | $\alpha_D$ | `dirichlet_alpha` | 1 | Dirichlet concentration for cluster proportions |
 | $\lambda$ | `lambda` | 1 | Poisson rate for number of clusters |
 
-When the between-block hyperparameters are not specified (NULL in R),
-they default to $-1$ in C++ (sentinel value), and the prior uses the
-within-block hyperparameters for all blocks.
+All six hyperparameters are required when `edge_prior = "Stochastic-Block"`
+is selected. Validation enforces that all values are positive and finite.
 
 ## Output
 
 The cluster allocations at each post-warmup iteration are stored in
 `ChainResult::allocation_samples` and accessible via
-`extract_sbm()` in R, which returns the allocation matrix and a
-co-clustering probability matrix (proportion of iterations where
-each pair of variables was in the same cluster).
+`extract_sbm()` in R, which returns:
+
+- `posterior_num_blocks` — posterior distribution over the number of clusters
+- `posterior_mean_allocations` — posterior mean cluster assignments
+- `posterior_mode_allocations` — posterior mode cluster assignments
+- `posterior_mean_coclustering_matrix` — proportion of iterations where
+  each pair of variables was in the same cluster

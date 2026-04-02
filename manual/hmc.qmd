@@ -24,19 +24,19 @@ which inherits warmup adaptation from `GradientSamplerBase`.
 
 Each HMC iteration proceeds as follows:
 
-1. **Sample momentum** — Draw $r \sim \mathcal{N}(0,\, M)$, where
+1. **Sample momentum** — Draw $p \sim \mathcal{N}(0,\, M)$, where
    $M$ is the diagonal mass matrix.
 2. **Leapfrog integration** — Simulate $L$ steps of the Störmer–Verlet
    integrator with step size $\epsilon$:
-   - Half-step momentum: $r \leftarrow r + \tfrac{\epsilon}{2}\,\nabla\log p(\theta)$
-   - Full-step position: $\theta \leftarrow \theta + \epsilon\,M^{-1} r$
-   - Half-step momentum: $r \leftarrow r + \tfrac{\epsilon}{2}\,\nabla\log p(\theta)$
+   - Half-step momentum: $p \leftarrow p + \tfrac{\epsilon}{2}\,\nabla\log \pi(q)$
+   - Full-step position: $q \leftarrow q + \epsilon\,M^{-1} p$
+   - Half-step momentum: $p \leftarrow p + \tfrac{\epsilon}{2}\,\nabla\log \pi(q)$
 3. **Metropolis correction** — Accept the proposal
-   $(\theta^*, r^*)$ with probability
+   $(q^*, p^*)$ with probability
    $$
-   \alpha = \min\!\bigl(1,\; \exp\bigl(H(\theta, r) - H(\theta^*, r^*)\bigr)\bigr),
+   \alpha = \min\!\bigl(1,\; \exp\bigl(H(q, p) - H(q^*, p^*)\bigr)\bigr),
    $$
-   where $H(\theta, r) = -\log p(\theta) + \tfrac{1}{2}\,r^\top M^{-1} r$
+   where $H(q, p) = -\log \pi(q) + \tfrac{1}{2}\,p^\top M^{-1} p$
    is the Hamiltonian.
 
 The number of leapfrog steps $L$ is controlled by

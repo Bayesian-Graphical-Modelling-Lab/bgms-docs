@@ -2,12 +2,8 @@
 title: "R Scaffolding"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 The R layer sits between user-facing functions (`bgm()`, `bgmCompare()`)
-and the C++ engine. It validates inputs, constructs a specification
+and the C++ sampler. It validates inputs, constructs a specification
 object, dispatches to the appropriate C++ sampler, and assembles the
 returned output into an S3 fit object.
 
@@ -63,7 +59,7 @@ lowest observed category.
 
 `validate_sampler()` resolves the `update_method` argument into a
 concrete sampler type (`"nuts"` or `"adaptive_metropolis"`;
-`"hmc"` is accepted but deprecated)
+`"hamiltonian-mc"` is accepted but deprecated)
 and sets defaults for tuning parameters (`target_accept`,
 `nuts_max_depth`, `hmc_num_leapfrogs`). It detects the number of
 available cores and resolves the progress display type.
@@ -89,13 +85,16 @@ then delegates to one of four model-specific builders:
 | `"mixed_mrf"` | `build_spec_mixed_mrf()` | Separate discrete/continuous matrices, pseudolikelihood type |
 | `"compare"` | `build_spec_compare()` | Group indices, projection matrix, precomputed pairwise stats |
 
-Each builder assembles five sub-lists:
+Each builder assembles a spec with seven components:
 
+- `$model_type` — model class string (`"ggm"`, `"omrf"`, etc.)
 - `$data` — observations, dimensions, variable names
 - `$variables` — variable types, ordinal flags, baseline categories
 - `$missing` — `na_action`, imputation flag, missing indices
 - `$prior` — prior type, hyperparameters, scaling factors
 - `$sampler` — algorithm, iterations, warmup, chains, seed
+- `$precomputed` — sufficient statistics and derived quantities
+  (e.g., cross-products for GGM, pairwise stats for compare)
 
 The result passes through `new_bgm_spec()` (type assertions) and
 `validate_bgm_spec()` (cross-field invariants, such as: if
@@ -147,5 +146,6 @@ variable ordering.
 ### Compare (`build_output_compare()`)
 
 The comparison builder splits posterior means into group-level
-(`$group_posterior_means`) and difference (`$difference_posterior_means`)
-components, and computes difference inclusion probabilities.
+(`$group_posterior_means`) and contrast
+(`$difference_posterior_means`) components, and computes contrast
+inclusion probabilities.

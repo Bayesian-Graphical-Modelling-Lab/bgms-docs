@@ -12,7 +12,7 @@ analysis workflows, and MCMC output.
 - [Getting Started](getting-started.qmd) — Installation and first model fit
 - [Graphical Models](graphical-models.qmd) — Nodes, edges, and conditional independence
 - [The Bayesian Approach](bayesian-approach.qmd) — Priors, posteriors, and Bayes factors
-- [Prior Basics](prior-basics.qmd) — How bgms uses priors and when to change defaults
+- [Prior Basics](prior-basics.qmd) — How `bgms` uses priors and when to change defaults
 
 ### Models
 

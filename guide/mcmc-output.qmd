@@ -103,7 +103,7 @@ for the edge; near 0 indicates strong evidence against it. Values around
 0.5 are inconclusive. The transition counts (`n0->0`, `n0->1`, `n1->0`,
 `n1->1`) show how often the edge indicator switched between excluded
 (0) and included (1) states during sampling. Edges with very few
-transitions (fewer than 5) have unreliable mixture ESS estimates; bgms
+transitions (fewer than 5) have unreliable mixture ESS estimates; `bgms`
 suppresses these automatically.
 
 ### Summary columns

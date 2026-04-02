@@ -88,11 +88,11 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | manual/parallel-chains.qmd | Medium | Not started | No | No | - |
 | manual/ggm-internals.qmd | High | Contradiction-checked | No | No | - |
 | manual/omrf-internals.qmd | High | Contradiction-checked | No | No | - |
-| manual/variable-helpers.qmd | High | Not started | No | No | - |
+| manual/variable-helpers.qmd | High | Contradiction-checked | No | No | - |
 | manual/mixed-internals.qmd | High | Contradiction-checked | No | No | - |
-| manual/edge-priors.qmd | High | Not started | No | No | - |
-| manual/sbm-prior.qmd | High | Not started | No | No | - |
-| manual/bgmcompare-internals.qmd | High | Not started | No | No | - |
+| manual/edge-priors.qmd | High | Contradiction-checked | No | No | - |
+| manual/sbm-prior.qmd | High | Contradiction-checked | No | No | - |
+| manual/bgmcompare-internals.qmd | High | Contradiction-checked | No | No | - |
 | manual/numerical.qmd | High | Scaffolded | No | No | - |
 | **Examples** | | | | | |
 | examples/index.qmd | Low | Not started | No | No | - |
@@ -120,6 +120,8 @@ These tasks are important but are not part of the core review flow above.
 - [ ] Add GitHub Actions workflow in bgms-docs to render Quarto and deploy to the publishing target used by the bgms website.
 - [ ] Configure deployment credentials (fine-grained PAT or GitHub App) with least-privilege access.
 - [ ] Document deployment and rollback steps for maintainers.
+
+### P3 - Notation consistency fixes\n\nSee STYLE_GUIDE.md \u00a7 Mathematical Notation for the authoritative conventions.\nAll notation fixes have been applied.
 
 ### P2 - Documentation maintenance
 

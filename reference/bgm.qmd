@@ -15,7 +15,7 @@ or mixed variables using a Markov Random Field, with support for edge
 selection through Bayesian variable selection. The statistical foundation of
 the model is described in Marsman et al. (2025), where the ordinal MRF model
 and its Bayesian estimation procedure were first introduced. While the
-implementation in bgms has since been extended and updated (e.g., alternative
+implementation in `bgms` has since been extended and updated (e.g., alternative
 priors, parallel chains, HMC/NUTS warmup), it builds on that original
 framework.
 

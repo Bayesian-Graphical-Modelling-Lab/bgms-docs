@@ -108,7 +108,7 @@ thresholds of 1.1 or 1.2; @VehtariEtAl_2021 tightened this to 1.01
 based on experience with rank-normalized split-R-hat. Values above 1.01
 suggest that the chains have not mixed and should be run longer.
 
-bgms reports R-hat in `summary()` output and through `extract_rhat()`.
+`bgms` reports R-hat in `summary()` output and through `extract_rhat()`.
 
 ## Trace plots
 

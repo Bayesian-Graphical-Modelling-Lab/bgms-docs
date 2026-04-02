@@ -119,7 +119,7 @@ In this plot, edges with posterior inclusion probability below 0.5 are set to ze
 
 ## Continuous data
 
-For continuous variables, bgms fits a Gaussian graphical model. The interface is identical; only the `variable_type` argument changes.
+For continuous variables, `bgms` fits a Gaussian graphical model. The interface is identical; only the `variable_type` argument changes.
 
 As a continuous-data example, we use the classic examination marks dataset from @MardiaKentBibby_1979. The data contain scores of 88 students on five examinations:
 
@@ -215,7 +215,7 @@ This plot shows the estimated conditional association network for the continuous
 
 ## Next steps
 
-- Learn about the unified [graphical model framework](graphical-models.qmd) in bgms, with [ordinal](omrf.qmd) and [continuous](ggm.qmd) special cases
+- Learn about the unified [graphical model framework](graphical-models.qmd) in `bgms`, with [ordinal](omrf.qmd) and [continuous](ggm.qmd) special cases
 - Understand [edge selection](edge-selection.qmd) with spike-and-slab priors
 - Compare groups with [`bgmCompare()`](group-comparison.qmd)
 - Discover edge communities with [Bayesian edge clustering](clustering.qmd)

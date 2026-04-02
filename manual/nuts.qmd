@@ -14,11 +14,11 @@ with the generalized U-turn criterion from @Betancourt_2017_hmc.
 ## Leapfrog integration
 
 Each elementary step of HMC is a leapfrog integrator that
-approximately preserves the Hamiltonian $H(\theta, r) = -\log p(\theta) + \frac{1}{2} r^\top M^{-1} r$:
+approximately preserves the Hamiltonian $H(q, p) = -\log \pi(q) + \frac{1}{2} p^\top M^{-1} p$:
 
-1. Half-step momentum: $r \leftarrow r + \frac{\epsilon}{2} \nabla \log p(\theta)$
-2. Full-step position: $\theta \leftarrow \theta + \epsilon\, M^{-1} r$
-3. Half-step momentum: $r \leftarrow r + \frac{\epsilon}{2} \nabla \log p(\theta)$
+1. Half-step momentum: $p \leftarrow p + \frac{\epsilon}{2} \nabla \log \pi(q)$
+2. Full-step position: $q \leftarrow q + \epsilon\, M^{-1} p$
+3. Half-step momentum: $p \leftarrow p + \frac{\epsilon}{2} \nabla \log \pi(q)$
 
 The implementation uses a diagonal mass matrix $M$, stored as the
 vector of inverse diagonal elements (`inv_mass_diag`).
@@ -26,13 +26,13 @@ vector of inverse diagonal elements (`inv_mass_diag`).
 ### Memoizer
 
 The `Memoizer` class in `leapfrog.h` caches a single
-$(\log p, \nabla \log p)$ pair keyed by the parameter vector $\theta$.
+$(\log \pi, \nabla \log \pi)$ pair keyed by the position vector $q$.
 During NUTS tree building, each leapfrog step produces a new unique
-$\theta$, so the cache avoids redundant evaluations at tree-node
-boundaries where the same $\theta$ appears as both the end of one
+$q$, so the cache avoids redundant evaluations at tree-node
+boundaries where the same $q$ appears as both the end of one
 subtree and the start of another.
 
-When RATTLE is active, the SHAKE projection moves $\theta$ to a
+When RATTLE is active, the SHAKE projection moves $q$ to a
 new point on the constraint manifold, making the cached gradient
 stale. The Memoizer is explicitly invalidated after projection,
 forcing a fresh gradient evaluation at the projected position.
@@ -91,11 +91,11 @@ Each subtree returns a `BuildTreeResult` struct containing:
 
 | Field | Purpose |
 |-------|---------|
-| `theta_min`, `r_min` | Leftmost (backward) endpoint |
-| `theta_plus`, `r_plus` | Rightmost (forward) endpoint |
+| `theta_min`, `r_min` | Leftmost (backward) position and momentum |
+| `theta_plus`, `r_plus` | Rightmost (forward) position and momentum |
 | `theta_prime`, `r_prime` | Proposed sample from this subtree |
 | `rho` | Running momentum sum (for U-turn check) |
-| `p_sharp_beg`, `p_sharp_end` | Mass-preconditioned momentum $M^{-1}r$ at subtree endpoints (used in the generalized U-turn criterion) |
+| `p_sharp_beg`, `p_sharp_end` | Mass-preconditioned momentum $M^{-1}p$ at subtree endpoints (used in the generalized U-turn criterion) |
 | `p_beg`, `p_end` | Raw momentum at subtree endpoints (used in cross-subtree U-turn checks at merge time) |
 | `n_prime` | Number of valid states (for multinomial sampling) |
 | `s_prime` | Continuation flag (0 = stop) |
@@ -146,7 +146,7 @@ Each NUTS step records four diagnostics:
   that use the constrained integrator (e.g., edge selection with
   continuous variables). A non-reversible step terminates the NUTS
   tree, similar to a divergence.
-- **Energy** — The Hamiltonian $H = -\log p(\theta) + \frac{1}{2} r^\top M^{-1} r$.
+- **Energy** — The Hamiltonian $H = -\log \pi(q) + \frac{1}{2} p^\top M^{-1} p$.
   Used to compute E-BFMI (energy Bayesian fraction of missing
   information).
 

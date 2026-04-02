@@ -6,7 +6,7 @@ title: "Model Classes"
 This page has not yet passed technical or readability review.
 :::
 
-All graphical models in bgms inherit from a single abstract base class,
+All graphical models in `bgms` inherit from a single abstract base class,
 `BaseModel`, defined in `src/models/base_model.h`. The chain runner
 interacts with models exclusively through this interface, so adding a
 new model type requires implementing the relevant virtual methods
@@ -164,8 +164,8 @@ execution. Each clone gets its own RNG state via `set_seed()`.
 Defined in `src/models/ggm/ggm_model.h` and `ggm_model.cpp`.
 
 **Parameterization.** The GGM is parameterized by the precision matrix
-$\boldsymbol{\Omega}$ (inverse covariance). The model maintains an upper-triangular
-Cholesky factor $\mathbf{R}$ such that $\mathbf{R}^\top\mathbf{R} = \boldsymbol{\Omega}$.
+$\boldsymbol{\Theta}$ (inverse covariance). The model maintains an upper-triangular
+Cholesky factor $\mathbf{R}$ such that $\mathbf{R}^\top\mathbf{R} = \boldsymbol{\Theta}$.
 
 **Sampling.** The GGM supports both NUTS and element-wise
 Metropolis-Hastings. For NUTS, the model uses a free-element
@@ -206,7 +206,7 @@ computed by the [variable helpers](variable-helpers.qmd), which use
 a FAST/SAFE dual-path strategy for numerical stability.
 
 **Residual matrix.** The model maintains a precomputed residual matrix
-$\mathbf{R}_{ni} = 2\sum_{j \neq i} x_{nj} \sigma_{ij}$ that caches
+$\mathbf{R}_{ni} = 2\sum_{j \neq i} x_{nj} \omega_{ij}$ that caches
 the contribution of pairwise interactions to each variable's
 conditional distribution. This matrix is updated incrementally when
 a single interaction changes.

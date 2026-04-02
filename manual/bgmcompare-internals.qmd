@@ -1,13 +1,9 @@
 ---
-title: "Group Comparison Engine"
+title: "bgmCompare Internals"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 How `bgmCompare()` works under the hood: multi-group posterior,
-difference parameterization, and sampler implementation. Source:
+contrast parameterization, and sampler implementation. Source:
 `src/bgmCompare/` directory.
 
 ## Differences from single-group bgm
@@ -17,38 +13,44 @@ The `bgmCompare` engine shares the same OMRF likelihood
 NUTS/Metropolis sampler options (HMC is deprecated), but differs in three key ways:
 
 1. **Parameter decomposition** — Group-specific parameters
-   $\boldsymbol{\theta}^{(g)}$ are decomposed into a shared baseline
-   $\boldsymbol{\varphi}$ and group differences
-   $\boldsymbol{\delta}^{(g)}$, linked through a contrast matrix.
+   $\boldsymbol{\omega}^{(g)}$ are decomposed into a shared baseline
+   $\boldsymbol{\omega}$ and contrast parameters
+   $\boldsymbol{\delta}^{(k)}$, linked through a contrast matrix.
 2. **Separate sampler** — The bgmCompare engine uses its own chain
    runner (`run_gibbs_sampler_bgmCompare()`) rather than the general
    `run_mcmc_chain()`, because the multi-group structure requires
-   group-specific likelihood evaluations and difference selection.
-3. **Difference selection** — In addition to edge selection (which
-   edges exist in the shared graph), bgmCompare performs difference
-   selection (which edges differ between groups).
+   group-specific likelihood evaluations and contrast selection.
+3. **Contrast selection** — Instead of edge selection (which edges
+   exist), bgmCompare performs contrast selection: for each
+   parameter, the baseline component is always present, and the
+   spike-and-slab mechanism decides whether contrast parameters are
+   active or collapsed to zero.
 
 ## Contrast-matrix parameterization
 
-For $G$ groups, the per-group parameter vector $\boldsymbol{\theta}^{(g)}$
+For $G$ groups, the per-group parameter vector $\boldsymbol{\omega}^{(g)}$
 is expressed as:
 
 $$
-\boldsymbol{\theta}^{(g)} = \boldsymbol{\varphi} + \sum_{h=1}^{G-1} P_{gh}\, \boldsymbol{\delta}^{(h)}
+\omega_{ij}^{(g)} = \omega_{ij} + \sum_{k=1}^{G-1} c_{gk}\, \delta_{ij}^{(k)}
 $$
 
-where $\mathbf{P}$ is a $G \times (G-1)$ projection (contrast) matrix.
-Column $h = 0$ (the baseline $\boldsymbol{\varphi}$) captures the
-shared structure; columns $h > 0$ (the differences
-$\boldsymbol{\delta}^{(h)}$) capture how groups deviate from the
-baseline.
+where $\mathbf{C}$ is a $G \times (G-1)$ projection (contrast) matrix.
+The baseline $\omega_{ij}$ captures the shared structure; the
+contrast parameters $\delta_{ij}^{(k)}$ are the projections onto the
+$G-1$ orthogonal contrast directions. For two groups, the single
+contrast reduces to a scaled group difference. Category thresholds
+are decomposed in the same way.
 
-In the flat parameter vector, the baseline and difference parameters
-are interleaved per effect:
+The flat parameter vector (used by NUTS and HMC) groups by component
+type, not per effect:
 
 ```
-[ φ_main | δ^(1)_main | ... | δ^(G-1)_main | φ_pair | δ^(1)_pair | ... ]
+[ overall_mains | overall_pairs | active_main_diffs | active_pair_diffs ]
 ```
+
+Contrast parameters appear only when their inclusion indicator is 1;
+inactive contrasts are excluded from the vector entirely.
 
 ## Multi-group log-posterior and gradient
 
@@ -60,48 +62,52 @@ The log-pseudoposterior sums over groups. For each group $g$:
 3. Evaluate the gradient of the pseudolikelihood with respect to the
    active parameters
 
-The gradient has two components:
+The `gradient()` function combines three components:
 
-- **Observed-data gradient** (`gradient_observed_active()`) — Projects
+- **Observed-data gradient** (`gradient_observed_active()`) — projects
   group-level sufficient statistics into the active-parameter layout
-  using the contrast matrix
-- **Expected-data gradient** (`gradient_expected_active()`) — Computes
-  expected sufficient statistics under the current parameters using
-  category probabilities from the variable helpers
-
-The prior gradient adds Cauchy penalties on both baseline and
-difference pairwise parameters.
+  using the contrast matrix. Precomputed from `counts_per_category`,
+  `blume_capel_stats`, and `pairwise_stats`.
+- **Expected-data gradient** — computed inline within `gradient()`
+  by building group-specific parameters via the contrast projection,
+  evaluating softmax probabilities, and subtracting expected counts.
+- **Prior gradient** — Cauchy penalties on both baseline and
+  contrast pairwise parameters, with scale adjusted by the number
+  of observations.
 
 ## Sampler implementation
 
 `run_gibbs_sampler_bgmCompare()` orchestrates one MCMC chain. Each
 iteration:
 
-1. **NUTS/Metropolis step** — Update all active parameters
-   (baseline + differences) using the joint log-pseudoposterior
-2. **Difference selection** (if active) — For each edge, decide
-   whether the group-difference parameters are included or set to
-   zero. Uses a spike-and-slab mechanism analogous to edge selection
-   in the single-group model.
-3. **Main-effect difference selection** (optional) — Separately select
-   which main-effect parameters differ between groups
-4. **Edge prior update** — Update inclusion probabilities (Bernoulli,
-   Beta-Bernoulli, or SBM)
-5. **Missing data imputation** (if active) — Impute missing
-   observations per group
+1. **Missing data imputation** (if `na_impute = TRUE`) — Impute
+   missing observations per group using the current parameters.
+   Updates the observation matrix, category counts, Blume-Capel
+   statistics, and pairwise statistics.
+2. **Contrast selection** (if active) — A Metropolis step decides
+   whether each contrast parameter is included or collapsed
+   to zero (`update_indicator_differences_metropolis_bgmcompare()`).
+3. **Parameter updates** — With adaptive Metropolis, main effects
+   and pairwise effects are updated separately
+   (`update_main_effects_metropolis_bgmcompare()`, then
+   `update_pairwise_effects_metropolis_bgmcompare()`). With
+   NUTS or HMC, all active parameters are updated jointly via
+   the vectorized log-pseudoposterior.
+4. **Inclusion probability update** (Beta-Bernoulli prior only) —
+   Draw new inclusion probability from the conjugate Beta posterior.
 
 The warmup schedule follows the same five-stage structure as the
 single-group model (see [Warmup Schedule](warmup.qmd)).
 
 ## Active parameter tracking
 
-Because difference selection can turn parameters on and off, the
+Because contrast selection can turn parameters on and off, the
 `total_length()` function recomputes the active parameter dimension
 at each iteration. Index maps (`build_index_maps()`) provide the
 mapping between the flat active-parameter vector and the structured
 (variable, group) parameter layout.
 
-When a difference parameter is "off" (indicator = 0), it is excluded
+When a contrast parameter is "off" (indicator = 0), it is excluded
 from the NUTS block. The step size and mass matrix adapt to the
 current active dimension.
 
@@ -111,19 +117,20 @@ The `bgmCompareOutput` struct stores:
 
 | Field | Content |
 |-------|---------|
-| `samples` | Posterior samples of all parameters (baseline + differences) |
-| `indicator_samples` | Edge inclusion indicators |
-| `difference_indicator_samples` | Difference selection indicators |
-| `warmup_check` | Warmup diagnostics |
-| NUTS fields | Tree depth, divergences, energy (when NUTS is used) |
+| `main_samples` | Main-effect posterior samples (iterations $\times$ thresholds $\times$ groups) |
+| `pairwise_samples` | Pairwise-effect posterior samples (iterations $\times$ pairs $\times$ groups) |
+| `indicator_samples` | Contrast inclusion indicators (iterations $\times$ parameters) |
+| `treedepth_samples` | Tree depth per iteration (NUTS only) |
+| `divergent_samples` | Divergent transition flags (NUTS only) |
+| `energy_samples` | Hamiltonian energy per iteration (NUTS only) |
 
 The R output builder (`build_output_compare()`) splits the posterior
 means into:
 
 - `$group_posterior_means` — Posterior means of the group-level
-  parameters $\boldsymbol{\theta}^{(g)}$, reconstructed from baseline
-  and differences
-- `$difference_posterior_means` — Posterior means of the difference
-  parameters $\boldsymbol{\delta}^{(h)}$
+  parameters $\boldsymbol{\omega}^{(g)}$, reconstructed from the
+  baseline $\omega_{ij}$ and contrast parameters $\delta_{ij}^{(k)}$
+- `$difference_posterior_means` — Posterior means of the contrast
+  parameters $\delta_{ij}^{(k)}$
 - `$difference_inclusion_probabilities` — Proportion of iterations
-  where each difference indicator was included
+  where each contrast indicator was included

@@ -26,7 +26,7 @@ head(data)
 
 ## Fit the model
 
-Pass the data to `bgm()`. Because all variables are ordinal, bgms fits
+Pass the data to `bgm()`. Because all variables are ordinal, `bgms` fits
 an ordinal MRF with spike-and-slab edge selection by default.
 
 ```{r}

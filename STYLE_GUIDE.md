@@ -160,3 +160,83 @@ Citations if applicable.
 3. **No orphan headings** - every heading should have content below it
 4. **Code comments are not headings** - `# comment` inside code blocks is fine
 5. **Cross-reference with IDs** when needed: `## Overview {#overview}`
+
+---
+
+## Mathematical Notation
+
+Conventions established in the guide pages. All manual and reference pages must follow these.
+
+### Pairwise associations and interaction matrices
+
+| Symbol | Meaning | Context |
+|--------|---------|---------|
+| `ω_{ij}` | Partial association (pairwise interaction) | All models — the unified user-facing symbol |
+| `Ω` (bold) | Interaction matrix (matrix of `ω_{ij}`) | All models |
+| `Θ` (bold) | Precision matrix (GGM-specific, `Θ = −2Ω`) | GGM pages only |
+| `θ_{ij}` | Precision element (`θ_{ij} = −2ω_{ij}`) | GGM pages only |
+
+Do **not** use `σ_{ij}` for pairwise interactions — that is the C++ variable name, not the user-facing notation.
+
+### Thresholds and main effects
+
+| Symbol | Meaning |
+|--------|---------|
+| `μ_{ic}` or `μ_i(c)` | Category threshold for variable `i`, category `c` |
+| `α`, `β` (Blume-Capel) | Linear and quadratic effects in `μ(c) = α(c − b) + β(c − b)²` |
+
+### Edge indicators and inclusion probabilities
+
+| Symbol | Meaning |
+|--------|---------|
+| `γ_{ij}` | Edge inclusion indicator (0/1) |
+| `π_{ij}` | Edge inclusion probability |
+
+### Group comparison (bgmCompare)
+
+| Symbol | Meaning |
+|--------|---------|
+| `ω_{ij}^{(g)}` | Group-specific partial association in group `g` |
+| `ω_{ij}` | Overall (baseline) partial association |
+| `δ_{ij}^{(k)}` | Contrast parameter for the `k`-th orthogonal contrast |
+| `c_{gk}` | Projection-matrix coefficient |
+
+The per-group parameter is `ω_{ij}^{(g)} = ω_{ij} + Σ_k c_{gk} δ_{ij}^{(k)}`.
+
+Terminology: call `δ` **contrast parameters**, not "group differences." For two groups the single contrast reduces to a scaled group difference, but for `G > 2` the `G − 1` contrasts are projections onto orthogonal basis directions, not pairwise group differences.
+
+### Hamiltonian samplers (NUTS, HMC)
+
+| Symbol | Meaning |
+|--------|---------||
+| `q` | Position (parameter vector) |
+| `p` | Momentum |
+| `π(q)` | Target density (avoids collision with `p` for momentum) |
+| `H(q, p)` | Hamiltonian: `−log π(q) + ½ pᵀ M⁻¹ p` |
+| `M` | Mass matrix (diagonal) |
+| `ε` | Step size |
+
+### Adaptive Metropolis
+
+Metropolis pages use `θ_k` for a scalar parameter element (no Hamiltonian context). This does not conflict with the GGM precision element because the Metropolis page describes a generic algorithm.
+
+### Proposal standard deviations
+
+| Symbol | Meaning |
+|--------|---------||
+| `σ_k` or `σ_{ij}` | Proposal standard deviation (Metropolis, MoMS edge moves) |
+
+Do **not** use `τ` for proposal SDs.
+
+### Covariance and related
+
+| Symbol | Meaning |
+|--------|---------|
+| `Σ` (bold) | Covariance matrix |
+| `ρ_{ij·rest}` | Partial correlation |
+| `Φ` (bold) | Upper Cholesky factor of `Θ` (GGM internals) |
+
+### Known overloads (acceptable)
+
+- `α`, `β` — Blume-Capel effects in model pages; Beta prior shape parameters in prior/clustering pages. Context disambiguates.
+- `δ` — Contrast parameters in group-comparison pages; cluster assignment probabilities in clustering.qmd. Different page contexts, no within-page collision.

@@ -36,7 +36,7 @@ Comparing this with the general MRF identifies the interaction matrix as $\bolds
 
 ## Partial associations
 
-As described in [Graphical Models](graphical-models.qmd), bgms reports all pairwise effects on a unified partial association scale. For the GGM, the partial association between variables $i$ and $j$ is:
+As described in [Graphical Models](graphical-models.qmd), `bgms` reports all pairwise effects on a unified partial association scale. For the GGM, the partial association between variables $i$ and $j$ is:
 
 $$
 \omega_{ij} = -\tfrac{1}{2}\, \theta_{ij}

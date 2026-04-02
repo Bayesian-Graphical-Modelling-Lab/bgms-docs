@@ -17,7 +17,7 @@ $$
 P(X_{ni} = c \mid \text{rest}) = \frac{\exp\!\bigl(\mu_i(c) + c \cdot r_{ni}\bigr)}{\sum_{k=0}^{K_i} \exp\!\bigl(\mu_i(k) + k \cdot r_{ni}\bigr)}
 $$
 
-where $r_{ni} = 2\sum_{j \neq i} x_{nj}\, \sigma_{ij}$ is the
+where $r_{ni} = 2\sum_{j \neq i} x_{nj}\, \omega_{ij}$ is the
 residual score summarizing the pairwise interactions with all other
 variables.
 
@@ -41,10 +41,10 @@ The model maintains a precomputed $n \times p$ residual matrix where
 entry $(n, i)$ stores:
 
 $$
-r_{ni} = 2\sum_{j \neq i} x_{nj}\, \sigma_{ij}
+r_{ni} = 2\sum_{j \neq i} x_{nj}\, \omega_{ij}
 $$
 
-When a single interaction $\sigma_{ij}$ changes by $\delta$, the
+When a single interaction $\omega_{ij}$ changes by $\delta$, the
 residual matrix is updated incrementally:
 
 - Column $i$: $r_{ni} \leftarrow r_{ni} + 2\delta \cdot x_{nj}$ for all $n$
@@ -74,13 +74,13 @@ conditionals, computed by the
 
 The `logp_and_gradient()` method computes both the
 log-pseudoposterior and its gradient in a single pass. The observed
-contribution to the gradient for a pairwise interaction $\sigma_{ij}$
+contribution to the gradient for a pairwise interaction $\omega_{ij}$
 is $4 \sum_{n} x_{ni} x_{nj}$ (from the sufficient statistic
 $\mathbf{X}^\top\mathbf{X}$). The expected contribution accumulates
 over both variables:
 
 $$
-\frac{\partial \text{PL}}{\partial \sigma_{ij}} = 4\sum_{n=1}^{N} x_{ni}\, x_{nj} - 2\sum_{n=1}^{N} \bigl(E[X_i \mid \text{rest}]\, x_{nj} + E[X_j \mid \text{rest}]\, x_{ni}\bigr)
+\frac{\partial \text{PL}}{\partial \omega_{ij}} = 4\sum_{n=1}^{N} x_{ni}\, x_{nj} - 2\sum_{n=1}^{N} \bigl(E[X_i \mid \text{rest}]\, x_{nj} + E[X_j \mid \text{rest}]\, x_{ni}\bigr)
 $$
 
 The expected values $E[X_i \mid \text{rest}]$ are computed from the
@@ -103,26 +103,26 @@ all $p(p-1)/2$ edges after each gradient-based step. For each edge
 $(i, j)$:
 
 **Add move** ($\gamma_{ij} = 0 \to 1$). Propose a new interaction
-value $\sigma_{ij}^\star \sim \mathcal{N}(\sigma_{ij},\, \tau_{ij}^2)$
+value $\omega_{ij}^\star \sim \mathcal{N}(\omega_{ij},\, \sigma_{ij}^2)$
 and accept with probability
 $$
 \alpha = \min\!\left\{1,\;
-  \frac{p(\boldsymbol{\gamma}^\star, \boldsymbol{\sigma}^\star \mid \mathbf{X})}
-       {p(\boldsymbol{\gamma},\, \boldsymbol{\sigma} \mid \mathbf{X})}
-  \;\frac{1}{q(\sigma_{ij}^\star \mid \sigma_{ij})}
+  \frac{p(\boldsymbol{\gamma}^\star, \boldsymbol{\omega}^\star \mid \mathbf{X})}
+       {p(\boldsymbol{\gamma},\, \boldsymbol{\omega} \mid \mathbf{X})}
+  \;\frac{1}{q(\omega_{ij}^\star \mid \omega_{ij})}
 \right\}
 $$
 where the posterior ratio includes the pseudolikelihood ratio, the
-Cauchy slab prior on $\sigma_{ij}^\star$, and the prior inclusion
+Cauchy slab prior on $\omega_{ij}^\star$, and the prior inclusion
 odds.
 
-**Delete move** ($\gamma_{ij} = 1 \to 0$). Set $\sigma_{ij}^\star = 0$
+**Delete move** ($\gamma_{ij} = 1 \to 0$). Set $\omega_{ij}^\star = 0$
 and accept with probability
 $$
 \alpha = \min\!\left\{1,\;
-  \frac{p(\boldsymbol{\gamma}^\star, \boldsymbol{\sigma}^\star \mid \mathbf{X})}
-       {p(\boldsymbol{\gamma},\, \boldsymbol{\sigma} \mid \mathbf{X})}
-  \;\frac{q(\sigma_{ij} \mid \sigma_{ij}^\star)}{1}
+  \frac{p(\boldsymbol{\gamma}^\star, \boldsymbol{\omega}^\star \mid \mathbf{X})}
+       {p(\boldsymbol{\gamma},\, \boldsymbol{\omega} \mid \mathbf{X})}
+  \;\frac{q(\omega_{ij} \mid \omega_{ij}^\star)}{1}
 \right\}
 $$
 

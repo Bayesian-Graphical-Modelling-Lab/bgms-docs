@@ -3,10 +3,10 @@ title: "Technical Manual"
 toc: false
 ---
 
-Technical documentation for the bgms C++ backend, MCMC algorithms, and R
-scaffolding layer. This manual targets contributors to bgms development,
+Technical documentation for the `bgms` C++ backend, MCMC algorithms, and R
+scaffolding layer. This manual targets contributors to `bgms` development,
 users who need to understand implementation details, and researchers
-extending bgms for new model types.
+extending `bgms` for new model types.
 
 ## Architecture
 

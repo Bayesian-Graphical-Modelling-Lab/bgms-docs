@@ -6,7 +6,7 @@ title: "C++ Architecture"
 This page has not yet passed technical or readability review.
 :::
 
-The bgms C++ backend is organized in five top-level directories under
+The `bgms` C++ backend is organized in five top-level directories under
 `src/`. Each directory has a distinct role, and dependencies flow
 downward: algorithms depend on math utilities but not on models, and
 the execution layer orchestrates everything.
