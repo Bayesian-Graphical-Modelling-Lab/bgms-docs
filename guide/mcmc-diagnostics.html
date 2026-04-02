@@ -658,6 +658,11 @@ Figure&nbsp;1: Trace plot for the first pairwise interaction parameter across tw
 <h3 class="anchored" data-anchor-id="tree-depth">Tree depth</h3>
 <p>NUTS builds trajectories by repeatedly doubling their length until a U-turn criterion is satisfied. If the trajectory frequently reaches the maximum allowed depth (<code>nuts_max_depth</code>), the sampler may benefit from longer trajectories. Hitting the maximum depth occasionally is normal; hitting it on most iterations may indicate challenging posterior geometry. Consider increasing <code>nuts_max_depth</code>.</p>
 </section>
+<section id="non-reversible-steps" class="level3">
+<h3 class="anchored" data-anchor-id="non-reversible-steps">Non-reversible steps</h3>
+<p>For models with continuous variables and edge selection, the leapfrog integrator enforces zero constraints through a projection step (the RATTLE scheme). After each forward step, the integrator checks whether reversing the step returns to the starting point. When the round-trip error exceeds a tolerance scaled by the square of the step size, the step is flagged as non-reversible.</p>
+<p>A small number of non-reversible steps is not a concern. A large number indicates that the step size is too large for the constraint geometry. Because the step size is tuned during warmup, the most effective remedy is to increase <code>warmup</code> so the adapter has more time to find an appropriate step size. If non-reversible steps persist after increasing warmup, switch to <code>update_method = "adaptive-metropolis"</code>.</p>
+</section>
 </section>
 <section id="warmup-equilibration-check" class="level2">
 <h2 class="anchored" data-anchor-id="warmup-equilibration-check">Warmup equilibration check</h2>
@@ -707,7 +712,7 @@ Figure&nbsp;1: Trace plot for the first pairwise interaction parameter across tw
 <h2 class="anchored" data-anchor-id="recommended-workflow">Recommended workflow</h2>
 <ol type="1">
 <li><strong>Inspect <code>summary()</code></strong>: check R-hat (&lt; 1.01) and ESS (≥ 100) for all parameters.</li>
-<li><strong>Check NUTS diagnostics</strong>: <code>fit$nuts_diag$summary</code> for divergences, tree depth saturation, and E-BFMI.</li>
+<li><strong>Check NUTS diagnostics</strong>: <code>fit$nuts_diag$summary</code> for divergences, non-reversible steps, tree depth saturation, and E-BFMI.</li>
 <li><strong>Check warmup</strong>: <code>fit$nuts_diag$warmup_check</code> for signs of incomplete equilibration.</li>
 <li><strong>Plot traces</strong>: visually inspect a few key parameters for mixing and stationarity.</li>
 <li><strong>If problems are found</strong>: increase <code>warmup</code> and/or <code>iter</code>, adjust <code>target_accept</code>, or switch samplers.</li>
