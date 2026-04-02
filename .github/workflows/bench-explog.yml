@@ -1,0 +1,120 @@
+name: Benchmark exp/log
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    steps:
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::jsonlite
+            github::Bayesian-Graphical-Modelling-Lab/bgms
+
+      - name: Run benchmark
+        shell: Rscript {0}
+        run: |
+          library(bgms)
+          library(jsonlite)
+
+          platform = Sys.info()[["sysname"]]
+          mode     = bgms:::get_explog_switch()
+
+          set.seed(42)
+          x  = rnorm(1e6)
+          ax = abs(x)
+          n  = 100L
+
+          base_exp   = system.time(for(i in seq_len(n)) exp(x))[["elapsed"]]
+          custom_exp = system.time(for(i in seq_len(n)) bgms:::rcpp_ieee754_exp(x))[["elapsed"]]
+          base_log   = system.time(for(i in seq_len(n)) log(ax))[["elapsed"]]
+          custom_log = system.time(for(i in seq_len(n)) bgms:::rcpp_ieee754_log(ax))[["elapsed"]]
+
+          result = data.frame(
+            platform   = platform,
+            mode       = mode,
+            base_exp   = base_exp,
+            custom_exp = custom_exp,
+            base_log   = base_log,
+            custom_log = custom_log
+          )
+          cat(toJSON(result, auto_unbox = TRUE), "\n")
+          dir.create("bench-out", showWarnings = FALSE)
+          writeLines(toJSON(result, auto_unbox = TRUE),
+                     file.path("bench-out", paste0(tolower(platform), ".json")))
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bench-${{ matrix.os }}
+          path: bench-out/
+
+  update-page:
+    needs: benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: bench-artifacts
+          merge-multiple: true
+
+      - name: Build table and patch page
+        shell: python3 {0}
+        run: |
+          import json, re, glob, datetime
+
+          data = {}
+          for path in glob.glob("bench-artifacts/*.json"):
+              with open(path) as f:
+                  row = json.load(f)
+              data[row["platform"]] = row
+
+          mac = data["Darwin"]
+          win = data["Windows"]
+          date = datetime.date.today().isoformat()
+
+          table = f"""Elapsed seconds for 100 iterations over 1 000 000 elements
+          (GitHub Actions runners, {date}):
+
+          | | macOS ({mac['mode']}) | Windows ({win['mode']}) |
+          |---|---:|---:|
+          | `exp()` (base R) | {mac['base_exp']}s | {win['base_exp']}s |
+          | `MY_EXP` (custom) | {mac['custom_exp']}s | {win['custom_exp']}s |
+          | `log()` (base R) | {mac['base_log']}s | {win['base_log']}s |
+          | `MY_LOG` (custom) | {mac['custom_log']}s | {win['custom_log']}s |"""
+
+          # Strip leading whitespace from YAML indentation
+          import textwrap
+          table = textwrap.dedent(table)
+
+          qmd = "manual/numerical.qmd"
+          content = open(qmd).read()
+          pattern = r"(<!-- bench:start -->).*?(<!-- bench:end -->)"
+          replacement = f"\\1\n{table}\n\\2"
+          result = re.sub(pattern, replacement, content, flags=re.DOTALL)
+          open(qmd, "w").write(result)
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manual/numerical.qmd
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: update exp/log benchmark results"
+            git push
+          fi
