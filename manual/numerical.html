@@ -619,7 +619,39 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="the-problem">The problem</h2>
 <p>The <code>std::exp()</code> and <code>std::log()</code> that ship with the Windows toolchain R uses (Rtools / UCRT) are much slower than their macOS and Linux counterparts. Because MCMC samplers call <code>exp()</code> and <code>log()</code> millions of times per run, the difference makes <code>bgms</code> prohibitively slow on Windows without intervention.</p>
 <!-- bench:start -->
-<p><em>Run the <code>Benchmark exp/log</code> workflow to populate this table.</em> <!-- bench:end --></p>
+<p>Elapsed seconds for 100 iterations over 1 000 000 elements (GitHub Actions runners, 2026-04-02):</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">macOS (standard)</th>
+<th style="text-align: right;">Windows (custom)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>exp()</code> (base R)</td>
+<td style="text-align: right;">0.999s</td>
+<td style="text-align: right;">4.22s</td>
+</tr>
+<tr class="even">
+<td><code>MY_EXP</code> (custom)</td>
+<td style="text-align: right;">1.065s</td>
+<td style="text-align: right;">1.32s</td>
+</tr>
+<tr class="odd">
+<td><code>log()</code> (base R)</td>
+<td style="text-align: right;">0.695s</td>
+<td style="text-align: right;">5.8s</td>
+</tr>
+<tr class="even">
+<td><code>MY_LOG</code> (custom)</td>
+<td style="text-align: right;">0.849s</td>
+<td style="text-align: right;">1.01s</td>
+</tr>
+</tbody>
+</table>
+<!-- bench:end -->
 <div class="callout callout-style-default callout-tip callout-titled" title="Reproduce locally">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
