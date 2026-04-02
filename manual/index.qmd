@@ -23,6 +23,7 @@ The sampling machinery shared by all models.
 
 - [Sampler Hierarchy](samplers.qmd) — `SamplerBase`, gradient-based samplers, factory dispatch
 - [NUTS Algorithm](nuts.qmd) — Binary tree construction, U-turn criterion, divergence detection
+- [Constrained Leapfrog (RATTLE)](rattle.qmd) — Position/momentum projection, reversibility check, Memoizer
 - [Warmup Schedule](warmup.qmd) — Five-stage adaptation, dual averaging, mass matrix tuning
 - [Parallel Chains](parallel-chains.qmd) — TBB threading, model cloning, per-chain RNG
 
@@ -33,7 +34,7 @@ Model-specific sampling and likelihood computation.
 - [GGM Internals](ggm-internals.qmd) — Precision matrix Metropolis, Cholesky rank-1 updates
 - [OMRF Internals](omrf-internals.qmd) — Ordinal thresholds, Blume-Capel, pseudolikelihood
 - [Variable Helpers](variable-helpers.qmd) — Numerically stable probability computation (FAST/SAFE)
-- [Mixed MRF Internals](mixed-internals.qmd) — Hybrid NUTS+Metropolis, block parameter layout
+- [Mixed MRF Internals](mixed-internals.qmd) — NUTS + precision Metropolis, block parameter layout, RATTLE
 
 ## Priors & Edge Selection
 
