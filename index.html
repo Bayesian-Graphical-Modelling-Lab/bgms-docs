@@ -365,22 +365,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1 class="mt-1">bgms</h1>
 <h3 id="bayesian-graphical-models-in-r">Bayesian Graphical Models in R</h3>
 <ul>
-<li>Estimate networks of mixed <strong>binary</strong>, <strong>ordinal</strong>, and <strong>continuous</strong> variables</li>
-<li>Use <strong>Bayesian variable selection</strong> to:
-<ul>
-<li>Quantify evidence for <strong>including or excluding edges</strong></li>
-<li>Detect <strong>group differences</strong> in network parameters</li>
-</ul></li>
-<li>Discover <strong>communities of related edges</strong> with Bayesian edge clustering</li>
-<li>Fast posterior inference with:
-<ul>
-<li><strong>No-U-Turn sampler</strong></li>
-<li><strong>Parallel multi-chain sampling</strong><br>
-</li>
-<li><strong>C++ backend</strong></li>
-</ul></li>
+<li>Bayesian estimation for <strong>ordinal Markov random fields</strong> and <strong>Gaussian graphical models</strong></li>
+<li><strong>Edge selection</strong> via posterior inclusion probabilities and Bayes factors</li>
+<li><strong>Group comparison</strong> to identify network differences between populations</li>
+<li>Built on efficient <strong>C++ MCMC algorithms</strong> with the No-U-Turn Sampler</li>
 </ul>
-<h3 id="explore-structure-in-your-network-with-principled-bayesian-inference.">Explore structure in your network with principled Bayesian inference.</h3>
+<h3 id="understand-structure-in-your-data-with-principled-bayesian-inference.">Understand structure in your data with principled Bayesian inference.</h3>
 <div class="grid gap-3 pb-3 pt-4">
 <div class="g-col-12 g-col-sm-4">
 <p><a href="./guide/getting-started.html" class="btn-action-primary btn-action btn btn-lg w-100" role="button">Get Started</a></p>
@@ -401,7 +391,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install from CRAN</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"bgms"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit an ordinal Markov random field to the Wenchuan earthquake data</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit an ordinal MRF to the Wenchuan earthquake data</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bgms)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Wenchuan)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">bgm</span>(Wenchuan)</span>
@@ -412,12 +402,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="features">
 <section id="users-guide" class="feature">
 <h3>User’s Guide</h3>
-<p>Learn bgms from the ground up: installation, basic usage, and statistical concepts behind Bayesian graphical models for mixed variable types.</p>
+<p>Learn bgms from the ground up: installation, basic usage, and statistical concepts behind ordinal MRFs and Gaussian graphical models.</p>
 <p><a href="./guide/index.html">Guide →</a></p>
 </section>
 <section id="reference" class="feature">
 <h3>Reference</h3>
-<p>Complete documentation for all R functions: <a href="./reference/bgm.html"><code>bgm()</code></a>, <a href="./reference/bgmCompare.html"><code>bgmCompare()</code></a>, S3 methods, and extractor functions.</p>
+<p>Complete documentation for all R functions: <code>bgm()</code>, <code>bgmCompare()</code>, S3 methods, and extractor functions.</p>
 <p><a href="./reference/index.html">Reference →</a></p>
 </section>
 <section id="manual" class="feature">
@@ -430,56 +420,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="get-started alt-background">
 <section id="citation" class="content-block">
 <h3>Citation</h3>
-<p>If you use bgms in your research, please cite the software package.</p>
-<p>Choose a citation format (version is set to the documented release):</p>
-<div class="citation-picker" data-cite-picker="bgms">
-<div class="citation-picker-tabs" role="tablist" aria-label="Citation format">
-<button class="citation-tab is-active" type="button" data-citation-tab="apa" role="tab" aria-selected="true">
-APA
-</button>
-<button class="citation-tab" type="button" data-citation-tab="chicago" role="tab" aria-selected="false">
-Chicago
-</button>
-<button class="citation-tab" type="button" data-citation-tab="bibtex" role="tab" aria-selected="false">
-BibTeX
-</button>
-<button class="citation-tab" type="button" data-citation-tab="ris" role="tab" aria-selected="false">
-RIS
-</button>
-</div>
-<div class="citation-panel is-active" data-citation-panel="apa" role="tabpanel">
-<p>Marsman, M., &amp; van den Bergh, D. (2026). bgms: Bayesian analysis of graphical models (R package, version 0.2.0.0). https://CRAN.R-project.org/package=bgms</p>
-</div>
-<div class="citation-panel" data-citation-panel="chicago" role="tabpanel" hidden="hidden">
-<p>Marsman, Maarten, and Don van den Bergh. 2026. bgms: Bayesian Analysis of Graphical Models. R package, version 0.2.0.0. https://CRAN.R-project.org/package=bgms.</p>
-</div>
-<div class="citation-panel" data-citation-panel="bibtex" role="tabpanel" hidden="hidden">
-<pre><code class="language-bibtex">
-@Manual{bgms-package,
-  title   = {bgms: Bayesian Analysis of Graphical Models},
-  author  = {Marsman, Maarten and van den Bergh, Don},
-  year    = {2026},
-  note    = {R package version 0.2.0.0},
-  url     = {https://CRAN.R-project.org/package=bgms}
-}
-</code></pre>
-</div>
-<div class="citation-panel" data-citation-panel="ris" role="tabpanel" hidden="hidden">
-<pre><code class="language-text">
-TY  - COMP
-TI  - bgms: Bayesian Analysis of Graphical Models
-AU  - Marsman, Maarten
-AU  - van den Bergh, Don
-PY  - 2026
-N1  - R package version 0.2.0.0
-UR  - https://CRAN.R-project.org/package=bgms
-ER  -
-</code></pre>
-</div>
-</div>
-<p>To generate citations directly from your installed package in R:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">"bgms"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">toBibtex</span>(<span class="fu">citation</span>(<span class="st">"bgms"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If you use bgms in your research, please cite:</p>
+<blockquote class="blockquote">
+<p>Marsman, M., van den Bergh, D., &amp; Haslbeck, J. M. B. (2025). Bayesian analysis of the ordinal Markov random field. <em>Psychometrika</em>, 90(1), 146–182. https://doi.org/10.1017/psy.2024.4</p>
+</blockquote>
 </section>
 </div>
 
@@ -502,34 +446,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>

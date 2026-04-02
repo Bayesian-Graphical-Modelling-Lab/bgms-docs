@@ -497,7 +497,7 @@ Warning
 <p>Bayesian estimation and variable selection for group differences in Markov Random Fields.</p>
 <section id="description" class="level2">
 <h2 class="anchored" data-anchor-id="description">Description</h2>
-<p>The <code>bgmCompare</code> function estimates group differences in category threshold parameters (main effects) and partial associations (pairwise effects) of a Markov Random Field (MRF) for binary and ordinal variables. Groups can be defined either by supplying two separate datasets (<code>x</code> and <code>y</code>) or by a group membership vector. Optionally, Bayesian variable selection identifies differences across groups.</p>
+<p>The <code>bgmCompare</code> function estimates group differences in category threshold parameters (main effects) and pairwise interactions (pairwise effects) of a Markov Random Field (MRF) for binary and ordinal variables. Groups can be defined either by supplying two separate datasets (<code>x</code> and <code>y</code>) or by a group membership vector. Optionally, Bayesian variable selection identifies differences across groups.</p>
 </section>
 <section id="usage" class="level2">
 <h2 class="anchored" data-anchor-id="usage">Usage</h2>
@@ -514,7 +514,7 @@ Warning
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference_probability =</span> <span class="fl">0.5</span>,</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha =</span> <span class="dv">1</span>,</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_beta =</span> <span class="dv">1</span>,</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">pairwise_scale =</span> <span class="dv">1</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">pairwise_scale =</span> <span class="fl">2.5</span>,</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">main_alpha =</span> <span class="fl">0.5</span>,</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">main_beta =</span> <span class="fl">0.5</span>,</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">1000</span>,</span>
@@ -633,7 +633,7 @@ Warning
 <tbody>
 <tr class="odd">
 <td><code>pairwise_scale</code></td>
-<td>Scale of the Cauchy prior for baseline partial associations. Default: <code>1</code>.</td>
+<td>Scale of the Cauchy prior for baseline pairwise interactions. Default: <code>2.5</code>.</td>
 </tr>
 <tr class="even">
 <td><code>main_alpha</code>, <code>main_beta</code></td>
@@ -641,7 +641,7 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>standardize</code></td>
-<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each partial association (both baseline and difference) is adjusted based on the range of response scores. Default: <code>FALSE</code>.</td>
+<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each pairwise interaction (both baseline and difference) is adjusted based on the range of response scores. Default: <code>FALSE</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -670,15 +670,15 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>update_method</code></td>
-<td>Sampling algorithm: <code>"nuts"</code> or <code>"adaptive-metropolis"</code>. <code>"hamiltonian-mc"</code> is accepted but <strong>deprecated</strong>; use <code>"nuts"</code> instead. Default: <code>"nuts"</code>.</td>
+<td>Sampling algorithm: <code>"nuts"</code>, <code>"adaptive-metropolis"</code>, or <code>"hamiltonian-mc"</code>. Default: <code>"nuts"</code>.</td>
 </tr>
 <tr class="even">
 <td><code>target_accept</code></td>
-<td>Target acceptance rate. Defaults: <code>0.44</code> (Metropolis), <code>0.80</code> (NUTS).</td>
+<td>Target acceptance rate. Defaults: <code>0.44</code> (Metropolis), <code>0.65</code> (HMC), <code>0.80</code> (NUTS).</td>
 </tr>
 <tr class="odd">
 <td><code>hmc_num_leapfrogs</code></td>
-<td><strong>Deprecated.</strong> Leapfrog steps for HMC. Only relevant when <code>update_method = "hamiltonian-mc"</code>, which is deprecated. Default: <code>100</code>.</td>
+<td>Leapfrog steps for HMC. Default: <code>100</code>.</td>
 </tr>
 <tr class="even">
 <td><code>nuts_max_depth</code></td>
@@ -686,7 +686,7 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>learn_mass_matrix</code></td>
-<td>Logical. If <code>TRUE</code>, adapts a diagonal mass matrix during warmup (NUTS only). Default: <code>TRUE</code>.</td>
+<td>Logical. If <code>TRUE</code>, adapts a diagonal mass matrix during warmup (HMC/NUTS only). Default: <code>TRUE</code>.</td>
 </tr>
 <tr class="even">
 <td><code>chains</code></td>
@@ -716,8 +716,8 @@ Warning
 <h2 class="anchored" data-anchor-id="value">Value</h2>
 <p>A list of class <code>"bgmCompare"</code> containing posterior summaries, posterior mean matrices, and raw MCMC samples:</p>
 <ul>
-<li><code>posterior_summary_main_baseline</code>, <code>posterior_summary_pairwise_baseline</code> — Summaries of baseline thresholds and partial associations.</li>
-<li><code>posterior_summary_main_differences</code>, <code>posterior_summary_pairwise_differences</code> — Summaries of group differences in thresholds and partial associations.</li>
+<li><code>posterior_summary_main_baseline</code>, <code>posterior_summary_pairwise_baseline</code> — Summaries of baseline thresholds and pairwise interactions.</li>
+<li><code>posterior_summary_main_differences</code>, <code>posterior_summary_pairwise_differences</code> — Summaries of group differences in thresholds and pairwise interactions.</li>
 <li><code>posterior_summary_indicator</code> — Summaries of inclusion indicators (if <code>difference_selection = TRUE</code>).</li>
 <li><code>posterior_mean_main_baseline</code>, <code>posterior_mean_pairwise_baseline</code> — Posterior mean matrices (legacy style).</li>
 <li><code>raw_samples</code> — List of raw draws per chain for main, pairwise, and indicator parameters.</li>
@@ -727,11 +727,11 @@ Warning
 </section>
 <section id="details" class="level2">
 <h2 class="anchored" data-anchor-id="details">Details</h2>
-<section id="partial-associations" class="level3">
-<h3 class="anchored" data-anchor-id="partial-associations">Partial associations</h3>
-<p>For variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, the group-specific partial association is represented as:</p>
-<p><span class="math display">\[\theta_{ij}^{(g)} = \omega_{ij} + \delta_{ij}^{(g)}\]</span></p>
-<p>where <span class="math inline">\(\omega_{ij}\)</span> is the baseline effect and <span class="math inline">\(\delta_{ij}^{(g)}\)</span> are group differences constrained to sum to zero.</p>
+<section id="pairwise-interactions" class="level3">
+<h3 class="anchored" data-anchor-id="pairwise-interactions">Pairwise interactions</h3>
+<p>For variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, the group-specific interaction is represented as:</p>
+<p><span class="math display">\[\theta_{ij}^{(g)} = \phi_{ij} + \delta_{ij}^{(g)}\]</span></p>
+<p>where <span class="math inline">\(\phi_{ij}\)</span> is the baseline effect and <span class="math inline">\(\delta_{ij}^{(g)}\)</span> are group differences constrained to sum to zero.</p>
 </section>
 <section id="ordinal-variables" class="level3">
 <h3 class="anchored" data-anchor-id="ordinal-variables">Ordinal variables</h3>
@@ -748,20 +748,7 @@ Warning
 </section>
 <section id="sampling-algorithms-and-warmup" class="level3">
 <h3 class="anchored" data-anchor-id="sampling-algorithms-and-warmup">Sampling algorithms and warmup</h3>
-<p>Parameters are updated within a Gibbs framework, using the same sampling algorithms and staged warmup scheme described in <a href="../reference/bgm.html">bgm()</a>: adaptive Metropolis–Hastings or the No-U-Turn Sampler (NUTS). When <code>difference_selection = TRUE</code>, indicator updates are delayed until late warmup.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><code>update_method = "hamiltonian-mc"</code> (fixed-length HMC) is deprecated. Use <code>"nuts"</code> instead.</p>
-</div>
-</div>
+<p>Parameters are updated within a Gibbs framework, using the same sampling algorithms and staged warmup scheme described in <a href="../reference/bgm.html">bgm()</a>: adaptive Metropolis–Hastings, Hamiltonian Monte Carlo, or the No-U-Turn Sampler. When <code>difference_selection = TRUE</code>, indicator updates are delayed until late warmup.</p>
 </section>
 </section>
 <section id="examples" class="level2">
@@ -811,34 +798,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>

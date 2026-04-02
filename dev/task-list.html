@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Adaptive Metropolis – bgms</title>
+<title>task-list – bgms</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -33,8 +33,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../manual/rattle.html" rel="next">
-<link href="../manual/hmc.html" rel="prev">
 <link href="../bgms_sticker.svg" rel="icon" type="image/svg+xml">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -78,40 +76,11 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -317,7 +286,7 @@ window.Quarto = {
 <span class="menu-text">Reference</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../manual/index.html" aria-current="page"> 
+    <a class="nav-link" href="../manual/index.html"> 
 <span class="menu-text">Manual</span></a>
   </li>  
   <li class="nav-item">
@@ -342,324 +311,587 @@ window.Quarto = {
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/samplers.html">MCMC Engine</a></li><li class="breadcrumb-item"><a href="../manual/metropolis.html">Adaptive Metropolis</a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-        </a>
-    </div>
-  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Technical Manual</span></a>
-  </div>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Architecture</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">C++ Architecture</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/r-scaffolding.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">R Scaffolding</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/model-classes.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Classes</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">MCMC Engine</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/samplers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Sampler Hierarchy</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/nuts.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">NUTS Algorithm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">HMC Algorithm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Adaptive Metropolis</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Warmup Schedule</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/parallel-chains.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Parallel Chains</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Models</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/ggm-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">GGM Internals</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">OMRF Internals</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/mixed-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Mixed MRF Internals</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Priors &amp; Edge Selection</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/edge-priors.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Edge Priors</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/sbm-prior.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Stochastic Block Model Prior</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Group Comparison</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Group Comparison Engine</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Numerical Methods</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/numerical.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Numerical Considerations</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Pseudolikelihood</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Variable Helpers</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/samplers.html">MCMC Engine</a></li><li class="breadcrumb-item"><a href="../manual/metropolis.html">Adaptive Metropolis</a></li></ol></nav>
-<div class="quarto-title">
-<h1 class="title">Adaptive Metropolis</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
 
 
-</header>
-
-
-<p>The adaptive Metropolis sampler (<code>update_method = "adaptive-metropolis"</code>) updates parameters one at a time using scalar random-walk Metropolis–Hastings steps. Proposal standard deviations are tuned during warmup via Robbins–Monro adaptation.</p>
-<p>The algorithm function is in <code>src/mcmc/algorithms/metropolis.h</code> and <code>metropolis.cpp</code>. The sampler wrapper is <code>MetropolisSampler</code> in <code>src/mcmc/samplers/metropolis_sampler.h</code>, and the adaptation controller is <code>MetropolisAdaptationController</code> in <code>src/mcmc/samplers/metropolis_adaptation.h</code>.</p>
-<section id="algorithm" class="level2">
-<h2 class="anchored" data-anchor-id="algorithm">Algorithm</h2>
-<p>Each scalar Metropolis step for parameter <span class="math inline">\(\theta_k\)</span>:</p>
-<ol type="1">
-<li><strong>Propose</strong> — Draw <span class="math inline">\(\theta_k^* \sim \mathcal{N}(\theta_k,\, \sigma_k^2)\)</span>, where <span class="math inline">\(\sigma_k\)</span> is the current proposal standard deviation for element <span class="math inline">\(k\)</span>.</li>
-<li><strong>Accept/reject</strong> — Compute the acceptance probability <span class="math display">\[
-\alpha = \min\!\bigl(1,\; \exp\bigl(\log p(\theta_k^*) - \log p(\theta_k)\bigr)\bigr).
-\]</span> The proposal distribution is symmetric, so no Hastings ratio correction is needed.</li>
-<li><strong>Update</strong> — Set <span class="math inline">\(\theta_k \leftarrow \theta_k^*\)</span> with probability <span class="math inline">\(\alpha\)</span>; otherwise keep <span class="math inline">\(\theta_k\)</span>.</li>
-</ol>
-<p>The <code>metropolis_step()</code> function in <code>metropolis.cpp</code> implements this for a single scalar parameter and returns a <code>StepResult</code> containing the accepted state and <span class="math inline">\(\alpha\)</span>.</p>
-</section>
-<section id="model-driven-sweeps" class="level2">
-<h2 class="anchored" data-anchor-id="model-driven-sweeps">Model-driven sweeps</h2>
-<p>Unlike NUTS and HMC, where the sampler drives integration over the full parameter vector, <code>MetropolisSampler</code> delegates the sweep structure to the model. The sampler calls <code>model.do_one_metropolis_step(iteration)</code>, and each model class defines how to iterate over its parameters:</p>
+<section id="bgms-docs-task-list-single-source-of-truth" class="level1">
+<h1>bgms-docs Task List (Single Source of Truth)</h1>
+<p>This file is the official status board for docs work. If another note conflicts with this file, this file wins.</p>
+<section id="how-to-use-this-board" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-use-this-board">How To Use This Board</h2>
 <ul>
-<li><strong>GGMModel</strong> — Sweeps over free elements of the precision matrix (or Cholesky factor), updating each element with a scalar Metropolis step against its full conditional log-posterior.</li>
-<li><strong>OMRFModel</strong> — Sweeps over thresholds and pairwise interaction parameters, with each step targeting the pseudolikelihood-based conditional.</li>
-<li><strong>MixedMRFModel</strong> — Sweeps over discrete thresholds, discrete interactions, continuous interactions, and cross-type interactions in separate blocks, each with its own proposal SD matrix.</li>
+<li>Keep updates short and concrete.</li>
+<li>Update this file when page status changes.</li>
+<li>Use one status value only: <code>Scaffolded</code>, <code>Populated</code>, <code>Contradiction-checked</code>, <code>Reviewed</code>, <code>Approved</code>, <code>Blocked</code>.</li>
+<li>Technical sign-off owner: Maarten.</li>
+<li>Readability sign-off owner: Emily.</li>
 </ul>
-<p>This design allows each model to exploit problem-specific structure (e.g., conditional independence, sufficient statistics) that a generic vector-level sampler cannot access.</p>
 </section>
-<section id="robbinsmonro-adaptation" class="level2">
-<h2 class="anchored" data-anchor-id="robbinsmonro-adaptation">Robbins–Monro adaptation</h2>
-<p>During warmup, the proposal standard deviations <span class="math inline">\(\sigma_k\)</span> are adapted to target an acceptance rate of 0.44. The <code>MetropolisAdaptationController</code> applies the update rule:</p>
-<p><span class="math display">\[
-\sigma_k^{(t+1)} = \sigma_k^{(t)} + \bigl(\alpha_k^{(t)} - 0.44\bigr)\,w_t,
-\]</span></p>
-<p>where <span class="math inline">\(w_t = t^{-0.75}\)</span> is the Robbins–Monro weight with decay exponent 0.75. The updated value is clamped to <span class="math inline">\([0.001,\; 2.0]\)</span>. NaN values (from degenerate proposals) are reset to 1.0.</p>
-<section id="element-wise-adaptation" class="level3">
-<h3 class="anchored" data-anchor-id="element-wise-adaptation">Element-wise adaptation</h3>
-<p>The controller operates on a matrix of proposal standard deviations (matching the parameter layout of the model) with an index mask that selects which elements to adapt. At each iteration, the controller receives the matrix of acceptance probabilities from the most recent sweep and updates only the masked elements.</p>
+<section id="current-cycle-focus" class="level2">
+<h2 class="anchored" data-anchor-id="current-cycle-focus">Current Cycle Focus</h2>
+<ul>
+<li>Build trusted docs with automation-first QA.</li>
+<li>Run runnable R code checks on all pages with runnable code.</li>
+<li>Keep accountability links for high-risk claims.</li>
+</ul>
 </section>
-<section id="warmup-boundary" class="level3">
-<h3 class="anchored" data-anchor-id="warmup-boundary">Warmup boundary</h3>
-<p>Adaptation runs only while <code>iteration &lt; total_warmup</code>. After warmup ends, proposal standard deviations are frozen at their final values.</p>
+<section id="review-sequence-main-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="review-sequence-main-workflow">Review Sequence (Main Workflow)</h2>
+<p>This is the main A -&gt; B workflow for Maarten and Emily. Anything below in “Secondary Backlog” is not part of this immediate review sequence.</p>
+<section id="a.-draft-and-source-linking" class="level3">
+<h3 class="anchored" data-anchor-id="a.-draft-and-source-linking">A. Draft and source-linking</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Draft or update page content.</label></li>
+<li><label><input type="checkbox">Add provenance/accountability links for high-risk claims (hard gate).</label></li>
+<li><label><input type="checkbox">Ensure no unresolved factual placeholders remain except explicit blockers.</label></li>
+</ul>
+</section>
+<section id="b.-automated-qa-gate" class="level3">
+<h3 class="anchored" data-anchor-id="b.-automated-qa-gate">B. Automated QA gate</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Full render passes.</label></li>
+<li><label><input type="checkbox">Link checks pass.</label></li>
+<li><label><input type="checkbox">Search index sanity check passes.</label></li>
+<li><label><input type="checkbox">No unresolved <code>TODO:</code> markers.</label></li>
+<li><label><input type="checkbox">No malformed <code>SOURCE:</code> markers (if inline provenance is used).</label></li>
+<li><label><input type="checkbox">Runnable code executes on all pages that contain runnable code.</label></li>
+</ul>
+</section>
+<section id="c.-human-review-gate" class="level3">
+<h3 class="anchored" data-anchor-id="c.-human-review-gate">C. Human review gate</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Maarten completes technical sign-off.</label></li>
+<li><label><input type="checkbox">Emily completes readability sign-off.</label></li>
+<li><label><input type="checkbox">Any blocking issue is logged in the page board and resolved.</label></li>
+</ul>
+</section>
+<section id="d.-final-release-gate" class="level3">
+<h3 class="anchored" data-anchor-id="d.-final-release-gate">D. Final release gate</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Short human smoke check (desktop/mobile visual sanity and navigation behavior).</label></li>
+<li><label><input type="checkbox">Zero unresolved factual issues.</label></li>
+<li><label><input type="checkbox">Page status moved to <code>Approved</code>.</label></li>
+<li><label><input type="checkbox">Automation QA requirements from step B are still green at merge time.</label></li>
+</ul>
 </section>
 </section>
-<section id="sampler-dispatch" class="level2">
-<h2 class="anchored" data-anchor-id="sampler-dispatch">Sampler dispatch</h2>
-<p>The chain runner factory in <code>chain_runner.cpp</code> maps two string identifiers to <code>MetropolisSampler</code>: <code>"mh"</code> and <code>"adaptive-metropolis"</code>. The R interface uses <code>"adaptive-metropolis"</code> as the <code>update_method</code> value.</p>
-</section>
-<section id="initialization" class="level2">
-<h2 class="anchored" data-anchor-id="initialization">Initialization</h2>
-<p><code>MetropolisSampler</code> uses lazy initialization. On the first call to <code>step()</code> (or via an explicit <code>initialize()</code> call from the chain runner), it invokes <code>model.init_metropolis_adaptation(schedule)</code>, which creates <code>MetropolisAdaptationController</code> instances for each parameter block in the model.</p>
-</section>
-<section id="source-files" class="level2">
-<h2 class="anchored" data-anchor-id="source-files">Source files</h2>
+<section id="page-status-board" class="level2">
+<h2 class="anchored" data-anchor-id="page-status-board">Page Status Board</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 37%">
-<col style="width: 62%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>File</th>
-<th>Contents</th>
+<th>Page</th>
+<th>Risk</th>
+<th>Status</th>
+<th>Technical sign-off (Maarten)</th>
+<th>Readability sign-off (Emily)</th>
+<th>Blocking issue</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>src/mcmc/algorithms/metropolis.h</code></td>
-<td><code>metropolis_step()</code> declaration</td>
+<td><strong>Guide</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr class="even">
-<td><code>src/mcmc/algorithms/metropolis.cpp</code></td>
-<td><code>metropolis_step()</code> implementation</td>
+<td>guide/index.qmd</td>
+<td>Low</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
 </tr>
 <tr class="odd">
-<td><code>src/mcmc/samplers/metropolis_sampler.h</code></td>
-<td><code>MetropolisSampler</code> class (header-only)</td>
+<td>guide/getting-started.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
 </tr>
 <tr class="even">
-<td><code>src/mcmc/samplers/metropolis_adaptation.h</code></td>
-<td><code>MetropolisAdaptationController</code> class (header-only)</td>
+<td>guide/graphical-models.qmd</td>
+<td>Low</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
 </tr>
 <tr class="odd">
-<td><code>src/mcmc/execution/step_result.h</code></td>
-<td><code>update_proposal_sd_with_robbins_monro()</code> utility</td>
+<td>guide/bayesian-approach.qmd</td>
+<td>Low</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>guide/prior-basics.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>Renamed from prior-guide.qmd</td>
+</tr>
+<tr class="odd">
+<td>guide/ggm.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>guide/omrf.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>guide/mixed-model.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>guide/edge-selection.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>guide/group-comparison.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>guide/clustering.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>guide/mcmc-output.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>guide/mcmc-diagnostics.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td><strong>Reference</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>reference/index.qmd</td>
+<td>Low</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>reference/bgm.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>reference/bgmCompare.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>reference/methods.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>reference/extractors.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>reference/datasets.qmd</td>
+<td>Low</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td><strong>Manual</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>manual/index.qmd</td>
+<td>Low</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/architecture.qmd</td>
+<td>Medium</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>manual/r-scaffolding.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/model-classes.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>manual/samplers.qmd</td>
+<td>High</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/nuts.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>manual/warmup.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/parallel-chains.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>manual/ggm-internals.qmd</td>
+<td>High</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/omrf-internals.qmd</td>
+<td>High</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>manual/variable-helpers.qmd</td>
+<td>High</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/mixed-internals.qmd</td>
+<td>High</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>manual/edge-priors.qmd</td>
+<td>High</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/sbm-prior.qmd</td>
+<td>High</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>manual/bgmcompare-internals.qmd</td>
+<td>High</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>manual/numerical.qmd</td>
+<td>High</td>
+<td>Scaffolded</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td><strong>Examples</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>examples/index.qmd</td>
+<td>Low</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>examples/binary-network.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>examples/ordinal-network.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>examples/continuous-network.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>examples/mixed-network.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>examples/group-comparison.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>examples/clustering.qmd</td>
+<td>Medium</td>
+<td>Not started</td>
+<td>No</td>
+<td>No</td>
+<td>-</td>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="secondary-backlog-not-part-of-a---b-review-sequence" class="level2">
+<h2 class="anchored" data-anchor-id="secondary-backlog-not-part-of-a---b-review-sequence">Secondary Backlog (Not Part of A -&gt; B Review Sequence)</h2>
+<p>These tasks are important but are not part of the core review flow above.</p>
+<section id="p1---documentation-delivery-workflow" class="level3">
+<h3 class="anchored" data-anchor-id="p1---documentation-delivery-workflow">P1 - Documentation delivery workflow</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Finalize and follow the process in <code>dev/set-up.md</code>.</label></li>
+<li><label><input type="checkbox">Keep this file updated at every status change.</label></li>
+<li><label><input type="checkbox">Define accountability link examples for high-risk claims.</label></li>
+<li><label><input type="checkbox">Add a small script/CI job for the required automation QA checklist.</label></li>
+</ul>
+</section>
+<section id="p2---infrastructure" class="level3">
+<h3 class="anchored" data-anchor-id="p2---infrastructure">P2 - Infrastructure</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Host the documentation from bgms-docs while keeping the public URL at https://bayesian-graphical-modelling-lab.github.io/bgms/.</label></li>
+<li><label><input type="checkbox">Add GitHub Actions workflow in bgms-docs to render Quarto and deploy to the publishing target used by the bgms website.</label></li>
+<li><label><input type="checkbox">Configure deployment credentials (fine-grained PAT or GitHub App) with least-privilege access.</label></li>
+<li><label><input type="checkbox">Document deployment and rollback steps for maintainers.</label></li>
+</ul>
+</section>
+<section id="p2---documentation-maintenance" class="level3">
+<h3 class="anchored" data-anchor-id="p2---documentation-maintenance">P2 - Documentation maintenance</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Define a process to monitor upstream bgms repository changes for documentation impact.</label></li>
+<li><label><input type="checkbox">Add criteria for when code/API changes require documentation updates.</label></li>
+<li><label><input type="checkbox">Add attribution/licensing note after confirming terms for reused Quarto website structure/content.</label></li>
+<li><label><input type="checkbox">Investigate similar projects for attribution, content licensing, and trademark notices.</label></li>
+<li><label><input type="checkbox">Optional future check: if Positron website assets/templates are introduced later, reassess attribution and license compatibility.</label></li>
+<li><label><input type="checkbox">Deferred: draft <code>docs/attribution.md</code> template and <code>README.md</code> provenance boilerplate after licensing position is confirmed.</label></li>
+</ul>
+</section>
+<section id="p3---upstream-change-automation-bgms---bgms-docs" class="level3">
+<h3 class="anchored" data-anchor-id="p3---upstream-change-automation-bgms---bgms-docs">P3 - Upstream change automation (bgms -&gt; bgms-docs)</h3>
+<p>Event-driven alerts:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">In bgms repo: add workflow that detects docs-impacting file changes and sends <code>repository_dispatch</code> to bgms-docs.</label></li>
+<li><label><input type="checkbox">In bgms repo: define docs-impacting path filters (<code>R/**</code>, <code>src/**</code>, <code>man/**</code>, <code>NAMESPACE</code>, <code>DESCRIPTION</code>, <code>NEWS*</code>, selected <code>vignettes/**</code>).</label></li>
+<li><label><input type="checkbox">In bgms-docs repo: add workflow triggered by <code>repository_dispatch</code> to create or update a docs-sync issue immediately.</label></li>
+<li><label><input type="checkbox">In bgms-docs repo: issue body should include commit SHA, PR number/title, changed files summary, compare URL, and trigger timestamp.</label></li>
+</ul>
+<p>Scheduled checks:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Add weekly scheduled workflow in bgms-docs to compare latest processed bgms SHA with upstream default branch SHA.</label></li>
+<li><label><input type="checkbox">Add monthly scheduled workflow option (configurable) for lower-noise periods.</label></li>
+<li><label><input type="checkbox">Ensure scheduled run opens/updates issue only when there is meaningful delta.</label></li>
+</ul>
+<p>Triage workflow:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Auto-apply labels on created/updated issue: <code>docs-sync</code>, <code>needs-triage</code>.</label></li>
+<li><label><input type="checkbox">Add triage decision checklist to issue template: <code>no-doc-change</code>, <code>minor-doc-update</code>, <code>major-doc-update</code>.</label></li>
+<li><label><input type="checkbox">Auto-convert triage decision to follow-up issue labels (<code>minor</code>, <code>major</code>, <code>blocked</code>) when triage is completed.</label></li>
+<li><label><input type="checkbox">Keep one rolling tracking issue per release cycle to avoid issue spam.</label></li>
+</ul>
+<p>Reliability and security:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Configure cross-repo auth using least-privilege token (<code>BGMS_DOCS_DISPATCH_TOKEN</code>) stored as repository secret.</label></li>
+<li><label><input type="checkbox">Add idempotency guard so the same commit/PR event is not appended twice.</label></li>
+<li><label><input type="checkbox">Add failure notification path (workflow summary + optional issue comment) when dispatch or API update fails.</label></li>
+</ul>
+<p>Optional enhancements:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">In bgms PR template: add checkbox “This change may require docs updates” and map to <code>docs-impact</code> label.</label></li>
+<li><label><input type="checkbox">If <code>docs-impact</code> label is set, force dispatch regardless of path-filter outcome.</label></li>
+<li><label><input type="checkbox">Add contributor docs in <code>README.md</code> describing how automated docs-sync signals are generated and triaged.</label></li>
+</ul>
+</section>
+<section id="p3---design-de-risking-quarto-derived-skeleton" class="level3">
+<h3 class="anchored" data-anchor-id="p3---design-de-risking-quarto-derived-skeleton">P3 - Design de-risking (Quarto-derived skeleton)</h3>
+<p>Layout-impact guardrails:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Capture visual baseline for home, one guide page, one reference page, one manual page, in both light and dark mode.</label></li>
+<li><label><input type="checkbox">Define acceptance criteria per page type (navbar, sidebar, TOC, heading scale, code readability, mobile nav).</label></li>
+<li><label><input type="checkbox">Use change sequencing: replace styles/scripts first, then remove legacy files after replacement behavior is verified.</label></li>
+<li><label><input type="checkbox">For each de-risking PR, include before/after screenshots and a short note on intentional layout changes.</label></li>
+<li><label><input type="checkbox">Keep a rollback path: avoid deleting original files until replacement CSS/JS has passed review.</label></li>
+</ul>
+<p>Keep:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Keep Quarto-generated runtime assets in <code>docs/site_libs/</code> as standard framework output; do not hand-edit generated files.</label></li>
+<li><label><input type="checkbox">Keep overall information architecture pattern (navbar + sidebar + TOC) as implementation pattern, not copied branding.</label></li>
+<li><label><input type="checkbox">Keep package-specific content structure in <code>guide/</code>, <code>reference/</code>, and <code>manual/</code>.</label></li>
+</ul>
+<p>Change:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Refactor <code>index.css</code> hero/banner layout to diverge clearly from inherited skeleton.</label></li>
+<li><label><input type="checkbox">Rewrite <code>theme.scss</code> token choices to a bgms-specific design system.</label></li>
+<li><label><input type="checkbox">Rewrite <code>theme-dark.scss</code> custom rules and remove Quarto/Posit-specific language.</label></li>
+<li><label><input type="checkbox">Review and simplify <code>js.html</code> behavior; keep only behavior needed for bgms docs UX.</label></li>
+<li><label><input type="checkbox">Update <code>styles.css</code> to remove “Quarto-inspired” framing and define explicit bgms branding tokens.</label></li>
+</ul>
+<p>Remove or archive:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Remove <code>_quarto.yml.quarto-web-original</code> when internal reference is no longer needed.</label></li>
+<li><label><input type="checkbox">Remove or replace <code>filters/tools-tabset.lua</code> if tools-tabset UI is unused; otherwise rewrite labels/icons/text.</label></li>
+<li><label><input type="checkbox">Remove leftover Quarto/Posit naming in comments, alt text, class names, and metadata when not functionally required.</label></li>
+</ul>
+<p>Governance and traceability:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Add <code>docs/attribution.md</code> with explicit acknowledgments and links once licensing/permission is clarified.</label></li>
+<li><label><input type="checkbox">Add provenance note in <code>README.md</code> describing what was adapted vs rewritten.</label></li>
+<li><label><input type="checkbox">Record source map in <code>docs/attribution.md</code>: adapted elements vs original bgms work.</label></li>
+<li><label><input type="checkbox">Add release checklist item: design de-risking pass completed before first public deployment.</label></li>
+</ul>
+</section>
+</section>
+<section id="open-decisions" class="level2">
+<h2 class="anchored" data-anchor-id="open-decisions">Open Decisions</h2>
+<ul>
+<li>None currently.</li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -679,34 +911,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>
@@ -1123,18 +1327,6 @@ document.querySelectorAll("[data-cite-picker]").forEach(picker => {
     }
   });
   </script>
-<nav class="page-navigation">
-  <div class="nav-page nav-page-previous">
-      <a href="../manual/hmc.html" class="pagination-link" aria-label="HMC Algorithm">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">HMC Algorithm</span>
-      </a>          
-  </div>
-  <div class="nav-page nav-page-next">
-      <a href="../manual/rattle.html" class="pagination-link" aria-label="Constrained Leapfrog (RATTLE)">
-        <span class="nav-page-text">Constrained Leapfrog (RATTLE)</span> <i class="bi bi-arrow-right-short"></i>
-      </a>
-  </div>
-</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -1143,7 +1335,7 @@ document.querySelectorAll("[data-cite-picker]").forEach(picker => {
 </div>   
     <div class="nav-footer-center">
 <p>Built with <a href="https://quarto.org">Quarto</a></p>
-<div class="toc-actions"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs/edit/main/manual/metropolis.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs/edit/main/dev/task-list.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">

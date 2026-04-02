@@ -429,11 +429,11 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td><a href="../reference/bgm.html"><code>bgm()</code></a></td>
-<td>Estimates the main effects and pairwise interactions of a network using a Bayesian framework.</td>
+<td>Bayesian estimation or edge selection for Markov Random Fields</td>
 </tr>
 <tr class="even">
 <td><a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a></td>
-<td>Estimates whether edge weights and category thresholds differ across networks of two different groups.</td>
+<td>Bayesian estimation and variable selection for group differences in MRFs</td>
 </tr>
 </tbody>
 </table>
@@ -495,7 +495,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="odd">
 <td><a href="../reference/extractors.html#extract_pairwise_interactions"><code>extract_pairwise_interactions()</code></a></td>
-<td>Extract posterior samples of partial association parameters</td>
+<td>Extract posterior samples of pairwise interaction parameters</td>
 </tr>
 <tr class="even">
 <td><a href="../reference/extractors.html#extract_indicators"><code>extract_indicators()</code></a></td>
@@ -524,18 +524,6 @@ ul.task-list li input[type="checkbox"] {
 <tr class="even">
 <td><a href="../reference/extractors.html#extract_rhat"><code>extract_rhat()</code></a></td>
 <td>Compute split-R-hat convergence diagnostics</td>
-</tr>
-<tr class="odd">
-<td><a href="../reference/extractors.html#extract_precision"><code>extract_precision()</code></a></td>
-<td>Extract posterior mean precision matrix (GGM / continuous block)</td>
-</tr>
-<tr class="even">
-<td><a href="../reference/extractors.html#extract_partial_correlations"><code>extract_partial_correlations()</code></a></td>
-<td>Extract posterior mean partial correlation matrix</td>
-</tr>
-<tr class="odd">
-<td><a href="../reference/extractors.html#extract_log_odds"><code>extract_log_odds()</code></a></td>
-<td>Extract posterior mean log-odds matrix (OMRF / discrete block)</td>
 </tr>
 </tbody>
 </table>
@@ -585,34 +573,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>

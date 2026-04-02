@@ -452,24 +452,6 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">HMC Algorithm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Adaptive Metropolis</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Warmup Schedule</span></a>
   </div>
@@ -501,6 +483,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">OMRF Internals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -566,18 +554,6 @@ window.Quarto = {
  <span class="menu-text">Numerical Considerations</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Pseudolikelihood</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Variable Helpers</span></a>
-  </div>
-</li>
       </ul>
   </li>
     </ul>
@@ -609,25 +585,37 @@ window.Quarto = {
 </header>
 
 
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This page has not yet passed technical or readability review.</p>
+</div>
+</div>
 <p>The edge prior framework controls which edges are included in the graph. All priors inherit from <code>BaseEdgePrior</code> in <code>src/priors/edge_prior.h</code>.</p>
 <section id="baseedgeprior-interface" class="level2">
 <h2 class="anchored" data-anchor-id="baseedgeprior-interface">BaseEdgePrior interface</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BaseEdgePrior <span class="op">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">void</span> update<span class="op">(</span><span class="at">const</span> arma<span class="op">::</span>imat<span class="op">&amp;</span> edge_indicators<span class="op">,</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                      arma<span class="op">::</span>mat<span class="op">&amp;</span> inclusion_probability<span class="op">,</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                      <span class="dt">int</span> num_variables<span class="op">,</span> <span class="dt">int</span> num_pairwise<span class="op">,</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                      SafeRNG<span class="op">&amp;</span> rng<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="bu">std::</span>unique_ptr<span class="op">&lt;</span>BaseEdgePrior<span class="op">&gt;</span> clone<span class="op">()</span> <span class="at">const</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">bool</span> has_allocations<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span> <span class="op">}</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> arma<span class="op">::</span>ivec get_allocations<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> arma<span class="op">::</span>ivec<span class="op">();</span> <span class="op">}</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">void</span> update<span class="op">(</span>imat edge_indicators<span class="op">,</span> mat<span class="op">&amp;</span> inclusion_probability<span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                      <span class="dt">int</span> num_variables<span class="op">,</span> <span class="dt">int</span> num_pairwise<span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                      SafeRNG<span class="op">&amp;</span> rng<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> unique_ptr<span class="op">&lt;</span>BaseEdgePrior<span class="op">&gt;</span> clone<span class="op">()</span> <span class="at">const</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">bool</span> has_allocations<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> ivec get_allocations<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> ivec<span class="op">();</span> <span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>update()</code> method is called once per MCMC iteration (when edge selection is active). It receives the current edge indicators and updates the inclusion probability matrix in place. The updated probabilities are used by the model’s <code>update_edge_indicators()</code> method for the next round of edge proposals.</p>
 <p><code>clone()</code> produces an independent copy for parallel chain execution.</p>
 </section>
 <section id="bernoulliedgeprior" class="level2">
 <h2 class="anchored" data-anchor-id="bernoulliedgeprior">BernoulliEdgePrior</h2>
 <p>The simplest prior: each edge has a fixed inclusion probability that does not change during sampling. The <code>update()</code> method is a no-op.</p>
-<p>This prior is used when the user specifies <code>edge_prior = "Bernoulli"</code> with a fixed inclusion probability matrix. This is the default edge prior in <code>bgms</code>.</p>
+<p>This prior is used when the user specifies <code>edge_prior = "Bernoulli"</code> with a fixed inclusion probability matrix.</p>
 </section>
 <section id="betabernoulliedgeprior" class="level2">
 <h2 class="anchored" data-anchor-id="betabernoulliedgeprior">BetaBernoulliEdgePrior</h2>
@@ -639,6 +627,7 @@ window.Quarto = {
 <li>Set all entries of the inclusion probability matrix to <span class="math inline">\(\pi\)</span></li>
 </ol>
 <p>The hyperparameters <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> default to 1 (uniform prior on the inclusion probability).</p>
+<p>This is the default edge prior in bgms (<code>edge_prior = "Beta-Bernoulli"</code>).</p>
 </section>
 <section id="stochasticblockedgeprior" class="level2">
 <h2 class="anchored" data-anchor-id="stochasticblockedgeprior">StochasticBlockEdgePrior</h2>
@@ -687,20 +676,6 @@ window.Quarto = {
 </tbody>
 </table>
 <p>When <code>edge_selection = FALSE</code>, no edge prior is instantiated and all edges remain included throughout sampling.</p>
-</section>
-<section id="factory-dispatch" class="level2">
-<h2 class="anchored" data-anchor-id="factory-dispatch">Factory dispatch</h2>
-<p>The <code>create_edge_prior()</code> factory in <code>edge_prior.h</code> maps an <code>EdgePrior</code> enum value to the concrete class. The enum is produced from the R string by <code>edge_prior_from_string()</code> in <code>common_helpers.h</code>.</p>
-</section>
-<section id="execution-order" class="level2">
-<h2 class="anchored" data-anchor-id="execution-order">Execution order</h2>
-<p>Within each MCMC iteration, the edge prior update runs <strong>after</strong> the model’s edge indicator and parameter updates:</p>
-<ol type="1">
-<li><code>model.update_edge_indicators()</code> — MoMS add/delete moves using the current inclusion probability matrix</li>
-<li><code>sampler-&gt;step(model, iteration)</code> — parameter updates</li>
-<li><code>edge_prior.update(...)</code> — update the inclusion probability matrix based on the new edge indicators</li>
-</ol>
-<p>The updated probabilities take effect in the next iteration’s edge indicator proposals.</p>
 
 
 </section>
@@ -722,34 +697,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>
