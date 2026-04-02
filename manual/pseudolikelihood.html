@@ -23,7 +23,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -417,6 +437,18 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">HMC Algorithm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Adaptive Metropolis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
   </div>
@@ -562,23 +594,10 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>This page describes how pseudolikelihood approximations are used in bgms across OMRF, mixed MRF, and group-comparison models.</p>
+<p>This page describes how pseudolikelihood approximations are used in <code>bgms</code> across OMRF, mixed MRF, and group-comparison models.</p>
 <section id="why-pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="why-pseudolikelihood">Why pseudolikelihood</h2>
-<p>For discrete and mixed graphical models, the joint likelihood contains a normalizing constant that is expensive or intractable to evaluate for realistic network sizes. bgms therefore uses pseudolikelihood-based objectives built from full conditional distributions.</p>
+<p>For discrete and mixed graphical models, the joint likelihood contains a normalizing constant that is expensive or intractable to evaluate for realistic network sizes. <code>bgms</code> therefore uses pseudolikelihood-based objectives built from full conditional distributions.</p>
 </section>
 <section id="generic-form" class="level2">
 <h2 class="anchored" data-anchor-id="generic-form">Generic form</h2>
@@ -592,21 +611,26 @@ Warning
 \log \mathrm{PL}(\boldsymbol{\theta})
 = \sum_{n=1}^{N} \sum_{i=1}^{p} \log p(x_{ni} \mid \mathbf{x}_{n,-i}, \boldsymbol{\theta}).
 \]</span></p>
-<p>The MCMC samplers in bgms optimize/evaluate log-pseudoposterior quantities, that is, log-pseudolikelihood plus log-prior contributions.</p>
+<p>The MCMC samplers in <code>bgms</code> target the pseudoposterior distribution, combining the pseudolikelihood with the prior.</p>
+</section>
+<section id="statistical-properties" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-properties">Statistical properties</h2>
+<p>The pseudolikelihood and the full likelihood share the same mode: PL does not introduce additional bias beyond that already present in the full likelihood <span class="citation" data-cites="KeetelaarEtAl_2024_PL ArenaMarsman_2026_core">(<a href="#ref-ArenaMarsman_2026_core" role="doc-biblioref">Arena &amp; Marsman, 2026</a>; <a href="#ref-KeetelaarEtAl_2024_PL" role="doc-biblioref">Keetelaar et al., 2024</a>)</span>. However, the pseudolikelihood underestimates the variance of the parameters, producing pseudoposterior distributions that are too narrow compared to the true posterior <span class="citation" data-cites="Miller_2021_PLconsistency KeetelaarEtAl_2024_PL ArenaMarsman_2026_core">(<a href="#ref-ArenaMarsman_2026_core" role="doc-biblioref">Arena &amp; Marsman, 2026</a>; <a href="#ref-KeetelaarEtAl_2024_PL" role="doc-biblioref">Keetelaar et al., 2024</a>; <a href="#ref-Miller_2021_PLconsistency" role="doc-biblioref">Miller, 2021</a>)</span>.</p>
+<p>This variance underestimation has consequences for edge selection. Bayes factors derived from the pseudoposterior overstate the evidence for or against edge inclusion because the spike-and-slab comparison operates on a distribution that is artificially concentrated.</p>
+<p>For the mixed MRF, the two pseudolikelihood options differ in how they handle this variance underestimation for the cross-type (discrete-continuous) interactions. The marginal pseudolikelihood does not appear to underestimate the variance of the cross-type interactions, whereas the conditional pseudolikelihood does.</p>
 </section>
 <section id="omrf-pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="omrf-pseudolikelihood">OMRF pseudolikelihood</h2>
-<p>For OMRF, bgms uses the product of ordinal full conditionals. The conditional probabilities depend on category thresholds and residual scores that summarize the influence of all other variables.</p>
+<p>For OMRF, <code>bgms</code> uses the product of ordinal full conditionals. The conditional probabilities depend on category thresholds and residual scores that summarize the influence of all other variables.</p>
 <p>Implementation details and gradient expressions are documented in <a href="../manual/omrf-internals.html">OMRF Internals</a>.</p>
 </section>
 <section id="mixed-mrf-pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="mixed-mrf-pseudolikelihood">Mixed MRF pseudolikelihood</h2>
-<p>For mixed models, the pseudolikelihood combines discrete and continuous parts. The <code>pseudolikelihood</code> argument controls the continuous component:</p>
+<p>For mixed models, the pseudolikelihood combines discrete and continuous parts. The continuous block always uses the GGM likelihood. The <code>pseudolikelihood</code> argument controls how the <strong>discrete</strong> full conditionals are computed:</p>
 <ul>
-<li><code>"conditional"</code> (default): conditional pseudolikelihood for continuous variables.</li>
-<li><code>"marginal"</code>: marginal normal likelihood for the continuous block.</li>
+<li><code>"conditional"</code> (default): computes <span class="math inline">\(\log p(x_s \mid x_{-s}, y_{\text{obs}})\)</span>, conditioning on the observed continuous values. Faster because updating the continuous precision does not require re-evaluating the discrete pseudolikelihood.</li>
+<li><code>"marginal"</code>: computes <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> by integrating out the continuous variables. Uses the marginal interaction matrix <span class="math inline">\(\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top\)</span>, which couples the discrete pseudolikelihood to the precision parameters.</li>
 </ul>
-<p>This choice changes both objective evaluation and gradients for the NUTS-updated block.</p>
 <p>Implementation details are documented in <a href="../manual/mixed-internals.html">Mixed MRF Internals</a>.</p>
 </section>
 <section id="group-comparison-bgmcompare" class="level2">
@@ -616,21 +640,24 @@ Warning
 </section>
 <section id="numerical-and-gradient-considerations" class="level2">
 <h2 class="anchored" data-anchor-id="numerical-and-gradient-considerations">Numerical and gradient considerations</h2>
-<p>In discrete blocks, both log-normalizers and category probabilities are needed for efficient gradient computation. bgms computes these together to avoid redundant work and uses numerically stable paths for exponentiation-sensitive regions.</p>
+<p>In discrete blocks, both log-normalizers and category probabilities are needed for efficient gradient computation. <code>bgms</code> computes these together to avoid redundant work and uses numerically stable paths for exponentiation-sensitive regions.</p>
 <p>See <a href="../manual/variable-helpers.html">Variable Helpers</a> and <a href="../manual/numerical.html">Numerical Considerations</a>.</p>
-</section>
-<section id="practical-implications" class="level2">
-<h2 class="anchored" data-anchor-id="practical-implications">Practical implications</h2>
-<ul>
-<li>Pseudolikelihood improves computational tractability for larger networks.</li>
-<li>It is an approximation to the full joint likelihood, so interpretation should follow the model/diagnostic guidance in the user documentation.</li>
-<li>In mixed models, <code>"conditional"</code> versus <code>"marginal"</code> pseudolikelihood can trade off speed and fidelity depending on the continuous block size.</li>
-</ul>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-ArenaMarsman_2026_core" class="csl-entry" role="listitem">
+Arena, G., &amp; Marsman, M. (2026). Bayesian inference for discrete <span>M</span>arkov random fields through coordinate rescaling. <em>arXiv Preprint</em>. <a href="https://arxiv.org/abs/2601.17205">https://arxiv.org/abs/2601.17205</a>
+</div>
+<div id="ref-KeetelaarEtAl_2024_PL" class="csl-entry" role="listitem">
+Keetelaar, S., Sekulovski, N., Borsboom, D., &amp; Marsman, M. (2024). Comparing maximum likelihood and pseudo-maximum likelihood estimators for the <span>I</span>sing model. <em>Advances.in/Psychology</em>, <em>2</em>(e25745). <a href="https://doi.org/10.56296/aip00013">https://doi.org/10.56296/aip00013</a>
+</div>
+<div id="ref-Miller_2021_PLconsistency" class="csl-entry" role="listitem">
+Miller, J. W. (2021). Asymptotic normality, concentration, and coverage of generalized posteriors. <em>Journal of Machine Learning Research</em>, <em>22</em>(168), 1–53.
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms

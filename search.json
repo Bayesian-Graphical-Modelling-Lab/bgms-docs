@@ -612,7 +612,7 @@
     "href": "manual/pseudolikelihood.html",
     "title": "Pseudolikelihood",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThis page describes how pseudolikelihood approximations are used in bgms across OMRF, mixed MRF, and group-comparison models.",
+    "text": "This page describes how pseudolikelihood approximations are used in bgms across OMRF, mixed MRF, and group-comparison models.",
     "crumbs": [
       "Manual",
       "Numerical Methods",
@@ -636,7 +636,19 @@
     "href": "manual/pseudolikelihood.html#generic-form",
     "title": "Pseudolikelihood",
     "section": "Generic form",
-    "text": "Generic form\nLet \\(\\mathbf{x}_n\\) denote observation \\(n\\), and let \\(x_{ni}\\) be variable \\(i\\) in that observation. The pseudolikelihood is\n\\[\n\\mathrm{PL}(\\boldsymbol{\\theta})\n= \\prod_{n=1}^{N} \\prod_{i=1}^{p} p(x_{ni} \\mid \\mathbf{x}_{n,-i}, \\boldsymbol{\\theta})\n\\]\nwith log form\n\\[\n\\log \\mathrm{PL}(\\boldsymbol{\\theta})\n= \\sum_{n=1}^{N} \\sum_{i=1}^{p} \\log p(x_{ni} \\mid \\mathbf{x}_{n,-i}, \\boldsymbol{\\theta}).\n\\]\nThe MCMC samplers in bgms optimize/evaluate log-pseudoposterior quantities, that is, log-pseudolikelihood plus log-prior contributions.",
+    "text": "Generic form\nLet \\(\\mathbf{x}_n\\) denote observation \\(n\\), and let \\(x_{ni}\\) be variable \\(i\\) in that observation. The pseudolikelihood is\n\\[\n\\mathrm{PL}(\\boldsymbol{\\theta})\n= \\prod_{n=1}^{N} \\prod_{i=1}^{p} p(x_{ni} \\mid \\mathbf{x}_{n,-i}, \\boldsymbol{\\theta})\n\\]\nwith log form\n\\[\n\\log \\mathrm{PL}(\\boldsymbol{\\theta})\n= \\sum_{n=1}^{N} \\sum_{i=1}^{p} \\log p(x_{ni} \\mid \\mathbf{x}_{n,-i}, \\boldsymbol{\\theta}).\n\\]\nThe MCMC samplers in bgms target the pseudoposterior distribution, combining the pseudolikelihood with the prior.",
+    "crumbs": [
+      "Manual",
+      "Numerical Methods",
+      "Pseudolikelihood"
+    ]
+  },
+  {
+    "objectID": "manual/pseudolikelihood.html#statistical-properties",
+    "href": "manual/pseudolikelihood.html#statistical-properties",
+    "title": "Pseudolikelihood",
+    "section": "Statistical properties",
+    "text": "Statistical properties\nThe pseudolikelihood and the full likelihood share the same mode: PL does not introduce additional bias beyond that already present in the full likelihood (Arena & Marsman, 2026; Keetelaar et al., 2024). However, the pseudolikelihood underestimates the variance of the parameters, producing pseudoposterior distributions that are too narrow compared to the true posterior (Arena & Marsman, 2026; Keetelaar et al., 2024; Miller, 2021).\nThis variance underestimation has consequences for edge selection. Bayes factors derived from the pseudoposterior overstate the evidence for or against edge inclusion because the spike-and-slab comparison operates on a distribution that is artificially concentrated.\nFor the mixed MRF, the two pseudolikelihood options differ in how they handle this variance underestimation for the cross-type (discrete-continuous) interactions. The marginal pseudolikelihood does not appear to underestimate the variance of the cross-type interactions, whereas the conditional pseudolikelihood does.",
     "crumbs": [
       "Manual",
       "Numerical Methods",
@@ -660,7 +672,7 @@
     "href": "manual/pseudolikelihood.html#mixed-mrf-pseudolikelihood",
     "title": "Pseudolikelihood",
     "section": "Mixed MRF pseudolikelihood",
-    "text": "Mixed MRF pseudolikelihood\nFor mixed models, the pseudolikelihood combines discrete and continuous parts. The pseudolikelihood argument controls the continuous component:\n\n\"conditional\" (default): conditional pseudolikelihood for continuous variables.\n\"marginal\": marginal normal likelihood for the continuous block.\n\nThis choice changes both objective evaluation and gradients for the NUTS-updated block.\nImplementation details are documented in Mixed MRF Internals.",
+    "text": "Mixed MRF pseudolikelihood\nFor mixed models, the pseudolikelihood combines discrete and continuous parts. The continuous block always uses the GGM likelihood. The pseudolikelihood argument controls how the discrete full conditionals are computed:\n\n\"conditional\" (default): computes \\(\\log p(x_s \\mid x_{-s}, y_{\\text{obs}})\\), conditioning on the observed continuous values. Faster because updating the continuous precision does not require re-evaluating the discrete pseudolikelihood.\n\"marginal\": computes \\(\\log p(x_s \\mid x_{-s})\\) by integrating out the continuous variables. Uses the marginal interaction matrix \\(\\Theta = 2A_{xx} + 2A_{xy}\\Sigma_{yy}A_{xy}^\\top\\), which couples the discrete pseudolikelihood to the precision parameters.\n\nImplementation details are documented in Mixed MRF Internals.",
     "crumbs": [
       "Manual",
       "Numerical Methods",
@@ -692,23 +704,11 @@
     ]
   },
   {
-    "objectID": "manual/pseudolikelihood.html#practical-implications",
-    "href": "manual/pseudolikelihood.html#practical-implications",
-    "title": "Pseudolikelihood",
-    "section": "Practical implications",
-    "text": "Practical implications\n\nPseudolikelihood improves computational tractability for larger networks.\nIt is an approximation to the full joint likelihood, so interpretation should follow the model/diagnostic guidance in the user documentation.\nIn mixed models, \"conditional\" versus \"marginal\" pseudolikelihood can trade off speed and fidelity depending on the continuous block size.",
-    "crumbs": [
-      "Manual",
-      "Numerical Methods",
-      "Pseudolikelihood"
-    ]
-  },
-  {
     "objectID": "manual/omrf-internals.html",
     "href": "manual/omrf-internals.html",
     "title": "OMRF Internals",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nImplementation details of the ordinal Markov random field in bgms. Source: src/models/omrf/omrf_model.h and omrf_model.cpp.",
+    "text": "Implementation details of the ordinal Markov random field in bgms. Source: src/models/omrf/omrf_model.h and omrf_model.cpp.",
     "crumbs": [
       "Manual",
       "Models",
@@ -720,7 +720,7 @@
     "href": "manual/omrf-internals.html#ordinal-threshold-parameterization",
     "title": "OMRF Internals",
     "section": "Ordinal threshold parameterization",
-    "text": "Ordinal threshold parameterization\nFor an ordinal variable \\(X_i\\) with \\(K_i\\) categories \\((0, 1, \\ldots, K_i - 1)\\), the model assigns one threshold parameter \\(\\mu_i(c)\\) per category \\(c\\). The category \\(c = 0\\) serves as the reference with \\(\\mu_i(0) = 0\\). The conditional probability of observing category \\(c\\) for person \\(n\\) is:\n\\[\nP(X_{ni} = c \\mid \\text{rest}) = \\frac{\\exp\\!\\bigl(\\mu_i(c) + c \\cdot r_{ni}\\bigr)}{\\sum_{k=0}^{K_i - 1} \\exp\\!\\bigl(\\mu_i(k) + k \\cdot r_{ni}\\bigr)}\n\\]\nwhere \\(r_{ni} = \\sum_{j \\neq i} x_{nj}\\, \\sigma_{ij}\\) is the residual score summarizing the pairwise interactions with all other variables.",
+    "text": "Ordinal threshold parameterization\nFor an ordinal variable \\(X_i\\) with \\(K_i + 1\\) categories \\((0, 1, \\ldots, K_i)\\), the model assigns \\(K_i\\) threshold parameters \\(\\mu_i(1), \\ldots, \\mu_i(K_i)\\). Category \\(c = 0\\) serves as the reference with \\(\\mu_i(0) = 0\\). The conditional probability of observing category \\(c\\) for person \\(n\\) is:\n\\[\nP(X_{ni} = c \\mid \\text{rest}) = \\frac{\\exp\\!\\bigl(\\mu_i(c) + c \\cdot r_{ni}\\bigr)}{\\sum_{k=0}^{K_i} \\exp\\!\\bigl(\\mu_i(k) + k \\cdot r_{ni}\\bigr)}\n\\]\nwhere \\(r_{ni} = 2\\sum_{j \\neq i} x_{nj}\\, \\sigma_{ij}\\) is the residual score summarizing the pairwise interactions with all other variables.",
     "crumbs": [
       "Manual",
       "Models",
@@ -744,7 +744,7 @@
     "href": "manual/omrf-internals.html#residual-matrix",
     "title": "OMRF Internals",
     "section": "Residual matrix",
-    "text": "Residual matrix\nThe model maintains a precomputed \\(n \\times p\\) residual matrix where entry \\((n, i)\\) stores:\n\\[\nr_{ni} = \\sum_{j \\neq i} x_{nj}\\, \\sigma_{ij}\n\\]\nWhen a single interaction \\(\\sigma_{ij}\\) changes by \\(\\delta\\), the residual matrix is updated incrementally:\n\nColumn \\(i\\): \\(r_{ni} \\leftarrow r_{ni} + \\delta \\cdot x_{nj}\\) for all \\(n\\)\nColumn \\(j\\): \\(r_{nj} \\leftarrow r_{nj} + \\delta \\cdot x_{ni}\\) for all \\(n\\)\n\nThis avoids recomputing the full matrix product after each parameter update.",
+    "text": "Residual matrix\nThe model maintains a precomputed \\(n \\times p\\) residual matrix where entry \\((n, i)\\) stores:\n\\[\nr_{ni} = 2\\sum_{j \\neq i} x_{nj}\\, \\sigma_{ij}\n\\]\nWhen a single interaction \\(\\sigma_{ij}\\) changes by \\(\\delta\\), the residual matrix is updated incrementally:\n\nColumn \\(i\\): \\(r_{ni} \\leftarrow r_{ni} + 2\\delta \\cdot x_{nj}\\) for all \\(n\\)\nColumn \\(j\\): \\(r_{nj} \\leftarrow r_{nj} + 2\\delta \\cdot x_{ni}\\) for all \\(n\\)\n\nThis avoids recomputing the full matrix product after each parameter update.",
     "crumbs": [
       "Manual",
       "Models",
@@ -768,7 +768,7 @@
     "href": "manual/omrf-internals.html#gradient-computation",
     "title": "OMRF Internals",
     "section": "Gradient computation",
-    "text": "Gradient computation\nThe logp_and_gradient() method computes both the log-pseudoposterior and its gradient in a single pass. The gradient for a pairwise interaction \\(\\sigma_{ij}\\) accumulates over all persons:\n\\[\n\\frac{\\partial \\text{PL}}{\\partial \\sigma_{ij}} = \\sum_{n=1}^{N} \\bigl(x_{ni} - E[X_i \\mid \\text{rest}]\\bigr)\\, x_{nj} + \\bigl(x_{nj} - E[X_j \\mid \\text{rest}]\\bigr)\\, x_{ni}\n\\]\nThe expected values \\(E[X_i \\mid \\text{rest}]\\) are computed from the category probabilities, which are obtained via the numerically stable FAST/SAFE paths in variable_helpers.cpp.",
+    "text": "Gradient computation\nThe logp_and_gradient() method computes both the log-pseudoposterior and its gradient in a single pass. The observed contribution to the gradient for a pairwise interaction \\(\\sigma_{ij}\\) is \\(4 \\sum_{n} x_{ni} x_{nj}\\) (from the sufficient statistic \\(\\mathbf{X}^\\top\\mathbf{X}\\)). The expected contribution accumulates over both variables:\n\\[\n\\frac{\\partial \\text{PL}}{\\partial \\sigma_{ij}} = 4\\sum_{n=1}^{N} x_{ni}\\, x_{nj} - 2\\sum_{n=1}^{N} \\bigl(E[X_i \\mid \\text{rest}]\\, x_{nj} + E[X_j \\mid \\text{rest}]\\, x_{ni}\\bigr)\n\\]\nThe expected values \\(E[X_i \\mid \\text{rest}]\\) are computed from the category probabilities, which are obtained via the numerically stable FAST/SAFE paths in variable_helpers.cpp. The pairwise gradient is vectorized using BLAS matrix products: \\(\\mathbf{X}^\\top \\mathbf{E}\\) where \\(\\mathbf{E}\\) is the matrix of conditional expected values.",
     "crumbs": [
       "Manual",
       "Models",
@@ -780,7 +780,7 @@
     "href": "manual/omrf-internals.html#edge-indicator-updates",
     "title": "OMRF Internals",
     "section": "Edge indicator updates",
-    "text": "Edge indicator updates\nWhen edge selection is active, the model performs a full scan over all \\(p(p-1)/2\\) edges after each gradient-based step. For each edge \\((i, j)\\):\n\nCompute the pseudolikelihood ratio for inclusion vs. exclusion\nCombine with the prior inclusion probability to get the posterior inclusion probability\nSample the indicator \\(\\gamma_{ij} \\sim \\text{Bernoulli}(p_{ij})\\)\nIf the indicator changes, update the residual matrix accordingly\n\nThe scan order is randomized at each iteration via prepare_iteration(), which calls arma_randperm().",
+    "text": "Edge indicator updates\nEdge selection uses a Metropolis-Hastings sampler based on the mixtures of mutually singular (MoMS) distributions framework (Gottardo & Raftery, 2008; van den Bergh et al., 2026). All interaction parameters live in a fixed-dimensional space; excluded edges are represented as parameters fixed at zero rather than removed from the model.\nWhen edge selection is active, the model performs a full scan over all \\(p(p-1)/2\\) edges after each gradient-based step. For each edge \\((i, j)\\):\nAdd move (\\(\\gamma_{ij} = 0 \\to 1\\)). Propose a new interaction value \\(\\sigma_{ij}^\\star \\sim \\mathcal{N}(\\sigma_{ij},\\, \\tau_{ij}^2)\\) and accept with probability \\[\n\\alpha = \\min\\!\\left\\{1,\\;\n  \\frac{p(\\boldsymbol{\\gamma}^\\star, \\boldsymbol{\\sigma}^\\star \\mid \\mathbf{X})}\n       {p(\\boldsymbol{\\gamma},\\, \\boldsymbol{\\sigma} \\mid \\mathbf{X})}\n  \\;\\frac{1}{q(\\sigma_{ij}^\\star \\mid \\sigma_{ij})}\n\\right\\}\n\\] where the posterior ratio includes the pseudolikelihood ratio, the Cauchy slab prior on \\(\\sigma_{ij}^\\star\\), and the prior inclusion odds.\nDelete move (\\(\\gamma_{ij} = 1 \\to 0\\)). Set \\(\\sigma_{ij}^\\star = 0\\) and accept with probability \\[\n\\alpha = \\min\\!\\left\\{1,\\;\n  \\frac{p(\\boldsymbol{\\gamma}^\\star, \\boldsymbol{\\sigma}^\\star \\mid \\mathbf{X})}\n       {p(\\boldsymbol{\\gamma},\\, \\boldsymbol{\\sigma} \\mid \\mathbf{X})}\n  \\;\\frac{q(\\sigma_{ij} \\mid \\sigma_{ij}^\\star)}{1}\n\\right\\}\n\\]\nThe scan order is randomized at each iteration via prepare_iteration(), which calls arma_randperm().",
     "crumbs": [
       "Manual",
       "Models",
@@ -792,7 +792,7 @@
     "href": "manual/omrf-internals.html#adaptive-metropolis-fallback",
     "title": "OMRF Internals",
     "section": "Adaptive Metropolis fallback",
-    "text": "Adaptive Metropolis fallback\nEven when NUTS is the primary sampler, the OMRF implements element-wise adaptive Metropolis proposals for use during warmup stage 3b (proposal SD learning) and as a user-selectable alternative via update_method = \"adaptive-metropolis\". The proposal SDs are tuned by Robbins-Monro targeting 0.234 acceptance, clamped to \\([0.001, 2.0]\\).",
+    "text": "Adaptive Metropolis fallback\nEven when NUTS is the primary sampler, the OMRF implements element-wise adaptive Metropolis proposals for use during warmup stage 3b (proposal SD learning) and as a user-selectable alternative via update_method = \"adaptive-metropolis\". The proposal SDs are tuned by Robbins-Monro targeting 0.44 acceptance, clamped to \\([0.001, 2.0]\\).",
     "crumbs": [
       "Manual",
       "Models",
@@ -989,6 +989,94 @@
       "Manual",
       "Models",
       "Mixed MRF Internals"
+    ]
+  },
+  {
+    "objectID": "manual/index.html",
+    "href": "manual/index.html",
+    "title": "Technical Manual",
+    "section": "",
+    "text": "Technical documentation for the bgms C++ backend, MCMC algorithms, and R scaffolding layer. This manual targets contributors to bgms development, users who need to understand implementation details, and researchers extending bgms for new model types.",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#architecture",
+    "href": "manual/index.html#architecture",
+    "title": "Technical Manual",
+    "section": "Architecture",
+    "text": "Architecture\nHow the R front-end and C++ back-end are organized, and how they communicate.\n\nC++ Architecture — Source layout, layer separation, design principles\nR Scaffolding — Validation, spec construction, sampler dispatch, output assembly\nModel Classes — BaseModel hierarchy and virtual interface",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#mcmc-engine",
+    "href": "manual/index.html#mcmc-engine",
+    "title": "Technical Manual",
+    "section": "MCMC Engine",
+    "text": "MCMC Engine\nThe sampling machinery shared by all models.\n\nSampler Hierarchy — SamplerBase, gradient-based samplers, factory dispatch\nNUTS Algorithm — Binary tree construction, U-turn criterion, divergence detection\nHMC Algorithm — Fixed-length leapfrog, Metropolis correction (deprecated)\nAdaptive Metropolis — Scalar random-walk MH, Robbins–Monro adaptation\nConstrained Leapfrog (RATTLE) — Position/momentum projection, reversibility check, Memoizer\nWarmup Schedule — Five-stage adaptation, dual averaging, mass matrix tuning\nParallel Chains — TBB threading, model cloning, per-chain RNG",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#models",
+    "href": "manual/index.html#models",
+    "title": "Technical Manual",
+    "section": "Models",
+    "text": "Models\nModel-specific sampling and likelihood computation.\n\nGGM Internals — Precision matrix Metropolis, Cholesky rank-1 updates\nOMRF Internals — Ordinal thresholds, Blume-Capel, pseudolikelihood\nVariable Helpers — Numerically stable probability computation (FAST/SAFE)\nMixed MRF Internals — NUTS + precision Metropolis, block parameter layout, RATTLE",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#priors-edge-selection",
+    "href": "manual/index.html#priors-edge-selection",
+    "title": "Technical Manual",
+    "section": "Priors & Edge Selection",
+    "text": "Priors & Edge Selection\nPrior specification and edge inclusion machinery.\n\nEdge Priors — Bernoulli, Beta-Bernoulli, and SBM prior classes\nSBM Prior — MFM-SBM formulation, collapsed Gibbs, cluster allocation",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#group-comparison",
+    "href": "manual/index.html#group-comparison",
+    "title": "Technical Manual",
+    "section": "Group Comparison",
+    "text": "Group Comparison\n\nbgmCompare Engine — Multi-group posterior, difference selection",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#numerical-methods",
+    "href": "manual/index.html#numerical-methods",
+    "title": "Technical Manual",
+    "section": "Numerical Methods",
+    "text": "Numerical Methods\n\nNumerical Considerations — Cross-platform exp/log, OpenLibM, IEEE 754 compliance",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
+    ]
+  },
+  {
+    "objectID": "manual/index.html#prerequisites",
+    "href": "manual/index.html#prerequisites",
+    "title": "Technical Manual",
+    "section": "Prerequisites",
+    "text": "Prerequisites\nThis manual assumes familiarity with C++ programming, MCMC methods, and the No-U-Turn Sampler. The User’s Guide covers the statistical background at a conceptual level.",
+    "crumbs": [
+      "Manual",
+      "Technical Manual"
     ]
   },
   {
@@ -2794,7 +2882,7 @@
     "href": "manual/architecture.html#design-principles",
     "title": "C++ Architecture",
     "section": "Design principles",
-    "text": "Design principles\nSeparation of concerns. Algorithms know nothing about models. A nuts_step() call receives a function logp_and_gradient(vec) → (double, vec) and returns a StepResult. The model provides the function; the algorithm does the math.\nVirtual dispatch for models. All models inherit from BaseModel and override a small set of virtual methods. The chain runner calls model.logp_and_gradient() without knowing whether it is sampling a GGM or an ordinal MRF. See Model Classes.\nCloning for parallelism. Both BaseModel and BaseEdgePrior expose a clone() method that produces an independent copy. The chain runner clones the prototype once per chain before dispatching to TBB threads. See Parallel Chains.\nHeader-only samplers. The sampler classes in mcmc/samplers/ are header-only. They are lightweight wrappers that hold adaptation state and call algorithm functions from mcmc/algorithms/.\nRcpp interface files. The top-level .cpp files in src/ (sample_ggm.cpp, sample_omrf.cpp, sample_mixed.cpp, bgmCompare_interface.cpp) are thin Rcpp entry points. They construct C++ objects from R lists and call run_mcmc_sampler().",
+    "text": "Design principles\nSeparation of concerns. Algorithms know nothing about models. A nuts_step() call receives a function logp_and_gradient(vec) → (double, vec) and returns a StepResult. The model provides the function; the algorithm does the math.\nVirtual dispatch for models. All models inherit from BaseModel and override a small set of virtual methods. The chain runner calls model.logp_and_gradient() without knowing whether it is sampling a GGM or an ordinal MRF. See Model Classes.\nCloning for parallelism. Both BaseModel and BaseEdgePrior expose a clone() method that produces an independent copy. The Rcpp entry point constructs a single model from R input and passes it to run_mcmc_sampler(). Inside C++, that prototype is cloned once per chain (each clone receiving its own RNG seed), and the clones are dispatched to TBB threads via RcppParallel::parallelFor(). R never interacts with the clones directly — parallelism is entirely C++-side. After all chains finish, the vector&lt;ChainResult&gt; is converted to an R list and returned. See Parallel Chains.\nHeader-only samplers. The sampler classes in mcmc/samplers/ are header-only. They are lightweight wrappers that hold adaptation state and call algorithm functions from mcmc/algorithms/.\nRcpp interface files. The top-level .cpp files in src/ (sample_ggm.cpp, sample_omrf.cpp, sample_mixed.cpp, bgmCompare_interface.cpp) are thin Rcpp entry points. They construct C++ objects from R lists and call run_mcmc_sampler().",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -2886,91 +2974,183 @@
     ]
   },
   {
-    "objectID": "manual/index.html",
-    "href": "manual/index.html",
-    "title": "Technical Manual",
+    "objectID": "manual/hmc.html",
+    "href": "manual/hmc.html",
+    "title": "HMC Algorithm",
     "section": "",
-    "text": "Technical documentation for the bgms C++ backend, MCMC algorithms, and R scaffolding layer. This manual targets contributors to bgms development, users who need to understand implementation details, and researchers extending bgms for new model types.",
+    "text": "WarningDeprecated\n\n\n\nThe fixed-length HMC sampler (update_method = \"hamiltonian-mc\") is deprecated and will be removed in a future release. Use update_method = \"nuts\" instead — NUTS adapts trajectory length automatically and avoids the need to tune the number of leapfrog steps.\nHamiltonian Monte Carlo (HMC) simulates Hamiltonian dynamics to propose distant moves in parameter space while maintaining a high acceptance rate. The bgms implementation uses fixed-length leapfrog integration with a Metropolis accept/reject correction.\nThe implementation is in src/mcmc/algorithms/hmc.h and hmc.cpp. The sampler wrapper is HMCSampler in src/mcmc/samplers/hmc_sampler.h, which inherits warmup adaptation from GradientSamplerBase.",
     "crumbs": [
       "Manual",
-      "Technical Manual"
+      "MCMC Engine",
+      "HMC Algorithm"
     ]
   },
   {
-    "objectID": "manual/index.html#architecture",
-    "href": "manual/index.html#architecture",
-    "title": "Technical Manual",
-    "section": "Architecture",
-    "text": "Architecture\nHow the R front-end and C++ back-end are organized, and how they communicate.\n\nC++ Architecture — Source layout, layer separation, design principles\nR Scaffolding — Validation, spec construction, sampler dispatch, output assembly\nModel Classes — BaseModel hierarchy and virtual interface",
+    "objectID": "manual/hmc.html#algorithm",
+    "href": "manual/hmc.html#algorithm",
+    "title": "HMC Algorithm",
+    "section": "Algorithm",
+    "text": "Algorithm\nEach HMC iteration proceeds as follows:\n\nSample momentum — Draw \\(r \\sim \\mathcal{N}(0,\\, M)\\), where \\(M\\) is the diagonal mass matrix.\nLeapfrog integration — Simulate \\(L\\) steps of the Störmer–Verlet integrator with step size \\(\\epsilon\\):\n\nHalf-step momentum: \\(r \\leftarrow r + \\tfrac{\\epsilon}{2}\\,\\nabla\\log p(\\theta)\\)\nFull-step position: \\(\\theta \\leftarrow \\theta + \\epsilon\\,M^{-1} r\\)\nHalf-step momentum: \\(r \\leftarrow r + \\tfrac{\\epsilon}{2}\\,\\nabla\\log p(\\theta)\\)\n\nMetropolis correction — Accept the proposal \\((\\theta^*, r^*)\\) with probability \\[\n\\alpha = \\min\\!\\bigl(1,\\; \\exp\\bigl(H(\\theta, r) - H(\\theta^*, r^*)\\bigr)\\bigr),\n\\] where \\(H(\\theta, r) = -\\log p(\\theta) + \\tfrac{1}{2}\\,r^\\top M^{-1} r\\) is the Hamiltonian.\n\nThe number of leapfrog steps \\(L\\) is controlled by hmc_num_leapfrogs (default 100 from the R interface, configurable via SamplerConfig::num_leapfrogs).",
     "crumbs": [
       "Manual",
-      "Technical Manual"
+      "MCMC Engine",
+      "HMC Algorithm"
     ]
   },
   {
-    "objectID": "manual/index.html#mcmc-engine",
-    "href": "manual/index.html#mcmc-engine",
-    "title": "Technical Manual",
-    "section": "MCMC Engine",
-    "text": "MCMC Engine\nThe sampling machinery shared by all models.\n\nSampler Hierarchy — SamplerBase, gradient-based samplers, factory dispatch\nNUTS Algorithm — Binary tree construction, U-turn criterion, divergence detection\nConstrained Leapfrog (RATTLE) — Position/momentum projection, reversibility check, Memoizer\nWarmup Schedule — Five-stage adaptation, dual averaging, mass matrix tuning\nParallel Chains — TBB threading, model cloning, per-chain RNG",
+    "objectID": "manual/hmc.html#why-nuts-is-preferred",
+    "href": "manual/hmc.html#why-nuts-is-preferred",
+    "title": "HMC Algorithm",
+    "section": "Why NUTS is preferred",
+    "text": "Why NUTS is preferred\nHMC requires \\(L\\) to be set in advance. A value that is too small wastes gradient evaluations on short trajectories; a value that is too large wastes them on trajectories that loop back. NUTS eliminates this tuning parameter by growing a binary tree until a U-turn is detected, adapting the trajectory length to the local geometry of the posterior. See NUTS Algorithm.",
     "crumbs": [
       "Manual",
-      "Technical Manual"
+      "MCMC Engine",
+      "HMC Algorithm"
     ]
   },
   {
-    "objectID": "manual/index.html#models",
-    "href": "manual/index.html#models",
-    "title": "Technical Manual",
-    "section": "Models",
-    "text": "Models\nModel-specific sampling and likelihood computation.\n\nGGM Internals — Precision matrix Metropolis, Cholesky rank-1 updates\nOMRF Internals — Ordinal thresholds, Blume-Capel, pseudolikelihood\nVariable Helpers — Numerically stable probability computation (FAST/SAFE)\nMixed MRF Internals — NUTS + precision Metropolis, block parameter layout, RATTLE",
+    "objectID": "manual/hmc.html#constrained-variant",
+    "href": "manual/hmc.html#constrained-variant",
+    "title": "HMC Algorithm",
+    "section": "Constrained variant",
+    "text": "Constrained variant\nFor models with edge selection on continuous variables (GGM, Mixed MRF), HMCSampler dispatches to a constrained integration path that uses RATTLE projections at each leapfrog step. This keeps excluded precision entries exactly zero throughout the trajectory. The constrained path includes an optional reversibility check identical to the one used by NUTS (see Constrained Leapfrog (RATTLE)).\nA fixed trajectory length interacts poorly with the constraint manifold: the integrator cannot shorten the trajectory when it encounters high-curvature regions or non-reversible projections. NUTS handles this by terminating the tree early. When update_method = \"hamiltonian-mc\" is used with edge selection, bgms issues a warning:\n\nhamiltonian-mc with edge selection on a GGM uses constrained integration (RATTLE), which can be numerically fragile with a fixed trajectory length. Consider using ‘nuts’ instead, which adapts trajectory length and avoids degenerate regions.",
     "crumbs": [
       "Manual",
-      "Technical Manual"
+      "MCMC Engine",
+      "HMC Algorithm"
     ]
   },
   {
-    "objectID": "manual/index.html#priors-edge-selection",
-    "href": "manual/index.html#priors-edge-selection",
-    "title": "Technical Manual",
-    "section": "Priors & Edge Selection",
-    "text": "Priors & Edge Selection\nPrior specification and edge inclusion machinery.\n\nEdge Priors — Bernoulli, Beta-Bernoulli, and SBM prior classes\nSBM Prior — MFM-SBM formulation, collapsed Gibbs, cluster allocation",
+    "objectID": "manual/hmc.html#step-size-heuristic",
+    "href": "manual/hmc.html#step-size-heuristic",
+    "title": "HMC Algorithm",
+    "section": "Step-size heuristic",
+    "text": "Step-size heuristic\nBefore warmup begins, heuristic_initial_step_size() finds a reasonable starting step size by iteratively doubling or halving a candidate \\(\\epsilon\\) until a single leapfrog step yields an acceptance probability near the target (default 0.8). The algorithm:\n\nEvaluate the Hamiltonian at the current position with a fresh momentum draw.\nRun one leapfrog step and evaluate the proposed Hamiltonian.\nIf \\(\\alpha &gt; \\alpha_{\\text{target}}\\), double \\(\\epsilon\\); otherwise halve it.\nRepeat until the acceptance probability crosses the target or max_attempts (default 20) is reached.\n\nThree overloads exist:\n\n\n\nVariant\nMass matrix\nIntegration\n\n\n\n\nIdentity\n\\(M = I\\)\nUnconstrained\n\n\nDiagonal\nUser-supplied \\(M^{-1}\\)\nUnconstrained\n\n\nConstrained\nUser-supplied \\(M^{-1}\\)\nRATTLE projections\n\n\n\nThe constrained overload (heuristic_initial_step_size_constrained) projects momentum onto the cotangent space before evaluating kinetic energy and uses leapfrog_constrained() for the trial step.",
     "crumbs": [
       "Manual",
-      "Technical Manual"
+      "MCMC Engine",
+      "HMC Algorithm"
     ]
   },
   {
-    "objectID": "manual/index.html#group-comparison",
-    "href": "manual/index.html#group-comparison",
-    "title": "Technical Manual",
-    "section": "Group Comparison",
-    "text": "Group Comparison\n\nbgmCompare Engine — Multi-group posterior, difference selection",
+    "objectID": "manual/hmc.html#warmup-adaptation",
+    "href": "manual/hmc.html#warmup-adaptation",
+    "title": "HMC Algorithm",
+    "section": "Warmup adaptation",
+    "text": "Warmup adaptation\nHMCSampler inherits from GradientSamplerBase, which owns an HMCAdaptationController. The adaptation schedule is identical to NUTS (see Warmup Schedule):\n\nStage 1 — Fast step-size adaptation via dual averaging.\nStage 2 — Diagonal mass matrix estimation in doubling windows, with step-size re-initialization after each window.\nStage 3a — Final step-size tuning with the learned mass matrix.\nStage 3b — Proposal-SD tuning for edge selection (model-driven).\nStage 3c — Step-size re-adaptation after edge-selection structure changes.\n\nThe default target acceptance rate for HMC is 0.65 (vs. 0.80 for NUTS).",
     "crumbs": [
       "Manual",
-      "Technical Manual"
+      "MCMC Engine",
+      "HMC Algorithm"
     ]
   },
   {
-    "objectID": "manual/index.html#numerical-methods",
-    "href": "manual/index.html#numerical-methods",
-    "title": "Technical Manual",
-    "section": "Numerical Methods",
-    "text": "Numerical Methods\n\nNumerical Considerations — Cross-platform exp/log, OpenLibM, IEEE 754 compliance",
+    "objectID": "manual/hmc.html#sampler-dispatch",
+    "href": "manual/hmc.html#sampler-dispatch",
+    "title": "HMC Algorithm",
+    "section": "Sampler dispatch",
+    "text": "Sampler dispatch\nThe chain runner factory in chain_runner.cpp maps two string identifiers to HMCSampler: \"hmc\" and \"hamiltonian-mc\". The R interface uses \"hamiltonian-mc\" as the update_method value. On the R side, validate_sampler() issues a .Deprecated() warning when this method is selected.",
     "crumbs": [
       "Manual",
-      "Technical Manual"
+      "MCMC Engine",
+      "HMC Algorithm"
     ]
   },
   {
-    "objectID": "manual/index.html#prerequisites",
-    "href": "manual/index.html#prerequisites",
-    "title": "Technical Manual",
-    "section": "Prerequisites",
-    "text": "Prerequisites\nThis manual assumes familiarity with C++ programming, MCMC methods, and the No-U-Turn Sampler. The User’s Guide covers the statistical background at a conceptual level.",
+    "objectID": "manual/hmc.html#source-files",
+    "href": "manual/hmc.html#source-files",
+    "title": "HMC Algorithm",
+    "section": "Source files",
+    "text": "Source files\n\n\n\n\n\n\n\nFile\nContents\n\n\n\n\nsrc/mcmc/algorithms/hmc.h\nkinetic_energy(), heuristic_initial_step_size() (3 overloads), hmc_step() (2 overloads)\n\n\nsrc/mcmc/algorithms/hmc.cpp\nImplementations of all HMC algorithm functions\n\n\nsrc/mcmc/samplers/hmc_sampler.h\nHMCSampler class (header-only)\n\n\nsrc/mcmc/samplers/hmc_adaptation.h\nDualAveraging, DiagMassMatrixAccumulator, HMCAdaptationController",
     "crumbs": [
       "Manual",
-      "Technical Manual"
+      "MCMC Engine",
+      "HMC Algorithm"
+    ]
+  },
+  {
+    "objectID": "manual/metropolis.html",
+    "href": "manual/metropolis.html",
+    "title": "Adaptive Metropolis",
+    "section": "",
+    "text": "The adaptive Metropolis sampler (update_method = \"adaptive-metropolis\") updates parameters one at a time using scalar random-walk Metropolis–Hastings steps. Proposal standard deviations are tuned during warmup via Robbins–Monro adaptation.\nThe algorithm function is in src/mcmc/algorithms/metropolis.h and metropolis.cpp. The sampler wrapper is MetropolisSampler in src/mcmc/samplers/metropolis_sampler.h, and the adaptation controller is MetropolisAdaptationController in src/mcmc/samplers/metropolis_adaptation.h.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Adaptive Metropolis"
+    ]
+  },
+  {
+    "objectID": "manual/metropolis.html#algorithm",
+    "href": "manual/metropolis.html#algorithm",
+    "title": "Adaptive Metropolis",
+    "section": "Algorithm",
+    "text": "Algorithm\nEach scalar Metropolis step for parameter \\(\\theta_k\\):\n\nPropose — Draw \\(\\theta_k^* \\sim \\mathcal{N}(\\theta_k,\\, \\sigma_k^2)\\), where \\(\\sigma_k\\) is the current proposal standard deviation for element \\(k\\).\nAccept/reject — Compute the acceptance probability \\[\n\\alpha = \\min\\!\\bigl(1,\\; \\exp\\bigl(\\log p(\\theta_k^*) - \\log p(\\theta_k)\\bigr)\\bigr).\n\\] The proposal distribution is symmetric, so no Hastings ratio correction is needed.\nUpdate — Set \\(\\theta_k \\leftarrow \\theta_k^*\\) with probability \\(\\alpha\\); otherwise keep \\(\\theta_k\\).\n\nThe metropolis_step() function in metropolis.cpp implements this for a single scalar parameter and returns a StepResult containing the accepted state and \\(\\alpha\\).",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Adaptive Metropolis"
+    ]
+  },
+  {
+    "objectID": "manual/metropolis.html#model-driven-sweeps",
+    "href": "manual/metropolis.html#model-driven-sweeps",
+    "title": "Adaptive Metropolis",
+    "section": "Model-driven sweeps",
+    "text": "Model-driven sweeps\nUnlike NUTS and HMC, where the sampler drives integration over the full parameter vector, MetropolisSampler delegates the sweep structure to the model. The sampler calls model.do_one_metropolis_step(iteration), and each model class defines how to iterate over its parameters:\n\nGGMModel — Sweeps over free elements of the precision matrix (or Cholesky factor), updating each element with a scalar Metropolis step against its full conditional log-posterior.\nOMRFModel — Sweeps over thresholds and pairwise interaction parameters, with each step targeting the pseudolikelihood-based conditional.\nMixedMRFModel — Sweeps over discrete thresholds, discrete interactions, continuous interactions, and cross-type interactions in separate blocks, each with its own proposal SD matrix.\n\nThis design allows each model to exploit problem-specific structure (e.g., conditional independence, sufficient statistics) that a generic vector-level sampler cannot access.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Adaptive Metropolis"
+    ]
+  },
+  {
+    "objectID": "manual/metropolis.html#robbinsmonro-adaptation",
+    "href": "manual/metropolis.html#robbinsmonro-adaptation",
+    "title": "Adaptive Metropolis",
+    "section": "Robbins–Monro adaptation",
+    "text": "Robbins–Monro adaptation\nDuring warmup, the proposal standard deviations \\(\\sigma_k\\) are adapted to target an acceptance rate of 0.44. The MetropolisAdaptationController applies the update rule:\n\\[\n\\sigma_k^{(t+1)} = \\sigma_k^{(t)} + \\bigl(\\alpha_k^{(t)} - 0.44\\bigr)\\,w_t,\n\\]\nwhere \\(w_t = t^{-0.75}\\) is the Robbins–Monro weight with decay exponent 0.75. The updated value is clamped to \\([0.001,\\; 2.0]\\). NaN values (from degenerate proposals) are reset to 1.0.\n\nElement-wise adaptation\nThe controller operates on a matrix of proposal standard deviations (matching the parameter layout of the model) with an index mask that selects which elements to adapt. At each iteration, the controller receives the matrix of acceptance probabilities from the most recent sweep and updates only the masked elements.\n\n\nWarmup boundary\nAdaptation runs only while iteration &lt; total_warmup. After warmup ends, proposal standard deviations are frozen at their final values.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Adaptive Metropolis"
+    ]
+  },
+  {
+    "objectID": "manual/metropolis.html#sampler-dispatch",
+    "href": "manual/metropolis.html#sampler-dispatch",
+    "title": "Adaptive Metropolis",
+    "section": "Sampler dispatch",
+    "text": "Sampler dispatch\nThe chain runner factory in chain_runner.cpp maps two string identifiers to MetropolisSampler: \"mh\" and \"adaptive-metropolis\". The R interface uses \"adaptive-metropolis\" as the update_method value.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Adaptive Metropolis"
+    ]
+  },
+  {
+    "objectID": "manual/metropolis.html#initialization",
+    "href": "manual/metropolis.html#initialization",
+    "title": "Adaptive Metropolis",
+    "section": "Initialization",
+    "text": "Initialization\nMetropolisSampler uses lazy initialization. On the first call to step() (or via an explicit initialize() call from the chain runner), it invokes model.init_metropolis_adaptation(schedule), which creates MetropolisAdaptationController instances for each parameter block in the model.",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Adaptive Metropolis"
+    ]
+  },
+  {
+    "objectID": "manual/metropolis.html#source-files",
+    "href": "manual/metropolis.html#source-files",
+    "title": "Adaptive Metropolis",
+    "section": "Source files",
+    "text": "Source files\n\n\n\n\n\n\n\nFile\nContents\n\n\n\n\nsrc/mcmc/algorithms/metropolis.h\nmetropolis_step() declaration\n\n\nsrc/mcmc/algorithms/metropolis.cpp\nmetropolis_step() implementation\n\n\nsrc/mcmc/samplers/metropolis_sampler.h\nMetropolisSampler class (header-only)\n\n\nsrc/mcmc/samplers/metropolis_adaptation.h\nMetropolisAdaptationController class (header-only)\n\n\nsrc/mcmc/execution/step_result.h\nupdate_proposal_sd_with_robbins_monro() utility",
+    "crumbs": [
+      "Manual",
+      "MCMC Engine",
+      "Adaptive Metropolis"
     ]
   },
   {
@@ -2990,7 +3170,7 @@
     "href": "manual/model-classes.html#basemodel-interface",
     "title": "Model Classes",
     "section": "BaseModel interface",
-    "text": "BaseModel interface\nBaseModel declares over 30 virtual methods. The most important groups are:\n\nCapability queries\nThese methods tell the sampler what the model supports. The chain runner and sampler factory use them to select the correct algorithm.\n\n\n\nMethod\nDefault\nGGMModel\nOMRFModel\nMixedMRFModel\n\n\n\n\nhas_gradient()\nfalse\nfalse\ntrue\ntrue\n\n\nhas_adaptive_metropolis()\nfalse\ntrue\ntrue\ntrue\n\n\nhas_nuts()\nhas_gradient()\nfalse\ntrue\ntrue\n\n\nhas_edge_selection()\nfalse\ntrue\ntrue\ntrue\n\n\nhas_missing_data()\nfalse\ntrue\ntrue\ntrue\n\n\nhas_constraints()\nfalse\ntrue†\nfalse\ntrue†\n\n\n\n† Returns true when edge_selection_ or has_sparse_graph_ is active. For GGMModel this flag is present for interface consistency but does not trigger RATTLE integration because the GGM uses Metropolis sampling only. For MixedMRFModel it switches the NUTS sampler to constrained (RATTLE) integration.\n\n\nSampling methods\nvirtual void do_one_metropolis_step(int iteration) = 0;\nvirtual vec gradient(vec parameters);\nvirtual pair&lt;double, vec&gt; logp_and_gradient(vec parameters);\nEvery model must implement do_one_metropolis_step(). Models that support gradient-based samplers (NUTS) also override gradient() and logp_and_gradient(). The joint function is more efficient because the log-posterior and gradient share intermediate computations.\n\n\nParameter access\nvirtual vec get_vectorized_parameters() const = 0;\nvirtual void set_vectorized_parameters(const vec& params) = 0;\nvirtual vec get_full_vectorized_parameters() const;\nvirtual vec get_storage_vectorized_parameters() const;\nvirtual size_t parameter_dimension() const = 0;\nvirtual size_t full_parameter_dimension() const;\nvirtual size_t storage_dimension() const;\nget_vectorized_parameters() returns the parameters that the gradient-based sampler updates. get_storage_vectorized_parameters() returns all parameters that need to be saved (including those updated by Metropolis steps outside the NUTS block).\nThe distinction matters for the mixed MRF, where the NUTS block contains thresholds, pairwise discrete interactions, means, and cross-type interactions, but the continuous-continuous precision elements are updated by a separate Metropolis step and only appear in the storage vector.\n\n\nEdge selection\nvirtual void update_edge_indicators();\nvirtual void initialize_graph();\nvirtual void set_edge_selection_active(bool active);\nWhen edge selection is active, update_edge_indicators() performs a full scan over all edges, proposing inclusion/exclusion for each using the spike-and-slab prior. initialize_graph() sets starting edge indicators (all edges included by default).\n\n\nAdaptation support\nvirtual void init_metropolis_adaptation(WarmupSchedule& schedule);\nvirtual void tune_proposal_sd(int iteration, WarmupSchedule& schedule);\nvirtual void prepare_iteration();\nModels with element-wise Metropolis proposals (GGM, OMRF, mixed MRF) implement these methods to tune proposal standard deviations during warmup using Robbins-Monro updates.\n\n\nConstraint projection\nWhen has_constraints() returns true, the NUTS sampler uses constrained (RATTLE) leapfrog integration. The model must implement the following methods to provide the projection functions:\nvirtual bool has_constraints() const;\nvirtual arma::vec get_full_position() const;\nvirtual void set_full_position(const arma::vec& position);\nvirtual std::pair&lt;double, arma::vec&gt;\n    logp_and_gradient_full(const arma::vec& position);\nvirtual void project_position(arma::vec& position,\n                              const arma::vec& inv_mass);\nvirtual void project_momentum(arma::vec& momentum,\n                              const arma::vec& position,\n                              const arma::vec& inv_mass);\nvirtual void reset_projection_cache();\n\n\n\n\n\n\n\nMethod\nPurpose\n\n\n\n\nget_full_position()\nReturns the complete parameter vector including constrained (zero) entries\n\n\nset_full_position()\nSets all parameters from the full vector\n\n\nlogp_and_gradient_full()\nLog-posterior and gradient over the full parameter space\n\n\nproject_position()\nSHAKE step: projects position onto the constraint manifold (zeros excluded edges)\n\n\nproject_momentum()\nRATTLE step: projects momentum onto the cotangent space of the manifold\n\n\nreset_projection_cache()\nClears cached projection data at the start of each NUTS step\n\n\n\nThe get_full_position() / set_full_position() pair operates on the full NUTS-block parameter vector (including entries fixed at zero), while get_vectorized_parameters() / set_vectorized_parameters() operates on the active subset only.\nThe OMRF does not implement these methods. It handles edge selection by adjusting the dimension of its active parameter vector instead, so the unconstrained NUTS path suffices.\n\n\nMass matrix access\nvirtual arma::vec get_inv_mass() const;\nvirtual void set_inv_mass(const arma::vec& inv_mass);\nvirtual arma::vec get_active_inv_mass() const;\nget_inv_mass() returns the diagonal inverse mass matrix for the full parameter space (used by the constrained path). get_active_inv_mass() returns the subset corresponding to active parameters only (used by the unconstrained path).\n\n\nInfrastructure\nvirtual void set_seed(int seed) = 0;\nvirtual unique_ptr&lt;BaseModel&gt; clone() const = 0;\nclone() produces an independent deep copy for parallel chain execution. Each clone gets its own RNG state via set_seed().",
+    "text": "BaseModel interface\nBaseModel declares over 30 virtual methods. The most important groups are:\n\nCapability queries\nThese methods tell the sampler what the model supports. The chain runner and sampler factory use them to select the correct algorithm.\n\n\n\nMethod\nDefault\nGGMModel\nOMRFModel\nMixedMRFModel\n\n\n\n\nhas_gradient()\nfalse\ntrue\ntrue\ntrue\n\n\nhas_adaptive_metropolis()\nfalse\ntrue\ntrue\ntrue\n\n\nhas_nuts()\nhas_gradient()\ntrue\ntrue\ntrue\n\n\nhas_edge_selection()\nfalse\ntrue\ntrue\ntrue\n\n\nhas_missing_data()\nfalse\ntrue\ntrue\ntrue\n\n\nhas_constraints()\nfalse\ntrue†\nfalse\ntrue†\n\n\n\n† Returns true when edge_selection_ or has_sparse_graph_ is active. For GGMModel this triggers RATTLE constrained integration for the NUTS sampler. For MixedMRFModel it likewise switches the NUTS sampler to constrained (RATTLE) integration.\n\n\nSampling methods\nvirtual void do_one_metropolis_step(int iteration) = 0;\nvirtual vec gradient(vec parameters);\nvirtual pair&lt;double, vec&gt; logp_and_gradient(vec parameters);\nEvery model must implement do_one_metropolis_step(). Models that support gradient-based samplers (NUTS) also override gradient() and logp_and_gradient(). The joint function is more efficient because the log-posterior and gradient share intermediate computations.\n\n\nParameter access\nvirtual vec get_vectorized_parameters() const = 0;\nvirtual void set_vectorized_parameters(const vec& params) = 0;\nvirtual vec get_full_vectorized_parameters() const;\nvirtual vec get_storage_vectorized_parameters() const;\nvirtual size_t parameter_dimension() const = 0;\nvirtual size_t full_parameter_dimension() const;\nvirtual size_t storage_dimension() const;\nget_vectorized_parameters() returns the parameters that the gradient-based sampler updates. get_storage_vectorized_parameters() returns all parameters in a fixed-size vector for saving to output.\nFor the mixed MRF, get_vectorized_parameters() packs the Cholesky factor of the continuous precision matrix (diagonal on the log scale), while get_storage_vectorized_parameters() stores the raw precision entries. The two representations differ, but both include the continuous-continuous block.\n\n\nEdge selection\nvirtual void update_edge_indicators();\nvirtual void initialize_graph();\nvirtual void set_edge_selection_active(bool active);\nWhen edge selection is active, update_edge_indicators() performs a full scan over all edges, proposing add/delete moves using the MoMS framework (Gottardo & Raftery, 2008; van den Bergh et al., 2026). Excluded edges are represented as parameters fixed at zero within a fixed-dimensional space. initialize_graph() draws starting edge indicators from the prior inclusion probabilities.\n\n\nAdaptation support\nvirtual void init_metropolis_adaptation(WarmupSchedule& schedule);\nvirtual void tune_proposal_sd(int iteration, WarmupSchedule& schedule);\nvirtual void prepare_iteration();\nModels with element-wise Metropolis proposals (GGM, OMRF, mixed MRF) implement these methods to tune proposal standard deviations during warmup using Robbins-Monro updates.\n\n\nConstraint projection\nWhen has_constraints() returns true, the NUTS sampler uses constrained (RATTLE) leapfrog integration. The model must implement the following methods to provide the projection functions:\nvirtual bool has_constraints() const;\nvirtual arma::vec get_full_position() const;\nvirtual void set_full_position(const arma::vec& position);\nvirtual std::pair&lt;double, arma::vec&gt;\n    logp_and_gradient_full(const arma::vec& position);\nvirtual void project_position(arma::vec& position,\n                              const arma::vec& inv_mass);\nvirtual void project_momentum(arma::vec& momentum,\n                              const arma::vec& position,\n                              const arma::vec& inv_mass);\nvirtual void reset_projection_cache();\n\n\n\n\n\n\n\nMethod\nPurpose\n\n\n\n\nget_full_position()\nReturns the complete parameter vector including constrained (zero) entries\n\n\nset_full_position()\nSets all parameters from the full vector\n\n\nlogp_and_gradient_full()\nLog-posterior and gradient over the full parameter space\n\n\nproject_position()\nSHAKE step: projects position onto the constraint manifold (zeros excluded edges)\n\n\nproject_momentum()\nRATTLE step: projects momentum onto the cotangent space of the manifold\n\n\nreset_projection_cache()\nClears cached projection data at the start of each NUTS step\n\n\n\nThe get_full_position() / set_full_position() pair operates on the full NUTS-block parameter vector (including entries fixed at zero), while get_vectorized_parameters() / set_vectorized_parameters() operates on the active subset only.\nThe OMRF does not implement these methods. It handles edge selection by adjusting the dimension of its active parameter vector instead, so the unconstrained NUTS path suffices.\n\n\nMass matrix access\nvirtual arma::vec get_inv_mass() const;\nvirtual void set_inv_mass(const arma::vec& inv_mass);\nvirtual arma::vec get_active_inv_mass() const;\nget_inv_mass() returns the diagonal inverse mass matrix for the full parameter space (used by the constrained path). get_active_inv_mass() returns the subset corresponding to active parameters only (used by the unconstrained path).\n\n\nInfrastructure\nvirtual void set_seed(int seed) = 0;\nvirtual unique_ptr&lt;BaseModel&gt; clone() const = 0;\nclone() produces an independent deep copy for parallel chain execution. Each clone gets its own RNG state via set_seed().",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -3002,7 +3182,7 @@
     "href": "manual/model-classes.html#ggmmodel",
     "title": "Model Classes",
     "section": "GGMModel",
-    "text": "GGMModel\nDefined in src/models/ggm/ggm_model.h and ggm_model.cpp.\nParameterization. The GGM is parameterized by the precision matrix \\(\\boldsymbol{\\Omega}\\) (inverse covariance). The model maintains an upper-triangular Cholesky factor \\(\\mathbf{R}\\) such that \\(\\mathbf{R}^\\top\\mathbf{R} = \\boldsymbol{\\Omega}\\).\nSampling. Because the precision matrix must remain positive definite, the GGM does not support gradient-based samplers. Instead, it uses element-wise Metropolis-Hastings: each off-diagonal element \\(\\omega_{ij}\\) is proposed from a Gaussian centered on the current value. After each proposal, the Cholesky factor is updated via a rank-1 Givens rotation (or hyperbolic rotation for downdates), avoiding a full \\(O(p^3)\\) decomposition.\nSufficient statistics. For complete data, the GGM only needs the sufficient statistic \\(\\mathbf{X}^\\top\\mathbf{X}\\), not the raw data matrix. When missing data imputation is active, the sufficient statistics are recomputed after each imputation step.\nSpike-and-slab. Edge indicators \\(\\gamma_{ij} \\in \\{0, 1\\}\\) control whether edge \\((i,j)\\) is included. When \\(\\gamma_{ij} = 0\\), the corresponding precision element is fixed at zero.",
+    "text": "GGMModel\nDefined in src/models/ggm/ggm_model.h and ggm_model.cpp.\nParameterization. The GGM is parameterized by the precision matrix \\(\\boldsymbol{\\Omega}\\) (inverse covariance). The model maintains an upper-triangular Cholesky factor \\(\\mathbf{R}\\) such that \\(\\mathbf{R}^\\top\\mathbf{R} = \\boldsymbol{\\Omega}\\).\nSampling. The GGM supports both NUTS and element-wise Metropolis-Hastings. For NUTS, the model uses a free-element Cholesky parameterization: the diagonal entries are stored on the log scale to enforce positivity, and the off-diagonal entries are expressed in a null-space basis that respects excluded edges. The logp_and_gradient() method computes the gradient in this parameterization. For Metropolis-Hastings, each off-diagonal element \\(\\omega_{ij}\\) is proposed from a Gaussian centered on the current value, and the Cholesky factor is updated via a rank-1 Givens rotation (or hyperbolic rotation for downdates), avoiding a full \\(O(p^3)\\) decomposition.\nSufficient statistics. For complete data, the GGM only needs the sufficient statistic \\(\\mathbf{X}^\\top\\mathbf{X}\\), not the raw data matrix. When missing data imputation is active, the sufficient statistics are recomputed after each imputation step.\nSpike-and-slab. Edge indicators \\(\\gamma_{ij} \\in \\{0, 1\\}\\) control whether edge \\((i,j)\\) is included. When \\(\\gamma_{ij} = 0\\), the corresponding precision element is fixed at zero.",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -3014,7 +3194,7 @@
     "href": "manual/model-classes.html#omrfmodel",
     "title": "Model Classes",
     "section": "OMRFModel",
-    "text": "OMRFModel\nDefined in src/models/omrf/omrf_model.h and omrf_model.cpp.\nParameterization. The ordinal MRF has two parameter types: main effects (category thresholds) and pairwise interactions. For ordinal variables, there is one threshold per category. For Blume-Capel variables, there are two parameters: a linear effect \\(\\alpha\\) and a quadratic effect \\(\\beta\\), with the category score \\(\\mu_c = \\alpha(c - b) + \\beta(c - b)^2\\) where \\(b\\) is the reference category.\nGradient. The OMRF supports logp_and_gradient(), enabling NUTS sampling. The gradient involves category probabilities computed by the variable helpers, which use a FAST/SAFE dual-path strategy for numerical stability.\nResidual matrix. The model maintains a precomputed residual matrix \\(\\mathbf{R}_{ni} = \\sum_{j \\neq i} x_{nj} \\sigma_{ij}\\) that caches the contribution of pairwise interactions to each variable’s conditional distribution. This matrix is updated incrementally when a single interaction changes.\nMetropolis fallback. Even when NUTS is the primary sampler, the OMRF uses element-wise Metropolis proposals for edge indicator updates during the edge selection phase.",
+    "text": "OMRFModel\nDefined in src/models/omrf/omrf_model.h and omrf_model.cpp.\nParameterization. The ordinal MRF has two parameter types: main effects (category thresholds) and pairwise interactions. For ordinal variables, there is one threshold per category. For Blume-Capel variables, there are two parameters: a linear effect \\(\\alpha\\) and a quadratic effect \\(\\beta\\), with the category score \\(\\mu_c = \\alpha(c - b) + \\beta(c - b)^2\\) where \\(b\\) is the reference category.\nGradient. The OMRF supports logp_and_gradient(), enabling NUTS sampling. The gradient involves category probabilities computed by the variable helpers, which use a FAST/SAFE dual-path strategy for numerical stability.\nResidual matrix. The model maintains a precomputed residual matrix \\(\\mathbf{R}_{ni} = 2\\sum_{j \\neq i} x_{nj} \\sigma_{ij}\\) that caches the contribution of pairwise interactions to each variable’s conditional distribution. This matrix is updated incrementally when a single interaction changes.\nEdge selection. Edge indicators are updated via add/delete MoMS moves (Gottardo & Raftery, 2008; van den Bergh et al., 2026), independent of the parameter sampler. The OMRF also provides an element-wise adaptive Metropolis fallback for parameter updates (used during warmup proposal-SD tuning and as a user-selectable alternative to NUTS).",
     "crumbs": [
       "Manual",
       "Architecture",
@@ -3026,7 +3206,7 @@
     "href": "manual/model-classes.html#mixedmrfmodel",
     "title": "Model Classes",
     "section": "MixedMRFModel",
-    "text": "MixedMRFModel\nDefined in src/models/mixed/mixed_mrf_model.h and four .cpp files.\nParameterization. The mixed MRF handles \\(p\\) discrete and \\(q\\) continuous variables jointly. The log-density has the form:\n\\[\n\\log f(\\mathbf{x}, \\mathbf{y}) = \\sum_i \\mu_i(x_i) + \\mathbf{x}^\\top \\boldsymbol{\\Omega}_{xx} \\mathbf{x} + \\mathbf{y}^\\top \\boldsymbol{\\Omega}_{yy} \\mathbf{y} + 2\\mathbf{x}^\\top \\boldsymbol{\\Omega}_{xy} \\mathbf{y}\n\\]\nwhere \\(\\boldsymbol{\\Omega}_{xx}\\), \\(\\boldsymbol{\\Omega}_{yy}\\), and \\(\\boldsymbol{\\Omega}_{xy}\\) are the discrete-discrete, continuous-continuous, and cross-type pairwise interaction matrices (see the User’s Guide for their statistical interpretation).\nSampling. All five parameter blocks are updated jointly by NUTS. The continuous precision matrix is parameterized through its Cholesky factor (diagonal entries on the log scale) so that positive definiteness is guaranteed by construction. The gradient includes the Jacobian of the Cholesky-to-precision mapping. The model also provides a component-wise adaptive Metropolis fallback (do_one_metropolis_step()) used when the sampler is set to \"adaptive-metropolis\".\nThree dimension concepts. All three include the Cholesky block:\n\nparameter_dimension() — Active parameters (excludes inactive edges, includes full Cholesky block)\nfull_parameter_dimension() — All parameters including inactive edges\nstorage_dimension() — Same layout as the full vector (what gets saved to output)\n\nWhen edge selection is active, has_constraints() returns true and the NUTS sampler uses the constrained integration path. The get_full_position() and logp_and_gradient_full() methods operate on the full_parameter_dimension() vector. Projection functions enforce zero entries for excluded edges at each leapfrog step.\nPseudolikelihood options. The pseudolikelihood argument controls whether the model uses conditional or marginal pseudolikelihood for the continuous block. See the User’s Guide for the statistical distinction.",
+    "text": "MixedMRFModel\nDefined in src/models/mixed/mixed_mrf_model.h and four .cpp files.\nParameterization. The mixed MRF handles \\(p\\) discrete and \\(q\\) continuous variables jointly. The log-density has the form:\n\\[\n\\log f(\\mathbf{x}, \\mathbf{y}) = \\sum_i \\mu_i(x_i) + \\mathbf{x}^\\top \\boldsymbol{\\Omega}_{xx} \\mathbf{x} + \\mathbf{y}^\\top \\boldsymbol{\\Omega}_{yy} \\mathbf{y} + 2\\mathbf{x}^\\top \\boldsymbol{\\Omega}_{xy} \\mathbf{y}\n\\]\nwhere \\(\\boldsymbol{\\Omega}_{xx}\\), \\(\\boldsymbol{\\Omega}_{yy}\\), and \\(\\boldsymbol{\\Omega}_{xy}\\) are the discrete-discrete, continuous-continuous, and cross-type pairwise interaction matrices (see the User’s Guide for their statistical interpretation).\nSampling. All five parameter blocks are updated jointly by NUTS. The continuous precision matrix is parameterized through its Cholesky factor (diagonal entries on the log scale) so that positive definiteness is guaranteed by construction. The gradient includes the Jacobian of the Cholesky-to-precision mapping. The model also provides a component-wise adaptive Metropolis fallback (do_one_metropolis_step()) used when the sampler is set to \"adaptive-metropolis\".\nThree dimension concepts. All three include the Cholesky block:\n\nparameter_dimension() — Active parameters (excludes inactive edges, includes full Cholesky block)\nfull_parameter_dimension() — All parameters including inactive edges\nstorage_dimension() — Same layout as the full vector (what gets saved to output)\n\nWhen edge selection is active, has_constraints() returns true and the NUTS sampler uses the constrained integration path. The get_full_position() and logp_and_gradient_full() methods operate on the full_parameter_dimension() vector. Projection functions enforce zero entries for excluded edges at each leapfrog step.\nPseudolikelihood options. The pseudolikelihood argument controls how the discrete full conditionals are computed, not the continuous block. See Mixed MRF Internals for details.",
     "crumbs": [
       "Manual",
       "Architecture",
