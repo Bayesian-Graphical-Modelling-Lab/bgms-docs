@@ -1663,7 +1663,7 @@
     "href": "guide/clustering.html#the-stochastic-block-model",
     "title": "Edge Clustering",
     "section": "The stochastic block model",
-    "text": "The stochastic block model\nThe SBM (Holland et al., 1983) assumes that each node belongs to one of \\(B\\) blocks and that the probability of an edge depends on the block membership of its two endpoints. Let \\(z_i \\in \\{1, \\dots, B\\}\\) denote the block assignment of node \\(i\\). The edge indicators then follow\n\\[\n\\gamma_{ij} \\mid \\boldsymbol{\\pi}, \\mathbf{z} \\sim \\text{Bernoulli}(\\pi_{z_i z_j})\n\\]\nwhere \\(\\pi_{ab}\\) is the inclusion probability for edges connecting blocks \\(a\\) and \\(b\\). The SBM prior in bgms distinguishes within-block edge probabilities (\\(a = b\\)) from between-block edge probabilities (\\(a \\neq b\\)), assigning independent Beta priors to each:\n\\[\n\\pi_{ab} \\sim\n\\begin{cases}\n\\text{Beta}(\\alpha_w, \\beta_w) & a = b \\\\[4pt]\n\\text{Beta}(\\alpha_b, \\beta_b) & a \\neq b\n\\end{cases}\n\\]\nSetting \\(\\alpha_w &gt; \\beta_w\\) and \\(\\alpha_b &lt; \\beta_b\\) encodes the expectation that within-cluster connections are dense and between-cluster connections are sparse. When \\(B = 1\\), the SBM reduces to the standard Beta-Bernoulli prior with hyperparameters \\(\\alpha_w\\) and \\(\\beta_w\\).\nThe block assignments are modeled using a categorical distribution with prior probability \\(P(z_i = b \\mid \\boldsymbol{\\delta}, B) = \\delta_b\\), where the assignment probabilities \\(\\boldsymbol{\\delta}\\) receive a Dirichlet\\((\\epsilon_1, \\dots, \\epsilon_B)\\) prior with default \\(\\epsilon_b = 1\\). The number of blocks \\(B\\) is itself a parameter and receives a zero-truncated Poisson prior,\n\\[\nP(B) = \\frac{\\lambda^B}{B!\\,(\\exp(\\lambda) - 1)}, \\quad B \\geq 1\n\\]\nwith rate \\(\\lambda\\) controlling the expected number of clusters. The rate parameter \\(\\lambda\\) does not exactly equal the expected number of clusters but approximates it: \\(\\lambda = 1.59\\) corresponds to approximately 2 clusters, \\(\\lambda = 2.82\\) to 3, \\(\\lambda = 3.92\\) to 4, and \\(\\lambda = 4.96\\) to 5. For 6 or more expected clusters, \\(\\lambda\\) can be set equal to the expected number of clusters.\nIn summary, the full hierarchical specification is:\n\n\\(B \\sim \\text{Poisson}^+(\\lambda)\\)\n\\(\\boldsymbol{\\delta} \\mid B \\sim \\text{Dirichlet}(\\epsilon_1, \\dots, \\epsilon_B)\\)\n\\(z_i \\mid \\boldsymbol{\\delta}, B \\sim \\text{Categorical}(\\boldsymbol{\\delta})\\)\n\\(\\pi_{ab} \\mid B \\sim \\text{Beta}(\\alpha_w, \\beta_w)\\) for \\(a = b\\) (within-cluster)\n\\(\\pi_{ab} \\mid B \\sim \\text{Beta}(\\alpha_b, \\beta_b)\\) for \\(a \\neq b\\) (between-cluster)\n\\(\\gamma_{ij} \\mid \\boldsymbol{\\pi}, \\mathbf{z}, B \\sim \\text{Bernoulli}(\\pi_{z_i z_j})\\)\n\nBoth \\(B\\) and \\(\\boldsymbol{\\delta}\\) are analytically marginalized out using the Mixtures of Finite Mixtures (MFM) framework (Miller & Harrison, 2018), following the implementation of Geng et al. (2019) for the SBM. This avoids transdimensional sampling while providing consistent estimation of the number of clusters. For details, see Sekulovski et al. (2025).",
+    "text": "The stochastic block model\nThe SBM (Holland et al., 1983) assumes that each node belongs to one of \\(B\\) blocks and that the probability of an edge depends on the block membership of its two endpoints. Let \\(z_i \\in \\{1, \\dots, B\\}\\) denote the block assignment of node \\(i\\). The edge indicators then follow\n\\[\n\\gamma_{ij} \\mid \\boldsymbol{\\pi}, \\mathbf{z} \\sim \\text{Bernoulli}(\\pi_{z_i z_j})\n\\]\nwhere \\(\\pi_{ab}\\) is the inclusion probability for edges connecting blocks \\(a\\) and \\(b\\). The SBM prior in bgms distinguishes within-block edge probabilities (\\(a = b\\)) from between-block edge probabilities (\\(a \\neq b\\)), assigning independent Beta priors to each:\n\\[\n\\pi_{ab} \\sim\n\\begin{cases}\n\\text{Beta}(\\alpha_w, \\beta_w) & a = b \\\\[4pt]\n\\text{Beta}(\\alpha_b, \\beta_b) & a \\neq b\n\\end{cases}\n\\]\nSetting \\(\\alpha_w &gt; \\beta_w\\) and \\(\\alpha_b &lt; \\beta_b\\) encodes the expectation that within-cluster connections are dense and between-cluster connections are sparse. When \\(B = 1\\), the SBM reduces to the standard Beta-Bernoulli prior with hyperparameters \\(\\alpha_w\\) and \\(\\beta_w\\).\nThe block assignments are modeled using a categorical distribution with prior probability \\(P(z_i = b \\mid \\boldsymbol{\\delta}, B) = \\delta_b\\), where the assignment probabilities \\(\\boldsymbol{\\delta}\\) receive a Dirichlet\\((\\epsilon_1, \\dots, \\epsilon_B)\\) prior with default \\(\\epsilon_b = 1\\). The number of blocks \\(B\\) is itself a parameter and receives a zero-truncated Poisson prior,\n\\[\nP(B) = \\frac{\\lambda^B}{B!\\,(\\exp(\\lambda) - 1)}, \\quad B \\geq 1\n\\]\nwith rate \\(\\lambda\\) controlling the expected number of clusters. The rate parameter \\(\\lambda\\) does not exactly equal the expected number of clusters but approximates it: \\(\\lambda = 1.59\\) corresponds to approximately 2 clusters, \\(\\lambda = 2.82\\) to 3, \\(\\lambda = 3.92\\) to 4, and \\(\\lambda = 4.96\\) to 5. For 6 or more expected clusters, \\(\\lambda\\) can be set equal to the expected number of clusters.\nIn summary, the full hierarchical specification is:\n\n\\(B \\sim \\text{Poisson}^+(\\lambda)\\)\n\\(\\boldsymbol{\\delta} \\mid B \\sim \\text{Dirichlet}(\\epsilon_1, \\dots, \\epsilon_B)\\)\n\\(z_i \\mid \\boldsymbol{\\delta}, B \\sim \\text{Categorical}(\\boldsymbol{\\delta})\\)\n\\(\\pi_{ab} \\mid B \\sim \\text{Beta}(\\alpha_w, \\beta_w)\\) for \\(a = b\\) (within-cluster)\n\\(\\pi_{ab} \\mid B \\sim \\text{Beta}(\\alpha_b, \\beta_b)\\) for \\(a \\neq b\\) (between-cluster)\n\\(\\gamma_{ij} \\mid \\boldsymbol{\\pi}, \\mathbf{z}, B \\sim \\text{Bernoulli}(\\pi_{z_i z_j})\\)\n\nBoth \\(B\\) and \\(\\boldsymbol{\\delta}\\) are analytically marginalized out using the Mixtures of Finite Mixtures (MFM) framework (Miller & Harrison, 2018), following the implementation of Geng et al. (2019) for the SBM. This avoids transdimensional sampling while providing consistent estimation of the number of clusters. For details, see Sekulovski et al. (2025). The C++ implementation is documented in Stochastic Block Model Prior.",
     "crumbs": [
       "Get Started",
       "Analyses",
@@ -2906,7 +2906,7 @@
     "href": "manual/edge-priors.html",
     "title": "Edge Priors",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nThe edge prior framework controls which edges are included in the graph. All priors inherit from BaseEdgePrior in src/priors/edge_prior.h.",
+    "text": "The edge prior framework controls which edges are included in the graph. All priors inherit from BaseEdgePrior in src/priors/edge_prior.h.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -2918,7 +2918,7 @@
     "href": "manual/edge-priors.html#baseedgeprior-interface",
     "title": "Edge Priors",
     "section": "BaseEdgePrior interface",
-    "text": "BaseEdgePrior interface\nclass BaseEdgePrior {\n  virtual void update(imat edge_indicators, mat& inclusion_probability,\n                      int num_variables, int num_pairwise,\n                      SafeRNG& rng) = 0;\n  virtual unique_ptr&lt;BaseEdgePrior&gt; clone() const = 0;\n  virtual bool has_allocations() const { return false; }\n  virtual ivec get_allocations() const { return ivec(); }\n};\nThe update() method is called once per MCMC iteration (when edge selection is active). It receives the current edge indicators and updates the inclusion probability matrix in place. The updated probabilities are used by the model’s update_edge_indicators() method for the next round of edge proposals.\nclone() produces an independent copy for parallel chain execution.",
+    "text": "BaseEdgePrior interface\nclass BaseEdgePrior {\n  virtual void update(const arma::imat& edge_indicators,\n                      arma::mat& inclusion_probability,\n                      int num_variables, int num_pairwise,\n                      SafeRNG& rng) = 0;\n  virtual std::unique_ptr&lt;BaseEdgePrior&gt; clone() const = 0;\n  virtual bool has_allocations() const { return false; }\n  virtual arma::ivec get_allocations() const { return arma::ivec(); }\n};\nThe update() method is called once per MCMC iteration (when edge selection is active). It receives the current edge indicators and updates the inclusion probability matrix in place. The updated probabilities are used by the model’s update_edge_indicators() method for the next round of edge proposals.\nclone() produces an independent copy for parallel chain execution.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -2930,7 +2930,7 @@
     "href": "manual/edge-priors.html#bernoulliedgeprior",
     "title": "Edge Priors",
     "section": "BernoulliEdgePrior",
-    "text": "BernoulliEdgePrior\nThe simplest prior: each edge has a fixed inclusion probability that does not change during sampling. The update() method is a no-op.\nThis prior is used when the user specifies edge_prior = \"Bernoulli\" with a fixed inclusion probability matrix.",
+    "text": "BernoulliEdgePrior\nThe simplest prior: each edge has a fixed inclusion probability that does not change during sampling. The update() method is a no-op.\nThis prior is used when the user specifies edge_prior = \"Bernoulli\" with a fixed inclusion probability matrix. This is the default edge prior in bgms.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -2942,7 +2942,7 @@
     "href": "manual/edge-priors.html#betabernoulliedgeprior",
     "title": "Edge Priors",
     "section": "BetaBernoulliEdgePrior",
-    "text": "BetaBernoulliEdgePrior\nA conjugate prior that learns a shared inclusion probability from the data. At each iteration:\n\nCount the number of included edges: \\(k = \\sum_{i&lt;j} \\gamma_{ij}\\)\nCount the total number of possible edges: \\(m = p(p-1)/2\\)\nDraw a new inclusion probability: \\(\\pi \\sim \\text{Beta}(\\alpha + k,\\; \\beta + m - k)\\)\nSet all entries of the inclusion probability matrix to \\(\\pi\\)\n\nThe hyperparameters \\(\\alpha\\) and \\(\\beta\\) default to 1 (uniform prior on the inclusion probability).\nThis is the default edge prior in bgms (edge_prior = \"Beta-Bernoulli\").",
+    "text": "BetaBernoulliEdgePrior\nA conjugate prior that learns a shared inclusion probability from the data. At each iteration:\n\nCount the number of included edges: \\(k = \\sum_{i&lt;j} \\gamma_{ij}\\)\nCount the total number of possible edges: \\(m = p(p-1)/2\\)\nDraw a new inclusion probability: \\(\\pi \\sim \\text{Beta}(\\alpha + k,\\; \\beta + m - k)\\)\nSet all entries of the inclusion probability matrix to \\(\\pi\\)\n\nThe hyperparameters \\(\\alpha\\) and \\(\\beta\\) default to 1 (uniform prior on the inclusion probability).",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -2967,6 +2967,30 @@
     "title": "Edge Priors",
     "section": "Prior selection in R",
     "text": "Prior selection in R\nThe edge_prior argument in bgm() maps to these classes:\n\n\n\n\n\n\n\n\nR value\nC++ class\nBehavior\n\n\n\n\n\"Bernoulli\"\nBernoulliEdgePrior\nFixed inclusion probabilities\n\n\n\"Beta-Bernoulli\"\nBetaBernoulliEdgePrior\nLearns shared inclusion rate\n\n\n\"Stochastic-Block\"\nStochasticBlockEdgePrior\nCluster-structured inclusion\n\n\n\nWhen edge_selection = FALSE, no edge prior is instantiated and all edges remain included throughout sampling.",
+    "crumbs": [
+      "Manual",
+      "Priors & Edge Selection",
+      "Edge Priors"
+    ]
+  },
+  {
+    "objectID": "manual/edge-priors.html#factory-dispatch",
+    "href": "manual/edge-priors.html#factory-dispatch",
+    "title": "Edge Priors",
+    "section": "Factory dispatch",
+    "text": "Factory dispatch\nThe create_edge_prior() factory in edge_prior.h maps an EdgePrior enum value to the concrete class. The enum is produced from the R string by edge_prior_from_string() in common_helpers.h.",
+    "crumbs": [
+      "Manual",
+      "Priors & Edge Selection",
+      "Edge Priors"
+    ]
+  },
+  {
+    "objectID": "manual/edge-priors.html#execution-order",
+    "href": "manual/edge-priors.html#execution-order",
+    "title": "Edge Priors",
+    "section": "Execution order",
+    "text": "Execution order\nWithin each MCMC iteration, the edge prior update runs after the model’s edge indicator and parameter updates:\n\nmodel.update_edge_indicators() — MoMS add/delete moves using the current inclusion probability matrix\nsampler-&gt;step(model, iteration) — parameter updates\nedge_prior.update(...) — update the inclusion probability matrix based on the new edge indicators\n\nThe updated probabilities take effect in the next iteration’s edge indicator proposals.",
     "crumbs": [
       "Manual",
       "Priors & Edge Selection",
@@ -3602,7 +3626,7 @@
     "href": "manual/variable-helpers.html",
     "title": "Variable Helpers",
     "section": "",
-    "text": "Warning\n\n\n\nThis page has not yet passed technical or readability review.\nNumerically stable computation of MRF category denominators and probabilities. Source: src/utils/variable_helpers.h and variable_helpers.cpp.",
+    "text": "Numerically stable computation of MRF category denominators and probabilities. Source: src/utils/variable_helpers.h and variable_helpers.cpp.",
     "crumbs": [
       "Manual",
       "Numerical Methods",
@@ -3614,7 +3638,7 @@
     "href": "manual/variable-helpers.html#the-problem",
     "title": "Variable Helpers",
     "section": "The problem",
-    "text": "The problem\nMRF conditional probabilities involve exponentials of residual scores. For large networks or extreme parameter values, the arguments to exp() can exceed the IEEE 754 double-precision range, producing Inf or underflowing to zero. Naive computation (direct exponentiation followed by normalization) fails silently in these cases.",
+    "text": "The problem\nMRF conditional probabilities involve exponentials of residual scores. Computing exp() for every person–category combination is expensive and dominates the cost of pseudolikelihood evaluation. The variable helpers reformulate the normalizing constants as a recursion that avoids per-category exp() calls (the FAST path). When the recursion’s intermediate values would overflow or underflow, a SAFE path falls back to explicit exp() calls with log-sum-exp stabilization.",
     "crumbs": [
       "Manual",
       "Numerical Methods",
@@ -3626,7 +3650,7 @@
     "href": "manual/variable-helpers.html#the-fastsafe-dual-path-strategy",
     "title": "Variable Helpers",
     "section": "The FAST/SAFE dual-path strategy",
-    "text": "The FAST/SAFE dual-path strategy\nEvery denominator and probability function in variable_helpers.cpp uses a two-path approach:\n\nFAST path — Precomputed exponentials with power-chain accumulation. Used when the exponent arguments stay within safe bounds.\nSAFE path — Direct log-sum-exp evaluation as a fallback when bounds are violated.\n\nThe choice is made per-person (per row of the data matrix) based on whether the residual score times the maximum category exceeds the EXP_BOUND threshold.\n\nFAST path detail\nFor an ordinal variable with categories \\(0, 1, \\ldots, K-1\\) and residual \\(r\\):\n\nPrecompute \\(e_r = \\exp(r)\\) and \\(e_m = \\exp(\\mu(c))\\) for each category\nAccumulate the denominator as a Horner-like chain: \\(D = e^{-b}(1 + e_m[1] \\cdot e_r + e_m[2] \\cdot e_r^2 + \\cdots)\\) where \\(b\\) is a stabilizing shift\n\nThis avoids computing exp() for each category-residual combination independently and exploits the geometric structure of the category scores.\n\n\nSAFE path detail\nWhen the FAST path would overflow or underflow:\n\nCompute \\(s_c = \\mu(c) + c \\cdot r\\) for each category\nFind \\(s_{\\max} = \\max_c s_c\\)\nCompute \\(D = \\exp(s_{\\max}) \\sum_c \\exp(s_c - s_{\\max})\\)\n\nThis is the standard log-sum-exp trick, applied per person.\n\n\nBlock scanning\nThe functions process persons in contiguous blocks. Within each block, all persons follow the same path (FAST or SAFE). The block boundaries are determined by scanning the residual vector for bound violations. This enables branch-free vectorization within each block.",
+    "text": "The FAST/SAFE dual-path strategy\nEvery denominator and probability function in variable_helpers.cpp uses a two-path approach:\n\nFAST path — A recursive power-chain accumulation that precomputes a small number of exponentials and builds the normalizing constant without per-category exp() calls.\nSAFE path — Explicit per-category exp() evaluation with log-sum-exp stabilization, used as a fallback when the FAST path’s intermediate values would overflow or underflow.\n\nThe choice is made per-person (per row of the data matrix) based on whether the residual score times the maximum category exceeds the EXP_BOUND threshold.\n\nFAST path detail\nFor an ordinal variable with categories \\(0, 1, \\ldots, K\\) and residual \\(r\\):\n\nPrecompute \\(e_r = \\exp(r)\\), \\(e_b = \\exp(-b)\\), and \\(e_\\mu(c) = \\exp(\\mu(c))\\) for each category (once per variable)\nAccumulate the denominator with a running power \\(P\\):\n\n\\[\n\\begin{aligned}\nP &\\leftarrow e_r \\\\\nD &\\leftarrow e_b \\\\\n\\text{for } c &= 1, \\ldots, K: \\\\\n  D &\\leftarrow D + e_\\mu(c) \\cdot P \\cdot e_b \\\\\n  P &\\leftarrow P \\cdot e_r\n\\end{aligned}\n\\]\nOnly two per-person exp() calls are needed (\\(e_r\\) and \\(e_b\\)), plus \\(K\\) for the main effects. The running product \\(P = e_r^{\\,c}\\) replaces the \\(K\\) per-category exp() calls that a naive implementation would require.\n\n\nSAFE path detail\nWhen the FAST path would overflow or underflow:\n\nCompute \\(s_c = \\mu(c) + c \\cdot r\\) for each category\nFind \\(s_{\\max} = \\max_c s_c\\)\nCompute \\(D = \\exp(s_{\\max}) \\sum_c \\exp(s_c - s_{\\max})\\)\n\nThis is the standard log-sum-exp computation, applied per person.\n\n\nBlock scanning\nThe functions process persons in contiguous blocks. Within each block, all persons follow the same path (FAST or SAFE). The block boundaries are determined by scanning the residual vector for bound violations. This enables branch-free vectorization within each block.",
     "crumbs": [
       "Manual",
       "Numerical Methods",
@@ -3638,7 +3662,7 @@
     "href": "manual/variable-helpers.html#ordinal-variables",
     "title": "Variable Helpers",
     "section": "Ordinal variables",
-    "text": "Ordinal variables\n\ncompute_denom_ordinal()\nComputes the normalization constant (denominator) for each person’s conditional distribution. Takes the residual vector, main-effect vector, and precomputed bound vector. Returns a vector of length \\(n\\).\n\n\ncompute_probs_ordinal()\nComputes the full category probability matrix (\\(n \\times K\\)) for one ordinal variable. Probabilities are clamped at zero to prevent negative values from floating-point error in the normalization step.",
+    "text": "Ordinal variables\n\ncompute_denom_ordinal()\nComputes the normalization constant (denominator) for each person’s conditional distribution. Takes the residual vector, main-effect vector, and precomputed bound vector. Returns a vector of length \\(n\\).\n\n\ncompute_probs_ordinal()\nComputes the full category probability matrix (\\(n \\times (K+1)\\)) for one ordinal variable, where column 0 is category 0 and columns 1 through \\(K\\) are categories 1 through \\(K\\). Probabilities are clamped at zero to prevent negative values from floating-point error in the normalization step.",
     "crumbs": [
       "Manual",
       "Numerical Methods",
@@ -3674,7 +3698,7 @@
     "href": "manual/variable-helpers.html#the-exp_bound-709-threshold",
     "title": "Variable Helpers",
     "section": "The EXP_BOUND = 709 threshold",
-    "text": "The EXP_BOUND = 709 threshold\nThe bound that triggers the SAFE path is set to 709, derived from IEEE 754 double precision: \\(\\exp(709) \\approx 8.2 \\times 10^{307}\\) is the largest representable value, while \\(\\exp(710) = \\text{Inf}\\). The FAST path checks whether \\(|r| \\cdot (K - 1) &lt; 709\\) before proceeding.",
+    "text": "The EXP_BOUND = 709 threshold\nThe bound that triggers the SAFE path is set to 709, derived from IEEE 754 double precision: \\(\\exp(709) \\approx 8.2 \\times 10^{307}\\) is the largest representable value, while \\(\\exp(710) = \\text{Inf}\\). The FAST path checks whether \\(|b_i| \\le 709\\) before proceeding, where \\(b_i = K \\cdot r_i\\) for ordinal variables. For the joint log-normalizer functions, the threshold is reduced to \\(709 - \\max_c |\\theta_c|\\) to account for intermediate overflow risk in the power chain. The Blume–Capel variants additionally check \\(|K \\cdot r_i - b_i| \\le 709\\).",
     "crumbs": [
       "Manual",
       "Numerical Methods",
