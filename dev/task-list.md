@@ -77,19 +77,19 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | reference/datasets.qmd | Low | Scaffolded | No | No | - |
 | **Manual** | | | | | |
 | manual/index.qmd | Low | Scaffolded | No | No | - |
-| manual/architecture.qmd | Medium | Scaffolded | No | No | - |
+| manual/architecture.qmd | Medium | Populated | No | No | - |
 | manual/r-scaffolding.qmd | Medium | Not started | No | No | - |
-| manual/model-classes.qmd | High | Scaffolded | No | No | - |
-| manual/samplers.qmd | High | Not started | No | No | - |
-| manual/nuts.qmd | High | Scaffolded | No | No | - |
+| manual/model-classes.qmd | High | Contradiction-checked | No | No | - |
+| manual/samplers.qmd | High | Populated | No | No | - |
+| manual/nuts.qmd | High | Populated | No | No | - |
 | manual/hmc.qmd | Medium | Populated | No | No | Deprecated sampler |
 | manual/metropolis.qmd | High | Populated | No | No | - |
-| manual/warmup.qmd | High | Scaffolded | No | No | - |
+| manual/warmup.qmd | High | Populated | No | No | - |
 | manual/parallel-chains.qmd | Medium | Not started | No | No | - |
-| manual/ggm-internals.qmd | High | Not started | No | No | - |
-| manual/omrf-internals.qmd | High | Not started | No | No | - |
+| manual/ggm-internals.qmd | High | Contradiction-checked | No | No | - |
+| manual/omrf-internals.qmd | High | Contradiction-checked | No | No | - |
 | manual/variable-helpers.qmd | High | Not started | No | No | - |
-| manual/mixed-internals.qmd | High | Not started | No | No | - |
+| manual/mixed-internals.qmd | High | Contradiction-checked | No | No | - |
 | manual/edge-priors.qmd | High | Not started | No | No | - |
 | manual/sbm-prior.qmd | High | Not started | No | No | - |
 | manual/bgmcompare-internals.qmd | High | Not started | No | No | - |
