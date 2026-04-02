@@ -2,18 +2,14 @@
 title: "Pseudolikelihood"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
-This page describes how pseudolikelihood approximations are used in bgms
+This page describes how pseudolikelihood approximations are used in `bgms`
 across OMRF, mixed MRF, and group-comparison models.
 
 ## Why pseudolikelihood
 
 For discrete and mixed graphical models, the joint likelihood contains a
 normalizing constant that is expensive or intractable to evaluate for realistic
-network sizes. bgms therefore uses pseudolikelihood-based objectives built from
+network sizes. `bgms` therefore uses pseudolikelihood-based objectives built from
 full conditional distributions.
 
 ## Generic form
@@ -33,12 +29,34 @@ $$
 = \sum_{n=1}^{N} \sum_{i=1}^{p} \log p(x_{ni} \mid \mathbf{x}_{n,-i}, \boldsymbol{\theta}).
 $$
 
-The MCMC samplers in bgms optimize/evaluate log-pseudoposterior quantities,
-that is, log-pseudolikelihood plus log-prior contributions.
+The MCMC samplers in `bgms` target the pseudoposterior distribution,
+combining the pseudolikelihood with the prior.
+
+## Statistical properties
+
+The pseudolikelihood and the full likelihood share the same mode: PL
+does not introduce additional bias beyond that already present in
+the full likelihood [@KeetelaarEtAl_2024_PL;
+@ArenaMarsman_2026_core]. However, the pseudolikelihood underestimates
+the variance of the parameters, producing pseudoposterior distributions
+that are too narrow compared to the true posterior
+[@Miller_2021_PLconsistency; @KeetelaarEtAl_2024_PL;
+@ArenaMarsman_2026_core].
+
+This variance underestimation has consequences for edge selection.
+Bayes factors derived from the pseudoposterior overstate the evidence
+for or against edge inclusion because the spike-and-slab comparison
+operates on a distribution that is artificially concentrated.
+
+For the mixed MRF, the two pseudolikelihood options differ in how
+they handle this variance underestimation for the cross-type
+(discrete-continuous) interactions. The marginal pseudolikelihood
+does not appear to underestimate the variance of the cross-type
+interactions, whereas the conditional pseudolikelihood does.
 
 ## OMRF pseudolikelihood
 
-For OMRF, bgms uses the product of ordinal full conditionals. The conditional
+For OMRF, `bgms` uses the product of ordinal full conditionals. The conditional
 probabilities depend on category thresholds and residual scores that summarize
 the influence of all other variables.
 
@@ -48,13 +66,17 @@ Implementation details and gradient expressions are documented in
 ## Mixed MRF pseudolikelihood
 
 For mixed models, the pseudolikelihood combines discrete and continuous parts.
-The `pseudolikelihood` argument controls the continuous component:
+The continuous block always uses the GGM likelihood. The `pseudolikelihood`
+argument controls how the **discrete** full conditionals are computed:
 
-- `"conditional"` (default): conditional pseudolikelihood for continuous variables.
-- `"marginal"`: marginal normal likelihood for the continuous block.
-
-This choice changes both objective evaluation and gradients for the NUTS-updated
-block.
+- `"conditional"` (default): computes $\log p(x_s \mid x_{-s}, y_{\text{obs}})$,
+  conditioning on the observed continuous values. Faster because updating
+  the continuous precision does not require re-evaluating the discrete
+  pseudolikelihood.
+- `"marginal"`: computes $\log p(x_s \mid x_{-s})$ by integrating out the
+  continuous variables. Uses the marginal interaction matrix
+  $\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top$, which couples the
+  discrete pseudolikelihood to the precision parameters.
 
 Implementation details are documented in [Mixed MRF Internals](mixed-internals.qmd).
 
@@ -70,17 +92,9 @@ Implementation details are documented in
 ## Numerical and gradient considerations
 
 In discrete blocks, both log-normalizers and category probabilities are needed
-for efficient gradient computation. bgms computes these together to avoid
+for efficient gradient computation. `bgms` computes these together to avoid
 redundant work and uses numerically stable paths for exponentiation-sensitive
 regions.
 
 See [Variable Helpers](variable-helpers.qmd) and
 [Numerical Considerations](numerical.qmd).
-
-## Practical implications
-
-- Pseudolikelihood improves computational tractability for larger networks.
-- It is an approximation to the full joint likelihood, so interpretation should
-  follow the model/diagnostic guidance in the user documentation.
-- In mixed models, `"conditional"` versus `"marginal"` pseudolikelihood can
-  trade off speed and fidelity depending on the continuous block size.

@@ -2,26 +2,22 @@
 title: "OMRF Internals"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
-Implementation details of the ordinal Markov random field in bgms.
+Implementation details of the ordinal Markov random field in `bgms`.
 Source: `src/models/omrf/omrf_model.h` and `omrf_model.cpp`.
 
 ## Ordinal threshold parameterization
 
-For an ordinal variable $X_i$ with $K_i$ categories
-$(0, 1, \ldots, K_i - 1)$, the model assigns one threshold parameter
-$\mu_i(c)$ per category $c$. The category $c = 0$ serves as the
+For an ordinal variable $X_i$ with $K_i + 1$ categories
+$(0, 1, \ldots, K_i)$, the model assigns $K_i$ threshold parameters
+$\mu_i(1), \ldots, \mu_i(K_i)$. Category $c = 0$ serves as the
 reference with $\mu_i(0) = 0$. The conditional probability of
 observing category $c$ for person $n$ is:
 
 $$
-P(X_{ni} = c \mid \text{rest}) = \frac{\exp\!\bigl(\mu_i(c) + c \cdot r_{ni}\bigr)}{\sum_{k=0}^{K_i - 1} \exp\!\bigl(\mu_i(k) + k \cdot r_{ni}\bigr)}
+P(X_{ni} = c \mid \text{rest}) = \frac{\exp\!\bigl(\mu_i(c) + c \cdot r_{ni}\bigr)}{\sum_{k=0}^{K_i} \exp\!\bigl(\mu_i(k) + k \cdot r_{ni}\bigr)}
 $$
 
-where $r_{ni} = \sum_{j \neq i} x_{nj}\, \sigma_{ij}$ is the
+where $r_{ni} = 2\sum_{j \neq i} x_{nj}\, \sigma_{ij}$ is the
 residual score summarizing the pairwise interactions with all other
 variables.
 
@@ -45,14 +41,14 @@ The model maintains a precomputed $n \times p$ residual matrix where
 entry $(n, i)$ stores:
 
 $$
-r_{ni} = \sum_{j \neq i} x_{nj}\, \sigma_{ij}
+r_{ni} = 2\sum_{j \neq i} x_{nj}\, \sigma_{ij}
 $$
 
 When a single interaction $\sigma_{ij}$ changes by $\delta$, the
 residual matrix is updated incrementally:
 
-- Column $i$: $r_{ni} \leftarrow r_{ni} + \delta \cdot x_{nj}$ for all $n$
-- Column $j$: $r_{nj} \leftarrow r_{nj} + \delta \cdot x_{ni}$ for all $n$
+- Column $i$: $r_{ni} \leftarrow r_{ni} + 2\delta \cdot x_{nj}$ for all $n$
+- Column $j$: $r_{nj} \leftarrow r_{nj} + 2\delta \cdot x_{ni}$ for all $n$
 
 This avoids recomputing the full matrix product after each parameter
 update.
@@ -77,29 +73,58 @@ conditionals, computed by the
 ## Gradient computation
 
 The `logp_and_gradient()` method computes both the
-log-pseudoposterior and its gradient in a single pass. The gradient
-for a pairwise interaction $\sigma_{ij}$ accumulates over all
-persons:
+log-pseudoposterior and its gradient in a single pass. The observed
+contribution to the gradient for a pairwise interaction $\sigma_{ij}$
+is $4 \sum_{n} x_{ni} x_{nj}$ (from the sufficient statistic
+$\mathbf{X}^\top\mathbf{X}$). The expected contribution accumulates
+over both variables:
 
 $$
-\frac{\partial \text{PL}}{\partial \sigma_{ij}} = \sum_{n=1}^{N} \bigl(x_{ni} - E[X_i \mid \text{rest}]\bigr)\, x_{nj} + \bigl(x_{nj} - E[X_j \mid \text{rest}]\bigr)\, x_{ni}
+\frac{\partial \text{PL}}{\partial \sigma_{ij}} = 4\sum_{n=1}^{N} x_{ni}\, x_{nj} - 2\sum_{n=1}^{N} \bigl(E[X_i \mid \text{rest}]\, x_{nj} + E[X_j \mid \text{rest}]\, x_{ni}\bigr)
 $$
 
 The expected values $E[X_i \mid \text{rest}]$ are computed from the
 category probabilities, which are obtained via the numerically stable
-FAST/SAFE paths in `variable_helpers.cpp`.
+FAST/SAFE paths in `variable_helpers.cpp`. The pairwise gradient is
+vectorized using BLAS matrix products: $\mathbf{X}^\top \mathbf{E}$
+where $\mathbf{E}$ is the matrix of conditional expected values.
 
 ## Edge indicator updates
+
+Edge selection uses a Metropolis-Hastings sampler based on the
+mixtures of mutually singular (MoMS) distributions framework
+[@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms]. All
+interaction parameters live in a fixed-dimensional space; excluded
+edges are represented as parameters fixed at zero rather than
+removed from the model.
 
 When edge selection is active, the model performs a full scan over
 all $p(p-1)/2$ edges after each gradient-based step. For each edge
 $(i, j)$:
 
-1. Compute the pseudolikelihood ratio for inclusion vs. exclusion
-2. Combine with the prior inclusion probability to get the posterior
-   inclusion probability
-3. Sample the indicator $\gamma_{ij} \sim \text{Bernoulli}(p_{ij})$
-4. If the indicator changes, update the residual matrix accordingly
+**Add move** ($\gamma_{ij} = 0 \to 1$). Propose a new interaction
+value $\sigma_{ij}^\star \sim \mathcal{N}(\sigma_{ij},\, \tau_{ij}^2)$
+and accept with probability
+$$
+\alpha = \min\!\left\{1,\;
+  \frac{p(\boldsymbol{\gamma}^\star, \boldsymbol{\sigma}^\star \mid \mathbf{X})}
+       {p(\boldsymbol{\gamma},\, \boldsymbol{\sigma} \mid \mathbf{X})}
+  \;\frac{1}{q(\sigma_{ij}^\star \mid \sigma_{ij})}
+\right\}
+$$
+where the posterior ratio includes the pseudolikelihood ratio, the
+Cauchy slab prior on $\sigma_{ij}^\star$, and the prior inclusion
+odds.
+
+**Delete move** ($\gamma_{ij} = 1 \to 0$). Set $\sigma_{ij}^\star = 0$
+and accept with probability
+$$
+\alpha = \min\!\left\{1,\;
+  \frac{p(\boldsymbol{\gamma}^\star, \boldsymbol{\sigma}^\star \mid \mathbf{X})}
+       {p(\boldsymbol{\gamma},\, \boldsymbol{\sigma} \mid \mathbf{X})}
+  \;\frac{q(\sigma_{ij} \mid \sigma_{ij}^\star)}{1}
+\right\}
+$$
 
 The scan order is randomized at each iteration via
 `prepare_iteration()`, which calls `arma_randperm()`.
@@ -110,4 +135,4 @@ Even when NUTS is the primary sampler, the OMRF implements element-wise
 adaptive Metropolis proposals for use during warmup stage 3b (proposal
 SD learning) and as a user-selectable alternative via
 `update_method = "adaptive-metropolis"`. The proposal SDs are tuned by
-Robbins-Monro targeting 0.234 acceptance, clamped to $[0.001, 2.0]$.
+Robbins-Monro targeting 0.44 acceptance, clamped to $[0.001, 2.0]$.

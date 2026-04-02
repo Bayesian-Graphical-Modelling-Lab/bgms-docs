@@ -82,6 +82,8 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | manual/model-classes.qmd | High | Scaffolded | No | No | - |
 | manual/samplers.qmd | High | Not started | No | No | - |
 | manual/nuts.qmd | High | Scaffolded | No | No | - |
+| manual/hmc.qmd | Medium | Populated | No | No | Deprecated sampler |
+| manual/metropolis.qmd | High | Populated | No | No | - |
 | manual/warmup.qmd | High | Scaffolded | No | No | - |
 | manual/parallel-chains.qmd | Medium | Not started | No | No | - |
 | manual/ggm-internals.qmd | High | Not started | No | No | - |

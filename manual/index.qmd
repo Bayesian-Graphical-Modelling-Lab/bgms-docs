@@ -23,6 +23,8 @@ The sampling machinery shared by all models.
 
 - [Sampler Hierarchy](samplers.qmd) — `SamplerBase`, gradient-based samplers, factory dispatch
 - [NUTS Algorithm](nuts.qmd) — Binary tree construction, U-turn criterion, divergence detection
+- [HMC Algorithm](hmc.qmd) — Fixed-length leapfrog, Metropolis correction (deprecated)
+- [Adaptive Metropolis](metropolis.qmd) — Scalar random-walk MH, Robbins–Monro adaptation
 - [Constrained Leapfrog (RATTLE)](rattle.qmd) — Position/momentum projection, reversibility check, Memoizer
 - [Warmup Schedule](warmup.qmd) — Five-stage adaptation, dual averaging, mass matrix tuning
 - [Parallel Chains](parallel-chains.qmd) — TBB threading, model cloning, per-chain RNG

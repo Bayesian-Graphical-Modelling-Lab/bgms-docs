@@ -24,18 +24,17 @@ runner and sampler factory use them to select the correct algorithm.
 
 | Method | Default | GGMModel | OMRFModel | MixedMRFModel |
 |--------|---------|----------|-----------|---------------|
-| `has_gradient()` | `false` | `false` | `true` | `true` |
+| `has_gradient()` | `false` | `true` | `true` | `true` |
 | `has_adaptive_metropolis()` | `false` | `true` | `true` | `true` |
-| `has_nuts()` | `has_gradient()` | `false` | `true` | `true` |
+| `has_nuts()` | `has_gradient()` | `true` | `true` | `true` |
 | `has_edge_selection()` | `false` | `true` | `true` | `true` |
 | `has_missing_data()` | `false` | `true` | `true` | `true` |
 | `has_constraints()` | `false` | `true`^†^ | `false` | `true`^†^ |
 
 ^†^ Returns `true` when `edge_selection_` or `has_sparse_graph_` is
-active. For GGMModel this flag is present for interface consistency
-but does not trigger RATTLE integration because the GGM uses
-Metropolis sampling only. For MixedMRFModel it switches the NUTS
-sampler to constrained (RATTLE) integration.
+active. For GGMModel this triggers RATTLE constrained integration
+for the NUTS sampler. For MixedMRFModel it likewise switches the
+NUTS sampler to constrained (RATTLE) integration.
 
 ### Sampling methods
 
@@ -64,14 +63,13 @@ virtual size_t storage_dimension() const;
 
 `get_vectorized_parameters()` returns the parameters that the
 gradient-based sampler updates. `get_storage_vectorized_parameters()`
-returns all parameters that need to be saved (including those updated
-by Metropolis steps outside the NUTS block).
+returns all parameters in a fixed-size vector for saving to output.
 
-The distinction matters for the mixed MRF, where the NUTS block
-contains thresholds, pairwise discrete interactions, means, and
-cross-type interactions, but the continuous-continuous precision
-elements are updated by a separate Metropolis step and only appear
-in the storage vector.
+For the mixed MRF, `get_vectorized_parameters()` packs the Cholesky
+factor of the continuous precision matrix (diagonal on the log
+scale), while `get_storage_vectorized_parameters()` stores the raw
+precision entries. The two representations differ, but both include
+the continuous-continuous block.
 
 ### Edge selection
 
@@ -82,9 +80,11 @@ virtual void set_edge_selection_active(bool active);
 ```
 
 When edge selection is active, `update_edge_indicators()` performs a
-full scan over all edges, proposing inclusion/exclusion for each
-using the spike-and-slab prior. `initialize_graph()` sets starting
-edge indicators (all edges included by default).
+full scan over all edges, proposing add/delete moves using the MoMS
+framework [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms].
+Excluded edges are represented as parameters fixed at zero within a
+fixed-dimensional space. `initialize_graph()` draws starting edge
+indicators from the prior inclusion probabilities.
 
 ### Adaptation support
 
@@ -167,13 +167,17 @@ Defined in `src/models/ggm/ggm_model.h` and `ggm_model.cpp`.
 $\boldsymbol{\Omega}$ (inverse covariance). The model maintains an upper-triangular
 Cholesky factor $\mathbf{R}$ such that $\mathbf{R}^\top\mathbf{R} = \boldsymbol{\Omega}$.
 
-**Sampling.** Because the precision matrix must remain positive
-definite, the GGM does not support gradient-based samplers. Instead,
-it uses element-wise Metropolis-Hastings: each off-diagonal element
+**Sampling.** The GGM supports both NUTS and element-wise
+Metropolis-Hastings. For NUTS, the model uses a free-element
+Cholesky parameterization: the diagonal entries are stored on the
+log scale to enforce positivity, and the off-diagonal entries are
+expressed in a null-space basis that respects excluded edges.
+The `logp_and_gradient()` method computes the gradient in this
+parameterization. For Metropolis-Hastings, each off-diagonal element
 $\omega_{ij}$ is proposed from a Gaussian centered on the current
-value. After each proposal, the Cholesky factor is updated via a
-rank-1 Givens rotation (or hyperbolic rotation for downdates),
-avoiding a full $O(p^3)$ decomposition.
+value, and the Cholesky factor is updated via a rank-1 Givens
+rotation (or hyperbolic rotation for downdates), avoiding a full
+$O(p^3)$ decomposition.
 
 **Sufficient statistics.** For complete data, the GGM only needs the
 sufficient statistic $\mathbf{X}^\top\mathbf{X}$, not the raw data matrix.
@@ -202,14 +206,17 @@ computed by the [variable helpers](variable-helpers.qmd), which use
 a FAST/SAFE dual-path strategy for numerical stability.
 
 **Residual matrix.** The model maintains a precomputed residual matrix
-$\mathbf{R}_{ni} = \sum_{j \neq i} x_{nj} \sigma_{ij}$ that caches
+$\mathbf{R}_{ni} = 2\sum_{j \neq i} x_{nj} \sigma_{ij}$ that caches
 the contribution of pairwise interactions to each variable's
 conditional distribution. This matrix is updated incrementally when
 a single interaction changes.
 
-**Metropolis fallback.** Even when NUTS is the primary sampler, the
-OMRF uses element-wise Metropolis proposals for edge indicator
-updates during the edge selection phase.
+**Edge selection.** Edge indicators are updated via add/delete
+MoMS moves [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms],
+independent of the parameter sampler. The OMRF also provides an
+element-wise adaptive Metropolis fallback for parameter updates
+(used during warmup proposal-SD tuning and as a user-selectable
+alternative to NUTS).
 
 ## MixedMRFModel
 
@@ -250,6 +257,6 @@ on the `full_parameter_dimension()` vector. Projection functions
 enforce zero entries for excluded edges at each leapfrog step.
 
 **Pseudolikelihood options.** The `pseudolikelihood` argument controls
-whether the model uses conditional or marginal pseudolikelihood for
-the continuous block. See the [User's Guide](../guide/mixed-model.qmd)
-for the statistical distinction.
+how the discrete full conditionals are computed, not the continuous
+block. See [Mixed MRF Internals](mixed-internals.qmd#pseudolikelihood-options)
+for details.

@@ -125,6 +125,8 @@ website:
           contents:
             - manual/samplers.qmd
             - manual/nuts.qmd
+            - manual/hmc.qmd
+            - manual/metropolis.qmd
             - manual/rattle.qmd
             - manual/warmup.qmd
             - manual/parallel-chains.qmd
