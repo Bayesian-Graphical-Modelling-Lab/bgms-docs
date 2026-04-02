@@ -1,5 +1,5 @@
 ---
-title: "GGM Internals"
+title: "GGM"
 ---
 
 Implementation details of the Gaussian graphical model in `bgms`.

@@ -1,5 +1,5 @@
 ---
-title: "Constrained Leapfrog (RATTLE)"
+title: "Constrained Leapfrog"
 ---
 
 When edge selection is active, excluded edges must remain exactly zero

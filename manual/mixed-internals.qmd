@@ -1,5 +1,5 @@
 ---
-title: "Mixed MRF Internals"
+title: "Mixed MRF"
 ---
 
 Implementation details of the mixed Markov random field in bgms.

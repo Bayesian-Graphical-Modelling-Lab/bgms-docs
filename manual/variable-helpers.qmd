@@ -1,5 +1,5 @@
 ---
-title: "Variable Helpers"
+title: "Fast Computation"
 ---
 
 Numerically stable computation of MRF category denominators and

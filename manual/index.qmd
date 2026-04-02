@@ -45,7 +45,7 @@ How each model type computes likelihoods, gradients, and parameter updates.
 Supporting pages:
 
 - [Pseudolikelihood](pseudolikelihood.qmd) — Why `bgms` uses pseudolikelihood instead of the full likelihood, and how this affects inference. Relevant for OMRF and mixed models.
-- [Fast Probability Computation](variable-helpers.qmd) — Recursive accumulation of MRF category probabilities that avoids per-category `exp()` calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.
+- [Fast Computation](variable-helpers.qmd) — Recursive accumulation of MRF category probabilities that avoids per-category `exp()` calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.
 
 ## Edge Priors
 

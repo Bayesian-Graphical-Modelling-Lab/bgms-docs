@@ -1,5 +1,5 @@
 ---
-title: "OMRF Internals"
+title: "OMRF"
 ---
 
 Implementation details of the ordinal Markov random field in `bgms`.

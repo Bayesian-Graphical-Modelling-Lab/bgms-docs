@@ -138,8 +138,10 @@ website:
             - manual/ggm-internals.qmd
             - manual/omrf-internals.qmd
             - manual/mixed-internals.qmd
-            - manual/pseudolikelihood.qmd
-            - manual/variable-helpers.qmd
+            - section: "Supporting Pages"
+              contents:
+                - manual/pseudolikelihood.qmd
+                - manual/variable-helpers.qmd
         - section: "Edge Priors"
           contents:
             - manual/edge-priors.qmd
