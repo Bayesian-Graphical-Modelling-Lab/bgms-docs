@@ -118,15 +118,9 @@ group differences).
 ### Example
 
 ```{r}
-#| eval: false
-# Fit a model
-fit = bgm(Wenchuan, seed = 1234)
-```
-
-```{r}
-# Predict probabilities for the first observation
-# given its values on variables 2-17
-predict(fit, newdata = Wenchuan[1, ], variables = 1)
+# Predict probabilities for the first observation's variable 1
+# given its observed values on variables 2-17
+predict(fit, newdata = Wenchuan[1, , drop = FALSE], variables = 1)
 
 # Predict responses (most likely category) for first 3 observations
 predict(fit, newdata = Wenchuan[1:3, ], variables = 1:3, type = "response")
