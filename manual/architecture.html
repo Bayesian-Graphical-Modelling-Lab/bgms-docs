@@ -388,6 +388,24 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">HMC Algorithm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Adaptive Metropolis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Warmup Schedule</span></a>
   </div>
@@ -419,12 +437,6 @@ ul.task-list li input[type="checkbox"] {
   <div class="sidebar-item-container"> 
   <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">OMRF Internals</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -470,7 +482,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Group Comparison Engine</span></a>
+ <span class="menu-text">bgmCompare Internals</span></a>
   </div>
 </li>
       </ul>
@@ -488,6 +500,18 @@ ul.task-list li input[type="checkbox"] {
   <div class="sidebar-item-container"> 
   <a href="../manual/numerical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Numerical Considerations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pseudolikelihood</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
       </ul>
@@ -534,7 +558,7 @@ Warning
 <p>This page has not yet passed technical or readability review.</p>
 </div>
 </div>
-<p>The bgms C++ backend is organized in five top-level directories under <code>src/</code>. Each directory has a distinct role, and dependencies flow downward: algorithms depend on math utilities but not on models, and the execution layer orchestrates everything.</p>
+<p>The <code>bgms</code> C++ backend is organized in five top-level directories under <code>src/</code>. Each directory has a distinct role, and dependencies flow downward: algorithms depend on math utilities but not on models, and the execution layer orchestrates everything.</p>
 <section id="source-layout" class="level2">
 <h2 class="anchored" data-anchor-id="source-layout">Source layout</h2>
 <pre><code>src/
@@ -546,7 +570,7 @@ Warning
 │   ├── base_model.h     # Abstract interface (30+ virtual methods)
 │   ├── ggm/             # GGMModel — precision matrix, Metropolis-only
 │   ├── omrf/            # OMRFModel — ordinal MRF, gradient-based
-│   └── mixed/           # MixedMRFModel — hybrid NUTS+Metropolis
+│   └── mixed/           # MixedMRFModel — mixed discrete-continuous MRF
 ├── priors/
 │   ├── edge_prior.h     # BaseEdgePrior + Bernoulli, BetaBernoulli, SBM
 │   ├── sbm_edge_prior.h # MFM-SBM Gibbs updates
@@ -629,7 +653,7 @@ Warning
 <h2 class="anchored" data-anchor-id="design-principles">Design principles</h2>
 <p><strong>Separation of concerns.</strong> Algorithms know nothing about models. A <code>nuts_step()</code> call receives a function <code>logp_and_gradient(vec) → (double, vec)</code> and returns a <code>StepResult</code>. The model provides the function; the algorithm does the math.</p>
 <p><strong>Virtual dispatch for models.</strong> All models inherit from <code>BaseModel</code> and override a small set of virtual methods. The chain runner calls <code>model.logp_and_gradient()</code> without knowing whether it is sampling a GGM or an ordinal MRF. See <a href="../manual/model-classes.html">Model Classes</a>.</p>
-<p><strong>Cloning for parallelism.</strong> Both <code>BaseModel</code> and <code>BaseEdgePrior</code> expose a <code>clone()</code> method that produces an independent copy. The chain runner clones the prototype once per chain before dispatching to TBB threads. See <a href="../manual/parallel-chains.html">Parallel Chains</a>.</p>
+<p><strong>Cloning for parallelism.</strong> Both <code>BaseModel</code> and <code>BaseEdgePrior</code> expose a <code>clone()</code> method that produces an independent copy. The Rcpp entry point constructs a single model from R input and passes it to <code>run_mcmc_sampler()</code>. Inside C++, that prototype is cloned once per chain (each clone receiving its own RNG seed), and the clones are dispatched to TBB threads via <code>RcppParallel::parallelFor()</code>. R never interacts with the clones directly — parallelism is entirely C++-side. After all chains finish, the <code>vector&lt;ChainResult&gt;</code> is converted to an R list and returned. See <a href="../manual/parallel-chains.html">Parallel Chains</a>.</p>
 <p><strong>Header-only samplers.</strong> The sampler classes in <code>mcmc/samplers/</code> are header-only. They are lightweight wrappers that hold adaptation state and call algorithm functions from <code>mcmc/algorithms/</code>.</p>
 <p><strong>Rcpp interface files.</strong> The top-level <code>.cpp</code> files in <code>src/</code> (<code>sample_ggm.cpp</code>, <code>sample_omrf.cpp</code>, <code>sample_mixed.cpp</code>, <code>bgmCompare_interface.cpp</code>) are thin Rcpp entry points. They construct C++ objects from R lists and call <code>run_mcmc_sampler()</code>.</p>
 </section>
@@ -670,6 +694,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

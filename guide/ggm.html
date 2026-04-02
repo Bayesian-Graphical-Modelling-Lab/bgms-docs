@@ -58,7 +58,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -496,7 +516,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Output &amp; Diagnostics</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -505,7 +525,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../guide/mcmc-output.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MCMC Output</span></a>
+ <span class="menu-text">Model Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -545,54 +565,99 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>The Gaussian graphical model (GGM) is a Markov Random Field for continuous variables. In bgms, the GGM is fit when <code>variable_type = "continuous"</code>.</p>
+<p>The Gaussian graphical model (GGM) is a Markov random field for continuous variables. It is the most widely studied undirected graphical model <span class="citation" data-cites="Lauritzen1996">(<a href="#ref-Lauritzen1996" role="doc-biblioref">Lauritzen, 1996</a>)</span> and forms the continuous component of the <a href="../guide/mixed-model.html">Mixed MRF</a> in <code>bgms</code>. To fit a GGM, set <code>variable_type = "continuous"</code>.</p>
 <section id="the-model" class="level2">
 <h2 class="anchored" data-anchor-id="the-model">The model</h2>
 <p>A GGM assumes that <span class="math inline">\(p\)</span> continuous variables follow a multivariate normal distribution:</p>
 <p><span class="math display">\[
 \mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})
 \]</span></p>
-<p>The network structure is encoded in the precision matrix <span class="math inline">\(\boldsymbol{K} = \boldsymbol{\Sigma}^{-1}\)</span>. A zero entry <span class="math inline">\(K_{ij} = 0\)</span> means that variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are conditionally independent given all other variables — equivalently, the edge between nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is absent.</p>
+<p>where <span class="math inline">\(\boldsymbol{\mu}\)</span> is the mean vector and <span class="math inline">\(\boldsymbol{\Sigma}\)</span> is the <span class="math inline">\(p \times p\)</span> covariance matrix. The covariance matrix describes marginal associations between pairs of variables, but marginal associations confound direct and indirect effects. Two variables may be strongly correlated because both depend on a third variable, not because they influence each other directly.</p>
+<p>The GGM is defined not through the covariance matrix but through its inverse, the precision matrix <span class="math inline">\(\boldsymbol{\Theta} = \boldsymbol{\Sigma}^{-1}\)</span>. <span class="citation" data-cites="Dempster_1972">Dempster (<a href="#ref-Dempster_1972" role="doc-biblioref">1972</a>)</span> introduced this idea under the name <em>covariance selection</em>: the precision matrix separates direct from indirect associations, and a zero entry <span class="math inline">\(\theta_{ij} = 0\)</span> means that variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are conditionally independent given all other variables. In the graph, this corresponds to the absence of the edge between nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</p>
+</section>
+<section id="connection-to-the-mrf-framework" class="level2">
+<h2 class="anchored" data-anchor-id="connection-to-the-mrf-framework">Connection to the MRF framework</h2>
+<p>The <a href="../guide/graphical-models.html">Graphical Models</a> page introduced the general pairwise MRF:</p>
+<p><span class="math display">\[
+p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
+\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
+\]</span></p>
+<p>The GGM is a special case of this form. In <code>bgms</code>, continuous variables are centered before estimation, so <span class="math inline">\(\boldsymbol{\mu} = \mathbf{0}\)</span> and the node potentials vanish. The multivariate normal density then reduces to:</p>
+<p><span class="math display">\[
+p(\mathbf{x}) \propto \exp\!\left(
+- \tfrac{1}{2}\,\mathbf{x}^{\sf T} \boldsymbol{\Theta}\, \mathbf{x}\right)
+\]</span></p>
+<p>Comparing this with the general MRF identifies the interaction matrix as <span class="math inline">\(\boldsymbol{\Omega} = -\tfrac{1}{2}\,\boldsymbol{\Theta}\)</span>. The off-diagonal entry <span class="math inline">\(\omega_{ij} = -\tfrac{1}{2}\,\theta_{ij}\)</span> is the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and when <span class="math inline">\(\theta_{ij} = 0\)</span> the partial association is zero and the edge is absent.</p>
+</section>
+<section id="partial-associations" class="level2">
+<h2 class="anchored" data-anchor-id="partial-associations">Partial associations</h2>
+<p>As described in <a href="../guide/graphical-models.html">Graphical Models</a>, <code>bgms</code> reports all pairwise effects on a unified partial association scale. For the GGM, the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is:</p>
+<p><span class="math display">\[
+\omega_{ij} = -\tfrac{1}{2}\, \theta_{ij}
+\]</span></p>
+<p>A positive <span class="math inline">\(\omega_{ij}\)</span> means that, holding all other variables constant, higher values of <span class="math inline">\(x_i\)</span> are associated with higher values of <span class="math inline">\(x_j\)</span>.</p>
+<p>The partial association and the precision element carry the same information — one is a linear rescaling of the other. The rescaling ensures that the GGM partial association occupies the same structural role as the partial association in the ordinal MRF, where <span class="math inline">\(\omega_{ij}\)</span> is half the log adjacent-category odds ratio (see <a href="../guide/omrf.html">Ordinal MRF</a>). This unified scale means that <code>coef(fit)$pairwise</code> returns partial associations regardless of model type, and the spike-and-slab prior (<a href="../guide/prior-basics.html">Prior Basics</a>) operates on the same quantity across models. To obtain the precision matrix directly, use <code>extract_precision(fit)</code>.</p>
 </section>
 <section id="partial-correlations" class="level2">
 <h2 class="anchored" data-anchor-id="partial-correlations">Partial correlations</h2>
-<p>The off-diagonal entries of the standardized precision matrix are partial correlations:</p>
+<p>The partial correlation is a standardized measure of conditional association. It removes the influence of the variables’ scales and is bounded between <span class="math inline">\(-1\)</span> and <span class="math inline">\(1\)</span>:</p>
 <p><span class="math display">\[
-\rho_{ij \cdot \text{rest}} = -\frac{K_{ij}}{\sqrt{K_{ii} K_{jj}}}
+\rho_{ij \cdot \text{rest}} = -\frac{\theta_{ij}}{\sqrt{\theta_{ii}\, \theta_{jj}}}
 \]</span></p>
-<p>A positive partial correlation means that, holding all other variables constant, higher values of <span class="math inline">\(x_i\)</span> are associated with higher values of <span class="math inline">\(x_j\)</span>. bgms reports these partial correlations as the pairwise interaction parameters.</p>
+<p>Because the partial correlation standardizes the off-diagonal precision element by the conditional standard deviations of both variables, it is invariant to rescaling. Two datasets that differ only in their units of measurement produce the same partial correlations.</p>
+<p>The partial correlation is related to the partial association by:</p>
+<p><span class="math display">\[
+\rho_{ij \cdot \text{rest}} = \frac{2\,\omega_{ij}}{\sqrt{\theta_{ii}\, \theta_{jj}}}
+\]</span></p>
+<p>When comparing the strength of associations across variable pairs — identifying which edges are strongest relative to each variable’s conditional variability — partial correlations are the natural summary. When the goal is edge selection or comparison with discrete network models, the partial associations are more appropriate. To obtain the partial correlation matrix directly, use <code>extract_partial_correlations(fit)</code>.</p>
 </section>
-<section id="fitting-a-ggm" class="level2">
-<h2 class="anchored" data-anchor-id="fitting-a-ggm">Fitting a GGM</h2>
-<p>To fit a GGM, pass continuous data and set <code>variable_type</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> continuous_data, <span class="at">variable_type =</span> <span class="st">"continuous"</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The <code>summary()</code> and <code>coef()</code> methods work the same as for ordinal models. The pairwise effects in the output are partial correlations, and the diagonal of the pairwise matrix contains the precision matrix diagonal.</p>
+<section id="the-precision-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="the-precision-matrix">The precision matrix</h2>
+<p>The diagonal entries of the precision matrix, <span class="math inline">\(\theta_{ii}\)</span>, are the inverse of the residual variance of variable <span class="math inline">\(i\)</span> — the variance that remains after regressing <span class="math inline">\(x_i\)</span> on all other variables. A small residual variance <span class="math inline">\(1 / \theta_{ii}\)</span> means the variable is well predicted by the rest of the network.</p>
+<p>In <code>bgms</code>, the diagonal entries are nuisance parameters. They receive a Gamma<span class="math inline">\((1, 1)\)</span> prior and are estimated during MCMC sampling, but they are not subject to edge selection. The off-diagonal entries — or equivalently the partial associations — are the primary inferential targets.</p>
+</section>
+<section id="likelihood" class="level2">
+<h2 class="anchored" data-anchor-id="likelihood">Likelihood</h2>
+<p>Unlike the ordinal MRF, whose normalizing constant is intractable and requires a pseudolikelihood approximation (see <a href="../guide/omrf.html">Ordinal MRF</a>), the GGM has a closed-form likelihood. For <span class="math inline">\(n\)</span> observations with sufficient statistic <span class="math inline">\(\mathbf{S} = \mathbf{X}^{\sf T}\mathbf{X}\)</span>, the log-likelihood is:</p>
+<p><span class="math display">\[
+\ell(\boldsymbol{\Theta}) = \frac{n}{2}\,\log|\boldsymbol{\Theta}|
+- \frac{1}{2}\,\operatorname{tr}(\mathbf{S}\,\boldsymbol{\Theta})
+\]</span></p>
+<p>The likelihood depends on the data only through <span class="math inline">\(\mathbf{S}\)</span> and <span class="math inline">\(n\)</span>, not through the individual observations. The log-determinant <span class="math inline">\(\log|\boldsymbol{\Theta}|\)</span> is computed efficiently from the Cholesky factor of the precision matrix.</p>
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>
-<p>When <code>edge_selection = TRUE</code> (the default), bgms applies spike-and-slab priors to the off-diagonal entries of the precision matrix. Edges with posterior inclusion probability above 0.5 have more evidence for presence than absence. See <a href="../guide/edge-selection.html">Edge Selection</a> for details.</p>
+<p>When <code>edge_selection = TRUE</code> (the default), <code>bgms</code> applies spike-and-slab priors to the partial associations <span class="math inline">\(\omega_{ij}\)</span>. The spike sets <span class="math inline">\(\omega_{ij} = 0\)</span> (and therefore <span class="math inline">\(\theta_{ij} = 0\)</span>), enforcing the absence of the edge. The slab places a Cauchy prior on <span class="math inline">\(\omega_{ij}\)</span>, allowing the effect size to be estimated from the data. See <a href="../guide/prior-basics.html">Prior Basics</a> for the spike-and-slab specification.</p>
+<p>The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See <a href="../guide/edge-selection.html">Edge Selection</a>.</p>
 </section>
 <section id="missing-data" class="level2">
 <h2 class="anchored" data-anchor-id="missing-data">Missing data</h2>
-<p>For continuous data, missing values can be imputed within the MCMC sampler by setting <code>na_action = "impute"</code>. Missing entries are resampled at each iteration from their full conditional distribution. The default behavior is <code>na_action = "listwise"</code>, which removes rows with any missing values before fitting.</p>
+<p>For continuous data, missing values can be imputed within the MCMC sampler by setting <code>na_action = "impute"</code>. At each iteration, missing entries are drawn from their conditional normal distribution given the current precision matrix and the observed values. Because the imputation is embedded in the MCMC chain, the posterior summaries account for the uncertainty introduced by missing data.</p>
+<p>The default behavior is <code>na_action = "listwise"</code>, which removes rows with any missing values before fitting.</p>
+</section>
+<section id="fitting-a-ggm" class="level2">
+<h2 class="anchored" data-anchor-id="fitting-a-ggm">Fitting a GGM</h2>
+<p>To fit a GGM, set <code>variable_type = "continuous"</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">variable_type =</span> <span class="st">"continuous"</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>summary()</code> and <code>coef()</code> methods work the same as for ordinal and mixed models. <code>coef(fit)$pairwise</code> returns the posterior means of the partial associations <span class="math inline">\(\omega_{ij}\)</span>, and <code>coef(fit)$indicator</code> returns the posterior inclusion probabilities.</p>
+<p>To obtain model-specific parameterizations, use the dedicated extractors:</p>
+<ul>
+<li><code>extract_precision(fit)</code> — returns the full precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span>.</li>
+<li><code>extract_partial_correlations(fit)</code> — returns the partial correlation matrix.</li>
+</ul>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-Dempster_1972" class="csl-entry" role="listitem">
+Dempster, A. P. (1972). Covariance selection. <em>Biometrics</em>, <em>28</em>(1), 157–175. <a href="https://doi.org/10.2307/2528966">https://doi.org/10.2307/2528966</a>
+</div>
+<div id="ref-Lauritzen1996" class="csl-entry" role="listitem">
+Lauritzen, S. L. (1996). <em>Graphical models</em>. Oxford University Press.
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
@@ -609,6 +674,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

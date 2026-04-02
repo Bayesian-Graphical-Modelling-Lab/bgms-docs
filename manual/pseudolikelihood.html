@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>set-up – bgms</title>
+<title>Pseudolikelihood – bgms</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -23,7 +23,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -33,6 +53,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../manual/variable-helpers.html" rel="next">
+<link href="../manual/numerical.html" rel="prev">
 <link href="../bgms_sticker.svg" rel="icon" type="image/svg+xml">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -76,11 +98,40 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -286,7 +337,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Reference</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../manual/index.html"> 
+    <a class="nav-link active" href="../manual/index.html" aria-current="page"> 
 <span class="menu-text">Manual</span></a>
   </li>  
   <li class="nav-item">
@@ -311,630 +362,302 @@ ul.task-list li input[type="checkbox"] {
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/numerical.html">Numerical Methods</a></li><li class="breadcrumb-item"><a href="../manual/pseudolikelihood.html">Pseudolikelihood</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Technical Manual</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Architecture</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">C++ Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/r-scaffolding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">R Scaffolding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/model-classes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Model Classes</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">MCMC Engine</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/samplers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampler Hierarchy</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/nuts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">NUTS Algorithm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">HMC Algorithm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Adaptive Metropolis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Warmup Schedule</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/parallel-chains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parallel Chains</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Models</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/ggm-internals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GGM Internals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OMRF Internals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/mixed-internals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mixed MRF Internals</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Priors &amp; Edge Selection</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/edge-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Edge Priors</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/sbm-prior.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stochastic Block Model Prior</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Group Comparison</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">bgmCompare Internals</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Numerical Methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/numerical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Numerical Considerations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Pseudolikelihood</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variable Helpers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/numerical.html">Numerical Methods</a></li><li class="breadcrumb-item"><a href="../manual/pseudolikelihood.html">Pseudolikelihood</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Pseudolikelihood</h1>
+</div>
 
 
 
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
 
 
-<section id="bgms-docs-build-plan" class="level1">
-<h1>bgms-docs Build Plan</h1>
-<section id="how-this-plan-works" class="level2">
-<h2 class="anchored" data-anchor-id="how-this-plan-works">How this plan works</h2>
-<p>This plan is written as a step-by-step playbook. Read it top to bottom. Each phase tells you what to do, who does it, and when it is done. All page statuses are tracked in one file: <code>dev/task-list.md</code>.</p>
-<section id="roles" class="level3">
-<h3 class="anchored" data-anchor-id="roles">Roles</h3>
+</header>
+
+
+<p>This page describes how pseudolikelihood approximations are used in <code>bgms</code> across OMRF, mixed MRF, and group-comparison models.</p>
+<section id="why-pseudolikelihood" class="level2">
+<h2 class="anchored" data-anchor-id="why-pseudolikelihood">Why pseudolikelihood</h2>
+<p>For discrete and mixed graphical models, the joint likelihood contains a normalizing constant that is expensive or intractable to evaluate for realistic network sizes. <code>bgms</code> therefore uses pseudolikelihood-based objectives built from full conditional distributions.</p>
+</section>
+<section id="generic-form" class="level2">
+<h2 class="anchored" data-anchor-id="generic-form">Generic form</h2>
+<p>Let <span class="math inline">\(\mathbf{x}_n\)</span> denote observation <span class="math inline">\(n\)</span>, and let <span class="math inline">\(x_{ni}\)</span> be variable <span class="math inline">\(i\)</span> in that observation. The pseudolikelihood is</p>
+<p><span class="math display">\[
+\mathrm{PL}(\boldsymbol{\theta})
+= \prod_{n=1}^{N} \prod_{i=1}^{p} p(x_{ni} \mid \mathbf{x}_{n,-i}, \boldsymbol{\theta})
+\]</span></p>
+<p>with log form</p>
+<p><span class="math display">\[
+\log \mathrm{PL}(\boldsymbol{\theta})
+= \sum_{n=1}^{N} \sum_{i=1}^{p} \log p(x_{ni} \mid \mathbf{x}_{n,-i}, \boldsymbol{\theta}).
+\]</span></p>
+<p>The MCMC samplers in <code>bgms</code> target the pseudoposterior distribution, combining the pseudolikelihood with the prior.</p>
+</section>
+<section id="statistical-properties" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-properties">Statistical properties</h2>
+<p>The pseudolikelihood and the full likelihood share the same mode: PL does not introduce additional bias beyond that already present in the full likelihood <span class="citation" data-cites="KeetelaarEtAl_2024_PL ArenaMarsman_2026_core">(<a href="#ref-ArenaMarsman_2026_core" role="doc-biblioref">Arena &amp; Marsman, 2026</a>; <a href="#ref-KeetelaarEtAl_2024_PL" role="doc-biblioref">Keetelaar et al., 2024</a>)</span>. However, the pseudolikelihood underestimates the variance of the parameters, producing pseudoposterior distributions that are too narrow compared to the true posterior <span class="citation" data-cites="Miller_2021_PLconsistency KeetelaarEtAl_2024_PL ArenaMarsman_2026_core">(<a href="#ref-ArenaMarsman_2026_core" role="doc-biblioref">Arena &amp; Marsman, 2026</a>; <a href="#ref-KeetelaarEtAl_2024_PL" role="doc-biblioref">Keetelaar et al., 2024</a>; <a href="#ref-Miller_2021_PLconsistency" role="doc-biblioref">Miller, 2021</a>)</span>.</p>
+<p>This variance underestimation has consequences for edge selection. Bayes factors derived from the pseudoposterior overstate the evidence for or against edge inclusion because the spike-and-slab comparison operates on a distribution that is artificially concentrated.</p>
+<p>For the mixed MRF, the two pseudolikelihood options differ in how they handle this variance underestimation for the cross-type (discrete-continuous) interactions. The marginal pseudolikelihood does not appear to underestimate the variance of the cross-type interactions, whereas the conditional pseudolikelihood does.</p>
+</section>
+<section id="omrf-pseudolikelihood" class="level2">
+<h2 class="anchored" data-anchor-id="omrf-pseudolikelihood">OMRF pseudolikelihood</h2>
+<p>For OMRF, <code>bgms</code> uses the product of ordinal full conditionals. The conditional probabilities depend on category thresholds and residual scores that summarize the influence of all other variables.</p>
+<p>Implementation details and gradient expressions are documented in <a href="../manual/omrf-internals.html">OMRF Internals</a>.</p>
+</section>
+<section id="mixed-mrf-pseudolikelihood" class="level2">
+<h2 class="anchored" data-anchor-id="mixed-mrf-pseudolikelihood">Mixed MRF pseudolikelihood</h2>
+<p>For mixed models, the pseudolikelihood combines discrete and continuous parts. The continuous block always uses the GGM likelihood. The <code>pseudolikelihood</code> argument controls how the <strong>discrete</strong> full conditionals are computed:</p>
 <ul>
-<li><strong>Maarten</strong> — technical sign-off (facts, code, algorithms).</li>
-<li><strong>Emily</strong> — readability sign-off (clarity, audience fit).</li>
-<li><strong>LLMs</strong> — drafting and transformation only. Never treated as source of truth.</li>
+<li><code>"conditional"</code> (default): computes <span class="math inline">\(\log p(x_s \mid x_{-s}, y_{\text{obs}})\)</span>, conditioning on the observed continuous values. Faster because updating the continuous precision does not require re-evaluating the discrete pseudolikelihood.</li>
+<li><code>"marginal"</code>: computes <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> by integrating out the continuous variables. Uses the marginal interaction matrix <span class="math inline">\(\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top\)</span>, which couples the discrete pseudolikelihood to the precision parameters.</li>
 </ul>
+<p>Implementation details are documented in <a href="../manual/mixed-internals.html">Mixed MRF Internals</a>.</p>
 </section>
-<section id="how-git-branches-work" class="level3">
-<h3 class="anchored" data-anchor-id="how-git-branches-work">How git branches work</h3>
-<ul>
-<li>All work happens on one cycle branch (e.g.&nbsp;<code>docs/cycle-01</code>).</li>
-<li>Files stay in their normal folders (<code>guide/</code>, <code>reference/</code>, <code>manual/</code>).</li>
-<li>As a page matures, you make new commits on the same branch.</li>
-<li>When pages are approved, merge the cycle branch into <code>main</code>.</li>
-<li>Statuses (Scaffolded, Populated, etc.) are labels in <code>dev/task-list.md</code>, not separate branches.</li>
-</ul>
+<section id="group-comparison-bgmcompare" class="level2">
+<h2 class="anchored" data-anchor-id="group-comparison-bgmcompare">Group comparison (bgmCompare)</h2>
+<p>The group-comparison engine uses the same pseudolikelihood idea but evaluates it per group under the baseline-plus-differences parameterization. Gradient contributions are then projected through the contrast structure.</p>
+<p>Implementation details are documented in <a href="../manual/bgmcompare-internals.html">bgmCompare Engine</a>.</p>
 </section>
-<section id="when-sources-disagree-trust-this-order" class="level3">
-<h3 class="anchored" data-anchor-id="when-sources-disagree-trust-this-order">When sources disagree, trust this order</h3>
-<ol type="1">
-<li>bgms code behavior (actual implementation)</li>
-<li>roxygen/man generated docs</li>
-<li>design docs / algorithm notes</li>
-<li>existing website text</li>
-<li>LLM-generated text</li>
-</ol>
-<p>Never let LLM text override implementation facts.</p>
-<hr>
-</section>
-</section>
-<section id="phase-0-preparation-one-time" class="level2">
-<h2 class="anchored" data-anchor-id="phase-0-preparation-one-time">Phase 0 — Preparation (one-time)</h2>
-<p><strong>Goal:</strong> Lock in the page list and set up the workspace.</p>
-<p>Do this:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Confirm the page list. Use the <code>_quarto.yml</code> sidebar as the starting point.</label></li>
-<li><label><input type="checkbox">Set audience per section:</label>
-<ul>
-<li>Guide → users and applied analysts.</li>
-<li>Reference → exact API behavior.</li>
-<li>Manual → technical internals and algorithms.</li>
-</ul></li>
-<li><label><input type="checkbox">Assign risk levels to each page in <code>dev/task-list.md</code>:</label>
-<ul>
-<li>High: algorithm internals, defaults/priors, convergence, NUTS/warmup, core API (<code>bgm</code>, <code>bgmCompare</code>).</li>
-<li>Medium: method interpretation, workflow guidance.</li>
-<li>Low: intro/context pages.</li>
-</ul></li>
-<li><label><input type="checkbox">Create the cycle branch: <code>git checkout -b docs/cycle-01</code>.</label></li>
-</ul>
-<p><strong>Done when:</strong> Page list, audiences, and risk levels are recorded in <code>dev/task-list.md</code>.</p>
-<hr>
-</section>
-<section id="site-structure" class="level2">
-<h2 class="anchored" data-anchor-id="site-structure">Site Structure</h2>
-<p>Four top-level sections, each with a distinct audience and purpose.</p>
-<section id="guide-users-and-applied-analysts" class="level3">
-<h3 class="anchored" data-anchor-id="guide-users-and-applied-analysts">Guide (users and applied analysts)</h3>
-<p>Teaches concepts and walks through analyses. A reader who finishes the Guide can fit models, interpret output, and set priors with confidence.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Page</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>guide/index.qmd</td>
-<td>Section landing page.</td>
-</tr>
-<tr class="even">
-<td>guide/getting-started.qmd</td>
-<td>Install, load, first <code>bgm()</code> call, read the output.</td>
-</tr>
-<tr class="odd">
-<td><strong>Background</strong></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>guide/graphical-models.qmd</td>
-<td>What is a graphical model? Nodes, edges, conditional independence.</td>
-</tr>
-<tr class="odd">
-<td>guide/bayesian-approach.qmd</td>
-<td>Why Bayesian? Posterior, prior, credible intervals, Bayes factors.</td>
-</tr>
-<tr class="even">
-<td>guide/prior-basics.qmd</td>
-<td>Shared primer: what priors are, how bgms uses them, why they matter. Renamed from prior-guide.qmd.</td>
-</tr>
-<tr class="odd">
-<td><strong>Models</strong></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>guide/ggm.qmd</td>
-<td>Gaussian graphical model: continuous data, partial correlations, precision matrix.</td>
-</tr>
-<tr class="odd">
-<td>guide/omrf.qmd</td>
-<td>Ordinal MRF: ordinal/binary data, category thresholds, Blume-Capel parameterization.</td>
-</tr>
-<tr class="even">
-<td>guide/mixed-model.qmd</td>
-<td>Mixed MRF: datasets with both continuous and discrete variables.</td>
-</tr>
-<tr class="odd">
-<td><strong>Analyses</strong></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>guide/edge-selection.qmd</td>
-<td>Bayesian edge selection: inclusion Bayes factors, posterior inclusion probabilities. Includes analysis-specific prior guidance.</td>
-</tr>
-<tr class="odd">
-<td>guide/group-comparison.qmd</td>
-<td>Comparing networks across groups with <code>bgmCompare()</code>. Includes analysis-specific prior guidance.</td>
-</tr>
-<tr class="even">
-<td>guide/clustering.qmd</td>
-<td>Stochastic block model for edge clustering. Includes analysis-specific prior guidance.</td>
-</tr>
-<tr class="odd">
-<td><strong>MCMC output</strong></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>guide/mcmc-output.qmd</td>
-<td>What the sampler returns: posterior samples, summary statistics, raw output structure.</td>
-</tr>
-<tr class="odd">
-<td>guide/mcmc-diagnostics.qmd</td>
-<td>Convergence checks: ESS, R-hat, trace plots, divergences, E-BFMI.</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Pedagogical flow:</strong> Background → Models → Analyses → MCMC output. Each analysis page includes a short prior section specific to that analysis, so readers learn about priors in context rather than in the abstract.</p>
-</section>
-<section id="reference-exact-api-behavior" class="level3">
-<h3 class="anchored" data-anchor-id="reference-exact-api-behavior">Reference (exact API behavior)</h3>
-<p>One page per exported function or function family. Content is extracted from roxygen documentation with minimal paraphrasing.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Page</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>reference/index.qmd</td>
-<td>Section landing page with function index.</td>
-</tr>
-<tr class="even">
-<td>reference/bgm.qmd</td>
-<td><code>bgm()</code>: all arguments, defaults, return structure.</td>
-</tr>
-<tr class="odd">
-<td>reference/bgmCompare.qmd</td>
-<td><code>bgmCompare()</code>: all arguments, defaults, return structure.</td>
-</tr>
-<tr class="even">
-<td>reference/methods.qmd</td>
-<td>S3 methods: <code>print</code>, <code>plot</code>, <code>summary</code>, <code>simulate</code>, <code>predict</code>.</td>
-</tr>
-<tr class="odd">
-<td>reference/extractors.qmd</td>
-<td>Extractor functions: <code>extract_arguments</code>, <code>extract_indicators</code>, <code>extract_posterior_inclusion_probabilities</code>, <code>extract_sbm</code>.</td>
-</tr>
-<tr class="even">
-<td>reference/datasets.qmd</td>
-<td>Bundled datasets.</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="manual-technical-internals-and-algorithms" class="level3">
-<h3 class="anchored" data-anchor-id="manual-technical-internals-and-algorithms">Manual (technical internals and algorithms)</h3>
-<p>For developers and methodologists who need to understand how bgms works under the hood. Each page explains a subsystem with reference to the actual code.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Page</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>manual/index.qmd</td>
-<td>Section landing page and subsystem map.</td>
-</tr>
-<tr class="even">
-<td><strong>Architecture</strong></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>manual/architecture.qmd</td>
-<td>Top-level design: R front-end → C++ engine. The three-stage pipeline (<code>bgm_spec</code> → <code>run_sampler</code> → <code>build_output</code>). Package directory layout.</td>
-</tr>
-<tr class="even">
-<td>manual/r-scaffolding.qmd</td>
-<td>The R layer in detail: validation pipeline (<code>validate_data</code>, <code>validate_variable_types</code>, <code>validate_sampler</code>), spec construction (<code>bgm_spec</code>, <code>new_bgm_spec</code>, <code>validate_bgm_spec</code>), sampler dispatch (<code>run_sampler</code> → model-specific C++ entry points), output assembly (<code>build_output</code> → posterior summaries, raw samples, diagnostics). Data flow diagram from user call to returned fit object.</td>
-</tr>
-<tr class="odd">
-<td>manual/model-classes.qmd</td>
-<td>C++ class hierarchy: <code>BaseModel</code> → <code>GGMModel</code>, <code>OMRFModel</code>, <code>MixedMRFModel</code>. Virtual interface (capability queries, parameter access, edge selection, adaptation, missing data). How models register their storage layout.</td>
-</tr>
-<tr class="even">
-<td><strong>MCMC engine</strong></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>manual/samplers.qmd</td>
-<td>Sampler hierarchy: <code>SamplerBase</code> → <code>MetropolisSampler</code>, <code>GradientSamplerBase</code> → <code>HMCSampler</code>, <code>NUTSSampler</code>, <code>HybridNUTSSampler</code>. Step-size adaptation, mass matrix tuning. Factory dispatch by <code>sampler_type</code> string.</td>
-</tr>
-<tr class="even">
-<td>manual/nuts.qmd</td>
-<td>NUTS algorithm: recursive tree-building, U-turn criterion, multinomial sampling, divergence detection. How tree depth and energy diagnostics are recorded.</td>
-</tr>
-<tr class="odd">
-<td>manual/warmup.qmd</td>
-<td>Three-stage adaptive warmup schedule: stage 1 (step-size), stage 2 (mass matrix), stage 3a (final step-size). Edge-selection phases 3b (proposal-SD tuning) and 3c (graph initialization). How <code>WarmupSchedule</code> coordinates sampler and model.</td>
-</tr>
-<tr class="even">
-<td>manual/parallel-chains.qmd</td>
-<td>Parallel chain execution: <code>model.clone()</code> / <code>edge_prior.clone()</code> per chain, TBB thread control via <code>tbb::global_control</code>, <code>RcppParallel::parallelFor</code> dispatch through <code>MCMCChainRunner</code>. Sequential fallback for single-thread mode. Per-chain RNG seeding (<code>config.seed + chain_id</code>). Progress tracking and user-interrupt handling across threads.</td>
-</tr>
-<tr class="odd">
-<td><strong>Models</strong></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>manual/ggm-internals.qmd</td>
-<td>GGM implementation: precision matrix parameterization, Cholesky updates (<code>cholupdate</code>), continuous-data likelihood and gradient, edge-specific Metropolis proposals.</td>
-</tr>
-<tr class="odd">
-<td>manual/omrf-internals.qmd</td>
-<td>OMRF implementation: ordinal threshold parameterization, Blume-Capel model with linear + quadratic effects, pseudo-likelihood, full-conditional Gibbs steps for edge indicators.</td>
-</tr>
-<tr class="even">
-<td>manual/variable-helpers.qmd</td>
-<td>Numerically stable computation for MRF variables. The FAST/SAFE dual-path strategy: precomputed exponentials and power-chain accumulation when exponents are bounded (FAST path), direct log-sum-exp evaluation as fallback (SAFE path). Covers <code>compute_denom_ordinal</code>, <code>compute_denom_blume_capel</code>, <code>compute_probs_ordinal</code>, <code>compute_probs_blume_capel</code>, joint <code>LogZAndProbs</code> computation. The <code>EXP_BOUND = 709</code> threshold and contiguous-block scanning for branch-free vectorization.</td>
-</tr>
-<tr class="odd">
-<td>manual/mixed-internals.qmd</td>
-<td>Mixed MRF implementation: block structure (discrete-discrete, continuous-continuous, cross-type), how the sampler handles mixed parameter vectors.</td>
-</tr>
-<tr class="even">
-<td><strong>Priors and edge selection</strong></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>manual/edge-priors.qmd</td>
-<td>Edge prior framework: <code>BaseEdgePrior</code> interface, Beta-Bernoulli default, unit-information prior. How inclusion probabilities and Bayes factors are computed.</td>
-</tr>
-<tr class="even">
-<td>manual/sbm-prior.qmd</td>
-<td>Stochastic block model prior: MFM-SBM formulation, Gibbs block-allocation updates, how cluster structure regularizes edge inclusion. The <code>StochasticBlockEdgePrior</code> class.</td>
-</tr>
-<tr class="odd">
-<td><strong>Group comparison</strong></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>manual/bgmcompare-internals.qmd</td>
-<td><code>bgmCompare</code> engine: separate sampler, multi-group log-posterior and gradient, output handling. How it differs from single-group <code>bgm</code>.</td>
-</tr>
-<tr class="odd">
-<td><strong>Numerical methods</strong></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>manual/numerical.qmd</td>
-<td>Numerical stability toolkit: custom <code>exp</code>/<code>log</code> macros (<code>explog_macros.h</code>), Cholesky rank-1 updates, the FAST/SAFE pattern. Cross-references variable-helpers.qmd for the full dual-path story.</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples-worked-analyses" class="level3">
-<h3 class="anchored" data-anchor-id="examples-worked-analyses">Examples (worked analyses)</h3>
-<p>Complete, self-contained analyses from data to interpretation. Each example uses a bundled or simulated dataset and runs end-to-end.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Page</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>examples/index.qmd</td>
-<td>Section landing page.</td>
-</tr>
-<tr class="even">
-<td>examples/binary-network.qmd</td>
-<td>Binary data → OMRF → edge selection → interpretation.</td>
-</tr>
-<tr class="odd">
-<td>examples/ordinal-network.qmd</td>
-<td>Ordinal data → OMRF → edge selection → interpretation.</td>
-</tr>
-<tr class="even">
-<td>examples/continuous-network.qmd</td>
-<td>Continuous data → GGM → edge selection → interpretation.</td>
-</tr>
-<tr class="odd">
-<td>examples/mixed-network.qmd</td>
-<td>Mixed data → Mixed MRF → edge selection → interpretation.</td>
-</tr>
-<tr class="even">
-<td>examples/group-comparison.qmd</td>
-<td>Two-group data → <code>bgmCompare()</code> → network differences.</td>
-</tr>
-<tr class="odd">
-<td>examples/clustering.qmd</td>
-<td>Edge clustering via SBM prior → block structure.</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="page-counts" class="level3">
-<h3 class="anchored" data-anchor-id="page-counts">Page counts</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Section</th>
-<th>Pages</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Guide</td>
-<td>13</td>
-</tr>
-<tr class="even">
-<td>Reference</td>
-<td>6</td>
-</tr>
-<tr class="odd">
-<td>Manual</td>
-<td>16</td>
-</tr>
-<tr class="even">
-<td>Examples</td>
-<td>7</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td><strong>42</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-</section>
-<section id="phase-1-scaffold-all-pages" class="level2">
-<h2 class="anchored" data-anchor-id="phase-1-scaffold-all-pages">Phase 1 — Scaffold all pages</h2>
-<p><strong>Goal:</strong> Every <code>.qmd</code> file exists with headings and placeholders. No real content yet.</p>
-<p>Do this:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">For each page, use an LLM to generate structure only:</label>
-<ul>
-<li>Title.</li>
-<li>3–6 section headings.</li>
-<li><code>TODO: source</code> placeholders for uncertain parts.</li>
-</ul></li>
-<li><label><input type="checkbox">Do not let the LLM invent facts. Headings and placeholders only.</label></li>
-<li><label><input type="checkbox">Render the site. Fix broken links, missing nav entries, and heading hierarchy issues.</label></li>
-<li><label><input type="checkbox">Commit: <code>docs(scaffold): add section templates and placeholders</code>.</label></li>
-<li><label><input type="checkbox">Update status to <code>Scaffolded</code> in <code>dev/task-list.md</code>.</label></li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox">All target <code>.qmd</code> files exist.</label></li>
-<li><label><input type="checkbox">No broken links.</label></li>
-<li><label><input type="checkbox">Heading depth ≤ 3.</label></li>
-<li><label><input type="checkbox">Navigation entries are present.</label></li>
-</ul>
-<p><strong>Recommended order:</strong> Build all skeletons before populating any page.</p>
-<hr>
-</section>
-<section id="phase-2-populate-pages-with-real-content" class="level2">
-<h2 class="anchored" data-anchor-id="phase-2-populate-pages-with-real-content">Phase 2 — Populate pages with real content</h2>
-<p><strong>Goal:</strong> Fill pages with facts from sources. Mark where each fact came from.</p>
-<p>Do this for reference pages:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Pull function signatures, arguments, return values, and examples from roxygen/man.</label></li>
-<li><label><input type="checkbox">Use deterministic extraction tooling where possible (<code>.Rd</code> parsing, <code>tools::Rd2txt()</code>).</label></li>
-<li><label><input type="checkbox">Insert with minimal paraphrasing first.</label></li>
-</ul>
-<p>Do this for guide and manual pages:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Pull from algorithm design notes and implementation comments.</label></li>
-<li><label><input type="checkbox">Convert into plain-language explanations.</label></li>
-</ul>
-<p>For all pages:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Add provenance markers to important claims so you can trace where text came from:</label>
-<ul>
-<li><code>SOURCE: R/&lt;file&gt;.R#&lt;function&gt;</code></li>
-<li><code>SOURCE: man/&lt;topic&gt;.Rd</code></li>
-<li><code>SOURCE: design/&lt;note&gt;.md#&lt;section&gt;</code></li>
-</ul></li>
-<li><label><input type="checkbox">For high-risk claims (defaults, priors, convergence, sampling, core API), add accountability links that point a reader or developer straight to the source. This is a hard release gate for high-risk claims. Best effort for low-risk narrative text.</label></li>
-<li><label><input type="checkbox">Commit: <code>docs(gen): populate &lt;section&gt; from &lt;source&gt;</code>.</label></li>
-<li><label><input type="checkbox">Update status to <code>Populated</code> in <code>dev/task-list.md</code>.</label></li>
-</ul>
-<p><strong>Done when:</strong> Each major claim has a provenance marker.</p>
-<p><strong>Recommended order:</strong></p>
-<ol type="1">
-<li>Reference pages first (closest to direct extraction).</li>
-<li>Guide pages next (user task flow).</li>
-<li>Manual/algorithm pages last (highest review depth).</li>
-</ol>
-<hr>
-</section>
-<section id="phase-3-llm-refinement" class="level2">
-<h2 class="anchored" data-anchor-id="phase-3-llm-refinement">Phase 3 — LLM refinement</h2>
-<p><strong>Goal:</strong> Improve clarity without changing facts.</p>
-<p>Do this:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Ask LLMs to rewrite for readability only.</label></li>
-<li><label><input type="checkbox">Enforce these constraints:</label>
-<ul>
-<li>Preserve function names and parameter semantics.</li>
-<li>Do not alter numeric defaults unless explicitly sourced.</li>
-<li>Do not add undocumented features.</li>
-</ul></li>
-<li><label><input type="checkbox">Request diff-style changes so you can review what changed.</label></li>
-<li><label><input type="checkbox">Always provide source text snippets in prompts.</label></li>
-<li><label><input type="checkbox">Ask the LLM to flag uncertainty.</label></li>
-</ul>
-<p><strong>Done when:</strong> Prose is cleaner but facts have not changed.</p>
-<hr>
-</section>
-<section id="phase-4-contradiction-check" class="level2">
-<h2 class="anchored" data-anchor-id="phase-4-contradiction-check">Phase 4 — Contradiction check</h2>
-<p><strong>Goal:</strong> Catch factual errors before human review begins.</p>
-<p>Do this:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Run an LLM pass that compares page text against quoted source excerpts.</label></li>
-<li><label><input type="checkbox">Require mismatch-only output with severity: <code>high</code>, <code>medium</code>, <code>low</code>.</label></li>
-<li><label><input type="checkbox">Fix all <code>high</code> mismatches immediately.</label></li>
-<li><label><input type="checkbox">Log the mismatch list in page-level review notes.</label></li>
-<li><label><input type="checkbox">Update status to <code>Contradiction-checked</code> in <code>dev/task-list.md</code>.</label></li>
-</ul>
-<p><strong>Done when:</strong> All high-severity mismatches are resolved.</p>
-<hr>
-</section>
-<section id="phase-5-human-review" class="level2">
-<h2 class="anchored" data-anchor-id="phase-5-human-review">Phase 5 — Human review</h2>
-<p><strong>Goal:</strong> Maarten validates facts. Emily validates readability. Both sign off.</p>
-<section id="maarten-technical-sign-off" class="level3">
-<h3 class="anchored" data-anchor-id="maarten-technical-sign-off">Maarten (technical sign-off)</h3>
-<ul class="task-list">
-<li><label><input type="checkbox">Review high-risk pages first:</label>
-<ul>
-<li>model classes</li>
-<li>MCMC/NUTS/warmup</li>
-<li>core function reference (<code>bgm</code>, <code>bgmCompare</code>)</li>
-</ul></li>
-<li><label><input type="checkbox">Verify claims against the source-of-truth hierarchy.</label></li>
-<li><label><input type="checkbox">Check that accountability links for high-risk claims actually point to the right source.</label></li>
-<li><label><input type="checkbox">For algorithm pages, verify equations/steps against code or design notes.</label></li>
-<li><label><input type="checkbox">Log review decisions (what changed and why).</label></li>
-</ul>
-</section>
-<section id="emily-readability-sign-off" class="level3">
-<h3 class="anchored" data-anchor-id="emily-readability-sign-off">Emily (readability sign-off)</h3>
-<ul class="task-list">
-<li><label><input type="checkbox">Review each page for clarity and audience fit.</label></li>
-<li><label><input type="checkbox">Flag jargon, unclear steps, or confusing structure.</label></li>
-<li><label><input type="checkbox">Log review decisions.</label></li>
-</ul>
-</section>
-<section id="both" class="level3">
-<h3 class="anchored" data-anchor-id="both">Both</h3>
-<ul class="task-list">
-<li><label><input type="checkbox">Resolve any blocking issues and record them in <code>dev/task-list.md</code>.</label></li>
-<li><label><input type="checkbox">Commit fixes: <code>docs(review): &lt;description of fix&gt;</code>.</label></li>
-<li><label><input type="checkbox">Update status to <code>Reviewed</code> in <code>dev/task-list.md</code>.</label></li>
-</ul>
-<p><strong>Done when:</strong> Each high-risk page has both sign-offs recorded in the task board.</p>
-</section>
-<section id="review-cadence" class="level3">
-<h3 class="anchored" data-anchor-id="review-cadence">Review cadence</h3>
-<ul>
-<li>Work in short cycles: 2–3 days, 3–6 pages per cycle.</li>
-<li>At the end of each cycle, produce:
-<ul>
-<li>A rendered preview.</li>
-<li>An open issues list.</li>
-<li>An accepted pages list.</li>
-</ul></li>
-</ul>
-<hr>
-</section>
-</section>
-<section id="phase-6-consistency-and-style-pass" class="level2">
-<h2 class="anchored" data-anchor-id="phase-6-consistency-and-style-pass">Phase 6 — Consistency and style pass</h2>
-<p><strong>Goal:</strong> Make the whole site feel like one voice.</p>
-<p>Do this:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Standardize terminology across sections.</label></li>
-<li><label><input type="checkbox">Normalize heading patterns and cross-links.</label></li>
-<li><label><input type="checkbox">Enforce <code>STYLE_GUIDE.md</code> conventions.</label></li>
-<li><label><input type="checkbox">Ensure examples match current API signatures.</label></li>
-</ul>
-<p><strong>Done when:</strong> No style inconsistencies across sections.</p>
-<hr>
-</section>
-<section id="phase-7-qa-and-publish" class="level2">
-<h2 class="anchored" data-anchor-id="phase-7-qa-and-publish">Phase 7 — QA and publish</h2>
-<p><strong>Goal:</strong> Final automated and human checks, then deploy.</p>
-<section id="automated-qa-runs-every-cycle-and-pre-release" class="level3">
-<h3 class="anchored" data-anchor-id="automated-qa-runs-every-cycle-and-pre-release">Automated QA (runs every cycle and pre-release)</h3>
-<ul class="task-list">
-<li><label><input type="checkbox">Full render succeeds.</label></li>
-<li><label><input type="checkbox">No broken links.</label></li>
-<li><label><input type="checkbox">Search index sanity check passes.</label></li>
-<li><label><input type="checkbox">No unresolved <code>TODO:</code> markers.</label></li>
-<li><label><input type="checkbox">No malformed <code>SOURCE:</code> markers.</label></li>
-<li><label><input type="checkbox">All runnable R code executes without error on every page.</label></li>
-</ul>
-</section>
-<section id="human-smoke-check" class="level3">
-<h3 class="anchored" data-anchor-id="human-smoke-check">Human smoke check</h3>
-<ul class="task-list">
-<li><label><input type="checkbox">Desktop and mobile visual sanity.</label></li>
-<li><label><input type="checkbox">Navigation and table-of-contents behavior.</label></li>
-<li><label><input type="checkbox">Zero unresolved factual issues.</label></li>
-</ul>
-</section>
-<section id="release" class="level3">
-<h3 class="anchored" data-anchor-id="release">Release</h3>
-<ul class="task-list">
-<li><label><input type="checkbox">Final sign-off by both Maarten and Emily.</label></li>
-<li><label><input type="checkbox">Update status to <code>Approved</code> in <code>dev/task-list.md</code>.</label></li>
-<li><label><input type="checkbox">Merge cycle branch into <code>main</code> and deploy.</label></li>
-</ul>
-<p><strong>Done when:</strong> Site is live and all pages show <code>Approved</code>.</p>
-<hr>
-</section>
-</section>
-<section id="page-acceptance-checklist" class="level2">
-<h2 class="anchored" data-anchor-id="page-acceptance-checklist">Page acceptance checklist</h2>
-<p>A page can only be marked <code>Approved</code> if all of these are true:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Structure matches section template.</label></li>
-<li><label><input type="checkbox">Facts verified against source hierarchy.</label></li>
-<li><label><input type="checkbox">No unresolved TODOs.</label></li>
-<li><label><input type="checkbox">Cross-links resolve.</label></li>
-<li><label><input type="checkbox">Terminology consistent with related pages.</label></li>
-<li><label><input type="checkbox">Reviewer notes resolved.</label></li>
-<li><label><input type="checkbox">Automated QA checks pass.</label></li>
-<li><label><input type="checkbox">Rendered page looks correct on desktop and mobile.</label></li>
-<li><label><input type="checkbox">Code examples execute without error.</label></li>
-<li><label><input type="checkbox">Basic accessibility: alt text, color contrast, keyboard navigation for interactive elements.</label></li>
-<li><label><input type="checkbox">Accountability links present for all high-risk claims.</label></li>
-</ul>
-<hr>
-</section>
-<section id="ongoing-keeping-docs-in-sync-with-bgms" class="level2">
-<h2 class="anchored" data-anchor-id="ongoing-keeping-docs-in-sync-with-bgms">Ongoing: keeping docs in sync with bgms</h2>
-<p>After the first release, keep docs aligned with the package:</p>
-<ol type="1">
-<li>Re-run deterministic extraction when bgms version or API signatures change.</li>
-<li>Maintain a “changed functions → affected pages” mapping.</li>
-<li>Re-open approved pages impacted by package changes before the next release.</li>
-</ol>
-<hr>
-</section>
-<section id="optional-metrics-to-track" class="level2">
-<h2 class="anchored" data-anchor-id="optional-metrics-to-track">Optional: metrics to track</h2>
-<p>If you want visibility into progress, track per cycle:</p>
-<ul>
-<li>Pages scaffolded / populated / reviewed / approved.</li>
-<li>Open factual issues.</li>
-<li>Average time from scaffolded → approved.</li>
-<li>Factual issues older than one cycle.</li>
-</ul>
-<p>Keep it lightweight. This is for direction, not reporting.</p>
+<section id="numerical-and-gradient-considerations" class="level2">
+<h2 class="anchored" data-anchor-id="numerical-and-gradient-considerations">Numerical and gradient considerations</h2>
+<p>In discrete blocks, both log-normalizers and category probabilities are needed for efficient gradient computation. <code>bgms</code> computes these together to avoid redundant work and uses numerically stable paths for exponentiation-sensitive regions.</p>
+<p>See <a href="../manual/variable-helpers.html">Variable Helpers</a> and <a href="../manual/numerical.html">Numerical Considerations</a>.</p>
+
 
 
 </section>
-</section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-ArenaMarsman_2026_core" class="csl-entry" role="listitem">
+Arena, G., &amp; Marsman, M. (2026). Bayesian inference for discrete <span>M</span>arkov random fields through coordinate rescaling. <em>arXiv Preprint</em>. <a href="https://arxiv.org/abs/2601.17205">https://arxiv.org/abs/2601.17205</a>
+</div>
+<div id="ref-KeetelaarEtAl_2024_PL" class="csl-entry" role="listitem">
+Keetelaar, S., Sekulovski, N., Borsboom, D., &amp; Marsman, M. (2024). Comparing maximum likelihood and pseudo-maximum likelihood estimators for the <span>I</span>sing model. <em>Advances.in/Psychology</em>, <em>2</em>(e25745). <a href="https://doi.org/10.56296/aip00013">https://doi.org/10.56296/aip00013</a>
+</div>
+<div id="ref-Miller_2021_PLconsistency" class="csl-entry" role="listitem">
+Miller, J. W. (2021). Asymptotic normality, concentration, and coverage of generalized posteriors. <em>Journal of Machine Learning Research</em>, <em>22</em>(168), 1–53.
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
@@ -951,6 +674,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>
@@ -1367,6 +1118,18 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
     }
   });
   </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../manual/numerical.html" class="pagination-link" aria-label="Numerical Considerations">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Numerical Considerations</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../manual/variable-helpers.html" class="pagination-link" aria-label="Variable Helpers">
+        <span class="nav-page-text">Variable Helpers</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -1375,7 +1138,7 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
 </div>   
     <div class="nav-footer-center">
 <p>Built with <a href="https://quarto.org">Quarto</a></p>
-<div class="toc-actions"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs/edit/main/dev/set-up.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions"><ul><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs/edit/main/manual/pseudolikelihood.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">

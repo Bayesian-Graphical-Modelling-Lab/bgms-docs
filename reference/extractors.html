@@ -113,6 +113,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -506,7 +535,7 @@ Warning
 </table>
 <p>The structure depends on the model type:</p>
 <ul>
-<li><strong>GGM</strong> (<code>bgms</code>): <code>NULL</code>. GGM models have no main effects; the precision matrix diagonal is on <code>coef(fit)$pairwise</code>.</li>
+<li><strong>GGM</strong> (<code>bgms</code>): <code>NULL</code>. GGM models have no main effects.</li>
 <li><strong>OMRF</strong> (<code>bgms</code>): A numeric matrix (p x max_categories) of posterior mean category thresholds. Columns beyond the number of categories for a variable are <code>NA</code>.</li>
 <li><strong>Mixed MRF</strong> (<code>bgms</code>): A list with <code>$discrete</code> (threshold matrix) and <code>$continuous</code> (means matrix).</li>
 <li><strong><code>bgmCompare</code></strong>: A matrix with one row per post-warmup iteration, containing posterior samples of baseline main-effect parameters.</li>
@@ -514,7 +543,7 @@ Warning
 </section>
 <section id="extract_pairwise_interactions" class="level2">
 <h2 class="anchored" data-anchor-id="extract_pairwise_interactions">extract_pairwise_interactions</h2>
-<p>Retrieve posterior samples of pairwise interaction parameters.</p>
+<p>Retrieve posterior samples of partial association parameters.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_pairwise_interactions</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top table">
 <thead>
@@ -530,7 +559,7 @@ Warning
 </tr>
 </tbody>
 </table>
-<p>Returns a matrix with one row per post-warmup iteration and one column per edge. For <code>bgmCompare</code>, columns correspond to baseline pairwise interaction parameters.</p>
+<p>Returns a matrix with one row per post-warmup iteration and one column per edge. For <code>bgmCompare</code>, columns correspond to baseline partial association parameters.</p>
 </section>
 <section id="extract_indicators" class="level2">
 <h2 class="anchored" data-anchor-id="extract_indicators">extract_indicators</h2>
@@ -698,6 +727,67 @@ Warning
 <li><code>extract_pairwise_thresholds()</code> — Renamed to <code>extract_main_effects()</code>.</li>
 </ul>
 </section>
+<section id="extract_precision" class="level2">
+<h2 class="anchored" data-anchor-id="extract_precision">extract_precision</h2>
+<p>Retrieve the posterior mean precision matrix.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_precision</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> object (GGM or mixed MRF).</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a symmetric p x p matrix (or the continuous block submatrix for mixed MRFs) containing the posterior mean precision matrix <span class="math inline">\(\boldsymbol{K}\)</span>.</p>
+</section>
+<section id="extract_partial_correlations" class="level2">
+<h2 class="anchored" data-anchor-id="extract_partial_correlations">extract_partial_correlations</h2>
+<p>Retrieve the posterior mean partial correlation matrix.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_partial_correlations</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> object (GGM or mixed MRF).</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a symmetric matrix of partial correlations, computed by standardizing the precision matrix: <span class="math inline">\(\rho_{ij} = -K_{ij} / \sqrt{K_{ii}
+K_{jj}}\)</span>.</p>
+</section>
+<section id="extract_log_odds" class="level2">
+<h2 class="anchored" data-anchor-id="extract_log_odds">extract_log_odds</h2>
+<p>Retrieve the posterior mean log-odds matrix.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_log_odds</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bgms_object</code></td>
+<td>A fitted <code>bgms</code> object (OMRF or mixed MRF).</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a symmetric matrix of log adjacent-category odds ratios. For the ordinal MRF, <span class="math inline">\(\text{log-odds}_{ij} = 2 \omega_{ij}\)</span>.</p>
+</section>
 <section id="see-also" class="level2">
 <h2 class="anchored" data-anchor-id="see-also">See also</h2>
 <p><a href="../reference/bgm.html">bgm()</a>, <a href="../reference/bgmCompare.html">bgmCompare()</a>, <a href="../reference/methods.html">S3 methods</a></p>
@@ -722,6 +812,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>

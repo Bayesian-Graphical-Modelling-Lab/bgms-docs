@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Group Comparison Engine – bgms</title>
+<title>bgmCompare Internals – bgms</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -347,7 +347,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/bgmcompare-internals.html">Group Comparison</a></li><li class="breadcrumb-item"><a href="../manual/bgmcompare-internals.html">Group Comparison Engine</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/bgmcompare-internals.html">Group Comparison</a></li><li class="breadcrumb-item"><a href="../manual/bgmcompare-internals.html">bgmCompare Internals</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -417,6 +417,24 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">HMC Algorithm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Adaptive Metropolis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Warmup Schedule</span></a>
   </div>
@@ -448,12 +466,6 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">OMRF Internals</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -499,7 +511,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Group Comparison Engine</span></a>
+ <span class="menu-text">bgmCompare Internals</span></a>
   </div>
 </li>
       </ul>
@@ -519,6 +531,18 @@ window.Quarto = {
  <span class="menu-text">Numerical Considerations</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pseudolikelihood</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variable Helpers</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -531,9 +555,9 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/bgmcompare-internals.html">Group Comparison</a></li><li class="breadcrumb-item"><a href="../manual/bgmcompare-internals.html">Group Comparison Engine</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/bgmcompare-internals.html">Group Comparison</a></li><li class="breadcrumb-item"><a href="../manual/bgmcompare-internals.html">bgmCompare Internals</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Group Comparison Engine</h1>
+<h1 class="title">bgmCompare Internals</h1>
 </div>
 
 
@@ -550,38 +574,26 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>How <code>bgmCompare()</code> works under the hood: multi-group posterior, difference parameterization, and sampler implementation. Source: <code>src/bgmCompare/</code> directory.</p>
+<p>How <code>bgmCompare()</code> works under the hood: multi-group posterior, contrast parameterization, and sampler implementation. Source: <code>src/bgmCompare/</code> directory.</p>
 <section id="differences-from-single-group-bgm" class="level2">
 <h2 class="anchored" data-anchor-id="differences-from-single-group-bgm">Differences from single-group bgm</h2>
-<p>The <code>bgmCompare</code> engine shares the same OMRF likelihood (pseudolikelihood over ordinal/Blume-Capel variables) and the same NUTS/HMC/Metropolis sampler options, but differs in three key ways:</p>
+<p>The <code>bgmCompare</code> engine shares the same OMRF likelihood (pseudolikelihood over ordinal/Blume-Capel variables) and the same NUTS/Metropolis sampler options (HMC is deprecated), but differs in three key ways:</p>
 <ol type="1">
-<li><strong>Parameter decomposition</strong> — Group-specific parameters <span class="math inline">\(\boldsymbol{\theta}^{(g)}\)</span> are decomposed into a shared baseline <span class="math inline">\(\boldsymbol{\varphi}\)</span> and group differences <span class="math inline">\(\boldsymbol{\delta}^{(g)}\)</span>, linked through a contrast matrix.</li>
-<li><strong>Separate sampler</strong> — The bgmCompare engine uses its own chain runner (<code>run_gibbs_sampler_bgmCompare()</code>) rather than the general <code>run_mcmc_chain()</code>, because the multi-group structure requires group-specific likelihood evaluations and difference selection.</li>
-<li><strong>Difference selection</strong> — In addition to edge selection (which edges exist in the shared graph), bgmCompare performs difference selection (which edges differ between groups).</li>
+<li><strong>Parameter decomposition</strong> — Group-specific parameters <span class="math inline">\(\boldsymbol{\omega}^{(g)}\)</span> are decomposed into a shared baseline <span class="math inline">\(\boldsymbol{\omega}\)</span> and contrast parameters <span class="math inline">\(\boldsymbol{\delta}^{(k)}\)</span>, linked through a contrast matrix.</li>
+<li><strong>Separate sampler</strong> — The bgmCompare engine uses its own chain runner (<code>run_gibbs_sampler_bgmCompare()</code>) rather than the general <code>run_mcmc_chain()</code>, because the multi-group structure requires group-specific likelihood evaluations and contrast selection.</li>
+<li><strong>Contrast selection</strong> — Instead of edge selection (which edges exist), bgmCompare performs contrast selection: for each parameter, the baseline component is always present, and the spike-and-slab mechanism decides whether contrast parameters are active or collapsed to zero.</li>
 </ol>
 </section>
 <section id="contrast-matrix-parameterization" class="level2">
 <h2 class="anchored" data-anchor-id="contrast-matrix-parameterization">Contrast-matrix parameterization</h2>
-<p>For <span class="math inline">\(G\)</span> groups, the per-group parameter vector <span class="math inline">\(\boldsymbol{\theta}^{(g)}\)</span> is expressed as:</p>
+<p>For <span class="math inline">\(G\)</span> groups, the per-group parameter vector <span class="math inline">\(\boldsymbol{\omega}^{(g)}\)</span> is expressed as:</p>
 <p><span class="math display">\[
-\boldsymbol{\theta}^{(g)} = \boldsymbol{\varphi} + \sum_{h=1}^{G-1} P_{gh}\, \boldsymbol{\delta}^{(h)}
+\omega_{ij}^{(g)} = \omega_{ij} + \sum_{k=1}^{G-1} c_{gk}\, \delta_{ij}^{(k)}
 \]</span></p>
-<p>where <span class="math inline">\(\mathbf{P}\)</span> is a <span class="math inline">\(G \times (G-1)\)</span> projection (contrast) matrix. Column <span class="math inline">\(h = 0\)</span> (the baseline <span class="math inline">\(\boldsymbol{\varphi}\)</span>) captures the shared structure; columns <span class="math inline">\(h &gt; 0\)</span> (the differences <span class="math inline">\(\boldsymbol{\delta}^{(h)}\)</span>) capture how groups deviate from the baseline.</p>
-<p>In the flat parameter vector, the baseline and difference parameters are interleaved per effect:</p>
-<pre><code>[ φ_main | δ^(1)_main | ... | δ^(G-1)_main | φ_pair | δ^(1)_pair | ... ]</code></pre>
+<p>where <span class="math inline">\(\mathbf{C}\)</span> is a <span class="math inline">\(G \times (G-1)\)</span> projection (contrast) matrix. The baseline <span class="math inline">\(\omega_{ij}\)</span> captures the shared structure; the contrast parameters <span class="math inline">\(\delta_{ij}^{(k)}\)</span> are the projections onto the <span class="math inline">\(G-1\)</span> orthogonal contrast directions. For two groups, the single contrast reduces to a scaled group difference. Category thresholds are decomposed in the same way.</p>
+<p>The flat parameter vector (used by NUTS and HMC) groups by component type, not per effect:</p>
+<pre><code>[ overall_mains | overall_pairs | active_main_diffs | active_pair_diffs ]</code></pre>
+<p>Contrast parameters appear only when their inclusion indicator is 1; inactive contrasts are excluded from the vector entirely.</p>
 </section>
 <section id="multi-group-log-posterior-and-gradient" class="level2">
 <h2 class="anchored" data-anchor-id="multi-group-log-posterior-and-gradient">Multi-group log-posterior and gradient</h2>
@@ -591,29 +603,28 @@ Warning
 <li>Compute the pseudolikelihood using group <span class="math inline">\(g\)</span>’s data (sufficient statistics: category counts, Blume-Capel stats, pairwise stats)</li>
 <li>Evaluate the gradient of the pseudolikelihood with respect to the active parameters</li>
 </ol>
-<p>The gradient has two components:</p>
+<p>The <code>gradient()</code> function combines three components:</p>
 <ul>
-<li><strong>Observed-data gradient</strong> (<code>gradient_observed_active()</code>) — Projects group-level sufficient statistics into the active-parameter layout using the contrast matrix</li>
-<li><strong>Expected-data gradient</strong> (<code>gradient_expected_active()</code>) — Computes expected sufficient statistics under the current parameters using category probabilities from the variable helpers</li>
+<li><strong>Observed-data gradient</strong> (<code>gradient_observed_active()</code>) — projects group-level sufficient statistics into the active-parameter layout using the contrast matrix. Precomputed from <code>counts_per_category</code>, <code>blume_capel_stats</code>, and <code>pairwise_stats</code>.</li>
+<li><strong>Expected-data gradient</strong> — computed inline within <code>gradient()</code> by building group-specific parameters via the contrast projection, evaluating softmax probabilities, and subtracting expected counts.</li>
+<li><strong>Prior gradient</strong> — Cauchy penalties on both baseline and contrast pairwise parameters, with scale adjusted by the number of observations.</li>
 </ul>
-<p>The prior gradient adds Cauchy penalties on both baseline and difference pairwise parameters.</p>
 </section>
 <section id="sampler-implementation" class="level2">
 <h2 class="anchored" data-anchor-id="sampler-implementation">Sampler implementation</h2>
 <p><code>run_gibbs_sampler_bgmCompare()</code> orchestrates one MCMC chain. Each iteration:</p>
 <ol type="1">
-<li><strong>NUTS/HMC/Metropolis step</strong> — Update all active parameters (baseline + differences) using the joint log-pseudoposterior</li>
-<li><strong>Difference selection</strong> (if active) — For each edge, decide whether the group-difference parameters are included or set to zero. Uses a spike-and-slab mechanism analogous to edge selection in the single-group model.</li>
-<li><strong>Main-effect difference selection</strong> (optional) — Separately select which main-effect parameters differ between groups</li>
-<li><strong>Edge prior update</strong> — Update inclusion probabilities (Bernoulli, Beta-Bernoulli, or SBM)</li>
-<li><strong>Missing data imputation</strong> (if active) — Impute missing observations per group</li>
+<li><strong>Missing data imputation</strong> (if <code>na_impute = TRUE</code>) — Impute missing observations per group using the current parameters. Updates the observation matrix, category counts, Blume-Capel statistics, and pairwise statistics.</li>
+<li><strong>Contrast selection</strong> (if active) — A Metropolis step decides whether each contrast parameter is included or collapsed to zero (<code>update_indicator_differences_metropolis_bgmcompare()</code>).</li>
+<li><strong>Parameter updates</strong> — With adaptive Metropolis, main effects and pairwise effects are updated separately (<code>update_main_effects_metropolis_bgmcompare()</code>, then <code>update_pairwise_effects_metropolis_bgmcompare()</code>). With NUTS or HMC, all active parameters are updated jointly via the vectorized log-pseudoposterior.</li>
+<li><strong>Inclusion probability update</strong> (Beta-Bernoulli prior only) — Draw new inclusion probability from the conjugate Beta posterior.</li>
 </ol>
 <p>The warmup schedule follows the same five-stage structure as the single-group model (see <a href="../manual/warmup.html">Warmup Schedule</a>).</p>
 </section>
 <section id="active-parameter-tracking" class="level2">
 <h2 class="anchored" data-anchor-id="active-parameter-tracking">Active parameter tracking</h2>
-<p>Because difference selection can turn parameters on and off, the <code>total_length()</code> function recomputes the active parameter dimension at each iteration. Index maps (<code>build_index_maps()</code>) provide the mapping between the flat active-parameter vector and the structured (variable, group) parameter layout.</p>
-<p>When a difference parameter is “off” (indicator = 0), it is excluded from the NUTS block. The step size and mass matrix adapt to the current active dimension.</p>
+<p>Because contrast selection can turn parameters on and off, the <code>total_length()</code> function recomputes the active parameter dimension at each iteration. Index maps (<code>build_index_maps()</code>) provide the mapping between the flat active-parameter vector and the structured (variable, group) parameter layout.</p>
+<p>When a contrast parameter is “off” (indicator = 0), it is excluded from the NUTS block. The step size and mass matrix adapt to the current active dimension.</p>
 </section>
 <section id="output-handling" class="level2">
 <h2 class="anchored" data-anchor-id="output-handling">Output handling</h2>
@@ -631,32 +642,36 @@ Warning
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>samples</code></td>
-<td>Posterior samples of all parameters (baseline + differences)</td>
+<td><code>main_samples</code></td>
+<td>Main-effect posterior samples (iterations <span class="math inline">\(\times\)</span> thresholds <span class="math inline">\(\times\)</span> groups)</td>
 </tr>
 <tr class="even">
+<td><code>pairwise_samples</code></td>
+<td>Pairwise-effect posterior samples (iterations <span class="math inline">\(\times\)</span> pairs <span class="math inline">\(\times\)</span> groups)</td>
+</tr>
+<tr class="odd">
 <td><code>indicator_samples</code></td>
-<td>Edge inclusion indicators</td>
-</tr>
-<tr class="odd">
-<td><code>difference_indicator_samples</code></td>
-<td>Difference selection indicators</td>
+<td>Contrast inclusion indicators (iterations <span class="math inline">\(\times\)</span> parameters)</td>
 </tr>
 <tr class="even">
-<td><code>warmup_check</code></td>
-<td>Warmup diagnostics</td>
+<td><code>treedepth_samples</code></td>
+<td>Tree depth per iteration (NUTS only)</td>
 </tr>
 <tr class="odd">
-<td>NUTS fields</td>
-<td>Tree depth, divergences, energy (when NUTS is used)</td>
+<td><code>divergent_samples</code></td>
+<td>Divergent transition flags (NUTS only)</td>
+</tr>
+<tr class="even">
+<td><code>energy_samples</code></td>
+<td>Hamiltonian energy per iteration (NUTS only)</td>
 </tr>
 </tbody>
 </table>
 <p>The R output builder (<code>build_output_compare()</code>) splits the posterior means into:</p>
 <ul>
-<li><code>$group_posterior_means</code> — Posterior means of the group-level parameters <span class="math inline">\(\boldsymbol{\theta}^{(g)}\)</span>, reconstructed from baseline and differences</li>
-<li><code>$difference_posterior_means</code> — Posterior means of the difference parameters <span class="math inline">\(\boldsymbol{\delta}^{(h)}\)</span></li>
-<li><code>$difference_inclusion_probabilities</code> — Proportion of iterations where each difference indicator was included</li>
+<li><code>$group_posterior_means</code> — Posterior means of the group-level parameters <span class="math inline">\(\boldsymbol{\omega}^{(g)}\)</span>, reconstructed from the baseline <span class="math inline">\(\omega_{ij}\)</span> and contrast parameters <span class="math inline">\(\delta_{ij}^{(k)}\)</span></li>
+<li><code>$difference_posterior_means</code> — Posterior means of the contrast parameters <span class="math inline">\(\delta_{ij}^{(k)}\)</span></li>
+<li><code>$difference_inclusion_probabilities</code> — Proportion of iterations where each contrast indicator was included</li>
 </ul>
 
 
@@ -679,6 +694,34 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
+});
+
+// citation format picker on landing page
+document.querySelectorAll("[data-cite-picker]").forEach(picker => {
+   const tabs = picker.querySelectorAll("[data-citation-tab]");
+   const panels = picker.querySelectorAll("[data-citation-panel]");
+
+   const setActive = (format) => {
+      tabs.forEach(tab => {
+         const isActive = tab.dataset.citationTab === format;
+         tab.classList.toggle("is-active", isActive);
+         tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach(panel => {
+         const isActive = panel.dataset.citationPanel === format;
+         panel.classList.toggle("is-active", isActive);
+         if (isActive) {
+            panel.removeAttribute("hidden");
+         } else {
+            panel.setAttribute("hidden", "hidden");
+         }
+      });
+   };
+
+   tabs.forEach(tab => {
+      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
+   });
 });
 
 </script>
