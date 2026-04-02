@@ -42,7 +42,8 @@ jobs:
           base_log   = system.time(for(i in seq_len(n)) log(ax))[["elapsed"]]
           custom_log = system.time(for(i in seq_len(n)) bgms:::rcpp_ieee754_log(ax))[["elapsed"]]
 
-          result = data.frame(
+          # Use list (not data.frame) to get a single JSON object
+          result = list(
             platform   = platform,
             mode       = mode,
             base_exp   = base_exp,
@@ -50,9 +51,10 @@ jobs:
             base_log   = base_log,
             custom_log = custom_log
           )
-          cat(toJSON(result, auto_unbox = TRUE), "\n")
+          json_out = toJSON(result, auto_unbox = TRUE)
+          cat(json_out, "\n")
           dir.create("bench-out", showWarnings = FALSE)
-          writeLines(toJSON(result, auto_unbox = TRUE),
+          writeLines(json_out,
                      file.path("bench-out", paste0(tolower(platform), ".json")))
 
       - uses: actions/upload-artifact@v4
@@ -79,8 +81,8 @@ jobs:
           data = {}
           for path in glob.glob("bench-artifacts/*.json"):
               with open(path) as f:
-                  raw = json.load(f)
-              row = raw[0] if isinstance(raw, list) else raw
+                  row = json.load(f)
+              # row is now a plain object {...}, not an array
               data[row["platform"]] = row
 
           mac = data["Darwin"]
