@@ -2,10 +2,6 @@
 title: "Variable Helpers"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 Numerically stable computation of MRF category denominators and
 probabilities. Source: `src/utils/variable_helpers.h` and
 `variable_helpers.cpp`.
@@ -13,22 +9,25 @@ probabilities. Source: `src/utils/variable_helpers.h` and
 ## The problem
 
 MRF conditional probabilities involve exponentials of residual
-scores. For large networks or extreme parameter values, the
-arguments to `exp()` can exceed the IEEE 754 double-precision
-range, producing `Inf` or underflowing to zero. Naive computation
-(direct exponentiation followed by normalization) fails silently
-in these cases.
+scores. Computing `exp()` for every person–category combination is
+expensive and dominates the cost of pseudolikelihood evaluation.
+The variable helpers reformulate the normalizing constants as a
+recursion that avoids per-category `exp()` calls (the FAST path).
+When the recursion's intermediate values would overflow or
+underflow, a SAFE path falls back to explicit `exp()` calls
+with log-sum-exp stabilization.
 
 ## The FAST/SAFE dual-path strategy
 
 Every denominator and probability function in `variable_helpers.cpp`
 uses a two-path approach:
 
-1. **FAST path** — Precomputed exponentials with power-chain
-   accumulation. Used when the exponent arguments stay within safe
-   bounds.
-2. **SAFE path** — Direct log-sum-exp evaluation as a fallback when
-   bounds are violated.
+1. **FAST path** — A recursive power-chain accumulation that
+   precomputes a small number of exponentials and builds the
+   normalizing constant without per-category `exp()` calls.
+2. **SAFE path** — Explicit per-category `exp()` evaluation with
+   log-sum-exp stabilization, used as a fallback when the FAST
+   path's intermediate values would overflow or underflow.
 
 The choice is made per-person (per row of the data matrix) based on
 whether the residual score times the maximum category exceeds the
@@ -36,18 +35,27 @@ whether the residual score times the maximum category exceeds the
 
 ### FAST path detail
 
-For an ordinal variable with categories $0, 1, \ldots, K-1$ and
+For an ordinal variable with categories $0, 1, \ldots, K$ and
 residual $r$:
 
-1. Precompute $e_r = \exp(r)$ and $e_m = \exp(\mu(c))$ for each
-   category
-2. Accumulate the denominator as a Horner-like chain:
-   $D = e^{-b}(1 + e_m[1] \cdot e_r + e_m[2] \cdot e_r^2 + \cdots)$
-   where $b$ is a stabilizing shift
+1. Precompute $e_r = \exp(r)$, $e_b = \exp(-b)$, and
+   $e_\mu(c) = \exp(\mu(c))$ for each category (once per variable)
+2. Accumulate the denominator with a running power $P$:
 
-This avoids computing `exp()` for each category-residual combination
-independently and exploits the geometric structure of the category
-scores.
+$$
+\begin{aligned}
+P &\leftarrow e_r \\
+D &\leftarrow e_b \\
+\text{for } c &= 1, \ldots, K: \\
+  D &\leftarrow D + e_\mu(c) \cdot P \cdot e_b \\
+  P &\leftarrow P \cdot e_r
+\end{aligned}
+$$
+
+Only two per-person `exp()` calls are needed ($e_r$ and $e_b$),
+plus $K$ for the main effects. The running product $P = e_r^{\,c}$
+replaces the $K$ per-category `exp()` calls that a naive
+implementation would require.
 
 ### SAFE path detail
 
@@ -57,7 +65,7 @@ When the FAST path would overflow or underflow:
 2. Find $s_{\max} = \max_c s_c$
 3. Compute $D = \exp(s_{\max}) \sum_c \exp(s_c - s_{\max})$
 
-This is the standard log-sum-exp trick, applied per person.
+This is the standard log-sum-exp computation, applied per person.
 
 ### Block scanning
 
@@ -78,9 +86,11 @@ $n$.
 
 ### `compute_probs_ordinal()`
 
-Computes the full category probability matrix ($n \times K$) for
-one ordinal variable. Probabilities are clamped at zero to prevent
-negative values from floating-point error in the normalization step.
+Computes the full category probability matrix ($n \times (K+1)$) for
+one ordinal variable, where column 0 is category 0 and columns 1
+through $K$ are categories 1 through $K$. Probabilities are clamped
+at zero to prevent negative values from floating-point error in the
+normalization step.
 
 ## Blume-Capel variables
 
@@ -115,5 +125,9 @@ same pass.
 The bound that triggers the SAFE path is set to 709, derived from
 IEEE 754 double precision: $\exp(709) \approx 8.2 \times 10^{307}$
 is the largest representable value, while $\exp(710) = \text{Inf}$.
-The FAST path checks whether $|r| \cdot (K - 1) < 709$ before
-proceeding.
+The FAST path checks whether $|b_i| \le 709$ before proceeding,
+where $b_i = K \cdot r_i$ for ordinal variables. For the joint
+log-normalizer functions, the threshold is reduced to
+$709 - \max_c |\theta_c|$ to account for intermediate overflow
+risk in the power chain. The Blume–Capel variants additionally
+check $|K \cdot r_i - b_i| \le 709$.
