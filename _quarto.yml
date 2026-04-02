@@ -67,7 +67,7 @@ website:
     - id: guide
       title: "User's Guide"
       style: "floating"
-      collapse-level: 2
+      collapse-level: 1
       align: left
       contents:
         - guide/index.qmd
@@ -95,7 +95,7 @@ website:
     - id: reference
       title: "Reference"
       style: "floating"
-      collapse-level: 2
+      collapse-level: 1
       align: left
       contents:
         - reference/index.qmd
@@ -112,7 +112,7 @@ website:
     - id: manual
       title: "Manual"
       style: "floating"
-      collapse-level: 2
+      collapse-level: 1
       align: left
       contents:
         - manual/index.qmd
@@ -152,7 +152,7 @@ website:
     - id: examples
       title: "Examples"
       style: "floating"
-      collapse-level: 2
+      collapse-level: 1
       align: left
       contents:
         - examples/index.qmd
