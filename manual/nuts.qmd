@@ -35,6 +35,19 @@ $\theta$, so the cache trivially avoids redundant evaluations at
 tree-node boundaries where the same $\theta$ appears as both the end
 of one subtree and the start of another.
 
+## Constrained leapfrog (RATTLE) {#constrained-leapfrog-rattle}
+
+When a model has constraints (edge selection or a sparse graph in the
+mixed MRF), the standard leapfrog integrator cannot enforce zero
+entries for excluded edges. bgms uses a RATTLE-based constrained
+leapfrog scheme that projects position and momentum onto the
+constraint manifold at each step, with a runtime reversibility check
+that detects numerical failures.
+
+The full algorithm, Memoizer cache, projection callbacks, reversibility
+check, and sampler dispatch logic are documented in
+[Constrained Leapfrog (RATTLE)](rattle.qmd).
+
 ## Binary tree construction
 
 NUTS builds a balanced binary tree by doubling the trajectory in a
@@ -99,13 +112,18 @@ mass matrix is updated during warmup.
 
 ## NUTS diagnostics
 
-Each NUTS step records three diagnostics:
+Each NUTS step records four diagnostics:
 
 - **Tree depth** — Number of doubling steps (0 to `max_tree_depth`).
   Consistently hitting the maximum indicates the step size may be
   too small.
 - **Divergent** — Whether a divergence was detected in any leapfrog
   step during tree building.
+- **Non-reversible** — Whether a constrained leapfrog step (RATTLE)
+  failed the round-trip reversibility check. Only relevant for models
+  that use the constrained integrator (e.g., edge selection with
+  continuous variables). A non-reversible step terminates the NUTS
+  tree, similar to a divergence.
 - **Energy** — The Hamiltonian $H = -\log p(\theta) + \frac{1}{2} r^\top M^{-1} r$.
   Used to compute E-BFMI (energy Bayesian fraction of missing
   information).

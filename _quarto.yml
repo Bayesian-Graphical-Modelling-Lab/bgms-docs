@@ -125,13 +125,13 @@ website:
           contents:
             - manual/samplers.qmd
             - manual/nuts.qmd
+            - manual/rattle.qmd
             - manual/warmup.qmd
             - manual/parallel-chains.qmd
         - section: "Models"
           contents:
             - manual/ggm-internals.qmd
             - manual/omrf-internals.qmd
-            - manual/variable-helpers.qmd
             - manual/mixed-internals.qmd
         - section: "Priors & Edge Selection"
           contents:
@@ -143,6 +143,8 @@ website:
         - section: "Numerical Methods"
           contents:
             - manual/numerical.qmd
+            - manual/pseudolikelihood.qmd
+            - manual/variable-helpers.qmd
 
     - id: examples
       title: "Examples"
