@@ -66,8 +66,8 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | guide/edge-selection.qmd | Medium | Scaffolded | No | No | - |
 | guide/group-comparison.qmd | Medium | Scaffolded | No | No | - |
 | guide/clustering.qmd | Medium | Not started | No | No | - |
-| guide/mcmc-output.qmd | Medium | Not started | No | No | - |
-| guide/mcmc-diagnostics.qmd | Medium | Not started | No | No | - |
+| guide/mcmc-output.qmd | Medium | Populated | No | No | - |
+| guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | - |
 | **Reference** | | | | | |
 | reference/index.qmd | Low | Scaffolded | No | No | - |
 | reference/bgm.qmd | High | Scaffolded | No | No | - |
@@ -77,20 +77,22 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | reference/datasets.qmd | Low | Scaffolded | No | No | - |
 | **Manual** | | | | | |
 | manual/index.qmd | Low | Scaffolded | No | No | - |
-| manual/architecture.qmd | Medium | Scaffolded | No | No | - |
+| manual/architecture.qmd | Medium | Populated | No | No | - |
 | manual/r-scaffolding.qmd | Medium | Not started | No | No | - |
-| manual/model-classes.qmd | High | Scaffolded | No | No | - |
-| manual/samplers.qmd | High | Not started | No | No | - |
-| manual/nuts.qmd | High | Scaffolded | No | No | - |
-| manual/warmup.qmd | High | Scaffolded | No | No | - |
+| manual/model-classes.qmd | High | Contradiction-checked | No | No | - |
+| manual/samplers.qmd | High | Populated | No | No | - |
+| manual/nuts.qmd | High | Populated | No | No | - |
+| manual/hmc.qmd | Medium | Populated | No | No | Deprecated sampler |
+| manual/metropolis.qmd | High | Populated | No | No | - |
+| manual/warmup.qmd | High | Populated | No | No | - |
 | manual/parallel-chains.qmd | Medium | Not started | No | No | - |
-| manual/ggm-internals.qmd | High | Not started | No | No | - |
-| manual/omrf-internals.qmd | High | Not started | No | No | - |
-| manual/variable-helpers.qmd | High | Not started | No | No | - |
-| manual/mixed-internals.qmd | High | Not started | No | No | - |
-| manual/edge-priors.qmd | High | Not started | No | No | - |
-| manual/sbm-prior.qmd | High | Not started | No | No | - |
-| manual/bgmcompare-internals.qmd | High | Not started | No | No | - |
+| manual/ggm-internals.qmd | High | Contradiction-checked | No | No | - |
+| manual/omrf-internals.qmd | High | Contradiction-checked | No | No | - |
+| manual/variable-helpers.qmd | High | Contradiction-checked | No | No | - |
+| manual/mixed-internals.qmd | High | Contradiction-checked | No | No | - |
+| manual/edge-priors.qmd | High | Contradiction-checked | No | No | - |
+| manual/sbm-prior.qmd | High | Contradiction-checked | No | No | - |
+| manual/bgmcompare-internals.qmd | High | Contradiction-checked | No | No | - |
 | manual/numerical.qmd | High | Scaffolded | No | No | - |
 | **Examples** | | | | | |
 | examples/index.qmd | Low | Not started | No | No | - |
@@ -118,6 +120,8 @@ These tasks are important but are not part of the core review flow above.
 - [ ] Add GitHub Actions workflow in bgms-docs to render Quarto and deploy to the publishing target used by the bgms website.
 - [ ] Configure deployment credentials (fine-grained PAT or GitHub App) with least-privilege access.
 - [ ] Document deployment and rollback steps for maintainers.
+
+### P3 - Notation consistency fixes\n\nSee STYLE_GUIDE.md \u00a7 Mathematical Notation for the authoritative conventions.\nAll notation fixes have been applied.
 
 ### P2 - Documentation maintenance
 
@@ -198,6 +202,17 @@ Governance and traceability:
 - [ ] Add provenance note in `README.md` describing what was adapted vs rewritten.
 - [ ] Record source map in `docs/attribution.md`: adapted elements vs original bgms work.
 - [ ] Add release checklist item: design de-risking pass completed before first public deployment.
+
+### P3 - Automated reference checking
+
+- [ ] Integrate `hallucinator-cli` (Rust) into a pre-render or pre-commit check for `.bib` files.
+  - Install: `curl --proto '=https' --tlsv1.2 -LsSf https://github.com/gianlucasb/hallucinator/releases/latest/download/hallucinator-cli-installer.sh | sh`
+  - Checks CrossRef, arXiv, DBLP, Semantic Scholar, ACL, Europe PMC, PubMed, OpenAlex in parallel.
+  - Flags: verified, author-mismatch, not-found (potential hallucination), retracted papers.
+  - Supports `.bib` files directly: `hallucinator-cli check references.bib`
+  - Known limitations: weak on books, old math papers, niche venues; DBLP rate-limits (consider offline DB).
+- [ ] Evaluate as part of a future quarto-based paper-writing suite for automated reference validation.
+- [ ] Consider complementing with `rcrossref` (R/CRAN) DOI-based metadata verification for entries that have DOIs.
 
 ## Open Decisions
 

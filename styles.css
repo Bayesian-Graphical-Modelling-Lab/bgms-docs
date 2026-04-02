@@ -72,7 +72,7 @@ pre {
 
 /* Math styling */
 .math {
-  font-size: 1.1em;
+  font-size: 1em;
 }
 
 /* Code block improvements */
@@ -119,4 +119,56 @@ h3 {
 [data-bs-theme="dark"] .navbar,
 .quarto-dark .navbar {
   font-size: 1rem;
+}
+
+/* Citation picker */
+.citation-picker {
+  margin-top: 0.6rem;
+}
+
+.citation-picker-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.citation-tab {
+  border: 1px solid #c7ced6;
+  background: #f8f9fb;
+  border-radius: 999px;
+  padding: 0.28rem 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.citation-tab.is-active {
+  border-color: #0b5ed7;
+  background: #0b5ed7;
+  color: #fff;
+}
+
+.citation-panel {
+  padding: 0.8rem;
+  border: 1px solid #d7dde5;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.citation-panel > p {
+  margin: 0;
+}
+
+[data-bs-theme="dark"] .citation-tab,
+.quarto-dark .citation-tab {
+  border-color: #4a5057;
+  background: #25292e;
+  color: #e8ecef;
+}
+
+[data-bs-theme="dark"] .citation-panel,
+.quarto-dark .citation-panel {
+  border-color: #4a5057;
+  background: #1f2328;
 }

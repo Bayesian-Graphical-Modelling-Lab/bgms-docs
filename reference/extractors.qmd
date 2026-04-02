@@ -39,8 +39,7 @@ extract_main_effects(bgms_object)
 
 The structure depends on the model type:
 
-- **GGM** (`bgms`): `NULL`. GGM models have no main effects; the precision
-  matrix diagonal is on `coef(fit)$pairwise`.
+- **GGM** (`bgms`): `NULL`. GGM models have no main effects.
 - **OMRF** (`bgms`): A numeric matrix (p x max_categories) of posterior mean
   category thresholds. Columns beyond the number of categories for a
   variable are `NA`.
@@ -51,7 +50,7 @@ The structure depends on the model type:
 
 ## extract_pairwise_interactions {#extract_pairwise_interactions}
 
-Retrieve posterior samples of pairwise interaction parameters.
+Retrieve posterior samples of partial association parameters.
 
 ```r
 extract_pairwise_interactions(bgms_object)
@@ -62,7 +61,7 @@ extract_pairwise_interactions(bgms_object)
 | `bgms_object` | A fitted `bgms` or `bgmCompare` object. |
 
 Returns a matrix with one row per post-warmup iteration and one column per
-edge. For `bgmCompare`, columns correspond to baseline pairwise interaction
+edge. For `bgmCompare`, columns correspond to baseline partial association
 parameters.
 
 ## extract_indicators {#extract_indicators}
@@ -198,6 +197,53 @@ the model (e.g., `main`, `pairwise`, `indicator`).
 - `extract_category_thresholds()` --- Renamed to `extract_main_effects()`.
 - `extract_edge_indicators()` --- Renamed to `extract_indicators()`.
 - `extract_pairwise_thresholds()` --- Renamed to `extract_main_effects()`.
+
+## extract_precision {#extract_precision}
+
+Retrieve the posterior mean precision matrix.
+
+```r
+extract_precision(bgms_object)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `bgms_object` | A fitted `bgms` object (GGM or mixed MRF). |
+
+Returns a symmetric p x p matrix (or the continuous block submatrix for
+mixed MRFs) containing the posterior mean precision matrix
+$\boldsymbol{K}$.
+
+## extract_partial_correlations {#extract_partial_correlations}
+
+Retrieve the posterior mean partial correlation matrix.
+
+```r
+extract_partial_correlations(bgms_object)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `bgms_object` | A fitted `bgms` object (GGM or mixed MRF). |
+
+Returns a symmetric matrix of partial correlations, computed by
+standardizing the precision matrix: $\rho_{ij} = -K_{ij} / \sqrt{K_{ii}
+K_{jj}}$.
+
+## extract_log_odds {#extract_log_odds}
+
+Retrieve the posterior mean log-odds matrix.
+
+```r
+extract_log_odds(bgms_object)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `bgms_object` | A fitted `bgms` object (OMRF or mixed MRF). |
+
+Returns a symmetric matrix of log adjacent-category odds ratios. For the
+ordinal MRF, $\text{log-odds}_{ij} = 2 \omega_{ij}$.
 
 ## See also
 

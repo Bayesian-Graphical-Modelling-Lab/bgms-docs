@@ -6,7 +6,7 @@ title: "C++ Architecture"
 This page has not yet passed technical or readability review.
 :::
 
-The bgms C++ backend is organized in five top-level directories under
+The `bgms` C++ backend is organized in five top-level directories under
 `src/`. Each directory has a distinct role, and dependencies flow
 downward: algorithms depend on math utilities but not on models, and
 the execution layer orchestrates everything.
@@ -23,7 +23,7 @@ src/
 │   ├── base_model.h     # Abstract interface (30+ virtual methods)
 │   ├── ggm/             # GGMModel — precision matrix, Metropolis-only
 │   ├── omrf/            # OMRFModel — ordinal MRF, gradient-based
-│   └── mixed/           # MixedMRFModel — hybrid NUTS+Metropolis
+│   └── mixed/           # MixedMRFModel — mixed discrete-continuous MRF
 ├── priors/
 │   ├── edge_prior.h     # BaseEdgePrior + Bernoulli, BetaBernoulli, SBM
 │   ├── sbm_edge_prior.h # MFM-SBM Gibbs updates
@@ -74,9 +74,15 @@ and override a small set of virtual methods. The chain runner calls
 GGM or an ordinal MRF. See [Model Classes](model-classes.qmd).
 
 **Cloning for parallelism.** Both `BaseModel` and `BaseEdgePrior`
-expose a `clone()` method that produces an independent copy. The
-chain runner clones the prototype once per chain before dispatching
-to TBB threads. See [Parallel Chains](parallel-chains.qmd).
+expose a `clone()` method that produces an independent copy. The Rcpp
+entry point constructs a single model from R input and passes it to
+`run_mcmc_sampler()`. Inside C++, that prototype is cloned once per
+chain (each clone receiving its own RNG seed), and the clones are
+dispatched to TBB threads via `RcppParallel::parallelFor()`. R never
+interacts with the clones directly — parallelism is entirely
+C++-side. After all chains finish, the `vector<ChainResult>` is
+converted to an R list and returned. See
+[Parallel Chains](parallel-chains.qmd).
 
 **Header-only samplers.** The sampler classes in `mcmc/samplers/` are
 header-only. They are lightweight wrappers that hold adaptation state

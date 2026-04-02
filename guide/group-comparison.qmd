@@ -2,27 +2,20 @@
 title: "Group Comparison"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
 
-The `bgmCompare()` function tests for differences in network structure
-between groups. It estimates whether pairwise interactions and category
-thresholds differ across groups in an ordinal Markov Random Field.
+The [`bgmCompare()`](../reference/bgmCompare.qmd) function tests whether the network parameters differ between groups in networks of binary or ordinal variables [@MarsmanEtAl_2025_ttest]. It estimates both the shared network — the overall partial associations and category thresholds — and the group differences, using the same Bayesian framework as [`bgm()`](../reference/bgm.qmd). A key advantage of this approach is its ability to distinguish three outcomes for each parameter: evidence that a parameter differs across groups, evidence that it is invariant, and absence of evidence — the data are simply not informative enough to decide.
 
 ## The model
 
-For each pair of variables $(i, j)$, the group-specific interaction is
-decomposed as:
+The group comparison model separates overall effects from group differences. For each pair of variables $(i, j)$, the group-specific partial association in group $g$ is constructed as
 
 $$
-\theta_{ij}^{(g)} = \phi_{ij} + \delta_{ij}^{(g)}
+\theta_{ij}^{(g)} = \omega_{ij} + \sum_{k=1}^{G-1} c_{gk}\,\delta_{ij}^{(k)}
 $$
 
-where $\phi_{ij}$ is the baseline effect (shared across groups) and
-$\delta_{ij}^{(g)}$ is the group-specific difference, constrained so that
-the differences sum to zero across groups. The same decomposition applies
-to category threshold parameters.
+where $\omega_{ij}$ is the overall partial association — the value that would be obtained if all groups were combined — and $\delta_{ij}^{(k)}$ are the difference parameters, one for each of the $G - 1$ orthogonal contrasts. The coefficients $c_{gk}$ come from an orthonormal projection matrix that maps the contrast parameters to group-specific effects. Category thresholds are decomposed in the same way.
+
+For two groups, the projection matrix reduces to $c = (-\tfrac{1}{2},\; +\tfrac{1}{2})^\top$, so that $\theta_{ij} = \omega_{ij} \pm \tfrac{1}{2}\,\delta_{ij}$. This is the centered parameterization of the Bayesian independent-samples $t$-test [@RouderEtAl_2009], where the overall effect and the group difference are separated. For more than two groups, the projection generalizes the idea to an ANOVA-like design with $G - 1$ orthogonal contrasts [@RouderEtAl_2012]. In each case, making the differences explicit parameters — rather than computing them post hoc from separate group estimates — allows each difference to receive its own prior distribution and its own hypothesis test.
 
 ## Defining groups
 
@@ -34,70 +27,46 @@ Groups can be specified in two ways:
 fit = bgmCompare(x = data_group1, y = data_group2, seed = 1234)
 ```
 
-**Group membership vector** — pass a single dataset with a group indicator:
+**Group membership vector** — pass a single dataset with a group indicator (two or more groups):
 
 ```r
 fit = bgmCompare(x = data, group_indicator = groups, seed = 1234)
 ```
 
-The `group_indicator` approach supports more than two groups.
-
 ## Difference selection
 
-When `difference_selection = TRUE` (the default), spike-and-slab priors are
-placed on the difference parameters $\delta_{ij}^{(g)}$. The posterior
-inclusion probability for each difference indicates how plausible it is
-that the groups differ on that parameter.
+When `difference_selection = TRUE` (the default), spike-and-slab priors are placed on the group difference parameters. For each pairwise interaction, a binary indicator $\gamma_{ij}$ governs whether the difference is included in the model:
 
-By default, only pairwise interaction differences are selected
-(`main_difference_selection = FALSE`). Main effect (threshold) differences
-are always included. This default reflects that main effects are often
-nuisance parameters, and their selection can interfere with pairwise
-selection under the Beta-Bernoulli prior.
+- When $\gamma_{ij} = 0$ (spike), the difference is exactly zero — all groups have the same partial association.
+- When $\gamma_{ij} = 1$ (slab), the difference receives a Cauchy prior with scale `difference_scale` and is estimated from the data.
 
-## Interpreting the output
-
-The `summary()` method reports:
-
-- **Baseline effects**: posterior summaries for the shared parameters
-  $\phi_{ij}$.
-- **Difference effects**: posterior summaries for the group differences
-  $\delta_{ij}^{(g)}$, including inclusion probabilities and Bayes factors.
-
-The `coef()` method returns:
-
-- `$pairwise_effects_groups`: group-specific posterior mean pairwise
-  interactions (baseline + difference).
-- `$main_effects_groups`: group-specific posterior mean thresholds.
-- `$indicator`: posterior inclusion probabilities for differences.
+By default, only pairwise interaction differences are selected (`main_difference_selection = FALSE`). Threshold differences are always included as free parameters. This default reflects that thresholds are typically nuisance parameters: their selection can interfere with pairwise selection under the Beta-Bernoulli prior, and group differences in thresholds are rarely the primary research question.
 
 ## Bayes factors for group differences
 
-When `difference_probability = 0.5` (the default), the Bayes factor for a
-group difference equals the posterior odds:
+The inclusion Bayes factor for a group difference has the same form as for edge selection (see [Edge Selection](edge-selection.qmd)):
 
 $$
-\text{BF}_{10} = \frac{p(\gamma = 1 \mid \mathbf{x})}{1 - p(\gamma = 1 \mid \mathbf{x})}
+\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \text{data})}{p(\gamma_{ij} = 0 \mid \text{data})} \bigg/
+\frac{p(\gamma_{ij} = 1)}{p(\gamma_{ij} = 0)}
 $$
 
-A large Bayes factor indicates that the groups differ on that parameter;
-a small one (or equivalently, a large $1 / \text{BF}_{10}$) indicates that
-they do not.
+Values greater than one indicate evidence that the groups differ on the partial association between variables $i$ and $j$. Values less than one — equivalently, $1/\text{BF}_{10}$ greater than one — indicate evidence that the parameter is invariant. Values close to one indicate that the data are uninformative: there is not enough evidence to decide whether the parameter differs between groups or not. This three-way distinction — evidence for a difference, evidence for equivalence, and absence of evidence — is the central advantage of the Bayesian approach to group comparison.
 
-## Prior guidance for group comparison
+As with edge selection, the inclusion Bayes factor averages over all possible configurations of the remaining group differences. Testing whether the interaction between variables $i$ and $j$ differs across groups does not require assumptions about which other interactions differ — the test integrates over this uncertainty. See [Why the inclusion Bayes factor](edge-selection.qmd#why-the-inclusion-bayes-factor) and [The Bayesian Approach](bayesian-approach.qmd) for the formal derivation.
 
-- **`difference_scale = 1`** (default): scale of the Cauchy prior for
-  difference parameters. This is smaller than the default `pairwise_scale`
-  (2.5) because group differences are typically smaller than the effects
-  themselves.
-- **`difference_prior = "Bernoulli"`** (default): fixed inclusion
-  probability for differences. `"Beta-Bernoulli"` lets the data inform the
-  overall rate of group differences.
-- **`difference_probability = 0.5`** (default): prior probability that any
-  given difference is nonzero.
+## Interpreting the output
 
-## References
+The `summary()` method reports posterior summaries for the shared parameters $\omega_{ij}$ and the group difference parameters $\delta_{ij}$, including posterior inclusion probabilities and Bayes factors.
 
-Marsman, M., Waldorp, L. J., Sekulovski, N., & Haslbeck, J. M. B. (2025).
-Bayes factor tests for group differences in ordinal and binary graphical
-models. *Psychometrika*, 90(5), 1809–1842.
+The `coef()` method returns:
+
+- `$pairwise_effects_groups`: group-specific posterior mean partial associations, reconstructed from the overall effects and the projection of the difference parameters.
+- `$main_effects_groups`: group-specific posterior mean thresholds.
+- `$indicator`: posterior inclusion probabilities for the group differences.
+
+## Prior guidance
+
+- **`difference_scale = 1`** (default): scale of the Cauchy prior for the difference parameters. This matches the current default `pairwise_scale` (`1`) for baseline partial associations.
+- **`difference_prior = "Bernoulli"`** (default): each difference has a fixed prior inclusion probability. Set to `"Beta-Bernoulli"` to place a beta hyperprior on the inclusion probability, which provides automatic multiplicity correction — important when the number of potential group differences is large [@MarsmanEtAl_2025_ttest].
+- **`difference_probability = 0.5`** (default): prior probability that any given difference is nonzero. When `difference_probability = 0.5`, the prior odds equal one and the Bayes factor simplifies to the posterior odds.

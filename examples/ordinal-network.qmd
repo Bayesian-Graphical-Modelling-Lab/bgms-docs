@@ -26,7 +26,7 @@ head(data)
 
 ## Fit the model
 
-Pass the data to `bgm()`. Because all variables are ordinal, bgms fits
+Pass the data to `bgm()`. Because all variables are ordinal, `bgms` fits
 an ordinal MRF with spike-and-slab edge selection by default.
 
 ```{r}
@@ -37,7 +37,7 @@ fit = bgm(data, seed = 1234)
 ## Posterior summaries
 
 `summary()` returns posterior means, standard deviations, R-hat, and
-effective sample sizes for all pairwise interaction and threshold
+effective sample sizes for all partial association and threshold
 parameters. `coef()` provides posterior means and inclusion
 probabilities.
 
@@ -80,7 +80,7 @@ The reciprocal gives the Bayes factor in favor of exclusion:
 ## Interpretation
 
 Threshold the inclusion probabilities at 0.5 to obtain the median
-probability network, then plot with `qgraph`.
+probability network, then plot with `qgraph` [@EpskampEtAl_2012_qgraph].
 
 ```{r}
 #| eval: false

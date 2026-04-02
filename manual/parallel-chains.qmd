@@ -2,11 +2,7 @@
 title: "Parallel Chains"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
-bgms runs multiple MCMC chains in parallel using Intel TBB (Threading
+`bgms` runs multiple MCMC chains in parallel using Intel TBB (Threading
 Building Blocks), accessed through the RcppParallel package. The
 implementation is in `src/mcmc/execution/chain_runner.h` and
 `chain_runner.cpp`.
@@ -41,7 +37,7 @@ exclusively with no shared mutable state between threads.
 
 ## TBB thread control
 
-Before dispatching, bgms sets the maximum parallelism via TBB's
+Before dispatching, `bgms` sets the maximum parallelism via TBB's
 global control:
 
 ```cpp
@@ -73,9 +69,11 @@ Dispatch uses `RcppParallel::parallelFor(0, no_chains, runner)`.
 
 ## Sequential fallback
 
-When `no_threads = 1` or `no_chains = 1`, bgms skips TBB and runs
-chains sequentially in a simple loop. This avoids TBB overhead for
-single-chain runs and simplifies debugging.
+When `no_threads == 1`, `bgms` skips TBB and runs chains sequentially
+in a simple loop. This avoids TBB overhead for single-chain runs and
+simplifies debugging. The branch condition checks threads, not chain
+count, so multiple chains with `no_threads = 1` still run
+sequentially.
 
 ## Per-chain RNG seeding
 
@@ -99,8 +97,9 @@ interrupt detection across threads.
   iterations. If the user presses Ctrl-C, the flag is set and all
   chains exit their sampling loops. The partial results are still
   returned (with a warning) rather than discarded.
-- **Thread safety** — Progress updates and interrupt checks use a
-  shared `print_mutex` to prevent garbled console output.
+- **Thread safety** — Progress updates and interrupt checks use
+  `ProgressManager`'s internal `std::mutex` to prevent garbled
+  console output.
 
 ## ChainResult storage
 
@@ -113,6 +112,7 @@ Each chain writes its output into a preallocated `ChainResult`:
 | `allocation_samples` | n_vars × n_iter | SBM cluster allocations (if SBM prior) |
 | `treedepth_samples` | n_iter | NUTS tree depth (if NUTS) |
 | `divergent_samples` | n_iter | Divergence flags (if NUTS) |
+| `non_reversible_samples` | n_iter | Non-reversible step flags (if NUTS) |
 | `energy_samples` | n_iter | Hamiltonian energy (if NUTS) |
 
 The `ChainResult` also carries error status and user interrupt flags

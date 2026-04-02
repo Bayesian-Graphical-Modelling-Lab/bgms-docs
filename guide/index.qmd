@@ -12,18 +12,18 @@ analysis workflows, and MCMC output.
 - [Getting Started](getting-started.qmd) — Installation and first model fit
 - [Graphical Models](graphical-models.qmd) — Nodes, edges, and conditional independence
 - [The Bayesian Approach](bayesian-approach.qmd) — Priors, posteriors, and Bayes factors
-- [Prior Basics](prior-basics.qmd) — How bgms uses priors and when to change defaults
+- [Prior Basics](prior-basics.qmd) — How `bgms` uses priors and when to change defaults
 
 ### Models
 
-- [Gaussian Graphical Model](ggm.qmd) — Continuous data, partial correlations, precision matrix
-- [Ordinal MRF](omrf.qmd) — Binary and ordinal data, category thresholds, pairwise interactions
+- [Gaussian Graphical Model](ggm.qmd) — Continuous data, partial associations, precision matrix
+- [Ordinal MRF](omrf.qmd) — Binary and ordinal data, category thresholds, partial associations
 - [Mixed MRF](mixed-model.qmd) — Datasets with both continuous and discrete variables
 
 ### Analyses
 
 - [Edge Selection](edge-selection.qmd) — Spike-and-slab priors for structure learning
-- [Group Comparison](group-comparison.qmd) — Comparing networks across groups with `bgmCompare()`
+- [Group Comparison](group-comparison.qmd) — Comparing networks across groups with [`bgmCompare()`](../reference/bgmCompare.qmd)
 - [Edge Clustering](clustering.qmd) — Stochastic block model prior for discovering edge clusters
 
 ### MCMC Output

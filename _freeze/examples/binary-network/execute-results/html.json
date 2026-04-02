@@ -1,0 +1,17 @@
+{
+  "hash": "4ef5b34eb0cbf6330ff3ca88e4d3ac61",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Binary Network\"\n---\n\n::: {.callout-warning}\nThis page has not yet passed technical or readability review.\n:::\n\nAn end-to-end analysis of binary data using the ordinal Markov random\nfield. This example uses the ADHD dataset bundled with bgms.\n\n## Data\n\nThe `ADHD` dataset contains binary symptom ratings for 355 children.\nThe first column is a group indicator (ADHD diagnosis); columns 2–19\nare nine Inattentive and nine Hyperactive/Impulsive items scored as\npresent (1) or absent (0). We drop the group column and analyze the\nfirst five Inattentive items.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(bgms)\ndata = ADHD[, 2:6]\nhead(data)\n```\n:::\n\n\n## Fit the model\n\nBinary variables are a special case of ordinal data (two categories).\n`bgm()` fits an ordinal MRF with spike-and-slab edge selection by\ndefault.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfit = bgm(data, seed = 1234)\n```\n:::\n\n\n## Posterior summaries\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsummary(fit)\ncoef(fit)\n```\n:::\n\n\n## Edge selection\n\nThe posterior inclusion probabilities indicate the evidence for each\nedge:\n\n\n::: {.cell}\n\n```{.r .cell-code}\ncoef(fit)$indicator\n```\n:::\n\n\nConvert to Bayes factors when the prior inclusion probability equals\n0.5:\n\n\n::: {.cell}\n\n```{.r .cell-code}\np = coef(fit)$indicator[1, 2]\nBF_10 = p / (1 - p)       # evidence for inclusion\n1 / BF_10                  # evidence for exclusion\n```\n:::\n\n\n## Interpretation\n\nThreshold the inclusion probabilities at 0.5 and plot with `qgraph` [@EpskampEtAl_2012_qgraph].\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(qgraph)\n\nmedian_probability_network = coef(fit)$pairwise\nmedian_probability_network[coef(fit)$indicator < 0.5] = 0.0\n\nqgraph(median_probability_network,\n  theme = \"TeamFortress\",\n  maximum = 1,\n  fade = FALSE,\n  color = c(\"#f0ae0e\"), vsize = 10, repulsion = .9,\n  label.cex = 1, label.scale = \"FALSE\",\n  labels = colnames(data)\n)\n```\n:::\n\n\n## Diagnostics\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsummary(fit)$pairwise\nfit$nuts_diag$summary\n```\n:::\n\n\nSee the [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) guide for\ninterpretation.\n",
+    "supporting": [
+      "binary-network_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

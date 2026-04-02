@@ -2,10 +2,6 @@
 title: "Edge Priors"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 The edge prior framework controls which edges are included in the
 graph. All priors inherit from `BaseEdgePrior` in
 `src/priors/edge_prior.h`.
@@ -14,12 +10,13 @@ graph. All priors inherit from `BaseEdgePrior` in
 
 ```cpp
 class BaseEdgePrior {
-  virtual void update(imat edge_indicators, mat& inclusion_probability,
+  virtual void update(const arma::imat& edge_indicators,
+                      arma::mat& inclusion_probability,
                       int num_variables, int num_pairwise,
                       SafeRNG& rng) = 0;
-  virtual unique_ptr<BaseEdgePrior> clone() const = 0;
+  virtual std::unique_ptr<BaseEdgePrior> clone() const = 0;
   virtual bool has_allocations() const { return false; }
-  virtual ivec get_allocations() const { return ivec(); }
+  virtual arma::ivec get_allocations() const { return arma::ivec(); }
 };
 ```
 
@@ -37,7 +34,8 @@ The simplest prior: each edge has a fixed inclusion probability that
 does not change during sampling. The `update()` method is a no-op.
 
 This prior is used when the user specifies `edge_prior = "Bernoulli"`
-with a fixed inclusion probability matrix.
+with a fixed inclusion probability matrix. This is the default edge
+prior in `bgms`.
 
 ## BetaBernoulliEdgePrior
 
@@ -52,8 +50,6 @@ the data. At each iteration:
 
 The hyperparameters $\alpha$ and $\beta$ default to 1 (uniform prior
 on the inclusion probability).
-
-This is the default edge prior in bgms (`edge_prior = "Beta-Bernoulli"`).
 
 ## StochasticBlockEdgePrior
 
@@ -88,3 +84,23 @@ The `edge_prior` argument in `bgm()` maps to these classes:
 
 When `edge_selection = FALSE`, no edge prior is instantiated and all
 edges remain included throughout sampling.
+
+## Factory dispatch
+
+The `create_edge_prior()` factory in `edge_prior.h` maps an
+`EdgePrior` enum value to the concrete class. The enum is produced
+from the R string by `edge_prior_from_string()` in `common_helpers.h`.
+
+## Execution order
+
+Within each MCMC iteration, the edge prior update runs **after** the
+model's edge indicator and parameter updates:
+
+1. `model.update_edge_indicators()` — MoMS add/delete moves using the
+   current inclusion probability matrix
+2. `sampler->step(model, iteration)` — parameter updates
+3. `edge_prior.update(...)` — update the inclusion probability matrix
+   based on the new edge indicators
+
+The updated probabilities take effect in the next iteration's edge
+indicator proposals.

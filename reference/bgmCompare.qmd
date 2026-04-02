@@ -12,7 +12,7 @@ Random Fields.
 ## Description
 
 The `bgmCompare` function estimates group differences in category threshold
-parameters (main effects) and pairwise interactions (pairwise effects) of a
+parameters (main effects) and partial associations (pairwise effects) of a
 Markov Random Field (MRF) for binary and ordinal variables. Groups can be
 defined either by supplying two separate datasets (`x` and `y`) or by a
 group membership vector. Optionally, Bayesian variable selection identifies
@@ -34,7 +34,7 @@ bgmCompare(
   difference_probability = 0.5,
   beta_bernoulli_alpha = 1,
   beta_bernoulli_beta = 1,
-  pairwise_scale = 2.5,
+  pairwise_scale = 1,
   main_alpha = 0.5,
   main_beta = 0.5,
   iter = 1000,
@@ -82,9 +82,9 @@ bgmCompare(
 
 | Argument | Description |
 |----------|-------------|
-| `pairwise_scale` | Scale of the Cauchy prior for baseline pairwise interactions. Default: `2.5`. |
+| `pairwise_scale` | Scale of the Cauchy prior for baseline partial associations. Default: `1`. |
 | `main_alpha`, `main_beta` | Shape parameters of the beta-prime prior for baseline threshold parameters. Defaults: `0.5`. |
-| `standardize` | Logical. If `TRUE`, the Cauchy prior scale for each pairwise interaction (both baseline and difference) is adjusted based on the range of response scores. Default: `FALSE`. |
+| `standardize` | Logical. If `TRUE`, the Cauchy prior scale for each partial association (both baseline and difference) is adjusted based on the range of response scores. Default: `FALSE`. |
 
 ### Sampler settings
 
@@ -92,11 +92,11 @@ bgmCompare(
 |----------|-------------|
 | `iter` | Number of post-warmup iterations per chain. Default: `1000`. |
 | `warmup` | Number of warmup iterations before sampling. Default: `1000`. |
-| `update_method` | Sampling algorithm: `"nuts"`, `"adaptive-metropolis"`, or `"hamiltonian-mc"`. Default: `"nuts"`. |
-| `target_accept` | Target acceptance rate. Defaults: `0.44` (Metropolis), `0.65` (HMC), `0.80` (NUTS). |
-| `hmc_num_leapfrogs` | Leapfrog steps for HMC. Default: `100`. |
+| `update_method` | Sampling algorithm: `"nuts"` or `"adaptive-metropolis"`. `"hamiltonian-mc"` is accepted but **deprecated**; use `"nuts"` instead. Default: `"nuts"`. |
+| `target_accept` | Target acceptance rate. Defaults: `0.44` (Metropolis), `0.80` (NUTS). |
+| `hmc_num_leapfrogs` | **Deprecated.** Leapfrog steps for HMC. Only relevant when `update_method = "hamiltonian-mc"`, which is deprecated. Default: `100`. |
 | `nuts_max_depth` | Maximum tree depth for NUTS. Default: `10`. |
-| `learn_mass_matrix` | Logical. If `TRUE`, adapts a diagonal mass matrix during warmup (HMC/NUTS only). Default: `TRUE`. |
+| `learn_mass_matrix` | Logical. If `TRUE`, adapts a diagonal mass matrix during warmup (NUTS only). Default: `TRUE`. |
 | `chains` | Number of parallel chains. Default: `4`. |
 | `cores` | Number of CPU cores. Default: `parallel::detectCores()`. |
 | `display_progress` | Progress reporting: `"per-chain"`, `"total"`, or `"none"`. Default: `"per-chain"`. |
@@ -109,9 +109,9 @@ A list of class `"bgmCompare"` containing posterior summaries, posterior mean
 matrices, and raw MCMC samples:
 
 - `posterior_summary_main_baseline`, `posterior_summary_pairwise_baseline` ---
-  Summaries of baseline thresholds and pairwise interactions.
+  Summaries of baseline thresholds and partial associations.
 - `posterior_summary_main_differences`, `posterior_summary_pairwise_differences`
-  --- Summaries of group differences in thresholds and pairwise interactions.
+  --- Summaries of group differences in thresholds and partial associations.
 - `posterior_summary_indicator` --- Summaries of inclusion indicators (if
   `difference_selection = TRUE`).
 - `posterior_mean_main_baseline`, `posterior_mean_pairwise_baseline` ---
@@ -126,13 +126,14 @@ posterior means. NUTS diagnostics are available in `fit$nuts_diag` when
 
 ## Details
 
-### Pairwise interactions
+### Partial associations
 
-For variables $i$ and $j$, the group-specific interaction is represented as:
+For variables $i$ and $j$, the group-specific partial association is
+represented as:
 
-$$\theta_{ij}^{(g)} = \phi_{ij} + \delta_{ij}^{(g)}$$
+$$\theta_{ij}^{(g)} = \omega_{ij} + \delta_{ij}^{(g)}$$
 
-where $\phi_{ij}$ is the baseline effect and $\delta_{ij}^{(g)}$ are group
+where $\omega_{ij}$ is the baseline effect and $\delta_{ij}^{(g)}$ are group
 differences constrained to sum to zero.
 
 ### Ordinal variables
@@ -156,9 +157,14 @@ difference parameters:
 
 Parameters are updated within a Gibbs framework, using the same sampling
 algorithms and staged warmup scheme described in [bgm()](bgm.qmd):
-adaptive Metropolis--Hastings, Hamiltonian Monte Carlo, or the No-U-Turn
-Sampler. When `difference_selection = TRUE`, indicator updates are delayed
-until late warmup.
+adaptive Metropolis--Hastings or the No-U-Turn Sampler (NUTS). When
+`difference_selection = TRUE`, indicator updates are delayed until late
+warmup.
+
+::: {.callout-note}
+`update_method = "hamiltonian-mc"` (fixed-length HMC) is deprecated. Use
+`"nuts"` instead.
+:::
 
 ## Examples
 

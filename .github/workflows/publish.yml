@@ -19,12 +19,16 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Install R packages
-        run: |
-          Rscript -e 'install.packages(c("knitr", "rmarkdown", "bgms"))'
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::knitr
+            any::rmarkdown
+            any::qgraph
+            github::Bayesian-Graphical-Modelling-Lab/bgms
 
       - name: Render site
-        run: quarto render
+        run: quarto render --profile ci
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

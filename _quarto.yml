@@ -4,6 +4,9 @@ project:
   resources:
     - icons/
 
+execute:
+  freeze: true
+
 highlight-style: a11y
 
 website:
@@ -84,7 +87,7 @@ website:
             - guide/edge-selection.qmd
             - guide/group-comparison.qmd
             - guide/clustering.qmd
-        - section: "MCMC Output"
+        - section: "Output & Diagnostics"
           contents:
             - guide/mcmc-output.qmd
             - guide/mcmc-diagnostics.qmd
@@ -122,13 +125,15 @@ website:
           contents:
             - manual/samplers.qmd
             - manual/nuts.qmd
+            - manual/hmc.qmd
+            - manual/metropolis.qmd
+            - manual/rattle.qmd
             - manual/warmup.qmd
             - manual/parallel-chains.qmd
         - section: "Models"
           contents:
             - manual/ggm-internals.qmd
             - manual/omrf-internals.qmd
-            - manual/variable-helpers.qmd
             - manual/mixed-internals.qmd
         - section: "Priors & Edge Selection"
           contents:
@@ -140,6 +145,8 @@ website:
         - section: "Numerical Methods"
           contents:
             - manual/numerical.qmd
+            - manual/pseudolikelihood.qmd
+            - manual/variable-helpers.qmd
 
     - id: examples
       title: "Examples"
@@ -154,6 +161,9 @@ website:
         - examples/mixed-network.qmd
         - examples/group-comparison.qmd
         - examples/clustering.qmd
+
+bibliography: references.bib
+csl: apa.csl
 
 format:
   html:

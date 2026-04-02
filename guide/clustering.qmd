@@ -2,27 +2,51 @@
 title: "Edge Clustering"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
 
-The stochastic block model (SBM) prior in bgms discovers clusters of
-edges in the network. Nodes are assigned to latent blocks, and edge
-inclusion probabilities depend on whether the two endpoints belong to the
-same block or different blocks.
+In many networks, nodes can be organized in clusters or communities, and edges are not exchangeable. Standard edge priors (Bernoulli, Beta-Bernoulli) cannot encode such structure because they assign the same inclusion probability to every edge. The stochastic block model (SBM) prior embeds the assumption of clustering directly into the graphical model, so that cluster assignments, the number of clusters, and the evidence for clustering are all estimated as part of the analysis [@SekulovskiEtAl_2025_sbm].
 
-## What is edge clustering?
+## The stochastic block model
 
-In many applied networks, edges are not exchangeable: some groups of
-variables are densely connected while connections between groups are sparse.
-The SBM prior captures this structure by learning block assignments from
-the data. Nodes within the same block share a within-cluster inclusion
-probability, and edges between blocks share a (typically lower)
-between-cluster inclusion probability.
+The SBM [@HollandEtAl_1983] assumes that each node belongs to one of $B$ blocks and that the probability of an edge depends on the block membership of its two endpoints. Let $z_i \in \{1, \dots, B\}$ denote the block assignment of node $i$. The edge indicators then follow
+
+$$
+\gamma_{ij} \mid \boldsymbol{\pi}, \mathbf{z} \sim \text{Bernoulli}(\pi_{z_i z_j})
+$$
+
+where $\pi_{ab}$ is the inclusion probability for edges connecting blocks $a$ and $b$. The SBM prior in `bgms` distinguishes within-block edge probabilities ($a = b$) from between-block edge probabilities ($a \neq b$), assigning independent Beta priors to each:
+
+$$
+\pi_{ab} \sim
+\begin{cases}
+\text{Beta}(\alpha_w, \beta_w) & a = b \\[4pt]
+\text{Beta}(\alpha_b, \beta_b) & a \neq b
+\end{cases}
+$$
+
+Setting $\alpha_w > \beta_w$ and $\alpha_b < \beta_b$ encodes the expectation that within-cluster connections are dense and between-cluster connections are sparse. When $B = 1$, the SBM reduces to the standard Beta-Bernoulli prior with hyperparameters $\alpha_w$ and $\beta_w$.
+
+The block assignments are modeled using a categorical distribution with prior probability $P(z_i = b \mid \boldsymbol{\delta}, B) = \delta_b$, where the assignment probabilities $\boldsymbol{\delta}$ receive a Dirichlet$(\epsilon_1, \dots, \epsilon_B)$ prior with default $\epsilon_b = 1$. The number of blocks $B$ is itself a parameter and receives a zero-truncated Poisson prior,
+
+$$
+P(B) = \frac{\lambda^B}{B!\,(\exp(\lambda) - 1)}, \quad B \geq 1
+$$
+
+with rate $\lambda$ controlling the expected number of clusters. The rate parameter $\lambda$ does not exactly equal the expected number of clusters but approximates it: $\lambda = 1.59$ corresponds to approximately 2 clusters, $\lambda = 2.82$ to 3, $\lambda = 3.92$ to 4, and $\lambda = 4.96$ to 5. For 6 or more expected clusters, $\lambda$ can be set equal to the expected number of clusters.
+
+In summary, the full hierarchical specification is:
+
+- $B \sim \text{Poisson}^+(\lambda)$
+- $\boldsymbol{\delta} \mid B \sim \text{Dirichlet}(\epsilon_1, \dots, \epsilon_B)$
+- $z_i \mid \boldsymbol{\delta}, B \sim \text{Categorical}(\boldsymbol{\delta})$
+- $\pi_{ab} \mid B \sim \text{Beta}(\alpha_w, \beta_w)$ for $a = b$ (within-cluster)
+- $\pi_{ab} \mid B \sim \text{Beta}(\alpha_b, \beta_b)$ for $a \neq b$ (between-cluster)
+- $\gamma_{ij} \mid \boldsymbol{\pi}, \mathbf{z}, B \sim \text{Bernoulli}(\pi_{z_i z_j})$
+
+Both $B$ and $\boldsymbol{\delta}$ are analytically marginalized out using the Mixtures of Finite Mixtures (MFM) framework [@MillerHarrison_2018], following the implementation of @GengEtAl_2019 for the SBM. This avoids transdimensional sampling while providing consistent estimation of the number of clusters. For details, see @SekulovskiEtAl_2025_sbm. The C++ implementation is documented in [Stochastic Block Model Prior](../manual/sbm-prior.qmd).
 
 ## Setting up the SBM prior
 
-To use the SBM prior, set `edge_prior = "Stochastic-Block"` in `bgm()`:
+To use the SBM prior, set `edge_prior = "Stochastic-Block"` in [`bgm()`](../reference/bgm.qmd):
 
 ```r
 fit = bgm(
@@ -32,22 +56,28 @@ fit = bgm(
 )
 ```
 
-The SBM prior has several hyperparameters:
+The SBM prior has the following hyperparameters:
 
 | Parameter | Default | Role |
 |-----------|---------|------|
-| `beta_bernoulli_alpha`, `beta_bernoulli_beta` | 1, 1 | Shape parameters of the Beta prior on within-cluster inclusion probability |
-| `beta_bernoulli_alpha_between`, `beta_bernoulli_beta_between` | 1, 1 | Shape parameters of the Beta prior on between-cluster inclusion probability |
+| `beta_bernoulli_alpha`, `beta_bernoulli_beta` | 1, 1 | Beta prior on within-cluster inclusion probability ($\alpha_w$, $\beta_w$) |
+| `beta_bernoulli_alpha_between`, `beta_bernoulli_beta_between` | 1, 1 | Beta prior on between-cluster inclusion probability ($\alpha_b$, $\beta_b$) |
 | `dirichlet_alpha` | 1 | Concentration of the Dirichlet prior on block assignments |
 | `lambda` | 1 | Rate of the zero-truncated Poisson prior on the number of clusters |
 
-With the defaults, the prior is symmetric (within and between clusters
-have the same Beta(1, 1) prior on inclusion probability) and the number
-of clusters is determined by the data.
+## Testing for clustering
+
+Since $B$ is analytically marginalized out, the MCMC sampler does not produce direct samples of $B$. Instead, the posterior probability of each number of clusters is computed from the sampled block allocations $\mathbf{z}$ using the conditional posterior $P(B = b \mid |\mathcal{C}|)$, where $|\mathcal{C}|$ is the number of non-empty clusters implied by $\mathbf{z}$ [see @MillerHarrison_2018, Eq. 3.7]. These posterior cluster probabilities support two types of Bayes factor tests.
+
+**Clustering vs. no clustering.** The first test compares $\mathcal{H}_1\!: B > 1$ against $\mathcal{H}_0\!: B = 1$. The posterior probability of clustering is obtained by summing the posterior probabilities for all $B > 1$, and the prior odds follow directly from the truncated Poisson: $\lambda / (\exp(\lambda) - 1 - \lambda)$. A Bayes factor greater than one indicates that the data favor a clustered structure; a Bayes factor less than one indicates evidence for a single-cluster solution. Values near one mean the data do not discriminate — absence of evidence rather than evidence of absence.
+
+**Comparing specific cluster counts.** The second test compares two point hypotheses — for example $\mathcal{H}_1\!: B = b_1$ versus $\mathcal{H}_2\!: B = b_2$ — with prior odds $\lambda^{b_1 - b_2} \cdot b_2! \,/\, b_1!$. This allows a finer-grained assessment of the evidence for a particular clustering solution.
+
+Both tests are computed from the posterior cluster probabilities returned by `extract_sbm()` (see below). For the simulation performance and practical recommendations for both Bayes factors, see @SekulovskiEtAl_2025_sbm.
 
 ## Interpreting block structure
 
-The `extract_sbm()` function retrieves the SBM results:
+The `extract_sbm()` function retrieves the clustering results for models fitted with `edge_prior = "Stochastic-Block"`:
 
 ```r
 sbm = extract_sbm(fit)
@@ -55,38 +85,48 @@ sbm = extract_sbm(fit)
 
 This returns:
 
-- **`posterior_mean_allocations`**: the estimated cluster assignment for
-  each node, computed using the method of Dahl (2006).
-- **`posterior_mode_allocations`**: the most frequent cluster assignment
-  across iterations.
-- **`posterior_coclustering_matrix`**: a symmetric matrix where entry
-  $(i, j)$ is the proportion of iterations in which nodes $i$ and $j$
-  were assigned to the same cluster. Plotting this matrix reveals the
-  block structure.
-- **`posterior_num_blocks`**: a table of posterior probabilities for each
-  possible number of clusters.
+- **`posterior_num_blocks`**: a data frame of posterior probabilities for each number of clusters. These probabilities serve as the basis for computing clustering Bayes factors.
+- **`posterior_mean_allocations`**: the estimated cluster assignment for each node, obtained by selecting the allocation that best approximates the average co-clustering structure across MCMC iterations.
+- **`posterior_mode_allocations`**: the most frequently occurring cluster assignment across MCMC iterations.
+- **`posterior_mean_coclustering_matrix`**: a symmetric matrix where entry $(i, j)$ is the proportion of iterations in which nodes $i$ and $j$ were assigned to the same cluster. Coherent blocks indicate stable clusters; diffuse patterns indicate nodes with uncertain membership.
 
-## Prior choices for clustering
+## Choosing hyperparameters
 
-- **`lambda`** controls the expected number of clusters. A small
-  `lambda` favors fewer clusters; a larger `lambda` allows more. The
-  zero-truncated Poisson prior ensures at least one cluster.
+The choice of hyperparameters encodes how strongly the prior favors a clustered solution and the expected shape of that solution. @SekulovskiEtAl_2025_sbm provide simulation-based recommendations.
 
-- **`dirichlet_alpha`** controls how evenly nodes are distributed across
-  clusters. A value of 1 gives a uniform prior over partitions. Smaller
-  values favor uneven cluster sizes (a few large clusters and several
-  small ones).
+**When clustering is expected** — set the within-cluster Beta prior to favor dense connections and the between-cluster prior to favor sparse connections:
 
-- The **within-cluster** Beta parameters control how dense within-cluster
-  connectivity is _a priori_. Setting `beta_bernoulli_alpha > beta_bernoulli_beta`
-  favors dense within-cluster connections.
+```r
+fit = bgm(
+  x = data,
+  edge_prior = "Stochastic-Block",
+  beta_bernoulli_alpha = 8, beta_bernoulli_beta = 1,
+  beta_bernoulli_alpha_between = 1, beta_bernoulli_beta_between = 8,
+  lambda = 1.59,
+  seed = 1234
+)
+```
 
-- The **between-cluster** Beta parameters control between-cluster
-  connectivity. Setting `beta_bernoulli_beta_between > beta_bernoulli_alpha_between`
-  favors sparse between-cluster connections.
+Here `lambda = 1.59` corresponds to a prior expectation of approximately two clusters. Higher values of `lambda` shift the expectation toward more clusters (2.82 $\approx$ 3 clusters, 3.92 $\approx$ 4 clusters).
 
-## References
+**When no clustering is expected**, or the goal is conservative inference that protects against false positive clustering, an informative between-cluster prior combined with flat within-cluster settings provides the best performance:
 
-Sekulovski, N., Keetelaar, S., Haslbeck, J. M. B., & Marsman, M. (2025).
-Bayesian variable selection in multilevel and multi-group graphical models
-using a stochastic block model. *Manuscript submitted for publication*.
+```r
+fit = bgm(
+  x = data,
+  edge_prior = "Stochastic-Block",
+  beta_bernoulli_alpha = 1, beta_bernoulli_beta = 1,
+  beta_bernoulli_alpha_between = 1, beta_bernoulli_beta_between = 8,
+  lambda = 1,
+  seed = 1234
+)
+```
+
+This configuration discourages between-cluster edges ($\beta_b = 8$), which protects against inferring multiple clusters when only one exists, without imposing strong assumptions about within-cluster density.
+
+The `dirichlet_alpha` parameter controls how evenly nodes are distributed across clusters. The default of 1 gives a uniform prior over partitions.
+
+::: {.callout-tip}
+## Tutorial
+@SekulovskiEtAl_2025_sbm provides a step-by-step tutorial on fitting the SBM prior in `bgms`, including guidance on hyperparameter selection and result interpretation. It is available at <https://www.nikolasekulovski.com/blog/post2/>.
+:::

@@ -1,0 +1,279 @@
+---
+title: "Constrained Leapfrog (RATTLE)"
+---
+
+When edge selection is active, excluded edges must remain exactly zero
+throughout HMC integration. The standard leapfrog integrator cannot
+enforce this: after an unconstrained position update, a zero entry
+will drift to a nonzero value. `bgms` solves this with a constrained
+leapfrog scheme based on RATTLE [@Reich_1996], with the implementation
+adapted from the Mici library [@Graham_2019_mici].
+
+The implementation lives in `leapfrog.h` and `leapfrog.cpp`.
+
+## Why constraints?
+
+In the MoMS edge-selection framework [@VanDenBerghEtAl_2026_moms],
+each pairwise parameter is either exactly zero (edge absent) or free
+(edge present). For models with continuous variables (GGM, Mixed MRF),
+the precision matrix $\boldsymbol{\Theta}$ must be positive definite.
+`bgms` enforces this through a Cholesky parameterization
+$\boldsymbol{\Theta} = L^\top L$, where the sampler operates on the
+entries of $L$. Positive definiteness is then guaranteed by
+construction.
+
+The complication is sparsity. An excluded edge ($\gamma_{ij} = 0$)
+requires $\theta_{ij} = 0$, which in Cholesky entries means
+
+$$
+\sum_l L_{li}\,L_{lj} = 0.
+$$
+
+This is a nonlinear (quadratic) constraint on the entries of $L$,
+because different columns of $L$ interact through the $L^\top L$
+product. The constraint manifold is
+
+$$
+\mathcal{M} = \bigl\{L : \theta_{ij} = \textstyle\sum_l L_{li}\,L_{lj} = 0
+\;\text{for all }\; \gamma_{ij} = 0\bigr\}.
+$$
+
+Standard leapfrog preserves the Hamiltonian but not this nonlinear
+constraint: after an unconstrained position update, excluded precision
+entries drift away from zero. RATTLE adds projection steps that snap
+the trajectory back onto $\mathcal{M}$ after each leapfrog sub-step.
+
+## Algorithm
+
+Each constrained leapfrog step has seven phases:
+
+```
+       ┌──────────────────────────────────────────┐
+       │         Constrained leapfrog step         │
+       ├──────────────────────────────────────────┤
+       │  1. Half-step momentum                    │
+       │  2. Project momentum → cotangent space    │
+       │  3. Full-step position                    │
+       │  4. SHAKE: project position → manifold    │
+       │  5. Momentum correction (constraint force)│
+       │  6. Second half-step momentum             │
+       │  7. Project momentum → cotangent space    │
+       └──────────────────────────────────────────┘
+```
+
+In mathematical notation:
+
+1. **Half-step momentum** — $r \leftarrow r + \tfrac{\epsilon}{2}\,\nabla\log p(x)$
+2. **Project momentum** — Project $r$ onto the cotangent space of $\mathcal{M}$ at $x$. This ensures the momentum does not push the trajectory off the constraint surface.
+3. **Full-step position** — $x \leftarrow x + \epsilon\,M^{-1} r$
+4. **SHAKE (position projection)** [@RyckaertEtAl_1977] — Set excluded entries of $x$ back to zero. Record the displacement $\Delta x = x_{\text{after}} - x_{\text{before}}$.
+5. **Momentum correction** — Account for the constraint forces that produced the position snap: $r \leftarrow r + \Delta x \,/\, (\epsilon\,M^{-1})$
+6. **Second half-step momentum** — $r \leftarrow r + \tfrac{\epsilon}{2}\,\nabla\log p(x)$
+7. **Project momentum** — Project $r$ onto the cotangent space again.
+
+Steps 2 and 7 keep the momentum tangent to the constraint manifold.
+Step 4 snaps the position back after the unconstrained update.
+Step 5 adjusts the momentum to reflect the constraint forces implied
+by the position snap.
+
+### Memoizer cache invalidation
+
+The `Memoizer` (see [below](#memoizer)) caches $(x, \log p, \nabla\log p)$
+from the most recent evaluation. After step 4 changes $x$
+in place, the cached gradient refers to the pre-projection position and
+is invalid. The cache is explicitly invalidated between steps 4 and 6,
+forcing a fresh evaluation when step 6 requests the gradient.
+
+## Reversibility check {#reversibility-check}
+
+A symplectic integrator must be reversible: stepping forward and then
+backward with negated momentum should recover the original position
+exactly (up to floating-point rounding). Once projection enters the
+integrator, reversibility cannot be taken for granted: the nonlinear
+projection solve may fail to converge or may converge to a different
+branch on the backward step [@ZappaEtAl_2018; @LelievreEtAl_2019].
+
+### Why the projection is approximate
+
+The sparsity constraint on the precision matrix
+$\boldsymbol{\Theta} = L^\top L$ requires
+$\theta_{ij} = \sum_l L_{li}\,L_{lj} = 0$ for every excluded
+edge $(\gamma_{ij} = 0)$. This is nonlinear in the Cholesky entries
+of $L$ because different columns interact through the $L^\top L$
+product.
+
+The SHAKE projection in step 4 solves these constraints with a
+left-to-right column sweep: for each column $q$, it computes the
+exact linear correction that satisfies the constraints involving
+column $q$, given the already-projected earlier columns.
+Within a single call, the sweep is exact — each column's
+constraint $A_q x_q = 0$ is linear in $x_q$ when earlier columns
+are held fixed.
+
+The approximation enters because the position has moved $O(\epsilon)$
+off the manifold, and the column sweep solves the linearized
+constraints in one pass. Cross-column coupling through $L^\top L$
+means that correcting column $q$ can shift the residual of constraints
+involving later columns. This one-step Newton-like correction on an
+$O(\epsilon)$ perturbation leaves a residual of order $O(\epsilon^2)$
+— the standard truncation order for a single Newton step.
+
+`leapfrog_constrained_checked()` in `leapfrog.cpp` detects these
+failures at runtime:
+
+1. Perform the forward constrained step: $(x, r) \to (x', r')$.
+2. Negate momentum and perform a second constrained step: $(x', -r') \to (x'', r'')$.
+3. Compute the round-trip error: $\|x'' - x\|_\infty$.
+4. If the error exceeds $\tau \cdot \epsilon^2$, flag the step as non-reversible.
+
+The tolerance factor $\tau$ defaults to $0.5$ (`reverse_check_tol`
+in `sampler_config.h`). The $\epsilon^2$ scaling matches the
+$O(\epsilon^2)$ residual from the column-sweep projection.
+
+### Phase-aware enforcement
+
+The reversibility check runs at every iteration, but its consequences
+differ by phase:
+
+- **During warmup** — Non-reversible steps are recorded but do not
+  terminate the NUTS tree. The step-size adapter is still tuning, so
+  occasional failures are expected and informative: their frequency
+  guides the adapter toward a step size that keeps the integrator
+  reversible.
+- **During sampling** — A non-reversible step terminates the NUTS tree
+  and rejects the proposal, the same way a divergence does. This
+  prevents biased samples from entering the posterior.
+
+The switch happens at the warmup/sampling boundary. In
+`GradientSamplerBase::step()`:
+
+```cpp
+enforce_reverse_check_ = schedule_.sampling(iteration);
+```
+
+The `NUTSSampler` passes `reverse_check && enforce_reverse_check_` to
+`nuts_step()`, and `build_tree()` checks this flag at the base case:
+
+```{mermaid}
+flowchart TD
+    A["build_tree (depth 0)"] --> B{"Constrained\nmodel?"}
+    B -- yes --> C["leapfrog_constrained_checked()"]
+    B -- no --> D["leapfrog_memo()"]
+    C --> E{"Reversible?"}
+    E -- yes --> F["Compute logp, check divergence"]
+    E -- "no + enforcing" --> G["s_prime = 0\n(terminate tree)"]
+    E -- "no + warmup" --> F
+    D --> F
+    F --> H["Return BuildTreeResult"]
+    G --> H
+```
+
+### Diagnostics
+
+Each `BuildTreeResult` carries a `non_reversible` flag. When two
+subtrees are merged, the flags are OR-ed: a single non-reversible
+leaf anywhere in the tree flags the whole iteration. The flag
+propagates through `NUTSDiagnostics` in `step_result.h` to
+`ChainResult` in `chain_result.h`, and is surfaced in R as
+`fit$nuts_diag$non_reversible` — an integer matrix
+(chains $\times$ iterations) of 0/1 values. The summary field
+`fit$nuts_diag$summary$total_non_reversible` reports the total
+count across all chains and iterations.
+
+## Memoizer {#memoizer}
+
+The `Memoizer` class in `leapfrog.h` is a single-entry cache for
+$(\log p(x), \nabla\log p(x))$ evaluations.
+
+### Why a single-entry cache?
+
+NUTS tree building calls the gradient repeatedly as it extends the
+trajectory. Each leapfrog step produces a new unique $x$, so a
+multi-entry hash map would almost never hit — and hashing an
+`arma::vec` element-by-element is expensive. A single-entry cache
+exploits the fact that at tree-node boundaries the same $x$
+appears as both the end of one subtree and the start of the next.
+The cache uses `memcmp` for equality, which is a single comparison
+per step.
+
+### Joint evaluation
+
+Models often share computation between $\log p$ and $\nabla\log p$
+(e.g., normalization constants, sufficient statistics). The Memoizer
+accepts a joint function `(x) → (logp, grad)` and caches both values
+from a single call. Two access methods retrieve the cached values:
+
+- `cached_log_post(x)` — returns $\log p(x)$
+- `cached_grad(x)` — returns $\nabla\log p(x)$
+
+Both trigger a joint evaluation if the cache misses.
+
+### Invalidation
+
+After the SHAKE position projection (step 4 of the constrained
+leapfrog), $x$ is modified in place. The cached gradient refers
+to the pre-projection $x$ and must be discarded.
+`leapfrog_constrained()` calls `memo.invalidate()` immediately after
+the projection, before the second half-step requests a fresh gradient.
+
+## Projection callbacks {#projection-callbacks}
+
+The model provides the projection logic through two virtual methods
+on `BaseModel`:
+
+- `project_position(pos, inv_mass)` — Zeros out excluded-edge entries
+  in the position vector.
+- `project_momentum(mom, pos, inv_mass)` — Projects momentum onto
+  the cotangent space of the constraint manifold at `pos`.
+
+The `NUTSSampler` wraps these into `ProjectPositionFn` and
+`ProjectMomentumFn` lambda callbacks and passes them to `nuts_step()`,
+which forwards them to `leapfrog_constrained()` or
+`leapfrog_constrained_checked()`. When the callbacks are null (the
+default), `nuts_step()` uses the unconstrained `leapfrog_memo()`
+instead.
+
+### Per-model implementations
+
+RATTLE is needed only when a matrix definiteness constraint combines
+with edge-sparsity constraints. For models with continuous variables,
+the precision matrix (GGM) or the continuous-continuous block of the
+interaction matrix (Mixed MRF) must be positive definite, and excluded
+edges must be exactly zero. The Cholesky parameterization enforces
+definiteness, but zeroing precision entries within that
+parameterization is a nonlinear constraint that requires projection.
+For purely discrete models (OMRF), parameters are unconstrained reals
+and standard NUTS suffices.
+
+| Model | Position projection | Momentum projection |
+|-------|--------------------|--------------------|
+| GGM | Zeros out Cholesky-factor entries for excluded edges, column by column, using `GraphConstraintStructure` offsets. See [GGM Internals](ggm-internals.qmd). | Projects momentum onto the null space of the constraint Jacobian (identity rows for excluded entries). |
+| Mixed MRF | Same Cholesky-based projection, but only for the continuous-continuous ($G_{yy}$) block. Discrete-discrete and discrete-continuous interactions are unconstrained. See [Mixed MRF Internals](mixed-internals.qmd). | Same null-space projection, scoped to the $G_{yy}$ block. |
+| OMRF | Not applicable — no matrix definiteness constraint, so unconstrained NUTS is used. | — |
+
+## Dispatch in the sampler hierarchy
+
+The `NUTSSampler` checks whether the model needs constrained
+integration and dispatches accordingly:
+
+```{mermaid}
+flowchart TD
+    A["NUTSSampler::do_gradient_step()"] --> B{"model.has_constraints()?"}
+    B -- yes --> C["do_constrained_step()"]
+    B -- no --> D["do_unconstrained_step()"]
+    C --> E["model.reset_projection_cache()"]
+    E --> F["get_full_position()"]
+    F --> G["Build projection lambdas"]
+    G --> H["nuts_step(..., &proj_pos, &proj_mom,\n  reverse_check, tol)"]
+    D --> I["get_vectorized_parameters()"]
+    I --> J["nuts_step(..., nullptr, nullptr)"]
+    H --> K["set_full_position(result.state)"]
+    J --> L["set_vectorized_parameters(result.state)"]
+```
+
+The constrained path operates in the full parameter space (all
+off-diagonal Cholesky entries including zeros), while the
+unconstrained path operates in the active parameter space (only
+included edges). See [Sampler Hierarchy](samplers.qmd) and
+[Model Classes](model-classes.qmd) for details on the dimension
+distinction.

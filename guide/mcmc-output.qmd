@@ -1,117 +1,268 @@
 ---
-title: "MCMC Output"
+title: "Model Output"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
 
-This chapter describes what `bgm()` and `bgmCompare()` return and how to
-access specific components of the output.
+```{r}
+#| echo: false
+#| message: false
+library(bgms)
+
+resolve_fixture = function(name) {
+  input_dir = dirname(knitr::current_input(dir = TRUE))
+  candidates = c(
+    file.path(input_dir, "..", "fixtures", name),
+    file.path(input_dir, "fixtures", name),
+    file.path("fixtures", name),
+    file.path("..", "fixtures", name)
+  )
+  hit = candidates[file.exists(candidates)][1]
+  if (is.na(hit)) {
+    stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+  }
+  hit
+}
+
+fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
+fit_compare = readRDS(resolve_fixture("fit_compare_adhd.rds"))
+```
+
+`bgms` uses Markov chain Monte Carlo (MCMC) to sample from the posterior
+distribution of the model parameters. The output of
+[`bgm()`](../reference/bgm.qmd) and
+[`bgmCompare()`](../reference/bgmCompare.qmd) contains posterior summaries
+computed from these samples, posterior mean matrices, the raw MCMC draws
+themselves, and sampler
+diagnostics. This chapter describes how to access and interpret each of
+these components. For diagnostics related to the sampler itself, see [MCMC Diagnostics](mcmc-diagnostics.qmd).
+
+The examples use a fit to the Wenchuan earthquake data (17 ordinal PTSD
+items):
+
+```r
+library(bgms)
+fit = bgm(Wenchuan, chains = 2, seed = 1234)
+```
 
 ## The fit object
 
-Both `bgm()` and `bgmCompare()` return a list (of class `"bgms"` or
-`"bgmCompare"`) containing posterior summaries, posterior mean matrices,
-raw MCMC samples, and metadata.
+[`bgm()`](../reference/bgm.qmd) returns a list of class `"bgms"`.
 
-```r
-fit = bgm(x = data, seed = 1234)
+```{r}
 names(fit)
 ```
 
-## Posterior summaries
+The two primary interfaces are `summary()` for tabular diagnostics and
+`coef()` for posterior means in matrix form. Raw samples are available in
+`fit$raw_samples` for custom analyses.
 
-The `summary()` method prints formatted tables of posterior statistics. Each
-table includes:
+## Posterior summaries {#sec-posterior-summaries}
+
+Calling `summary()` prints formatted tables of posterior statistics.
+
+```{r}
+summary(fit)
+```
+
+### Reading the output
+
+The summary produces a set of tables depending on the model type. Each row
+is a parameter; each column is a posterior summary statistic. The tables
+that appear depend on which model was fitted:
+
+| Table | OMRF | GGM | Mixed MRF |
+|-------|:----:|:---:|:---------:|
+| Category thresholds | yes | — | yes (discrete block) |
+| Continuous means | — | — | yes (continuous block) |
+| Residual variances | — | yes | yes (continuous block) |
+| Pairwise interactions | yes | yes | yes |
+| Inclusion indicators | if edge selection | if edge selection | if edge selection |
+
+**Category thresholds** report the posterior estimates of the ordinal
+threshold parameters. These define the boundary between adjacent response
+categories on the log-odds scale. Negative values indicate that higher
+categories are less probable.
+
+**Residual variances** report the posterior estimates of the residual
+variance $1 / \Theta_{ii}$ for each continuous variable, where
+$\Theta_{ii}$ is the corresponding diagonal element of the precision
+matrix. Use `extract_precision()` to obtain the full precision matrix.
+
+**Pairwise interactions** report the conditional association between each
+pair of variables, controlling for all others. These are the edge weights
+in the graphical model. A value of zero means the two variables are
+conditionally independent. For mixed models, these span three blocks:
+discrete–discrete, continuous–continuous, and cross-type edges. Use
+`extract_partial_correlations()` for standardized partial correlations
+(continuous variables) and `extract_log_odds()` for log-odds ratios
+(discrete variables).
+
+**Inclusion indicators** report the posterior inclusion probability of
+each edge. An inclusion probability near 1 indicates strong evidence
+for the edge; near 0 indicates strong evidence against it. Values around
+0.5 are inconclusive. The transition counts (`n0->0`, `n0->1`, `n1->0`,
+`n1->1`) show how often the edge indicator switched between excluded
+(0) and included (1) states during sampling. Edges with very few
+transitions (fewer than 5) have unreliable mixture ESS estimates; `bgms`
+suppresses these automatically.
+
+### Summary columns
 
 | Column | Meaning |
 |--------|---------|
-| `mean` | Posterior mean |
-| `sd` | Posterior standard deviation |
-| `MCSE` | Monte Carlo standard error |
-| `n_eff` | Effective sample size (unconditional) |
-| `Rhat` | Split R-hat convergence diagnostic |
+| `mean` | Posterior mean of the parameter. |
+| `sd` | Posterior standard deviation — the width of the posterior. |
+| `mcse` | Monte Carlo standard error — how precisely the posterior mean is estimated. A small MCSE relative to `sd` indicates sufficient sampling. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mcse). |
+| `n_eff` | Effective sample size — the number of independent draws the chain is equivalent to. Values below 100 warrant longer runs. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-ess). |
+| `n_eff_mixt` | Mixture ESS for binary edge indicators, accounting for the spike-and-slab structure. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mixture-ess). |
+| `Rhat` | Split $\hat{R}$ convergence diagnostic. Values above 1.01 suggest the chains have not mixed. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rhat). |
 
-For pairwise effects under edge selection, two additional columns appear:
+### Accessing specific tables
 
-| Column | Meaning |
-|--------|---------|
-| `n_eff_mixt` | Mixture ESS accounting for spike-and-slab selection |
-| `inclusion_probability` | Posterior inclusion probability |
+The printed output is truncated. Access the full tables with:
 
-Access specific summary tables with:
+```{r}
+head(summary(fit)$main, 4)
+```
 
-```r
-summary(fit)$pairwise   # pairwise interactions
-summary(fit)$main        # category thresholds (ordinal) or means (GGM)
-summary(fit)$indicator   # inclusion indicators (if edge selection active)
+```{r}
+head(summary(fit)$pairwise, 4)
+```
+
+```{r}
+head(summary(fit)$indicator, 4)
 ```
 
 ## Posterior mean matrices
 
-The `coef()` method returns posterior means in matrix form:
+The `coef()` method returns posterior means in matrix form — convenient
+for network visualization and downstream analysis.
 
-```r
-coef(fit)$pairwise   # p x p symmetric matrix of interaction strengths
-coef(fit)$indicator   # p x p symmetric matrix of inclusion probabilities
+```{r}
+str(coef(fit), max.level = 1)
 ```
 
-For ordinal models, `coef(fit)$main` returns a matrix of category threshold
-means (variables in rows, categories in columns). For mixed MRFs, it returns
-a list with `$discrete` and `$continuous` components.
+`coef(fit)$pairwise` is a symmetric $p \times p$ matrix of posterior mean
+partial associations (zero diagonal). For interpretable scales, use
+`extract_precision()`, `extract_partial_correlations()`, or
+`extract_log_odds()`. `coef(fit)$indicator` is a symmetric $p \times p$
+matrix of posterior inclusion probabilities.
+
+For ordinal models, `coef(fit)$main` is a matrix with variables in rows
+and category thresholds in columns:
+
+```{r}
+coef(fit)$main[1:4, ]
+```
 
 ## Raw MCMC samples
 
-For custom analyses, the raw posterior draws are stored in
-`fit$raw_samples`:
+For custom analyses — posterior intervals, density plots, or derived
+quantities — the raw posterior draws are stored in `fit$raw_samples`:
 
-```r
+```{r}
 str(fit$raw_samples, max.level = 1)
 ```
 
-The structure is:
+Each element is a list of matrices, one per chain, with rows = iterations
+and columns = parameters. The chains are stored separately to allow
+per-chain diagnostics.
 
-- `$main`: list of matrices (one per chain), each with rows = iterations
-  and columns = main effect parameters.
-- `$pairwise`: list of matrices (one per chain) for pairwise interactions.
-- `$indicator`: list of matrices for edge indicators (if edge selection
-  was active).
-- `$allocations`: list of matrices for cluster assignments (if SBM prior
-  was used).
-- `$nchains`: number of chains.
-- `$niter`: number of post-warmup iterations per chain.
-- `$parameter_names`: named lists of parameter labels.
+### Example: posterior density for an edge
 
-Each chain is stored separately, allowing per-chain diagnostics and
-trace plots (see [MCMC Diagnostics](mcmc-diagnostics.qmd)).
+To extract the posterior samples for the intrusion--dreams interaction
+and compute a 95% credible interval:
+
+```{r}
+# Combine chains for one parameter
+edge = "intrusion-dreams"
+col_idx = which(fit$raw_samples$parameter_names$pairwise == edge)
+samples_c1 = fit$raw_samples$pairwise[[1]][, col_idx]
+samples_c2 = fit$raw_samples$pairwise[[2]][, col_idx]
+samples = c(samples_c1, samples_c2)
+
+cat("Posterior mean:", round(mean(samples), 3), "\n")
+cat("95% CI: [", round(quantile(samples, 0.025), 3), ",",
+    round(quantile(samples, 0.975), 3), "]\n")
+```
+
+```{r}
+#| fig-width: 5
+#| fig-height: 3.5
+par(mar = c(4, 4, 1, 1))
+plot(density(samples), main = "", xlab = "intrusion-dreams",
+  ylab = "Density", bty = "L", lwd = 2, col = "#2166AC")
+abline(v = 0, lty = 2, col = "grey50")
+```
 
 ## Extracting specific results
 
 The `extract_*()` family of functions provides targeted access to model
 components. These are documented in the
-[Extractor Functions](../reference/extractors.qmd) reference, but the most
+[Extractor Functions](../reference/extractors.qmd) reference. The most
 commonly used are:
 
 | Function | Returns |
 |----------|---------|
-| `extract_arguments()` | Arguments used when fitting the model |
-| `extract_pairwise_interactions()` | Raw pairwise interaction samples |
+| `extract_pairwise_interactions()` | Raw partial association samples |
 | `extract_main_effects()` | Raw main effect samples |
 | `extract_indicators()` | Raw indicator samples |
 | `extract_posterior_inclusion_probabilities()` | Posterior inclusion probabilities |
+| `extract_precision()` | Posterior mean precision matrix (GGM / continuous block) |
+| `extract_partial_correlations()` | Posterior mean partial correlation matrix (GGM / continuous block) |
+| `extract_log_odds()` | Posterior mean log-odds matrix (ordinal / discrete block) |
 | `extract_ess()` | Effective sample sizes |
-| `extract_rhat()` | Split R-hat values |
-| `extract_sbm()` | SBM cluster assignments and co-clustering matrix |
+| `extract_rhat()` | Split $\hat{R}$ values |
+| `extract_sbm()` | SBM cluster assignments and co-clustering matrix (when `edge_prior = "Stochastic-Block"`) |
+| `extract_arguments()` | Arguments used when fitting the model |
 
 ## NUTS diagnostics
 
 When `update_method = "nuts"` (the default), additional diagnostics are
 stored in `fit$nuts_diag`:
 
-```r
-fit$nuts_diag$summary       # per-chain summary of tree depth, divergences, energy
-fit$nuts_diag$warmup_check  # warmup equilibration diagnostics
+```{r}
+str(fit$nuts_diag, max.level = 1)
 ```
 
-These are described in detail in [MCMC Diagnostics](mcmc-diagnostics.qmd).
+The `summary` field contains per-chain summaries of tree depth,
+divergences, non-reversible steps, and energy. The `warmup_check` field
+reports whether warmup equilibration was sufficient. These are described in detail in
+[MCMC Diagnostics](mcmc-diagnostics.qmd). If these diagnostics remain problematic after tuning, refit with `update_method = "adaptive-metropolis"`.
+
+## Output from [`bgmCompare()`](../reference/bgmCompare.qmd)
+
+[`bgmCompare()`](../reference/bgmCompare.qmd) returns a list of class `"bgmCompare"` with the same
+structure as [`bgm()`](../reference/bgm.qmd), plus additional components for group differences.
+The examples use the ADHD data (18 binary items, two groups):
+
+```r
+fit_compare = bgmCompare(
+  x = ADHD[, -1],
+  group_indicator = ADHD$group,
+  variable_type = "ordinal",
+  chains = 2,
+  seed = 1234
+)
+```
+
+```{r}
+summary(fit_compare)
+```
+
+The summary includes two additional tables beyond what [`bgm()`](../reference/bgm.qmd) produces:
+
+- **Group differences (main effects)** — posterior estimates of how
+  category thresholds differ between the two groups. Large positive or
+  negative values indicate that a symptom's baseline severity differs
+  across groups.
+
+- **Group differences (pairwise effects)** — posterior estimates of how
+  edge weights differ between the two groups. These quantify whether the
+  conditional association between two symptoms is stronger or weaker in
+  one group relative to the other.
+
+When `difference_selection = TRUE` (the default), the inclusion indicators
+for these difference parameters are reported alongside the common-structure
+indicators. An inclusion probability near 1 for a difference parameter
+indicates strong evidence that the groups differ on that effect.

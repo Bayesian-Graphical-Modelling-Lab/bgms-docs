@@ -1,6 +1,10 @@
 # Quarto
 /.quarto/
 /_site/
+/docs/
+
+# Development
+dev/
 
 # R
 .Rproj.user
@@ -15,5 +19,10 @@ Thumbs.db
 # Editor
 *.swp
 *~
+.vscode/
+*.code-workspace
 
 **/*.quarto_ipynb
+
+# Fixtures (large, regenerated via scripts/generate_fixtures.R)
+fixtures/*.rds

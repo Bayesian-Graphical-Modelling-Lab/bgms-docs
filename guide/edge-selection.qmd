@@ -2,82 +2,93 @@
 title: "Edge Selection"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
-Bayesian edge selection determines which edges are present in the network
-by placing spike-and-slab priors on the pairwise interaction parameters.
-When `edge_selection = TRUE` (the default), `bgm()` estimates both the
-edge structure and the effect sizes simultaneously.
+Bayesian edge selection determines which edges are present in the network by placing spike-and-slab priors on the partial association parameters. When `edge_selection = TRUE` (the default), [`bgm()`](../reference/bgm.qmd) estimates both the edge structure and the effect sizes simultaneously.
 
 ## Spike-and-slab priors
 
-For each edge $(i, j)$, an indicator variable $\gamma_{ij} \in \{0, 1\}$
-governs whether the interaction is included in the model:
+For each edge $(i, j)$, an indicator variable $\gamma_{ij} \in \{0, 1\}$ governs whether the interaction is included in the model:
 
-- When $\gamma_{ij} = 0$ (spike), the interaction $\sigma_{ij}$ is set to
-  exactly zero — the edge is absent.
-- When $\gamma_{ij} = 1$ (slab), the interaction receives a Cauchy prior
-  with scale `pairwise_scale` — the edge is present and the effect size is
-  estimated.
+- When $\gamma_{ij} = 0$ (spike), the partial association $\omega_{ij}$ is set to exactly zero — the edge is absent.
+- When $\gamma_{ij} = 1$ (slab), the partial association receives a Cauchy prior with scale `pairwise_scale` — the edge is present and the effect size is estimated.
 
-The prior probability of inclusion is controlled by the `edge_prior`
-argument. See [Prior Basics](prior-basics.qmd) for the available options
-(Bernoulli, Beta-Bernoulli, Stochastic-Block).
+This is the *mixtures of mutually singular distributions* (MoMS) formulation of the spike-and-slab prior [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms]. Because each edge is either exactly zero or follows a continuous distribution — with no overlap between the two components — the sampler moves between mutually exclusive subspaces rather than gradually shrinking toward zero. This discrete formulation provides model-selection consistency and avoids the need for transdimensional (reversible-jump) MCMC proposals.
+
+The prior probability of inclusion is controlled by the `edge_prior` argument. See [Prior Basics](prior-basics.qmd) for the available options (Bernoulli, Beta-Bernoulli, Stochastic-Block).
 
 ## Posterior inclusion probabilities
 
-The posterior inclusion probability for edge $(i, j)$ is the posterior
-mean of $\gamma_{ij}$: the proportion of MCMC iterations in which the edge
-was included. It ranges from 0 to 1:
+The posterior inclusion probability for edge $(i, j)$ is the posterior mean of $\gamma_{ij}$: it is estimates as the proportion of MCMC iterations in which the edge was included. It ranges from 0 to 1:
 
-- Values near 1.0: strong evidence that the edge is present
-- Values near 0.0: strong evidence that the edge is absent
-- Values near 0.5: inconclusive (neither inclusion nor exclusion is
-  strongly supported)
+- Values near 1.0: strong evidence that the edge is present.
+- Values near 0.0: strong evidence that the edge is absent.
+- Values near 0.5: the data are uninformative — there is not enough evidence to decide whether the edge is present or absent.
 
 These are reported by `coef(fit)$indicator` and in the `summary()` output.
 
 ## Bayes factors for edges
 
-When the prior inclusion probability is 0.5, the posterior inclusion
-probability can be directly transformed into a Bayes factor:
+When the prior inclusion probability is $\frac{1}{2}$, the posterior inclusion probability can be directly transformed into a Bayes factor [@KassRaftery_1995]:
 
 $$
 \text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{1 - p(\gamma_{ij} = 1 \mid \mathbf{x})}
 $$
 
-For other prior inclusion probabilities, the Bayes factor accounts for
-the prior odds:
+For other prior inclusion probabilities, the Bayes factor accounts for the prior odds:
 
 $$
-\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x}) / p(\gamma_{ij} = 0 \mid \mathbf{x})}{p(\gamma_{ij} = 1) / p(\gamma_{ij} = 0)}
+\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x}) \;/\; p(\gamma_{ij} = 0 \mid \mathbf{x})}{p(\gamma_{ij} = 1) \;/\; p(\gamma_{ij} = 0)}
 $$
 
-The reciprocal $1 / \text{BF}_{10}$ quantifies the evidence for edge
-absence.
+The reciprocal $1 / \text{BF}_{10}$ quantifies the evidence for edge absence, i.e., conditional independence [@SekulovskiEtAl_2024]. Values of $\text{BF}_{10}$ close to one indicate that the data do not discriminate between the two hypotheses — absence of evidence rather than evidence of absence.
+
+## Other approaches to testing conditional independence
+
+The inclusion Bayes factor is not the only Bayesian approach to testing 
+conditional independence. Two common alternatives can also be computed from 
+`bgms` output when `edge_selection = FALSE`. @SekulovskiEtAl_2024 provide a 
+detailed comparison of all three methods.
+
+**Credible intervals.** With `edge_selection = FALSE`, posterior credible 
+intervals for each partial association $\omega_{ij}$ can be constructed from the 
+MCMC samples (available in `fit$raw_samples`). If the interval excludes zero, 
+this is sometimes taken as evidence *against* the absence of an edge. 
+
+**Savage--Dickey Bayes factor.** With `edge_selection = FALSE`, the posterior 
+samples from the full model can be used to compute a Savage--Dickey density 
+ratio for each edge, testing whether $\omega_{ij} = 0$. This approach assumes 
+that the rest of the network is fully connected.
+
+**Inclusion Bayes factor.** When `edge_selection = TRUE`, the edge indicator 
+samples can be used to compute an inclusion Bayes factor for each edge, testing 
+whether $\omega_{ij} = 0$. Opposed to the Savage--Dickey approach, this method 
+does not assume that the rest of the network is fully connected, but weighs each 
+possible structure by its posterior plausibility. It thus tests each edge while 
+accounting for structural uncertainty. See 
+[The Bayesian Approach](bayesian-approach.qmd).
 
 ## Evidence categories
 
-The following classification, based on Kass and Raftery (1995), is a
-common convention:
+The following classification, based on @KassRaftery_1995, is a common convention
+for interpreting Bayes factors:
 
 | Bayes factor | Evidence |
 |-------------|----------|
-| 1–3 | Weak |
-| 3–10 | Moderate |
+| 1–3 | Not worth more than a bare mention |
+| 3–10 | Substantial |
 | 10–100 | Strong |
 | > 100 | Decisive |
 
-The same scale applies for evidence of absence using $1 / \text{BF}_{10}$.
+The same scale applies for evidence of absence using $1 / \text{BF}_{10}$. These thresholds are conventions, not absolute standards — the Bayes factor is a continuous measure of evidence and does not require strict cutoffs.
+
+## Evidence in practice
+
+As an illustration from psychology, @HuthEtAl_2026_evidence reanalyzed 293 networks from 126 studies and found that the network structure is highly uncertain: for the majority of edges, the data do not clearly decide whether the edge should be present or absent. Only about one in five edges was supported by strong evidence; for the rest, the evidence was weak or inconclusive. The exact proportions depend on the evidence thresholds used, but the overall picture is clear — uncertainty about individual edges is the norm, not the exception.
+
+This is precisely why a Bayesian approach matters. Without it, a missing edge in an estimated network is ambiguous: did the method find evidence that the edge is absent, or was there simply not enough data to detect it? The Bayes factor makes this distinction explicit. When the evidence is inconclusive, it says so — and that information is just as valuable as a decisive result, because it prevents conclusions that the data cannot support.
 
 ## Median probability model
 
-A common summary of the posterior network is the median probability model:
-retain all edges with posterior inclusion probability above 0.5. This
-corresponds to including edges for which there is more evidence for
-presence than absence.
+A common summary of the posterior network is the median probability model [@BarbieriBerger_2004]: retain all edges with posterior inclusion probability above 0.5. This corresponds to including edges for which there is more evidence for presence than absence.
 
 ```r
 network = coef(fit)$pairwise
@@ -86,19 +97,11 @@ network[coef(fit)$indicator < 0.5] = 0
 
 ## Prior guidance for edge selection
 
-The default `inclusion_probability = 0.5` with a Bernoulli prior is a
-standard noninformative choice. Considerations for changing it:
+The default `inclusion_probability = 0.5` with a Bernoulli prior is a standard noninformative choice. Considerations for changing it:
 
-- **Sparse networks**: lower the inclusion probability (e.g., 0.25) to
-  encode a prior expectation that most edges are absent.
-- **Dense networks**: raise the inclusion probability if prior knowledge
-  suggests many edges.
-- **Learned inclusion probability**: use `edge_prior = "Beta-Bernoulli"`
-  to let the data inform the overall sparsity level.
-- **Structured sparsity**: use `edge_prior = "Stochastic-Block"` when
-  edges are expected to cluster (see [Edge Clustering](clustering.qmd)).
+- **Sparse networks**: lower the inclusion probability (e.g., 0.25) to encode a prior expectation that most edges are absent.
+- **Dense networks**: raise the inclusion probability if prior knowledge suggests many edges.
+- **Learned inclusion probability**: use `edge_prior = "Beta-Bernoulli"` to let the data inform the overall sparsity level.
+- **Structured sparsity**: use `edge_prior = "Stochastic-Block"` when edges are expected to cluster (see [Edge Clustering](clustering.qmd)).
 
-The `pairwise_scale` parameter controls the slab width. A wider slab
-makes it harder for the Bayes factor to favor inclusion when the true effect
-is small, because the prior spreads probability over a wide range. The
-default of 2.5 balances sensitivity to small effects against specificity.
+The `pairwise_scale` parameter controls the slab width. A wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small, because the prior spreads probability over a wide range. The default value is `1`.

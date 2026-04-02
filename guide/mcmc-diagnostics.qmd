@@ -2,24 +2,29 @@
 title: "MCMC Diagnostics"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
-Before interpreting results from `bgm()` or `bgmCompare()`, check that the
+Before interpreting results from [`bgm()`](../reference/bgm.qmd) or
+[`bgmCompare()`](../reference/bgmCompare.qmd), check that the
 MCMC sampler has converged and that posterior estimates are reliable. This
-chapter covers the diagnostic tools available in bgms.
+chapter describes how to do so with the diagnostic tools in bgms. For
+background on MCMC convergence diagnostics and choosing the number of
+iterations, chains, and warmup length, see @MargossianGelman_2024.
 
 ## Effective sample size (ESS)
 
 The effective sample size estimates how many independent draws the MCMC
 chain is equivalent to. Correlated draws reduce the effective information
-per sample. A larger ESS means more precise posterior estimates.
+per sample. A larger ESS means more precise posterior estimates
+[@MargossianGelman_2024].
 
-The `summary()` output reports `n_eff` for each parameter. Values of
-`n_eff` above 400 are generally sufficient for reliable posterior means and
-credible intervals. Lower values suggest that more iterations may be
-needed.
+The `summary()` output reports `n_eff` for each parameter. How large
+`n_eff` needs to be depends on the inferential goal. As a rule of thumb,
+an ESS of 100 yields an MCSE of roughly $0.1$ times the posterior standard
+deviation — enough for one significant digit of precision. An ESS below
+100 is also the threshold at which convergence diagnostics such as
+$\hat{R}$ and the ESS estimate itself become unreliable
+[@VehtariEtAl_2021; @MargossianGelman_2024]. If higher precision is
+required, more iterations or chains are needed: two significant digits
+require an ESS on the order of 10,000 [@MargossianGelman_2024].
 
 ### Mixture ESS for edge-selected parameters
 
@@ -33,17 +38,77 @@ Two ESS measures are reported:
   (including zeros). Measures how precisely the overall posterior mean is
   estimated.
 - **`n_eff_mixt`**: the mixture ESS, which accounts for additional
-  uncertainty from the spike-and-slab switching. When the indicator rarely
-  switches (fewer than 5 transitions), `n_eff_mixt` is suppressed.
+  uncertainty from the spike-and-slab switching. Suppressed in printed
+  output when the total number of indicator transitions ($n_{0 \to 1} +
+  n_{1 \to 0}$) is below 5, though still computed and stored.
+
+The mixture ESS is derived from a two-state Markov chain representation
+of the indicator sequence [@VanDenBerghEtAl_2026_moms]. Let $a$ denote the
+probability of switching from excluded to included ($0 \to 1$) and
+$b$ the probability of switching from included to excluded ($1 \to 0$).
+The lag-$k$ autocorrelation of the indicator chain is
+$\rho(k) = (1 - a - b)^k$, which gives an integrated autocorrelation time
+of $\tau = (2 - a - b) / (a + b)$ and an effective sample size of
+$\text{ESS} = T \cdot (a + b) / (2 - a - b)$.
+In practice, $a$ and $b$ are estimated from the observed transition counts
+$n_{01}$, $n_{00}$, $n_{10}$, and $n_{11}$.
+
+#### Limitations near the boundary
+
+The two-state Markov chain ESS has known limitations when the inclusion
+probability is near 0 or 1. In these cases the indicator is almost always
+in the same state, so transitions are rare and the estimates $\hat{a}$ and
+$\hat{b}$ are based on very few events. A single extra transition can
+change the ESS estimate substantially, making it unreliable as a
+precision diagnostic. For this reason, `n_eff_mixt` is suppressed in
+printed output when the total number of transitions is below 5.
+
+At the extreme — when the indicator never switches — there are no
+transitions to estimate from. This does not necessarily indicate a
+problem: if the posterior strongly favors inclusion or exclusion, there is
+little uncertainty about the indicator and the inclusion probability is
+well determined even without switching.
+
+When transitions are observed but rare, the ESS estimate itself becomes
+imprecise. The transition probability estimates $\hat{a}$ and $\hat{b}$
+are each based on only a few events, giving them high relative error.
+Because the ESS formula $T (a + b) / (2 - a - b)$ depends on their
+sum, small fluctuations in the transition counts can produce large
+swings in the ESS. In these cases, plotting the cumulative inclusion
+probability across iterations provides a more informative check on
+stability: a flat trajectory indicates the estimate has settled, while a
+drifting one suggests the chain needs more iterations.
+
+## Monte Carlo standard error (MCSE)
+
+The MCSE measures the additional variability introduced by using a finite
+number of MCMC draws instead of the exact posterior. It depends on both
+the posterior variability and the effective sample size.
+
+For continuous parameters:
+$$
+\text{MCSE} = \frac{\text{sd}}{\sqrt{n_{\text{eff}}}}
+$$
+
+For inclusion probabilities, the posterior variance has the Bernoulli form
+$\hat{p}(1 - \hat{p})$, so:
+$$
+\text{MCSE}(\hat{p}) = \sqrt{\frac{\hat{p}(1 - \hat{p})}{\text{ESS}}}
+$$
+
+A small MCSE relative to the posterior standard deviation indicates stable
+estimates; a large MCSE suggests that more iterations are needed.
 
 ## R-hat
 
-R-hat (split R-hat) compares the between-chain and within-chain variance.
-Values close to 1.0 indicate that the chains have converged to the same
-distribution. R-hat values above 1.01 suggest that the chains have not mixed
-and should be run longer.
+R-hat (split R-hat) compares the between-chain and within-chain variance
+[@GelmanRubin_1992]. Values close to 1.0 indicate that the chains
+have converged to the same distribution. Earlier guidance recommended
+thresholds of 1.1 or 1.2; @VehtariEtAl_2021 tightened this to 1.01
+based on experience with rank-normalized split-R-hat. Values above 1.01
+suggest that the chains have not mixed and should be run longer.
 
-bgms reports R-hat in `summary()` output and through `extract_rhat()`.
+`bgms` reports R-hat in `summary()` output and through `extract_rhat()`.
 
 ## Trace plots
 
@@ -52,23 +117,58 @@ assess convergence. Chains that have converged look like random noise
 fluctuating around a stable mean; chains that have not converged show
 trends, level shifts, or poor mixing.
 
-Raw samples are accessible through `fit$raw_samples`:
+Raw samples are accessible through `fit$raw_samples`. The examples on this
+page use a model fitted to the Wenchuan dataset (17 PTSD symptom items,
+362 respondents):
 
 ```r
+library(bgms)
+fit = bgm(Wenchuan, chains = 2, seed = 1234)
+```
+
+```{r}
+#| label: load-fixture
+#| echo: false
+resolve_fixture = function(name) {
+  input_dir = dirname(knitr::current_input(dir = TRUE))
+  candidates = c(
+    file.path(input_dir, "..", "fixtures", name),
+    file.path(input_dir, "fixtures", name),
+    file.path("fixtures", name),
+    file.path("..", "fixtures", name)
+  )
+  hit = candidates[file.exists(candidates)][1]
+  if (is.na(hit)) {
+    stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+  }
+  hit
+}
+
+fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
+```
+
+```{r}
+#| label: fig-traceplot
+#| fig-cap: "Trace plot for the first pairwise interaction parameter across two chains."
+#| fig-width: 7
+#| fig-height: 3.5
 param_index = 1
 chains = fit$raw_samples$pairwise
 nchains = length(chains)
-cols = c("firebrick", "steelblue", "darkgreen", "goldenrod")
+cols = adjustcolor(c("#B22222", "#4682B4", "#2E8B57", "#DAA520"), alpha.f = 0.7)
 
-plot(chains[[1]][, param_index], type = "l", col = cols[1],
-  xlab = "Iteration", ylab = "Value",
-  main = "Traceplot",
-  ylim = range(sapply(chains, function(ch) range(ch[, param_index]))))
+par(mar = c(4, 4, 1.5, 1), family = "sans")
+plot(chains[[1]][, param_index], type = "l", col = cols[1], lwd = 0.6,
+  xlab = "Iteration", ylab = colnames(chains[[1]])[param_index],
+  ylim = range(sapply(chains, function(ch) range(ch[, param_index]))),
+  las = 1, bty = "l")
 if(nchains > 1) {
   for(c in 2:nchains) {
-    lines(chains[[c]][, param_index], col = cols[c])
+    lines(chains[[c]][, param_index], col = cols[c], lwd = 0.6)
   }
 }
+legend("topright", legend = paste("Chain", seq_len(nchains)),
+  col = cols[seq_len(nchains)], lwd = 1.5, bty = "n", cex = 0.8)
 ```
 
 ## NUTS-specific diagnostics
@@ -79,10 +179,11 @@ are stored in `fit$nuts_diag`.
 ### E-BFMI
 
 E-BFMI (Energy Bayesian Fraction of Missing Information) measures how
-efficiently the sampler explores the posterior. It compares the typical size
-of energy changes between successive samples to the overall spread of
-energies. Values close to 1 indicate efficient exploration; values below 0.3
-suggest the sampler may be getting stuck.
+efficiently the sampler explores the posterior
+[@Betancourt_2016_ebfmi]. It compares the typical size of energy changes
+between successive samples to the overall spread of energies. Values
+close to 1 indicate efficient exploration; values below 0.3 suggest the
+sampler may be getting stuck [@Betancourt_2017_hmc].
 
 A low E-BFMI does not necessarily mean the results are wrong, but it does
 warrant investigation. In models with edge selection, the most common cause
@@ -105,10 +206,26 @@ and compare results.
 
 NUTS builds trajectories by repeatedly doubling their length until a
 U-turn criterion is satisfied. If the trajectory frequently reaches the
-maximum allowed depth (`nuts_max_depth`, default 10), the sampler may
+maximum allowed depth (`nuts_max_depth`), the sampler may
 benefit from longer trajectories. Hitting the maximum depth occasionally is
 normal; hitting it on most iterations may indicate challenging posterior
 geometry. Consider increasing `nuts_max_depth`.
+
+### Non-reversible steps
+
+For models with continuous variables and edge selection, the leapfrog
+integrator enforces zero constraints through a projection step (the
+RATTLE scheme). After each forward step, the integrator checks whether
+reversing the step returns to the starting point. When the round-trip
+error exceeds a tolerance scaled by the square of the step size, the step
+is flagged as non-reversible.
+
+A small number of non-reversible steps is not a concern. A large number
+indicates that the step size is too large for the constraint geometry.
+Because the step size is tuned during warmup, the most effective remedy is
+to increase `warmup` so the adapter has more time to find an appropriate
+step size. If non-reversible steps persist after increasing warmup, switch
+to `update_method = "adaptive-metropolis"`.
 
 ## Warmup equilibration check
 
@@ -138,10 +255,10 @@ further investigation is warranted.
 
 ## Recommended workflow
 
-1. **Inspect `summary()`**: check R-hat (< 1.01) and ESS (> 400) for all
+1. **Inspect `summary()`**: check R-hat (< 1.01) and ESS (≥ 100) for all
    parameters.
 2. **Check NUTS diagnostics**: `fit$nuts_diag$summary` for divergences,
-   tree depth saturation, and E-BFMI.
+   non-reversible steps, tree depth saturation, and E-BFMI.
 3. **Check warmup**: `fit$nuts_diag$warmup_check` for signs of
    incomplete equilibration.
 4. **Plot traces**: visually inspect a few key parameters for mixing and

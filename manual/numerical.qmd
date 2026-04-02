@@ -2,36 +2,43 @@
 title: "Numerical Considerations"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
-Cross-platform numerical consistency in bgms. Source:
+Custom exp/log for Windows performance in `bgms`. Source:
 `src/math/custom_explog.h`, `custom_explog.cpp`,
 `custom_arma_explog.h`, and `explog_macros.h`.
 
 ## The problem
 
-Standard library implementations of `exp()` and `log()` differ across
-platforms. The GNU C Library (glibc, used on Linux), macOS libm, and
-MSVC's C runtime produce slightly different results for the same
-input, especially near boundary values. These differences are small
-(last-bit-of-precision level) but compound across thousands of MCMC
-iterations, causing:
+The `std::exp()` and `std::log()` that ship with the Windows
+toolchain R uses (Rtools / UCRT) are much slower than their macOS
+and Linux counterparts. Because MCMC samplers call `exp()` and
+`log()` millions of times per run, the difference makes `bgms`
+prohibitively slow on Windows without intervention.
 
-- Different platforms to produce different posterior samples from the
-  same seed
-- CRAN check failures when comparing numerical output across
-  architectures
-- Occasional test failures when expected values are computed on one
-  platform and checked on another
+<!-- bench:start -->
+*Run the `Benchmark exp/log` workflow to populate this table.*
+<!-- bench:end -->
+
+::: {.callout-tip collapse="true" title="Reproduce locally"}
+```r
+library(bgms)
+bgms:::get_explog_switch()
+
+x = rnorm(1e6)
+n = 100L
+
+system.time(for(i in seq_len(n)) exp(x))
+system.time(for(i in seq_len(n)) bgms:::rcpp_ieee754_exp(x))
+system.time(for(i in seq_len(n)) log(abs(x)))
+system.time(for(i in seq_len(n)) bgms:::rcpp_ieee754_log(abs(x)))
+```
+:::
 
 ## OpenLibM solution
 
-bgms ships a copy of the `__ieee754_exp()` and `__ieee754_log()`
+`bgms` ships a copy of the `__ieee754_exp()` and `__ieee754_log()`
 implementations from OpenLibM (the FreeBSD/Sun math library). These
-are self-contained C functions that follow IEEE 754 exactly and
-produce identical results on all platforms.
+are self-contained C functions that bypass the toolchain's standard
+library, bringing Windows performance much closer to macOS and Linux.
 
 The implementation in `custom_explog.cpp` (approximately 800 lines)
 is the original Sun/FreeBSD code, lightly adapted to compile as C++
@@ -51,15 +58,16 @@ is used:
 
 The logic:
 
-- **Windows** — Uses custom exp/log by default because MSVC's
-  `std::exp`/`std::log` differ from POSIX implementations and are
-  slower
-- **Linux/macOS** — Uses the system libm by default (which is fast
-  and POSIX-compliant). Custom exp/log can be enabled by setting
-  `CUSTOM_EXP_LOG=1`
+- **Windows** — Uses custom exp/log by default because the Rtools
+  toolchain's `std::exp`/`std::log` are much slower
+- **Linux/macOS** — Uses the system libm by default (which is fast).
+  Custom exp/log can be enabled by setting `CUSTOM_EXP_LOG=1`
 
-The `configure` and `configure.win` scripts set the appropriate
-compiler flag in `Makevars`.
+The `configure` and `configure.win` scripts do not control this
+flag. Platform detection is handled entirely by the C++ preprocessor
+via `_WIN32`. Users can override the default by adding
+`-DCUSTOM_EXP_LOG=1` (to enable custom on non-Windows) or by
+omitting the flag (to keep the platform default).
 
 ## Usage in C++ code
 
@@ -68,7 +76,9 @@ Two levels of macros are available:
 | Macro | Expands to (custom) | Expands to (system) |
 |-------|-------------------|-------------------|
 | `MY_EXP(x)` | `__ieee754_exp(x)` | `std::exp(x)` |
+| `MY_LOG(x)` | `__ieee754_log(x)` | `std::log(x)` |
 | `ARMA_MY_EXP(X)` | `custom_arma_exp(X)` | `arma::exp(X)` |
+| `ARMA_MY_LOG(X)` | `custom_arma_log(X)` | `arma::log(X)` |
 
 The `ARMA_MY_EXP` variant applies element-wise custom exp/log to
 Armadillo matrices and vectors. It wraps `custom_arma_exp()` and
@@ -77,14 +87,15 @@ matrix elements and call the scalar `__ieee754_exp`/`__ieee754_log`.
 
 ## Performance
 
-On macOS and Linux, the system `exp()` and `log()` are highly
-optimized (hardware-accelerated on some architectures). The custom
-versions are slightly slower but guarantee cross-platform
-reproducibility.
+On Windows, the Rtools `std::exp`/`std::log` are much slower than
+the OpenLibM replacements, making the custom path essential for
+acceptable MCMC runtimes. `bgms` enables the custom path on Windows by
+default.
 
-On Windows with MSVC, the custom implementations are often 2–5×
-*faster* than `std::exp`/`std::log`, making the custom path
-beneficial for both correctness and speed.
+On macOS and Linux, the system libm is already fast, so `bgms` uses
+the system implementations by default. The custom path can be
+enabled for cross-platform reproducibility, at the cost of slightly
+slower scalar operations.
 
 ## EXP_BOUND and overflow prevention
 
@@ -101,6 +112,18 @@ This bound is used throughout the codebase (not just in variable
 helpers) to guard against overflow before calling `MY_EXP()`.
 
 ## R interface
+
+`explog_interface.cpp` (in `src/`, not `src/math/`) exposes three
+functions to R:
+
+| R function | Purpose |
+|-----------|--------|
+| `get_explog_switch()` | Returns `"custom"` or `"standard"` depending on compile-time `USE_CUSTOM_LOG` |
+| `rcpp_ieee754_exp(x)` | Vectorised exp via `MY_EXP` |
+| `rcpp_ieee754_log(x)` | Vectorised log via `MY_LOG` |
+
+On the standard path, `rcpp_ieee754_exp()` and `rcpp_ieee754_log()`
+call `std::exp` and `std::log` despite the `ieee754` naming.
 
 The `explog_interface.cpp` file exposes the custom exp/log functions
 to R for testing purposes. This allows verification that the custom

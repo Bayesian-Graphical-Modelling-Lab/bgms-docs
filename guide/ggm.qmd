@@ -2,65 +2,108 @@
 title: "Gaussian Graphical Model"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
-The Gaussian graphical model (GGM) is a Markov Random Field for continuous
-variables. In bgms, the GGM is fit when `variable_type = "continuous"`.
+The Gaussian graphical model (GGM) is a Markov random field for continuous variables. It is the most widely studied undirected graphical model [@Lauritzen1996] and forms the continuous component of the [Mixed MRF](mixed-model.qmd) in `bgms`. To fit a GGM, set `variable_type = "continuous"`.
 
 ## The model
 
-A GGM assumes that $p$ continuous variables follow a multivariate normal
-distribution:
+A GGM assumes that $p$ continuous variables follow a multivariate normal distribution:
 
 $$
 \mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})
 $$
 
-The network structure is encoded in the precision matrix
-$\boldsymbol{K} = \boldsymbol{\Sigma}^{-1}$. A zero entry $K_{ij} = 0$
-means that variables $i$ and $j$ are conditionally independent given all
-other variables — equivalently, the edge between nodes $i$ and $j$ is
-absent.
+where $\boldsymbol{\mu}$ is the mean vector and $\boldsymbol{\Sigma}$ is the $p \times p$ covariance matrix. The covariance matrix describes marginal associations between pairs of variables, but marginal associations confound direct and indirect effects. Two variables may be strongly correlated because both depend on a third variable, not because they influence each other directly.
+
+The GGM is defined not through the covariance matrix but through its inverse, the precision matrix $\boldsymbol{\Theta} = \boldsymbol{\Sigma}^{-1}$. @Dempster_1972 introduced this idea under the name *covariance selection*: the precision matrix separates direct from indirect associations, and a zero entry $\theta_{ij} = 0$ means that variables $i$ and $j$ are conditionally independent given all other variables. In the graph, this corresponds to the absence of the edge between nodes $i$ and $j$.
+
+## Connection to the MRF framework
+
+The [Graphical Models](graphical-models.qmd) page introduced the general pairwise MRF:
+
+$$
+p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
+\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
+$$
+
+The GGM is a special case of this form. In `bgms`, continuous variables are centered before estimation, so $\boldsymbol{\mu} = \mathbf{0}$ and the node potentials vanish. The multivariate normal density then reduces to:
+
+$$
+p(\mathbf{x}) \propto \exp\!\left(
+- \tfrac{1}{2}\,\mathbf{x}^{\sf T} \boldsymbol{\Theta}\, \mathbf{x}\right)
+$$
+
+Comparing this with the general MRF identifies the interaction matrix as $\boldsymbol{\Omega} = -\tfrac{1}{2}\,\boldsymbol{\Theta}$. The off-diagonal entry $\omega_{ij} = -\tfrac{1}{2}\,\theta_{ij}$ is the partial association between variables $i$ and $j$, and when $\theta_{ij} = 0$ the partial association is zero and the edge is absent.
+
+## Partial associations
+
+As described in [Graphical Models](graphical-models.qmd), `bgms` reports all pairwise effects on a unified partial association scale. For the GGM, the partial association between variables $i$ and $j$ is:
+
+$$
+\omega_{ij} = -\tfrac{1}{2}\, \theta_{ij}
+$$
+
+A positive $\omega_{ij}$ means that, holding all other variables constant, higher values of $x_i$ are associated with higher values of $x_j$.
+
+The partial association and the precision element carry the same information — one is a linear rescaling of the other. The rescaling ensures that the GGM partial association occupies the same structural role as the partial association in the ordinal MRF, where $\omega_{ij}$ is half the log adjacent-category odds ratio (see [Ordinal MRF](omrf.qmd)). This unified scale means that `coef(fit)$pairwise` returns partial associations regardless of model type, and the spike-and-slab prior ([Prior Basics](prior-basics.qmd)) operates on the same quantity across models. To obtain the precision matrix directly, use `extract_precision(fit)`.
 
 ## Partial correlations
 
-The off-diagonal entries of the standardized precision matrix are partial
-correlations:
+The partial correlation is a standardized measure of conditional association. It removes the influence of the variables' scales and is bounded between $-1$ and $1$:
 
 $$
-\rho_{ij \cdot \text{rest}} = -\frac{K_{ij}}{\sqrt{K_{ii} K_{jj}}}
+\rho_{ij \cdot \text{rest}} = -\frac{\theta_{ij}}{\sqrt{\theta_{ii}\, \theta_{jj}}}
 $$
 
-A positive partial correlation means that, holding all other variables
-constant, higher values of $x_i$ are associated with higher values of $x_j$.
-bgms reports these partial correlations as the pairwise interaction
-parameters.
+Because the partial correlation standardizes the off-diagonal precision element by the conditional standard deviations of both variables, it is invariant to rescaling. Two datasets that differ only in their units of measurement produce the same partial correlations.
 
-## Fitting a GGM
+The partial correlation is related to the partial association by:
 
-To fit a GGM, pass continuous data and set `variable_type`:
+$$
+\rho_{ij \cdot \text{rest}} = \frac{2\,\omega_{ij}}{\sqrt{\theta_{ii}\, \theta_{jj}}}
+$$
 
-```r
-fit = bgm(x = continuous_data, variable_type = "continuous", seed = 1234)
-```
+When comparing the strength of associations across variable pairs — identifying which edges are strongest relative to each variable's conditional variability — partial correlations are the natural summary. When the goal is edge selection or comparison with discrete network models, the partial associations are more appropriate. To obtain the partial correlation matrix directly, use `extract_partial_correlations(fit)`.
 
-The `summary()` and `coef()` methods work the same as for ordinal models.
-The pairwise effects in the output are partial correlations, and the
-diagonal of the pairwise matrix contains the precision matrix diagonal.
+## The precision matrix
+
+The diagonal entries of the precision matrix, $\theta_{ii}$, are the inverse of the residual variance of variable $i$ — the variance that remains after regressing $x_i$ on all other variables. A small residual variance $1 / \theta_{ii}$ means the variable is well predicted by the rest of the network.
+
+In `bgms`, the diagonal entries are nuisance parameters. They receive a Gamma$(1, 1)$ prior and are estimated during MCMC sampling, but they are not subject to edge selection. The off-diagonal entries — or equivalently the partial associations — are the primary inferential targets.
+
+## Likelihood
+
+Unlike the ordinal MRF, whose normalizing constant is intractable and requires a pseudolikelihood approximation (see [Ordinal MRF](omrf.qmd)), the GGM has a closed-form likelihood. For $n$ observations with sufficient statistic $\mathbf{S} = \mathbf{X}^{\sf T}\mathbf{X}$, the log-likelihood is:
+
+$$
+\ell(\boldsymbol{\Theta}) = \frac{n}{2}\,\log|\boldsymbol{\Theta}|
+- \frac{1}{2}\,\operatorname{tr}(\mathbf{S}\,\boldsymbol{\Theta})
+$$
+
+The likelihood depends on the data only through $\mathbf{S}$ and $n$, not through the individual observations. The log-determinant $\log|\boldsymbol{\Theta}|$ is computed efficiently from the Cholesky factor of the precision matrix.
 
 ## Edge selection
 
-When `edge_selection = TRUE` (the default), bgms applies spike-and-slab
-priors to the off-diagonal entries of the precision matrix. Edges with
-posterior inclusion probability above 0.5 have more evidence for presence
-than absence. See [Edge Selection](edge-selection.qmd) for details.
+When `edge_selection = TRUE` (the default), `bgms` applies spike-and-slab priors to the partial associations $\omega_{ij}$. The spike sets $\omega_{ij} = 0$ (and therefore $\theta_{ij} = 0$), enforcing the absence of the edge. The slab places a Cauchy prior on $\omega_{ij}$, allowing the effect size to be estimated from the data. See [Prior Basics](prior-basics.qmd) for the spike-and-slab specification.
+
+The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See [Edge Selection](edge-selection.qmd).
 
 ## Missing data
 
-For continuous data, missing values can be imputed within the MCMC sampler
-by setting `na_action = "impute"`. Missing entries are resampled at each
-iteration from their full conditional distribution. The default behavior is
-`na_action = "listwise"`, which removes rows with any missing values before
-fitting.
+For continuous data, missing values can be imputed within the MCMC sampler by setting `na_action = "impute"`. At each iteration, missing entries are drawn from their conditional normal distribution given the current precision matrix and the observed values. Because the imputation is embedded in the MCMC chain, the posterior summaries account for the uncertainty introduced by missing data.
+
+The default behavior is `na_action = "listwise"`, which removes rows with any missing values before fitting.
+
+## Fitting a GGM
+
+To fit a GGM, set `variable_type = "continuous"`:
+
+```r
+fit = bgm(x = data, variable_type = "continuous", seed = 1234)
+```
+
+The `summary()` and `coef()` methods work the same as for ordinal and mixed models. `coef(fit)$pairwise` returns the posterior means of the partial associations $\omega_{ij}$, and `coef(fit)$indicator` returns the posterior inclusion probabilities.
+
+To obtain model-specific parameterizations, use the dedicated extractors:
+
+- `extract_precision(fit)` — returns the full precision matrix $\boldsymbol{\Theta}$.
+- `extract_partial_correlations(fit)` — returns the partial correlation matrix.

@@ -3,10 +3,10 @@ title: "Technical Manual"
 toc: false
 ---
 
-Technical documentation for the bgms C++ backend, MCMC algorithms, and R
-scaffolding layer. This manual targets contributors to bgms development,
+Technical documentation for the `bgms` C++ backend, MCMC algorithms, and R
+scaffolding layer. This manual targets contributors to `bgms` development,
 users who need to understand implementation details, and researchers
-extending bgms for new model types.
+extending `bgms` for new model types.
 
 ## Architecture
 
@@ -23,6 +23,9 @@ The sampling machinery shared by all models.
 
 - [Sampler Hierarchy](samplers.qmd) — `SamplerBase`, gradient-based samplers, factory dispatch
 - [NUTS Algorithm](nuts.qmd) — Binary tree construction, U-turn criterion, divergence detection
+- [HMC Algorithm](hmc.qmd) — Fixed-length leapfrog, Metropolis correction (deprecated)
+- [Adaptive Metropolis](metropolis.qmd) — Scalar random-walk MH, Robbins–Monro adaptation
+- [Constrained Leapfrog (RATTLE)](rattle.qmd) — Position/momentum projection, reversibility check, Memoizer
 - [Warmup Schedule](warmup.qmd) — Five-stage adaptation, dual averaging, mass matrix tuning
 - [Parallel Chains](parallel-chains.qmd) — TBB threading, model cloning, per-chain RNG
 
@@ -33,7 +36,7 @@ Model-specific sampling and likelihood computation.
 - [GGM Internals](ggm-internals.qmd) — Precision matrix Metropolis, Cholesky rank-1 updates
 - [OMRF Internals](omrf-internals.qmd) — Ordinal thresholds, Blume-Capel, pseudolikelihood
 - [Variable Helpers](variable-helpers.qmd) — Numerically stable probability computation (FAST/SAFE)
-- [Mixed MRF Internals](mixed-internals.qmd) — Hybrid NUTS+Metropolis, block parameter layout
+- [Mixed MRF Internals](mixed-internals.qmd) — NUTS + precision Metropolis, block parameter layout, RATTLE
 
 ## Priors & Edge Selection
 
@@ -53,5 +56,5 @@ Prior specification and edge inclusion machinery.
 ## Prerequisites
 
 This manual assumes familiarity with C++ programming, MCMC methods,
-and Hamiltonian Monte Carlo. The [User's Guide](../guide/index.qmd)
+and the No-U-Turn Sampler. The [User's Guide](../guide/index.qmd)
 covers the statistical background at a conceptual level.

@@ -1,0 +1,108 @@
+---
+title: "Adaptive Metropolis"
+---
+
+The adaptive Metropolis sampler (`update_method = "adaptive-metropolis"`)
+updates parameters one at a time using scalar random-walk
+Metropolis–Hastings steps. Proposal standard deviations are tuned
+during warmup via Robbins–Monro adaptation.
+
+The algorithm function is in `src/mcmc/algorithms/metropolis.h` and
+`metropolis.cpp`. The sampler wrapper is `MetropolisSampler` in
+`src/mcmc/samplers/metropolis_sampler.h`, and the adaptation
+controller is `MetropolisAdaptationController` in
+`src/mcmc/samplers/metropolis_adaptation.h`.
+
+## Algorithm
+
+Each scalar Metropolis step for parameter $\theta_k$:
+
+1. **Propose** — Draw $\theta_k^* \sim \mathcal{N}(\theta_k,\, \sigma_k^2)$,
+   where $\sigma_k$ is the current proposal standard deviation for
+   element $k$.
+2. **Accept/reject** — Compute the acceptance probability
+   $$
+   \alpha = \min\!\bigl(1,\; \exp\bigl(\log p(\theta_k^*) - \log p(\theta_k)\bigr)\bigr).
+   $$
+   The proposal distribution is symmetric, so no Hastings ratio
+   correction is needed.
+3. **Update** — Set $\theta_k \leftarrow \theta_k^*$ with probability
+   $\alpha$; otherwise keep $\theta_k$.
+
+The `metropolis_step()` function in `metropolis.cpp` implements this
+for a single scalar parameter and returns a `StepResult` containing
+the accepted state and $\alpha$.
+
+## Model-driven sweeps
+
+Unlike NUTS and HMC, where the sampler drives integration over the
+full parameter vector, `MetropolisSampler` delegates the sweep
+structure to the model. The sampler calls `model.do_one_metropolis_step(iteration)`,
+and each model class defines how to iterate over its parameters:
+
+- **GGMModel** — Sweeps over free elements of the precision matrix
+  (or Cholesky factor), updating each element with a scalar
+  Metropolis step against its full conditional log-posterior.
+- **OMRFModel** — Sweeps over thresholds and pairwise interaction
+  parameters, with each step targeting the pseudolikelihood-based
+  conditional.
+- **MixedMRFModel** — Sweeps over discrete thresholds, discrete
+  interactions, continuous interactions, and cross-type
+  interactions in separate blocks, each with its own proposal SD
+  matrix.
+
+This design allows each model to exploit problem-specific structure
+(e.g., conditional independence, sufficient statistics) that a
+generic vector-level sampler cannot access.
+
+## Robbins–Monro adaptation
+
+During warmup, the proposal standard deviations $\sigma_k$ are
+adapted to target an acceptance rate of 0.44. The
+`MetropolisAdaptationController` applies the update rule:
+
+$$
+\sigma_k^{(t+1)} = \sigma_k^{(t)} + \bigl(\alpha_k^{(t)} - 0.44\bigr)\,w_t,
+$$
+
+where $w_t = t^{-0.75}$ is the Robbins–Monro weight with decay
+exponent 0.75. The updated value is clamped to $[0.001,\; 2.0]$.
+NaN values (from degenerate proposals) are reset to 1.0.
+
+### Element-wise adaptation
+
+The controller operates on a matrix of proposal standard deviations
+(matching the parameter layout of the model) with an index mask that
+selects which elements to adapt. At each iteration, the controller
+receives the matrix of acceptance probabilities from the most recent
+sweep and updates only the masked elements.
+
+### Warmup boundary
+
+Adaptation runs only while `iteration < total_warmup`. After warmup
+ends, proposal standard deviations are frozen at their final values.
+
+## Sampler dispatch
+
+The chain runner factory in `chain_runner.cpp` maps two string
+identifiers to `MetropolisSampler`: `"mh"` and `"adaptive-metropolis"`.
+The R interface uses `"adaptive-metropolis"` as the `update_method`
+value.
+
+## Initialization
+
+`MetropolisSampler` uses lazy initialization. On the first call to
+`step()` (or via an explicit `initialize()` call from the chain runner),
+it invokes `model.init_metropolis_adaptation(schedule)`, which creates
+`MetropolisAdaptationController` instances for each parameter block
+in the model.
+
+## Source files
+
+| File | Contents |
+|------|----------|
+| `src/mcmc/algorithms/metropolis.h` | `metropolis_step()` declaration |
+| `src/mcmc/algorithms/metropolis.cpp` | `metropolis_step()` implementation |
+| `src/mcmc/samplers/metropolis_sampler.h` | `MetropolisSampler` class (header-only) |
+| `src/mcmc/samplers/metropolis_adaptation.h` | `MetropolisAdaptationController` class (header-only) |
+| `src/mcmc/execution/step_result.h` | `update_proposal_sd_with_robbins_monro()` utility |

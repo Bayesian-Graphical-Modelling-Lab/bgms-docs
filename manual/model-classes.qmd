@@ -6,7 +6,7 @@ title: "Model Classes"
 This page has not yet passed technical or readability review.
 :::
 
-All graphical models in bgms inherit from a single abstract base class,
+All graphical models in `bgms` inherit from a single abstract base class,
 `BaseModel`, defined in `src/models/base_model.h`. The chain runner
 interacts with models exclusively through this interface, so adding a
 new model type requires implementing the relevant virtual methods
@@ -24,11 +24,17 @@ runner and sampler factory use them to select the correct algorithm.
 
 | Method | Default | GGMModel | OMRFModel | MixedMRFModel |
 |--------|---------|----------|-----------|---------------|
-| `has_gradient()` | `false` | `false` | `true` | `true` |
+| `has_gradient()` | `false` | `true` | `true` | `true` |
 | `has_adaptive_metropolis()` | `false` | `true` | `true` | `true` |
-| `has_nuts()` | `false` | `false` | `true` | `true` |
+| `has_nuts()` | `has_gradient()` | `true` | `true` | `true` |
 | `has_edge_selection()` | `false` | `true` | `true` | `true` |
 | `has_missing_data()` | `false` | `true` | `true` | `true` |
+| `has_constraints()` | `false` | `true`^†^ | `false` | `true`^†^ |
+
+^†^ Returns `true` when `edge_selection_` or `has_sparse_graph_` is
+active. For GGMModel this triggers RATTLE constrained integration
+for the NUTS sampler. For MixedMRFModel it likewise switches the
+NUTS sampler to constrained (RATTLE) integration.
 
 ### Sampling methods
 
@@ -39,7 +45,7 @@ virtual pair<double, vec> logp_and_gradient(vec parameters);
 ```
 
 Every model must implement `do_one_metropolis_step()`. Models that
-support gradient-based samplers (NUTS, HMC) also override `gradient()`
+support gradient-based samplers (NUTS) also override `gradient()`
 and `logp_and_gradient()`. The joint function is more efficient because
 the log-posterior and gradient share intermediate computations.
 
@@ -57,14 +63,13 @@ virtual size_t storage_dimension() const;
 
 `get_vectorized_parameters()` returns the parameters that the
 gradient-based sampler updates. `get_storage_vectorized_parameters()`
-returns all parameters that need to be saved (including those updated
-by Metropolis steps outside the NUTS block).
+returns all parameters in a fixed-size vector for saving to output.
 
-The distinction matters for the mixed MRF, where the NUTS block
-contains thresholds, pairwise discrete interactions, means, and
-cross-type interactions, but the continuous-continuous precision
-elements are updated by a separate Metropolis step and only appear
-in the storage vector.
+For the mixed MRF, `get_vectorized_parameters()` packs the Cholesky
+factor of the continuous precision matrix (diagonal on the log
+scale), while `get_storage_vectorized_parameters()` stores the raw
+precision entries. The two representations differ, but both include
+the continuous-continuous block.
 
 ### Edge selection
 
@@ -75,9 +80,11 @@ virtual void set_edge_selection_active(bool active);
 ```
 
 When edge selection is active, `update_edge_indicators()` performs a
-full scan over all edges, proposing inclusion/exclusion for each
-using the spike-and-slab prior. `initialize_graph()` sets starting
-edge indicators (all edges included by default).
+full scan over all edges, proposing add/delete moves using the MoMS
+framework [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms].
+Excluded edges are represented as parameters fixed at zero within a
+fixed-dimensional space. `initialize_graph()` draws starting edge
+indicators from the prior inclusion probabilities.
 
 ### Adaptation support
 
@@ -90,6 +97,57 @@ virtual void prepare_iteration();
 Models with element-wise Metropolis proposals (GGM, OMRF, mixed MRF)
 implement these methods to tune proposal standard deviations during
 warmup using Robbins-Monro updates.
+
+### Constraint projection {#constraint-projection}
+
+When `has_constraints()` returns `true`, the NUTS sampler uses
+constrained (RATTLE) leapfrog integration. The model must implement
+the following methods to provide the projection functions:
+
+```cpp
+virtual bool has_constraints() const;
+virtual arma::vec get_full_position() const;
+virtual void set_full_position(const arma::vec& position);
+virtual std::pair<double, arma::vec>
+    logp_and_gradient_full(const arma::vec& position);
+virtual void project_position(arma::vec& position,
+                              const arma::vec& inv_mass);
+virtual void project_momentum(arma::vec& momentum,
+                              const arma::vec& position,
+                              const arma::vec& inv_mass);
+virtual void reset_projection_cache();
+```
+
+| Method | Purpose |
+|--------|---------|
+| `get_full_position()` | Returns the complete parameter vector including constrained (zero) entries |
+| `set_full_position()` | Sets all parameters from the full vector |
+| `logp_and_gradient_full()` | Log-posterior and gradient over the full parameter space |
+| `project_position()` | SHAKE step: projects position onto the constraint manifold (zeros excluded edges) |
+| `project_momentum()` | RATTLE step: projects momentum onto the cotangent space of the manifold |
+| `reset_projection_cache()` | Clears cached projection data at the start of each NUTS step |
+
+The `get_full_position()` / `set_full_position()` pair operates on
+the full NUTS-block parameter vector (including entries fixed at
+zero), while `get_vectorized_parameters()` /
+`set_vectorized_parameters()` operates on the active subset only.
+
+The OMRF does not implement these methods. It handles edge selection
+by adjusting the dimension of its active parameter vector instead,
+so the unconstrained NUTS path suffices.
+
+### Mass matrix access
+
+```cpp
+virtual arma::vec get_inv_mass() const;
+virtual void set_inv_mass(const arma::vec& inv_mass);
+virtual arma::vec get_active_inv_mass() const;
+```
+
+`get_inv_mass()` returns the diagonal inverse mass matrix for the
+full parameter space (used by the constrained path).
+`get_active_inv_mass()` returns the subset corresponding to active
+parameters only (used by the unconstrained path).
 
 ### Infrastructure
 
@@ -106,16 +164,20 @@ execution. Each clone gets its own RNG state via `set_seed()`.
 Defined in `src/models/ggm/ggm_model.h` and `ggm_model.cpp`.
 
 **Parameterization.** The GGM is parameterized by the precision matrix
-$\boldsymbol{\Omega}$ (inverse covariance). The model maintains an upper-triangular
-Cholesky factor $\mathbf{R}$ such that $\mathbf{R}^\top\mathbf{R} = \boldsymbol{\Omega}$.
+$\boldsymbol{\Theta}$ (inverse covariance). The model maintains an upper-triangular
+Cholesky factor $\mathbf{R}$ such that $\mathbf{R}^\top\mathbf{R} = \boldsymbol{\Theta}$.
 
-**Sampling.** Because the precision matrix must remain positive
-definite, the GGM does not support gradient-based samplers. Instead,
-it uses element-wise Metropolis-Hastings: each off-diagonal element
+**Sampling.** The GGM supports both NUTS and element-wise
+Metropolis-Hastings. For NUTS, the model uses a free-element
+Cholesky parameterization: the diagonal entries are stored on the
+log scale to enforce positivity, and the off-diagonal entries are
+expressed in a null-space basis that respects excluded edges.
+The `logp_and_gradient()` method computes the gradient in this
+parameterization. For Metropolis-Hastings, each off-diagonal element
 $\omega_{ij}$ is proposed from a Gaussian centered on the current
-value. After each proposal, the Cholesky factor is updated via a
-rank-1 Givens rotation (or hyperbolic rotation for downdates),
-avoiding a full $O(p^3)$ decomposition.
+value, and the Cholesky factor is updated via a rank-1 Givens
+rotation (or hyperbolic rotation for downdates), avoiding a full
+$O(p^3)$ decomposition.
 
 **Sufficient statistics.** For complete data, the GGM only needs the
 sufficient statistic $\mathbf{X}^\top\mathbf{X}$, not the raw data matrix.
@@ -139,19 +201,22 @@ $\mu_c = \alpha(c - b) + \beta(c - b)^2$ where $b$ is the reference
 category.
 
 **Gradient.** The OMRF supports `logp_and_gradient()`, enabling NUTS
-and HMC sampling. The gradient involves category probabilities
+sampling. The gradient involves category probabilities
 computed by the [variable helpers](variable-helpers.qmd), which use
 a FAST/SAFE dual-path strategy for numerical stability.
 
 **Residual matrix.** The model maintains a precomputed residual matrix
-$\mathbf{R}_{ni} = \sum_{j \neq i} x_{nj} \sigma_{ij}$ that caches
+$\mathbf{R}_{ni} = 2\sum_{j \neq i} x_{nj} \omega_{ij}$ that caches
 the contribution of pairwise interactions to each variable's
 conditional distribution. This matrix is updated incrementally when
 a single interaction changes.
 
-**Metropolis fallback.** Even when NUTS is the primary sampler, the
-OMRF uses element-wise Metropolis proposals for edge indicator
-updates during the edge selection phase.
+**Edge selection.** Edge indicators are updated via add/delete
+MoMS moves [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms],
+independent of the parameter sampler. The OMRF also provides an
+element-wise adaptive Metropolis fallback for parameter updates
+(used during warmup proposal-SD tuning and as a user-selectable
+alternative to NUTS).
 
 ## MixedMRFModel
 
@@ -161,28 +226,37 @@ Defined in `src/models/mixed/mixed_mrf_model.h` and four `.cpp` files.
 continuous variables jointly. The log-density has the form:
 
 $$
-\log f(\mathbf{x}, \mathbf{y}) = \sum_i \mu_i(x_i) + \mathbf{x}^\top \mathbf{K}_{xx} \mathbf{x} + \mathbf{y}^\top \mathbf{K}_{yy} \mathbf{y} + 2\mathbf{x}^\top \mathbf{K}_{xy} \mathbf{y}
+\log f(\mathbf{x}, \mathbf{y}) = \sum_i \mu_i(x_i) + \mathbf{x}^\top \boldsymbol{\Omega}_{xx} \mathbf{x} + \mathbf{y}^\top \boldsymbol{\Omega}_{yy} \mathbf{y} + 2\mathbf{x}^\top \boldsymbol{\Omega}_{xy} \mathbf{y}
 $$
 
-where $\mathbf{K}_{xx}$, $\mathbf{K}_{yy}$, and $\mathbf{K}_{xy}$
-are the discrete-discrete, continuous-continuous, and cross-type
-interaction matrices.
+where $\boldsymbol{\Omega}_{xx}$, $\boldsymbol{\Omega}_{yy}$, and
+$\boldsymbol{\Omega}_{xy}$ are the discrete-discrete, continuous-continuous,
+and cross-type pairwise interaction matrices (see the
+[User's Guide](../guide/mixed-model.qmd) for their statistical
+interpretation).
 
-**Hybrid sampling.** The NUTS block updates thresholds, discrete
-pairwise interactions ($\mathbf{K}_{xx}$), continuous means, and
-cross-type interactions ($\mathbf{K}_{xy}$). The continuous precision
-elements ($\mathbf{K}_{yy}$) are excluded from the NUTS block because
-the precision matrix must remain positive definite; they are updated
-by a separate element-wise Metropolis step
-(`do_pairwise_continuous_metropolis_step()`), analogous to the GGM.
+**Sampling.** All five parameter blocks are updated jointly by NUTS.
+The continuous precision matrix is parameterized through its Cholesky
+factor (diagonal entries on the log scale) so that positive
+definiteness is guaranteed by construction. The gradient includes the
+Jacobian of the Cholesky-to-precision mapping. The model also provides
+a component-wise adaptive Metropolis fallback
+(`do_one_metropolis_step()`) used when the sampler is set to
+`"adaptive-metropolis"`.
 
-**Three dimension concepts.** The model distinguishes:
+**Three dimension concepts.** All three include the Cholesky block:
 
-- `parameter_dimension()` — Active NUTS parameters (excludes inactive edges and $\mathbf{K}_{yy}$)
-- `full_parameter_dimension()` — All NUTS-block parameters (includes inactive edges, excludes $\mathbf{K}_{yy}$)
-- `storage_dimension()` — All parameters including $\mathbf{K}_{yy}$ (what gets saved to output)
+- `parameter_dimension()` — Active parameters (excludes inactive edges, includes full Cholesky block)
+- `full_parameter_dimension()` — All parameters including inactive edges
+- `storage_dimension()` — Same layout as the full vector (what gets saved to output)
+
+When edge selection is active, `has_constraints()` returns `true`
+and the NUTS sampler uses the constrained integration path. The
+`get_full_position()` and `logp_and_gradient_full()` methods operate
+on the `full_parameter_dimension()` vector. Projection functions
+enforce zero entries for excluded edges at each leapfrog step.
 
 **Pseudolikelihood options.** The `pseudolikelihood` argument controls
-whether the model uses conditional or marginal pseudolikelihood for
-the continuous block. See the [User's Guide](../guide/mixed-model.qmd)
-for the statistical distinction.
+how the discrete full conditionals are computed, not the continuous
+block. See [Mixed MRF Internals](mixed-internals.qmd#pseudolikelihood-options)
+for details.

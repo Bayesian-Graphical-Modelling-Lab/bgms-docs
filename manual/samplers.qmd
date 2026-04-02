@@ -2,10 +2,6 @@
 title: "Sampler Hierarchy"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 The sampler classes in `src/mcmc/samplers/` are header-only wrappers
 that own adaptation state and delegate to the stateless algorithm
 functions in `src/mcmc/algorithms/`. The chain runner interacts with
@@ -13,17 +9,42 @@ samplers through the `SamplerBase` interface.
 
 ## Class hierarchy
 
-```
-SamplerBase                       (abstract)
-├── MetropolisSampler             — element-wise Metropolis-Hastings
-└── GradientSamplerBase           (abstract, owns HMCAdaptationController)
-    ├── HMCSampler                — fixed-length leapfrog
-    └── NUTSSampler               — adaptive tree depth
+```{mermaid}
+classDiagram
+    class SamplerBase {
+        <<abstract>>
+        +step(model, iteration) StepResult
+        +initialize(model)
+        +has_nuts_diagnostics() bool
+    }
+    class MetropolisSampler {
+        element-wise MH
+    }
+    class GradientSamplerBase {
+        <<abstract>>
+        owns HMCAdaptationController
+        #do_gradient_step(model) StepResult
+    }
+    class HMCSampler {
+        fixed-length leapfrog
+        ~~deprecated~~
+    }
+    class NUTSSampler {
+        adaptive tree depth
+        -do_unconstrained_step()
+        -do_constrained_step()
+    }
+    SamplerBase <|-- MetropolisSampler
+    SamplerBase <|-- GradientSamplerBase
+    GradientSamplerBase <|-- HMCSampler
+    GradientSamplerBase <|-- NUTSSampler
 ```
 
-The `HybridNUTSSampler` variant exists for the mixed MRF, combining
-a NUTS step for the main parameter block with a Metropolis step for
-the continuous precision elements.
+The mixed MRF combines a NUTS step for the main parameter block
+(thresholds, discrete interactions, means, cross-type interactions)
+with an element-wise Metropolis step for the continuous precision
+elements. The chain runner orchestrates this; there is no combined
+sampler class.
 
 ## SamplerBase interface
 
@@ -42,17 +63,15 @@ and optional NUTS diagnostics.
 `initialize()` is called once before the first iteration. For
 gradient-based samplers, it runs the step-size heuristic that finds
 a reasonable initial step size by iteratively doubling or halving
-until the acceptance probability is near the target (default 0.625).
+until the acceptance probability is near the target (default 0.8).
 
 ## MetropolisSampler
 
-The simplest sampler. Each call to `step()`:
-
-1. Calls `model.do_one_metropolis_step(iteration)`, which performs a
-   full sweep of element-wise proposals
-2. If the model has edge selection and the warmup schedule indicates
-   selection is active, calls `model.update_edge_indicators()`
-3. Returns the current parameters as the accepted state
+The simplest sampler. Each call to `step()` invokes
+`model.do_one_metropolis_step(iteration)`, which performs a full
+sweep of element-wise proposals, and returns the result. Edge
+selection is handled by the chain runner before the sampler step,
+not by `MetropolisSampler` itself.
 
 Proposal standard deviations are tuned during warmup via Robbins-Monro
 updates (see [Warmup Schedule](warmup.qmd)).
@@ -75,12 +94,19 @@ The `step()` method in `GradientSamplerBase`:
 After warmup, the adaptation controller freezes and returns the
 smoothed step size from dual averaging.
 
-## HMCSampler
+## HMCSampler (deprecated)
+
+::: {.callout-warning}
+`HMCSampler` is deprecated. The R-level `update_method = "hamiltonian-mc"`
+option still dispatches to this class, but it will be removed in a future
+release. Use NUTS instead.
+:::
 
 Performs fixed-length leapfrog integration. The number of leapfrog
 steps is set at construction from `config.num_leapfrogs`. Each call
 to `do_gradient_step()` invokes `hmc_step()` from
-`mcmc/algorithms/hmc.h`.
+`mcmc/algorithms/hmc.h`. For constrained models, RATTLE integration
+is used (see [Constrained Leapfrog (RATTLE)](rattle.qmd)).
 
 ## NUTSSampler
 
@@ -98,42 +124,56 @@ based on the model's capabilities and the user's choice:
 ```cpp
 unique_ptr<SamplerBase> create_sampler(const SamplerConfig& config,
                                         WarmupSchedule& schedule) {
-  switch(config.sampler_type) {
-    case nuts:                return make_unique<NUTSSampler>(config, schedule);
-    case hamiltonian_mc:      return make_unique<HMCSampler>(config, schedule);
-    case adaptive_metropolis: return make_unique<MetropolisSampler>(config, schedule);
+  if (config.sampler_type == "nuts") {
+    return make_unique<NUTSSampler>(config, schedule);
+  } else if (config.sampler_type == "hmc" ||
+             config.sampler_type == "hamiltonian-mc") {
+    return make_unique<HMCSampler>(config, schedule);
+  } else if (config.sampler_type == "mh" ||
+             config.sampler_type == "adaptive-metropolis") {
+    return make_unique<MetropolisSampler>(config, schedule);
   }
 }
 ```
 
-The GGM always uses `MetropolisSampler` because it does not provide a
-gradient. The OMRF and mixed MRF default to NUTS but fall back to
-Metropolis when the user requests it via `interaction_scale`.
+The R layer (`validate_sampler.R`) resolves strings like
+`"hamiltonian-mc"` and `"adaptive-metropolis"` before they reach C++,
+so in practice the factory receives `"nuts"`, `"hmc"`, or `"mh"`.
 
-## Step-size adaptation
+All three model types (GGM, OMRF, mixed MRF) default to NUTS.
+The user can select Metropolis via
+`update_method = "adaptive-metropolis"`.
 
-The `DualAveraging` class implements the Nesterov dual-averaging
-scheme from Hoffman and Gelman (2014). During warmup, each step's
-acceptance probability is fed to the dual averager, which maintains
-both a current step size (for exploration) and a smoothed average
-(used after warmup).
+## Step-size and mass-matrix adaptation
 
-Key parameters:
+`GradientSamplerBase` owns an `HMCAdaptationController` that
+coordinates dual averaging for $\epsilon$ and Welford variance
+estimation for the diagonal mass matrix $M$. The full adaptation
+schedule — stage boundaries, doubling windows, blending formula,
+and dual-averaging parameters — is documented in
+[Warmup Schedule](warmup.qmd).
 
-- **Target acceptance** — Default 0.8 for NUTS
-- **$\gamma$, $t_0$, $\kappa$** — Shrinkage and decay parameters from the NUTS paper
+`MetropolisSampler` uses a separate
+`MetropolisAdaptationController` that tunes proposal standard
+deviations via Robbins–Monro updates targeting an acceptance rate
+of 0.44.
 
-## Mass matrix tuning
+## Constrained integration dispatch
 
-The `DiagMassMatrixAccumulator` collects parameter samples during
-warmup stage 2 using Welford's algorithm for numerically stable
-variance computation. At the end of each adaptation window, the
-accumulated variance is extracted as the diagonal mass matrix.
+When `model.has_constraints()` returns `true`, `NUTSSampler`
+switches from the unconstrained leapfrog to RATTLE integration:
 
-The variance estimate is blended with a prior (shrunk toward 1.0) to
-prevent degenerate mass matrices early in warmup when few samples
-are available.
+- **Unconstrained path** — Uses `get_vectorized_parameters()` and
+  `logp_and_gradient()` on the active parameter subset. Used by the
+  OMRF, which handles edge selection by adjusting its active
+  parameter dimension instead.
+- **Constrained path** — Uses `get_full_position()` and
+  `logp_and_gradient_full()` on the complete parameter vector.
+  The sampler wraps the model's `project_position` and
+  `project_momentum` methods into lambda callbacks passed to
+  `nuts_step()`.
 
-When the mass matrix changes, the step size is reinitialized from
-scratch using the heuristic, because the optimal step size depends
-on the mass matrix.
+The RATTLE algorithm itself is documented in
+[Constrained Leapfrog (RATTLE)](rattle.qmd). The model-side
+projection functions are described in
+[Model Classes — Constraint projection](model-classes.qmd#constraint-projection).

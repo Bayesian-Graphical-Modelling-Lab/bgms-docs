@@ -57,7 +57,7 @@ in the same way as for single-group models.
 ## Interpretation
 
 Extract the group-specific pairwise effects and plot the network for
-the ADHD group.
+the ADHD group using `qgraph` [@EpskampEtAl_2012_qgraph].
 
 ```{r}
 #| eval: false
