@@ -2,7 +2,7 @@ name: Build and Deploy Documentation
 
 on:
   push:
-    branches: [main, docs/cycle-*]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
