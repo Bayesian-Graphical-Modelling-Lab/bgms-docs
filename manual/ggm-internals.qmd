@@ -2,92 +2,303 @@
 title: "GGM Internals"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
-Implementation details of the Gaussian graphical model in bgms.
-Source: `src/models/ggm/ggm_model.h` and `ggm_model.cpp`.
-
-## Precision matrix parameterization
+Implementation details of the Gaussian graphical model in `bgms`.
+Source: `src/models/ggm/`.
 
 The GGM is parameterized by the $p \times p$ precision matrix
-$\boldsymbol{\Theta}$ (inverse covariance). The off-diagonal elements
-$\theta_{ij}$ are the negative partial correlations (up to scaling).
-The model maintains an upper-triangular Cholesky factor $\mathbf{R}$
-such that $\mathbf{R}^\top \mathbf{R} = \boldsymbol{\Theta}$
-throughout sampling.
+$\boldsymbol{\Theta} = \boldsymbol{\Sigma}^{-1}$. The off-diagonal
+entries $\theta_{ij}$ encode partial associations: $\theta_{ij} = 0$
+if and only if variables $i$ and $j$ are conditionally independent
+given all other variables. The model maintains an upper-triangular
+Cholesky factor $\boldsymbol{\Phi}$ such that
+$\boldsymbol{\Phi}^\top \boldsymbol{\Phi} = \boldsymbol{\Theta}$
+throughout sampling. For complete data, the likelihood depends on
+the data only through the sufficient statistic
+$\mathbf{S} = \mathbf{X}^\top \mathbf{X}$.
 
-For complete data, the likelihood depends on the data only through
-the sufficient statistic $\mathbf{S} = \mathbf{X}^\top \mathbf{X}$.
-The `GGMModel` constructor accepts either raw data or precomputed
-sufficient statistics.
+## Sampling overview
 
-## Element-wise Metropolis
+The GGM supports two samplers:
 
-The GGM does not support gradient-based samplers because the
-precision matrix must remain positive definite — a constraint that
-is difficult to enforce in a global HMC step. Instead, each
-off-diagonal element $\theta_{ij}$ is updated individually:
+- **NUTS** (default) — Gradient-based sampling of all continuous
+  parameters simultaneously. Uses a free-element Cholesky
+  parameterization with RATTLE constraints when edge selection is
+  active.
+- **Adaptive Metropolis** (fallback) — Element-wise updates of
+  individual $\theta_{ij}$ entries via rank-1 Cholesky updates.
 
-1. Propose $\theta_{ij}^* \sim \mathcal{N}(\theta_{ij}, \sigma_{ij}^2)$
-2. Compute the log-acceptance ratio using the Cholesky factor
-3. Accept or reject via Metropolis-Hastings
+The sampler is selected by the `interaction` argument in `bgm()`.
+Edge indicators $\gamma_{ij}$ are always updated by Metropolis–Hastings
+moves, regardless of the continuous-parameter sampler. Within each
+iteration, edge indicator updates run first, then the continuous
+sampler runs with the graph held fixed. See
+[Sampler Hierarchy](samplers.qmd) for the full dispatch logic.
+
+## Free-element Cholesky parameterization {#cholesky-param}
+
+NUTS requires an unconstrained parameter vector. The GGM achieves
+this through a column-wise parameterization of $\boldsymbol{\Phi}$
+that separates free parameters from constrained (zero-precision)
+entries.
+
+### Column layout
+
+The parameter vector $\theta$ is packed column by column:
+
+$$
+\theta = (\psi_1,\; f_2, \psi_2,\; f_3, \psi_3,\; \ldots,\; f_p, \psi_p),
+$$
+
+where for each column $q$:
+
+- $\psi_q = \log(\Phi_{qq})$ — the log-transformed diagonal entry,
+  ensuring $\Phi_{qq} > 0$.
+- $f_q \in \mathbb{R}^{d_q}$ — free parameters for column $q$'s
+  off-diagonal entries, with $d_q$ equal to the number of included
+  edges in column $q$.
+
+### Null-space basis
+
+When column $q$ has $m_q$ excluded edges ($\gamma_{iq} = 0$), the
+constraint matrix $A_q$ encodes the zero-precision requirements
+$\theta_{iq} = \sum_l \Phi_{li}\,\Phi_{lq} = 0$ (see
+[RATTLE](rattle.qmd#projection-callbacks)). The off-diagonal entries
+of $\boldsymbol{\Phi}$ for column $q$ must lie in the null space of
+$A_q$. A Givens QR factorization of $A_q^\top$ produces
+an orthonormal null-space basis $N_q$, and the off-diagonal entries
+are recovered as $x_q = N_q f_q$.
+
+This maps $d_q$ unconstrained parameters to the $(q - 1)$-dimensional
+off-diagonal slot while satisfying all $m_q$ constraints exactly.
+When $m_q = 0$ (no excluded edges in column $q$), $N_q$ is the
+identity and $f_q = x_q$ directly.
+
+### Two coordinate systems
+
+The GGM operates in two coordinate systems depending on whether
+constraints are active:
+
+| Coordinate system | Dimension | Used by |
+|-------------------|-----------|---------|
+| **Active** $(f_q, \psi_q)$ | $p + \lvert E\rvert$ | Unconstrained NUTS (no edge selection) |
+| **Full** $(\Phi_{iq}, \psi_q)$ | $p(p+1)/2$ | Constrained NUTS with RATTLE |
+
+When edge selection is inactive, NUTS operates in the active
+coordinate system — the null-space rotation $N_q f_q$ maps free
+parameters to Cholesky entries, and the sampler never sees the
+excluded dimensions.
+
+When edge selection is active, NUTS operates in the full coordinate
+system (raw Cholesky entries including zeros for excluded edges).
+RATTLE projection enforces the zero-precision constraints at each
+leapfrog step. The switch between these two paths is described in
+[RATTLE: Dispatch in the sampler hierarchy](rattle.qmd#dispatch-in-the-sampler-hierarchy).
+
+### `GraphConstraintStructure`
+
+The `GraphConstraintStructure` in `graph_constraint_structure.h`
+precomputes the index maps needed by both the parameterization and
+the RATTLE projections. For each column $q$ it stores:
+
+- `excluded_indices` / `included_indices` — which rows are
+  constrained vs. free
+- `m_q` / `d_q` — number of constraints / free parameters
+- `theta_offsets[q]` — start of column $q$'s block in the active
+  $\theta$ vector
+- `full_theta_offsets[q]` — start of column $q$'s block in the full
+  position vector
+
+The structure is rebuilt whenever the edge indicators change (the
+`constraint_dirty_` flag triggers a lazy rebuild at the next
+gradient evaluation).
+
+## Gradient computation {#gradient}
+
+The gradient engine (`GGMGradientEngine` in `ggm_gradient.h/.cpp`)
+computes $\log p(\theta)$ and $\nabla_\theta \log p(\theta)$ jointly.
+
+### Forward map
+
+The forward map $\theta \to \boldsymbol{\Phi} \to \boldsymbol{\Theta}$
+processes columns left to right:
+
+1. For each column $q$, build $A_q$ from earlier (finalized) columns.
+2. QR-factorize $A_q^\top$ via Givens rotations to get $N_q$.
+3. Compute $x_q = N_q f_q$ and set $\Phi_{qq} = e^{\psi_q}$.
+4. Accumulate the log-Jacobian determinant from the QR factors.
+
+The log-Jacobian has three terms:
+
+$$
+\log|J| = p \log 2 + 2\sum_q \psi_q
+         + \sum_{q=0}^{p-2}(p - 1 - q)\,\psi_q
+         - \sum_q \sum_j \log|R_{q,jj}|,
+$$
+
+combining the $\boldsymbol{\Phi} \to \boldsymbol{\Theta}$ Jacobian,
+the $\psi_q \to \Phi_{qq}$ exponential transform, and the null-space
+QR rotation.
+
+### Backward pass
+
+The log-posterior being differentiated is
+
+$$
+\log p = \tfrac{n}{2}\log|\boldsymbol{\Theta}|
+       - \tfrac{1}{2}\operatorname{tr}(\boldsymbol{\Theta}\mathbf{S})
+       + \log p_{\text{prior}}(\boldsymbol{\Theta})
+       + \log|J|.
+$$
+
+The backward pass runs in two phases:
+
+1. **Phase 1 (data + priors → $\bar{\boldsymbol{\Phi}}$)** — Computes
+   the adjoint of the Cholesky factor from the data likelihood, Cauchy
+   prior on off-diagonals, and Gamma prior on diagonals.
+2. **Phase 2 (right-to-left column sweep)** — Propagates
+   $\bar{\boldsymbol{\Phi}}$ through the stored Givens rotations to
+   extract $\partial\log p / \partial f_q$ and
+   $\partial\log p / \partial \psi_q$. Reverse-mode differentiation
+   through the QR factorization captures cross-column dependencies
+   automatically.
+
+### Full-space gradient (RATTLE mode)
+
+When RATTLE is active, the gradient operates in the full coordinate
+system (raw Cholesky entries) rather than the $(f_q, \psi_q)$ active
+coordinates. The full-space gradient in `logp_and_gradient_full()`
+is simpler: off-diagonal adjoints are used directly without the
+null-space rotation, and the QR Jacobian terms are omitted (RATTLE
+preserves the correct measure on the constraint manifold).
+
+## Element-wise Metropolis {#metropolis}
+
+When the adaptive-Metropolis sampler is selected, each off-diagonal
+entry $\theta_{ij}$ is updated individually via
+Metropolis–Hastings. The algorithm exploits a structural property
+of the Cholesky parameterization: changing one off-diagonal entry
+$\theta_{ij}$ while holding the Cholesky factor consistent
+requires adjusting the diagonal $\theta_{jj}$ deterministically.
+This reduces a constrained positive-definite update to a
+one-dimensional proposal, and the entire update — proposal,
+likelihood ratio, and Cholesky maintenance — runs without
+permutation or refactorization of the precision matrix.
+
+### Roverato constraint structure
+
+Since $\boldsymbol{\Theta} = \boldsymbol{\Phi}^\top\boldsymbol{\Phi}$,
+each off-diagonal precision entry ($i < j$) is
+
+$$
+\theta_{ij} = \sum_{l=1}^{i} \Phi_{li}\,\Phi_{lj},
+$$
+
+which is **linear** in the off-diagonal entries of column $j$ of
+$\boldsymbol{\Phi}$, with coefficients from the already-fixed
+column $i$. The diagonal entry $\theta_{jj} = \sum_l \Phi_{lj}^2$
+is **quadratic** in those same entries. Taken together, proposing
+a new value for a single off-diagonal Cholesky entry $\Phi_{ij}$
+changes $\theta_{ij}$ and $\theta_{jj}$ while all other precision
+entries remain fixed, and the diagonal adjustment is
+deterministic. The resulting $\boldsymbol{\Theta}$ is
+automatically positive definite because the Cholesky factor stays
+valid — only one off-diagonal entry changes and diagonal entries
+remain positive.
+
+The standard approach exploits this by permuting the precision
+matrix so that the target pair $(i,j)$ occupies the bottom-right
+corner, then refactorizing — at $O(p^3)$ per element. The `bgms`
+implementation avoids this entirely: the same relationship between
+$\theta_{ij}$, $\theta_{jj}$, and $\Phi_{ij}$ can be read from
+the cached covariance matrix
+$\boldsymbol{\Sigma} = \boldsymbol{\Theta}^{-1}$ using cofactor
+identities, replacing an $O(p^3)$ factorization with an $O(1)$
+lookup.
+
+### The update algorithm
+
+For a single off-diagonal element $\theta_{ij}$:
+
+1. **Read the constraint relationship** from
+   $\boldsymbol{\Sigma}$ and $\boldsymbol{\Theta}$ in $O(1)$.
+2. **Propose** $\theta_{ij}^* \sim \mathcal{N}(\theta_{ij},\,
+   \sigma_{ij}^2)$ and set $\theta_{jj}^*$ deterministically.
+3. **Likelihood ratio** via the matrix-determinant lemma —
+   the log-determinant ratio and trace update both use $O(1)$
+   covariance entries, not a fresh factorization.
+4. **Accept or reject** via Metropolis–Hastings.
+5. **On accept** — update $\boldsymbol{\Theta}$ and apply a
+   rank-2 Cholesky update to $\boldsymbol{\Phi}$ (one Givens
+   update + one hyperbolic downdate, $O(p^2)$), then refresh
+   $\boldsymbol{\Sigma}$.
 
 The proposal standard deviations $\sigma_{ij}$ are tuned during
-warmup by Robbins-Monro updates targeting an acceptance rate of
-0.234.
+warmup by Robbins–Monro updates targeting an acceptance rate of
+0.44.
 
-## Cholesky rank-1 updates
+### Rank-2 Cholesky update
 
-When a single element $\theta_{ij}$ changes by $\delta$, the
-precision matrix changes by a rank-1 update:
-$\boldsymbol{\Theta}' = \boldsymbol{\Theta} + \delta (\mathbf{e}_i \mathbf{e}_j^\top + \mathbf{e}_j \mathbf{e}_i^\top)$.
-Rather than recomputing the full Cholesky decomposition in $O(p^3)$,
-bgms applies a rank-1 update to $\mathbf{R}$ in $O(p^2)$.
+Changing $\theta_{ij}$ and $\theta_{jj}$ simultaneously gives a
+symmetric rank-2 perturbation
+$\boldsymbol{\Theta}' = \boldsymbol{\Theta} + \Delta\boldsymbol{\Theta}$
+that decomposes into one rank-1 **update** (Givens rotations) and
+one rank-1 **downdate** (hyperbolic rotations):
 
-### Givens rotation update
+$$
+\boldsymbol{\Theta}' = \boldsymbol{\Theta}
+  + \mathbf{u}_1\mathbf{u}_1^\top
+  - \mathbf{u}_2\mathbf{u}_2^\top,
+$$
 
-For an increase in $\theta_{ij}$ (adding a positive-semidefinite
-term), the Cholesky factor is updated using Givens rotations. The
-update satisfies $\mathbf{R}'^{\!\top}\mathbf{R}' = \mathbf{R}^\top\mathbf{R} + \mathbf{u}\mathbf{u}^\top$.
-
-### Hyperbolic rotation downdate
-
-For a decrease (subtracting a term), a hyperbolic rotation is used:
-$\mathbf{R}'^{\!\top}\mathbf{R}' = \mathbf{R}^\top\mathbf{R} - \mathbf{u}\mathbf{u}^\top$.
-If the result would not be positive definite (detected by a negative
-radicand), the downdate sets a sentinel value (`R(1,0) = -2.0`)
-and the proposal is rejected.
+where $\mathbf{u}_1$ and $\mathbf{u}_2$ are derived from the
+change in $\theta_{ij}$ and $\theta_{jj}$. Each rank-1 operation
+costs $O(p^2)$. If the downdate would destroy positive
+definiteness (detected by a negative radicand), a sentinel value
+(`Phi(1,0) = -2.0`) is set and the proposal is rejected.
 
 The Cholesky update/downdate code in `src/math/cholupdate.cpp` is
 ported from Simon Wood's mgcv package (GPL).
 
-## Edge-specific proposals
+The standard approach to element-wise updates permutes the precision
+matrix and refactorizes at $O(p^3)$ per element. The in-place
+approach replaces the two most expensive operations — constant
+extraction and likelihood evaluation — with $O(1)$ covariance
+lookups, and the Cholesky maintenance with an $O(p^2)$ rank-2
+update. The remaining $O(p^3)$ cost per element is the covariance
+refresh (recomputing $\boldsymbol{\Sigma}$ from
+$\boldsymbol{\Phi}$).
+
+## Edge selection {#edge-selection}
 
 When edge selection is active, each edge $(i,j)$ has a binary
-indicator $\gamma_{ij}$. The update cycle for a single edge:
+indicator $\gamma_{ij}$. The add-delete update reuses the same
+Roverato constants and in-place machinery described above:
 
 1. **Propose inclusion/exclusion** — Compute the Bayes factor for
-   including vs. excluding the edge, using the change in
-   log-likelihood and the prior inclusion probability
+   including vs. excluding the edge, using the $O(1)$ likelihood
+   ratio and the prior inclusion probability.
 2. **If included** ($\gamma_{ij} = 1$) — Sample $\theta_{ij}$ from
-   its full conditional via the Metropolis proposal
+   its full conditional via the Metropolis proposal; set
+   $\theta_{jj}$ from the constraint curve.
 3. **If excluded** ($\gamma_{ij} = 0$) — Set $\theta_{ij} = 0$
+   and $\theta_{jj}$ to its constrained value; apply the rank-2
+   Cholesky update.
 
-The order of edge updates is randomized at each iteration to avoid
-systematic sweep artifacts.
+The order of edge updates is randomized at each iteration. After all
+edge indicator updates complete, the `constraint_dirty_` flag is set
+and the constraint structure is rebuilt lazily at the next gradient
+evaluation. This ensures NUTS operates on an up-to-date graph.
 
-## Log-likelihood computation
+## Log-likelihood
 
 The GGM log-likelihood for $n$ observations is:
 
 $$
-\ell(\boldsymbol{\Theta}) = \frac{n}{2} \log |\boldsymbol{\Theta}| - \frac{1}{2} \text{tr}(\mathbf{S}\boldsymbol{\Theta})
+\ell(\boldsymbol{\Theta}) = \frac{n}{2} \log |\boldsymbol{\Theta}| - \frac{1}{2} \operatorname{tr}(\mathbf{S}\,\boldsymbol{\Theta})
 $$
 
 The log-determinant is computed from the Cholesky factor as
-$\log|\boldsymbol{\Theta}| = 2\sum_i \log R_{ii}$. The trace term
+$\log|\boldsymbol{\Theta}| = 2\sum_q \log \Phi_{qq}$. The trace term
 uses the precomputed sufficient statistic $\mathbf{S}$.
 
 ## Missing data imputation
