@@ -226,8 +226,8 @@ str(fit$nuts_diag, max.level = 1)
 ```
 
 The `summary` field contains per-chain summaries of tree depth,
-divergences, and energy. The `warmup_check` field reports whether warmup
-equilibration was sufficient. These are described in detail in
+divergences, non-reversible steps, and energy. The `warmup_check` field
+reports whether warmup equilibration was sufficient. These are described in detail in
 [MCMC Diagnostics](mcmc-diagnostics.qmd). If these diagnostics remain problematic after tuning, refit with `update_method = "adaptive-metropolis"`.
 
 ## Output from [`bgmCompare()`](../reference/bgmCompare.qmd)

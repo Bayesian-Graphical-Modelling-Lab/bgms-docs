@@ -211,6 +211,22 @@ benefit from longer trajectories. Hitting the maximum depth occasionally is
 normal; hitting it on most iterations may indicate challenging posterior
 geometry. Consider increasing `nuts_max_depth`.
 
+### Non-reversible steps
+
+For models with continuous variables and edge selection, the leapfrog
+integrator enforces zero constraints through a projection step (the
+RATTLE scheme). After each forward step, the integrator checks whether
+reversing the step returns to the starting point. When the round-trip
+error exceeds a tolerance scaled by the square of the step size, the step
+is flagged as non-reversible.
+
+A small number of non-reversible steps is not a concern. A large number
+indicates that the step size is too large for the constraint geometry.
+Because the step size is tuned during warmup, the most effective remedy is
+to increase `warmup` so the adapter has more time to find an appropriate
+step size. If non-reversible steps persist after increasing warmup, switch
+to `update_method = "adaptive-metropolis"`.
+
 ## Warmup equilibration check
 
 In models with edge selection, the discrete graph structure may take longer
@@ -242,7 +258,7 @@ further investigation is warranted.
 1. **Inspect `summary()`**: check R-hat (< 1.01) and ESS (≥ 100) for all
    parameters.
 2. **Check NUTS diagnostics**: `fit$nuts_diag$summary` for divergences,
-   tree depth saturation, and E-BFMI.
+   non-reversible steps, tree depth saturation, and E-BFMI.
 3. **Check warmup**: `fit$nuts_diag$warmup_check` for signs of
    incomplete equilibration.
 4. **Plot traces**: visually inspect a few key parameters for mixing and
