@@ -58,27 +58,7 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -516,7 +496,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Output &amp; Diagnostics</span></a>
+ <span class="menu-text">MCMC Output</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -525,7 +505,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../guide/mcmc-output.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Output</span></a>
+ <span class="menu-text">MCMC Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -565,76 +545,80 @@ window.Quarto = {
 </header>
 
 
-<p>The <a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a> function tests whether the network parameters differ between groups in networks of binary or ordinal variables <span class="citation" data-cites="MarsmanEtAl_2025_ttest">(<a href="#ref-MarsmanEtAl_2025_ttest" role="doc-biblioref">Marsman et al., 2025</a>)</span>. It estimates both the shared network — the overall partial associations and category thresholds — and the group differences, using the same Bayesian framework as <a href="../reference/bgm.html"><code>bgm()</code></a>. A key advantage of this approach is its ability to distinguish three outcomes for each parameter: evidence that a parameter differs across groups, evidence that it is invariant, and absence of evidence — the data are simply not informative enough to decide.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This page has not yet passed technical or readability review.</p>
+</div>
+</div>
+<p>The <code>bgmCompare()</code> function tests for differences in network structure between groups. It estimates whether pairwise interactions and category thresholds differ across groups in an ordinal Markov Random Field.</p>
 <section id="the-model" class="level2">
 <h2 class="anchored" data-anchor-id="the-model">The model</h2>
-<p>The group comparison model separates overall effects from group differences. For each pair of variables <span class="math inline">\((i, j)\)</span>, the group-specific partial association in group <span class="math inline">\(g\)</span> is constructed as</p>
+<p>For each pair of variables <span class="math inline">\((i, j)\)</span>, the group-specific interaction is decomposed as:</p>
 <p><span class="math display">\[
-\theta_{ij}^{(g)} = \omega_{ij} + \sum_{k=1}^{G-1} c_{gk}\,\delta_{ij}^{(k)}
+\theta_{ij}^{(g)} = \phi_{ij} + \delta_{ij}^{(g)}
 \]</span></p>
-<p>where <span class="math inline">\(\omega_{ij}\)</span> is the overall partial association — the value that would be obtained if all groups were combined — and <span class="math inline">\(\delta_{ij}^{(k)}\)</span> are the difference parameters, one for each of the <span class="math inline">\(G - 1\)</span> orthogonal contrasts. The coefficients <span class="math inline">\(c_{gk}\)</span> come from an orthonormal projection matrix that maps the contrast parameters to group-specific effects. Category thresholds are decomposed in the same way.</p>
-<p>For two groups, the projection matrix reduces to <span class="math inline">\(c = (-\tfrac{1}{2},\; +\tfrac{1}{2})^\top\)</span>, so that <span class="math inline">\(\theta_{ij} = \omega_{ij} \pm \tfrac{1}{2}\,\delta_{ij}\)</span>. This is the centered parameterization of the Bayesian independent-samples <span class="math inline">\(t\)</span>-test <span class="citation" data-cites="RouderEtAl_2009">(<a href="#ref-RouderEtAl_2009" role="doc-biblioref">Rouder et al., 2009</a>)</span>, where the overall effect and the group difference are separated. For more than two groups, the projection generalizes the idea to an ANOVA-like design with <span class="math inline">\(G - 1\)</span> orthogonal contrasts <span class="citation" data-cites="RouderEtAl_2012">(<a href="#ref-RouderEtAl_2012" role="doc-biblioref">Rouder et al., 2012</a>)</span>. In each case, making the differences explicit parameters — rather than computing them post hoc from separate group estimates — allows each difference to receive its own prior distribution and its own hypothesis test.</p>
+<p>where <span class="math inline">\(\phi_{ij}\)</span> is the baseline effect (shared across groups) and <span class="math inline">\(\delta_{ij}^{(g)}\)</span> is the group-specific difference, constrained so that the differences sum to zero across groups. The same decomposition applies to category threshold parameters.</p>
 </section>
 <section id="defining-groups" class="level2">
 <h2 class="anchored" data-anchor-id="defining-groups">Defining groups</h2>
 <p>Groups can be specified in two ways:</p>
 <p><strong>Two separate datasets</strong> — pass <code>x</code> (Group 1) and <code>y</code> (Group 2):</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgmCompare</span>(<span class="at">x =</span> data_group1, <span class="at">y =</span> data_group2, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Group membership vector</strong> — pass a single dataset with a group indicator (two or more groups):</p>
+<p><strong>Group membership vector</strong> — pass a single dataset with a group indicator:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgmCompare</span>(<span class="at">x =</span> data, <span class="at">group_indicator =</span> groups, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>group_indicator</code> approach supports more than two groups.</p>
 </section>
 <section id="difference-selection" class="level2">
 <h2 class="anchored" data-anchor-id="difference-selection">Difference selection</h2>
-<p>When <code>difference_selection = TRUE</code> (the default), spike-and-slab priors are placed on the group difference parameters. For each pairwise interaction, a binary indicator <span class="math inline">\(\gamma_{ij}\)</span> governs whether the difference is included in the model:</p>
-<ul>
-<li>When <span class="math inline">\(\gamma_{ij} = 0\)</span> (spike), the difference is exactly zero — all groups have the same partial association.</li>
-<li>When <span class="math inline">\(\gamma_{ij} = 1\)</span> (slab), the difference receives a Cauchy prior with scale <code>difference_scale</code> and is estimated from the data.</li>
-</ul>
-<p>By default, only pairwise interaction differences are selected (<code>main_difference_selection = FALSE</code>). Threshold differences are always included as free parameters. This default reflects that thresholds are typically nuisance parameters: their selection can interfere with pairwise selection under the Beta-Bernoulli prior, and group differences in thresholds are rarely the primary research question.</p>
-</section>
-<section id="bayes-factors-for-group-differences" class="level2">
-<h2 class="anchored" data-anchor-id="bayes-factors-for-group-differences">Bayes factors for group differences</h2>
-<p>The inclusion Bayes factor for a group difference has the same form as for edge selection (see <a href="../guide/edge-selection.html">Edge Selection</a>):</p>
-<p><span class="math display">\[
-\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \text{data})}{p(\gamma_{ij} = 0 \mid \text{data})} \bigg/
-\frac{p(\gamma_{ij} = 1)}{p(\gamma_{ij} = 0)}
-\]</span></p>
-<p>Values greater than one indicate evidence that the groups differ on the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>. Values less than one — equivalently, <span class="math inline">\(1/\text{BF}_{10}\)</span> greater than one — indicate evidence that the parameter is invariant. Values close to one indicate that the data are uninformative: there is not enough evidence to decide whether the parameter differs between groups or not. This three-way distinction — evidence for a difference, evidence for equivalence, and absence of evidence — is the central advantage of the Bayesian approach to group comparison.</p>
-<p>As with edge selection, the inclusion Bayes factor averages over all possible configurations of the remaining group differences. Testing whether the interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> differs across groups does not require assumptions about which other interactions differ — the test integrates over this uncertainty. See <a href="../guide/edge-selection.html#why-the-inclusion-bayes-factor">Why the inclusion Bayes factor</a> and <a href="../guide/bayesian-approach.html">The Bayesian Approach</a> for the formal derivation.</p>
+<p>When <code>difference_selection = TRUE</code> (the default), spike-and-slab priors are placed on the difference parameters <span class="math inline">\(\delta_{ij}^{(g)}\)</span>. The posterior inclusion probability for each difference indicates how plausible it is that the groups differ on that parameter.</p>
+<p>By default, only pairwise interaction differences are selected (<code>main_difference_selection = FALSE</code>). Main effect (threshold) differences are always included. This default reflects that main effects are often nuisance parameters, and their selection can interfere with pairwise selection under the Beta-Bernoulli prior.</p>
 </section>
 <section id="interpreting-the-output" class="level2">
 <h2 class="anchored" data-anchor-id="interpreting-the-output">Interpreting the output</h2>
-<p>The <code>summary()</code> method reports posterior summaries for the shared parameters <span class="math inline">\(\omega_{ij}\)</span> and the group difference parameters <span class="math inline">\(\delta_{ij}\)</span>, including posterior inclusion probabilities and Bayes factors.</p>
+<p>The <code>summary()</code> method reports:</p>
+<ul>
+<li><strong>Baseline effects</strong>: posterior summaries for the shared parameters <span class="math inline">\(\phi_{ij}\)</span>.</li>
+<li><strong>Difference effects</strong>: posterior summaries for the group differences <span class="math inline">\(\delta_{ij}^{(g)}\)</span>, including inclusion probabilities and Bayes factors.</li>
+</ul>
 <p>The <code>coef()</code> method returns:</p>
 <ul>
-<li><code>$pairwise_effects_groups</code>: group-specific posterior mean partial associations, reconstructed from the overall effects and the projection of the difference parameters.</li>
+<li><code>$pairwise_effects_groups</code>: group-specific posterior mean pairwise interactions (baseline + difference).</li>
 <li><code>$main_effects_groups</code>: group-specific posterior mean thresholds.</li>
-<li><code>$indicator</code>: posterior inclusion probabilities for the group differences.</li>
+<li><code>$indicator</code>: posterior inclusion probabilities for differences.</li>
 </ul>
 </section>
-<section id="prior-guidance" class="level2">
-<h2 class="anchored" data-anchor-id="prior-guidance">Prior guidance</h2>
+<section id="bayes-factors-for-group-differences" class="level2">
+<h2 class="anchored" data-anchor-id="bayes-factors-for-group-differences">Bayes factors for group differences</h2>
+<p>When <code>difference_probability = 0.5</code> (the default), the Bayes factor for a group difference equals the posterior odds:</p>
+<p><span class="math display">\[
+\text{BF}_{10} = \frac{p(\gamma = 1 \mid \mathbf{x})}{1 - p(\gamma = 1 \mid \mathbf{x})}
+\]</span></p>
+<p>A large Bayes factor indicates that the groups differ on that parameter; a small one (or equivalently, a large <span class="math inline">\(1 / \text{BF}_{10}\)</span>) indicates that they do not.</p>
+</section>
+<section id="prior-guidance-for-group-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="prior-guidance-for-group-comparison">Prior guidance for group comparison</h2>
 <ul>
-<li><strong><code>difference_scale = 1</code></strong> (default): scale of the Cauchy prior for the difference parameters. This matches the current default <code>pairwise_scale</code> (<code>1</code>) for baseline partial associations.</li>
-<li><strong><code>difference_prior = "Bernoulli"</code></strong> (default): each difference has a fixed prior inclusion probability. Set to <code>"Beta-Bernoulli"</code> to place a beta hyperprior on the inclusion probability, which provides automatic multiplicity correction — important when the number of potential group differences is large <span class="citation" data-cites="MarsmanEtAl_2025_ttest">(<a href="#ref-MarsmanEtAl_2025_ttest" role="doc-biblioref">Marsman et al., 2025</a>)</span>.</li>
-<li><strong><code>difference_probability = 0.5</code></strong> (default): prior probability that any given difference is nonzero. When <code>difference_probability = 0.5</code>, the prior odds equal one and the Bayes factor simplifies to the posterior odds.</li>
+<li><strong><code>difference_scale = 1</code></strong> (default): scale of the Cauchy prior for difference parameters. This is smaller than the default <code>pairwise_scale</code> (2.5) because group differences are typically smaller than the effects themselves.</li>
+<li><strong><code>difference_prior = "Bernoulli"</code></strong> (default): fixed inclusion probability for differences. <code>"Beta-Bernoulli"</code> lets the data inform the overall rate of group differences.</li>
+<li><strong><code>difference_probability = 0.5</code></strong> (default): prior probability that any given difference is nonzero.</li>
 </ul>
-
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p>Marsman, M., Waldorp, L. J., Sekulovski, N., &amp; Haslbeck, J. M. B. (2025). Bayes factor tests for group differences in ordinal and binary graphical models. <em>Psychometrika</em>, 90(5), 1809–1842.</p>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
-<div id="ref-MarsmanEtAl_2025_ttest" class="csl-entry" role="listitem">
-Marsman, M., Waldorp, L. J., Sekulovski, N., &amp; Haslbeck, J. M. B. (2025). Bayes factor tests for group differences in ordinal and binary graphical models. <em>Psychometrika</em>, <em>90</em>(5), 1809–1842. <a href="https://doi.org/10.1017/psy.2025.10060">https://doi.org/10.1017/psy.2025.10060</a>
-</div>
-<div id="ref-RouderEtAl_2012" class="csl-entry" role="listitem">
-Rouder, J. N., Morey, R. D., Speckman, P. L., &amp; Province, J. M. (2012). Default <span>B</span>ayes factors for <span>ANOVA</span> designs. <em>Journal of Mathematical Psychology</em>, <em>56</em>(5), 356–374. <a href="https://doi.org/10.1016/j.jmp.2012.08.001">https://doi.org/10.1016/j.jmp.2012.08.001</a>
-</div>
-<div id="ref-RouderEtAl_2009" class="csl-entry" role="listitem">
-Rouder, J. N., Speckman, P. L., Sun, D., &amp; Morey, R. D. (2009). Bayesian <span class="math inline">\(t\)</span> tests for accepting and rejecting the null hypothesis. <em>Psychonomic Bulletin &amp; Review</em>, <em>16</em>(2), 225–237. <a href="https://doi.org/10.3758/PBR.16.2.225">https://doi.org/10.3758/PBR.16.2.225</a>
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
@@ -651,34 +635,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>

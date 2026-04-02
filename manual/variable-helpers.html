@@ -33,7 +33,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../manual/pseudolikelihood.html" rel="prev">
+<link href="../manual/mixed-internals.html" rel="next">
+<link href="../manual/omrf-internals.html" rel="prev">
 <link href="../bgms_sticker.svg" rel="icon" type="image/svg+xml">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -346,7 +347,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/numerical.html">Numerical Methods</a></li><li class="breadcrumb-item"><a href="../manual/variable-helpers.html">Variable Helpers</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/ggm-internals.html">Models</a></li><li class="breadcrumb-item"><a href="../manual/variable-helpers.html">Variable Helpers</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -416,24 +417,6 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">HMC Algorithm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Adaptive Metropolis</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Warmup Schedule</span></a>
   </div>
@@ -465,6 +448,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">OMRF Internals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -510,7 +499,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">bgmCompare Internals</span></a>
+ <span class="menu-text">Group Comparison Engine</span></a>
   </div>
 </li>
       </ul>
@@ -530,18 +519,6 @@ window.Quarto = {
  <span class="menu-text">Numerical Considerations</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Pseudolikelihood</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Variable Helpers</span></a>
-  </div>
-</li>
       </ul>
   </li>
     </ul>
@@ -554,7 +531,7 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/numerical.html">Numerical Methods</a></li><li class="breadcrumb-item"><a href="../manual/variable-helpers.html">Variable Helpers</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/ggm-internals.html">Models</a></li><li class="breadcrumb-item"><a href="../manual/variable-helpers.html">Variable Helpers</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Variable Helpers</h1>
 </div>
@@ -573,36 +550,40 @@ window.Quarto = {
 </header>
 
 
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This page has not yet passed technical or readability review.</p>
+</div>
+</div>
 <p>Numerically stable computation of MRF category denominators and probabilities. Source: <code>src/utils/variable_helpers.h</code> and <code>variable_helpers.cpp</code>.</p>
 <section id="the-problem" class="level2">
 <h2 class="anchored" data-anchor-id="the-problem">The problem</h2>
-<p>MRF conditional probabilities involve exponentials of residual scores. Computing <code>exp()</code> for every person–category combination is expensive and dominates the cost of pseudolikelihood evaluation. The variable helpers reformulate the normalizing constants as a recursion that avoids per-category <code>exp()</code> calls (the FAST path). When the recursion’s intermediate values would overflow or underflow, a SAFE path falls back to explicit <code>exp()</code> calls with log-sum-exp stabilization.</p>
+<p>MRF conditional probabilities involve exponentials of residual scores. For large networks or extreme parameter values, the arguments to <code>exp()</code> can exceed the IEEE 754 double-precision range, producing <code>Inf</code> or underflowing to zero. Naive computation (direct exponentiation followed by normalization) fails silently in these cases.</p>
 </section>
 <section id="the-fastsafe-dual-path-strategy" class="level2">
 <h2 class="anchored" data-anchor-id="the-fastsafe-dual-path-strategy">The FAST/SAFE dual-path strategy</h2>
 <p>Every denominator and probability function in <code>variable_helpers.cpp</code> uses a two-path approach:</p>
 <ol type="1">
-<li><strong>FAST path</strong> — A recursive power-chain accumulation that precomputes a small number of exponentials and builds the normalizing constant without per-category <code>exp()</code> calls.</li>
-<li><strong>SAFE path</strong> — Explicit per-category <code>exp()</code> evaluation with log-sum-exp stabilization, used as a fallback when the FAST path’s intermediate values would overflow or underflow.</li>
+<li><strong>FAST path</strong> — Precomputed exponentials with power-chain accumulation. Used when the exponent arguments stay within safe bounds.</li>
+<li><strong>SAFE path</strong> — Direct log-sum-exp evaluation as a fallback when bounds are violated.</li>
 </ol>
 <p>The choice is made per-person (per row of the data matrix) based on whether the residual score times the maximum category exceeds the <code>EXP_BOUND</code> threshold.</p>
 <section id="fast-path-detail" class="level3">
 <h3 class="anchored" data-anchor-id="fast-path-detail">FAST path detail</h3>
-<p>For an ordinal variable with categories <span class="math inline">\(0, 1, \ldots, K\)</span> and residual <span class="math inline">\(r\)</span>:</p>
+<p>For an ordinal variable with categories <span class="math inline">\(0, 1, \ldots, K-1\)</span> and residual <span class="math inline">\(r\)</span>:</p>
 <ol type="1">
-<li>Precompute <span class="math inline">\(e_r = \exp(r)\)</span>, <span class="math inline">\(e_b = \exp(-b)\)</span>, and <span class="math inline">\(e_\mu(c) = \exp(\mu(c))\)</span> for each category (once per variable)</li>
-<li>Accumulate the denominator with a running power <span class="math inline">\(P\)</span>:</li>
+<li>Precompute <span class="math inline">\(e_r = \exp(r)\)</span> and <span class="math inline">\(e_m = \exp(\mu(c))\)</span> for each category</li>
+<li>Accumulate the denominator as a Horner-like chain: <span class="math inline">\(D = e^{-b}(1 + e_m[1] \cdot e_r + e_m[2] \cdot e_r^2 + \cdots)\)</span> where <span class="math inline">\(b\)</span> is a stabilizing shift</li>
 </ol>
-<p><span class="math display">\[
-\begin{aligned}
-P &amp;\leftarrow e_r \\
-D &amp;\leftarrow e_b \\
-\text{for } c &amp;= 1, \ldots, K: \\
-  D &amp;\leftarrow D + e_\mu(c) \cdot P \cdot e_b \\
-  P &amp;\leftarrow P \cdot e_r
-\end{aligned}
-\]</span></p>
-<p>Only two per-person <code>exp()</code> calls are needed (<span class="math inline">\(e_r\)</span> and <span class="math inline">\(e_b\)</span>), plus <span class="math inline">\(K\)</span> for the main effects. The running product <span class="math inline">\(P = e_r^{\,c}\)</span> replaces the <span class="math inline">\(K\)</span> per-category <code>exp()</code> calls that a naive implementation would require.</p>
+<p>This avoids computing <code>exp()</code> for each category-residual combination independently and exploits the geometric structure of the category scores.</p>
 </section>
 <section id="safe-path-detail" class="level3">
 <h3 class="anchored" data-anchor-id="safe-path-detail">SAFE path detail</h3>
@@ -612,7 +593,7 @@ D &amp;\leftarrow e_b \\
 <li>Find <span class="math inline">\(s_{\max} = \max_c s_c\)</span></li>
 <li>Compute <span class="math inline">\(D = \exp(s_{\max}) \sum_c \exp(s_c - s_{\max})\)</span></li>
 </ol>
-<p>This is the standard log-sum-exp computation, applied per person.</p>
+<p>This is the standard log-sum-exp trick, applied per person.</p>
 </section>
 <section id="block-scanning" class="level3">
 <h3 class="anchored" data-anchor-id="block-scanning">Block scanning</h3>
@@ -627,7 +608,7 @@ D &amp;\leftarrow e_b \\
 </section>
 <section id="compute_probs_ordinal" class="level3">
 <h3 class="anchored" data-anchor-id="compute_probs_ordinal"><code>compute_probs_ordinal()</code></h3>
-<p>Computes the full category probability matrix (<span class="math inline">\(n \times (K+1)\)</span>) for one ordinal variable, where column 0 is category 0 and columns 1 through <span class="math inline">\(K\)</span> are categories 1 through <span class="math inline">\(K\)</span>. Probabilities are clamped at zero to prevent negative values from floating-point error in the normalization step.</p>
+<p>Computes the full category probability matrix (<span class="math inline">\(n \times K\)</span>) for one ordinal variable. Probabilities are clamped at zero to prevent negative values from floating-point error in the normalization step.</p>
 </section>
 </section>
 <section id="blume-capel-variables" class="level2">
@@ -648,7 +629,7 @@ D &amp;\leftarrow e_b \\
 </section>
 <section id="the-exp_bound-709-threshold" class="level2">
 <h2 class="anchored" data-anchor-id="the-exp_bound-709-threshold">The EXP_BOUND = 709 threshold</h2>
-<p>The bound that triggers the SAFE path is set to 709, derived from IEEE 754 double precision: <span class="math inline">\(\exp(709) \approx 8.2 \times 10^{307}\)</span> is the largest representable value, while <span class="math inline">\(\exp(710) = \text{Inf}\)</span>. The FAST path checks whether <span class="math inline">\(|b_i| \le 709\)</span> before proceeding, where <span class="math inline">\(b_i = K \cdot r_i\)</span> for ordinal variables. For the joint log-normalizer functions, the threshold is reduced to <span class="math inline">\(709 - \max_c |\theta_c|\)</span> to account for intermediate overflow risk in the power chain. The Blume–Capel variants additionally check <span class="math inline">\(|K \cdot r_i - b_i| \le 709\)</span>.</p>
+<p>The bound that triggers the SAFE path is set to 709, derived from IEEE 754 double precision: <span class="math inline">\(\exp(709) \approx 8.2 \times 10^{307}\)</span> is the largest representable value, while <span class="math inline">\(\exp(710) = \text{Inf}\)</span>. The FAST path checks whether <span class="math inline">\(|r| \cdot (K - 1) &lt; 709\)</span> before proceeding.</p>
 
 
 </section>
@@ -670,34 +651,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>
@@ -1116,11 +1069,14 @@ document.querySelectorAll("[data-cite-picker]").forEach(picker => {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../manual/pseudolikelihood.html" class="pagination-link" aria-label="Pseudolikelihood">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Pseudolikelihood</span>
+      <a href="../manual/omrf-internals.html" class="pagination-link" aria-label="OMRF Internals">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">OMRF Internals</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="../manual/mixed-internals.html" class="pagination-link" aria-label="Mixed MRF Internals">
+        <span class="nav-page-text">Mixed MRF Internals</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->

@@ -461,7 +461,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Output &amp; Diagnostics</span></a>
+ <span class="menu-text">MCMC Output</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -470,7 +470,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../guide/mcmc-output.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Output</span></a>
+ <span class="menu-text">MCMC Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -510,38 +510,53 @@ window.Quarto = {
 </header>
 
 
-<p>A graphical model represents relationships among a set of variables as a graph. <code>bgms</code> estimates a class of undirected graphical models: pairwise Markov random fields.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This page has not yet passed technical or readability review.</p>
+</div>
+</div>
+<p>A graphical model represents the statistical relationships among a set of variables as a graph. Each variable is a node, and edges between nodes encode direct statistical associations. bgms estimates undirected graphical models — specifically, Markov Random Fields.</p>
 <section id="nodes-and-edges" class="level2">
 <h2 class="anchored" data-anchor-id="nodes-and-edges">Nodes and edges</h2>
 <p>In a graphical model, the <span class="math inline">\(p\)</span> variables in a dataset are represented as nodes (or vertices) of a graph. An edge between two nodes indicates a direct statistical association between the corresponding variables, after accounting for all other variables in the model.</p>
-<p>The absence of an edge between two nodes means the two variables are conditionally independent given the remaining variables. This is the key interpretive property of Markov random fields: the graph encodes the conditional independence structure of the joint distribution.</p>
+<p>The absence of an edge between two nodes means that the two variables are conditionally independent given the remaining variables. This is the key interpretive property of undirected graphical models: the graph encodes the conditional independence structure of the joint distribution.</p>
 </section>
 <section id="conditional-independence" class="level2">
 <h2 class="anchored" data-anchor-id="conditional-independence">Conditional independence</h2>
-<p>Two variables <span class="math inline">\(X_i\)</span> and <span class="math inline">\(X_j\)</span> are conditionally independent given the rest if <span class="math inline">\(X_i\)</span> provides no additional information about <span class="math inline">\(X_j\)</span> once all other variables are observed. In the graph, this corresponds to the absence of a direct edge between nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</p>
-<p>Conditional independence is distinct from marginal independence. Two variables may be marginally correlated (both associated with a third variable) yet conditionally independent once that third variable is accounted for. The Markov random field separates direct from indirect associations.</p>
+<p>Two variables <span class="math inline">\(X_i\)</span> and <span class="math inline">\(X_j\)</span> are conditionally independent given the rest if knowing the value of <span class="math inline">\(X_i\)</span> provides no additional information about <span class="math inline">\(X_j\)</span> once all other variables are observed. In the graph, this corresponds to the absence of a direct edge between nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</p>
+<p>Conditional independence is distinct from marginal independence. Two variables may be marginally correlated (both associated with a third variable) yet conditionally independent once that third variable is accounted for. The graphical model separates direct from indirect associations.</p>
 </section>
 <section id="markov-random-fields" class="level2">
 <h2 class="anchored" data-anchor-id="markov-random-fields">Markov Random Fields</h2>
-<p>A Markov random field (MRF) is an undirected graphical model in which the joint distribution factorizes according to the graph structure. For <span class="math inline">\(p\)</span> variables with observations <span class="math inline">\(\mathbf{x} = (x_1, \ldots, x_p)\)</span>, the MRF specifies:</p>
+<p>A Markov Random Field (MRF) is an undirected graphical model in which the joint distribution of the variables factorizes according to the graph structure. For a set of <span class="math inline">\(p\)</span> variables with observations <span class="math inline">\(\mathbf{x} = (x_1, \ldots, x_p)\)</span>, the MRF specifies:</p>
 <p><span class="math display">\[
-p(\mathbf{x}) \propto \exp\left(\sum_{i} \mu_i(x_i) +
-\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
+p(\mathbf{x}) \propto \exp\left(\sum_{i} \theta_i(x_i) +
+\sum_{i &lt; j} \sigma_{ij} \, s_i(x_i) \, s_j(x_j)\right)
 \]</span></p>
-<p>where <span class="math inline">\(\mu_i(x_i)\)</span> are node potentials that capture the univariate properties of variable <span class="math inline">\(i\)</span>, and <span class="math inline">\(\boldsymbol{\Omega}\)</span> is a symmetric pairwise interaction matrix. The off-diagonal entry <span class="math inline">\(\omega_{ij}\)</span> is the partial association between variables <span class="math inline">\(x_i\)</span> and <span class="math inline">\(x_j\)</span>. When <span class="math inline">\(\omega_{ij} = 0\)</span>, the two variables are conditionally independent and the corresponding edge is absent from the graph. Thus, the primary inferential targets are the partial associations in <span class="math inline">\(\boldsymbol{\Omega}\)</span> and the network structure that they imply.</p>
+<p>where <span class="math inline">\(\theta_i(x_i)\)</span> are main effects (node potentials), <span class="math inline">\(\sigma_{ij}\)</span> are pairwise interaction parameters, and <span class="math inline">\(s_i(x_i)\)</span> are sufficient statistics that depend on the variable type.</p>
+<p>The pairwise interaction <span class="math inline">\(\sigma_{ij}\)</span> controls the edge between nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>: when <span class="math inline">\(\sigma_{ij} = 0\)</span>, the edge is absent and the two variables are conditionally independent.</p>
 </section>
 <section id="model-families-in-bgms" class="level2">
-<h2 class="anchored" data-anchor-id="model-families-in-bgms">Model families in <code>bgms</code></h2>
-<p><code>bgms</code> estimates one general MRF. The variable types in the data determine the form of the node potentials <span class="math inline">\(\mu_i(x_i)\)</span> and the interpretation of the pairwise interactions <span class="math inline">\(\omega_{ij}\)</span>:</p>
+<h2 class="anchored" data-anchor-id="model-families-in-bgms">Model families in bgms</h2>
+<p>bgms supports three model families, all MRFs:</p>
 <ul>
-<li><p><strong>Ordinal MRF</strong> — all variables are binary or ordinal. Node potentials are category thresholds, and partial associations are proportional to log adjacent-category odds ratios. See <a href="../guide/omrf.html">Ordinal MRF</a>.</p></li>
-<li><p><strong>Gaussian graphical model (GGM)</strong> — all variables are continuous. The partial associations are directly related to the precision matrix (inverse covariance matrix), whose standardized off-diagonal entries are partial correlations. See <a href="../guide/ggm.html">GGM</a>.</p></li>
-<li><p><strong>Mixed MRF</strong> — for mixed discrete and continuous variables. The interaction matrix decomposes into blocks for discrete–discrete, continuous–continuous, and cross-type associations. See <a href="../guide/mixed-model.html">Mixed MRF</a>.</p></li>
+<li><p><strong>Ordinal MRF</strong> — for binary and ordinal variables. Category thresholds serve as main effects, and pairwise interactions capture associations between ordinal scores. See <a href="../guide/omrf.html">Ordinal MRF</a>.</p></li>
+<li><p><strong>Gaussian Graphical Model (GGM)</strong> — for continuous variables. The precision matrix (inverse covariance matrix) determines the edge structure: nonzero off-diagonal entries correspond to edges. See <a href="../guide/ggm.html">GGM</a>.</p></li>
+<li><p><strong>Mixed MRF</strong> — for datasets containing both discrete and continuous variables. Combines the ordinal MRF and GGM into a joint model. See <a href="../guide/mixed-model.html">Mixed MRF</a>.</p></li>
 </ul>
 </section>
-<section id="modeling-conditional-independence" class="level2">
-<h2 class="anchored" data-anchor-id="modeling-conditional-independence">Modeling conditional independence</h2>
-<p>The conditional independence structure — which edges are present — is typically unknown. <code>bgms</code> treats edge inclusion as a model selection problem, testing <span class="math inline">\(\omega_{ij} = 0\)</span> against <span class="math inline">\(\omega_{ij} \neq 0\)</span> for each pair of variables using spike-and-slab priors. This produces posterior inclusion probabilities that quantify the evidence for each edge. See <a href="../guide/edge-selection.html">Edge Selection</a>.</p>
+<section id="why-networks" class="level2">
+<h2 class="anchored" data-anchor-id="why-networks">Why networks?</h2>
+<p>In psychology and the social sciences, graphical models are used to study how symptoms, attitudes, or behaviors relate to each other directly, rather than through latent constructs. Estimating the conditional independence structure — the network — identifies which pairs of variables have direct associations and which are only indirectly related.</p>
+<p>Bayesian methods add the ability to quantify evidence for the presence or absence of each edge, rather than relying on thresholding rules applied to point estimates. bgms implements this through Bayesian edge selection with spike-and-slab priors (see <a href="../guide/edge-selection.html">Edge Selection</a>).</p>
 
 
 </section>
@@ -563,34 +578,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>

@@ -387,24 +387,6 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">HMC Algorithm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Adaptive Metropolis</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Warmup Schedule</span></a>
   </div>
@@ -436,6 +418,12 @@ ul.task-list li input[type="checkbox"] {
   <div class="sidebar-item-container"> 
   <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">OMRF Internals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -481,7 +469,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">bgmCompare Internals</span></a>
+ <span class="menu-text">Group Comparison Engine</span></a>
   </div>
 </li>
       </ul>
@@ -499,18 +487,6 @@ ul.task-list li input[type="checkbox"] {
   <div class="sidebar-item-container"> 
   <a href="../manual/numerical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Numerical Considerations</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Pseudolikelihood</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
       </ul>
@@ -544,7 +520,7 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Technical documentation for the <code>bgms</code> C++ backend, MCMC algorithms, and R scaffolding layer. This manual targets contributors to <code>bgms</code> development, users who need to understand implementation details, and researchers extending <code>bgms</code> for new model types.</p>
+<p>Technical documentation for the bgms C++ backend, MCMC algorithms, and R scaffolding layer. This manual targets contributors to bgms development, users who need to understand implementation details, and researchers extending bgms for new model types.</p>
 <section id="architecture" class="level2">
 <h2 class="anchored" data-anchor-id="architecture">Architecture</h2>
 <p>How the R front-end and C++ back-end are organized, and how they communicate.</p>
@@ -560,9 +536,6 @@ ul.task-list li input[type="checkbox"] {
 <ul>
 <li><a href="../manual/samplers.html">Sampler Hierarchy</a> — <code>SamplerBase</code>, gradient-based samplers, factory dispatch</li>
 <li><a href="../manual/nuts.html">NUTS Algorithm</a> — Binary tree construction, U-turn criterion, divergence detection</li>
-<li><a href="../manual/hmc.html">HMC Algorithm</a> — Fixed-length leapfrog, Metropolis correction (deprecated)</li>
-<li><a href="../manual/metropolis.html">Adaptive Metropolis</a> — Scalar random-walk MH, Robbins–Monro adaptation</li>
-<li><a href="../manual/rattle.html">Constrained Leapfrog (RATTLE)</a> — Position/momentum projection, reversibility check, Memoizer</li>
 <li><a href="../manual/warmup.html">Warmup Schedule</a> — Five-stage adaptation, dual averaging, mass matrix tuning</li>
 <li><a href="../manual/parallel-chains.html">Parallel Chains</a> — TBB threading, model cloning, per-chain RNG</li>
 </ul>
@@ -574,7 +547,7 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="../manual/ggm-internals.html">GGM Internals</a> — Precision matrix Metropolis, Cholesky rank-1 updates</li>
 <li><a href="../manual/omrf-internals.html">OMRF Internals</a> — Ordinal thresholds, Blume-Capel, pseudolikelihood</li>
 <li><a href="../manual/variable-helpers.html">Variable Helpers</a> — Numerically stable probability computation (FAST/SAFE)</li>
-<li><a href="../manual/mixed-internals.html">Mixed MRF Internals</a> — NUTS + precision Metropolis, block parameter layout, RATTLE</li>
+<li><a href="../manual/mixed-internals.html">Mixed MRF Internals</a> — Hybrid NUTS+Metropolis, block parameter layout</li>
 </ul>
 </section>
 <section id="priors-edge-selection" class="level2">
@@ -599,7 +572,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="prerequisites" class="level2">
 <h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
-<p>This manual assumes familiarity with C++ programming, MCMC methods, and the No-U-Turn Sampler. The <a href="../guide/index.html">User’s Guide</a> covers the statistical background at a conceptual level.</p>
+<p>This manual assumes familiarity with C++ programming, MCMC methods, and Hamiltonian Monte Carlo. The <a href="../guide/index.html">User’s Guide</a> covers the statistical background at a conceptual level.</p>
 
 
 </section>
@@ -621,34 +594,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>

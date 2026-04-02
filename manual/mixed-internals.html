@@ -34,7 +34,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../manual/edge-priors.html" rel="next">
-<link href="../manual/omrf-internals.html" rel="prev">
+<link href="../manual/variable-helpers.html" rel="prev">
 <link href="../bgms_sticker.svg" rel="icon" type="image/svg+xml">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -417,24 +417,6 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">HMC Algorithm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Adaptive Metropolis</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Warmup Schedule</span></a>
   </div>
@@ -466,6 +448,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">OMRF Internals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -511,7 +499,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">bgmCompare Internals</span></a>
+ <span class="menu-text">Group Comparison Engine</span></a>
   </div>
 </li>
       </ul>
@@ -529,18 +517,6 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/numerical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Numerical Considerations</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Pseudolikelihood</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
       </ul>
@@ -574,21 +550,36 @@ window.Quarto = {
 </header>
 
 
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This page has not yet passed technical or readability review.</p>
+</div>
+</div>
 <p>Implementation details of the mixed Markov random field in bgms. Source: <code>src/models/mixed/mixed_mrf_model.h</code> and four <code>.cpp</code> files (<code>mixed_mrf_model.cpp</code>, <code>mixed_mrf_gradient.cpp</code>, <code>mixed_mrf_likelihoods.cpp</code>, <code>mixed_mrf_metropolis.cpp</code>).</p>
 <section id="block-structure" class="level2">
 <h2 class="anchored" data-anchor-id="block-structure">Block structure</h2>
 <p>The mixed MRF handles <span class="math inline">\(p\)</span> discrete and <span class="math inline">\(q\)</span> continuous variables. The parameter space is organized into three interaction blocks plus main effects:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 29%">
-<col style="width: 45%">
-<col style="width: 25%">
+<col style="width: 21%">
+<col style="width: 33%">
+<col style="width: 18%">
+<col style="width: 27%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Block</th>
 <th>Parameters</th>
 <th>Size</th>
+<th>Sampler</th>
 </tr>
 </thead>
 <tbody>
@@ -596,73 +587,79 @@ window.Quarto = {
 <td>Main effects</td>
 <td>Discrete thresholds + continuous means</td>
 <td><span class="math inline">\(\text{thresholds} + q\)</span></td>
+<td>NUTS</td>
 </tr>
 <tr class="even">
 <td>Discrete-discrete</td>
-<td>Pairwise discrete interactions (symmetric)</td>
+<td><span class="math inline">\(\mathbf{K}_{xx}\)</span> (symmetric)</td>
 <td><span class="math inline">\(p(p-1)/2\)</span></td>
+<td>NUTS</td>
 </tr>
 <tr class="odd">
 <td>Cross-type</td>
-<td>Discrete-continuous interactions</td>
+<td><span class="math inline">\(\mathbf{K}_{xy}\)</span></td>
 <td><span class="math inline">\(p \times q\)</span></td>
+<td>NUTS</td>
 </tr>
 <tr class="even">
 <td>Continuous-continuous</td>
-<td>Cholesky factor of the precision matrix</td>
+<td><span class="math inline">\(\mathbf{K}_{yy}\)</span> (precision)</td>
 <td><span class="math inline">\(q(q+1)/2\)</span></td>
+<td>Metropolis</td>
 </tr>
 </tbody>
 </table>
-<p>All five blocks are updated jointly by NUTS. The continuous precision matrix is parameterized through its Cholesky factor <span class="math inline">\(R\)</span> (with diagonal entries on the log scale) so that positive definiteness is guaranteed by construction. The gradient includes the Jacobian of the Cholesky-to-precision mapping.</p>
+<p>The continuous precision <span class="math inline">\(\mathbf{K}_{yy}\)</span> must remain positive definite, so it is excluded from the NUTS block and updated by element-wise Metropolis proposals with Cholesky rank-1 updates, identical to the GGM strategy.</p>
 </section>
 <section id="parameter-vector-layout" class="level2">
 <h2 class="anchored" data-anchor-id="parameter-vector-layout">Parameter vector layout</h2>
 <p>The model distinguishes three vector types:</p>
 <section id="active-vector-parameter_dimension" class="level3">
 <h3 class="anchored" data-anchor-id="active-vector-parameter_dimension">Active vector (<code>parameter_dimension()</code>)</h3>
-<p>Contains the parameters that NUTS updates, excluding edges set to zero by edge selection. The Cholesky block is always fully included:</p>
-<pre><code>[ thresholds | discrete interactions (active) | means | cross-type (active) | Cholesky (all) ]</code></pre>
+<p>Contains only the parameters that NUTS updates, excluding edges set to zero by edge selection:</p>
+<pre><code>[ thresholds | K_xx (active) | means | K_xy (active) ]</code></pre>
 <p>The mass matrix and gradient are dimensioned to this vector.</p>
 </section>
 <section id="full-vector-full_parameter_dimension" class="level3">
 <h3 class="anchored" data-anchor-id="full-vector-full_parameter_dimension">Full vector (<code>full_parameter_dimension()</code>)</h3>
-<p>Contains all parameters including inactive edges:</p>
-<pre><code>[ thresholds | discrete interactions (all) | means | cross-type (all) | Cholesky (all) ]</code></pre>
+<p>Contains all NUTS-block parameters including inactive edges:</p>
+<pre><code>[ thresholds | K_xx (all) | means | K_xy (all) ]</code></pre>
 <p>Used for storage and initialization.</p>
 </section>
 <section id="storage-vector-storage_dimension" class="level3">
 <h3 class="anchored" data-anchor-id="storage-vector-storage_dimension">Storage vector (<code>storage_dimension()</code>)</h3>
-<p>Identical layout to the full vector. This is what gets saved to <code>ChainResult::samples</code> at each iteration.</p>
+<p>Adds the Metropolis-updated continuous precision to the full vector:</p>
+<pre><code>[ thresholds | K_xx (all) | means | K_xy (all) | K_yy (all) ]</code></pre>
+<p>This is what gets saved to <code>ChainResult::samples</code> at each iteration.</p>
 </section>
 </section>
-<section id="sampling-strategy" class="level2">
-<h2 class="anchored" data-anchor-id="sampling-strategy">Sampling strategy</h2>
-<p>Each MCMC iteration updates the full active parameter vector (all five blocks) in a single NUTS step. The <code>logp_and_gradient()</code> method computes the log-pseudoposterior and gradient for the entire vector, including the Cholesky block with its log-determinant Jacobian.</p>
-<p>When edge selection is active (or the initial graph is sparse), the model reports <code>has_constraints() = true</code> and the NUTS sampler switches to constrained (RATTLE) integration, using <code>logp_and_gradient_full()</code> and projection callbacks to enforce zero entries for excluded edges (see <a href="../manual/rattle.html">Constrained Leapfrog (RATTLE)</a>).</p>
+<section id="hybrid-sampling-strategy" class="level2">
+<h2 class="anchored" data-anchor-id="hybrid-sampling-strategy">Hybrid sampling strategy</h2>
+<p>Each MCMC iteration has two phases:</p>
+<ol type="1">
+<li><p><strong>NUTS phase</strong> — Update the active parameter vector (thresholds, <span class="math inline">\(\mathbf{K}_{xx}\)</span>, means, <span class="math inline">\(\mathbf{K}_{xy}\)</span>) using one NUTS step. The <code>logp_and_gradient()</code> method computes the log-pseudoposterior and gradient for this block only.</p></li>
+<li><p><strong>Metropolis phase</strong> — Update the continuous precision elements (<span class="math inline">\(\mathbf{K}_{yy}\)</span>) one at a time via <code>do_pairwise_continuous_metropolis_step()</code>. Each proposal uses a Gaussian perturbation with Robbins-Monro-tuned SD, followed by a Cholesky rank-1 update to maintain positive definiteness.</p></li>
+</ol>
 <p>Edge indicator updates (when active) operate on all three interaction blocks.</p>
-<p>The model also provides a component-wise adaptive Metropolis fallback (<code>do_one_metropolis_step()</code>), used when the sampler is set to <code>"adaptive-metropolis"</code>. In Metropolis mode, each parameter is updated individually with Robbins–Monro-tuned proposal SDs targeting an acceptance rate of 0.44. Off-diagonal precision updates use a rank-2 Cholesky update; diagonal updates use rank-1.</p>
 </section>
 <section id="gradient-computation" class="level2">
 <h2 class="anchored" data-anchor-id="gradient-computation">Gradient computation</h2>
-<p>The gradient (<code>mixed_mrf_gradient.cpp</code>) covers all five parameter blocks in the NUTS vector. It involves:</p>
+<p>The gradient (<code>mixed_mrf_gradient.cpp</code>) is computed for the NUTS block only. It involves:</p>
 <ol type="1">
-<li><strong>Discrete conditionals</strong> — Category probabilities via <a href="../manual/variable-helpers.html">Variable Helpers</a>, contributing gradients for thresholds and discrete pairwise interactions</li>
-<li><strong>Cross-type terms</strong> — Contributions from discrete-continuous interactions to both discrete and continuous conditional distributions</li>
+<li><strong>Discrete conditionals</strong> — Category probabilities via <a href="../manual/variable-helpers.html">variable helpers</a>, contributing gradients for thresholds and <span class="math inline">\(\mathbf{K}_{xx}\)</span></li>
+<li><strong>Cross-type terms</strong> — Contributions from <span class="math inline">\(\mathbf{K}_{xy}\)</span> to both discrete and continuous conditional distributions</li>
 <li><strong>Continuous means</strong> — Gradient of the continuous-variable contribution to the pseudolikelihood</li>
-<li><strong>Cholesky block</strong> — The precision gradient <span class="math inline">\(\bar{\Omega}\)</span> is computed from the GGM conditional contribution and the conditional-mean coupling, then mapped to the Cholesky gradient <span class="math inline">\(\bar{R} = R(\bar{\Omega} + \bar{\Omega}^\top)\)</span>. Diagonal entries use the log-scale Jacobian: <span class="math inline">\(\partial\ell / \partial\psi_j =
-\bar{R}_{jj} R_{jj} + (q - j + 1)\)</span>.</li>
 </ol>
-<p>The log-prior gradient adds Cauchy penalties on off-diagonal precision entries and Gamma(1,1) penalties on diagonal entries.</p>
+<p>The log-prior gradient adds the Cauchy prior penalty on pairwise interactions.</p>
 </section>
 <section id="pseudolikelihood-options" class="level2">
 <h2 class="anchored" data-anchor-id="pseudolikelihood-options">Pseudolikelihood options</h2>
-<p>The <code>pseudolikelihood</code> argument controls how the <strong>discrete</strong> full conditionals are computed. It does not affect the continuous block, which always uses the GGM likelihood <span class="math inline">\(\log p(y \mid x) \propto \tfrac{n}{2}\log|\Omega| - \tfrac{1}{2}\operatorname{tr}(\Omega D^\top D)\)</span>.</p>
-<p>For a cross-model overview, see <a href="../manual/pseudolikelihood.html">Pseudolikelihood</a>.</p>
+<p>The <code>pseudolikelihood</code> argument controls the continuous-variable likelihood:</p>
 <ul>
-<li><code>"conditional"</code> (default) — Computes discrete full conditionals <span class="math inline">\(\log p(x_s \mid x_{-s}, y_{\text{obs}})\)</span>, conditioning on the observed continuous values. The rest score uses <code>pairwise_effects_discrete_</code> directly. Faster because updating the continuous precision elements does not require re-evaluating the discrete pseudolikelihood.</li>
-<li><code>"marginal"</code> — Computes discrete full conditionals <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> by integrating out the continuous variables. Uses the marginal interaction matrix <span class="math inline">\(\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top\)</span>, which must be recomputed whenever the precision or cross-type parameters change. This adds coupling terms to the gradient (the <span class="math inline">\(\partial\Theta/\partial\Sigma\)</span> chain rule contributes to the precision gradient via <span class="math inline">\(-2\Sigma A_{xy}^\top\bar\Theta A_{xy}\Sigma\)</span>).</li>
+<li><code>"conditional"</code> (default) — Uses the conditional distribution of each continuous variable given the rest, consistent with the discrete pseudolikelihood</li>
+<li><code>"marginal"</code> — Uses the marginal normal likelihood for the continuous block, which can be more efficient when <span class="math inline">\(q\)</span> is large</li>
 </ul>
+<p>The choice affects both the log-posterior evaluation and the gradient computation.</p>
 </section>
 <section id="missing-data" class="level2">
 <h2 class="anchored" data-anchor-id="missing-data">Missing data</h2>
@@ -696,34 +693,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>
@@ -1142,8 +1111,8 @@ document.querySelectorAll("[data-cite-picker]").forEach(picker => {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../manual/omrf-internals.html" class="pagination-link" aria-label="OMRF Internals">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">OMRF Internals</span>
+      <a href="../manual/variable-helpers.html" class="pagination-link" aria-label="Variable Helpers">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Variable Helpers</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

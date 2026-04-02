@@ -23,27 +23,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -437,24 +417,6 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">HMC Algorithm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/metropolis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Adaptive Metropolis</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Constrained Leapfrog (RATTLE)</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../manual/warmup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Warmup Schedule</span></a>
   </div>
@@ -486,6 +448,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/omrf-internals.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">OMRF Internals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -531,7 +499,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/bgmcompare-internals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">bgmCompare Internals</span></a>
+ <span class="menu-text">Group Comparison Engine</span></a>
   </div>
 </li>
       </ul>
@@ -549,18 +517,6 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../manual/numerical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Numerical Considerations</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Pseudolikelihood</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Variable Helpers</span></a>
   </div>
 </li>
       </ul>
@@ -594,7 +550,20 @@ window.Quarto = {
 </header>
 
 
-<p>The MFM-SBM (mixture of finite mixtures – stochastic block model) edge prior assigns variables to latent clusters and uses cluster-structured inclusion probabilities. The implementation is a translation of the R code accompanying <span class="citation" data-cites="GengEtAl_2019">Geng et al. (<a href="#ref-GengEtAl_2019" role="doc-biblioref">2019</a>)</span>, adapted for the <code>bgms</code> sampler architecture. For the statistical background and usage guidance, see <a href="../guide/clustering.html">Edge Clustering</a>. Source: <code>src/priors/sbm_edge_prior.h</code> and <code>sbm_edge_prior.cpp</code>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This page has not yet passed technical or readability review.</p>
+</div>
+</div>
+<p>The MFM-SBM (mixture of finite mixtures – stochastic block model) edge prior assigns variables to latent clusters and uses cluster-structured inclusion probabilities. Source: <code>src/priors/sbm_edge_prior.h</code> and <code>sbm_edge_prior.cpp</code>.</p>
 <section id="mfm-sbm-formulation" class="level2">
 <h2 class="anchored" data-anchor-id="mfm-sbm-formulation">MFM-SBM formulation</h2>
 <p>The prior has three levels:</p>
@@ -708,27 +677,16 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>All six hyperparameters are required when <code>edge_prior = "Stochastic-Block"</code> is selected. Validation enforces that all values are positive and finite.</p>
+<p>When the between-block hyperparameters are not specified (NULL in R), they default to <span class="math inline">\(-1\)</span> in C++ (sentinel value), and the prior uses the within-block hyperparameters for all blocks.</p>
 </section>
 <section id="output" class="level2">
 <h2 class="anchored" data-anchor-id="output">Output</h2>
-<p>The cluster allocations at each post-warmup iteration are stored in <code>ChainResult::allocation_samples</code> and accessible via <code>extract_sbm()</code> in R, which returns:</p>
-<ul>
-<li><code>posterior_num_blocks</code> — posterior distribution over the number of clusters</li>
-<li><code>posterior_mean_allocations</code> — posterior mean cluster assignments</li>
-<li><code>posterior_mode_allocations</code> — posterior mode cluster assignments</li>
-<li><code>posterior_mean_coclustering_matrix</code> — proportion of iterations where each pair of variables was in the same cluster</li>
-</ul>
-
+<p>The cluster allocations at each post-warmup iteration are stored in <code>ChainResult::allocation_samples</code> and accessible via <code>extract_sbm()</code> in R, which returns the allocation matrix and a co-clustering probability matrix (proportion of iterations where each pair of variables was in the same cluster).</p>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
-<div id="ref-GengEtAl_2019" class="csl-entry" role="listitem">
-Geng, J., Bhattacharya, A., &amp; Pati, D. (2019). Probabilistic community detection with unknown number of communities. <em>Journal of the American Statistical Association</em>, <em>114</em>(526), 893–905. <a href="https://doi.org/10.1080/01621459.2018.1458618">https://doi.org/10.1080/01621459.2018.1458618</a>
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
@@ -745,34 +703,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>
@@ -1196,8 +1126,8 @@ document.querySelectorAll("[data-cite-picker]").forEach(picker => {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../manual/bgmcompare-internals.html" class="pagination-link" aria-label="bgmCompare Internals">
-        <span class="nav-page-text">bgmCompare Internals</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../manual/bgmcompare-internals.html" class="pagination-link" aria-label="Group Comparison Engine">
+        <span class="nav-page-text">Group Comparison Engine</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

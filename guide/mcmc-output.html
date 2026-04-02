@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Model Output – bgms</title>
+<title>MCMC Output – bgms</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -113,35 +113,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -382,7 +353,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../guide/mcmc-output.html">Output &amp; Diagnostics</a></li><li class="breadcrumb-item"><a href="../guide/mcmc-output.html">Model Output</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../guide/mcmc-output.html">MCMC Output</a></li><li class="breadcrumb-item"><a href="../guide/mcmc-output.html">MCMC Output</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -496,7 +467,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Output &amp; Diagnostics</span></a>
+ <span class="menu-text">MCMC Output</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -505,7 +476,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../guide/mcmc-output.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Model Output</span></a>
+ <span class="menu-text">MCMC Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -526,9 +497,9 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../guide/mcmc-output.html">Output &amp; Diagnostics</a></li><li class="breadcrumb-item"><a href="../guide/mcmc-output.html">Model Output</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../guide/mcmc-output.html">MCMC Output</a></li><li class="breadcrumb-item"><a href="../guide/mcmc-output.html">MCMC Output</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Model Output</h1>
+<h1 class="title">MCMC Output</h1>
 </div>
 
 
@@ -545,132 +516,29 @@ window.Quarto = {
 </header>
 
 
-<p><code>bgms</code> uses Markov chain Monte Carlo (MCMC) to sample from the posterior distribution of the model parameters. The output of <a href="../reference/bgm.html"><code>bgm()</code></a> and <a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a> contains posterior summaries computed from these samples, posterior mean matrices, the raw MCMC draws themselves, and sampler diagnostics. This chapter describes how to access and interpret each of these components. For diagnostics related to the sampler itself, see <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>.</p>
-<p>The examples use a fit to the Wenchuan earthquake data (17 ordinal PTSD items):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bgms)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(Wenchuan, <span class="at">chains =</span> <span class="dv">2</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This page has not yet passed technical or readability review.</p>
+</div>
+</div>
+<p>This chapter describes what <code>bgm()</code> and <code>bgmCompare()</code> return and how to access specific components of the output.</p>
 <section id="the-fit-object" class="level2">
 <h2 class="anchored" data-anchor-id="the-fit-object">The fit object</h2>
-<p><a href="../reference/bgm.html"><code>bgm()</code></a> returns a list of class <code>"bgms"</code>.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] "posterior_summary_main"      "posterior_summary_pairwise" 
- [3] "posterior_summary_indicator" "posterior_mean_main"        
- [5] "posterior_mean_associations" "posterior_mean_indicator"   
- [7] "arguments"                   "raw_samples"                
- [9] "nuts_diag"                   ".bgm_spec"                  </code></pre>
-</div>
-</div>
-<p>The two primary interfaces are <code>summary()</code> for tabular diagnostics and <code>coef()</code> for posterior means in matrix form. Raw samples are available in <code>fit$raw_samples</code> for custom analyses.</p>
+<p>Both <code>bgm()</code> and <code>bgmCompare()</code> return a list (of class <code>"bgms"</code> or <code>"bgmCompare"</code>) containing posterior summaries, posterior mean matrices, raw MCMC samples, and metadata.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">seed =</span> <span class="dv">1234</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="sec-posterior-summaries" class="level2">
-<h2 class="anchored" data-anchor-id="sec-posterior-summaries">Posterior summaries</h2>
-<p>Calling <code>summary()</code> prints formatted tables of posterior statistics.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Posterior summaries from Bayesian estimation:
-
-Category thresholds: 
-                 mean  mcse    sd   n_eff  Rhat
-intrusion (1)   0.457 0.010 0.250 580.592 1.009
-intrusion (2)  -2.035 0.024 0.387 259.263 1.006
-intrusion (3)  -5.276 0.045 0.661 214.646 1.006
-intrusion (4) -10.347 0.066 1.038 248.274 1.003
-dreams (1)     -0.817 0.008 0.212 675.187 1.000
-dreams (2)     -4.379 0.020 0.420 436.475 1.001
-... (use `summary(fit)$main` to see full output)
-
-Pairwise interactions:
-                    mean    sd  mcse   n_eff  Rhat
-intrusion-dreams   0.369 0.001 0.037 848.100 1.000
-intrusion-flash    0.165 0.001 0.034 623.634 1.055
-intrusion-upset    0.062 0.055 0.008  46.612 1.058
-intrusion-physior  0.007 0.020 0.002 151.748 1.000
-intrusion-avoidth  0.000 0.000 0.000  84.121 1.000
-intrusion-avoidact 0.000 0.001 0.000 146.722 1.000
-... (use `summary(fit)$pairwise` to see full output)
-Note: NA values are suppressed in the print table. They occur here when an 
-indicator was zero across all iterations, so mcse/n_eff/n_eff_mixt/Rhat are undefined;
-`summary(fit)$pairwise` still contains the NA values.
-
-Inclusion probabilities:
-                    mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1    n_eff  Rhat
-intrusion-dreams   1.000 0.000           0     0     0  1999               
-intrusion-flash    1.000 0.000           0     0     0  1999               
-intrusion-upset    0.599 0.490 0.076   781    19    20  1179   41.265 1.116
-intrusion-physior  0.106 0.308 0.025  1760    27    27   185  153.394     1
-intrusion-avoidth  0.008 0.089 0.002  1969    14    14     2  1578.01  1.03
-intrusion-avoidact 0.012 0.109 0.003  1957    18    18     6 1223.503  1.03
-... (use `summary(fit)$indicator` to see full output)
-Note: NA values are suppressed in the print table. They occur when an indicator
-was constant or had fewer than 5 transitions, so n_eff_mixt is unreliable;
-`summary(fit)$indicator` still contains all computed values.
-
-Use `summary(fit)$&lt;component&gt;` to access full results.
-Use `extract_log_odds(fit)` for log odds ratios.
-See the `easybgm` package for other summary and plotting tools.</code></pre>
-</div>
-</div>
-<section id="reading-the-output" class="level3">
-<h3 class="anchored" data-anchor-id="reading-the-output">Reading the output</h3>
-<p>The summary produces a set of tables depending on the model type. Each row is a parameter; each column is a posterior summary statistic. The tables that appear depend on which model was fitted:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 24%">
-<col style="width: 20%">
-<col style="width: 17%">
-<col style="width: 37%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Table</th>
-<th style="text-align: center;">OMRF</th>
-<th style="text-align: center;">GGM</th>
-<th style="text-align: center;">Mixed MRF</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Category thresholds</td>
-<td style="text-align: center;">yes</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">yes (discrete block)</td>
-</tr>
-<tr class="even">
-<td>Continuous means</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">yes (continuous block)</td>
-</tr>
-<tr class="odd">
-<td>Residual variances</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">yes</td>
-<td style="text-align: center;">yes (continuous block)</td>
-</tr>
-<tr class="even">
-<td>Pairwise interactions</td>
-<td style="text-align: center;">yes</td>
-<td style="text-align: center;">yes</td>
-<td style="text-align: center;">yes</td>
-</tr>
-<tr class="odd">
-<td>Inclusion indicators</td>
-<td style="text-align: center;">if edge selection</td>
-<td style="text-align: center;">if edge selection</td>
-<td style="text-align: center;">if edge selection</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Category thresholds</strong> report the posterior estimates of the ordinal threshold parameters. These define the boundary between adjacent response categories on the log-odds scale. Negative values indicate that higher categories are less probable.</p>
-<p><strong>Residual variances</strong> report the posterior estimates of the residual variance <span class="math inline">\(1 / \Theta_{ii}\)</span> for each continuous variable, where <span class="math inline">\(\Theta_{ii}\)</span> is the corresponding diagonal element of the precision matrix. Use <code>extract_precision()</code> to obtain the full precision matrix.</p>
-<p><strong>Pairwise interactions</strong> report the conditional association between each pair of variables, controlling for all others. These are the edge weights in the graphical model. A value of zero means the two variables are conditionally independent. For mixed models, these span three blocks: discrete–discrete, continuous–continuous, and cross-type edges. Use <code>extract_partial_correlations()</code> for standardized partial correlations (continuous variables) and <code>extract_log_odds()</code> for log-odds ratios (discrete variables).</p>
-<p><strong>Inclusion indicators</strong> report the posterior inclusion probability of each edge. An inclusion probability near 1 indicates strong evidence for the edge; near 0 indicates strong evidence against it. Values around 0.5 are inconclusive. The transition counts (<code>n0-&gt;0</code>, <code>n0-&gt;1</code>, <code>n1-&gt;0</code>, <code>n1-&gt;1</code>) show how often the edge indicator switched between excluded (0) and included (1) states during sampling. Edges with very few transitions (fewer than 5) have unreliable mixture ESS estimates; bgms suppresses these automatically.</p>
-</section>
-<section id="summary-columns" class="level3">
-<h3 class="anchored" data-anchor-id="summary-columns">Summary columns</h3>
+<section id="posterior-summaries" class="level2">
+<h2 class="anchored" data-anchor-id="posterior-summaries">Posterior summaries</h2>
+<p>The <code>summary()</code> method prints formatted tables of posterior statistics. Each table includes:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -681,155 +549,76 @@ See the `easybgm` package for other summary and plotting tools.</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>mean</code></td>
-<td>Posterior mean of the parameter.</td>
+<td>Posterior mean</td>
 </tr>
 <tr class="even">
 <td><code>sd</code></td>
-<td>Posterior standard deviation — the width of the posterior.</td>
+<td>Posterior standard deviation</td>
 </tr>
 <tr class="odd">
-<td><code>mcse</code></td>
-<td>Monte Carlo standard error — how precisely the posterior mean is estimated. A small MCSE relative to <code>sd</code> indicates sufficient sampling. See <a href="../guide/mcmc-diagnostics.html#sec-mcse">MCMC Diagnostics</a>.</td>
+<td><code>MCSE</code></td>
+<td>Monte Carlo standard error</td>
 </tr>
 <tr class="even">
 <td><code>n_eff</code></td>
-<td>Effective sample size — the number of independent draws the chain is equivalent to. Values below 100 warrant longer runs. See <a href="../guide/mcmc-diagnostics.html#sec-ess">MCMC Diagnostics</a>.</td>
+<td>Effective sample size (unconditional)</td>
 </tr>
 <tr class="odd">
-<td><code>n_eff_mixt</code></td>
-<td>Mixture ESS for binary edge indicators, accounting for the spike-and-slab structure. See <a href="../guide/mcmc-diagnostics.html#sec-mixture-ess">MCMC Diagnostics</a>.</td>
-</tr>
-<tr class="even">
 <td><code>Rhat</code></td>
-<td>Split <span class="math inline">\(\hat{R}\)</span> convergence diagnostic. Values above 1.01 suggest the chains have not mixed. See <a href="../guide/mcmc-diagnostics.html#sec-rhat">MCMC Diagnostics</a>.</td>
+<td>Split R-hat convergence diagnostic</td>
 </tr>
 </tbody>
 </table>
-</section>
-<section id="accessing-specific-tables" class="level3">
-<h3 class="anchored" data-anchor-id="accessing-specific-tables">Accessing specific tables</h3>
-<p>The printed output is truncated. Access the full tables with:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">summary</span>(fit)<span class="sc">$</span>main, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                     mean       mcse        sd    n_eff     Rhat
-intrusion (1)   0.4568169 0.01038543 0.2502419 580.5918 1.009444
-intrusion (2)  -2.0354043 0.02402363 0.3868202 259.2634 1.005916
-intrusion (3)  -5.2762183 0.04511390 0.6609543 214.6457 1.006201
-intrusion (4) -10.3474787 0.06588472 1.0381272 248.2743 1.002817</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">summary</span>(fit)<span class="sc">$</span>pairwise, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                         mean          sd        mcse     n_eff      Rhat
-intrusion-dreams  0.368601582 0.001253424 0.036502412 848.09972 0.9998857
-intrusion-flash   0.165474538 0.001380939 0.034485738 623.63446 1.0553821
-intrusion-upset   0.062490783 0.055032261 0.008060624  46.61197 1.0576230
-intrusion-physior 0.006943673 0.020399916 0.001656027 151.74757 0.9997753</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">summary</span>(fit)<span class="sc">$</span>indicator, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                    mean        sd       mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1     n_eff
-intrusion-dreams  1.0000 0.0000000         NA     0     0     0  1999        NA
-intrusion-flash   1.0000 0.0000000         NA     0     0     0  1999        NA
-intrusion-upset   0.5995 0.4899997 0.07627922   781    19    20  1179  41.26475
-intrusion-physior 0.1060 0.3078376 0.02485517  1760    27    27   185 153.39448
-                       Rhat
-intrusion-dreams         NA
-intrusion-flash          NA
-intrusion-upset   1.1160963
-intrusion-physior 0.9997014</code></pre>
-</div>
-</div>
-</section>
+<p>For pairwise effects under edge selection, two additional columns appear:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>n_eff_mixt</code></td>
+<td>Mixture ESS accounting for spike-and-slab selection</td>
+</tr>
+<tr class="even">
+<td><code>inclusion_probability</code></td>
+<td>Posterior inclusion probability</td>
+</tr>
+</tbody>
+</table>
+<p>Access specific summary tables with:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>pairwise   <span class="co"># pairwise interactions</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>main        <span class="co"># category thresholds (ordinal) or means (GGM)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>indicator   <span class="co"># inclusion indicators (if edge selection active)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="posterior-mean-matrices" class="level2">
 <h2 class="anchored" data-anchor-id="posterior-mean-matrices">Posterior mean matrices</h2>
-<p>The <code>coef()</code> method returns posterior means in matrix form — convenient for network visualization and downstream analysis.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(<span class="fu">coef</span>(fit), <span class="at">max.level =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>List of 3
- $ main     : num [1:17, 1:4] 0.4568 -0.8175 -0.3684 0.0698 -0.6866 ...
-  ..- attr(*, "dimnames")=List of 2
- $ pairwise : num [1:17, 1:17] 0 0.3686 0.16547 0.06249 0.00694 ...
-  ..- attr(*, "dimnames")=List of 2
- $ indicator: num [1:17, 1:17] 0 1 1 0.599 0.106 ...
-  ..- attr(*, "dimnames")=List of 2</code></pre>
-</div>
-</div>
-<p><code>coef(fit)$pairwise</code> is a symmetric <span class="math inline">\(p \times p\)</span> matrix of posterior mean partial associations (zero diagonal). For interpretable scales, use <code>extract_precision()</code>, <code>extract_partial_correlations()</code>, or <code>extract_log_odds()</code>. <code>coef(fit)$indicator</code> is a symmetric <span class="math inline">\(p \times p\)</span> matrix of posterior inclusion probabilities.</p>
-<p>For ordinal models, <code>coef(fit)$main</code> is a matrix with variables in rows and category thresholds in columns:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)<span class="sc">$</span>main[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>              cat (1)   cat (2)   cat (3)   cat (4)
-intrusion  0.45681686 -2.035404 -5.276218 -10.34748
-dreams    -0.81747952 -4.379279 -8.213524 -13.31259
-flash     -0.36844405 -3.228067 -6.626082 -11.70289
-upset      0.06981198 -2.197320 -5.173231 -10.07425</code></pre>
-</div>
-</div>
+<p>The <code>coef()</code> method returns posterior means in matrix form:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)<span class="sc">$</span>pairwise   <span class="co"># p x p symmetric matrix of interaction strengths</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)<span class="sc">$</span>indicator   <span class="co"># p x p symmetric matrix of inclusion probabilities</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For ordinal models, <code>coef(fit)$main</code> returns a matrix of category threshold means (variables in rows, categories in columns). For mixed MRFs, it returns a list with <code>$discrete</code> and <code>$continuous</code> components.</p>
 </section>
 <section id="raw-mcmc-samples" class="level2">
 <h2 class="anchored" data-anchor-id="raw-mcmc-samples">Raw MCMC samples</h2>
-<p>For custom analyses — posterior intervals, density plots, or derived quantities — the raw posterior draws are stored in <code>fit$raw_samples</code>:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(fit<span class="sc">$</span>raw_samples, <span class="at">max.level =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>List of 7
- $ main           :List of 2
- $ pairwise       :List of 2
- $ indicator      :List of 2
- $ allocations    : NULL
- $ nchains        : int 2
- $ niter          : int 1000
- $ parameter_names:List of 4</code></pre>
-</div>
-</div>
-<p>Each element is a list of matrices, one per chain, with rows = iterations and columns = parameters. The chains are stored separately to allow per-chain diagnostics.</p>
-<section id="example-posterior-density-for-an-edge" class="level3">
-<h3 class="anchored" data-anchor-id="example-posterior-density-for-an-edge">Example: posterior density for an edge</h3>
-<p>To extract the posterior samples for the intrusion–dreams interaction and compute a 95% credible interval:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine chains for one parameter</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>edge <span class="ot">=</span> <span class="st">"intrusion-dreams"</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>col_idx <span class="ot">=</span> <span class="fu">which</span>(fit<span class="sc">$</span>raw_samples<span class="sc">$</span>parameter_names<span class="sc">$</span>pairwise <span class="sc">==</span> edge)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>samples_c1 <span class="ot">=</span> fit<span class="sc">$</span>raw_samples<span class="sc">$</span>pairwise[[<span class="dv">1</span>]][, col_idx]</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>samples_c2 <span class="ot">=</span> fit<span class="sc">$</span>raw_samples<span class="sc">$</span>pairwise[[<span class="dv">2</span>]][, col_idx]</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>samples <span class="ot">=</span> <span class="fu">c</span>(samples_c1, samples_c2)</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Posterior mean:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(samples), <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Posterior mean: 0.369 </code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"95% CI: ["</span>, <span class="fu">round</span>(<span class="fu">quantile</span>(samples, <span class="fl">0.025</span>), <span class="dv">3</span>), <span class="st">","</span>,</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">quantile</span>(samples, <span class="fl">0.975</span>), <span class="dv">3</span>), <span class="st">"]</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>95% CI: [ 0.299 , 0.44 ]</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(samples), <span class="at">main =</span> <span class="st">""</span>, <span class="at">xlab =</span> <span class="st">"intrusion-dreams"</span>,</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Density"</span>, <span class="at">bty =</span> <span class="st">"L"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"#2166AC"</span>)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey50"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mcmc-output_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="480"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
+<p>For custom analyses, the raw posterior draws are stored in <code>fit$raw_samples</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(fit<span class="sc">$</span>raw_samples, <span class="at">max.level =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The structure is:</p>
+<ul>
+<li><code>$main</code>: list of matrices (one per chain), each with rows = iterations and columns = main effect parameters.</li>
+<li><code>$pairwise</code>: list of matrices (one per chain) for pairwise interactions.</li>
+<li><code>$indicator</code>: list of matrices for edge indicators (if edge selection was active).</li>
+<li><code>$allocations</code>: list of matrices for cluster assignments (if SBM prior was used).</li>
+<li><code>$nchains</code>: number of chains.</li>
+<li><code>$niter</code>: number of post-warmup iterations per chain.</li>
+<li><code>$parameter_names</code>: named lists of parameter labels.</li>
+</ul>
+<p>Each chain is stored separately, allowing per-chain diagnostics and trace plots (see <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>).</p>
 </section>
 <section id="extracting-specific-results" class="level2">
 <h2 class="anchored" data-anchor-id="extracting-specific-results">Extracting specific results</h2>
-<p>The <code>extract_*()</code> family of functions provides targeted access to model components. These are documented in the <a href="../reference/extractors.html">Extractor Functions</a> reference. The most commonly used are:</p>
+<p>The <code>extract_*()</code> family of functions provides targeted access to model components. These are documented in the <a href="../reference/extractors.html">Extractor Functions</a> reference, but the most commonly used are:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 52%">
@@ -843,32 +632,24 @@ upset      0.06981198 -2.197320 -5.173231 -10.07425</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>extract_pairwise_interactions()</code></td>
-<td>Raw partial association samples</td>
+<td><code>extract_arguments()</code></td>
+<td>Arguments used when fitting the model</td>
 </tr>
 <tr class="even">
+<td><code>extract_pairwise_interactions()</code></td>
+<td>Raw pairwise interaction samples</td>
+</tr>
+<tr class="odd">
 <td><code>extract_main_effects()</code></td>
 <td>Raw main effect samples</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>extract_indicators()</code></td>
 <td>Raw indicator samples</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>extract_posterior_inclusion_probabilities()</code></td>
 <td>Posterior inclusion probabilities</td>
-</tr>
-<tr class="odd">
-<td><code>extract_precision()</code></td>
-<td>Posterior mean precision matrix (GGM / continuous block)</td>
-</tr>
-<tr class="even">
-<td><code>extract_partial_correlations()</code></td>
-<td>Posterior mean partial correlation matrix (GGM / continuous block)</td>
-</tr>
-<tr class="odd">
-<td><code>extract_log_odds()</code></td>
-<td>Posterior mean log-odds matrix (ordinal / discrete block)</td>
 </tr>
 <tr class="even">
 <td><code>extract_ess()</code></td>
@@ -876,15 +657,11 @@ upset      0.06981198 -2.197320 -5.173231 -10.07425</code></pre>
 </tr>
 <tr class="odd">
 <td><code>extract_rhat()</code></td>
-<td>Split <span class="math inline">\(\hat{R}\)</span> values</td>
+<td>Split R-hat values</td>
 </tr>
 <tr class="even">
 <td><code>extract_sbm()</code></td>
-<td>SBM cluster assignments and co-clustering matrix (when <code>edge_prior = "Stochastic-Block"</code>)</td>
-</tr>
-<tr class="odd">
-<td><code>extract_arguments()</code></td>
-<td>Arguments used when fitting the model</td>
+<td>SBM cluster assignments and co-clustering matrix</td>
 </tr>
 </tbody>
 </table>
@@ -892,111 +669,9 @@ upset      0.06981198 -2.197320 -5.173231 -10.07425</code></pre>
 <section id="nuts-diagnostics" class="level2">
 <h2 class="anchored" data-anchor-id="nuts-diagnostics">NUTS diagnostics</h2>
 <p>When <code>update_method = "nuts"</code> (the default), additional diagnostics are stored in <code>fit$nuts_diag</code>:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(fit<span class="sc">$</span>nuts_diag, <span class="at">max.level =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>List of 6
- $ treedepth   : num [1:2, 1:1000] 5 4 5 5 5 5 4 5 5 5 ...
- $ divergent   : num [1:2, 1:1000] 0 0 0 0 0 0 0 0 0 0 ...
- $ energy      : num [1:2, 1:1000] 6684 6654 6673 6663 6681 ...
- $ ebfmi       : num [1:2] 0.746 0.77
- $ warmup_check:List of 6
- $ summary     :List of 4</code></pre>
-</div>
-</div>
-<p>The <code>summary</code> field contains per-chain summaries of tree depth, divergences, non-reversible steps, and energy. The <code>warmup_check</code> field reports whether warmup equilibration was sufficient. These are described in detail in <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>. If these diagnostics remain problematic after tuning, refit with <code>update_method = "adaptive-metropolis"</code>.</p>
-</section>
-<section id="output-from-bgmcompare" class="level2">
-<h2 class="anchored" data-anchor-id="output-from-bgmcompare">Output from <a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a></h2>
-<p><a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a> returns a list of class <code>"bgmCompare"</code> with the same structure as <a href="../reference/bgm.html"><code>bgm()</code></a>, plus additional components for group differences. The examples use the ADHD data (18 binary items, two groups):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fit_compare <span class="ot">=</span> <span class="fu">bgmCompare</span>(</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> ADHD[, <span class="sc">-</span><span class="dv">1</span>],</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">group_indicator =</span> ADHD<span class="sc">$</span>group,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="st">"ordinal"</span>,</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">2</span>,</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_compare)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Posterior summaries from Bayesian grouped MRF estimation (bgmCompare):
-
-Category thresholds:
-     parameter   mean  mcse    sd    n_eff  Rhat
-1    avoid (1) -3.408 0.021 0.608  826.759 1.000
-2 closeatt (1) -2.771 0.017 0.543 1067.896 1.002
-3 distract (1) -2.359 0.021 0.546  647.922 1.015
-4   forget (1) -2.234 0.018 0.549  931.707 1.002
-5 instruct (1) -3.555 0.023 0.665  816.265 1.001
-6   listen (1) -1.331 0.026 0.651  651.067 1.008
-... (use `summary(fit)$main` to see full output)
-
-Pairwise interactions:
-       parameter   mean  mcse    sd    n_eff  Rhat
-1 avoid-closeatt  1.083 0.020 0.512  625.405 1.001
-2 avoid-distract  1.892 0.011 0.389 1353.472 1.002
-3   avoid-forget  0.703 0.015 0.420  734.835 1.002
-4 avoid-instruct  1.063 0.025 0.535  469.108 1.002
-5   avoid-listen -0.149 0.015 0.477 1041.748 1.000
-6    avoid-loses  0.216 0.012 0.398 1189.310 1.003
-... (use `summary(fit)$pairwise` to see full output)
-
-Inclusion probabilities:
-                 parameter  mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1    n_eff
-              avoid (main) 1.000 0.000           0     0     0  1999         
- avoid-closeatt (pairwise) 0.843 0.363 0.014   185   128   128  1558  640.029
- avoid-distract (pairwise) 0.382 0.486 0.012   809   426   425   339 1640.408
-   avoid-forget (pairwise) 0.798 0.401 0.017   259   145   145  1450  580.345
- avoid-instruct (pairwise) 0.914 0.281 0.012   102    71    71  1755  579.459
-   avoid-listen (pairwise) 0.659 0.474 0.017   421   261   261  1056  818.639
-  Rhat
-      
- 1.001
-     1
- 1.002
- 1.022
-     1
-... (use `summary(fit)$indicator` to see full output)
-Note: NA values are suppressed in the print table. They occur when an indicator
-was constant or had fewer than 5 transitions, so n_eff_mixt is unreliable;
-`summary(fit)$indicator` still contains all computed values.
-
-Group differences (main effects):
-           parameter  mean    sd mcse n_eff  Rhat
-    avoid (diff1; 1) 1.763 1.146            1.005
- closeatt (diff1; 1) 2.656 1.090            1.003
- distract (diff1; 1) 0.519 0.965            1.009
-   forget (diff1; 1) 2.274 1.022            1.004
- instruct (diff1; 1) 1.601 1.257            1.001
-   listen (diff1; 1) 3.921 1.310            1.000
-... (use `summary(fit)$main_diff` to see full output)
-Note: NA values are suppressed in the print table. They occur here when an
-indicator was zero across all iterations, so mcse/n_eff/n_eff_mixt/Rhat are undefined;
-`summary(fit)$main_diff` still contains the NA values.
-
-Group differences (pairwise effects):
-              parameter   mean    sd  mcse   n_eff  Rhat
- avoid-closeatt (diff1) -1.545 1.039 0.040 688.378 1.000
- avoid-distract (diff1) -0.212 0.373 0.015 592.635 1.000
-   avoid-forget (diff1) -1.188 0.865 0.036 588.020 1.002
- avoid-instruct (diff1)  2.179 1.215 0.052 545.404 1.000
-   avoid-listen (diff1)  0.922 0.932 0.038 613.600 1.000
-    avoid-loses (diff1) -0.303 0.467 0.015 955.778 1.000
-... (use `summary(fit)$pairwise_diff` to see full output)
-Note: NA values are suppressed in the print table. They occur here when an
-indicator was zero across all iterations, so mcse/n_eff/n_eff_mixt/Rhat are undefined;
-`summary(fit)$pairwise_diff` still contains the NA values.
-
-Use `summary(fit)$&lt;component&gt;` to access full results.
-See the `easybgm` package for other summary and plotting tools.</code></pre>
-</div>
-</div>
-<p>The summary includes two additional tables beyond what <a href="../reference/bgm.html"><code>bgm()</code></a> produces:</p>
-<ul>
-<li><p><strong>Group differences (main effects)</strong> — posterior estimates of how category thresholds differ between the two groups. Large positive or negative values indicate that a symptom’s baseline severity differs across groups.</p></li>
-<li><p><strong>Group differences (pairwise effects)</strong> — posterior estimates of how edge weights differ between the two groups. These quantify whether the conditional association between two symptoms is stronger or weaker in one group relative to the other.</p></li>
-</ul>
-<p>When <code>difference_selection = TRUE</code> (the default), the inclusion indicators for these difference parameters are reported alongside the common-structure indicators. An inclusion probability near 1 for a difference parameter indicates strong evidence that the groups differ on that effect.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit<span class="sc">$</span>nuts_diag<span class="sc">$</span>summary       <span class="co"># per-chain summary of tree depth, divergences, energy</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fit<span class="sc">$</span>nuts_diag<span class="sc">$</span>warmup_check  <span class="co"># warmup equilibration diagnostics</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>These are described in detail in <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>.</p>
 
 
 </section>
@@ -1018,34 +693,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>

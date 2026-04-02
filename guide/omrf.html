@@ -58,27 +58,7 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -516,7 +496,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Output &amp; Diagnostics</span></a>
+ <span class="menu-text">MCMC Output</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -525,7 +505,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../guide/mcmc-output.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Output</span></a>
+ <span class="menu-text">MCMC Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -565,155 +545,73 @@ window.Quarto = {
 </header>
 
 
-<p>The ordinal Markov random field (MRF) is a graphical model for networks of binary and ordinal variables <span class="citation" data-cites="AndersonVermunt_2000 SuggalaYangRavikumar_2017">(<a href="#ref-AndersonVermunt_2000" role="doc-biblioref">Anderson &amp; Vermunt, 2000</a>; <a href="#ref-SuggalaYangRavikumar_2017" role="doc-biblioref">Suggala et al., 2017</a>)</span>. It is the default model in <code>bgms</code> and forms the discrete component of the <a href="../guide/mixed-model.html">Mixed MRF</a>. To fit an ordinal MRF, use the default <code>variable_type = "ordinal"</code>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This page has not yet passed technical or readability review.</p>
+</div>
+</div>
+<p>The ordinal Markov Random Field (MRF) is a graphical model for networks of binary and ordinal variables. It is the default model in bgms.</p>
 <section id="the-model" class="level2">
 <h2 class="anchored" data-anchor-id="the-model">The model</h2>
 <p>For <span class="math inline">\(p\)</span> ordinal variables with observations <span class="math inline">\(\mathbf{x} = (x_1, \ldots, x_p)\)</span>, the ordinal MRF specifies the joint distribution as:</p>
 <p><span class="math display">\[
-p(\mathbf{x}) \propto \exp\!\left(\sum_{i=1}^{p} \sum_{c=1}^{m_i} \mathcal{I}(x_i = c)\,\mu_{ic} +
-\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
+p(\mathbf{x}) \propto \exp\left(\sum_{i=1}^{p} \mu_{x_i}^{(i)} +
+\sum_{i&lt;j} \sigma_{ij} \, x_i \, x_j\right)
 \]</span></p>
-<p>where <span class="math inline">\(\mu_{ic}\)</span> is the category threshold parameter for category <span class="math inline">\(c\)</span> of variable <span class="math inline">\(i\)</span> (one per category above the baseline <span class="math inline">\(c = 0\)</span>, which is fixed at <span class="math inline">\(\mu_{i0} = 0\)</span>) and <span class="math inline">\(\boldsymbol{\Omega}\)</span> is a symmetric interaction matrix whose off-diagonal entry <span class="math inline">\(\omega_{ij}\)</span> is the partial association between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</p>
+<p>where <span class="math inline">\(\mu_{x_i}^{(i)}\)</span> are category threshold parameters for variable <span class="math inline">\(i\)</span> (one per category above the lowest) and <span class="math inline">\(\sigma_{ij}\)</span> is the pairwise interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</p>
+<p>A positive interaction <span class="math inline">\(\sigma_{ij} &gt; 0\)</span> means that higher categories of <span class="math inline">\(x_i\)</span> tend to co-occur with higher categories of <span class="math inline">\(x_j\)</span>, conditional on all other variables. The category thresholds control the marginal distribution of each variable.</p>
 </section>
-<section id="why-the-adjacent-category-model" class="level2">
-<h2 class="anchored" data-anchor-id="why-the-adjacent-category-model">Why the adjacent category model?</h2>
-<p>The ordinal MRF can be understood as a multivariate generalization of the adjacent category logit model for ordinal responses <span class="citation" data-cites="Agresti_2010">(<a href="#ref-Agresti_2010" role="doc-biblioref">Agresti, 2010</a>)</span>.</p>
-<section id="the-univariate-case" class="level3">
-<h3 class="anchored" data-anchor-id="the-univariate-case">The univariate case</h3>
-<p>Consider a single ordinal variable <span class="math inline">\(x \in \{0, \dots, m\}\)</span>, where the category index reflects only the ordering of the response labels. The adjacent category model characterizes the log-odds between successive categories:</p>
-<p><span class="math display">\[
-\log\!\left( \frac{p(x = c+1)}{p(x = c)} \right) = \eta_c, \quad c = 0, \dots, m-1
-\]</span></p>
-<p>with <span class="math inline">\(\eta_0 = 0\)</span> for identifiability. The resulting probability mass function,</p>
-<p><span class="math display">\[
-p(x = c) = \frac{\exp\!\left( \sum_{k=c}^{m} \eta_k \right)}{1 + \sum_{j=1}^{m} \exp\!\left( \sum_{k=j}^{m} \eta_k \right)}
-\]</span></p>
-<p>is a member of the exponential family with canonical parameters <span class="math inline">\(\eta_c\)</span> and sufficient statistics <span class="math inline">\(\mathcal{I}(x \geq c)\)</span>.</p>
+<section id="regular-ordinal-variables" class="level2">
+<h2 class="anchored" data-anchor-id="regular-ordinal-variables">Regular ordinal variables</h2>
+<p>By default, bgms treats ordinal variables as “regular”: each category above the lowest receives its own threshold parameter. This imposes no constraint on the shape of the category distribution. Variables are internally recoded to consecutive integers starting at 0.</p>
+<p>For binary variables (two categories, coded 0 and 1), the model reduces to the Ising model, a classical MRF for binary data. The single threshold parameter controls the probability of category 1 relative to category 0.</p>
 </section>
-<section id="the-multivariate-extension" class="level3">
-<h3 class="anchored" data-anchor-id="the-multivariate-extension">The multivariate extension</h3>
-<p>For <span class="math inline">\(p\)</span> ordinal variables, we regress each variable <span class="math inline">\(x_i\)</span> on the others by modeling the canonical parameters as</p>
-<p><span class="math display">\[
-\eta_c = \alpha_c + \sum_{j \neq i} \beta_j\, x_j
-\]</span></p>
-<p>where <span class="math inline">\(\alpha_c\)</span> are category-specific intercepts and <span class="math inline">\(\beta_j\)</span> are common slopes. Crucially, the model depends on the ordinal variables only through the sufficient statistics <span class="math inline">\(\mathcal{I}(x_i \geq c)\)</span> and the interaction terms <span class="math inline">\(x_i\, x_j = \sum_c \sum_{c'} \mathcal{I}(x_i \geq c)\, \mathcal{I}(x_j \geq c')\)</span>. Because these terms are computed from cumulative indicators, the model captures only the ordering of the categories, without relying on any numeric interpretation or spacing of the labels. It is therefore invariant under monotonic recodings and does not assume interval-scale measurement.</p>
-<p>Other ordinal regression models, such as the cumulative logit and continuation ratio models <span class="citation" data-cites="Agresti_2010">(<a href="#ref-Agresti_2010" role="doc-biblioref">Agresti, 2010</a>)</span>, do not share this property. As shown by <span class="citation" data-cites="SuggalaYangRavikumar_2017">Suggala et al. (<a href="#ref-SuggalaYangRavikumar_2017" role="doc-biblioref">2017</a>)</span>, these models do not correspond to full conditionals of a joint distribution, and are therefore incompatible with a multivariate MRF formulation.</p>
-<p>The adjacent category model does yield consistent full conditionals, and the joint distribution that generates them is the ordinal MRF <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref"><span class="nocase">Marsman et al.</span>, 2025</a>)</span>.</p>
-</section>
-</section>
-<section id="connection-to-the-mrf-framework" class="level2">
-<h2 class="anchored" data-anchor-id="connection-to-the-mrf-framework">Connection to the MRF framework</h2>
-<p>The <a href="../guide/graphical-models.html">Graphical Models</a> page introduced the general pairwise MRF:</p>
-<p><span class="math display">\[
-p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
-\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
-\]</span></p>
-<p>The ordinal MRF is the discrete special case. The node potentials <span class="math inline">\(\mu_i(x_i)\)</span> are the category thresholds <span class="math inline">\(\mu_{ic}\)</span>, and the interaction matrix <span class="math inline">\(\boldsymbol{\Omega}\)</span> has off-diagonal entries <span class="math inline">\(\omega_{ij}\)</span>. The bilinear form <span class="math inline">\(\mathbf{x}^{\sf T}\boldsymbol{\Omega}\,\mathbf{x}\)</span> reduces to <span class="math inline">\(2\sum_{i &lt; j} \omega_{ij}\, x_i\, x_j\)</span> because <span class="math inline">\(\boldsymbol{\Omega}\)</span> is symmetric (the diagonal terms are not identifiable, and absorbed by the thresholds).</p>
-</section>
-<section id="partial-associations" class="level2">
-<h2 class="anchored" data-anchor-id="partial-associations">Partial associations</h2>
-<p>As described in <a href="../guide/graphical-models.html">Graphical Models</a>, <code>bgms</code> reports all pairwise effects on a unified partial association scale. For the ordinal MRF, the partial association <span class="math inline">\(\omega_{ij}\)</span> is half the log adjacent-category odds ratio. The adjacent-category odds ratio compares, for two variables <span class="math inline">\(x_i\)</span> and <span class="math inline">\(x_j\)</span>, how the odds of being in category <span class="math inline">\(h+1\)</span> versus <span class="math inline">\(h\)</span> for one variable change when the other variable moves from category <span class="math inline">\(q\)</span> to <span class="math inline">\(q+1\)</span>:</p>
-<p><span class="math display">\[
-\text{OR}_{ij} = \frac{P(x_i = h,\; x_j = q)\; P(x_i = h+1,\; x_j = q+1)}{P(x_i = h+1,\; x_j = q)\; P(x_i = h,\; x_j = q+1)} = \exp(2\omega_{ij})
-\]</span></p>
-<p>This ratio is constant across all category pairs <span class="math inline">\((h, q)\)</span> and does not depend on the values of the remaining variables. The partial association is therefore:</p>
-<p><span class="math display">\[
-\omega_{ij} = \tfrac{1}{2}\,\log\text{OR}_{ij}
-\]</span></p>
-<p>A positive <span class="math inline">\(\omega_{ij}\)</span> means that the odds of observing one variable in a higher adjacent category increase when the other variable is also in a higher adjacent category.</p>
-<p>To obtain the full log adjacent-category odds ratios, use <code>extract_log_odds(fit)</code>, which returns <span class="math inline">\(2\omega_{ij}\)</span> for each pair. The <code>coef(fit)$pairwise</code> method returns the partial associations <span class="math inline">\(\omega_{ij}\)</span>.</p>
-</section>
-<section id="category-thresholds" class="level2">
-<h2 class="anchored" data-anchor-id="category-thresholds">Category thresholds</h2>
-<p>The thresholds <span class="math inline">\(\mu_{ic}\)</span> are the node potentials of the ordinal MRF. They control the marginal category distribution of each variable — how likely each response category is, apart from any associations with other variables.</p>
-<section id="regular-ordinal-variables" class="level3">
-<h3 class="anchored" data-anchor-id="regular-ordinal-variables">Regular ordinal variables</h3>
-<p>By default, <code>bgms</code> treats ordinal variables as “regular”: each category above the lowest receives its own threshold parameter. This imposes no constraint on the shape of the category distribution. Variables are internally recoded to consecutive integers starting at 0.</p>
-<p>For binary variables (two categories, coded 0 and 1), the model reduces to the Ising model <span class="citation" data-cites="Ising_1925">(<a href="#ref-Ising_1925" role="doc-biblioref">Ising, 1925</a>)</span>, a classical MRF for binary data. The single threshold parameter controls the probability of category 1 relative to category 0.</p>
-</section>
-<section id="blume-capel-variables" class="level3">
-<h3 class="anchored" data-anchor-id="blume-capel-variables">Blume-Capel variables</h3>
-<p>The Blume-Capel model originates in statistical physics, where <span class="citation" data-cites="Blume_1966">Blume (<a href="#ref-Blume_1966" role="doc-biblioref">1966</a>)</span> and <span class="citation" data-cites="Capel_1966">Capel (<a href="#ref-Capel_1966" role="doc-biblioref">1966</a>)</span> independently developed it to study phase transitions in ternary spin systems. As an application to psychology, <span class="citation" data-cites="VanDerMaasBorsboomWaldorp_2026"><span class="nocase">van der Maas et al.</span> (<a href="#ref-VanDerMaasBorsboomWaldorp_2026" role="doc-biblioref">2026</a>)</span> used the model to study attitudes, depression, and intelligence.</p>
+<section id="blume-capel-variables" class="level2">
+<h2 class="anchored" data-anchor-id="blume-capel-variables">Blume-Capel variables</h2>
 <p>For ordinal variables with a natural baseline or reference category (e.g., a “neutral” response), the Blume-Capel parameterization models category thresholds as a quadratic function of distance from the baseline:</p>
 <p><span class="math display">\[
 \mu_c = \alpha \cdot (c - b) + \beta \cdot (c - b)^2
 \]</span></p>
-<p>where <span class="math inline">\(c\)</span> is the response category, <span class="math inline">\(b\)</span> is the baseline category, <span class="math inline">\(\alpha\)</span> captures the linear trend across categories, and <span class="math inline">\(\beta\)</span> captures the preference toward or away from the baseline:</p>
+<p>where <span class="math inline">\(c\)</span> is the category, <span class="math inline">\(b\)</span> is the baseline category, <span class="math inline">\(\alpha\)</span> captures the linear trend across categories, and <span class="math inline">\(\beta\)</span> captures the preference toward or away from the baseline:</p>
 <ul>
 <li><span class="math inline">\(\beta &lt; 0\)</span>: the model favors responses near the baseline category</li>
-<li><span class="math inline">\(\beta &gt; 0\)</span>: the model favors responses away from the baseline category</li>
+<li><span class="math inline">\(\beta &gt; 0\)</span>: the model favors extreme responses (far from the baseline)</li>
 </ul>
-<p>Partial associations between Blume-Capel variables use centered scores: the interaction term in the joint distribution becomes <span class="math inline">\(2(x_i - b_i)(x_j - b_j)\,\omega_{ij}\)</span> instead of <span class="math inline">\(2\,x_i\,x_j\,\omega_{ij}\)</span>. The partial association <span class="math inline">\(\omega_{ij}\)</span> remains the same; the centering is absorbed by the thresholds. For binary variables, the Blume-Capel parameterization reduces to the Ising model, just as the regular ordinal parameterization does.</p>
+<p>Pairwise interactions between Blume-Capel variables use centered scores <span class="math inline">\((c - b)\)</span> rather than raw category values.</p>
 <p>To use Blume-Capel variables, set <code>variable_type = "blume-capel"</code> and provide the <code>baseline_category</code> argument:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">variable_type =</span> <span class="st">"blume-capel"</span>,</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">baseline_category =</span> <span class="dv">2</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>baseline_category</code> can be a single integer (applied to all variables) or a vector of length <span class="math inline">\(p\)</span>.</p>
-<p>The thresholds are nuisance parameters — they are estimated during MCMC sampling but are typically not of direct inferential interest. To extract them, use <code>extract_main_effects(fit)</code>.</p>
-</section>
 </section>
 <section id="pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="pseudolikelihood">Pseudolikelihood</h2>
-<p>The normalizing constant of the ordinal MRF involves a sum over all possible configurations of <span class="math inline">\(p\)</span> ordinal variables, which is intractable for all but the smallest networks. <code>bgms</code> uses a pseudolikelihood approximation <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref"><span class="nocase">Marsman et al.</span>, 2025</a>)</span>: the product of full conditional distributions replaces the joint distribution.</p>
-<p>The full conditional distribution for variable <span class="math inline">\(i\)</span> given all other variables is:</p>
-<p><span class="math display">\[
-p(x_i = c \mid \mathbf{x}_{-i}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i} \exp\!\left(\mu_{ik} + k \cdot r_i\right)}
-\]</span></p>
-<p>where <span class="math inline">\(r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}\)</span> is the residual score — a sufficient reduction that summarizes the influence of all other variables on <span class="math inline">\(x_i\)</span>. The pseudolikelihood is the product of these conditionals across all observations and variables.</p>
-</section>
-<section id="edge-selection" class="level2">
-<h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>
-<p>When <code>edge_selection = TRUE</code> (the default), <code>bgms</code> applies spike-and-slab priors to the partial associations <span class="math inline">\(\omega_{ij}\)</span>. The spike sets <span class="math inline">\(\omega_{ij} = 0\)</span>, enforcing the absence of the edge. The slab places a Cauchy prior on <span class="math inline">\(\omega_{ij}\)</span>, allowing the effect size to be estimated from the data. See <a href="../guide/prior-basics.html">Prior Basics</a> for the spike-and-slab specification.</p>
-<p>The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See <a href="../guide/edge-selection.html">Edge Selection</a>.</p>
-</section>
-<section id="missing-data" class="level2">
-<h2 class="anchored" data-anchor-id="missing-data">Missing data</h2>
-<p>For discrete data, missing values can be imputed within the MCMC sampler by setting <code>na_action = "impute"</code>. At each iteration, missing entries are drawn from their full conditional distribution given the current parameter values and the observed data. Because the imputation is embedded in the MCMC chain, the posterior summaries account for the uncertainty introduced by missing data.</p>
-<p>The default behavior is <code>na_action = "listwise"</code>, which removes rows with any missing values before fitting.</p>
+<p>The normalizing constant of the ordinal MRF is intractable for all but the smallest networks. bgms uses a pseudolikelihood approximation: the product of full conditional distributions replaces the joint distribution. This makes estimation feasible for networks with many variables while retaining consistent parameter estimates.</p>
 </section>
 <section id="fitting-an-ordinal-mrf" class="level2">
 <h2 class="anchored" data-anchor-id="fitting-an-ordinal-mrf">Fitting an ordinal MRF</h2>
-<p>The ordinal MRF is the default model type. Call <a href="../reference/bgm.html"><code>bgm()</code></a> directly:</p>
+<p>The ordinal MRF is the default model type. For ordinal or binary data, call <code>bgm()</code> directly:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>For Blume-Capel variables:</p>
+<p>For Blume-Capel variables specifically:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> data, <span class="at">variable_type =</span> <span class="st">"blume-capel"</span>,</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">baseline_category =</span> <span class="dv">3</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The <code>summary()</code> and <code>coef()</code> methods work the same as for GGM and mixed models. <code>coef(fit)$pairwise</code> returns the posterior means of the partial associations <span class="math inline">\(\omega_{ij}\)</span>, and <code>coef(fit)$indicator</code> returns the posterior inclusion probabilities.</p>
-<p>To obtain model-specific parameterizations, use the dedicated extractors:</p>
-<ul>
-<li><code>extract_main_effects(fit)</code> — returns the category threshold parameters.</li>
-<li><code>extract_log_odds(fit)</code> — returns the log adjacent-category odds ratios <span class="math inline">\(2\omega_{ij}\)</span>.</li>
-</ul>
-
+<p>The output contains posterior summaries for both threshold parameters (<code>posterior_summary_main</code>) and pairwise interactions (<code>posterior_summary_pairwise</code>).</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p>Marsman, M., van den Bergh, D., &amp; Haslbeck, J. M. B. (2025). Bayesian analysis of the ordinal Markov random field. <em>Psychometrika</em>, 90(1), 146–182.</p>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
-<div id="ref-Agresti_2010" class="csl-entry" role="listitem">
-Agresti, A. (2010). <em>Analysis of ordinal categorical data</em> (2nd ed.). Wiley. <a href="https://doi.org/10.1002/9780470594001">https://doi.org/10.1002/9780470594001</a>
-</div>
-<div id="ref-AndersonVermunt_2000" class="csl-entry" role="listitem">
-Anderson, C. J., &amp; Vermunt, J. K. (2000). Log-multiplicative association models as latent variable models for nominal and/or ordinal data. <em>Sociological Methodology</em>, <em>30</em>(1), 81–121. <a href="https://doi.org/10.1111/0081-1750.00076">https://doi.org/10.1111/0081-1750.00076</a>
-</div>
-<div id="ref-Blume_1966" class="csl-entry" role="listitem">
-Blume, M. (1966). Theory of the first-order magnetic phase change in <span>UO</span><span class="math inline">\(_2\)</span>. <em>Physical Review</em>, <em>141</em>(2), 517–524. <a href="https://doi.org/10.1103/PhysRev.141.517">https://doi.org/10.1103/PhysRev.141.517</a>
-</div>
-<div id="ref-Capel_1966" class="csl-entry" role="listitem">
-Capel, H. W. (1966). On the possibility of first-order phase transitions in <span>I</span>sing systems of triplet ions with zero-field splitting. <em>Physica</em>, <em>32</em>(5), 966–988. <a href="https://doi.org/10.1016/0031-8914(66)90027-9">https://doi.org/10.1016/0031-8914(66)90027-9</a>
-</div>
-<div id="ref-Ising_1925" class="csl-entry" role="listitem">
-Ising, E. (1925). Beitrag zur <span>T</span>heorie des <span>F</span>erromagnetismus. <em>Zeitschrift f<span>ü</span>r Physik</em>, <em>31</em>(1), 253–258. <a href="https://doi.org/10.1007/BF02980577">https://doi.org/10.1007/BF02980577</a>
-</div>
-<div id="ref-MarsmanVandenBerghHaslbeck_2025" class="csl-entry" role="listitem">
-<span class="nocase">Marsman, M., van den Bergh, D., &amp; Haslbeck, J. M. B.</span> (2025). Bayesian analysis of the ordinal <span>M</span>arkov random field. <em>Psychometrika</em>, <em>90</em>(1), 146–182. <a href="https://doi.org/10.1017/psy.2024.4">https://doi.org/10.1017/psy.2024.4</a>
-</div>
-<div id="ref-SuggalaYangRavikumar_2017" class="csl-entry" role="listitem">
-Suggala, A. S., Yang, E., &amp; Ravikumar, P. (2017). Ordinal graphical models: A tale of two approaches. In D. Precup &amp; Y. W. Teh (Eds.), <em>Proceedings of the 34th international conference on machine learning</em> (Vol. 70, pp. 3260–3269). PMLR.
-</div>
-<div id="ref-VanDerMaasBorsboomWaldorp_2026" class="csl-entry" role="listitem">
-<span class="nocase">van der Maas, H. L. J., Borsboom, D., &amp; Waldorp, L.</span> (2026). The statistical physics of psychological networks: <span>Z</span>ero matters. <em>Psychological Review</em>. <a href="https://doi.org/10.1037/rev0000611">https://doi.org/10.1037/rev0000611</a>
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
@@ -730,34 +628,6 @@ document.querySelectorAll(".pymd span.co").forEach(el => {
    if (!el.innerText.startsWith("#|")) {
       el.style.fontWeight = 1000;
    }
-});
-
-// citation format picker on landing page
-document.querySelectorAll("[data-cite-picker]").forEach(picker => {
-   const tabs = picker.querySelectorAll("[data-citation-tab]");
-   const panels = picker.querySelectorAll("[data-citation-panel]");
-
-   const setActive = (format) => {
-      tabs.forEach(tab => {
-         const isActive = tab.dataset.citationTab === format;
-         tab.classList.toggle("is-active", isActive);
-         tab.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
-
-      panels.forEach(panel => {
-         const isActive = panel.dataset.citationPanel === format;
-         panel.classList.toggle("is-active", isActive);
-         if (isActive) {
-            panel.removeAttribute("hidden");
-         } else {
-            panel.setAttribute("hidden", "hidden");
-         }
-      });
-   };
-
-   tabs.forEach(tab => {
-      tab.addEventListener("click", () => setActive(tab.dataset.citationTab));
-   });
 });
 
 </script>
