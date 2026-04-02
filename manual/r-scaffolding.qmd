@@ -13,18 +13,14 @@ returned output into an S3 fit object.
 
 ## Data flow
 
-```
-bgm(x, ...)
-  ↓
-bgm_spec()            ← validates, assembles sub-lists
-  ↓
-new_bgm_spec()        ← asserts types and field presence
-  ↓
-validate_bgm_spec()   ← cross-field invariant checks
-  ↓
-run_sampler(spec)      ← dispatches to C++ via switch(model_type)
-  ↓
-build_output(spec, raw) ← normalizes raw C++ output into S3 object
+```{mermaid}
+flowchart TD
+    A["bgm(x, ...)"] --> B["bgm_spec()"]
+    B -->|"validates, assembles sub-lists"| C["new_bgm_spec()"]
+    C -->|"asserts types and field presence"| D["validate_bgm_spec()"]
+    D -->|"cross-field invariant checks"| E["run_sampler(spec)"]
+    E -->|"dispatches to C++ via model_type"| F["build_output(spec, raw)"]
+    F -->|"normalizes raw C++ output into S3 object"| G["bgm fit object"]
 ```
 
 Both `bgm()` and `bgmCompare()` follow this pipeline. The
@@ -65,7 +61,7 @@ lowest observed category.
 
 ### Sampler validation (`validate_sampler.R`)
 
-`validate_sampler()` resolves the `interaction_scale` argument into a
+`validate_sampler()` resolves the `update_method` argument into a
 concrete sampler type (`"nuts"` or `"adaptive_metropolis"`;
 `"hmc"` is accepted but deprecated)
 and sets defaults for tuning parameters (`target_accept`,

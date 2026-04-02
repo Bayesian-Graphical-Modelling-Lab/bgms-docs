@@ -63,6 +63,8 @@ The OMRF uses a pseudolikelihood approximation: the product of full
 conditional distributions rather than the intractable joint
 distribution. The log-pseudolikelihood is:
 
+For a cross-model overview, see [Pseudolikelihood](pseudolikelihood.qmd).
+
 $$
 \text{PL}(\boldsymbol{\theta}) = \sum_{i=1}^{p} \sum_{n=1}^{N} \log P(X_{ni} = x_{ni} \mid \text{rest})
 $$
@@ -70,7 +72,7 @@ $$
 The gradient of the log-pseudolikelihood with respect to each
 parameter involves the expected category values under the current
 conditionals, computed by the
-[variable helpers](variable-helpers.qmd).
+[Variable Helpers](variable-helpers.qmd).
 
 ## Gradient computation
 
@@ -107,5 +109,5 @@ The scan order is randomized at each iteration via
 Even when NUTS is the primary sampler, the OMRF implements element-wise
 adaptive Metropolis proposals for use during warmup stage 3b (proposal
 SD learning) and as a user-selectable alternative via
-`interaction_scale = "fixed"`. The proposal SDs are tuned by
+`update_method = "adaptive-metropolis"`. The proposal SDs are tuned by
 Robbins-Monro targeting 0.234 acceptance, clamped to $[0.001, 2.0]$.

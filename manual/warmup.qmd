@@ -28,8 +28,9 @@ A short burn-in phase (default: the first 75 iterations). The
 mass matrix is held at the identity. Dual averaging tunes the step
 size toward a target acceptance rate of 0.8. The starting value of
 $\epsilon$ comes from Algorithm 4 in @HoffmanGelman_2014_nuts,
-which doubles or halves a trial step size until the acceptance
-probability crosses 0.5.
+which doubles or halves a trial step size until the Metropolis
+acceptance ratio of a single leapfrog step crosses the target
+acceptance rate.
 
 ### Stage 2: Adaptation windows
 
