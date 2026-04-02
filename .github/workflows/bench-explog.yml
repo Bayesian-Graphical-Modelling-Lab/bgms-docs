@@ -79,7 +79,8 @@ jobs:
           data = {}
           for path in glob.glob("bench-artifacts/*.json"):
               with open(path) as f:
-                  row = json.load(f)
+                  raw = json.load(f)
+              row = raw[0] if isinstance(raw, list) else raw
               data[row["platform"]] = row
 
           mac = data["Darwin"]
