@@ -23,7 +23,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -729,13 +749,34 @@ window.Quarto = {
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>
-<p>When edge selection is active, each edge <span class="math inline">\((i,j)\)</span> has a binary indicator <span class="math inline">\(\gamma_{ij}\)</span>. The add-delete update reuses the same Roverato constants and in-place machinery described above:</p>
-<ol type="1">
-<li><strong>Propose inclusion/exclusion</strong> — Compute the Bayes factor for including vs.&nbsp;excluding the edge, using the <span class="math inline">\(O(1)\)</span> likelihood ratio and the prior inclusion probability.</li>
-<li><strong>If included</strong> (<span class="math inline">\(\gamma_{ij} = 1\)</span>) — Sample <span class="math inline">\(\theta_{ij}\)</span> from its full conditional via the Metropolis proposal; set <span class="math inline">\(\theta_{jj}\)</span> from the constraint curve.</li>
-<li><strong>If excluded</strong> (<span class="math inline">\(\gamma_{ij} = 0\)</span>) — Set <span class="math inline">\(\theta_{ij} = 0\)</span> and <span class="math inline">\(\theta_{jj}\)</span> to its constrained value; apply the rank-2 Cholesky update.</li>
-</ol>
-<p>The order of edge updates is randomized at each iteration. After all edge indicator updates complete, the <code>constraint_dirty_</code> flag is set and the constraint structure is rebuilt lazily at the next gradient evaluation. This ensures NUTS operates on an up-to-date graph.</p>
+<p>When edge selection is active, each edge <span class="math inline">\((i,j)\)</span> has a binary indicator <span class="math inline">\(\gamma_{ij}\)</span>. Edge indicators are updated via MoMS (Mixtures of Mutually Singular distributions) add/delete moves <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>, reusing the same Roverato constants and in-place Cholesky machinery described above.</p>
+<section id="delete-move-gamma_ij-1-to-0" class="level3">
+<h3 class="anchored" data-anchor-id="delete-move-gamma_ij-1-to-0">Delete move (<span class="math inline">\(\gamma_{ij} = 1 \to 0\)</span>)</h3>
+<p>Propose to set <span class="math inline">\(\theta_{ij} = 0\)</span> and <span class="math inline">\(\theta_{jj}\)</span> to its constrained value. The acceptance ratio includes:</p>
+<ul>
+<li>The <span class="math inline">\(O(1)\)</span> likelihood ratio via the matrix-determinant lemma</li>
+<li>The prior odds <span class="math inline">\((1 - \pi_{ij}) / \pi_{ij}\)</span></li>
+<li>The reverse proposal density <span class="math inline">\(\phi(\theta_{ij}^{\text{curr}} / c_3;\, 0,\, \sigma_{ij}) / c_3\)</span></li>
+<li>The Cauchy slab prior <span class="math inline">\(-\log p_{\text{Cauchy}}(\theta_{ij}^{\text{curr}})\)</span></li>
+<li>The Gamma(1,1) prior ratio on <span class="math inline">\(\theta_{jj}\)</span></li>
+</ul>
+</section>
+<section id="add-move-gamma_ij-0-to-1" class="level3">
+<h3 class="anchored" data-anchor-id="add-move-gamma_ij-0-to-1">Add move (<span class="math inline">\(\gamma_{ij} = 0 \to 1\)</span>)</h3>
+<p>Sample <span class="math inline">\(\epsilon \sim \mathcal{N}(0,\, \sigma_{ij})\)</span> and propose <span class="math inline">\(\theta_{ij}^* = c_3 \epsilon\)</span>, with <span class="math inline">\(\theta_{jj}^*\)</span> set from the constraint curve. The acceptance ratio includes:</p>
+<ul>
+<li>The <span class="math inline">\(O(1)\)</span> likelihood ratio</li>
+<li>The prior odds <span class="math inline">\(\pi_{ij} / (1 - \pi_{ij})\)</span></li>
+<li>The Cauchy slab prior <span class="math inline">\(\log p_{\text{Cauchy}}(\theta_{ij}^*)\)</span></li>
+<li>The reverse proposal density <span class="math inline">\(-\log \phi(\epsilon;\, 0,\, \sigma_{ij}) + \log c_3\)</span></li>
+<li>The Gamma(1,1) prior ratio on <span class="math inline">\(\theta_{jj}\)</span></li>
+</ul>
+<p>Here <span class="math inline">\(c_3\)</span> is the Roverato scaling constant (<code>constants_[3]</code>) relating the Cholesky proposal to the precision entry.</p>
+</section>
+<section id="iteration-order" class="level3">
+<h3 class="anchored" data-anchor-id="iteration-order">Iteration order</h3>
+<p>The order of edge updates is randomized at each iteration via <code>prepare_iteration()</code>, which shuffles the flat edge index with <code>arma_randperm()</code>. After all edge indicator updates complete, the <code>constraint_dirty_</code> flag is set and the constraint structure is rebuilt lazily at the next gradient evaluation. This ensures NUTS operates on an up-to-date graph.</p>
+</section>
 </section>
 <section id="log-likelihood" class="level2">
 <h2 class="anchored" data-anchor-id="log-likelihood">Log-likelihood</h2>
@@ -750,9 +791,17 @@ window.Quarto = {
 <p>When <code>na_action = "impute"</code>, the GGM imputes missing values using the conditional normal distribution implied by the current precision matrix. After imputation, the sufficient statistic <span class="math inline">\(\mathbf{S}\)</span> is recomputed for the next likelihood evaluation.</p>
 
 
+
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-GottardoRaftery_2008" class="csl-entry" role="listitem">
+Gottardo, R., &amp; Raftery, A. E. (2008). Markov chain <span>Monte Carlo</span> with mixtures of mutually singular distributions. <em>Journal of Computational and Graphical Statistics</em>, <em>17</em>(4), 949–975. <a href="https://doi.org/10.1198/106186008X386102">https://doi.org/10.1198/106186008X386102</a>
+</div>
+<div id="ref-VanDenBerghEtAl_2026_moms" class="csl-entry" role="listitem">
+<span class="nocase">van den Bergh, D., Clyde, M. A., Raftery, A. E., &amp; Marsman, M.</span> (2026). Reversible jump <span>MCMC</span> with no regrets: <span>B</span>ayesian variable selection using mixtures of mutually singular distributions. <em>Manuscript in Preparation</em>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
