@@ -13,7 +13,7 @@ A prior distribution encodes assumptions about a parameter before observing data
 
 The [Bayesian Approach](bayesian-approach.qmd) page introduced two prior distributions: one for the network structure, $p(\mathcal{S})$, and one for the partial associations conditional on that structure, $p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S})$. In `bgms`, these two priors are linked through a spike-and-slab prior on each partial association $\omega_{ij}$.
 
-The idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero ($\omega_{ij} = 0$). When the edge is present, the partial association is free to take any nonzero value ($\omega_{ij \in \mathbb{R}_{\setminus 0}}$). A binary indicator $\gamma_{ij}$ tracks the state of each edge: $\gamma_{ij} = 0$ means the edge is absent and $\gamma_{ij} = 1$ means it is present. Together, the collection of indicators forms the network structure $\mathcal{S}$.
+The idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero ($\omega_{ij} = 0$). When the edge is present, the partial association is free to take any nonzero value ($\omega_{ij} \in \mathbb{R} \setminus \{0\}$). A binary indicator $\gamma_{ij}$ tracks the state of each edge: $\gamma_{ij} = 0$ means the edge is absent and $\gamma_{ij} = 1$ means it is present. Together, the collection of indicators forms the network structure $\mathcal{S}$.
 
 We use the *mixtures of mutually singular distributions* formulation of the spike-and-slab prior [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms], which designates a mixture of two mutually exclusive components:
 

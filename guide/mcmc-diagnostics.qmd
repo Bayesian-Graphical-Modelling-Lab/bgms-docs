@@ -5,7 +5,7 @@ title: "MCMC Diagnostics"
 Before interpreting results from [`bgm()`](../reference/bgm.qmd) or
 [`bgmCompare()`](../reference/bgmCompare.qmd), check that the
 MCMC sampler has converged and that posterior estimates are reliable. This
-chapter describes how to do so with the diagnostic tools in bgms. For
+chapter describes how to do so with the diagnostic tools in `bgms`. For
 background on MCMC convergence diagnostics and choosing the number of
 iterations, chains, and warmup length, see @MargossianGelman_2024.
 

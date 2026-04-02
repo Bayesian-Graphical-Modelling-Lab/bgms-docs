@@ -4,7 +4,7 @@ toc: false
 ---
 
 The User's Guide covers conceptual background and practical tutorials for
-bgms. It is organized into four parts: background concepts, model types,
+`bgms`. It is organized into four parts: background concepts, model types,
 analysis workflows, and MCMC output.
 
 ### Background

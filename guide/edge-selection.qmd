@@ -17,7 +17,7 @@ The prior probability of inclusion is controlled by the `edge_prior` argument. S
 
 ## Posterior inclusion probabilities
 
-The posterior inclusion probability for edge $(i, j)$ is the posterior mean of $\gamma_{ij}$: it is estimates as the proportion of MCMC iterations in which the edge was included. It ranges from 0 to 1:
+The posterior inclusion probability for edge $(i, j)$ is the posterior mean of $\gamma_{ij}$: it is estimated as the proportion of MCMC iterations in which the edge was included. It ranges from 0 to 1:
 
 - Values near 1.0: strong evidence that the edge is present.
 - Values near 0.0: strong evidence that the edge is absent.
