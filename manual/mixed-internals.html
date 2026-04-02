@@ -520,8 +520,11 @@ window.Quarto = {
   </div>
 </li>
           <li class="sidebar-item">
- <span class="menu-text">manual/pseudolikelihood.qmd</span>
-  </li>
+  <div class="sidebar-item-container"> 
+  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pseudolikelihood</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
@@ -643,7 +646,7 @@ window.Quarto = {
 <section id="pseudolikelihood-options" class="level2">
 <h2 class="anchored" data-anchor-id="pseudolikelihood-options">Pseudolikelihood options</h2>
 <p>The <code>pseudolikelihood</code> argument controls how the <strong>discrete</strong> full conditionals are computed. It does not affect the continuous block, which always uses the GGM likelihood <span class="math inline">\(\log p(y \mid x) \propto \tfrac{n}{2}\log|\Omega| - \tfrac{1}{2}\operatorname{tr}(\Omega D^\top D)\)</span>.</p>
-<p>For a cross-model overview, see <a href="pseudolikelihood.qmd">Pseudolikelihood</a>.</p>
+<p>For a cross-model overview, see <a href="../manual/pseudolikelihood.html">Pseudolikelihood</a>.</p>
 <ul>
 <li><code>"conditional"</code> (default) — Computes discrete full conditionals <span class="math inline">\(\log p(x_s \mid x_{-s}, y_{\text{obs}})\)</span>, conditioning on the observed continuous values. The rest score uses <code>pairwise_effects_discrete_</code> directly. Faster because updating the continuous precision elements does not require re-evaluating the discrete pseudolikelihood.</li>
 <li><code>"marginal"</code> — Computes discrete full conditionals <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> by integrating out the continuous variables. Uses the marginal interaction matrix <span class="math inline">\(\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top\)</span>, which must be recomputed whenever the precision or cross-type parameters change. This adds coupling terms to the gradient (the <span class="math inline">\(\partial\Theta/\partial\Sigma\)</span> chain rule contributes to the precision gradient via <span class="math inline">\(-2\Sigma A_{xy}^\top\bar\Theta A_{xy}\Sigma\)</span>).</li>

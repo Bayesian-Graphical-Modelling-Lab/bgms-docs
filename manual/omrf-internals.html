@@ -520,8 +520,11 @@ window.Quarto = {
   </div>
 </li>
           <li class="sidebar-item">
- <span class="menu-text">manual/pseudolikelihood.qmd</span>
-  </li>
+  <div class="sidebar-item-container"> 
+  <a href="../manual/pseudolikelihood.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pseudolikelihood</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/variable-helpers.html" class="sidebar-item-text sidebar-link">
@@ -605,7 +608,7 @@ r_{ni} = \sum_{j \neq i} x_{nj}\, \sigma_{ij}
 <section id="pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="pseudolikelihood">Pseudolikelihood</h2>
 <p>The OMRF uses a pseudolikelihood approximation: the product of full conditional distributions rather than the intractable joint distribution. The log-pseudolikelihood is:</p>
-<p>For a cross-model overview, see <a href="pseudolikelihood.qmd">Pseudolikelihood</a>.</p>
+<p>For a cross-model overview, see <a href="../manual/pseudolikelihood.html">Pseudolikelihood</a>.</p>
 <p><span class="math display">\[
 \text{PL}(\boldsymbol{\theta}) = \sum_{i=1}^{p} \sum_{n=1}^{N} \log P(X_{ni} = x_{ni} \mid \text{rest})
 \]</span></p>
