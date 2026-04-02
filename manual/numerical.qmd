@@ -15,7 +15,15 @@ and Linux counterparts. Because MCMC samplers call `exp()` and
 prohibitively slow on Windows without intervention.
 
 <!-- bench:start -->
-*Run the `Benchmark exp/log` workflow to populate this table.*
+Elapsed seconds for 100 iterations over 1 000 000 elements
+(GitHub Actions runners, 2026-04-02):
+
+| | macOS (standard) | Windows (custom) |
+|---|---:|---:|
+| `exp()` (base R) | 0.999s | 4.22s |
+| `MY_EXP` (custom) | 1.065s | 1.32s |
+| `log()` (base R) | 0.695s | 5.8s |
+| `MY_LOG` (custom) | 0.849s | 1.01s |
 <!-- bench:end -->
 
 ::: {.callout-tip collapse="true" title="Reproduce locally"}
