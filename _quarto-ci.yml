@@ -1,7 +1,6 @@
 project:
   render:
     - "**/*.qmd"
-    - "!manual/"
     - "!dev/"
 
 website:
@@ -15,5 +14,7 @@ website:
         href: guide/index.qmd
       - text: "Reference"
         href: reference/index.qmd
+      - text: "Manual"
+        href: manual/index.qmd
       - text: "Examples"
         href: examples/index.qmd
