@@ -77,6 +77,9 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
 
 <link rel="stylesheet" href="../styles.css">
@@ -546,17 +549,24 @@ Warning
 <p>The R layer sits between user-facing functions (<code>bgm()</code>, <code>bgmCompare()</code>) and the C++ engine. It validates inputs, constructs a specification object, dispatches to the appropriate C++ sampler, and assembles the returned output into an S3 fit object.</p>
 <section id="data-flow" class="level2">
 <h2 class="anchored" data-anchor-id="data-flow">Data flow</h2>
-<pre><code>bgm(x, ...)
-  ↓
-bgm_spec()            ← validates, assembles sub-lists
-  ↓
-new_bgm_spec()        ← asserts types and field presence
-  ↓
-validate_bgm_spec()   ← cross-field invariant checks
-  ↓
-run_sampler(spec)      ← dispatches to C++ via switch(model_type)
-  ↓
-build_output(spec, raw) ← normalizes raw C++ output into S3 object</code></pre>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart TD
+    A["bgm(x, ...)"] --&gt; B["bgm_spec()"]
+    B --&gt;|"validates, assembles sub-lists"| C["new_bgm_spec()"]
+    C --&gt;|"asserts types and field presence"| D["validate_bgm_spec()"]
+    D --&gt;|"cross-field invariant checks"| E["run_sampler(spec)"]
+    E --&gt;|"dispatches to C++ via model_type"| F["build_output(spec, raw)"]
+    F --&gt;|"normalizes raw C++ output into S3 object"| G["bgm fit object"]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
 <p>Both <code>bgm()</code> and <code>bgmCompare()</code> follow this pipeline. The <code>bgmCompare()</code> path adds group-specific preprocessing (projection matrices, group indices, precomputed sufficient statistics) before the spec is constructed.</p>
 </section>
 <section id="validation-pipeline" class="level2">
@@ -585,7 +595,7 @@ build_output(spec, raw) ← normalizes raw C++ output into S3 object</code></pre
 </section>
 <section id="sampler-validation-validate_sampler.r" class="level3">
 <h3 class="anchored" data-anchor-id="sampler-validation-validate_sampler.r">Sampler validation (<code>validate_sampler.R</code>)</h3>
-<p><code>validate_sampler()</code> resolves the <code>interaction_scale</code> argument into a concrete sampler type (<code>"nuts"</code> or <code>"adaptive_metropolis"</code>; <code>"hmc"</code> is accepted but deprecated) and sets defaults for tuning parameters (<code>target_accept</code>, <code>nuts_max_depth</code>, <code>hmc_num_leapfrogs</code>). It detects the number of available cores and resolves the progress display type.</p>
+<p><code>validate_sampler()</code> resolves the <code>update_method</code> argument into a concrete sampler type (<code>"nuts"</code> or <code>"adaptive_metropolis"</code>; <code>"hmc"</code> is accepted but deprecated) and sets defaults for tuning parameters (<code>target_accept</code>, <code>nuts_max_depth</code>, <code>hmc_num_leapfrogs</code>). It detects the number of available cores and resolves the progress display type.</p>
 </section>
 <section id="edge-prior-validation-validate_model.r" class="level3">
 <h3 class="anchored" data-anchor-id="edge-prior-validation-validate_model.r">Edge prior validation (<code>validate_model.R</code>)</h3>

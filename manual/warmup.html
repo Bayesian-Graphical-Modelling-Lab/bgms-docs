@@ -661,7 +661,7 @@ window.Quarto = {
 </table>
 <section id="stage-1-initial-step-size-adaptation" class="level3">
 <h3 class="anchored" data-anchor-id="stage-1-initial-step-size-adaptation">Stage 1: Initial step-size adaptation</h3>
-<p>A short burn-in phase (default: the first 75 iterations). The mass matrix is held at the identity. Dual averaging tunes the step size toward a target acceptance rate of 0.8. The starting value of <span class="math inline">\(\epsilon\)</span> comes from Algorithm 4 in <span class="citation" data-cites="HoffmanGelman_2014_nuts">Hoffman &amp; Gelman (<a href="#ref-HoffmanGelman_2014_nuts" role="doc-biblioref">2014</a>)</span>, which doubles or halves a trial step size until the acceptance probability crosses 0.5.</p>
+<p>A short burn-in phase (default: the first 75 iterations). The mass matrix is held at the identity. Dual averaging tunes the step size toward a target acceptance rate of 0.8. The starting value of <span class="math inline">\(\epsilon\)</span> comes from Algorithm 4 in <span class="citation" data-cites="HoffmanGelman_2014_nuts">Hoffman &amp; Gelman (<a href="#ref-HoffmanGelman_2014_nuts" role="doc-biblioref">2014</a>)</span>, which doubles or halves a trial step size until the Metropolis acceptance ratio of a single leapfrog step crosses the target acceptance rate.</p>
 </section>
 <section id="stage-2-adaptation-windows" class="level3">
 <h3 class="anchored" data-anchor-id="stage-2-adaptation-windows">Stage 2: Adaptation windows</h3>

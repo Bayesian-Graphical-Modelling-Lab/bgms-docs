@@ -112,6 +112,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -594,47 +597,63 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
 <p>The sampler classes in <code>src/mcmc/samplers/</code> are header-only wrappers that own adaptation state and delegate to the stateless algorithm functions in <code>src/mcmc/algorithms/</code>. The chain runner interacts with samplers through the <code>SamplerBase</code> interface.</p>
 <section id="class-hierarchy" class="level2">
 <h2 class="anchored" data-anchor-id="class-hierarchy">Class hierarchy</h2>
-<pre><code>SamplerBase                       (abstract)
-├── MetropolisSampler             — element-wise Metropolis-Hastings
-└── GradientSamplerBase           (abstract, owns HMCAdaptationController)
-    ├── HMCSampler                — fixed-length leapfrog (deprecated)
-    └── NUTSSampler               — adaptive tree depth</code></pre>
-<p>The <code>HybridNUTSSampler</code> variant exists for the mixed MRF, combining a NUTS step for the main parameter block with a Metropolis step for the continuous precision elements.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">classDiagram
+    class SamplerBase {
+        &lt;&lt;abstract&gt;&gt;
+        +step(model, iteration) StepResult
+        +initialize(model)
+        +has_nuts_diagnostics() bool
+    }
+    class MetropolisSampler {
+        element-wise MH
+    }
+    class GradientSamplerBase {
+        &lt;&lt;abstract&gt;&gt;
+        owns HMCAdaptationController
+        #do_gradient_step(model) StepResult
+    }
+    class HMCSampler {
+        fixed-length leapfrog
+        ~~deprecated~~
+    }
+    class NUTSSampler {
+        adaptive tree depth
+        -do_unconstrained_step()
+        -do_constrained_step()
+    }
+    SamplerBase &lt;|-- MetropolisSampler
+    SamplerBase &lt;|-- GradientSamplerBase
+    GradientSamplerBase &lt;|-- HMCSampler
+    GradientSamplerBase &lt;|-- NUTSSampler
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>The mixed MRF combines a NUTS step for the main parameter block (thresholds, discrete interactions, means, cross-type interactions) with an element-wise Metropolis step for the continuous precision elements. The chain runner orchestrates this; there is no combined sampler class.</p>
 </section>
 <section id="samplerbase-interface" class="level2">
 <h2 class="anchored" data-anchor-id="samplerbase-interface">SamplerBase interface</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SamplerBase <span class="op">{</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> StepResult step<span class="op">(</span>BaseModel<span class="op">&amp;</span> model<span class="op">,</span> <span class="dt">int</span> iteration<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">void</span> initialize<span class="op">(</span>BaseModel<span class="op">&amp;</span> model<span class="op">)</span> <span class="op">{}</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">bool</span> has_nuts_diagnostics<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span> <span class="op">}</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SamplerBase <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> StepResult step<span class="op">(</span>BaseModel<span class="op">&amp;</span> model<span class="op">,</span> <span class="dt">int</span> iteration<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">void</span> initialize<span class="op">(</span>BaseModel<span class="op">&amp;</span> model<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">virtual</span> <span class="dt">bool</span> has_nuts_diagnostics<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>step()</code> performs one MCMC iteration and returns a <code>StepResult</code> containing the accepted parameter vector, acceptance probability, and optional NUTS diagnostics.</p>
-<p><code>initialize()</code> is called once before the first iteration. For gradient-based samplers, it runs the step-size heuristic that finds a reasonable initial step size by iteratively doubling or halving until the acceptance probability is near the target (default 0.625).</p>
+<p><code>initialize()</code> is called once before the first iteration. For gradient-based samplers, it runs the step-size heuristic that finds a reasonable initial step size by iteratively doubling or halving until the acceptance probability is near the target (default 0.8).</p>
 </section>
 <section id="metropolissampler" class="level2">
 <h2 class="anchored" data-anchor-id="metropolissampler">MetropolisSampler</h2>
-<p>The simplest sampler. Each call to <code>step()</code>:</p>
-<ol type="1">
-<li>Calls <code>model.do_one_metropolis_step(iteration)</code>, which performs a full sweep of element-wise proposals</li>
-<li>If the model has edge selection and the warmup schedule indicates selection is active, calls <code>model.update_edge_indicators()</code></li>
-<li>Returns the current parameters as the accepted state</li>
-</ol>
+<p>The simplest sampler. Each call to <code>step()</code> invokes <code>model.do_one_metropolis_step(iteration)</code>, which performs a full sweep of element-wise proposals, and returns the result. Edge selection is handled by the chain runner before the sampler step, not by <code>MetropolisSampler</code> itself.</p>
 <p>Proposal standard deviations are tuned during warmup via Robbins-Monro updates (see <a href="../manual/warmup.html">Warmup Schedule</a>).</p>
 </section>
 <section id="gradientsamplerbase" class="level2">
@@ -667,7 +686,7 @@ Warning
 <p><code>HMCSampler</code> is deprecated. The R-level <code>update_method = "hamiltonian-mc"</code> option still dispatches to this class, but it will be removed in a future release. Use NUTS instead.</p>
 </div>
 </div>
-<p>Performs fixed-length leapfrog integration. The number of leapfrog steps is set at construction from <code>config.num_leapfrogs</code>. Each call to <code>do_gradient_step()</code> invokes <code>hmc_step()</code> from <code>mcmc/algorithms/hmc.h</code>.</p>
+<p>Performs fixed-length leapfrog integration. The number of leapfrog steps is set at construction from <code>config.num_leapfrogs</code>. Each call to <code>do_gradient_step()</code> invokes <code>hmc_step()</code> from <code>mcmc/algorithms/hmc.h</code>. For constrained models, RATTLE integration is used (see <a href="../manual/rattle.html">Constrained Leapfrog (RATTLE)</a>).</p>
 </section>
 <section id="nutssampler" class="level2">
 <h2 class="anchored" data-anchor-id="nutssampler">NUTSSampler</h2>
@@ -676,30 +695,34 @@ Warning
 <section id="factory-dispatch" class="level2">
 <h2 class="anchored" data-anchor-id="factory-dispatch">Factory dispatch</h2>
 <p><code>create_sampler()</code> in <code>chain_runner.cpp</code> constructs the right sampler based on the model’s capabilities and the user’s choice:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>unique_ptr<span class="op">&lt;</span>SamplerBase<span class="op">&gt;</span> create_sampler<span class="op">(</span><span class="at">const</span> SamplerConfig<span class="op">&amp;</span> config<span class="op">,</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                                        WarmupSchedule<span class="op">&amp;</span> schedule<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">switch</span><span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> nuts<span class="op">:</span>                <span class="cf">return</span> make_unique<span class="op">&lt;</span>NUTSSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> hamiltonian_mc<span class="op">:</span>      <span class="cf">return</span> make_unique<span class="op">&lt;</span>HMCSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> adaptive_metropolis<span class="op">:</span> <span class="cf">return</span> make_unique<span class="op">&lt;</span>MetropolisSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The GGM always uses <code>MetropolisSampler</code> because it does not provide a gradient. The OMRF and mixed MRF default to NUTS but fall back to Metropolis when the user requests it via <code>interaction_scale</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>unique_ptr<span class="op">&lt;</span>SamplerBase<span class="op">&gt;</span> create_sampler<span class="op">(</span><span class="at">const</span> SamplerConfig<span class="op">&amp;</span> config<span class="op">,</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                                        WarmupSchedule<span class="op">&amp;</span> schedule<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"nuts"</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> make_unique<span class="op">&lt;</span>NUTSSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"hmc"</span> <span class="op">||</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>             config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"hamiltonian-mc"</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> make_unique<span class="op">&lt;</span>HMCSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"mh"</span> <span class="op">||</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>             config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"adaptive-metropolis"</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> make_unique<span class="op">&lt;</span>MetropolisSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The R layer (<code>validate_sampler.R</code>) resolves strings like <code>"hamiltonian-mc"</code> and <code>"adaptive-metropolis"</code> before they reach C++, so in practice the factory receives <code>"nuts"</code>, <code>"hmc"</code>, or <code>"mh"</code>.</p>
+<p>All three model types (GGM, OMRF, mixed MRF) default to NUTS. The user can select Metropolis via <code>update_method = "adaptive-metropolis"</code>.</p>
 </section>
-<section id="step-size-adaptation" class="level2">
-<h2 class="anchored" data-anchor-id="step-size-adaptation">Step-size adaptation</h2>
-<p>The <code>DualAveraging</code> class implements the Nesterov dual-averaging scheme from Hoffman and Gelman (2014). During warmup, each step’s acceptance probability is fed to the dual averager, which maintains both a current step size (for exploration) and a smoothed average (used after warmup).</p>
-<p>Key parameters:</p>
+<section id="step-size-and-mass-matrix-adaptation" class="level2">
+<h2 class="anchored" data-anchor-id="step-size-and-mass-matrix-adaptation">Step-size and mass-matrix adaptation</h2>
+<p><code>GradientSamplerBase</code> owns an <code>HMCAdaptationController</code> that coordinates dual averaging for <span class="math inline">\(\epsilon\)</span> and Welford variance estimation for the diagonal mass matrix <span class="math inline">\(M\)</span>. The full adaptation schedule — stage boundaries, doubling windows, blending formula, and dual-averaging parameters — is documented in <a href="../manual/warmup.html">Warmup Schedule</a>.</p>
+<p><code>MetropolisSampler</code> uses a separate <code>MetropolisAdaptationController</code> that tunes proposal standard deviations via Robbins–Monro updates targeting an acceptance rate of 0.44.</p>
+</section>
+<section id="constrained-integration-dispatch" class="level2">
+<h2 class="anchored" data-anchor-id="constrained-integration-dispatch">Constrained integration dispatch</h2>
+<p>When <code>model.has_constraints()</code> returns <code>true</code>, <code>NUTSSampler</code> switches from the unconstrained leapfrog to RATTLE integration:</p>
 <ul>
-<li><strong>Target acceptance</strong> — Default 0.8 for NUTS</li>
-<li><strong><span class="math inline">\(\gamma\)</span>, <span class="math inline">\(t_0\)</span>, <span class="math inline">\(\kappa\)</span></strong> — Shrinkage and decay parameters from the NUTS paper</li>
+<li><strong>Unconstrained path</strong> — Uses <code>get_vectorized_parameters()</code> and <code>logp_and_gradient()</code> on the active parameter subset. Used by the OMRF, which handles edge selection by adjusting its active parameter dimension instead.</li>
+<li><strong>Constrained path</strong> — Uses <code>get_full_position()</code> and <code>logp_and_gradient_full()</code> on the complete parameter vector. The sampler wraps the model’s <code>project_position</code> and <code>project_momentum</code> methods into lambda callbacks passed to <code>nuts_step()</code>.</li>
 </ul>
-</section>
-<section id="mass-matrix-tuning" class="level2">
-<h2 class="anchored" data-anchor-id="mass-matrix-tuning">Mass matrix tuning</h2>
-<p>The <code>DiagMassMatrixAccumulator</code> collects parameter samples during warmup stage 2 using Welford’s algorithm for numerically stable variance computation. At the end of each adaptation window, the accumulated variance is extracted as the diagonal mass matrix.</p>
-<p>The variance estimate is blended with a prior (shrunk toward 1.0) to prevent degenerate mass matrices early in warmup when few samples are available.</p>
-<p>When the mass matrix changes, the step size is reinitialized from scratch using the heuristic, because the optimal step size depends on the mass matrix.</p>
+<p>The RATTLE algorithm itself is documented in <a href="../manual/rattle.html">Constrained Leapfrog (RATTLE)</a>. The model-side projection functions are described in <a href="../manual/model-classes.html#constraint-projection">Model Classes — Constraint projection</a>.</p>
 
 
 </section>

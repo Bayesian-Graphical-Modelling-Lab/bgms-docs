@@ -605,10 +605,11 @@ r_{ni} = \sum_{j \neq i} x_{nj}\, \sigma_{ij}
 <section id="pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="pseudolikelihood">Pseudolikelihood</h2>
 <p>The OMRF uses a pseudolikelihood approximation: the product of full conditional distributions rather than the intractable joint distribution. The log-pseudolikelihood is:</p>
+<p>For a cross-model overview, see <a href="pseudolikelihood.qmd">Pseudolikelihood</a>.</p>
 <p><span class="math display">\[
 \text{PL}(\boldsymbol{\theta}) = \sum_{i=1}^{p} \sum_{n=1}^{N} \log P(X_{ni} = x_{ni} \mid \text{rest})
 \]</span></p>
-<p>The gradient of the log-pseudolikelihood with respect to each parameter involves the expected category values under the current conditionals, computed by the <a href="../manual/variable-helpers.html">variable helpers</a>.</p>
+<p>The gradient of the log-pseudolikelihood with respect to each parameter involves the expected category values under the current conditionals, computed by the <a href="../manual/variable-helpers.html">Variable Helpers</a>.</p>
 </section>
 <section id="gradient-computation" class="level2">
 <h2 class="anchored" data-anchor-id="gradient-computation">Gradient computation</h2>
@@ -631,7 +632,7 @@ r_{ni} = \sum_{j \neq i} x_{nj}\, \sigma_{ij}
 </section>
 <section id="adaptive-metropolis-fallback" class="level2">
 <h2 class="anchored" data-anchor-id="adaptive-metropolis-fallback">Adaptive Metropolis fallback</h2>
-<p>Even when NUTS is the primary sampler, the OMRF implements element-wise adaptive Metropolis proposals for use during warmup stage 3b (proposal SD learning) and as a user-selectable alternative via <code>interaction_scale = "fixed"</code>. The proposal SDs are tuned by Robbins-Monro targeting 0.234 acceptance, clamped to <span class="math inline">\([0.001, 2.0]\)</span>.</p>
+<p>Even when NUTS is the primary sampler, the OMRF implements element-wise adaptive Metropolis proposals for use during warmup stage 3b (proposal SD learning) and as a user-selectable alternative via <code>update_method = "adaptive-metropolis"</code>. The proposal SDs are tuned by Robbins-Monro targeting 0.234 acceptance, clamped to <span class="math inline">\([0.001, 2.0]\)</span>.</p>
 
 
 </section>
