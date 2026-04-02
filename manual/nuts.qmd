@@ -122,87 +122,15 @@ via `extract_nuts_diagnostics()`.
 
 ## Warmup {#warmup}
 
-The warmup procedure adapts the step size $\epsilon$ and the
-diagonal mass matrix $M$ before sampling begins. The three core
-stages (1, 2, 3a) follow Stan's warmup scheme for NUTS. Stages 3b and 3c
-are `bgms` extensions that accommodate the spike-and-slab edge
-selection machinery.
+NUTS adapts the step size $\epsilon$ and the diagonal mass matrix
+$M$ during a multi-stage warmup period before sampling begins.
+The three core stages (1, 2, 3a) follow Stan's warmup scheme for
+NUTS. Stages 3b and 3c are `bgms` extensions that accommodate
+the spike-and-slab edge selection machinery.
 
-### Budget allocation
-
-The warmup budget is split into stages. Without edge selection,
-all iterations go to the three core stages. With edge selection,
-85% goes to the core stages, 10% to proposal-SD tuning
-(Stage 3b), and 5% to step-size re-adaptation under edge
-selection (Stage 3c). If the Stage-3b budget would be fewer
-than 20 iterations, Stages 3b and 3c are skipped.
-
-### Stage 1 — Initial step-size adaptation
-
-**Default length:** 75 iterations.
-
-Dual averaging tunes the step size toward a target acceptance
-rate of 0.8. The mass matrix is held at the identity. The
-starting value of $\epsilon$ comes from a heuristic that doubles
-or halves a trial step size until the acceptance probability
-crosses 0.5.
-
-### Stage 2 — Mass-matrix estimation (doubling windows)
-
-**Default length:** remainder of the core budget minus Stage 1
-and Stage 3a.
-
-Both step-size adaptation and mass-matrix estimation run
-simultaneously. The stage is divided into doubling windows
-(25, 50, 100, 200, …). Within each window, a Welford running
-variance accumulates the sampled parameter vectors. At the end
-of each window, the diagonal mass matrix is set to
-
-$$
-\hat{M}^{-1}_j
-= \frac{n}{n + w}\,\hat{\sigma}^2_j
-+ \frac{w}{n + w}\,\sigma^2_0,
-$$
-
-blending the empirical variance $\hat{\sigma}^2_j$ (from $n$
-samples) with a prior variance $\sigma^2_0 = 10^{-3}$ at weight
-$w = 5$. After each mass-matrix update, the step-size heuristic
-reruns and dual averaging restarts.
-
-### Stage 3a — Terminal step-size tuning
-
-**Default length:** 50 iterations.
-
-The mass matrix is frozen. Dual averaging continues to give the
-step size a final tuning pass against the converged mass matrix.
-At the end of this stage, the step size is fixed at the
-dual-averaging estimate.
-
-### Stage 3b — Proposal-SD tuning (edge selection only)
-
-**Default length:** 10% of total warmup.
-
-Step-size adaptation is frozen. For models with element-wise
-Metropolis proposals (e.g., the OMRF's category parameters), the
-proposal standard deviations are tuned via Robbins–Monro updates
-targeting an acceptance rate of 0.44. Edge selection is not yet
-active in this stage.
-
-### Stage 3c — Re-adaptation under edge selection
-
-**Default length:** 5% of total warmup.
-
-Edge selection is activated: `set_edge_selection_active(true)`.
-Edge indicators $\gamma_{ij}$ are updated every iteration, changing
-the effective parameter space. Dual averaging restarts to re-tune
-$\epsilon$ for the new geometry. For models with constraints,
-the constrained step-size heuristic (using RATTLE) is used.
-
-### Dual averaging
-
-The step-size update follows @HoffmanGelman_2014_nuts with
-parameters $\gamma = 0.05$, $t_0 = 10$, $\kappa = 0.75$, and
-bias target $\mu = \log(10\,\epsilon_0)$.
+The full warmup schedule — stage boundaries, budget allocation,
+adaptation algorithms, and warning system — is documented in
+[Warmup Schedule](warmup.qmd).
 
 ## NUTS diagnostics
 
