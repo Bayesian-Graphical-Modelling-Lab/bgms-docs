@@ -526,85 +526,85 @@
   {
     "objectID": "manual/rattle.html",
     "href": "manual/rattle.html",
-    "title": "Constrained Leapfrog (RATTLE)",
+    "title": "Constrained Leapfrog",
     "section": "",
     "text": "When edge selection is active, excluded edges must remain exactly zero throughout HMC integration. The standard leapfrog integrator cannot enforce this: after an unconstrained position update, a zero entry will drift to a nonzero value. bgms solves this with a constrained leapfrog scheme based on RATTLE (Reich, 1996), with the implementation adapted from the Mici library (Graham, 2019).\nThe implementation lives in leapfrog.h and leapfrog.cpp.",
     "crumbs": [
       "Manual",
       "MCMC Algorithms",
-      "Constrained Leapfrog (RATTLE)"
+      "Constrained Leapfrog"
     ]
   },
   {
     "objectID": "manual/rattle.html#why-constraints",
     "href": "manual/rattle.html#why-constraints",
-    "title": "Constrained Leapfrog (RATTLE)",
+    "title": "Constrained Leapfrog",
     "section": "Why constraints?",
     "text": "Why constraints?\nIn the MoMS edge-selection framework (van den Bergh et al., 2026), each pairwise parameter is either exactly zero (edge absent) or free (edge present). For models with continuous variables (GGM, Mixed MRF), the precision matrix \\(\\boldsymbol{\\Theta}\\) must be positive definite. bgms enforces this through a Cholesky parameterization \\(\\boldsymbol{\\Theta} = L^\\top L\\), where the sampler operates on the entries of \\(L\\). Positive definiteness is then guaranteed by construction.\nThe complication is sparsity. An excluded edge (\\(\\gamma_{ij} = 0\\)) requires \\(\\theta_{ij} = 0\\), which in Cholesky entries means\n\\[\n\\sum_l L_{li}\\,L_{lj} = 0.\n\\]\nThis is a nonlinear (quadratic) constraint on the entries of \\(L\\), because different columns of \\(L\\) interact through the \\(L^\\top L\\) product. The constraint manifold is\n\\[\n\\mathcal{M} = \\bigl\\{L : \\theta_{ij} = \\textstyle\\sum_l L_{li}\\,L_{lj} = 0\n\\;\\text{for all }\\; \\gamma_{ij} = 0\\bigr\\}.\n\\]\nStandard leapfrog preserves the Hamiltonian but not this nonlinear constraint: after an unconstrained position update, excluded precision entries drift away from zero. RATTLE adds projection steps that snap the trajectory back onto \\(\\mathcal{M}\\) after each leapfrog sub-step.",
     "crumbs": [
       "Manual",
       "MCMC Algorithms",
-      "Constrained Leapfrog (RATTLE)"
+      "Constrained Leapfrog"
     ]
   },
   {
     "objectID": "manual/rattle.html#algorithm",
     "href": "manual/rattle.html#algorithm",
-    "title": "Constrained Leapfrog (RATTLE)",
+    "title": "Constrained Leapfrog",
     "section": "Algorithm",
     "text": "Algorithm\nEach constrained leapfrog step has seven phases:\n       ┌──────────────────────────────────────────┐\n       │         Constrained leapfrog step         │\n       ├──────────────────────────────────────────┤\n       │  1. Half-step momentum                    │\n       │  2. Project momentum → cotangent space    │\n       │  3. Full-step position                    │\n       │  4. SHAKE: project position → manifold    │\n       │  5. Momentum correction (constraint force)│\n       │  6. Second half-step momentum             │\n       │  7. Project momentum → cotangent space    │\n       └──────────────────────────────────────────┘\nIn mathematical notation:\n\nHalf-step momentum — \\(r \\leftarrow r + \\tfrac{\\epsilon}{2}\\,\\nabla\\log p(x)\\)\nProject momentum — Project \\(r\\) onto the cotangent space of \\(\\mathcal{M}\\) at \\(x\\). This ensures the momentum does not push the trajectory off the constraint surface.\nFull-step position — \\(x \\leftarrow x + \\epsilon\\,M^{-1} r\\)\nSHAKE (position projection) (Ryckaert et al., 1977) — Set excluded entries of \\(x\\) back to zero. Record the displacement \\(\\Delta x = x_{\\text{after}} - x_{\\text{before}}\\).\nMomentum correction — Account for the constraint forces that produced the position snap: \\(r \\leftarrow r + \\Delta x \\,/\\, (\\epsilon\\,M^{-1})\\)\nSecond half-step momentum — \\(r \\leftarrow r + \\tfrac{\\epsilon}{2}\\,\\nabla\\log p(x)\\)\nProject momentum — Project \\(r\\) onto the cotangent space again.\n\nSteps 2 and 7 keep the momentum tangent to the constraint manifold. Step 4 snaps the position back after the unconstrained update. Step 5 adjusts the momentum to reflect the constraint forces implied by the position snap.\n\nMemoizer cache invalidation\nThe Memoizer (see below) caches \\((x, \\log p, \\nabla\\log p)\\) from the most recent evaluation. After step 4 changes \\(x\\) in place, the cached gradient refers to the pre-projection position and is invalid. The cache is explicitly invalidated between steps 4 and 6, forcing a fresh evaluation when step 6 requests the gradient.",
     "crumbs": [
       "Manual",
       "MCMC Algorithms",
-      "Constrained Leapfrog (RATTLE)"
+      "Constrained Leapfrog"
     ]
   },
   {
     "objectID": "manual/rattle.html#reversibility-check",
     "href": "manual/rattle.html#reversibility-check",
-    "title": "Constrained Leapfrog (RATTLE)",
+    "title": "Constrained Leapfrog",
     "section": "Reversibility check",
     "text": "Reversibility check\nA symplectic integrator must be reversible: stepping forward and then backward with negated momentum should recover the original position exactly (up to floating-point rounding). Once projection enters the integrator, reversibility cannot be taken for granted: the nonlinear projection solve may fail to converge or may converge to a different branch on the backward step (Lelièvre et al., 2019; Zappa et al., 2018).\n\nWhy the projection is approximate\nThe sparsity constraint on the precision matrix \\(\\boldsymbol{\\Theta} = L^\\top L\\) requires \\(\\theta_{ij} = \\sum_l L_{li}\\,L_{lj} = 0\\) for every excluded edge \\((\\gamma_{ij} = 0)\\). This is nonlinear in the Cholesky entries of \\(L\\) because different columns interact through the \\(L^\\top L\\) product.\nThe SHAKE projection in step 4 solves these constraints with a left-to-right column sweep: for each column \\(q\\), it computes the exact linear correction that satisfies the constraints involving column \\(q\\), given the already-projected earlier columns. Within a single call, the sweep is exact — each column’s constraint \\(A_q x_q = 0\\) is linear in \\(x_q\\) when earlier columns are held fixed.\nThe approximation enters because the position has moved \\(O(\\epsilon)\\) off the manifold, and the column sweep solves the linearized constraints in one pass. Cross-column coupling through \\(L^\\top L\\) means that correcting column \\(q\\) can shift the residual of constraints involving later columns. This one-step Newton-like correction on an \\(O(\\epsilon)\\) perturbation leaves a residual of order \\(O(\\epsilon^2)\\) — the standard truncation order for a single Newton step.\nleapfrog_constrained_checked() in leapfrog.cpp detects these failures at runtime:\n\nPerform the forward constrained step: \\((x, r) \\to (x', r')\\).\nNegate momentum and perform a second constrained step: \\((x', -r') \\to (x'', r'')\\).\nCompute the round-trip error: \\(\\|x'' - x\\|_\\infty\\).\nIf the error exceeds \\(\\tau \\cdot \\epsilon^2\\), flag the step as non-reversible.\n\nThe tolerance factor \\(\\tau\\) defaults to \\(0.5\\) (reverse_check_tol in sampler_config.h). The \\(\\epsilon^2\\) scaling matches the \\(O(\\epsilon^2)\\) residual from the column-sweep projection.\n\n\nPhase-aware enforcement\nThe reversibility check runs at every iteration, but its consequences differ by phase:\n\nDuring warmup — Non-reversible steps are recorded but do not terminate the NUTS tree. The step-size adapter is still tuning, so occasional failures are expected and informative: their frequency guides the adapter toward a step size that keeps the integrator reversible.\nDuring sampling — A non-reversible step terminates the NUTS tree and rejects the proposal, the same way a divergence does. This prevents biased samples from entering the posterior.\n\nThe switch happens at the warmup/sampling boundary. In GradientSamplerBase::step():\nenforce_reverse_check_ = schedule_.sampling(iteration);\nThe NUTSSampler passes reverse_check && enforce_reverse_check_ to nuts_step(), and build_tree() checks this flag at the base case:\n\n\n\n\n\nflowchart TD\n    A[\"build_tree (depth 0)\"] --&gt; B{\"Constrained\\nmodel?\"}\n    B -- yes --&gt; C[\"leapfrog_constrained_checked()\"]\n    B -- no --&gt; D[\"leapfrog_memo()\"]\n    C --&gt; E{\"Reversible?\"}\n    E -- yes --&gt; F[\"Compute logp, check divergence\"]\n    E -- \"no + enforcing\" --&gt; G[\"s_prime = 0\\n(terminate tree)\"]\n    E -- \"no + warmup\" --&gt; F\n    D --&gt; F\n    F --&gt; H[\"Return BuildTreeResult\"]\n    G --&gt; H\n\n\n\n\n\n\n\n\nDiagnostics\nEach BuildTreeResult carries a non_reversible flag. When two subtrees are merged, the flags are OR-ed: a single non-reversible leaf anywhere in the tree flags the whole iteration. The flag propagates through NUTSDiagnostics in step_result.h to ChainResult in chain_result.h, and is surfaced in R as fit$nuts_diag$non_reversible — an integer matrix (chains \\(\\times\\) iterations) of 0/1 values. The summary field fit$nuts_diag$summary$total_non_reversible reports the total count across all chains and iterations.",
     "crumbs": [
       "Manual",
       "MCMC Algorithms",
-      "Constrained Leapfrog (RATTLE)"
+      "Constrained Leapfrog"
     ]
   },
   {
     "objectID": "manual/rattle.html#memoizer",
     "href": "manual/rattle.html#memoizer",
-    "title": "Constrained Leapfrog (RATTLE)",
+    "title": "Constrained Leapfrog",
     "section": "Memoizer",
     "text": "Memoizer\nThe Memoizer class in leapfrog.h is a single-entry cache for \\((\\log p(x), \\nabla\\log p(x))\\) evaluations.\n\nWhy a single-entry cache?\nNUTS tree building calls the gradient repeatedly as it extends the trajectory. Each leapfrog step produces a new unique \\(x\\), so a multi-entry hash map would almost never hit — and hashing an arma::vec element-by-element is expensive. A single-entry cache exploits the fact that at tree-node boundaries the same \\(x\\) appears as both the end of one subtree and the start of the next. The cache uses memcmp for equality, which is a single comparison per step.\n\n\nJoint evaluation\nModels often share computation between \\(\\log p\\) and \\(\\nabla\\log p\\) (e.g., normalization constants, sufficient statistics). The Memoizer accepts a joint function (x) → (logp, grad) and caches both values from a single call. Two access methods retrieve the cached values:\n\ncached_log_post(x) — returns \\(\\log p(x)\\)\ncached_grad(x) — returns \\(\\nabla\\log p(x)\\)\n\nBoth trigger a joint evaluation if the cache misses.\n\n\nInvalidation\nAfter the SHAKE position projection (step 4 of the constrained leapfrog), \\(x\\) is modified in place. The cached gradient refers to the pre-projection \\(x\\) and must be discarded. leapfrog_constrained() calls memo.invalidate() immediately after the projection, before the second half-step requests a fresh gradient.",
     "crumbs": [
       "Manual",
       "MCMC Algorithms",
-      "Constrained Leapfrog (RATTLE)"
+      "Constrained Leapfrog"
     ]
   },
   {
     "objectID": "manual/rattle.html#projection-callbacks",
     "href": "manual/rattle.html#projection-callbacks",
-    "title": "Constrained Leapfrog (RATTLE)",
+    "title": "Constrained Leapfrog",
     "section": "Projection callbacks",
     "text": "Projection callbacks\nThe model provides the projection logic through two virtual methods on BaseModel:\n\nproject_position(pos, inv_mass) — Zeros out excluded-edge entries in the position vector.\nproject_momentum(mom, pos, inv_mass) — Projects momentum onto the cotangent space of the constraint manifold at pos.\n\nThe NUTSSampler wraps these into ProjectPositionFn and ProjectMomentumFn lambda callbacks and passes them to nuts_step(), which forwards them to leapfrog_constrained() or leapfrog_constrained_checked(). When the callbacks are null (the default), nuts_step() uses the unconstrained leapfrog_memo() instead.\n\nPer-model implementations\nRATTLE is needed only when a matrix definiteness constraint combines with edge-sparsity constraints. For models with continuous variables, the precision matrix (GGM) or the continuous-continuous block of the interaction matrix (Mixed MRF) must be positive definite, and excluded edges must be exactly zero. The Cholesky parameterization enforces definiteness, but zeroing precision entries within that parameterization is a nonlinear constraint that requires projection. For purely discrete models (OMRF), parameters are unconstrained reals and standard NUTS suffices.\n\n\n\nModel\nPosition projection\nMomentum projection\n\n\n\n\nGGM\nZeros out Cholesky-factor entries for excluded edges, column by column, using GraphConstraintStructure offsets. See GGM Internals.\nProjects momentum onto the null space of the constraint Jacobian (identity rows for excluded entries).\n\n\nMixed MRF\nSame Cholesky-based projection, but only for the continuous-continuous (\\(G_{yy}\\)) block. Discrete-discrete and discrete-continuous interactions are unconstrained. See Mixed MRF Internals.\nSame null-space projection, scoped to the \\(G_{yy}\\) block.\n\n\nOMRF\nNot applicable — no matrix definiteness constraint, so unconstrained NUTS is used.\n—",
     "crumbs": [
       "Manual",
       "MCMC Algorithms",
-      "Constrained Leapfrog (RATTLE)"
+      "Constrained Leapfrog"
     ]
   },
   {
     "objectID": "manual/rattle.html#dispatch-in-the-sampler-hierarchy",
     "href": "manual/rattle.html#dispatch-in-the-sampler-hierarchy",
-    "title": "Constrained Leapfrog (RATTLE)",
+    "title": "Constrained Leapfrog",
     "section": "Dispatch in the sampler hierarchy",
     "text": "Dispatch in the sampler hierarchy\nThe NUTSSampler checks whether the model needs constrained integration and dispatches accordingly:\n\n\n\n\n\nflowchart TD\n    A[\"NUTSSampler::do_gradient_step()\"] --&gt; B{\"model.has_constraints()?\"}\n    B -- yes --&gt; C[\"do_constrained_step()\"]\n    B -- no --&gt; D[\"do_unconstrained_step()\"]\n    C --&gt; E[\"model.reset_projection_cache()\"]\n    E --&gt; F[\"get_full_position()\"]\n    F --&gt; G[\"Build projection lambdas\"]\n    G --&gt; H[\"nuts_step(..., &proj_pos, &proj_mom,\\n  reverse_check, tol)\"]\n    D --&gt; I[\"get_vectorized_parameters()\"]\n    I --&gt; J[\"nuts_step(..., nullptr, nullptr)\"]\n    H --&gt; K[\"set_full_position(result.state)\"]\n    J --&gt; L[\"set_vectorized_parameters(result.state)\"]\n\n\n\n\n\n\nThe constrained path operates in the full parameter space (all off-diagonal Cholesky entries including zeros), while the unconstrained path operates in the active parameter space (only included edges). See Sampler Hierarchy and Model Classes for details on the dimension distinction.",
     "crumbs": [
       "Manual",
       "MCMC Algorithms",
-      "Constrained Leapfrog (RATTLE)"
+      "Constrained Leapfrog"
     ]
   },
   {
@@ -616,6 +616,7 @@
     "crumbs": [
       "Manual",
       "Model Internals",
+      "Supporting Pages",
       "Pseudolikelihood"
     ]
   },
@@ -628,6 +629,7 @@
     "crumbs": [
       "Manual",
       "Model Internals",
+      "Supporting Pages",
       "Pseudolikelihood"
     ]
   },
@@ -640,6 +642,7 @@
     "crumbs": [
       "Manual",
       "Model Internals",
+      "Supporting Pages",
       "Pseudolikelihood"
     ]
   },
@@ -652,6 +655,7 @@
     "crumbs": [
       "Manual",
       "Model Internals",
+      "Supporting Pages",
       "Pseudolikelihood"
     ]
   },
@@ -664,6 +668,7 @@
     "crumbs": [
       "Manual",
       "Model Internals",
+      "Supporting Pages",
       "Pseudolikelihood"
     ]
   },
@@ -676,6 +681,7 @@
     "crumbs": [
       "Manual",
       "Model Internals",
+      "Supporting Pages",
       "Pseudolikelihood"
     ]
   },
@@ -688,6 +694,7 @@
     "crumbs": [
       "Manual",
       "Model Internals",
+      "Supporting Pages",
       "Pseudolikelihood"
     ]
   },
@@ -700,287 +707,288 @@
     "crumbs": [
       "Manual",
       "Model Internals",
+      "Supporting Pages",
       "Pseudolikelihood"
     ]
   },
   {
     "objectID": "manual/omrf-internals.html",
     "href": "manual/omrf-internals.html",
-    "title": "OMRF Internals",
+    "title": "OMRF",
     "section": "",
     "text": "Implementation details of the ordinal Markov random field in bgms. Source: src/models/omrf/omrf_model.h and omrf_model.cpp.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "OMRF Internals"
+      "OMRF"
     ]
   },
   {
     "objectID": "manual/omrf-internals.html#ordinal-threshold-parameterization",
     "href": "manual/omrf-internals.html#ordinal-threshold-parameterization",
-    "title": "OMRF Internals",
+    "title": "OMRF",
     "section": "Ordinal threshold parameterization",
     "text": "Ordinal threshold parameterization\nFor an ordinal variable \\(X_i\\) with \\(K_i + 1\\) categories \\((0, 1, \\ldots, K_i)\\), the model assigns \\(K_i\\) threshold parameters \\(\\mu_i(1), \\ldots, \\mu_i(K_i)\\). Category \\(c = 0\\) serves as the reference with \\(\\mu_i(0) = 0\\). The conditional probability of observing category \\(c\\) for person \\(n\\) is:\n\\[\nP(X_{ni} = c \\mid \\text{rest}) = \\frac{\\exp\\!\\bigl(\\mu_i(c) + c \\cdot r_{ni}\\bigr)}{\\sum_{k=0}^{K_i} \\exp\\!\\bigl(\\mu_i(k) + k \\cdot r_{ni}\\bigr)}\n\\]\nwhere \\(r_{ni} = 2\\sum_{j \\neq i} x_{nj}\\, \\omega_{ij}\\) is the residual score summarizing the pairwise interactions with all other variables.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "OMRF Internals"
+      "OMRF"
     ]
   },
   {
     "objectID": "manual/omrf-internals.html#blume-capel-model",
     "href": "manual/omrf-internals.html#blume-capel-model",
-    "title": "OMRF Internals",
+    "title": "OMRF",
     "section": "Blume-Capel model",
     "text": "Blume-Capel model\nFor Blume-Capel variables, the threshold structure is replaced by two parameters: a linear effect \\(\\alpha_i\\) and a quadratic effect \\(\\beta_i\\). The category score is:\n\\[\n\\mu_i(c) = \\alpha_i (c - b_i) + \\beta_i (c - b_i)^2\n\\]\nwhere \\(b_i\\) is the reference (baseline) category. This allows the model to capture non-monotone category effects, such as preferences for moderate responses.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "OMRF Internals"
+      "OMRF"
     ]
   },
   {
     "objectID": "manual/omrf-internals.html#residual-matrix",
     "href": "manual/omrf-internals.html#residual-matrix",
-    "title": "OMRF Internals",
+    "title": "OMRF",
     "section": "Residual matrix",
     "text": "Residual matrix\nThe model maintains a precomputed \\(n \\times p\\) residual matrix where entry \\((n, i)\\) stores:\n\\[\nr_{ni} = 2\\sum_{j \\neq i} x_{nj}\\, \\omega_{ij}\n\\]\nWhen a single interaction \\(\\omega_{ij}\\) changes by \\(\\delta\\), the residual matrix is updated incrementally:\n\nColumn \\(i\\): \\(r_{ni} \\leftarrow r_{ni} + 2\\delta \\cdot x_{nj}\\) for all \\(n\\)\nColumn \\(j\\): \\(r_{nj} \\leftarrow r_{nj} + 2\\delta \\cdot x_{ni}\\) for all \\(n\\)\n\nThis avoids recomputing the full matrix product after each parameter update.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "OMRF Internals"
+      "OMRF"
     ]
   },
   {
     "objectID": "manual/omrf-internals.html#pseudolikelihood",
     "href": "manual/omrf-internals.html#pseudolikelihood",
-    "title": "OMRF Internals",
+    "title": "OMRF",
     "section": "Pseudolikelihood",
     "text": "Pseudolikelihood\nThe OMRF uses a pseudolikelihood approximation: the product of full conditional distributions rather than the intractable joint distribution. The log-pseudolikelihood is:\nFor a cross-model overview, see Pseudolikelihood.\n\\[\n\\text{PL}(\\boldsymbol{\\theta}) = \\sum_{i=1}^{p} \\sum_{n=1}^{N} \\log P(X_{ni} = x_{ni} \\mid \\text{rest})\n\\]\nThe gradient of the log-pseudolikelihood with respect to each parameter involves the expected category values under the current conditionals, computed by the Variable Helpers.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "OMRF Internals"
+      "OMRF"
     ]
   },
   {
     "objectID": "manual/omrf-internals.html#gradient-computation",
     "href": "manual/omrf-internals.html#gradient-computation",
-    "title": "OMRF Internals",
+    "title": "OMRF",
     "section": "Gradient computation",
     "text": "Gradient computation\nThe logp_and_gradient() method computes both the log-pseudoposterior and its gradient in a single pass. The observed contribution to the gradient for a pairwise interaction \\(\\omega_{ij}\\) is \\(4 \\sum_{n} x_{ni} x_{nj}\\) (from the sufficient statistic \\(\\mathbf{X}^\\top\\mathbf{X}\\)). The expected contribution accumulates over both variables:\n\\[\n\\frac{\\partial \\text{PL}}{\\partial \\omega_{ij}} = 4\\sum_{n=1}^{N} x_{ni}\\, x_{nj} - 2\\sum_{n=1}^{N} \\bigl(E[X_i \\mid \\text{rest}]\\, x_{nj} + E[X_j \\mid \\text{rest}]\\, x_{ni}\\bigr)\n\\]\nThe expected values \\(E[X_i \\mid \\text{rest}]\\) are computed from the category probabilities, which are obtained via the numerically stable FAST/SAFE paths in variable_helpers.cpp. The pairwise gradient is vectorized using BLAS matrix products: \\(\\mathbf{X}^\\top \\mathbf{E}\\) where \\(\\mathbf{E}\\) is the matrix of conditional expected values.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "OMRF Internals"
+      "OMRF"
     ]
   },
   {
     "objectID": "manual/omrf-internals.html#edge-indicator-updates",
     "href": "manual/omrf-internals.html#edge-indicator-updates",
-    "title": "OMRF Internals",
+    "title": "OMRF",
     "section": "Edge indicator updates",
     "text": "Edge indicator updates\nEdge selection uses a Metropolis-Hastings sampler based on the mixtures of mutually singular (MoMS) distributions framework (Gottardo & Raftery, 2008; van den Bergh et al., 2026). All interaction parameters live in a fixed-dimensional space; excluded edges are represented as parameters fixed at zero rather than removed from the model.\nWhen edge selection is active, the model performs a full scan over all \\(p(p-1)/2\\) edges after each gradient-based step. For each edge \\((i, j)\\):\nAdd move (\\(\\gamma_{ij} = 0 \\to 1\\)). Propose a new interaction value \\(\\omega_{ij}^\\star \\sim \\mathcal{N}(\\omega_{ij},\\, \\sigma_{ij}^2)\\) and accept with probability \\[\n\\alpha = \\min\\!\\left\\{1,\\;\n  \\frac{p(\\boldsymbol{\\gamma}^\\star, \\boldsymbol{\\omega}^\\star \\mid \\mathbf{X})}\n       {p(\\boldsymbol{\\gamma},\\, \\boldsymbol{\\omega} \\mid \\mathbf{X})}\n  \\;\\frac{1}{q(\\omega_{ij}^\\star \\mid \\omega_{ij})}\n\\right\\}\n\\] where the posterior ratio includes the pseudolikelihood ratio, the Cauchy slab prior on \\(\\omega_{ij}^\\star\\), and the prior inclusion odds.\nDelete move (\\(\\gamma_{ij} = 1 \\to 0\\)). Set \\(\\omega_{ij}^\\star = 0\\) and accept with probability \\[\n\\alpha = \\min\\!\\left\\{1,\\;\n  \\frac{p(\\boldsymbol{\\gamma}^\\star, \\boldsymbol{\\omega}^\\star \\mid \\mathbf{X})}\n       {p(\\boldsymbol{\\gamma},\\, \\boldsymbol{\\omega} \\mid \\mathbf{X})}\n  \\;\\frac{q(\\omega_{ij} \\mid \\omega_{ij}^\\star)}{1}\n\\right\\}\n\\]\nThe scan order is randomized at each iteration via prepare_iteration(), which calls arma_randperm().",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "OMRF Internals"
+      "OMRF"
     ]
   },
   {
     "objectID": "manual/omrf-internals.html#adaptive-metropolis-fallback",
     "href": "manual/omrf-internals.html#adaptive-metropolis-fallback",
-    "title": "OMRF Internals",
+    "title": "OMRF",
     "section": "Adaptive Metropolis fallback",
     "text": "Adaptive Metropolis fallback\nEven when NUTS is the primary sampler, the OMRF implements element-wise adaptive Metropolis proposals for use during warmup stage 3b (proposal SD learning) and as a user-selectable alternative via update_method = \"adaptive-metropolis\". The proposal SDs are tuned by Robbins-Monro targeting 0.44 acceptance, clamped to \\([0.001, 2.0]\\).",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "OMRF Internals"
+      "OMRF"
     ]
   },
   {
     "objectID": "manual/numerical.html",
     "href": "manual/numerical.html",
-    "title": "Numerical Considerations",
+    "title": "OpenLibM Integration",
     "section": "",
     "text": "Custom exp/log for Windows performance in bgms. Source: src/math/custom_explog.h, custom_explog.cpp, custom_arma_explog.h, and explog_macros.h.",
     "crumbs": [
       "Manual",
-      "Numerical Considerations"
+      "OpenLibM Integration"
     ]
   },
   {
     "objectID": "manual/numerical.html#the-problem",
     "href": "manual/numerical.html#the-problem",
-    "title": "Numerical Considerations",
+    "title": "OpenLibM Integration",
     "section": "The problem",
     "text": "The problem\nThe std::exp() and std::log() that ship with the Windows toolchain R uses (Rtools / UCRT) are much slower than their macOS and Linux counterparts. Because MCMC samplers call exp() and log() millions of times per run, the difference makes bgms prohibitively slow on Windows without intervention.\n\nRun the Benchmark exp/log workflow to populate this table. \n\n\n\n\n\n\nTipReproduce locally\n\n\n\n\n\nlibrary(bgms)\nbgms:::get_explog_switch()\n\nx = rnorm(1e6)\nn = 100L\n\nsystem.time(for(i in seq_len(n)) exp(x))\nsystem.time(for(i in seq_len(n)) bgms:::rcpp_ieee754_exp(x))\nsystem.time(for(i in seq_len(n)) log(abs(x)))\nsystem.time(for(i in seq_len(n)) bgms:::rcpp_ieee754_log(abs(x)))",
     "crumbs": [
       "Manual",
-      "Numerical Considerations"
+      "OpenLibM Integration"
     ]
   },
   {
     "objectID": "manual/numerical.html#openlibm-solution",
     "href": "manual/numerical.html#openlibm-solution",
-    "title": "Numerical Considerations",
+    "title": "OpenLibM Integration",
     "section": "OpenLibM solution",
     "text": "OpenLibM solution\nbgms ships a copy of the __ieee754_exp() and __ieee754_log() implementations from OpenLibM (the FreeBSD/Sun math library). These are self-contained C functions that bypass the toolchain’s standard library, bringing Windows performance much closer to macOS and Linux.\nThe implementation in custom_explog.cpp (approximately 800 lines) is the original Sun/FreeBSD code, lightly adapted to compile as C++ within an R package.",
     "crumbs": [
       "Manual",
-      "Numerical Considerations"
+      "OpenLibM Integration"
     ]
   },
   {
     "objectID": "manual/numerical.html#platform-detection",
     "href": "manual/numerical.html#platform-detection",
-    "title": "Numerical Considerations",
+    "title": "OpenLibM Integration",
     "section": "Platform detection",
     "text": "Platform detection\nThe macro system in explog_macros.h controls when custom exp/log is used:\n#if (defined(_WIN32) && (!defined(CUSTOM_EXP_LOG) || CUSTOM_EXP_LOG == 0)) \\\n  || (!defined(_WIN32) && defined(CUSTOM_EXP_LOG) && CUSTOM_EXP_LOG != 0)\n  #define USE_CUSTOM_LOG 1\n#endif\nThe logic:\n\nWindows — Uses custom exp/log by default because the Rtools toolchain’s std::exp/std::log are much slower\nLinux/macOS — Uses the system libm by default (which is fast). Custom exp/log can be enabled by setting CUSTOM_EXP_LOG=1\n\nThe configure and configure.win scripts do not control this flag. Platform detection is handled entirely by the C++ preprocessor via _WIN32. Users can override the default by adding -DCUSTOM_EXP_LOG=1 (to enable custom on non-Windows) or by omitting the flag (to keep the platform default).",
     "crumbs": [
       "Manual",
-      "Numerical Considerations"
+      "OpenLibM Integration"
     ]
   },
   {
     "objectID": "manual/numerical.html#usage-in-c-code",
     "href": "manual/numerical.html#usage-in-c-code",
-    "title": "Numerical Considerations",
+    "title": "OpenLibM Integration",
     "section": "Usage in C++ code",
     "text": "Usage in C++ code\nTwo levels of macros are available:\n\n\n\nMacro\nExpands to (custom)\nExpands to (system)\n\n\n\n\nMY_EXP(x)\n__ieee754_exp(x)\nstd::exp(x)\n\n\nMY_LOG(x)\n__ieee754_log(x)\nstd::log(x)\n\n\nARMA_MY_EXP(X)\ncustom_arma_exp(X)\narma::exp(X)\n\n\nARMA_MY_LOG(X)\ncustom_arma_log(X)\narma::log(X)\n\n\n\nThe ARMA_MY_EXP variant applies element-wise custom exp/log to Armadillo matrices and vectors. It wraps custom_arma_exp() and custom_arma_log() from custom_arma_explog.h, which iterate over matrix elements and call the scalar __ieee754_exp/__ieee754_log.",
     "crumbs": [
       "Manual",
-      "Numerical Considerations"
+      "OpenLibM Integration"
     ]
   },
   {
     "objectID": "manual/numerical.html#performance",
     "href": "manual/numerical.html#performance",
-    "title": "Numerical Considerations",
+    "title": "OpenLibM Integration",
     "section": "Performance",
     "text": "Performance\nOn Windows, the Rtools std::exp/std::log are much slower than the OpenLibM replacements, making the custom path essential for acceptable MCMC runtimes. bgms enables the custom path on Windows by default.\nOn macOS and Linux, the system libm is already fast, so bgms uses the system implementations by default. The custom path can be enabled for cross-platform reproducibility, at the cost of slightly slower scalar operations.",
     "crumbs": [
       "Manual",
-      "Numerical Considerations"
+      "OpenLibM Integration"
     ]
   },
   {
     "objectID": "manual/numerical.html#exp_bound-and-overflow-prevention",
     "href": "manual/numerical.html#exp_bound-and-overflow-prevention",
-    "title": "Numerical Considerations",
+    "title": "OpenLibM Integration",
     "section": "EXP_BOUND and overflow prevention",
     "text": "EXP_BOUND and overflow prevention\nThe variable helpers use EXP_BOUND = 709 as the threshold for safe exponentiation, derived from the IEEE 754 double-precision range:\n\n\\(\\exp(709) \\approx 8.2 \\times 10^{307}\\) — largest representable\n\\(\\exp(710) = +\\text{Inf}\\)\n\\(\\exp(-745) \\approx 5 \\times 10^{-324}\\) — smallest positive subnormal\n\\(\\exp(-746) = 0\\)\n\nThis bound is used throughout the codebase (not just in variable helpers) to guard against overflow before calling MY_EXP().",
     "crumbs": [
       "Manual",
-      "Numerical Considerations"
+      "OpenLibM Integration"
     ]
   },
   {
     "objectID": "manual/numerical.html#r-interface",
     "href": "manual/numerical.html#r-interface",
-    "title": "Numerical Considerations",
+    "title": "OpenLibM Integration",
     "section": "R interface",
     "text": "R interface\nexplog_interface.cpp (in src/, not src/math/) exposes three functions to R:\n\n\n\n\n\n\n\nR function\nPurpose\n\n\n\n\nget_explog_switch()\nReturns \"custom\" or \"standard\" depending on compile-time USE_CUSTOM_LOG\n\n\nrcpp_ieee754_exp(x)\nVectorised exp via MY_EXP\n\n\nrcpp_ieee754_log(x)\nVectorised log via MY_LOG\n\n\n\nOn the standard path, rcpp_ieee754_exp() and rcpp_ieee754_log() call std::exp and std::log despite the ieee754 naming.\nThe explog_interface.cpp file exposes the custom exp/log functions to R for testing purposes. This allows verification that the custom implementations match expected values in R-level unit tests.",
     "crumbs": [
       "Manual",
-      "Numerical Considerations"
+      "OpenLibM Integration"
     ]
   },
   {
     "objectID": "manual/mixed-internals.html",
     "href": "manual/mixed-internals.html",
-    "title": "Mixed MRF Internals",
+    "title": "Mixed MRF",
     "section": "",
     "text": "Implementation details of the mixed Markov random field in bgms. Source: src/models/mixed/mixed_mrf_model.h and four .cpp files (mixed_mrf_model.cpp, mixed_mrf_gradient.cpp, mixed_mrf_likelihoods.cpp, mixed_mrf_metropolis.cpp).",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Mixed MRF Internals"
+      "Mixed MRF"
     ]
   },
   {
     "objectID": "manual/mixed-internals.html#block-structure",
     "href": "manual/mixed-internals.html#block-structure",
-    "title": "Mixed MRF Internals",
+    "title": "Mixed MRF",
     "section": "Block structure",
     "text": "Block structure\nThe mixed MRF handles \\(p\\) discrete and \\(q\\) continuous variables. The parameter space is organized into three interaction blocks plus main effects:\n\n\n\n\n\n\n\n\nBlock\nParameters\nSize\n\n\n\n\nMain effects\nDiscrete thresholds + continuous means\n\\(\\text{thresholds} + q\\)\n\n\nDiscrete-discrete\nPairwise discrete interactions (symmetric)\n\\(p(p-1)/2\\)\n\n\nCross-type\nDiscrete-continuous interactions\n\\(p \\times q\\)\n\n\nContinuous-continuous\nCholesky factor of the precision matrix\n\\(q(q+1)/2\\)\n\n\n\nAll five blocks are updated jointly by NUTS. The continuous precision matrix is parameterized through its Cholesky factor \\(R\\) (with diagonal entries on the log scale) so that positive definiteness is guaranteed by construction. The gradient includes the Jacobian of the Cholesky-to-precision mapping.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Mixed MRF Internals"
+      "Mixed MRF"
     ]
   },
   {
     "objectID": "manual/mixed-internals.html#parameter-vector-layout",
     "href": "manual/mixed-internals.html#parameter-vector-layout",
-    "title": "Mixed MRF Internals",
+    "title": "Mixed MRF",
     "section": "Parameter vector layout",
     "text": "Parameter vector layout\nThe model distinguishes three vector types:\n\nActive vector (parameter_dimension())\nContains the parameters that NUTS updates, excluding edges set to zero by edge selection. The Cholesky block is always fully included:\n[ thresholds | discrete interactions (active) | means | cross-type (active) | Cholesky (all) ]\nThe mass matrix and gradient are dimensioned to this vector.\n\n\nFull vector (full_parameter_dimension())\nContains all parameters including inactive edges:\n[ thresholds | discrete interactions (all) | means | cross-type (all) | Cholesky (all) ]\nUsed for storage and initialization.\n\n\nStorage vector (storage_dimension())\nIdentical layout to the full vector. This is what gets saved to ChainResult::samples at each iteration.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Mixed MRF Internals"
+      "Mixed MRF"
     ]
   },
   {
     "objectID": "manual/mixed-internals.html#sampling-strategy",
     "href": "manual/mixed-internals.html#sampling-strategy",
-    "title": "Mixed MRF Internals",
+    "title": "Mixed MRF",
     "section": "Sampling strategy",
     "text": "Sampling strategy\nEach MCMC iteration updates the full active parameter vector (all five blocks) in a single NUTS step. The logp_and_gradient() method computes the log-pseudoposterior and gradient for the entire vector, including the Cholesky block with its log-determinant Jacobian.\nWhen edge selection is active (or the initial graph is sparse), the model reports has_constraints() = true and the NUTS sampler switches to constrained (RATTLE) integration, using logp_and_gradient_full() and projection callbacks to enforce zero entries for excluded edges (see Constrained Leapfrog (RATTLE)).\nEdge indicator updates (when active) operate on all three interaction blocks.\nThe model also provides a component-wise adaptive Metropolis fallback (do_one_metropolis_step()), used when the sampler is set to \"adaptive-metropolis\". In Metropolis mode, each parameter is updated individually with Robbins–Monro-tuned proposal SDs targeting an acceptance rate of 0.44. Off-diagonal precision updates use a rank-2 Cholesky update; diagonal updates use rank-1.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Mixed MRF Internals"
+      "Mixed MRF"
     ]
   },
   {
     "objectID": "manual/mixed-internals.html#gradient-computation",
     "href": "manual/mixed-internals.html#gradient-computation",
-    "title": "Mixed MRF Internals",
+    "title": "Mixed MRF",
     "section": "Gradient computation",
     "text": "Gradient computation\nThe gradient (mixed_mrf_gradient.cpp) covers all five parameter blocks in the NUTS vector. It involves:\n\nDiscrete conditionals — Category probabilities via Variable Helpers, contributing gradients for thresholds and discrete pairwise interactions\nCross-type terms — Contributions from discrete-continuous interactions to both discrete and continuous conditional distributions\nContinuous means — Gradient of the continuous-variable contribution to the pseudolikelihood\nCholesky block — The precision gradient \\(\\bar{\\Omega}\\) is computed from the GGM conditional contribution and the conditional-mean coupling, then mapped to the Cholesky gradient \\(\\bar{R} = R(\\bar{\\Omega} + \\bar{\\Omega}^\\top)\\). Diagonal entries use the log-scale Jacobian: \\(\\partial\\ell / \\partial\\psi_j =\n\\bar{R}_{jj} R_{jj} + (q - j + 1)\\).\n\nThe log-prior gradient adds Cauchy penalties on off-diagonal precision entries and Gamma(1,1) penalties on diagonal entries.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Mixed MRF Internals"
+      "Mixed MRF"
     ]
   },
   {
     "objectID": "manual/mixed-internals.html#pseudolikelihood-options",
     "href": "manual/mixed-internals.html#pseudolikelihood-options",
-    "title": "Mixed MRF Internals",
+    "title": "Mixed MRF",
     "section": "Pseudolikelihood options",
     "text": "Pseudolikelihood options\nThe pseudolikelihood argument controls how the discrete full conditionals are computed. It does not affect the continuous block, which always uses the GGM likelihood \\(\\log p(y \\mid x) \\propto \\tfrac{n}{2}\\log|\\Omega| - \\tfrac{1}{2}\\operatorname{tr}(\\Omega D^\\top D)\\).\nFor a cross-model overview, see Pseudolikelihood.\n\n\"conditional\" (default) — Computes discrete full conditionals \\(\\log p(x_s \\mid x_{-s}, y_{\\text{obs}})\\), conditioning on the observed continuous values. The rest score uses pairwise_effects_discrete_ directly. Faster because updating the continuous precision elements does not require re-evaluating the discrete pseudolikelihood.\n\"marginal\" — Computes discrete full conditionals \\(\\log p(x_s \\mid x_{-s})\\) by integrating out the continuous variables. Uses the marginal interaction matrix \\(\\Theta = 2A_{xx} + 2A_{xy}\\Sigma_{yy}A_{xy}^\\top\\), which must be recomputed whenever the precision or cross-type parameters change. This adds coupling terms to the gradient (the \\(\\partial\\Theta/\\partial\\Sigma\\) chain rule contributes to the precision gradient via \\(-2\\Sigma A_{xy}^\\top\\bar\\Theta A_{xy}\\Sigma\\)).",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Mixed MRF Internals"
+      "Mixed MRF"
     ]
   },
   {
     "objectID": "manual/mixed-internals.html#missing-data",
     "href": "manual/mixed-internals.html#missing-data",
-    "title": "Mixed MRF Internals",
+    "title": "Mixed MRF",
     "section": "Missing data",
     "text": "Missing data\nThe mixed MRF tracks missing indices separately for discrete and continuous variables (missing_index_discrete, missing_index_continuous). During imputation:\n\nMissing discrete values are sampled from their full conditional categorical distributions\nMissing continuous values are sampled from their conditional normal distributions given the current precision matrix",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Mixed MRF Internals"
+      "Mixed MRF"
     ]
   },
   {
     "objectID": "manual/mixed-internals.html#output-assembly",
     "href": "manual/mixed-internals.html#output-assembly",
-    "title": "Mixed MRF Internals",
+    "title": "Mixed MRF",
     "section": "Output assembly",
     "text": "Output assembly\nThe R output builder (build_output_mixed_mrf() in build_output.R) maps the flat storage vector back to the original variable ordering using fill_mixed_symmetric(). This function places discrete-discrete, continuous-continuous, and cross-type interactions into the correct cells of the \\((p+q) \\times (p+q)\\) output matrix, respecting the original column order (which may interleave discrete and continuous variables).",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Mixed MRF Internals"
+      "Mixed MRF"
     ]
   },
   {
@@ -1032,7 +1040,7 @@
     "href": "manual/index.html#model-internals",
     "title": "Technical Manual",
     "section": "Model Internals",
-    "text": "Model Internals\nHow each model type computes likelihoods, gradients, and parameter updates.\n\nGGM — Precision matrix sampling via element-wise Metropolis with Cholesky rank-1 updates\nOMRF — Ordinal thresholds, Blume–Capel parameterization, pseudolikelihood gradients\nMixed MRF — Joint discrete-continuous models: NUTS for interactions, Metropolis for precision, RATTLE constraints\n\nSupporting pages:\n\nPseudolikelihood — Why bgms uses pseudolikelihood instead of the full likelihood, and how this affects inference. Relevant for OMRF and mixed models.\nFast Probability Computation — Recursive accumulation of MRF category probabilities that avoids per-category exp() calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.",
+    "text": "Model Internals\nHow each model type computes likelihoods, gradients, and parameter updates.\n\nGGM — Precision matrix sampling via element-wise Metropolis with Cholesky rank-1 updates\nOMRF — Ordinal thresholds, Blume–Capel parameterization, pseudolikelihood gradients\nMixed MRF — Joint discrete-continuous models: NUTS for interactions, Metropolis for precision, RATTLE constraints\n\nSupporting pages:\n\nPseudolikelihood — Why bgms uses pseudolikelihood instead of the full likelihood, and how this affects inference. Relevant for OMRF and mixed models.\nFast Computation — Recursive accumulation of MRF category probabilities that avoids per-category exp() calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.",
     "crumbs": [
       "Manual",
       "Technical Manual"
@@ -1085,97 +1093,97 @@
   {
     "objectID": "manual/ggm-internals.html",
     "href": "manual/ggm-internals.html",
-    "title": "GGM Internals",
+    "title": "GGM",
     "section": "",
     "text": "Implementation details of the Gaussian graphical model in bgms. Source: src/models/ggm/.\nThe GGM is parameterized by the \\(p \\times p\\) precision matrix \\(\\boldsymbol{\\Theta} = \\boldsymbol{\\Sigma}^{-1}\\). The off-diagonal entries \\(\\theta_{ij}\\) encode partial associations: \\(\\theta_{ij} = 0\\) if and only if variables \\(i\\) and \\(j\\) are conditionally independent given all other variables. The model maintains an upper-triangular Cholesky factor \\(\\boldsymbol{\\Phi}\\) such that \\(\\boldsymbol{\\Phi}^\\top \\boldsymbol{\\Phi} = \\boldsymbol{\\Theta}\\) throughout sampling. For complete data, the likelihood depends on the data only through the sufficient statistic \\(\\mathbf{S} = \\mathbf{X}^\\top \\mathbf{X}\\).",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "GGM Internals"
+      "GGM"
     ]
   },
   {
     "objectID": "manual/ggm-internals.html#sampling-overview",
     "href": "manual/ggm-internals.html#sampling-overview",
-    "title": "GGM Internals",
+    "title": "GGM",
     "section": "Sampling overview",
     "text": "Sampling overview\nThe GGM supports two samplers:\n\nNUTS (default) — Gradient-based sampling of all continuous parameters simultaneously. Uses a free-element Cholesky parameterization with RATTLE constraints when edge selection is active.\nAdaptive Metropolis (fallback) — Element-wise updates of individual \\(\\theta_{ij}\\) entries via rank-1 Cholesky updates.\n\nThe sampler is selected by the interaction argument in bgm(). Edge indicators \\(\\gamma_{ij}\\) are always updated by Metropolis–Hastings moves, regardless of the continuous-parameter sampler. Within each iteration, edge indicator updates run first, then the continuous sampler runs with the graph held fixed. See Sampler Hierarchy for the full dispatch logic.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "GGM Internals"
+      "GGM"
     ]
   },
   {
     "objectID": "manual/ggm-internals.html#cholesky-param",
     "href": "manual/ggm-internals.html#cholesky-param",
-    "title": "GGM Internals",
+    "title": "GGM",
     "section": "Free-element Cholesky parameterization",
     "text": "Free-element Cholesky parameterization\nNUTS requires an unconstrained parameter vector. The GGM achieves this through a column-wise parameterization of \\(\\boldsymbol{\\Phi}\\) that separates free parameters from constrained (zero-precision) entries.\n\nColumn layout\nThe parameter vector \\(\\theta\\) is packed column by column:\n\\[\n\\theta = (\\psi_1,\\; f_2, \\psi_2,\\; f_3, \\psi_3,\\; \\ldots,\\; f_p, \\psi_p),\n\\]\nwhere for each column \\(q\\):\n\n\\(\\psi_q = \\log(\\Phi_{qq})\\) — the log-transformed diagonal entry, ensuring \\(\\Phi_{qq} &gt; 0\\).\n\\(f_q \\in \\mathbb{R}^{d_q}\\) — free parameters for column \\(q\\)’s off-diagonal entries, with \\(d_q\\) equal to the number of included edges in column \\(q\\).\n\n\n\nNull-space basis\nWhen column \\(q\\) has \\(m_q\\) excluded edges (\\(\\gamma_{iq} = 0\\)), the constraint matrix \\(A_q\\) encodes the zero-precision requirements \\(\\theta_{iq} = \\sum_l \\Phi_{li}\\,\\Phi_{lq} = 0\\) (see RATTLE). The off-diagonal entries of \\(\\boldsymbol{\\Phi}\\) for column \\(q\\) must lie in the null space of \\(A_q\\). A Givens QR factorization of \\(A_q^\\top\\) produces an orthonormal null-space basis \\(N_q\\), and the off-diagonal entries are recovered as \\(x_q = N_q f_q\\).\nThis maps \\(d_q\\) unconstrained parameters to the \\((q - 1)\\)-dimensional off-diagonal slot while satisfying all \\(m_q\\) constraints exactly. When \\(m_q = 0\\) (no excluded edges in column \\(q\\)), \\(N_q\\) is the identity and \\(f_q = x_q\\) directly.\n\n\nTwo coordinate systems\nThe GGM operates in two coordinate systems depending on whether constraints are active:\n\n\n\n\n\n\n\n\nCoordinate system\nDimension\nUsed by\n\n\n\n\nActive \\((f_q, \\psi_q)\\)\n\\(p + \\lvert E\\rvert\\)\nUnconstrained NUTS (no edge selection)\n\n\nFull \\((\\Phi_{iq}, \\psi_q)\\)\n\\(p(p+1)/2\\)\nConstrained NUTS with RATTLE\n\n\n\nWhen edge selection is inactive, NUTS operates in the active coordinate system — the null-space rotation \\(N_q f_q\\) maps free parameters to Cholesky entries, and the sampler never sees the excluded dimensions.\nWhen edge selection is active, NUTS operates in the full coordinate system (raw Cholesky entries including zeros for excluded edges). RATTLE projection enforces the zero-precision constraints at each leapfrog step. The switch between these two paths is described in RATTLE: Dispatch in the sampler hierarchy.\n\n\nGraphConstraintStructure\nThe GraphConstraintStructure in graph_constraint_structure.h precomputes the index maps needed by both the parameterization and the RATTLE projections. For each column \\(q\\) it stores:\n\nexcluded_indices / included_indices — which rows are constrained vs. free\nm_q / d_q — number of constraints / free parameters\ntheta_offsets[q] — start of column \\(q\\)’s block in the active \\(\\theta\\) vector\nfull_theta_offsets[q] — start of column \\(q\\)’s block in the full position vector\n\nThe structure is rebuilt whenever the edge indicators change (the constraint_dirty_ flag triggers a lazy rebuild at the next gradient evaluation).",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "GGM Internals"
+      "GGM"
     ]
   },
   {
     "objectID": "manual/ggm-internals.html#gradient",
     "href": "manual/ggm-internals.html#gradient",
-    "title": "GGM Internals",
+    "title": "GGM",
     "section": "Gradient computation",
     "text": "Gradient computation\nThe gradient engine (GGMGradientEngine in ggm_gradient.h/.cpp) computes \\(\\log p(\\theta)\\) and \\(\\nabla_\\theta \\log p(\\theta)\\) jointly.\n\nForward map\nThe forward map \\(\\theta \\to \\boldsymbol{\\Phi} \\to \\boldsymbol{\\Theta}\\) processes columns left to right:\n\nFor each column \\(q\\), build \\(A_q\\) from earlier (finalized) columns.\nQR-factorize \\(A_q^\\top\\) via Givens rotations to get \\(N_q\\).\nCompute \\(x_q = N_q f_q\\) and set \\(\\Phi_{qq} = e^{\\psi_q}\\).\nAccumulate the log-Jacobian determinant from the QR factors.\n\nThe log-Jacobian has three terms:\n\\[\n\\log|J| = p \\log 2 + 2\\sum_q \\psi_q\n         + \\sum_{q=0}^{p-2}(p - 1 - q)\\,\\psi_q\n         - \\sum_q \\sum_j \\log|R_{q,jj}|,\n\\]\ncombining the \\(\\boldsymbol{\\Phi} \\to \\boldsymbol{\\Theta}\\) Jacobian, the \\(\\psi_q \\to \\Phi_{qq}\\) exponential transform, and the null-space QR rotation.\n\n\nBackward pass\nThe log-posterior being differentiated is\n\\[\n\\log p = \\tfrac{n}{2}\\log|\\boldsymbol{\\Theta}|\n       - \\tfrac{1}{2}\\operatorname{tr}(\\boldsymbol{\\Theta}\\mathbf{S})\n       + \\log p_{\\text{prior}}(\\boldsymbol{\\Theta})\n       + \\log|J|.\n\\]\nThe backward pass runs in two phases:\n\nPhase 1 (data + priors → \\(\\bar{\\boldsymbol{\\Phi}}\\)) — Computes the adjoint of the Cholesky factor from the data likelihood, Cauchy prior on off-diagonals, and Gamma prior on diagonals.\nPhase 2 (right-to-left column sweep) — Propagates \\(\\bar{\\boldsymbol{\\Phi}}\\) through the stored Givens rotations to extract \\(\\partial\\log p / \\partial f_q\\) and \\(\\partial\\log p / \\partial \\psi_q\\). Reverse-mode differentiation through the QR factorization captures cross-column dependencies automatically.\n\n\n\nFull-space gradient (RATTLE mode)\nWhen RATTLE is active, the gradient operates in the full coordinate system (raw Cholesky entries) rather than the \\((f_q, \\psi_q)\\) active coordinates. The full-space gradient in logp_and_gradient_full() is simpler: off-diagonal adjoints are used directly without the null-space rotation, and the QR Jacobian terms are omitted (RATTLE preserves the correct measure on the constraint manifold).",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "GGM Internals"
+      "GGM"
     ]
   },
   {
     "objectID": "manual/ggm-internals.html#metropolis",
     "href": "manual/ggm-internals.html#metropolis",
-    "title": "GGM Internals",
+    "title": "GGM",
     "section": "Element-wise Metropolis",
     "text": "Element-wise Metropolis\nWhen the adaptive-Metropolis sampler is selected, each off-diagonal entry \\(\\theta_{ij}\\) is updated individually via Metropolis–Hastings. The algorithm exploits a structural property of the Cholesky parameterization: changing one off-diagonal entry \\(\\theta_{ij}\\) while holding the Cholesky factor consistent requires adjusting the diagonal \\(\\theta_{jj}\\) deterministically. This reduces a constrained positive-definite update to a one-dimensional proposal, and the entire update — proposal, likelihood ratio, and Cholesky maintenance — runs without permutation or refactorization of the precision matrix.\n\nRoverato constraint structure\nSince \\(\\boldsymbol{\\Theta} = \\boldsymbol{\\Phi}^\\top\\boldsymbol{\\Phi}\\), each off-diagonal precision entry (\\(i &lt; j\\)) is\n\\[\n\\theta_{ij} = \\sum_{l=1}^{i} \\Phi_{li}\\,\\Phi_{lj},\n\\]\nwhich is linear in the off-diagonal entries of column \\(j\\) of \\(\\boldsymbol{\\Phi}\\), with coefficients from the already-fixed column \\(i\\). The diagonal entry \\(\\theta_{jj} = \\sum_l \\Phi_{lj}^2\\) is quadratic in those same entries. Taken together, proposing a new value for a single off-diagonal Cholesky entry \\(\\Phi_{ij}\\) changes \\(\\theta_{ij}\\) and \\(\\theta_{jj}\\) while all other precision entries remain fixed, and the diagonal adjustment is deterministic. The resulting \\(\\boldsymbol{\\Theta}\\) is automatically positive definite because the Cholesky factor stays valid — only one off-diagonal entry changes and diagonal entries remain positive.\nThe standard approach exploits this by permuting the precision matrix so that the target pair \\((i,j)\\) occupies the bottom-right corner, then refactorizing — at \\(O(p^3)\\) per element. The bgms implementation avoids this entirely: the same relationship between \\(\\theta_{ij}\\), \\(\\theta_{jj}\\), and \\(\\Phi_{ij}\\) can be read from the cached covariance matrix \\(\\boldsymbol{\\Sigma} = \\boldsymbol{\\Theta}^{-1}\\) using cofactor identities, replacing an \\(O(p^3)\\) factorization with an \\(O(1)\\) lookup.\n\n\nThe update algorithm\nFor a single off-diagonal element \\(\\theta_{ij}\\):\n\nRead the constraint relationship from \\(\\boldsymbol{\\Sigma}\\) and \\(\\boldsymbol{\\Theta}\\) in \\(O(1)\\).\nPropose \\(\\theta_{ij}^* \\sim \\mathcal{N}(\\theta_{ij},\\,\n\\sigma_{ij}^2)\\) and set \\(\\theta_{jj}^*\\) deterministically.\nLikelihood ratio via the matrix-determinant lemma — the log-determinant ratio and trace update both use \\(O(1)\\) covariance entries, not a fresh factorization.\nAccept or reject via Metropolis–Hastings.\nOn accept — update \\(\\boldsymbol{\\Theta}\\) and apply a rank-2 Cholesky update to \\(\\boldsymbol{\\Phi}\\) (one Givens update + one hyperbolic downdate, \\(O(p^2)\\)), then refresh \\(\\boldsymbol{\\Sigma}\\).\n\nThe proposal standard deviations \\(\\sigma_{ij}\\) are tuned during warmup by Robbins–Monro updates targeting an acceptance rate of 0.44.\n\n\nRank-2 Cholesky update\nChanging \\(\\theta_{ij}\\) and \\(\\theta_{jj}\\) simultaneously gives a symmetric rank-2 perturbation \\(\\boldsymbol{\\Theta}' = \\boldsymbol{\\Theta} + \\Delta\\boldsymbol{\\Theta}\\) that decomposes into one rank-1 update (Givens rotations) and one rank-1 downdate (hyperbolic rotations):\n\\[\n\\boldsymbol{\\Theta}' = \\boldsymbol{\\Theta}\n  + \\mathbf{u}_1\\mathbf{u}_1^\\top\n  - \\mathbf{u}_2\\mathbf{u}_2^\\top,\n\\]\nwhere \\(\\mathbf{u}_1\\) and \\(\\mathbf{u}_2\\) are derived from the change in \\(\\theta_{ij}\\) and \\(\\theta_{jj}\\). Each rank-1 operation costs \\(O(p^2)\\). If the downdate would destroy positive definiteness (detected by a negative radicand), a sentinel value (Phi(1,0) = -2.0) is set and the proposal is rejected.\nThe Cholesky update/downdate code in src/math/cholupdate.cpp is ported from Simon Wood’s mgcv package (GPL).\nThe standard approach to element-wise updates permutes the precision matrix and refactorizes at \\(O(p^3)\\) per element. The in-place approach replaces the two most expensive operations — constant extraction and likelihood evaluation — with \\(O(1)\\) covariance lookups, and the Cholesky maintenance with an \\(O(p^2)\\) rank-2 update. The remaining \\(O(p^3)\\) cost per element is the covariance refresh (recomputing \\(\\boldsymbol{\\Sigma}\\) from \\(\\boldsymbol{\\Phi}\\)).",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "GGM Internals"
+      "GGM"
     ]
   },
   {
     "objectID": "manual/ggm-internals.html#edge-selection",
     "href": "manual/ggm-internals.html#edge-selection",
-    "title": "GGM Internals",
+    "title": "GGM",
     "section": "Edge selection",
     "text": "Edge selection\nWhen edge selection is active, each edge \\((i,j)\\) has a binary indicator \\(\\gamma_{ij}\\). Edge indicators are updated via MoMS (Mixtures of Mutually Singular distributions) add/delete moves (Gottardo & Raftery, 2008; van den Bergh et al., 2026), reusing the same Roverato constants and in-place Cholesky machinery described above.\n\nDelete move (\\(\\gamma_{ij} = 1 \\to 0\\))\nPropose to set \\(\\theta_{ij} = 0\\) and \\(\\theta_{jj}\\) to its constrained value. The acceptance ratio includes:\n\nThe \\(O(1)\\) likelihood ratio via the matrix-determinant lemma\nThe prior odds \\((1 - \\pi_{ij}) / \\pi_{ij}\\)\nThe reverse proposal density \\(\\phi(\\theta_{ij}^{\\text{curr}} / c_3;\\, 0,\\, \\sigma_{ij}) / c_3\\)\nThe Cauchy slab prior \\(-\\log p_{\\text{Cauchy}}(\\theta_{ij}^{\\text{curr}})\\)\nThe Gamma(1,1) prior ratio on \\(\\theta_{jj}\\)\n\n\n\nAdd move (\\(\\gamma_{ij} = 0 \\to 1\\))\nSample \\(\\epsilon \\sim \\mathcal{N}(0,\\, \\sigma_{ij})\\) and propose \\(\\theta_{ij}^* = c_3 \\epsilon\\), with \\(\\theta_{jj}^*\\) set from the constraint curve. The acceptance ratio includes:\n\nThe \\(O(1)\\) likelihood ratio\nThe prior odds \\(\\pi_{ij} / (1 - \\pi_{ij})\\)\nThe Cauchy slab prior \\(\\log p_{\\text{Cauchy}}(\\theta_{ij}^*)\\)\nThe reverse proposal density \\(-\\log \\phi(\\epsilon;\\, 0,\\, \\sigma_{ij}) + \\log c_3\\)\nThe Gamma(1,1) prior ratio on \\(\\theta_{jj}\\)\n\nHere \\(c_3\\) is the Roverato scaling constant (constants_[3]) relating the Cholesky proposal to the precision entry.\n\n\nIteration order\nThe order of edge updates is randomized at each iteration via prepare_iteration(), which shuffles the flat edge index with arma_randperm(). After all edge indicator updates complete, the constraint_dirty_ flag is set and the constraint structure is rebuilt lazily at the next gradient evaluation. This ensures NUTS operates on an up-to-date graph.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "GGM Internals"
+      "GGM"
     ]
   },
   {
     "objectID": "manual/ggm-internals.html#log-likelihood",
     "href": "manual/ggm-internals.html#log-likelihood",
-    "title": "GGM Internals",
+    "title": "GGM",
     "section": "Log-likelihood",
     "text": "Log-likelihood\nThe GGM log-likelihood for \\(n\\) observations is:\n\\[\n\\ell(\\boldsymbol{\\Theta}) = \\frac{n}{2} \\log |\\boldsymbol{\\Theta}| - \\frac{1}{2} \\operatorname{tr}(\\mathbf{S}\\,\\boldsymbol{\\Theta})\n\\]\nThe log-determinant is computed from the Cholesky factor as \\(\\log|\\boldsymbol{\\Theta}| = 2\\sum_q \\log \\Phi_{qq}\\). The trace term uses the precomputed sufficient statistic \\(\\mathbf{S}\\).",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "GGM Internals"
+      "GGM"
     ]
   },
   {
     "objectID": "manual/ggm-internals.html#missing-data-imputation",
     "href": "manual/ggm-internals.html#missing-data-imputation",
-    "title": "GGM Internals",
+    "title": "GGM",
     "section": "Missing data imputation",
     "text": "Missing data imputation\nWhen na_action = \"impute\", the GGM imputes missing values using the conditional normal distribution implied by the current precision matrix. After imputation, the sufficient statistic \\(\\mathbf{S}\\) is recomputed for the next likelihood evaluation.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "GGM Internals"
+      "GGM"
     ]
   },
   {
@@ -3734,85 +3742,92 @@
   {
     "objectID": "manual/variable-helpers.html",
     "href": "manual/variable-helpers.html",
-    "title": "Variable Helpers",
+    "title": "Fast Computation",
     "section": "",
     "text": "Numerically stable computation of MRF category denominators and probabilities. Source: src/utils/variable_helpers.h and variable_helpers.cpp.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Variable Helpers"
+      "Supporting Pages",
+      "Fast Computation"
     ]
   },
   {
     "objectID": "manual/variable-helpers.html#the-problem",
     "href": "manual/variable-helpers.html#the-problem",
-    "title": "Variable Helpers",
+    "title": "Fast Computation",
     "section": "The problem",
     "text": "The problem\nMRF conditional probabilities involve exponentials of residual scores. Computing exp() for every person–category combination is expensive and dominates the cost of pseudolikelihood evaluation. The variable helpers reformulate the normalizing constants as a recursion that avoids per-category exp() calls (the FAST path). When the recursion’s intermediate values would overflow or underflow, a SAFE path falls back to explicit exp() calls with log-sum-exp stabilization.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Variable Helpers"
+      "Supporting Pages",
+      "Fast Computation"
     ]
   },
   {
     "objectID": "manual/variable-helpers.html#the-fastsafe-dual-path-strategy",
     "href": "manual/variable-helpers.html#the-fastsafe-dual-path-strategy",
-    "title": "Variable Helpers",
+    "title": "Fast Computation",
     "section": "The FAST/SAFE dual-path strategy",
     "text": "The FAST/SAFE dual-path strategy\nEvery denominator and probability function in variable_helpers.cpp uses a two-path approach:\n\nFAST path — A recursive power-chain accumulation that precomputes a small number of exponentials and builds the normalizing constant without per-category exp() calls.\nSAFE path — Explicit per-category exp() evaluation with log-sum-exp stabilization, used as a fallback when the FAST path’s intermediate values would overflow or underflow.\n\nThe choice is made per-person (per row of the data matrix) based on whether the residual score times the maximum category exceeds the EXP_BOUND threshold.\n\nFAST path detail\nFor an ordinal variable with categories \\(0, 1, \\ldots, K\\) and residual \\(r\\):\n\nPrecompute \\(e_r = \\exp(r)\\), \\(e_b = \\exp(-b)\\), and \\(e_\\mu(c) = \\exp(\\mu(c))\\) for each category (once per variable)\nAccumulate the denominator with a running power \\(P\\):\n\n\\[\n\\begin{aligned}\nP &\\leftarrow e_r \\\\\nD &\\leftarrow e_b \\\\\n\\text{for } c &= 1, \\ldots, K: \\\\\n  D &\\leftarrow D + e_\\mu(c) \\cdot P \\cdot e_b \\\\\n  P &\\leftarrow P \\cdot e_r\n\\end{aligned}\n\\]\nOnly two per-person exp() calls are needed (\\(e_r\\) and \\(e_b\\)), plus \\(K\\) for the main effects. The running product \\(P = e_r^{\\,c}\\) replaces the \\(K\\) per-category exp() calls that a naive implementation would require.\n\n\nSAFE path detail\nWhen the FAST path would overflow or underflow:\n\nCompute \\(s_c = \\mu(c) + c \\cdot r\\) for each category\nFind \\(s_{\\max} = \\max_c s_c\\)\nCompute \\(D = \\exp(s_{\\max}) \\sum_c \\exp(s_c - s_{\\max})\\)\n\nThis is the standard log-sum-exp computation, applied per person.\n\n\nBlock scanning\nThe functions process persons in contiguous blocks. Within each block, all persons follow the same path (FAST or SAFE). The block boundaries are determined by scanning the residual vector for bound violations. This enables branch-free vectorization within each block.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Variable Helpers"
+      "Supporting Pages",
+      "Fast Computation"
     ]
   },
   {
     "objectID": "manual/variable-helpers.html#ordinal-variables",
     "href": "manual/variable-helpers.html#ordinal-variables",
-    "title": "Variable Helpers",
+    "title": "Fast Computation",
     "section": "Ordinal variables",
     "text": "Ordinal variables\n\ncompute_denom_ordinal()\nComputes the normalization constant (denominator) for each person’s conditional distribution. Takes the residual vector, main-effect vector, and precomputed bound vector. Returns a vector of length \\(n\\).\n\n\ncompute_probs_ordinal()\nComputes the full category probability matrix (\\(n \\times (K+1)\\)) for one ordinal variable, where column 0 is category 0 and columns 1 through \\(K\\) are categories 1 through \\(K\\). Probabilities are clamped at zero to prevent negative values from floating-point error in the normalization step.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Variable Helpers"
+      "Supporting Pages",
+      "Fast Computation"
     ]
   },
   {
     "objectID": "manual/variable-helpers.html#blume-capel-variables",
     "href": "manual/variable-helpers.html#blume-capel-variables",
-    "title": "Variable Helpers",
+    "title": "Fast Computation",
     "section": "Blume-Capel variables",
     "text": "Blume-Capel variables\n\ncompute_denom_blume_capel()\nHandles the Blume-Capel parameterization, where the category score involves both linear and quadratic terms: \\(\\mu(c) = \\alpha(c - b) + \\beta(c - b)^2\\). The precomputation of \\(\\theta_c = \\alpha(c - b) + \\beta(c - b)^2\\) is done once per variable, and the FAST/SAFE split proceeds as for ordinal variables.\n\n\ncompute_probs_blume_capel()\nAnalogous to the ordinal version, but with the Blume-Capel category scores.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Variable Helpers"
+      "Supporting Pages",
+      "Fast Computation"
     ]
   },
   {
     "objectID": "manual/variable-helpers.html#joint-log-normalizer-and-probabilities",
     "href": "manual/variable-helpers.html#joint-log-normalizer-and-probabilities",
-    "title": "Variable Helpers",
+    "title": "Fast Computation",
     "section": "Joint log-normalizer and probabilities",
     "text": "Joint log-normalizer and probabilities\nThe LogZAndProbs struct bundles the log-normalizer \\(\\log Z\\) and the probability matrix into a single return value. The joint computation functions (compute_logZ_and_probs_ordinal(), compute_logZ_and_probs_blume_capel()) share work between the two quantities, avoiding redundant exponential evaluations.\nThese joint functions are used in the gradient computation, where both the log-pseudolikelihood (which needs \\(\\log Z\\)) and the gradient (which needs category probabilities) are computed in the same pass.",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Variable Helpers"
+      "Supporting Pages",
+      "Fast Computation"
     ]
   },
   {
     "objectID": "manual/variable-helpers.html#the-exp_bound-709-threshold",
     "href": "manual/variable-helpers.html#the-exp_bound-709-threshold",
-    "title": "Variable Helpers",
+    "title": "Fast Computation",
     "section": "The EXP_BOUND = 709 threshold",
     "text": "The EXP_BOUND = 709 threshold\nThe bound that triggers the SAFE path is set to 709, derived from IEEE 754 double precision: \\(\\exp(709) \\approx 8.2 \\times 10^{307}\\) is the largest representable value, while \\(\\exp(710) = \\text{Inf}\\). The FAST path checks whether \\(|b_i| \\le 709\\) before proceeding, where \\(b_i = K \\cdot r_i\\) for ordinal variables. For the joint log-normalizer functions, the threshold is reduced to \\(709 - \\max_c |\\theta_c|\\) to account for intermediate overflow risk in the power chain. The Blume–Capel variants additionally check \\(|K \\cdot r_i - b_i| \\le 709\\).",
     "crumbs": [
       "Manual",
       "Model Internals",
-      "Variable Helpers"
+      "Supporting Pages",
+      "Fast Computation"
     ]
   },
   {
