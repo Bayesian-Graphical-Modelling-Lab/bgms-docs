@@ -1,0 +1,86 @@
+---
+title: "Pseudolikelihood"
+---
+
+::: {.callout-warning}
+This page has not yet passed technical or readability review.
+:::
+
+This page describes how pseudolikelihood approximations are used in bgms
+across OMRF, mixed MRF, and group-comparison models.
+
+## Why pseudolikelihood
+
+For discrete and mixed graphical models, the joint likelihood contains a
+normalizing constant that is expensive or intractable to evaluate for realistic
+network sizes. bgms therefore uses pseudolikelihood-based objectives built from
+full conditional distributions.
+
+## Generic form
+
+Let $\mathbf{x}_n$ denote observation $n$, and let $x_{ni}$ be variable $i$ in
+that observation. The pseudolikelihood is
+
+$$
+\mathrm{PL}(\boldsymbol{\theta})
+= \prod_{n=1}^{N} \prod_{i=1}^{p} p(x_{ni} \mid \mathbf{x}_{n,-i}, \boldsymbol{\theta})
+$$
+
+with log form
+
+$$
+\log \mathrm{PL}(\boldsymbol{\theta})
+= \sum_{n=1}^{N} \sum_{i=1}^{p} \log p(x_{ni} \mid \mathbf{x}_{n,-i}, \boldsymbol{\theta}).
+$$
+
+The MCMC samplers in bgms optimize/evaluate log-pseudoposterior quantities,
+that is, log-pseudolikelihood plus log-prior contributions.
+
+## OMRF pseudolikelihood
+
+For OMRF, bgms uses the product of ordinal full conditionals. The conditional
+probabilities depend on category thresholds and residual scores that summarize
+the influence of all other variables.
+
+Implementation details and gradient expressions are documented in
+[OMRF Internals](omrf-internals.qmd).
+
+## Mixed MRF pseudolikelihood
+
+For mixed models, the pseudolikelihood combines discrete and continuous parts.
+The `pseudolikelihood` argument controls the continuous component:
+
+- `"conditional"` (default): conditional pseudolikelihood for continuous variables.
+- `"marginal"`: marginal normal likelihood for the continuous block.
+
+This choice changes both objective evaluation and gradients for the NUTS-updated
+block.
+
+Implementation details are documented in [Mixed MRF Internals](mixed-internals.qmd).
+
+## Group comparison (bgmCompare)
+
+The group-comparison engine uses the same pseudolikelihood idea but evaluates
+it per group under the baseline-plus-differences parameterization. Gradient
+contributions are then projected through the contrast structure.
+
+Implementation details are documented in
+[bgmCompare Engine](bgmcompare-internals.qmd).
+
+## Numerical and gradient considerations
+
+In discrete blocks, both log-normalizers and category probabilities are needed
+for efficient gradient computation. bgms computes these together to avoid
+redundant work and uses numerically stable paths for exponentiation-sensitive
+regions.
+
+See [Variable Helpers](variable-helpers.qmd) and
+[Numerical Considerations](numerical.qmd).
+
+## Practical implications
+
+- Pseudolikelihood improves computational tractability for larger networks.
+- It is an approximation to the full joint likelihood, so interpretation should
+  follow the model/diagnostic guidance in the user documentation.
+- In mixed models, `"conditional"` versus `"marginal"` pseudolikelihood can
+  trade off speed and fidelity depending on the continuous block size.

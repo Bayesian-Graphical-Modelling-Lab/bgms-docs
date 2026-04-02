@@ -26,9 +26,16 @@ runner and sampler factory use them to select the correct algorithm.
 |--------|---------|----------|-----------|---------------|
 | `has_gradient()` | `false` | `false` | `true` | `true` |
 | `has_adaptive_metropolis()` | `false` | `true` | `true` | `true` |
-| `has_nuts()` | `false` | `false` | `true` | `true` |
+| `has_nuts()` | `has_gradient()` | `false` | `true` | `true` |
 | `has_edge_selection()` | `false` | `true` | `true` | `true` |
 | `has_missing_data()` | `false` | `true` | `true` | `true` |
+| `has_constraints()` | `false` | `true`^†^ | `false` | `true`^†^ |
+
+^†^ Returns `true` when `edge_selection_` or `has_sparse_graph_` is
+active. For GGMModel this flag is present for interface consistency
+but does not trigger RATTLE integration because the GGM uses
+Metropolis sampling only. For MixedMRFModel it switches the NUTS
+sampler to constrained (RATTLE) integration.
 
 ### Sampling methods
 
@@ -90,6 +97,57 @@ virtual void prepare_iteration();
 Models with element-wise Metropolis proposals (GGM, OMRF, mixed MRF)
 implement these methods to tune proposal standard deviations during
 warmup using Robbins-Monro updates.
+
+### Constraint projection {#constraint-projection}
+
+When `has_constraints()` returns `true`, the NUTS sampler uses
+constrained (RATTLE) leapfrog integration. The model must implement
+the following methods to provide the projection functions:
+
+```cpp
+virtual bool has_constraints() const;
+virtual arma::vec get_full_position() const;
+virtual void set_full_position(const arma::vec& position);
+virtual std::pair<double, arma::vec>
+    logp_and_gradient_full(const arma::vec& position);
+virtual void project_position(arma::vec& position,
+                              const arma::vec& inv_mass);
+virtual void project_momentum(arma::vec& momentum,
+                              const arma::vec& position,
+                              const arma::vec& inv_mass);
+virtual void reset_projection_cache();
+```
+
+| Method | Purpose |
+|--------|---------|
+| `get_full_position()` | Returns the complete parameter vector including constrained (zero) entries |
+| `set_full_position()` | Sets all parameters from the full vector |
+| `logp_and_gradient_full()` | Log-posterior and gradient over the full parameter space |
+| `project_position()` | SHAKE step: projects position onto the constraint manifold (zeros excluded edges) |
+| `project_momentum()` | RATTLE step: projects momentum onto the cotangent space of the manifold |
+| `reset_projection_cache()` | Clears cached projection data at the start of each NUTS step |
+
+The `get_full_position()` / `set_full_position()` pair operates on
+the full NUTS-block parameter vector (including entries fixed at
+zero), while `get_vectorized_parameters()` /
+`set_vectorized_parameters()` operates on the active subset only.
+
+The OMRF does not implement these methods. It handles edge selection
+by adjusting the dimension of its active parameter vector instead,
+so the unconstrained NUTS path suffices.
+
+### Mass matrix access
+
+```cpp
+virtual arma::vec get_inv_mass() const;
+virtual void set_inv_mass(const arma::vec& inv_mass);
+virtual arma::vec get_active_inv_mass() const;
+```
+
+`get_inv_mass()` returns the diagonal inverse mass matrix for the
+full parameter space (used by the constrained path).
+`get_active_inv_mass()` returns the subset corresponding to active
+parameters only (used by the unconstrained path).
 
 ### Infrastructure
 
@@ -161,26 +219,35 @@ Defined in `src/models/mixed/mixed_mrf_model.h` and four `.cpp` files.
 continuous variables jointly. The log-density has the form:
 
 $$
-\log f(\mathbf{x}, \mathbf{y}) = \sum_i \mu_i(x_i) + \mathbf{x}^\top \mathbf{K}_{xx} \mathbf{x} + \mathbf{y}^\top \mathbf{K}_{yy} \mathbf{y} + 2\mathbf{x}^\top \mathbf{K}_{xy} \mathbf{y}
+\log f(\mathbf{x}, \mathbf{y}) = \sum_i \mu_i(x_i) + \mathbf{x}^\top \boldsymbol{\Omega}_{xx} \mathbf{x} + \mathbf{y}^\top \boldsymbol{\Omega}_{yy} \mathbf{y} + 2\mathbf{x}^\top \boldsymbol{\Omega}_{xy} \mathbf{y}
 $$
 
-where $\mathbf{K}_{xx}$, $\mathbf{K}_{yy}$, and $\mathbf{K}_{xy}$
-are the discrete-discrete, continuous-continuous, and cross-type
-interaction matrices.
+where $\boldsymbol{\Omega}_{xx}$, $\boldsymbol{\Omega}_{yy}$, and
+$\boldsymbol{\Omega}_{xy}$ are the discrete-discrete, continuous-continuous,
+and cross-type pairwise interaction matrices (see the
+[User's Guide](../guide/mixed-model.qmd) for their statistical
+interpretation).
 
-**Hybrid sampling.** The NUTS block updates thresholds, discrete
-pairwise interactions ($\mathbf{K}_{xx}$), continuous means, and
-cross-type interactions ($\mathbf{K}_{xy}$). The continuous precision
-elements ($\mathbf{K}_{yy}$) are excluded from the NUTS block because
-the precision matrix must remain positive definite; they are updated
-by a separate element-wise Metropolis step
-(`do_pairwise_continuous_metropolis_step()`), analogous to the GGM.
+**Sampling.** All five parameter blocks are updated jointly by NUTS.
+The continuous precision matrix is parameterized through its Cholesky
+factor (diagonal entries on the log scale) so that positive
+definiteness is guaranteed by construction. The gradient includes the
+Jacobian of the Cholesky-to-precision mapping. The model also provides
+a component-wise adaptive Metropolis fallback
+(`do_one_metropolis_step()`) used when the sampler is set to
+`"adaptive-metropolis"`.
 
-**Three dimension concepts.** The model distinguishes:
+**Three dimension concepts.** All three include the Cholesky block:
 
-- `parameter_dimension()` — Active NUTS parameters (excludes inactive edges and $\mathbf{K}_{yy}$)
-- `full_parameter_dimension()` — All NUTS-block parameters (includes inactive edges, excludes $\mathbf{K}_{yy}$)
-- `storage_dimension()` — All parameters including $\mathbf{K}_{yy}$ (what gets saved to output)
+- `parameter_dimension()` — Active parameters (excludes inactive edges, includes full Cholesky block)
+- `full_parameter_dimension()` — All parameters including inactive edges
+- `storage_dimension()` — Same layout as the full vector (what gets saved to output)
+
+When edge selection is active, `has_constraints()` returns `true`
+and the NUTS sampler uses the constrained integration path. The
+`get_full_position()` and `logp_and_gradient_full()` methods operate
+on the `full_parameter_dimension()` vector. Projection functions
+enforce zero entries for excluded edges at each leapfrog step.
 
 **Pseudolikelihood options.** The `pseudolikelihood` argument controls
 whether the model uses conditional or marginal pseudolikelihood for

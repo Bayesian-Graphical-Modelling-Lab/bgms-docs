@@ -2,10 +2,6 @@
 title: "Mixed MRF Internals"
 ---
 
-::: {.callout-warning}
-This page has not yet passed technical or readability review.
-:::
-
 Implementation details of the mixed Markov random field in bgms.
 Source: `src/models/mixed/mixed_mrf_model.h` and four `.cpp` files
 (`mixed_mrf_model.cpp`, `mixed_mrf_gradient.cpp`,
@@ -17,17 +13,18 @@ The mixed MRF handles $p$ discrete and $q$ continuous variables. The
 parameter space is organized into three interaction blocks plus
 main effects:
 
-| Block | Parameters | Size | Sampler |
-|-------|-----------|------|---------|
-| Main effects | Discrete thresholds + continuous means | $\text{thresholds} + q$ | NUTS |
-| Discrete-discrete | $\mathbf{K}_{xx}$ (symmetric) | $p(p-1)/2$ | NUTS |
-| Cross-type | $\mathbf{K}_{xy}$ | $p \times q$ | NUTS |
-| Continuous-continuous | $\mathbf{K}_{yy}$ (precision) | $q(q+1)/2$ | Metropolis |
+| Block | Parameters | Size |
+|-------|-----------|------|
+| Main effects | Discrete thresholds + continuous means | $\text{thresholds} + q$ |
+| Discrete-discrete | Pairwise discrete interactions (symmetric) | $p(p-1)/2$ |
+| Cross-type | Discrete-continuous interactions | $p \times q$ |
+| Continuous-continuous | Cholesky factor of the precision matrix | $q(q+1)/2$ |
 
-The continuous precision $\mathbf{K}_{yy}$ must remain positive
-definite, so it is excluded from the NUTS block and updated by
-element-wise Metropolis proposals with Cholesky rank-1 updates,
-identical to the GGM strategy.
+All five blocks are updated jointly by NUTS. The continuous
+precision matrix is parameterized through its Cholesky factor
+$R$ (with diagonal entries on the log scale) so that positive
+definiteness is guaranteed by construction. The gradient
+includes the Jacobian of the Cholesky-to-precision mapping.
 
 ## Parameter vector layout
 
@@ -35,82 +32,99 @@ The model distinguishes three vector types:
 
 ### Active vector (`parameter_dimension()`)
 
-Contains only the parameters that NUTS updates, excluding edges
-set to zero by edge selection:
+Contains the parameters that NUTS updates, excluding edges set to
+zero by edge selection. The Cholesky block is always fully included:
 
 ```
-[ thresholds | K_xx (active) | means | K_xy (active) ]
+[ thresholds | discrete interactions (active) | means | cross-type (active) | Cholesky (all) ]
 ```
 
 The mass matrix and gradient are dimensioned to this vector.
 
 ### Full vector (`full_parameter_dimension()`)
 
-Contains all NUTS-block parameters including inactive edges:
+Contains all parameters including inactive edges:
 
 ```
-[ thresholds | K_xx (all) | means | K_xy (all) ]
+[ thresholds | discrete interactions (all) | means | cross-type (all) | Cholesky (all) ]
 ```
 
 Used for storage and initialization.
 
 ### Storage vector (`storage_dimension()`)
 
-Adds the Metropolis-updated continuous precision to the full vector:
+Identical layout to the full vector. This is what gets saved to
+`ChainResult::samples` at each iteration.
 
-```
-[ thresholds | K_xx (all) | means | K_xy (all) | K_yy (all) ]
-```
+## Sampling strategy
 
-This is what gets saved to `ChainResult::samples` at each iteration.
+Each MCMC iteration updates the full active parameter vector (all
+five blocks) in a single NUTS step. The `logp_and_gradient()` method
+computes the log-pseudoposterior and gradient for the entire vector,
+including the Cholesky block with its log-determinant Jacobian.
 
-## Hybrid sampling strategy
-
-Each MCMC iteration has two phases:
-
-1. **NUTS phase** — Update the active parameter vector (thresholds,
-   $\mathbf{K}_{xx}$, means, $\mathbf{K}_{xy}$) using one NUTS step.
-   The `logp_and_gradient()` method computes the log-pseudoposterior
-   and gradient for this block only.
-
-2. **Metropolis phase** — Update the continuous precision elements
-   ($\mathbf{K}_{yy}$) one at a time via
-   `do_pairwise_continuous_metropolis_step()`. Each proposal uses a
-   Gaussian perturbation with Robbins-Monro-tuned SD, followed by a
-   Cholesky rank-1 update to maintain positive definiteness.
+When edge selection is active (or the initial graph is sparse), the
+model reports `has_constraints() = true` and the NUTS sampler
+switches to constrained (RATTLE) integration, using
+`logp_and_gradient_full()` and projection callbacks to enforce zero
+entries for excluded edges (see
+[Constrained Leapfrog (RATTLE)](rattle.qmd)).
 
 Edge indicator updates (when active) operate on all three interaction
 blocks.
 
+The model also provides a component-wise adaptive Metropolis fallback
+(`do_one_metropolis_step()`), used when the sampler is set to
+`"adaptive-metropolis"`. In Metropolis mode, each parameter is
+updated individually with Robbins–Monro-tuned proposal SDs targeting
+an acceptance rate of 0.44. Off-diagonal precision updates use a
+rank-2 Cholesky update; diagonal updates use rank-1.
+
 ## Gradient computation
 
-The gradient (`mixed_mrf_gradient.cpp`) is computed for the NUTS
-block only. It involves:
+The gradient (`mixed_mrf_gradient.cpp`) covers all five parameter
+blocks in the NUTS vector. It involves:
 
 1. **Discrete conditionals** — Category probabilities via
-   [variable helpers](variable-helpers.qmd), contributing gradients
-   for thresholds and $\mathbf{K}_{xx}$
-2. **Cross-type terms** — Contributions from $\mathbf{K}_{xy}$ to
-   both discrete and continuous conditional distributions
+   [Variable Helpers](variable-helpers.qmd), contributing gradients
+   for thresholds and discrete pairwise interactions
+2. **Cross-type terms** — Contributions from discrete-continuous
+   interactions to both discrete and continuous conditional distributions
 3. **Continuous means** — Gradient of the continuous-variable
    contribution to the pseudolikelihood
+4. **Cholesky block** — The precision gradient $\bar{\Omega}$ is
+   computed from the GGM conditional contribution and the
+   conditional-mean coupling, then mapped to the Cholesky gradient
+   $\bar{R} = R(\bar{\Omega} + \bar{\Omega}^\top)$. Diagonal entries
+   use the log-scale Jacobian: $\partial\ell / \partial\psi_j =
+   \bar{R}_{jj} R_{jj} + (q - j + 1)$.
 
-The log-prior gradient adds the Cauchy prior penalty on pairwise
-interactions.
+The log-prior gradient adds Cauchy penalties on off-diagonal
+precision entries and Gamma(1,1) penalties on diagonal entries.
 
 ## Pseudolikelihood options
 
-The `pseudolikelihood` argument controls the continuous-variable
-likelihood:
+The `pseudolikelihood` argument controls how the **discrete** full
+conditionals are computed. It does not affect the continuous block,
+which always uses the GGM likelihood
+$\log p(y \mid x) \propto \tfrac{n}{2}\log|\Omega| - \tfrac{1}{2}\operatorname{tr}(\Omega D^\top D)$.
 
-- `"conditional"` (default) — Uses the conditional distribution of
-  each continuous variable given the rest, consistent with the discrete
-  pseudolikelihood
-- `"marginal"` — Uses the marginal normal likelihood for the
-  continuous block, which can be more efficient when $q$ is large
+For a cross-model overview, see [Pseudolikelihood](pseudolikelihood.qmd).
 
-The choice affects both the log-posterior evaluation and the gradient
-computation.
+- `"conditional"` (default) — Computes discrete full conditionals
+  $\log p(x_s \mid x_{-s}, y_{\text{obs}})$, conditioning on the
+  observed continuous values. The rest score uses
+  `pairwise_effects_discrete_` directly. Faster because updating
+  the continuous precision elements does not require re-evaluating
+  the discrete pseudolikelihood.
+- `"marginal"` — Computes discrete full conditionals
+  $\log p(x_s \mid x_{-s})$ by integrating out the continuous
+  variables. Uses the marginal interaction matrix
+  $\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top$, which must
+  be recomputed whenever the precision or cross-type parameters
+  change. This adds coupling terms to the gradient (the
+  $\partial\Theta/\partial\Sigma$ chain rule contributes to the
+  precision gradient via $-2\Sigma A_{xy}^\top\bar\Theta A_{xy}\Sigma$).
 
 ## Missing data
 
