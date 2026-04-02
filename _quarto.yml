@@ -144,9 +144,7 @@ website:
           contents:
             - manual/edge-priors.qmd
             - manual/sbm-prior.qmd
-        - section: "Group Comparison"
-          contents:
-            - manual/bgmcompare-internals.qmd
+        - manual/bgmcompare-internals.qmd
         - manual/numerical.qmd
 
     - id: examples
