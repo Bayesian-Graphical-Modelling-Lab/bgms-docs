@@ -641,7 +641,7 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>has_nuts()</code></td>
-<td><code>false</code></td>
+<td><code>has_gradient()</code></td>
 <td><code>false</code></td>
 <td><code>true</code></td>
 <td><code>true</code></td>
@@ -660,8 +660,16 @@ Warning
 <td><code>true</code></td>
 <td><code>true</code></td>
 </tr>
+<tr class="even">
+<td><code>has_constraints()</code></td>
+<td><code>false</code></td>
+<td><code>true</code><sup>†</sup></td>
+<td><code>false</code></td>
+<td><code>true</code><sup>†</sup></td>
+</tr>
 </tbody>
 </table>
+<p><sup>†</sup> Returns <code>true</code> when <code>edge_selection_</code> or <code>has_sparse_graph_</code> is active. For GGMModel this flag is present for interface consistency but does not trigger RATTLE integration because the GGM uses Metropolis sampling only. For MixedMRFModel it switches the NUTS sampler to constrained (RATTLE) integration.</p>
 </section>
 <section id="sampling-methods" class="level3">
 <h3 class="anchored" data-anchor-id="sampling-methods">Sampling methods</h3>
@@ -696,10 +704,72 @@ Warning
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> prepare_iteration<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Models with element-wise Metropolis proposals (GGM, OMRF, mixed MRF) implement these methods to tune proposal standard deviations during warmup using Robbins-Monro updates.</p>
 </section>
+<section id="constraint-projection" class="level3">
+<h3 class="anchored" data-anchor-id="constraint-projection">Constraint projection</h3>
+<p>When <code>has_constraints()</code> returns <code>true</code>, the NUTS sampler uses constrained (RATTLE) leapfrog integration. The model must implement the following methods to provide the projection functions:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">bool</span> has_constraints<span class="op">()</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> arma<span class="op">::</span>vec get_full_position<span class="op">()</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> set_full_position<span class="op">(</span><span class="at">const</span> arma<span class="op">::</span>vec<span class="op">&amp;</span> position<span class="op">);</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="bu">std::</span>pair<span class="op">&lt;</span><span class="dt">double</span><span class="op">,</span> arma<span class="op">::</span>vec<span class="op">&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    logp_and_gradient_full<span class="op">(</span><span class="at">const</span> arma<span class="op">::</span>vec<span class="op">&amp;</span> position<span class="op">);</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> project_position<span class="op">(</span>arma<span class="op">::</span>vec<span class="op">&amp;</span> position<span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">const</span> arma<span class="op">::</span>vec<span class="op">&amp;</span> inv_mass<span class="op">);</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> project_momentum<span class="op">(</span>arma<span class="op">::</span>vec<span class="op">&amp;</span> momentum<span class="op">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                              <span class="at">const</span> arma<span class="op">::</span>vec<span class="op">&amp;</span> position<span class="op">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                              <span class="at">const</span> arma<span class="op">::</span>vec<span class="op">&amp;</span> inv_mass<span class="op">);</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> reset_projection_cache<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 47%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>get_full_position()</code></td>
+<td>Returns the complete parameter vector including constrained (zero) entries</td>
+</tr>
+<tr class="even">
+<td><code>set_full_position()</code></td>
+<td>Sets all parameters from the full vector</td>
+</tr>
+<tr class="odd">
+<td><code>logp_and_gradient_full()</code></td>
+<td>Log-posterior and gradient over the full parameter space</td>
+</tr>
+<tr class="even">
+<td><code>project_position()</code></td>
+<td>SHAKE step: projects position onto the constraint manifold (zeros excluded edges)</td>
+</tr>
+<tr class="odd">
+<td><code>project_momentum()</code></td>
+<td>RATTLE step: projects momentum onto the cotangent space of the manifold</td>
+</tr>
+<tr class="even">
+<td><code>reset_projection_cache()</code></td>
+<td>Clears cached projection data at the start of each NUTS step</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>get_full_position()</code> / <code>set_full_position()</code> pair operates on the full NUTS-block parameter vector (including entries fixed at zero), while <code>get_vectorized_parameters()</code> / <code>set_vectorized_parameters()</code> operates on the active subset only.</p>
+<p>The OMRF does not implement these methods. It handles edge selection by adjusting the dimension of its active parameter vector instead, so the unconstrained NUTS path suffices.</p>
+</section>
+<section id="mass-matrix-access" class="level3">
+<h3 class="anchored" data-anchor-id="mass-matrix-access">Mass matrix access</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> arma<span class="op">::</span>vec get_inv_mass<span class="op">()</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> set_inv_mass<span class="op">(</span><span class="at">const</span> arma<span class="op">::</span>vec<span class="op">&amp;</span> inv_mass<span class="op">);</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> arma<span class="op">::</span>vec get_active_inv_mass<span class="op">()</span> <span class="at">const</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>get_inv_mass()</code> returns the diagonal inverse mass matrix for the full parameter space (used by the constrained path). <code>get_active_inv_mass()</code> returns the subset corresponding to active parameters only (used by the unconstrained path).</p>
+</section>
 <section id="infrastructure" class="level3">
 <h3 class="anchored" data-anchor-id="infrastructure">Infrastructure</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> set_seed<span class="op">(</span><span class="dt">int</span> seed<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> unique_ptr<span class="op">&lt;</span>BaseModel<span class="op">&gt;</span> clone<span class="op">()</span> <span class="at">const</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> <span class="dt">void</span> set_seed<span class="op">(</span><span class="dt">int</span> seed<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">virtual</span> unique_ptr<span class="op">&lt;</span>BaseModel<span class="op">&gt;</span> clone<span class="op">()</span> <span class="at">const</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>clone()</code> produces an independent deep copy for parallel chain execution. Each clone gets its own RNG state via <code>set_seed()</code>.</p>
 </section>
 </section>
@@ -724,16 +794,17 @@ Warning
 <p>Defined in <code>src/models/mixed/mixed_mrf_model.h</code> and four <code>.cpp</code> files.</p>
 <p><strong>Parameterization.</strong> The mixed MRF handles <span class="math inline">\(p\)</span> discrete and <span class="math inline">\(q\)</span> continuous variables jointly. The log-density has the form:</p>
 <p><span class="math display">\[
-\log f(\mathbf{x}, \mathbf{y}) = \sum_i \mu_i(x_i) + \mathbf{x}^\top \mathbf{K}_{xx} \mathbf{x} + \mathbf{y}^\top \mathbf{K}_{yy} \mathbf{y} + 2\mathbf{x}^\top \mathbf{K}_{xy} \mathbf{y}
+\log f(\mathbf{x}, \mathbf{y}) = \sum_i \mu_i(x_i) + \mathbf{x}^\top \boldsymbol{\Omega}_{xx} \mathbf{x} + \mathbf{y}^\top \boldsymbol{\Omega}_{yy} \mathbf{y} + 2\mathbf{x}^\top \boldsymbol{\Omega}_{xy} \mathbf{y}
 \]</span></p>
-<p>where <span class="math inline">\(\mathbf{K}_{xx}\)</span>, <span class="math inline">\(\mathbf{K}_{yy}\)</span>, and <span class="math inline">\(\mathbf{K}_{xy}\)</span> are the discrete-discrete, continuous-continuous, and cross-type interaction matrices.</p>
-<p><strong>Hybrid sampling.</strong> The NUTS block updates thresholds, discrete pairwise interactions (<span class="math inline">\(\mathbf{K}_{xx}\)</span>), continuous means, and cross-type interactions (<span class="math inline">\(\mathbf{K}_{xy}\)</span>). The continuous precision elements (<span class="math inline">\(\mathbf{K}_{yy}\)</span>) are excluded from the NUTS block because the precision matrix must remain positive definite; they are updated by a separate element-wise Metropolis step (<code>do_pairwise_continuous_metropolis_step()</code>), analogous to the GGM.</p>
-<p><strong>Three dimension concepts.</strong> The model distinguishes:</p>
+<p>where <span class="math inline">\(\boldsymbol{\Omega}_{xx}\)</span>, <span class="math inline">\(\boldsymbol{\Omega}_{yy}\)</span>, and <span class="math inline">\(\boldsymbol{\Omega}_{xy}\)</span> are the discrete-discrete, continuous-continuous, and cross-type pairwise interaction matrices (see the <a href="../guide/mixed-model.html">User’s Guide</a> for their statistical interpretation).</p>
+<p><strong>Sampling.</strong> All five parameter blocks are updated jointly by NUTS. The continuous precision matrix is parameterized through its Cholesky factor (diagonal entries on the log scale) so that positive definiteness is guaranteed by construction. The gradient includes the Jacobian of the Cholesky-to-precision mapping. The model also provides a component-wise adaptive Metropolis fallback (<code>do_one_metropolis_step()</code>) used when the sampler is set to <code>"adaptive-metropolis"</code>.</p>
+<p><strong>Three dimension concepts.</strong> All three include the Cholesky block:</p>
 <ul>
-<li><code>parameter_dimension()</code> — Active NUTS parameters (excludes inactive edges and <span class="math inline">\(\mathbf{K}_{yy}\)</span>)</li>
-<li><code>full_parameter_dimension()</code> — All NUTS-block parameters (includes inactive edges, excludes <span class="math inline">\(\mathbf{K}_{yy}\)</span>)</li>
-<li><code>storage_dimension()</code> — All parameters including <span class="math inline">\(\mathbf{K}_{yy}\)</span> (what gets saved to output)</li>
+<li><code>parameter_dimension()</code> — Active parameters (excludes inactive edges, includes full Cholesky block)</li>
+<li><code>full_parameter_dimension()</code> — All parameters including inactive edges</li>
+<li><code>storage_dimension()</code> — Same layout as the full vector (what gets saved to output)</li>
 </ul>
+<p>When edge selection is active, <code>has_constraints()</code> returns <code>true</code> and the NUTS sampler uses the constrained integration path. The <code>get_full_position()</code> and <code>logp_and_gradient_full()</code> methods operate on the <code>full_parameter_dimension()</code> vector. Projection functions enforce zero entries for excluded edges at each leapfrog step.</p>
 <p><strong>Pseudolikelihood options.</strong> The <code>pseudolikelihood</code> argument controls whether the model uses conditional or marginal pseudolikelihood for the continuous block. See the <a href="../guide/mixed-model.html">User’s Guide</a> for the statistical distinction.</p>
 
 
