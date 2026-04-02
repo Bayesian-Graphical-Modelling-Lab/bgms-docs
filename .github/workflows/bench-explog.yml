@@ -92,7 +92,7 @@ jobs:
           table = f"""Elapsed seconds for 100 iterations over 1 000 000 elements
           (GitHub Actions runners, {date}):
 
-          | | macOS ({mac['mode']}) | Windows ({win['mode']}) |
+          | | macOS | Windows |
           |---|---:|---:|
           | `exp()` (base R) | {mac['base_exp']}s | {win['base_exp']}s |
           | `MY_EXP` (custom) | {mac['custom_exp']}s | {win['custom_exp']}s |

@@ -18,7 +18,7 @@ prohibitively slow on Windows without intervention.
 Elapsed seconds for 100 iterations over 1 000 000 elements
 (GitHub Actions runners, 2026-04-02):
 
-| | macOS (standard) | Windows (custom) |
+| | macOS | Windows |
 |---|---:|---:|
 | `exp()` (base R) | 0.999s | 4.22s |
 | `MY_EXP` (custom) | 1.065s | 1.32s |
