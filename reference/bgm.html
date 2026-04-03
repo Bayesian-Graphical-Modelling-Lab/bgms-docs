@@ -58,7 +58,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -481,23 +501,10 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>Estimates the main effects and pairwise interactions of a network using a Bayesian framework.</p>
+<p>Fits a single-network Bayesian graphical model with <code>bgm()</code> and returns an S7 object of class <code>bgms</code>.</p>
 <section id="description" class="level2">
 <h2 class="anchored" data-anchor-id="description">Description</h2>
-<p>This function models the joint distribution of binary, ordinal, continuous, or mixed variables using a Markov Random Field, with support for edge selection through Bayesian variable selection. The statistical foundation of the model is described in Marsman et al.&nbsp;(2025), where the ordinal MRF model and its Bayesian estimation procedure were first introduced. While the implementation in bgms has since been extended and updated (e.g., alternative priors, parallel chains, HMC/NUTS warmup), it builds on that original framework.</p>
+<p><code>bgm()</code> fits a single network for binary, ordinal, continuous, or mixed data, with optional Bayesian edge selection. This page is the technical reference for function arguments and returned objects. For interpretation and workflow, start with <a href="../guide/getting-started.html">Getting Started</a>, then see <a href="../guide/graphical-models.html">Graphical Models</a> and <a href="../guide/bayesian-approach.html">The Bayesian Approach</a>. Methodological background is provided in <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025"><span class="nocase">Marsman et al.</span> (<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref">2025</a>)</span>.</p>
 </section>
 <section id="usage" class="level2">
 <h2 class="anchored" data-anchor-id="usage">Usage</h2>
@@ -539,10 +546,6 @@ Warning
 <section id="data" class="level3">
 <h3 class="anchored" data-anchor-id="data">Data</h3>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 56%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Argument</th>
@@ -556,7 +559,7 @@ Warning
 </tr>
 <tr class="even">
 <td><code>variable_type</code></td>
-<td>Character or character vector. Specifies the type of each variable in <code>x</code>. Allowed values: <code>\"ordinal\"</code>, <code>\"blume-capel\"</code>, or <code>\"continuous\"</code>. A single string applies to all variables. A per-variable vector that mixes discrete (<code>\"ordinal\"</code> / <code>\"blume-capel\"</code>) and <code>\"continuous\"</code> types fits a mixed MRF. Binary variables are automatically treated as <code>\"ordinal\"</code>. Default: <code>\"ordinal\"</code>.</td>
+<td>Character or character vector. Specifies the type of each variable in <code>x</code>. Allowed values: <code>"ordinal"</code>, <code>"blume-capel"</code>, or <code>"continuous"</code>. A single string applies to all variables. A per-variable vector that mixes discrete (<code>"ordinal"</code> / <code>"blume-capel"</code>) and <code>"continuous"</code> types fits a mixed MRF. Binary variables are automatically treated as <code>"ordinal"</code>. Default: <code>"ordinal"</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>baseline_category</code></td>
@@ -564,7 +567,7 @@ Warning
 </tr>
 <tr class="even">
 <td><code>na_action</code></td>
-<td>Character. Specifies missing data handling. Either <code>\"listwise\"</code> (drop rows with missing values) or <code>\"impute\"</code> (perform single imputation during sampling). Default: <code>\"listwise\"</code>.</td>
+<td>Character. Specifies missing data handling. Either <code>"listwise"</code> (drop rows with missing values) or <code>"impute"</code> (impute within Gibbs sampler, propagating uncertainty). Default: <code>"listwise"</code>. See <a href="../guide/missing-data.html">Missing Data</a> for details.</td>
 </tr>
 </tbody>
 </table>
@@ -621,7 +624,7 @@ Warning
 </tr>
 <tr class="even">
 <td><code>standardize</code></td>
-<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products <span class="math inline">\((x_i \cdot x_j)\)</span>, which typically correspond to smaller interaction effects <span class="math inline">\((\sigma_{ij})\)</span>. Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores <span class="math inline">\(0, 1, \ldots, m\)</span>. The adjusted scale for the interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is <code>pairwise_scale * m_i * m_j</code>, so that <code>pairwise_scale</code> itself applies to the unit interval case (binary variables where <span class="math inline">\(m_i = m_j = 1\)</span>). For Blume-Capel variables with reference category <span class="math inline">\(b\)</span>, scores are centered as <span class="math inline">\(-b, \ldots, m-b\)</span>, and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints <span class="math inline">\((0, m)\)</span> and Blume-Capel variables use centered score endpoints <span class="math inline">\((-b, m-b)\)</span>. Default: <code>FALSE</code>.</td>
+<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products <span class="math inline">\((x_i \cdot x_j)\)</span>, which typically correspond to smaller interaction effects <span class="math inline">\((\omega_{ij})\)</span>. Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores <span class="math inline">\(0, 1, \ldots, m\)</span>. The adjusted scale for the interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is <code>pairwise_scale * m_i * m_j</code>, so that <code>pairwise_scale</code> itself applies to the unit interval case (binary variables where <span class="math inline">\(m_i = m_j = 1\)</span>). For Blume-Capel variables with reference category <span class="math inline">\(b\)</span>, scores are centered as <span class="math inline">\(-b, \ldots, m-b\)</span>, and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints <span class="math inline">\((0, m)\)</span> and Blume-Capel variables use centered score endpoints <span class="math inline">\((-b, m-b)\)</span>. Default: <code>FALSE</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -650,7 +653,7 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>update_method</code></td>
-<td>Character. Specifies how the MCMC sampler updates the model parameters: <code>\"adaptive-metropolis\"</code> (Componentwise adaptive Metropolis–Hastings with Robbins–Monro proposal adaptation), <code>\"hamiltonian-mc\"</code> (<strong>Deprecated.</strong> Use <code>\"nuts\"</code> instead. Will be removed in a future release.), or <code>\"nuts\"</code> (The No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: <code>\"nuts\"</code>.</td>
+<td>Character. Specifies how the MCMC sampler updates the model parameters: <code>"adaptive-metropolis"</code> (componentwise adaptive Metropolis–Hastings with Robbins–Monro proposal adaptation), <code>"hamiltonian-mc"</code> (<strong>Deprecated.</strong> Use <code>"nuts"</code> instead. Will be removed in a future release.), or <code>"nuts"</code> (the No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: <code>"nuts"</code>.</td>
 </tr>
 <tr class="even">
 <td><code>target_accept</code></td>
@@ -658,7 +661,7 @@ Warning
 </tr>
 <tr class="odd">
 <td><code>hmc_num_leapfrogs</code></td>
-<td><strong>Deprecated.</strong> Integer. Number of leapfrog steps for Hamiltonian Monte Carlo. Only relevant when <code>update_method = \"hamiltonian-mc\"</code>, which is deprecated. Default: <code>100</code>.</td>
+<td><strong>Deprecated.</strong> Integer. Number of leapfrog steps for Hamiltonian Monte Carlo. Only relevant when <code>update_method = "hamiltonian-mc"</code>, which is deprecated. Default: <code>100</code>.</td>
 </tr>
 <tr class="even">
 <td><code>nuts_max_depth</code></td>
@@ -686,7 +689,7 @@ Warning
 </tr>
 <tr class="even">
 <td><code>pseudolikelihood</code></td>
-<td>Character. Specifies the pseudo-likelihood approximation used for mixed MRF models (ignored for pure ordinal or pure continuous data). Options: <code>"conditional"</code> (conditions on the observed continuous variables when computing the discrete full conditionals; faster because the discrete pseudo-likelihood does not depend on the continuous precision matrix) or <code>"marginal"</code> (integrates out the continuous variables, giving discrete full conditionals that account for induced interactions through the continuous block; more expensive per iteration). Default: <code>"conditional"</code>.</td>
+<td>Character. Pseudolikelihood approximation for mixed MRF models (ignored for pure ordinal or pure continuous data). <code>"conditional"</code> conditions on the observed continuous variables when computing the discrete full conditionals; faster because the discrete pseudolikelihood does not depend on the continuous precision matrix. <code>"marginal"</code> integrates out the continuous variables, giving discrete full conditionals that account for induced interactions through the continuous block; more expensive per iteration. Default: <code>"conditional"</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>verbose</code></td>
@@ -698,7 +701,7 @@ Warning
 </section>
 <section id="value" class="level2">
 <h2 class="anchored" data-anchor-id="value">Value</h2>
-<p>A list of class <code>"bgms"</code> with posterior summaries, posterior mean matrices, and access to raw MCMC draws. The object can be passed to <code>print()</code>, <code>summary()</code>, and <code>coef()</code>.</p>
+<p>An S7 object of class <code>bgms</code> with posterior summaries, posterior mean matrices, and raw MCMC draws. Supports <code>print()</code>, <code>summary()</code>, <code>coef()</code>, <code>predict()</code>, and <code>simulate()</code>.</p>
 <p>Main components:</p>
 <ul>
 <li><code>posterior_summary_main</code> — Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for main-effect parameters. For OMRF models these are category thresholds; for mixed MRF models these are discrete thresholds and continuous means. <code>NULL</code> for GGM models.</li>
@@ -721,11 +724,11 @@ Warning
 </ul></li>
 <li><code>arguments</code> — A list of function call arguments and metadata.</li>
 </ul>
-<p>Additional summaries when <code>edge_prior = "Stochastic-Block"</code>. For more details about this prior see Sekulovski et al.&nbsp;(2025):</p>
+<p>Additional summaries when <code>edge_prior = "Stochastic-Block"</code> <span class="citation" data-cites="SekulovskiEtAl_2025_sbm">(see <a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">Sekulovski et al., 2025</a>)</span>:</p>
 <ul>
 <li><code>posterior_summary_pairwise_allocations</code> — Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for the pairwise cluster co-occurrence of the nodes. This serves to indicate whether the estimated posterior allocations, co-clustering matrix and posterior cluster probabilities have converged.</li>
 <li><code>posterior_coclustering_matrix</code> — Symmetric matrix of pairwise proportions of occurrence of every variable. This matrix can be plotted to visually inspect the estimated number of clusters and visually inspect nodes that tend to switch clusters.</li>
-<li><code>posterior_mean_allocations</code> — A vector with the posterior mean of the cluster allocations of the nodes. This is calculated using the method proposed in Dahl (2009).</li>
+<li><code>posterior_mean_allocations</code> — A vector with the posterior mean of the cluster allocations of the nodes.</li>
 <li><code>posterior_mode_allocations</code> — A vector with the posterior mode of the cluster allocations of the nodes.</li>
 <li><code>posterior_num_blocks</code> — A data frame with the estimated posterior inclusion probabilities for all the possible number of clusters.</li>
 </ul>
@@ -733,83 +736,30 @@ Warning
 </section>
 <section id="details" class="level2">
 <h2 class="anchored" data-anchor-id="details">Details</h2>
-<section id="ordinal-variables" class="level3">
-<h3 class="anchored" data-anchor-id="ordinal-variables">Ordinal variables</h3>
-<p>The function supports two types of ordinal variables.</p>
-<p><strong>Regular ordinal variables</strong> assign a category threshold parameter to each response category except the lowest. The model imposes no additional constraints on the distribution of category responses.</p>
-<p><strong>Blume–Capel ordinal variables</strong> assume a baseline category (e.g., a “neutral” response) and score responses by distance from this baseline. Category thresholds are modeled as:</p>
-<p><span class="math display">\[\mu_c = \alpha \cdot (c - b) + \beta \cdot (c - b)^2\]</span></p>
-<p>where <span class="math inline">\(\mu_c\)</span> is the category threshold for category <span class="math inline">\(c\)</span>, <span class="math inline">\(\alpha\)</span> is a linear trend across categories, <span class="math inline">\(\beta\)</span> is a quadratic effect (negative values favor responses near the baseline; positive values favor extremes), and <span class="math inline">\(b\)</span> is the baseline category.</p>
-</section>
-<section id="edge-selection" class="level3">
-<h3 class="anchored" data-anchor-id="edge-selection">Edge selection</h3>
-<p>When <code>edge_selection = TRUE</code>, the function performs Bayesian variable selection on partial associations using spike-and-slab priors:</p>
-<ul>
-<li><strong>Bernoulli</strong> — Fixed inclusion probability across edges.</li>
-<li><strong>Beta-Bernoulli</strong> — Inclusion probability is given a Beta prior.</li>
-<li><strong>Stochastic-Block</strong> — Cluster-based edge priors with Beta, Dirichlet, and Poisson hyperpriors.</li>
-</ul>
-</section>
-<section id="prior-distributions" class="level3">
-<h3 class="anchored" data-anchor-id="prior-distributions">Prior distributions</h3>
-<ul>
-<li><strong>Pairwise effects</strong> — Cauchy (slab) prior.</li>
-<li><strong>Main effects</strong> — Beta-prime distribution.</li>
-<li><strong>Edge indicators</strong> — Bernoulli, Beta-Bernoulli, or Stochastic-Block prior.</li>
-</ul>
-</section>
-<section id="sampling-algorithms-and-warmup" class="level3">
-<h3 class="anchored" data-anchor-id="sampling-algorithms-and-warmup">Sampling algorithms and warmup</h3>
-<p>Parameters are updated within a Gibbs framework using one of two algorithms:</p>
-<ul>
-<li><strong>Adaptive Metropolis–Hastings</strong> — Componentwise random-walk updates with Robbins–Monro proposal adaptation.</li>
-<li><strong>No-U-Turn Sampler (NUTS)</strong> — Joint updates using Hamiltonian dynamics with adaptively chosen trajectory lengths. Warmup uses a staged fast–slow–fast schedule for step-size and mass-matrix adaptation.</li>
-</ul>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><code>update_method = "hamiltonian-mc"</code> (fixed-length HMC) is deprecated. Use <code>"nuts"</code> instead.</p>
-</div>
-</div>
-<p>When <code>edge_selection = TRUE</code>, edge-inclusion indicator updates are delayed until after the core warmup phase. The warmup schedule appends additional stages for proposal-SD tuning (Stage 3b) and graph initialization (Stage 3c), so the total warmup exceeds the user-specified value.</p>
-</section>
-<section id="missing-data" class="level3">
-<h3 class="anchored" data-anchor-id="missing-data">Missing data</h3>
-<p>If <code>na_action = "listwise"</code>, rows with missing values are removed. If <code>na_action = "impute"</code>, missing values are imputed within the MCMC loop via Gibbs sampling.</p>
-</section>
+<p>For full explanations, see the guide. Model-specific assumptions and parameterization are described in <a href="../guide/omrf.html">Ordinal MRF</a>, <a href="../guide/ggm.html">Gaussian Graphical Model</a>, and <a href="../guide/mixed-model.html">Mixed MRF</a>. Prior specification and structure learning are discussed in <a href="../guide/prior-basics.html">Prior Basics</a>, <a href="../guide/edge-selection.html">Edge Selection</a>, and <a href="../guide/clustering.html">Edge Clustering</a>. To interpret outputs and verify chain quality, see <a href="../guide/mcmc-output.html">MCMC Output</a> and <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>.</p>
 </section>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit a model on a subset of the Wenchuan data</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> Wenchuan[, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">chains =</span> <span class="dv">2</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior inclusion probabilities</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>indicator</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior partial associations</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)<span class="sc">$</span>pairwise</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> Wenchuan, <span class="at">chains =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="see-also" class="level2">
 <h2 class="anchored" data-anchor-id="see-also">See also</h2>
-<p><a href="../reference/bgmCompare.html">bgmCompare()</a> for group comparisons, <a href="../reference/methods.html">S3 methods</a> for <code>print</code>, <code>summary</code>, and <code>coef</code>, <a href="../reference/extractors.html">extractor functions</a> for accessing specific model components.</p>
-</section>
-<section id="references" class="level2">
-<h2 class="anchored" data-anchor-id="references">References</h2>
-<p>Marsman, M., Van den Bergh, D., &amp; Haslbeck, J. M. B. (2025). Bayesian analysis of the ordinal Markov random field. <em>Psychometrika</em>.</p>
+<p><a href="../guide/getting-started.html">Getting Started</a>, <a href="../reference/methods.html">Methods</a>, <a href="../reference/extractors.html">Extractor Functions</a>, and <a href="../reference/bgmCompare.html">bgmCompare()</a>.</p>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-MarsmanVandenBerghHaslbeck_2025" class="csl-entry" role="listitem">
+<span class="nocase">Marsman, M., van den Bergh, D., &amp; Haslbeck, J. M. B.</span> (2025). Bayesian analysis of the ordinal <span>M</span>arkov random field. <em>Psychometrika</em>, <em>90</em>(1), 146–182. <a href="https://doi.org/10.1017/psy.2024.4">https://doi.org/10.1017/psy.2024.4</a>
+</div>
+<div id="ref-SekulovskiEtAl_2025_sbm" class="csl-entry" role="listitem">
+Sekulovski, N., Arena, G., Haslbeck, J. M. B., Huth, K. B. S., Friel, N., &amp; Marsman, M. (2025). A stochastic block prior for clustering in graphical models. <em>Manuscript Submitted for Publication</em>. <a href="https://osf.io/preprints/psyarxiv/29p3m_v3">https://osf.io/preprints/psyarxiv/29p3m_v3</a>
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms

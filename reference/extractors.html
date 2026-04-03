@@ -570,7 +570,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="extract_rhat">extract_rhat</h2>
 <p>Retrieve R-hat convergence diagnostics for all parameters.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_rhat</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Returns a named list with R-hat values for each parameter type present in the model (e.g., <code>main</code>, <code>pairwise</code>, <code>indicator</code>). R-hat is computed in C++ using the Gelman-Rubin formula, matching <code>coda::gelman.diag</code>. For implementation details, see the <a href="../manual/diagnostics.html">Technical Manual</a>.</p>
+<p>Returns a named list with R-hat values for each parameter type present in the model (e.g., <code>main</code>, <code>pairwise</code>, <code>indicator</code>). R-hat is computed in C++ using the Gelman-Rubin formula, matching <code>coda::gelman.diag</code>. For implementation details, see <a href="../manual/diagnostics.html">diagnostics</a> in the Technical Manual.</p>
 </section>
 <section id="deprecated-functions" class="level2">
 <h2 class="anchored" data-anchor-id="deprecated-functions">Deprecated functions</h2>
@@ -585,15 +585,15 @@ window.Quarto = {
 <p>Retrieve the posterior mean precision matrix.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_precision</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>bgms_object</code> must be a fitted <code>bgms</code> object (GGM or mixed MRF).</p>
-<p>Returns a symmetric p x p matrix (or the continuous block submatrix for mixed MRFs) containing the posterior mean precision matrix <span class="math inline">\(\boldsymbol{K}\)</span>.</p>
+<p>Returns a symmetric p x p matrix (or the continuous block submatrix for mixed MRFs) containing the posterior mean precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span>.</p>
 </section>
 <section id="extract_partial_correlations" class="level2">
 <h2 class="anchored" data-anchor-id="extract_partial_correlations">extract_partial_correlations</h2>
 <p>Retrieve the posterior mean partial correlation matrix.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_partial_correlations</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>bgms_object</code> must be a fitted <code>bgms</code> object (GGM or mixed MRF).</p>
-<p>Returns a symmetric matrix of partial correlations, computed by standardizing the precision matrix: <span class="math inline">\(\rho_{ij} = -K_{ij} / \sqrt{K_{ii}
-K_{jj}}\)</span>.</p>
+<p>Returns a symmetric matrix of partial correlations, computed by standardizing the precision matrix: <span class="math inline">\(\rho_{ij} = -\Theta_{ij} / \sqrt{\Theta_{ii}
+\Theta_{jj}}\)</span>.</p>
 </section>
 <section id="extract_log_odds" class="level2">
 <h2 class="anchored" data-anchor-id="extract_log_odds">extract_log_odds</h2>

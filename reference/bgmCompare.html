@@ -58,7 +58,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -113,35 +133,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -481,23 +472,10 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This page has not yet passed technical or readability review.</p>
-</div>
-</div>
-<p>Bayesian estimation and variable selection for group differences in Markov Random Fields.</p>
+<p>Compares group differences in networks for discrete (binary and ordinal) variables using Bayesian estimation and optional difference selection.</p>
 <section id="description" class="level2">
 <h2 class="anchored" data-anchor-id="description">Description</h2>
-<p>The <code>bgmCompare</code> function estimates group differences in category threshold parameters (main effects) and partial associations (pairwise effects) of a Markov Random Field (MRF) for binary and ordinal variables. Groups can be defined either by supplying two separate datasets (<code>x</code> and <code>y</code>) or by a group membership vector. Optionally, Bayesian variable selection identifies differences across groups.</p>
+<p><code>bgmCompare()</code> extends <code>bgm()</code> to test group differences in threshold and partial-association parameters for discrete MRFs. Groups can be supplied as two datasets (<code>x</code> and <code>y</code>) or through a grouping vector in <code>group_indicator</code>. This page is the technical reference for arguments and return values. For workflow and interpretation, see <a href="../guide/group-comparison.html">Group Comparison</a>, <a href="../guide/edge-selection.html">Edge Selection</a>, <a href="../guide/mcmc-output.html">MCMC Output</a>, and <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>. Methodological background is provided in <span class="citation" data-cites="MarsmanEtAl_2025_ttest">Marsman et al. (<a href="#ref-MarsmanEtAl_2025_ttest" role="doc-biblioref">2025</a>)</span>.</p>
 </section>
 <section id="usage" class="level2">
 <h2 class="anchored" data-anchor-id="usage">Usage</h2>
@@ -538,10 +516,6 @@ Warning
 <section id="data-and-groups" class="level3">
 <h3 class="anchored" data-anchor-id="data-and-groups">Data and groups</h3>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 56%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Argument</th>
@@ -571,7 +545,7 @@ Warning
 </tr>
 <tr class="even">
 <td><code>na_action</code></td>
-<td>How to handle missing data: <code>"listwise"</code> (drop rows) or <code>"impute"</code> (impute within Gibbs). Default: <code>"listwise"</code>.</td>
+<td>How to handle missing data: <code>"listwise"</code> (drop rows) or <code>"impute"</code> (impute within Gibbs sampler, propagating uncertainty). Default: <code>"listwise"</code>. See <a href="../guide/missing-data.html">Missing Data</a> for details.</td>
 </tr>
 </tbody>
 </table>
@@ -714,55 +688,44 @@ Warning
 </section>
 <section id="value" class="level2">
 <h2 class="anchored" data-anchor-id="value">Value</h2>
-<p>A list of class <code>"bgmCompare"</code> containing posterior summaries, posterior mean matrices, and raw MCMC samples:</p>
+<p>An S7 object of class <code>bgmCompare</code> with posterior summaries, posterior mean matrices, and raw MCMC samples. Standard methods such as <code>print()</code>, <code>summary()</code>, and <code>coef()</code> work through S3 dispatch for compatibility.</p>
+<p>Main components:</p>
 <ul>
-<li><code>posterior_summary_main_baseline</code>, <code>posterior_summary_pairwise_baseline</code> — Summaries of baseline thresholds and partial associations.</li>
-<li><code>posterior_summary_main_differences</code>, <code>posterior_summary_pairwise_differences</code> — Summaries of group differences in thresholds and partial associations.</li>
-<li><code>posterior_summary_indicator</code> — Summaries of inclusion indicators (if <code>difference_selection = TRUE</code>).</li>
-<li><code>posterior_mean_main_baseline</code>, <code>posterior_mean_pairwise_baseline</code> — Posterior mean matrices (legacy style).</li>
-<li><code>raw_samples</code> — List of raw draws per chain for main, pairwise, and indicator parameters.</li>
+<li><code>posterior_summary_main_baseline</code>, <code>posterior_summary_pairwise_baseline</code> — Data frames with posterior summaries (mean, sd, MCSE, ESS, Rhat) for baseline threshold and partial association parameters.</li>
+<li><code>posterior_summary_main_differences</code>, <code>posterior_summary_pairwise_differences</code> — Data frames with posterior summaries for group differences in thresholds and partial associations. Includes posterior inclusion probabilities when <code>difference_selection = TRUE</code>.</li>
+<li><code>posterior_summary_indicator</code> — Data frame with posterior summaries for difference inclusion indicators (if <code>difference_selection = TRUE</code>).</li>
+<li><code>posterior_mean_main_baseline</code> — Matrix of posterior mean baseline thresholds (p x max_categories).</li>
+<li><code>posterior_mean_associations_baseline</code> — Symmetric matrix of posterior mean baseline partial associations.</li>
+<li><code>posterior_mean_main_differences</code> — Matrix of posterior mean threshold differences.</li>
+<li><code>posterior_mean_associations_differences</code> — Symmetric matrix of posterior mean partial association differences.</li>
+<li><code>posterior_mean_indicator</code> — Symmetric matrix of posterior inclusion probabilities for differences (if <code>difference_selection = TRUE</code>).</li>
+<li><code>raw_samples</code> — List of raw MCMC draws per chain with sublists:
+<ul>
+<li><code>main_baseline</code>, <code>pairwise_baseline</code> — Baseline parameter samples.</li>
+<li><code>main_differences</code>, <code>pairwise_differences</code> — Difference parameter samples.</li>
+<li><code>indicator</code> — Difference indicator samples (if enabled).</li>
+<li><code>nchains</code>, <code>niter</code> — Number of chains and iterations per chain.</li>
+</ul></li>
 <li><code>arguments</code> — List of function call arguments and metadata.</li>
 </ul>
-<p>The <code>summary()</code> method prints formatted summaries, and <code>coef()</code> extracts posterior means. NUTS diagnostics are available in <code>fit$nuts_diag</code> when <code>update_method = "nuts"</code>.</p>
+<p>NUTS diagnostics are available in <code>fit$nuts_diag</code> when <code>update_method = "nuts"</code>.</p>
 </section>
 <section id="details" class="level2">
 <h2 class="anchored" data-anchor-id="details">Details</h2>
-<section id="partial-associations" class="level3">
-<h3 class="anchored" data-anchor-id="partial-associations">Partial associations</h3>
-<p>For variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, the group-specific partial association is represented as:</p>
-<p><span class="math display">\[\theta_{ij}^{(g)} = \omega_{ij} + \delta_{ij}^{(g)}\]</span></p>
-<p>where <span class="math inline">\(\omega_{ij}\)</span> is the baseline effect and <span class="math inline">\(\delta_{ij}^{(g)}\)</span> are group differences constrained to sum to zero.</p>
-</section>
-<section id="ordinal-variables" class="level3">
-<h3 class="anchored" data-anchor-id="ordinal-variables">Ordinal variables</h3>
-<p><strong>Regular ordinal variables</strong>: category thresholds are decomposed into a baseline plus group differences for each category.</p>
-<p><strong>Blume–Capel variables</strong>: category thresholds are quadratic in the category index, with both the linear and quadratic terms split into a baseline plus group differences.</p>
-</section>
-<section id="variable-selection" class="level3">
-<h3 class="anchored" data-anchor-id="variable-selection">Variable selection</h3>
-<p>When <code>difference_selection = TRUE</code>, spike-and-slab priors are applied to difference parameters:</p>
-<ul>
-<li><strong>Bernoulli</strong> — Fixed prior inclusion probability.</li>
-<li><strong>Beta-Bernoulli</strong> — Inclusion probability given a Beta prior.</li>
-</ul>
-</section>
-<section id="sampling-algorithms-and-warmup" class="level3">
-<h3 class="anchored" data-anchor-id="sampling-algorithms-and-warmup">Sampling algorithms and warmup</h3>
-<p>Parameters are updated within a Gibbs framework, using the same sampling algorithms and staged warmup scheme described in <a href="../reference/bgm.html">bgm()</a>: adaptive Metropolis–Hastings or the No-U-Turn Sampler (NUTS). When <code>difference_selection = TRUE</code>, indicator updates are delayed until late warmup.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<p>For full explanations, see the guide. The modeling setup for cross-group contrasts is explained in <a href="../guide/group-comparison.html">Group Comparison</a>, with related background in <a href="../guide/graphical-models.html">Graphical Models</a>. Prior choices for difference selection are discussed in <a href="../guide/edge-selection.html">Edge Selection</a>, and output interpretation and convergence checks are covered in <a href="../guide/mcmc-output.html">MCMC Output</a> and <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>update_method = "hamiltonian-mc"</code> (fixed-length HMC) is deprecated. Use <code>"nuts"</code> instead.</p>
+<p><code>update_method = "hamiltonian-mc"</code> is deprecated and will be removed in a future release. Prefer <code>update_method = "nuts"</code>.</p>
 </div>
 </div>
-</section>
 </section>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
@@ -785,16 +748,17 @@ Note
 </section>
 <section id="see-also" class="level2">
 <h2 class="anchored" data-anchor-id="see-also">See also</h2>
-<p><a href="../reference/bgm.html">bgm()</a> for single-group models, <a href="../reference/methods.html">S3 methods</a> for <code>print</code>, <code>summary</code>, and <code>coef</code>, <a href="../reference/extractors.html">extractor functions</a> for accessing specific model components.</p>
-</section>
-<section id="references" class="level2">
-<h2 class="anchored" data-anchor-id="references">References</h2>
-<p>Marsman, M., Waldorp, L. J., Sekulovski, N., &amp; Haslbeck, J. M. B. (2025). Bayes factor tests for group differences in ordinal and binary graphical models. <em>Psychometrika</em>, 90(5), 1809–1842.</p>
+<p><a href="../reference/bgm.html">bgm()</a>, <a href="../reference/methods.html">Methods</a>, <a href="../reference/extractors.html">Extractor Functions</a>, and <a href="../guide/group-comparison.html">Group Comparison</a>.</p>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-MarsmanEtAl_2025_ttest" class="csl-entry" role="listitem">
+Marsman, M., Waldorp, L. J., Sekulovski, N., &amp; Haslbeck, J. M. B. (2025). Bayes factor tests for group differences in ordinal and binary graphical models. <em>Psychometrika</em>, <em>90</em>(5), 1809–1842. <a href="https://doi.org/10.1017/psy.2025.10060">https://doi.org/10.1017/psy.2025.10060</a>
+</div>
+</div></section></div></main> <!-- /main -->
 <script type="text/javascript">
 
 // replace cmd keyboard shortcut w/ control on non-Mac platforms
