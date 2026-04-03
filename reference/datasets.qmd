@@ -7,7 +7,7 @@ Example datasets included in bgms.
 ## ADHD {#adhd}
 
 ADHD symptom ratings for 355 children aged 6 to 8 years from the Children's
-Attention Project (CAP) cohort @SilkEtAl_2019_adhd. The sample consists of
+Attention Project (CAP) cohort (@SilkEtAl_2019_adhd). The sample consists of
 146 children diagnosed with ADHD and 209 without a diagnosis. Symptoms were
 assessed through structured interviews with parents using the NIMH Diagnostic
 Interview Schedule for Children IV (DISC-IV; @ShafferEtAl_2000_disc). The
@@ -49,7 +49,7 @@ Licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 ## Boredom {#boredom}
 
 Responses to the 8-item Short Boredom Proneness Scale (SBPS), a self-report
-measure of susceptibility to boredom @MartarelliEtAl_2023_boredom. Items were
+measure of susceptibility to boredom (@MartarelliEtAl_2023_boredom). Items were
 rated on a 7-point Likert scale from 1 ("strongly disagree") to 7 ("strongly
 agree"). The scale was administered in either English @StrukEtAl_2015_bps
 or French @MartarelliEtAl_2023_boredom.
@@ -80,7 +80,7 @@ A matrix with 986 rows and 9 columns:
 
 Responses to 17 items assessing PTSD symptoms in Chinese adults who survived
 the 2008 Wenchuan earthquake and lost at least one child in the disaster
-@McNallyEtAl_2015_ptsd. Participants completed the civilian version of the
+(@McNallyEtAl_2015_ptsd). Participants completed the civilian version of the
 Posttraumatic Checklist, with each item corresponding to a DSM-IV PTSD
 symptom. Items were rated on a 5-point Likert scale from "not at all" to
 "extremely."
