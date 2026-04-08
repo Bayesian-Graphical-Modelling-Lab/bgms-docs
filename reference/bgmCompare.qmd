@@ -121,11 +121,11 @@ Main components:
   difference inclusion indicators (if `difference_selection = TRUE`).
 - `posterior_mean_main_baseline` --- Matrix of posterior mean baseline
   thresholds (p x max_categories).
-- `posterior_mean_associations_baseline` --- Symmetric matrix of posterior
+- `posterior_mean_pairwise_baseline` --- Symmetric matrix of posterior
   mean baseline partial associations.
 - `posterior_mean_main_differences` --- Matrix of posterior mean threshold
   differences.
-- `posterior_mean_associations_differences` --- Symmetric matrix of posterior
+- `posterior_mean_pairwise_differences` --- Symmetric matrix of posterior
   mean partial association differences.
 - `posterior_mean_indicator` --- Symmetric matrix of posterior inclusion
   probabilities for differences (if `difference_selection = TRUE`).

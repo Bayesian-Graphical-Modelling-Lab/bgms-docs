@@ -4,9 +4,7 @@ toc: false
 ---
 
 Technical documentation for the `bgms` C++ backend, MCMC algorithms, and R
-scaffolding layer. This manual targets contributors to `bgms` development,
-users who need to understand implementation details, and researchers
-extending `bgms` for new model types.
+scaffolding layer.
 
 ## Architecture
 
@@ -38,13 +36,13 @@ Shared machinery that supports all samplers.
 
 How each model type computes likelihoods, gradients, and parameter updates.
 
-- [GGM](ggm-internals.qmd) — Precision matrix sampling via element-wise Metropolis with Cholesky rank-1 updates
-- [OMRF](omrf-internals.qmd) — Ordinal thresholds, Blume–Capel parameterization, pseudolikelihood gradients
-- [Mixed MRF](mixed-internals.qmd) — Joint discrete-continuous models: NUTS for interactions, Metropolis for precision, RATTLE constraints
+- [GGM](ggm-internals.qmd) — Free-element Cholesky parameterization of the precision matrix, gradient computation, and edge selection
+- [OMRF](omrf-internals.qmd) — Ordinal threshold parameterization, Blume–Capel model, residual matrix bookkeeping, and pseudolikelihood gradients
+- [Mixed MRF](mixed-internals.qmd) — Block structure for discrete-continuous interactions, joint parameter updates, and RATTLE constraints
 
 Supporting pages:
 
-- [Pseudolikelihood](pseudolikelihood.qmd) — Why `bgms` uses pseudolikelihood instead of the full likelihood, and how this affects inference. Relevant for OMRF and mixed models.
+- [Pseudolikelihood](pseudolikelihood.qmd) — Pseudolikelihood objectives for OMRF, mixed MRF, and group-comparison models, including statistical properties and the conditional vs. marginal variants.
 - [Fast Computation](variable-helpers.qmd) — Recursive accumulation of MRF category probabilities that avoids per-category `exp()` calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.
 
 ## Edge Priors
@@ -60,10 +58,5 @@ Prior distributions over graph structure for edge selection.
 
 ## Cross-Platform Math
 
-- [OpenLibM Integration](numerical.qmd) — Ships a portable math library because the Windows C runtime `exp()` produces inconsistent results. Ensures identical output across operating systems.
+- [OpenLibM Integration](numerical.qmd) — Ships a portable `exp()` and `log()` implementations because the Windows C runtime versions are 4--5x slower than macOS/Linux. See [Numerical Considerations](numerical.qmd) for benchmark details.
 
-## Prerequisites
-
-This manual assumes familiarity with C++ programming, MCMC methods,
-and the No-U-Turn Sampler. The [User's Guide](../guide/index.qmd)
-covers the statistical background at a conceptual level.

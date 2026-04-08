@@ -57,7 +57,7 @@ bgm(
 
 | Argument | Description |
 |----------|-------------|
-| `x` | A data frame or matrix with `n` rows and `p` columns containing binary and ordinal responses. Variables are automatically recoded to non-negative integers (`0, 1, ..., m`). For regular ordinal variables, unobserved categories are collapsed; for Blume--Capel variables, all categories are retained. |
+| `x` | A data frame or matrix with `n` rows and `p` columns. Columns may contain binary, ordinal, or continuous variables (see `variable_type`). Discrete variables are automatically recoded to non-negative integers (`0, 1, ..., m`); for regular ordinal variables, unobserved categories are collapsed, while Blume--Capel variables retain all categories. Continuous variables are column-centered internally so that the GGM likelihood is formulated with a zero-mean assumption. |
 | `variable_type` | Character or character vector. Specifies the type of each variable in `x`. Allowed values: `"ordinal"`, `"blume-capel"`, or `"continuous"`. A single string applies to all variables. A per-variable vector that mixes discrete (`"ordinal"` / `"blume-capel"`) and `"continuous"` types fits a mixed MRF. Binary variables are automatically treated as `"ordinal"`. Default: `"ordinal"`. |
 | `baseline_category` | Integer or vector. Baseline category used in Blume--Capel variables. Can be a single integer (applied to all) or a vector of length `p`. Required if at least one variable is of type `"blume-capel"`. |
 | `na_action` | Character. Specifies missing data handling. Either `"listwise"` (drop rows with missing values) or `"impute"` (impute within Gibbs sampler, propagating uncertainty). Default: `"listwise"`. See [Missing Data](../guide/missing-data.qmd) for details. |
@@ -114,7 +114,7 @@ Main components:
 - `posterior_summary_indicator` --- Data frame with posterior summaries for
   edge inclusion indicators (if `edge_selection = TRUE`).
 - `posterior_mean_main` --- Posterior mean of main-effect parameters. `NULL` for GGM models. For OMRF: a matrix (p x max_categories) of category thresholds. For mixed MRF: a list with `$discrete` (threshold matrix) and `$continuous` (q x 1 matrix of means).
-- `posterior_mean_associations` --- Symmetric matrix of posterior mean partial associations (zero diagonal). For continuous variables these are unstandardized partial correlations; for discrete variables these are half the log adjacent-category odds ratio. Use `extract_precision()`, `extract_partial_correlations()`, or `extract_log_odds()` to convert to interpretable scales.
+- `posterior_mean_pairwise` --- Symmetric matrix of posterior mean partial associations (zero diagonal). For continuous variables these are unstandardized partial correlations; for discrete variables these are half the log adjacent-category odds ratio. Use `extract_precision()`, `extract_partial_correlations()`, or `extract_log_odds()` to convert to interpretable scales.
 - `posterior_mean_residual_variance` --- Named numeric vector of posterior mean residual variances $1/\Theta_{ii}$. Present for GGM and mixed MRF models; `NULL` for OMRF.
 - `posterior_mean_indicator` --- Symmetric matrix of posterior mean inclusion probabilities (if edge selection was enabled).
 - `raw_samples` --- A list of raw MCMC draws per chain with the following sublists:
