@@ -550,7 +550,7 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Technical documentation for the <code>bgms</code> C++ backend, MCMC algorithms, and R scaffolding layer. This manual targets contributors to <code>bgms</code> development, users who need to understand implementation details, and researchers extending <code>bgms</code> for new model types.</p>
+<p>Technical documentation for the <code>bgms</code> C++ backend, MCMC algorithms, and R scaffolding layer.</p>
 <section id="architecture" class="level2">
 <h2 class="anchored" data-anchor-id="architecture">Architecture</h2>
 <p>How the R front-end and C++ back-end fit together.</p>
@@ -584,13 +584,13 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="model-internals">Model Internals</h2>
 <p>How each model type computes likelihoods, gradients, and parameter updates.</p>
 <ul>
-<li><a href="../manual/ggm-internals.html">GGM</a> — Precision matrix sampling via element-wise Metropolis with Cholesky rank-1 updates</li>
-<li><a href="../manual/omrf-internals.html">OMRF</a> — Ordinal thresholds, Blume–Capel parameterization, pseudolikelihood gradients</li>
-<li><a href="../manual/mixed-internals.html">Mixed MRF</a> — Joint discrete-continuous models: NUTS for interactions, Metropolis for precision, RATTLE constraints</li>
+<li><a href="../manual/ggm-internals.html">GGM</a> — Free-element Cholesky parameterization of the precision matrix, gradient computation, and edge selection</li>
+<li><a href="../manual/omrf-internals.html">OMRF</a> — Ordinal threshold parameterization, Blume–Capel model, residual matrix bookkeeping, and pseudolikelihood gradients</li>
+<li><a href="../manual/mixed-internals.html">Mixed MRF</a> — Block structure for discrete-continuous interactions, joint parameter updates, and RATTLE constraints</li>
 </ul>
 <p>Supporting pages:</p>
 <ul>
-<li><a href="../manual/pseudolikelihood.html">Pseudolikelihood</a> — Why <code>bgms</code> uses pseudolikelihood instead of the full likelihood, and how this affects inference. Relevant for OMRF and mixed models.</li>
+<li><a href="../manual/pseudolikelihood.html">Pseudolikelihood</a> — Pseudolikelihood objectives for OMRF, mixed MRF, and group-comparison models, including statistical properties and the conditional vs.&nbsp;marginal variants.</li>
 <li><a href="../manual/variable-helpers.html">Fast Computation</a> — Recursive accumulation of MRF category probabilities that avoids per-category <code>exp()</code> calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.</li>
 </ul>
 </section>
@@ -611,12 +611,8 @@ ul.task-list li input[type="checkbox"] {
 <section id="cross-platform-math" class="level2">
 <h2 class="anchored" data-anchor-id="cross-platform-math">Cross-Platform Math</h2>
 <ul>
-<li><a href="../manual/numerical.html">OpenLibM Integration</a> — Ships a portable math library because the Windows C runtime <code>exp()</code> produces inconsistent results. Ensures identical output across operating systems.</li>
+<li><a href="../manual/numerical.html">OpenLibM Integration</a> — Ships a portable <code>exp()</code> and <code>log()</code> implementations because the Windows C runtime versions are 4–5x slower than macOS/Linux. See <a href="../manual/numerical.html">Numerical Considerations</a> for benchmark details.</li>
 </ul>
-</section>
-<section id="prerequisites" class="level2">
-<h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
-<p>This manual assumes familiarity with C++ programming, MCMC methods, and the No-U-Turn Sampler. The <a href="../guide/index.html">User’s Guide</a> covers the statistical background at a conceptual level.</p>
 
 
 </section>

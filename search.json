@@ -984,7 +984,7 @@
     "href": "manual/index.html",
     "title": "Technical Manual",
     "section": "",
-    "text": "Technical documentation for the bgms C++ backend, MCMC algorithms, and R scaffolding layer. This manual targets contributors to bgms development, users who need to understand implementation details, and researchers extending bgms for new model types.",
+    "text": "Technical documentation for the bgms C++ backend, MCMC algorithms, and R scaffolding layer.",
     "crumbs": [
       "Manual",
       "Technical Manual"
@@ -1028,7 +1028,7 @@
     "href": "manual/index.html#model-internals",
     "title": "Technical Manual",
     "section": "Model Internals",
-    "text": "Model Internals\nHow each model type computes likelihoods, gradients, and parameter updates.\n\nGGM — Precision matrix sampling via element-wise Metropolis with Cholesky rank-1 updates\nOMRF — Ordinal thresholds, Blume–Capel parameterization, pseudolikelihood gradients\nMixed MRF — Joint discrete-continuous models: NUTS for interactions, Metropolis for precision, RATTLE constraints\n\nSupporting pages:\n\nPseudolikelihood — Why bgms uses pseudolikelihood instead of the full likelihood, and how this affects inference. Relevant for OMRF and mixed models.\nFast Computation — Recursive accumulation of MRF category probabilities that avoids per-category exp() calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.",
+    "text": "Model Internals\nHow each model type computes likelihoods, gradients, and parameter updates.\n\nGGM — Free-element Cholesky parameterization of the precision matrix, gradient computation, and edge selection\nOMRF — Ordinal threshold parameterization, Blume–Capel model, residual matrix bookkeeping, and pseudolikelihood gradients\nMixed MRF — Block structure for discrete-continuous interactions, joint parameter updates, and RATTLE constraints\n\nSupporting pages:\n\nPseudolikelihood — Pseudolikelihood objectives for OMRF, mixed MRF, and group-comparison models, including statistical properties and the conditional vs. marginal variants.\nFast Computation — Recursive accumulation of MRF category probabilities that avoids per-category exp() calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.",
     "crumbs": [
       "Manual",
       "Technical Manual"
@@ -1061,18 +1061,7 @@
     "href": "manual/index.html#cross-platform-math",
     "title": "Technical Manual",
     "section": "Cross-Platform Math",
-    "text": "Cross-Platform Math\n\nOpenLibM Integration — Ships a portable math library because the Windows C runtime exp() produces inconsistent results. Ensures identical output across operating systems.",
-    "crumbs": [
-      "Manual",
-      "Technical Manual"
-    ]
-  },
-  {
-    "objectID": "manual/index.html#prerequisites",
-    "href": "manual/index.html#prerequisites",
-    "title": "Technical Manual",
-    "section": "Prerequisites",
-    "text": "Prerequisites\nThis manual assumes familiarity with C++ programming, MCMC methods, and the No-U-Turn Sampler. The User’s Guide covers the statistical background at a conceptual level.",
+    "text": "Cross-Platform Math\n\nOpenLibM Integration — Ships a portable exp() and log() implementations because the Windows C runtime versions are 4–5x slower than macOS/Linux. See Numerical Considerations for benchmark details.",
     "crumbs": [
       "Manual",
       "Technical Manual"
