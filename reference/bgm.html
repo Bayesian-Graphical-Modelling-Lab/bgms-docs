@@ -536,9 +536,8 @@ window.Quarto = {
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>),</span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">pseudolikelihood =</span> <span class="fu">c</span>(<span class="st">"conditional"</span>, <span class="st">"marginal"</span>),</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="arguments" class="level2">
 <h2 class="anchored" data-anchor-id="arguments">Arguments</h2>
@@ -683,10 +682,6 @@ window.Quarto = {
 <td>Optional integer. Random seed for reproducibility. Must be a single non-negative integer.</td>
 </tr>
 <tr class="odd">
-<td><code>pseudolikelihood</code></td>
-<td>Character. Pseudolikelihood approximation for mixed MRF models (ignored for pure ordinal or pure continuous data). <code>"conditional"</code> conditions on the observed continuous variables when computing the discrete full conditionals; faster because the discrete pseudolikelihood does not depend on the continuous precision matrix. <code>"marginal"</code> integrates out the continuous variables, giving discrete full conditionals that account for induced interactions through the continuous block; more expensive per iteration. Default: <code>"conditional"</code>.</td>
-</tr>
-<tr class="even">
 <td><code>verbose</code></td>
 <td>Logical. If <code>TRUE</code>, prints informational messages during data processing (e.g., missing data handling, variable recoding). Defaults to <code>getOption("bgms.verbose", TRUE)</code>. Set <code>options(bgms.verbose = FALSE)</code> to suppress messages globally.</td>
 </tr>

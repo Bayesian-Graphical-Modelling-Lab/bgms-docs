@@ -629,11 +629,7 @@ p(x_i = c \mid \mathbf{x}_{-i}, \mathbf{y}) = \frac{\exp\!\left(\mu_{ic} + c \cd
 <p><span class="math display">\[
 r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}^{xx} + 2\sum_{j=1}^{q} y_j\, \omega_{ij}^{xy}
 \]</span></p>
-<p>The <code>pseudolikelihood</code> argument controls how these discrete full conditionals are constructed:</p>
-<ul>
-<li><p><strong><code>"conditional"</code></strong> (default): conditions on the observed continuous variables when computing the discrete full conditionals. The rest score uses <span class="math inline">\(\boldsymbol{\Omega}_{xx}\)</span> and <span class="math inline">\(\boldsymbol{\Omega}_{xy}\)</span> directly.</p></li>
-<li><p><strong><code>"marginal"</code></strong>: integrates out the continuous variables, so the discrete full conditionals use effective interactions that account for indirect discrete–discrete associations mediated through the continuous block.</p></li>
-</ul>
+<p><code>bgms</code> constructs the discrete full conditionals by integrating out the continuous variables, so the discrete full conditionals use effective interactions that account for indirect discrete–discrete associations mediated through the continuous block.</p>
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>

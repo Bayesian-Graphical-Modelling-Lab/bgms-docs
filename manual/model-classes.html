@@ -840,7 +840,7 @@ Warning
 <li><code>storage_dimension()</code> — Same layout as the full vector (what gets saved to output)</li>
 </ul>
 <p>When edge selection is active, <code>has_constraints()</code> returns <code>true</code> and the NUTS sampler uses the constrained integration path. The <code>get_full_position()</code> and <code>logp_and_gradient_full()</code> methods operate on the <code>full_parameter_dimension()</code> vector. Projection functions enforce zero entries for excluded edges at each leapfrog step.</p>
-<p><strong>Pseudolikelihood options.</strong> The <code>pseudolikelihood</code> argument controls how the discrete full conditionals are computed, not the continuous block. See <a href="../manual/mixed-internals.html#pseudolikelihood-options">Mixed MRF Internals</a> for details.</p>
+<p><strong>Discrete pseudolikelihood.</strong> The discrete full conditionals are computed by integrating out the continuous block. See <a href="../manual/mixed-internals.html#discrete-pseudolikelihood">Mixed MRF Internals</a> for details.</p>
 
 
 
