@@ -35,7 +35,7 @@ the accepted state and $\alpha$.
 
 ## Model-driven sweeps
 
-Unlike NUTS and HMC, where the sampler drives integration over the
+Unlike NUTS, where the sampler drives integration over the
 full parameter vector, `MetropolisSampler` delegates the sweep
 structure to the model. The sampler calls `model.do_one_metropolis_step(iteration)`,
 and each model class defines how to iterate over its parameters:

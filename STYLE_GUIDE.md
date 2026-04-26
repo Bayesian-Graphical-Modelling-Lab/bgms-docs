@@ -205,7 +205,7 @@ The per-group parameter is `ω_{ij}^{(g)} = ω_{ij} + Σ_k c_{gk} δ_{ij}^{(k)}`
 
 Terminology: call `δ` **contrast parameters**, not "group differences." For two groups the single contrast reduces to a scaled group difference, but for `G > 2` the `G − 1` contrasts are projections onto orthogonal basis directions, not pairwise group differences.
 
-### Hamiltonian samplers (NUTS, HMC)
+### Hamiltonian sampler (NUTS)
 
 | Symbol | Meaning |
 |--------|---------||

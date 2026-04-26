@@ -39,9 +39,8 @@ bgmCompare(
   iter = 1000,
   warmup = 1000,
   na_action = c("listwise", "impute"),
-  update_method = c("nuts", "adaptive-metropolis", "hamiltonian-mc"),
+  update_method = c("nuts", "adaptive-metropolis"),
   target_accept,
-  hmc_num_leapfrogs = 100,
   nuts_max_depth = 10,
   learn_mass_matrix = TRUE,
   chains = 4,
@@ -91,9 +90,8 @@ bgmCompare(
 |----------|-------------|
 | `iter` | Number of post-warmup iterations per chain. Default: `1000`. |
 | `warmup` | Number of warmup iterations before sampling. Default: `1000`. |
-| `update_method` | Sampling algorithm: `"nuts"` or `"adaptive-metropolis"`. `"hamiltonian-mc"` is accepted but **deprecated**; use `"nuts"` instead. Default: `"nuts"`. |
+| `update_method` | Sampling algorithm: `"nuts"` or `"adaptive-metropolis"`. Default: `"nuts"`. |
 | `target_accept` | Target acceptance rate. Defaults: `0.44` (Metropolis), `0.80` (NUTS). |
-| `hmc_num_leapfrogs` | **Deprecated.** Leapfrog steps for HMC. Only relevant when `update_method = "hamiltonian-mc"`, which is deprecated. Default: `100`. |
 | `nuts_max_depth` | Maximum tree depth for NUTS. Default: `10`. |
 | `learn_mass_matrix` | Logical. If `TRUE`, adapts a diagonal mass matrix during warmup (NUTS only). Default: `TRUE`. |
 | `chains` | Number of parallel chains. Default: `4`. |
@@ -149,11 +147,6 @@ difference selection are discussed in [Edge Selection](../guide/edge-selection.q
 and output interpretation and convergence checks are covered in
 [MCMC Output](../guide/mcmc-output.qmd) and
 [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
-
-::: {.callout-warning}
-`update_method = "hamiltonian-mc"` is deprecated and will be removed in a
-future release. Prefer `update_method = "nuts"`.
-:::
 
 ## Examples
 

@@ -21,7 +21,6 @@ The sampling algorithms available in `bgms`.
 
 - [Adaptive Metropolis](metropolis.qmd) — Scalar random-walk Metropolis–Hastings with Robbins–Monro step-size adaptation. Used for discrete parameters (thresholds, interactions) in OMRF and mixed models.
 - [NUTS](nuts.qmd) — No-U-Turn Sampler: adaptive-length Hamiltonian Monte Carlo with binary tree expansion and U-turn termination. The default sampler for continuous parameters in mixed models.
-- [HMC](hmc.qmd) — Fixed-trajectory Hamiltonian Monte Carlo. Deprecated; NUTS is preferred.
 - [Constrained Leapfrog](rattle.qmd) — RATTLE integrator for Hamiltonian dynamics under precision-matrix constraints. Required for mixed models where the precision matrix must remain positive definite.
 
 ## Sampler Infrastructure

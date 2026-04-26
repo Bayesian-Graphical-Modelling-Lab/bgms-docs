@@ -16,8 +16,8 @@ the execution layer orchestrates everything.
 ```
 src/
 ├── mcmc/
-│   ├── algorithms/      # Stateless: nuts_step(), hmc_step(), leapfrog()
-│   ├── samplers/        # Stateful: NUTSSampler, HMCSampler, MetropolisSampler
+│   ├── algorithms/      # Stateless: nuts_step(), leapfrog()
+│   ├── samplers/        # Stateful: NUTSSampler, MetropolisSampler
 │   └── execution/       # Orchestration: chain_runner, warmup_schedule, chain_result
 ├── models/
 │   ├── base_model.h     # Abstract interface (30+ virtual methods)

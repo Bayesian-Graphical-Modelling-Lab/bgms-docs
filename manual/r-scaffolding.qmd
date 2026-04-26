@@ -58,10 +58,9 @@ lowest observed category.
 ### Sampler validation (`validate_sampler.R`)
 
 `validate_sampler()` resolves the `update_method` argument into a
-concrete sampler type (`"nuts"` or `"adaptive_metropolis"`;
-`"hamiltonian-mc"` is accepted but deprecated)
+concrete sampler type (`"nuts"` or `"adaptive_metropolis"`)
 and sets defaults for tuning parameters (`target_accept`,
-`nuts_max_depth`, `hmc_num_leapfrogs`). It detects the number of
+`nuts_max_depth`). It detects the number of
 available cores and resolves the progress display type.
 
 ### Edge prior validation (`validate_model.R`)

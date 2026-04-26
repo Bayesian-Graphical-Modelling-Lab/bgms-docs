@@ -126,7 +126,6 @@ website:
           contents:
             - manual/metropolis.qmd
             - manual/nuts.qmd
-            - manual/hmc.qmd
             - manual/rattle.qmd
         - section: "Sampler Infrastructure"
           contents:

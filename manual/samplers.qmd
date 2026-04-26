@@ -25,10 +25,6 @@ classDiagram
         owns HMCAdaptationController
         #do_gradient_step(model) StepResult
     }
-    class HMCSampler {
-        fixed-length leapfrog
-        ~~deprecated~~
-    }
     class NUTSSampler {
         adaptive tree depth
         -do_unconstrained_step()
@@ -36,7 +32,6 @@ classDiagram
     }
     SamplerBase <|-- MetropolisSampler
     SamplerBase <|-- GradientSamplerBase
-    GradientSamplerBase <|-- HMCSampler
     GradientSamplerBase <|-- NUTSSampler
 ```
 
@@ -78,7 +73,7 @@ updates (see [Warmup Schedule](warmup.qmd)).
 
 ## GradientSamplerBase
 
-Shared base class for HMC and NUTS. It owns an
+Base class for gradient-based sampling. It owns an
 `HMCAdaptationController` that manages:
 
 - **Dual averaging** for step-size adaptation
@@ -86,27 +81,13 @@ Shared base class for HMC and NUTS. It owns an
 
 The `step()` method in `GradientSamplerBase`:
 
-1. Calls the concrete `do_gradient_step()` override (HMC or NUTS)
+1. Calls the concrete `do_gradient_step()` override (NUTS)
 2. Passes the acceptance probability to the adaptation controller
 3. If the mass matrix was just updated (end of a warmup window),
    reinitializes the step size with the heuristic
 
 After warmup, the adaptation controller freezes and returns the
 smoothed step size from dual averaging.
-
-## HMCSampler (deprecated)
-
-::: {.callout-warning}
-`HMCSampler` is deprecated. The R-level `update_method = "hamiltonian-mc"`
-option still dispatches to this class, but it will be removed in a future
-release. Use NUTS instead.
-:::
-
-Performs fixed-length leapfrog integration. The number of leapfrog
-steps is set at construction from `config.num_leapfrogs`. Each call
-to `do_gradient_step()` invokes `hmc_step()` from
-`mcmc/algorithms/hmc.h`. For constrained models, RATTLE integration
-is used (see [Constrained Leapfrog (RATTLE)](rattle.qmd)).
 
 ## NUTSSampler
 
@@ -126,9 +107,6 @@ unique_ptr<SamplerBase> create_sampler(const SamplerConfig& config,
                                         WarmupSchedule& schedule) {
   if (config.sampler_type == "nuts") {
     return make_unique<NUTSSampler>(config, schedule);
-  } else if (config.sampler_type == "hmc" ||
-             config.sampler_type == "hamiltonian-mc") {
-    return make_unique<HMCSampler>(config, schedule);
   } else if (config.sampler_type == "mh" ||
              config.sampler_type == "adaptive-metropolis") {
     return make_unique<MetropolisSampler>(config, schedule);
@@ -136,9 +114,9 @@ unique_ptr<SamplerBase> create_sampler(const SamplerConfig& config,
 }
 ```
 
-The R layer (`validate_sampler.R`) resolves strings like
-`"hamiltonian-mc"` and `"adaptive-metropolis"` before they reach C++,
-so in practice the factory receives `"nuts"`, `"hmc"`, or `"mh"`.
+The R layer (`validate_sampler.R`) resolves `"adaptive-metropolis"`
+before it reaches C++, so in practice the factory receives `"nuts"`
+or `"mh"`.
 
 All three model types (GGM, OMRF, mixed MRF) default to NUTS.
 The user can select Metropolis via

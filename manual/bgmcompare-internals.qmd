@@ -10,7 +10,7 @@ contrast parameterization, and sampler implementation. Source:
 
 The `bgmCompare` engine shares the same OMRF likelihood
 (pseudolikelihood over ordinal/Blume-Capel variables) and the same
-NUTS/Metropolis sampler options (HMC is deprecated), but differs in three key ways:
+NUTS/Metropolis sampler options, but differs in three key ways:
 
 1. **Parameter decomposition** — Group-specific parameters
    $\boldsymbol{\omega}^{(g)}$ are decomposed into a shared baseline
@@ -42,7 +42,7 @@ $G-1$ orthogonal contrast directions. For two groups, the single
 contrast reduces to a scaled group difference. Category thresholds
 are decomposed in the same way.
 
-The flat parameter vector (used by NUTS and HMC) groups by component
+The flat parameter vector (used by NUTS) groups by component
 type, not per effect:
 
 ```
@@ -91,7 +91,7 @@ iteration:
    and pairwise effects are updated separately
    (`update_main_effects_metropolis_bgmcompare()`, then
    `update_pairwise_effects_metropolis_bgmcompare()`). With
-   NUTS or HMC, all active parameters are updated jointly via
+   NUTS, all active parameters are updated jointly via
    the vectorized log-pseudoposterior.
 4. **Inclusion probability update** (Beta-Bernoulli prior only) —
    Draw new inclusion probability from the conjugate Beta posterior.

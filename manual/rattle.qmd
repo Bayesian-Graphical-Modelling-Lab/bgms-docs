@@ -3,7 +3,7 @@ title: "Constrained Leapfrog"
 ---
 
 When edge selection is active, excluded edges must remain exactly zero
-throughout HMC integration. The standard leapfrog integrator cannot
+throughout NUTS integration. The standard leapfrog integrator cannot
 enforce this: after an unconstrained position update, a zero entry
 will drift to a nonzero value. `bgms` solves this with a constrained
 leapfrog scheme based on RATTLE [@Reich_1996], with the implementation
