@@ -81,7 +81,7 @@ then delegates to one of four model-specific builders:
 |-----------|---------|---------------|
 | `"ggm"` | `build_spec_ggm()` | Sufficient statistics (`X'X`), precision scale |
 | `"omrf"` | `build_spec_omrf()` | Category counts, ordinal/BC flags, scaling factors |
-| `"mixed_mrf"` | `build_spec_mixed_mrf()` | Separate discrete/continuous matrices, pseudolikelihood type |
+| `"mixed_mrf"` | `build_spec_mixed_mrf()` | Separate discrete/continuous matrices |
 | `"compare"` | `build_spec_compare()` | Group indices, projection matrix, precomputed pairwise stats |
 
 Each builder assembles a spec with seven components:

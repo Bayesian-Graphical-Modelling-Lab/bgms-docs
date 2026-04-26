@@ -256,7 +256,7 @@ and the NUTS sampler uses the constrained integration path. The
 on the `full_parameter_dimension()` vector. Projection functions
 enforce zero entries for excluded edges at each leapfrog step.
 
-**Pseudolikelihood options.** The `pseudolikelihood` argument controls
-how the discrete full conditionals are computed, not the continuous
-block. See [Mixed MRF Internals](mixed-internals.qmd#pseudolikelihood-options)
+**Discrete pseudolikelihood.** The discrete full conditionals are
+computed by integrating out the continuous block. See
+[Mixed MRF Internals](mixed-internals.qmd#discrete-pseudolikelihood)
 for details.

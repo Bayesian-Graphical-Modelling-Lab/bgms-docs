@@ -41,7 +41,7 @@ How each model type computes likelihoods, gradients, and parameter updates.
 
 Supporting pages:
 
-- [Pseudolikelihood](pseudolikelihood.qmd) — Pseudolikelihood objectives for OMRF, mixed MRF, and group-comparison models, including statistical properties and the conditional vs. marginal variants.
+- [Pseudolikelihood](pseudolikelihood.qmd) — Pseudolikelihood objectives for OMRF, mixed MRF, and group-comparison models, including statistical properties and the marginal pseudolikelihood used for mixed models.
 - [Fast Computation](variable-helpers.qmd) — Recursive accumulation of MRF category probabilities that avoids per-category `exp()` calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.
 
 ## Edge Priors

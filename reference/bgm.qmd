@@ -45,7 +45,6 @@ bgm(
   display_progress = c("per-chain", "total", "none"),
   seed = NULL,
   standardize = FALSE,
-  pseudolikelihood = c("conditional", "marginal"),
   verbose = getOption("bgms.verbose", TRUE)
 )
 ```
@@ -90,7 +89,6 @@ bgm(
 | `cores` | Integer. Number of CPU cores for parallel execution. Default: `parallel::detectCores()`. |
 | `display_progress` | Character. Controls progress reporting during sampling. Options: `"per-chain"` (separate bar per chain), `"total"` (single combined bar), or `"none"` (no progress). Default: `"per-chain"`. |
 | `seed` | Optional integer. Random seed for reproducibility. Must be a single non-negative integer. |
-| `pseudolikelihood` | Character. Pseudolikelihood approximation for mixed MRF models (ignored for pure ordinal or pure continuous data). `"conditional"` conditions on the observed continuous variables when computing the discrete full conditionals; faster because the discrete pseudolikelihood does not depend on the continuous precision matrix. `"marginal"` integrates out the continuous variables, giving discrete full conditionals that account for induced interactions through the continuous block; more expensive per iteration. Default: `"conditional"`. |
 | `verbose` | Logical. If `TRUE`, prints informational messages during data processing (e.g., missing data handling, variable recoding). Defaults to `getOption("bgms.verbose", TRUE)`. Set `options(bgms.verbose = FALSE)` to suppress messages globally. |
 
 ## Value

@@ -102,29 +102,21 @@ blocks in the NUTS vector. It involves:
 The log-prior gradient adds Cauchy penalties on off-diagonal
 precision entries and Gamma(1,1) penalties on diagonal entries.
 
-## Pseudolikelihood options
+## Discrete pseudolikelihood
 
-The `pseudolikelihood` argument controls how the **discrete** full
-conditionals are computed. It does not affect the continuous block,
-which always uses the GGM likelihood
+The discrete full conditionals integrate out the continuous block:
+$\log p(x_s \mid x_{-s})$ rather than $\log p(x_s \mid x_{-s}, y_{\text{obs}})$.
+The continuous block uses the GGM likelihood
 $\log p(y \mid x) \propto \tfrac{n}{2}\log|\Omega| - \tfrac{1}{2}\operatorname{tr}(\Omega D^\top D)$.
 
 For a cross-model overview, see [Pseudolikelihood](pseudolikelihood.qmd).
 
-- `"conditional"` (default) — Computes discrete full conditionals
-  $\log p(x_s \mid x_{-s}, y_{\text{obs}})$, conditioning on the
-  observed continuous values. The rest score uses
-  `pairwise_effects_discrete_` directly. Faster because updating
-  the continuous precision elements does not require re-evaluating
-  the discrete pseudolikelihood.
-- `"marginal"` — Computes discrete full conditionals
-  $\log p(x_s \mid x_{-s})$ by integrating out the continuous
-  variables. Uses the marginal interaction matrix
-  $\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top$, which must
-  be recomputed whenever the precision or cross-type parameters
-  change. This adds coupling terms to the gradient (the
-  $\partial\Theta/\partial\Sigma$ chain rule contributes to the
-  precision gradient via $-2\Sigma A_{xy}^\top\bar\Theta A_{xy}\Sigma$).
+The discrete conditionals use the marginal interaction matrix
+$\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top$, which must
+be recomputed whenever the precision or cross-type parameters
+change. The $\partial\Theta/\partial\Sigma$ chain rule contributes
+to the precision gradient via
+$-2\Sigma A_{xy}^\top\bar\Theta A_{xy}\Sigma$.
 
 ## Missing data
 
