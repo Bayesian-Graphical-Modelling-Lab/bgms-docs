@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -97,14 +97,14 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-3ff4805f19b0085abba01199065d0a21.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-70be5ccd51f03de5ce195d75fadf0882.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-3e6a3f4a26c10336ab3b4cfe85ff884b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-c551eed1d5edd77e8ad10f653d21c373.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-3e6a3f4a26c10336ab3b4cfe85ff884b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-727c311c0671326a6a83aefdf25e74e3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -498,18 +498,17 @@ div.csl-indent {
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">1000</span>,</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_action =</span> <span class="fu">c</span>(<span class="st">"listwise"</span>, <span class="st">"impute"</span>),</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">update_method =</span> <span class="fu">c</span>(<span class="st">"nuts"</span>, <span class="st">"adaptive-metropolis"</span>, <span class="st">"hamiltonian-mc"</span>),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">update_method =</span> <span class="fu">c</span>(<span class="st">"nuts"</span>, <span class="st">"adaptive-metropolis"</span>),</span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  target_accept,</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">hmc_num_leapfrogs =</span> <span class="dv">100</span>,</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">nuts_max_depth =</span> <span class="dv">10</span>,</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_mass_matrix =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>(),</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>),</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">nuts_max_depth =</span> <span class="dv">10</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_mass_matrix =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>(),</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>),</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="arguments" class="level2">
 <h2 class="anchored" data-anchor-id="arguments">Arguments</h2>
@@ -644,41 +643,37 @@ div.csl-indent {
 </tr>
 <tr class="odd">
 <td><code>update_method</code></td>
-<td>Sampling algorithm: <code>"nuts"</code> or <code>"adaptive-metropolis"</code>. <code>"hamiltonian-mc"</code> is accepted but <strong>deprecated</strong>; use <code>"nuts"</code> instead. Default: <code>"nuts"</code>.</td>
+<td>Sampling algorithm: <code>"nuts"</code> or <code>"adaptive-metropolis"</code>. Default: <code>"nuts"</code>.</td>
 </tr>
 <tr class="even">
 <td><code>target_accept</code></td>
 <td>Target acceptance rate. Defaults: <code>0.44</code> (Metropolis), <code>0.80</code> (NUTS).</td>
 </tr>
 <tr class="odd">
-<td><code>hmc_num_leapfrogs</code></td>
-<td><strong>Deprecated.</strong> Leapfrog steps for HMC. Only relevant when <code>update_method = "hamiltonian-mc"</code>, which is deprecated. Default: <code>100</code>.</td>
-</tr>
-<tr class="even">
 <td><code>nuts_max_depth</code></td>
 <td>Maximum tree depth for NUTS. Default: <code>10</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>learn_mass_matrix</code></td>
 <td>Logical. If <code>TRUE</code>, adapts a diagonal mass matrix during warmup (NUTS only). Default: <code>TRUE</code>.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>chains</code></td>
 <td>Number of parallel chains. Default: <code>4</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>cores</code></td>
 <td>Number of CPU cores. Default: <code>parallel::detectCores()</code>.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>display_progress</code></td>
 <td>Progress reporting: <code>"per-chain"</code>, <code>"total"</code>, or <code>"none"</code>. Default: <code>"per-chain"</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>seed</code></td>
 <td>Optional integer seed for reproducibility.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>verbose</code></td>
 <td>Logical. Print informational messages during data processing. Default: <code>getOption("bgms.verbose", TRUE)</code>.</td>
 </tr>
@@ -695,9 +690,9 @@ div.csl-indent {
 <li><code>posterior_summary_main_differences</code>, <code>posterior_summary_pairwise_differences</code> — Data frames with posterior summaries for group differences in thresholds and partial associations. Includes posterior inclusion probabilities when <code>difference_selection = TRUE</code>.</li>
 <li><code>posterior_summary_indicator</code> — Data frame with posterior summaries for difference inclusion indicators (if <code>difference_selection = TRUE</code>).</li>
 <li><code>posterior_mean_main_baseline</code> — Matrix of posterior mean baseline thresholds (p x max_categories).</li>
-<li><code>posterior_mean_associations_baseline</code> — Symmetric matrix of posterior mean baseline partial associations.</li>
+<li><code>posterior_mean_pairwise_baseline</code> — Symmetric matrix of posterior mean baseline partial associations.</li>
 <li><code>posterior_mean_main_differences</code> — Matrix of posterior mean threshold differences.</li>
-<li><code>posterior_mean_associations_differences</code> — Symmetric matrix of posterior mean partial association differences.</li>
+<li><code>posterior_mean_pairwise_differences</code> — Symmetric matrix of posterior mean partial association differences.</li>
 <li><code>posterior_mean_indicator</code> — Symmetric matrix of posterior inclusion probabilities for differences (if <code>difference_selection = TRUE</code>).</li>
 <li><code>raw_samples</code> — List of raw MCMC draws per chain with sublists:
 <ul>
@@ -713,19 +708,6 @@ div.csl-indent {
 <section id="details" class="level2">
 <h2 class="anchored" data-anchor-id="details">Details</h2>
 <p>For full explanations, see the guide. The modeling setup for cross-group contrasts is explained in <a href="../guide/group-comparison.html">Group Comparison</a>, with related background in <a href="../guide/graphical-models.html">Graphical Models</a>. Prior choices for difference selection are discussed in <a href="../guide/edge-selection.html">Edge Selection</a>, and output interpretation and convergence checks are covered in <a href="../guide/mcmc-output.html">MCMC Output</a> and <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><code>update_method = "hamiltonian-mc"</code> is deprecated and will be removed in a future release. Prefer <code>update_method = "nuts"</code>.</p>
-</div>
-</div>
 </section>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>

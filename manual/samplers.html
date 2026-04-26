@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -77,14 +77,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-3ff4805f19b0085abba01199065d0a21.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-70be5ccd51f03de5ce195d75fadf0882.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-3e6a3f4a26c10336ab3b4cfe85ff884b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-c551eed1d5edd77e8ad10f653d21c373.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-3e6a3f4a26c10336ab3b4cfe85ff884b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-727c311c0671326a6a83aefdf25e74e3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -461,12 +461,6 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">HMC Algorithm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Constrained Leapfrog</span></a>
   </div>
@@ -641,10 +635,6 @@ window.Quarto = {
         owns HMCAdaptationController
         #do_gradient_step(model) StepResult
     }
-    class HMCSampler {
-        fixed-length leapfrog
-        ~~deprecated~~
-    }
     class NUTSSampler {
         adaptive tree depth
         -do_unconstrained_step()
@@ -652,7 +642,6 @@ window.Quarto = {
     }
     SamplerBase &lt;|-- MetropolisSampler
     SamplerBase &lt;|-- GradientSamplerBase
-    GradientSamplerBase &lt;|-- HMCSampler
     GradientSamplerBase &lt;|-- NUTSSampler
 </pre>
 </div>
@@ -679,35 +668,18 @@ window.Quarto = {
 </section>
 <section id="gradientsamplerbase" class="level2">
 <h2 class="anchored" data-anchor-id="gradientsamplerbase">GradientSamplerBase</h2>
-<p>Shared base class for HMC and NUTS. It owns an <code>HMCAdaptationController</code> that manages:</p>
+<p>Base class for gradient-based sampling. It owns an <code>HMCAdaptationController</code> that manages:</p>
 <ul>
 <li><strong>Dual averaging</strong> for step-size adaptation</li>
 <li><strong>Diagonal mass matrix</strong> accumulation via Welford’s online algorithm</li>
 </ul>
 <p>The <code>step()</code> method in <code>GradientSamplerBase</code>:</p>
 <ol type="1">
-<li>Calls the concrete <code>do_gradient_step()</code> override (HMC or NUTS)</li>
+<li>Calls the concrete <code>do_gradient_step()</code> override (NUTS)</li>
 <li>Passes the acceptance probability to the adaptation controller</li>
 <li>If the mass matrix was just updated (end of a warmup window), reinitializes the step size with the heuristic</li>
 </ol>
 <p>After warmup, the adaptation controller freezes and returns the smoothed step size from dual averaging.</p>
-</section>
-<section id="hmcsampler-deprecated" class="level2">
-<h2 class="anchored" data-anchor-id="hmcsampler-deprecated">HMCSampler (deprecated)</h2>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><code>HMCSampler</code> is deprecated. The R-level <code>update_method = "hamiltonian-mc"</code> option still dispatches to this class, but it will be removed in a future release. Use NUTS instead.</p>
-</div>
-</div>
-<p>Performs fixed-length leapfrog integration. The number of leapfrog steps is set at construction from <code>config.num_leapfrogs</code>. Each call to <code>do_gradient_step()</code> invokes <code>hmc_step()</code> from <code>mcmc/algorithms/hmc.h</code>. For constrained models, RATTLE integration is used (see <a href="../manual/rattle.html">Constrained Leapfrog (RATTLE)</a>).</p>
 </section>
 <section id="nutssampler" class="level2">
 <h2 class="anchored" data-anchor-id="nutssampler">NUTSSampler</h2>
@@ -720,15 +692,12 @@ Warning
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                                        WarmupSchedule<span class="op">&amp;</span> schedule<span class="op">)</span> <span class="op">{</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"nuts"</span><span class="op">)</span> <span class="op">{</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> make_unique<span class="op">&lt;</span>NUTSSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"hmc"</span> <span class="op">||</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>             config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"hamiltonian-mc"</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> make_unique<span class="op">&lt;</span>HMCSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"mh"</span> <span class="op">||</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>             config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"adaptive-metropolis"</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> make_unique<span class="op">&lt;</span>MetropolisSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The R layer (<code>validate_sampler.R</code>) resolves strings like <code>"hamiltonian-mc"</code> and <code>"adaptive-metropolis"</code> before they reach C++, so in practice the factory receives <code>"nuts"</code>, <code>"hmc"</code>, or <code>"mh"</code>.</p>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"mh"</span> <span class="op">||</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>             config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"adaptive-metropolis"</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> make_unique<span class="op">&lt;</span>MetropolisSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The R layer (<code>validate_sampler.R</code>) resolves <code>"adaptive-metropolis"</code> before it reaches C++, so in practice the factory receives <code>"nuts"</code> or <code>"mh"</code>.</p>
 <p>All three model types (GGM, OMRF, mixed MRF) default to NUTS. The user can select Metropolis via <code>update_method = "adaptive-metropolis"</code>.</p>
 </section>
 <section id="step-size-and-mass-matrix-adaptation" class="level2">

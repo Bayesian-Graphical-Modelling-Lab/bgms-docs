@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -97,14 +97,14 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-3ff4805f19b0085abba01199065d0a21.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-70be5ccd51f03de5ce195d75fadf0882.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-3e6a3f4a26c10336ab3b4cfe85ff884b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-c551eed1d5edd77e8ad10f653d21c373.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-3e6a3f4a26c10336ab3b4cfe85ff884b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-727c311c0671326a6a83aefdf25e74e3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -527,19 +527,18 @@ window.Quarto = {
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">dirichlet_alpha =</span> <span class="dv">1</span>,</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="dv">1</span>,</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_action =</span> <span class="fu">c</span>(<span class="st">"listwise"</span>, <span class="st">"impute"</span>),</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">update_method =</span> <span class="fu">c</span>(<span class="st">"nuts"</span>, <span class="st">"adaptive-metropolis"</span>, <span class="st">"hamiltonian-mc"</span>),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">update_method =</span> <span class="fu">c</span>(<span class="st">"nuts"</span>, <span class="st">"adaptive-metropolis"</span>),</span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  target_accept,</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">hmc_num_leapfrogs =</span> <span class="dv">100</span>,</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">nuts_max_depth =</span> <span class="dv">10</span>,</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_mass_matrix =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>(),</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>),</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">pseudolikelihood =</span> <span class="fu">c</span>(<span class="st">"conditional"</span>, <span class="st">"marginal"</span>),</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">nuts_max_depth =</span> <span class="dv">10</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_mass_matrix =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>(),</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>),</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">pseudolikelihood =</span> <span class="fu">c</span>(<span class="st">"conditional"</span>, <span class="st">"marginal"</span>),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="arguments" class="level2">
 <h2 class="anchored" data-anchor-id="arguments">Arguments</h2>
@@ -555,7 +554,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td><code>x</code></td>
-<td>A data frame or matrix with <code>n</code> rows and <code>p</code> columns containing binary and ordinal responses. Variables are automatically recoded to non-negative integers (<code>0, 1, ..., m</code>). For regular ordinal variables, unobserved categories are collapsed; for Blume–Capel variables, all categories are retained.</td>
+<td>A data frame or matrix with <code>n</code> rows and <code>p</code> columns. Columns may contain binary, ordinal, or continuous variables (see <code>variable_type</code>). Discrete variables are automatically recoded to non-negative integers (<code>0, 1, ..., m</code>); for regular ordinal variables, unobserved categories are collapsed, while Blume–Capel variables retain all categories. Continuous variables are column-centered internally so that the GGM likelihood is formulated with a zero-mean assumption.</td>
 </tr>
 <tr class="even">
 <td><code>variable_type</code></td>
@@ -653,45 +652,41 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td><code>update_method</code></td>
-<td>Character. Specifies how the MCMC sampler updates the model parameters: <code>"adaptive-metropolis"</code> (componentwise adaptive Metropolis–Hastings with Robbins–Monro proposal adaptation), <code>"hamiltonian-mc"</code> (<strong>Deprecated.</strong> Use <code>"nuts"</code> instead. Will be removed in a future release.), or <code>"nuts"</code> (the No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: <code>"nuts"</code>.</td>
+<td>Character. Specifies how the MCMC sampler updates the model parameters: <code>"adaptive-metropolis"</code> (componentwise adaptive Metropolis–Hastings with Robbins–Monro proposal adaptation) or <code>"nuts"</code> (the No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: <code>"nuts"</code>.</td>
 </tr>
 <tr class="even">
 <td><code>target_accept</code></td>
 <td>Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: <code>0.44</code> for adaptive Metropolis and <code>0.80</code> for NUTS.</td>
 </tr>
 <tr class="odd">
-<td><code>hmc_num_leapfrogs</code></td>
-<td><strong>Deprecated.</strong> Integer. Number of leapfrog steps for Hamiltonian Monte Carlo. Only relevant when <code>update_method = "hamiltonian-mc"</code>, which is deprecated. Default: <code>100</code>.</td>
-</tr>
-<tr class="even">
 <td><code>nuts_max_depth</code></td>
 <td>Integer. Maximum tree depth in NUTS. Must be positive. Default: <code>10</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>learn_mass_matrix</code></td>
 <td>Logical. If <code>TRUE</code>, adapt a diagonal mass matrix during warmup (NUTS only). If <code>FALSE</code>, use the identity matrix. Default: <code>TRUE</code>.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>chains</code></td>
 <td>Integer. Number of parallel chains to run. Default: <code>4</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>cores</code></td>
 <td>Integer. Number of CPU cores for parallel execution. Default: <code>parallel::detectCores()</code>.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>display_progress</code></td>
 <td>Character. Controls progress reporting during sampling. Options: <code>"per-chain"</code> (separate bar per chain), <code>"total"</code> (single combined bar), or <code>"none"</code> (no progress). Default: <code>"per-chain"</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>seed</code></td>
 <td>Optional integer. Random seed for reproducibility. Must be a single non-negative integer.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>pseudolikelihood</code></td>
 <td>Character. Pseudolikelihood approximation for mixed MRF models (ignored for pure ordinal or pure continuous data). <code>"conditional"</code> conditions on the observed continuous variables when computing the discrete full conditionals; faster because the discrete pseudolikelihood does not depend on the continuous precision matrix. <code>"marginal"</code> integrates out the continuous variables, giving discrete full conditionals that account for induced interactions through the continuous block; more expensive per iteration. Default: <code>"conditional"</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>verbose</code></td>
 <td>Logical. If <code>TRUE</code>, prints informational messages during data processing (e.g., missing data handling, variable recoding). Defaults to <code>getOption("bgms.verbose", TRUE)</code>. Set <code>options(bgms.verbose = FALSE)</code> to suppress messages globally.</td>
 </tr>
@@ -709,7 +704,7 @@ window.Quarto = {
 <li><code>posterior_summary_pairwise</code> — Data frame with posterior summaries for partial association parameters.</li>
 <li><code>posterior_summary_indicator</code> — Data frame with posterior summaries for edge inclusion indicators (if <code>edge_selection = TRUE</code>).</li>
 <li><code>posterior_mean_main</code> — Posterior mean of main-effect parameters. <code>NULL</code> for GGM models. For OMRF: a matrix (p x max_categories) of category thresholds. For mixed MRF: a list with <code>$discrete</code> (threshold matrix) and <code>$continuous</code> (q x 1 matrix of means).</li>
-<li><code>posterior_mean_associations</code> — Symmetric matrix of posterior mean partial associations (zero diagonal). For continuous variables these are unstandardized partial correlations; for discrete variables these are half the log adjacent-category odds ratio. Use <code>extract_precision()</code>, <code>extract_partial_correlations()</code>, or <code>extract_log_odds()</code> to convert to interpretable scales.</li>
+<li><code>posterior_mean_pairwise</code> — Symmetric matrix of posterior mean partial associations (zero diagonal). For continuous variables these are unstandardized partial correlations; for discrete variables these are half the log adjacent-category odds ratio. Use <code>extract_precision()</code>, <code>extract_partial_correlations()</code>, or <code>extract_log_odds()</code> to convert to interpretable scales.</li>
 <li><code>posterior_mean_residual_variance</code> — Named numeric vector of posterior mean residual variances <span class="math inline">\(1/\Theta_{ii}\)</span>. Present for GGM and mixed MRF models; <code>NULL</code> for OMRF.</li>
 <li><code>posterior_mean_indicator</code> — Symmetric matrix of posterior mean inclusion probabilities (if edge selection was enabled).</li>
 <li><code>raw_samples</code> — A list of raw MCMC draws per chain with the following sublists:

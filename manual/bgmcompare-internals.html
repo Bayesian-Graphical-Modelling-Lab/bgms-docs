@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -42,14 +42,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-3ff4805f19b0085abba01199065d0a21.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-70be5ccd51f03de5ce195d75fadf0882.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-3e6a3f4a26c10336ab3b4cfe85ff884b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-c551eed1d5edd77e8ad10f653d21c373.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-3e6a3f4a26c10336ab3b4cfe85ff884b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-727c311c0671326a6a83aefdf25e74e3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -423,12 +423,6 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">HMC Algorithm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Constrained Leapfrog</span></a>
   </div>
@@ -583,7 +577,7 @@ window.Quarto = {
 <p>How <code>bgmCompare()</code> works under the hood: multi-group posterior, contrast parameterization, and sampler implementation. Source: <code>src/bgmCompare/</code> directory.</p>
 <section id="differences-from-single-group-bgm" class="level2">
 <h2 class="anchored" data-anchor-id="differences-from-single-group-bgm">Differences from single-group bgm</h2>
-<p>The <code>bgmCompare</code> engine shares the same OMRF likelihood (pseudolikelihood over ordinal/Blume-Capel variables) and the same NUTS/Metropolis sampler options (HMC is deprecated), but differs in three key ways:</p>
+<p>The <code>bgmCompare</code> engine shares the same OMRF likelihood (pseudolikelihood over ordinal/Blume-Capel variables) and the same NUTS/Metropolis sampler options, but differs in three key ways:</p>
 <ol type="1">
 <li><strong>Parameter decomposition</strong> — Group-specific parameters <span class="math inline">\(\boldsymbol{\omega}^{(g)}\)</span> are decomposed into a shared baseline <span class="math inline">\(\boldsymbol{\omega}\)</span> and contrast parameters <span class="math inline">\(\boldsymbol{\delta}^{(k)}\)</span>, linked through a contrast matrix.</li>
 <li><strong>Separate sampler</strong> — The bgmCompare engine uses its own chain runner (<code>run_gibbs_sampler_bgmCompare()</code>) rather than the general <code>run_mcmc_chain()</code>, because the multi-group structure requires group-specific likelihood evaluations and contrast selection.</li>
@@ -597,7 +591,7 @@ window.Quarto = {
 \omega_{ij}^{(g)} = \omega_{ij} + \sum_{k=1}^{G-1} c_{gk}\, \delta_{ij}^{(k)}
 \]</span></p>
 <p>where <span class="math inline">\(\mathbf{C}\)</span> is a <span class="math inline">\(G \times (G-1)\)</span> projection (contrast) matrix. The baseline <span class="math inline">\(\omega_{ij}\)</span> captures the shared structure; the contrast parameters <span class="math inline">\(\delta_{ij}^{(k)}\)</span> are the projections onto the <span class="math inline">\(G-1\)</span> orthogonal contrast directions. For two groups, the single contrast reduces to a scaled group difference. Category thresholds are decomposed in the same way.</p>
-<p>The flat parameter vector (used by NUTS and HMC) groups by component type, not per effect:</p>
+<p>The flat parameter vector (used by NUTS) groups by component type, not per effect:</p>
 <pre><code>[ overall_mains | overall_pairs | active_main_diffs | active_pair_diffs ]</code></pre>
 <p>Contrast parameters appear only when their inclusion indicator is 1; inactive contrasts are excluded from the vector entirely.</p>
 </section>
@@ -622,7 +616,7 @@ window.Quarto = {
 <ol type="1">
 <li><strong>Missing data imputation</strong> (if <code>na_impute = TRUE</code>) — Impute missing observations per group using the current parameters. Updates the observation matrix, category counts, Blume-Capel statistics, and pairwise statistics.</li>
 <li><strong>Contrast selection</strong> (if active) — A Metropolis step decides whether each contrast parameter is included or collapsed to zero (<code>update_indicator_differences_metropolis_bgmcompare()</code>).</li>
-<li><strong>Parameter updates</strong> — With adaptive Metropolis, main effects and pairwise effects are updated separately (<code>update_main_effects_metropolis_bgmcompare()</code>, then <code>update_pairwise_effects_metropolis_bgmcompare()</code>). With NUTS or HMC, all active parameters are updated jointly via the vectorized log-pseudoposterior.</li>
+<li><strong>Parameter updates</strong> — With adaptive Metropolis, main effects and pairwise effects are updated separately (<code>update_main_effects_metropolis_bgmcompare()</code>, then <code>update_pairwise_effects_metropolis_bgmcompare()</code>). With NUTS, all active parameters are updated jointly via the vectorized log-pseudoposterior.</li>
 <li><strong>Inclusion probability update</strong> (Beta-Bernoulli prior only) — Draw new inclusion probability from the conjugate Beta posterior.</li>
 </ol>
 <p>The warmup schedule follows the same five-stage structure as the single-group model (see <a href="../manual/warmup.html">Warmup Schedule</a>).</p>

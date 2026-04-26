@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -89,7 +89,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../manual/samplers.html" rel="next">
-<link href="../manual/hmc.html" rel="prev">
+<link href="../manual/nuts.html" rel="prev">
 <link href="../bgms_sticker.svg" rel="icon" type="image/svg+xml">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -97,14 +97,14 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-3ff4805f19b0085abba01199065d0a21.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-70be5ccd51f03de5ce195d75fadf0882.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-3e6a3f4a26c10336ab3b4cfe85ff884b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-c551eed1d5edd77e8ad10f653d21c373.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-3e6a3f4a26c10336ab3b4cfe85ff884b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-727c311c0671326a6a83aefdf25e74e3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -481,12 +481,6 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../manual/hmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">HMC Algorithm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../manual/rattle.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Constrained Leapfrog</span></a>
   </div>
@@ -638,7 +632,7 @@ window.Quarto = {
 </header>
 
 
-<p>When edge selection is active, excluded edges must remain exactly zero throughout HMC integration. The standard leapfrog integrator cannot enforce this: after an unconstrained position update, a zero entry will drift to a nonzero value. <code>bgms</code> solves this with a constrained leapfrog scheme based on RATTLE <span class="citation" data-cites="Reich_1996">(<a href="#ref-Reich_1996" role="doc-biblioref">Reich, 1996</a>)</span>, with the implementation adapted from the Mici library <span class="citation" data-cites="Graham_2019_mici">(<a href="#ref-Graham_2019_mici" role="doc-biblioref">Graham, 2019</a>)</span>.</p>
+<p>When edge selection is active, excluded edges must remain exactly zero throughout NUTS integration. The standard leapfrog integrator cannot enforce this: after an unconstrained position update, a zero entry will drift to a nonzero value. <code>bgms</code> solves this with a constrained leapfrog scheme based on RATTLE <span class="citation" data-cites="Reich_1996">(<a href="#ref-Reich_1996" role="doc-biblioref">Reich, 1996</a>)</span>, with the implementation adapted from the Mici library <span class="citation" data-cites="Graham_2019_mici">(<a href="#ref-Graham_2019_mici" role="doc-biblioref">Graham, 2019</a>)</span>.</p>
 <p>The implementation lives in <code>leapfrog.h</code> and <code>leapfrog.cpp</code>.</p>
 <section id="why-constraints" class="level2">
 <h2 class="anchored" data-anchor-id="why-constraints">Why constraints?</h2>
@@ -1313,8 +1307,8 @@ document.querySelectorAll("[data-cite-picker]").forEach(picker => {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../manual/hmc.html" class="pagination-link" aria-label="HMC Algorithm">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">HMC Algorithm</span>
+      <a href="../manual/nuts.html" class="pagination-link" aria-label="NUTS Algorithm">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">NUTS Algorithm</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
