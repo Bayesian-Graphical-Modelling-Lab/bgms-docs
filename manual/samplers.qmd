@@ -20,19 +20,14 @@ classDiagram
     class MetropolisSampler {
         element-wise MH
     }
-    class GradientSamplerBase {
-        <<abstract>>
-        owns HMCAdaptationController
-        #do_gradient_step(model) StepResult
-    }
     class NUTSSampler {
+        owns NUTSAdaptationController
         adaptive tree depth
         -do_unconstrained_step()
         -do_constrained_step()
     }
     SamplerBase <|-- MetropolisSampler
-    SamplerBase <|-- GradientSamplerBase
-    GradientSamplerBase <|-- NUTSSampler
+    SamplerBase <|-- NUTSSampler
 ```
 
 The mixed MRF combines a NUTS step for the main parameter block
@@ -71,24 +66,6 @@ not by `MetropolisSampler` itself.
 Proposal standard deviations are tuned during warmup via Robbins-Monro
 updates (see [Warmup Schedule](warmup.qmd)).
 
-## GradientSamplerBase
-
-Base class for gradient-based sampling. It owns an
-`HMCAdaptationController` that manages:
-
-- **Dual averaging** for step-size adaptation
-- **Diagonal mass matrix** accumulation via Welford's online algorithm
-
-The `step()` method in `GradientSamplerBase`:
-
-1. Calls the concrete `do_gradient_step()` override (NUTS)
-2. Passes the acceptance probability to the adaptation controller
-3. If the mass matrix was just updated (end of a warmup window),
-   reinitializes the step size with the heuristic
-
-After warmup, the adaptation controller freezes and returns the
-smoothed step size from dual averaging.
-
 ## NUTSSampler
 
 Uses the No-U-Turn criterion to adapt trajectory length
@@ -96,6 +73,22 @@ automatically. The maximum tree depth is set from
 `config.max_tree_depth` (default 10). Returns NUTS diagnostics
 (tree depth, divergence flag, energy) with each step. See
 [NUTS Algorithm](nuts.qmd) for the tree-building details.
+
+`NUTSSampler` owns a `NUTSAdaptationController` that manages:
+
+- **Dual averaging** for step-size adaptation
+- **Diagonal mass matrix** accumulation via Welford's online algorithm
+
+Each call to `step()`:
+
+1. Dispatches inline to `do_unconstrained_step()` or
+   `do_constrained_step()` based on `model.has_constraints()`
+2. Passes the acceptance probability to the adaptation controller
+3. If the mass matrix was just updated (end of a warmup window),
+   reinitializes the step size with the heuristic
+
+After warmup, the adaptation controller freezes and returns the
+smoothed step size from dual averaging.
 
 ## Factory dispatch
 
@@ -124,7 +117,7 @@ The user can select Metropolis via
 
 ## Step-size and mass-matrix adaptation
 
-`GradientSamplerBase` owns an `HMCAdaptationController` that
+`NUTSSampler` owns a `NUTSAdaptationController` that
 coordinates dual averaging for $\epsilon$ and Welford variance
 estimation for the diagonal mass matrix $M$. The full adaptation
 schedule — stage boundaries, doubling windows, blending formula,

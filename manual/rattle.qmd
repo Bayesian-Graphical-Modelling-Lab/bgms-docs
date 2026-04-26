@@ -145,7 +145,7 @@ differ by phase:
   prevents biased samples from entering the posterior.
 
 The switch happens at the warmup/sampling boundary. In
-`GradientSamplerBase::step()`:
+`NUTSSampler::step()`:
 
 ```cpp
 enforce_reverse_check_ = schedule_.sampling(iteration);
@@ -258,7 +258,7 @@ integration and dispatches accordingly:
 
 ```{mermaid}
 flowchart TD
-    A["NUTSSampler::do_gradient_step()"] --> B{"model.has_constraints()?"}
+    A["NUTSSampler::step()"] --> B{"model.has_constraints()?"}
     B -- yes --> C["do_constrained_step()"]
     B -- no --> D["do_unconstrained_step()"]
     C --> E["model.reset_projection_cache()"]
