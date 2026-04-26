@@ -630,19 +630,14 @@ window.Quarto = {
     class MetropolisSampler {
         element-wise MH
     }
-    class GradientSamplerBase {
-        &lt;&lt;abstract&gt;&gt;
-        owns HMCAdaptationController
-        #do_gradient_step(model) StepResult
-    }
     class NUTSSampler {
+        owns NUTSAdaptationController
         adaptive tree depth
         -do_unconstrained_step()
         -do_constrained_step()
     }
     SamplerBase &lt;|-- MetropolisSampler
-    SamplerBase &lt;|-- GradientSamplerBase
-    GradientSamplerBase &lt;|-- NUTSSampler
+    SamplerBase &lt;|-- NUTSSampler
 </pre>
 </div>
 <p></p></figure><p></p>
@@ -666,24 +661,21 @@ window.Quarto = {
 <p>The simplest sampler. Each call to <code>step()</code> invokes <code>model.do_one_metropolis_step(iteration)</code>, which performs a full sweep of element-wise proposals, and returns the result. Edge selection is handled by the chain runner before the sampler step, not by <code>MetropolisSampler</code> itself.</p>
 <p>Proposal standard deviations are tuned during warmup via Robbins-Monro updates (see <a href="../manual/warmup.html">Warmup Schedule</a>).</p>
 </section>
-<section id="gradientsamplerbase" class="level2">
-<h2 class="anchored" data-anchor-id="gradientsamplerbase">GradientSamplerBase</h2>
-<p>Base class for gradient-based sampling. It owns an <code>HMCAdaptationController</code> that manages:</p>
+<section id="nutssampler" class="level2">
+<h2 class="anchored" data-anchor-id="nutssampler">NUTSSampler</h2>
+<p>Uses the No-U-Turn criterion to adapt trajectory length automatically. The maximum tree depth is set from <code>config.max_tree_depth</code> (default 10). Returns NUTS diagnostics (tree depth, divergence flag, energy) with each step. See <a href="../manual/nuts.html">NUTS Algorithm</a> for the tree-building details.</p>
+<p><code>NUTSSampler</code> owns a <code>NUTSAdaptationController</code> that manages:</p>
 <ul>
 <li><strong>Dual averaging</strong> for step-size adaptation</li>
 <li><strong>Diagonal mass matrix</strong> accumulation via Welford’s online algorithm</li>
 </ul>
-<p>The <code>step()</code> method in <code>GradientSamplerBase</code>:</p>
+<p>Each call to <code>step()</code>:</p>
 <ol type="1">
-<li>Calls the concrete <code>do_gradient_step()</code> override (NUTS)</li>
+<li>Dispatches inline to <code>do_unconstrained_step()</code> or <code>do_constrained_step()</code> based on <code>model.has_constraints()</code></li>
 <li>Passes the acceptance probability to the adaptation controller</li>
 <li>If the mass matrix was just updated (end of a warmup window), reinitializes the step size with the heuristic</li>
 </ol>
 <p>After warmup, the adaptation controller freezes and returns the smoothed step size from dual averaging.</p>
-</section>
-<section id="nutssampler" class="level2">
-<h2 class="anchored" data-anchor-id="nutssampler">NUTSSampler</h2>
-<p>Uses the No-U-Turn criterion to adapt trajectory length automatically. The maximum tree depth is set from <code>config.max_tree_depth</code> (default 10). Returns NUTS diagnostics (tree depth, divergence flag, energy) with each step. See <a href="../manual/nuts.html">NUTS Algorithm</a> for the tree-building details.</p>
 </section>
 <section id="factory-dispatch" class="level2">
 <h2 class="anchored" data-anchor-id="factory-dispatch">Factory dispatch</h2>
@@ -702,7 +694,7 @@ window.Quarto = {
 </section>
 <section id="step-size-and-mass-matrix-adaptation" class="level2">
 <h2 class="anchored" data-anchor-id="step-size-and-mass-matrix-adaptation">Step-size and mass-matrix adaptation</h2>
-<p><code>GradientSamplerBase</code> owns an <code>HMCAdaptationController</code> that coordinates dual averaging for <span class="math inline">\(\epsilon\)</span> and Welford variance estimation for the diagonal mass matrix <span class="math inline">\(M\)</span>. The full adaptation schedule — stage boundaries, doubling windows, blending formula, and dual-averaging parameters — is documented in <a href="../manual/warmup.html">Warmup Schedule</a>.</p>
+<p><code>NUTSSampler</code> owns a <code>NUTSAdaptationController</code> that coordinates dual averaging for <span class="math inline">\(\epsilon\)</span> and Welford variance estimation for the diagonal mass matrix <span class="math inline">\(M\)</span>. The full adaptation schedule — stage boundaries, doubling windows, blending formula, and dual-averaging parameters — is documented in <a href="../manual/warmup.html">Warmup Schedule</a>.</p>
 <p><code>MetropolisSampler</code> uses a separate <code>MetropolisAdaptationController</code> that tunes proposal standard deviations via Robbins–Monro updates targeting an acceptance rate of 0.44.</p>
 </section>
 <section id="constrained-integration-dispatch" class="level2">

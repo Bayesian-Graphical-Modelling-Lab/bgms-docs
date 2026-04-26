@@ -702,7 +702,7 @@ window.Quarto = {
 <li><strong>During warmup</strong> — Non-reversible steps are recorded but do not terminate the NUTS tree. The step-size adapter is still tuning, so occasional failures are expected and informative: their frequency guides the adapter toward a step size that keeps the integrator reversible.</li>
 <li><strong>During sampling</strong> — A non-reversible step terminates the NUTS tree and rejects the proposal, the same way a divergence does. This prevents biased samples from entering the posterior.</li>
 </ul>
-<p>The switch happens at the warmup/sampling boundary. In <code>GradientSamplerBase::step()</code>:</p>
+<p>The switch happens at the warmup/sampling boundary. In <code>NUTSSampler::step()</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">enforce_reverse_check_</span> <span class="op">=</span> <span class="va">schedule_</span><span class="op">.</span>sampling<span class="op">(</span>iteration<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>NUTSSampler</code> passes <code>reverse_check &amp;&amp; enforce_reverse_check_</code> to <code>nuts_step()</code>, and <code>build_tree()</code> checks this flag at the base case:</p>
 <div class="cell" data-layout-align="default">
@@ -802,7 +802,7 @@ window.Quarto = {
 <p></p><figure class="figure"><p></p>
 <div>
 <pre class="mermaid mermaid-js">flowchart TD
-    A["NUTSSampler::do_gradient_step()"] --&gt; B{"model.has_constraints()?"}
+    A["NUTSSampler::step()"] --&gt; B{"model.has_constraints()?"}
     B -- yes --&gt; C["do_constrained_step()"]
     B -- no --&gt; D["do_unconstrained_step()"]
     C --&gt; E["model.reset_projection_cache()"]
