@@ -56,7 +56,7 @@ bgm(
 
 ### Prior specification
 
-Priors are specified by passing prior-object constructors (see [Prior Constructors](priors.qmd)). The legacy scalar arguments listed below the table (`pairwise_scale`, `main_alpha`, `main_beta`, `inclusion_probability`, `beta_bernoulli_alpha/beta`, …) are deprecated as of bgms 0.3.0; they still work but emit a lifecycle warning and forward to the equivalent prior object.
+Priors are specified by passing prior-object constructors (see [Prior Constructors](priors.qmd)). The legacy scalar arguments listed below the table (`pairwise_scale`, `main_alpha`, `main_beta`, `inclusion_probability`, `beta_bernoulli_alpha/beta`, …) are deprecated as of bgms 0.2.0; they still work but emit a lifecycle warning and forward to the equivalent prior object.
 
 | Argument | Description |
 |----------|-------------|
@@ -71,7 +71,7 @@ Priors are specified by passing prior-object constructors (see [Prior Constructo
 ::: {.callout-note}
 ## Deprecated scalar prior arguments
 
-The following arguments are deprecated as of bgms 0.3.0. They still work
+The following arguments are deprecated as of bgms 0.2.0. They still work
 but emit a lifecycle warning. Use the prior-object equivalents in the
 table above.
 

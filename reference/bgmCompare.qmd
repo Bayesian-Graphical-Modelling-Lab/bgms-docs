@@ -72,7 +72,7 @@ bgmCompare(
 
 ### Prior specification
 
-Priors on baseline parameters are specified via prior-object constructors (see [Prior Constructors](priors.qmd)). The legacy scalar arguments listed under the table are deprecated as of bgms 0.3.0 — they still work but emit a lifecycle warning.
+Priors on baseline parameters are specified via prior-object constructors (see [Prior Constructors](priors.qmd)). The legacy scalar arguments listed under the table are deprecated as of bgms 0.2.0 — they still work but emit a lifecycle warning.
 
 | Argument | Description |
 |----------|-------------|
