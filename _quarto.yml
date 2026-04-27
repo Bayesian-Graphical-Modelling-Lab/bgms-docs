@@ -49,8 +49,6 @@ website:
         href: reference/index.qmd
       - text: "Manual"
         href: manual/index.qmd
-      - text: "Examples"
-        href: examples/index.qmd
     tools:
       - icon: github
         href: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
@@ -152,20 +150,6 @@ website:
             - manual/sbm-prior.qmd
         - manual/bgmcompare-internals.qmd
         - manual/numerical.qmd
-
-    - id: examples
-      title: "Examples"
-      style: "floating"
-      collapse-level: 1
-      align: left
-      contents:
-        - examples/index.qmd
-        - examples/binary-network.qmd
-        - examples/ordinal-network.qmd
-        - examples/continuous-network.qmd
-        - examples/mixed-network.qmd
-        - examples/group-comparison.qmd
-        - examples/clustering.qmd
 
 bibliography: references.bib
 csl: apa.csl
