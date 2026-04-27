@@ -4,10 +4,8 @@ title: "sample_precision_prior()"
 
 Draws precision matrices $K$ from the prior of a Gaussian graphical model
 using the same constrained NUTS sampler that drives [`bgm()`](bgm.qmd) for
-continuous data, with the likelihood omitted ($n = 0$, $S = 0$). The chain
-therefore targets the prior alone — useful for simulation-based calibration
-(SBC) and for visualizing the prior's implied distribution over partial
-correlations.
+continuous data. Useful for simulation-based calibration (SBC) and for
+visualizing the prior's implied distribution over partial correlations.
 
 ## Description
 
