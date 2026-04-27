@@ -112,11 +112,11 @@ $\log p(y \mid x) \propto \tfrac{n}{2}\log|\Omega| - \tfrac{1}{2}\operatorname{t
 For a cross-model overview, see [Pseudolikelihood](pseudolikelihood.qmd).
 
 The discrete conditionals use the marginal interaction matrix
-$\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top$, which must
+$M = A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top$, which must
 be recomputed whenever the precision or cross-type parameters
-change. The $\partial\Theta/\partial\Sigma$ chain rule contributes
+change. The $\partial M/\partial\Sigma_{yy}$ chain rule contributes
 to the precision gradient via
-$-2\Sigma A_{xy}^\top\bar\Theta A_{xy}\Sigma$.
+$-2\Sigma_{yy} A_{xy}^\top\bar{M} A_{xy}\Sigma_{yy}$.
 
 ## Missing data
 

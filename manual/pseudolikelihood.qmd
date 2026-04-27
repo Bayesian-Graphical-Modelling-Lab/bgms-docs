@@ -66,11 +66,12 @@ Implementation details and gradient expressions are documented in
 ## Mixed MRF pseudolikelihood
 
 For mixed models, the pseudolikelihood combines discrete and continuous parts.
-The continuous block uses the GGM likelihood. The discrete full conditionals
-are computed by integrating out the continuous variables — i.e.,
+The continuous block uses the GGM likelihood. For the discrete block, `bgms`
+integrates out the continuous variables to obtain a marginal MRF on
+$\mathbf{x}$ and applies the pseudolikelihood to that marginal model:
 $\log p(x_s \mid x_{-s})$ rather than $\log p(x_s \mid x_{-s}, y_{\text{obs}})$.
-This uses the marginal interaction matrix
-$\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top$, which couples the
+The marginal interaction matrix is
+$M = A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top$, which couples the
 discrete pseudolikelihood to the precision parameters.
 
 Implementation details are documented in [Mixed MRF Internals](mixed-internals.qmd).

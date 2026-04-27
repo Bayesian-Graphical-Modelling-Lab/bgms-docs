@@ -75,19 +75,33 @@ $$
 
 where $\mathbf{M}_i = \boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}\,\mathbf{x}_i$ is the conditional mean for observation $i$. This expression is computed exactly — no pseudolikelihood approximation is needed for the continuous block.
 
-The discrete conditionals require a pseudolikelihood approximation, as in the ordinal MRF. The full conditional for discrete variable $x_i$ given all other variables is:
+For the discrete block, `bgms` integrates out the continuous variables to obtain a marginal MRF on $\mathbf{x}$ and applies a pseudolikelihood approximation to that marginal MRF. After integration, the log marginal density is
 
 $$
-p(x_i = c \mid \mathbf{x}_{-i}, \mathbf{y}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i}\exp\!\left(\mu_{ik} + k \cdot r_i\right)}
+\log p(\mathbf{x}) \propto \sum_{i=1}^{p}\sum_{c=1}^{m_i}\mathcal{I}(x_i = c)\,\mu_{ic} + \mathbf{x}^{\sf T} \mathbf{M}\, \mathbf{x} + 2(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)^{\sf T}\,\mathbf{x}
 $$
 
-where the rest score now includes contributions from both discrete and continuous variables:
+with effective discrete–discrete interaction matrix
 
 $$
-r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}^{xx} + 2\sum_{j=1}^{q} y_j\, \omega_{ij}^{xy}
+\mathbf{M} = \boldsymbol{\Omega}_{xx} + 2\,\boldsymbol{\Omega}_{xy}\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}.
 $$
 
-`bgms` constructs the discrete full conditionals by integrating out the continuous variables, so the discrete full conditionals use effective interactions that account for indirect discrete–discrete associations mediated through the continuous block.
+The off-diagonal entries of $\mathbf{M}$ combine the direct discrete–discrete partial associations in $\boldsymbol{\Omega}_{xx}$ with the indirect associations induced through the continuous block. The linear term $2(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)^{\sf T}\mathbf{x}$ shifts the discrete category bias by an amount that depends on the cross-type interactions and the continuous means.
+
+The full conditional for discrete variable $x_i$ in this marginal MRF has the same ordinal-MRF form as in the [Ordinal MRF](omrf.qmd):
+
+$$
+p(x_i = c \mid \mathbf{x}_{-i}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i}\exp\!\left(\mu_{ik} + k \cdot r_i\right)}
+$$
+
+with rest score
+
+$$
+r_i = 2\sum_{j \neq i} M_{ij}\, x_j + 2\,(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)_i.
+$$
+
+The pseudolikelihood is the product of these full conditionals across all observations and discrete variables.
 
 ## Edge selection
 
