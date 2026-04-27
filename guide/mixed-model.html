@@ -621,15 +621,24 @@ p(\mathbf{z}) \propto \exp\!\left(\sum_{i} \mu_i(z_i) +
 \log p(\mathbf{Y} \mid \mathbf{X}) = \frac{n}{2}\left(\log|\boldsymbol{\Theta}| - q\log(2\pi)\right) - \frac{1}{2}\sum_{i=1}^{n}(\mathbf{y}_i - \mathbf{M}_i)^{\sf T}\boldsymbol{\Theta}\,(\mathbf{y}_i - \mathbf{M}_i)
 \]</span></p>
 <p>where <span class="math inline">\(\mathbf{M}_i = \boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}\,\mathbf{x}_i\)</span> is the conditional mean for observation <span class="math inline">\(i\)</span>. This expression is computed exactly — no pseudolikelihood approximation is needed for the continuous block.</p>
-<p>The discrete conditionals require a pseudolikelihood approximation, as in the ordinal MRF. The full conditional for discrete variable <span class="math inline">\(x_i\)</span> given all other variables is:</p>
+<p>For the discrete block, <code>bgms</code> integrates out the continuous variables to obtain a marginal MRF on <span class="math inline">\(\mathbf{x}\)</span> and applies a pseudolikelihood approximation to that marginal MRF. After integration, the log marginal density is</p>
 <p><span class="math display">\[
-p(x_i = c \mid \mathbf{x}_{-i}, \mathbf{y}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i}\exp\!\left(\mu_{ik} + k \cdot r_i\right)}
+\log p(\mathbf{x}) \propto \sum_{i=1}^{p}\sum_{c=1}^{m_i}\mathcal{I}(x_i = c)\,\mu_{ic} + \mathbf{x}^{\sf T} \mathbf{M}\, \mathbf{x} + 2(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)^{\sf T}\,\mathbf{x}
 \]</span></p>
-<p>where the rest score now includes contributions from both discrete and continuous variables:</p>
+<p>with effective discrete–discrete interaction matrix</p>
 <p><span class="math display">\[
-r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}^{xx} + 2\sum_{j=1}^{q} y_j\, \omega_{ij}^{xy}
+\mathbf{M} = \boldsymbol{\Omega}_{xx} + 2\,\boldsymbol{\Omega}_{xy}\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}.
 \]</span></p>
-<p><code>bgms</code> constructs the discrete full conditionals by integrating out the continuous variables, so the discrete full conditionals use effective interactions that account for indirect discrete–discrete associations mediated through the continuous block.</p>
+<p>The off-diagonal entries of <span class="math inline">\(\mathbf{M}\)</span> combine the direct discrete–discrete partial associations in <span class="math inline">\(\boldsymbol{\Omega}_{xx}\)</span> with the indirect associations induced through the continuous block. The linear term <span class="math inline">\(2(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)^{\sf T}\mathbf{x}\)</span> shifts the discrete category bias by an amount that depends on the cross-type interactions and the continuous means.</p>
+<p>The full conditional for discrete variable <span class="math inline">\(x_i\)</span> in this marginal MRF has the same ordinal-MRF form as in the <a href="../guide/omrf.html">Ordinal MRF</a>:</p>
+<p><span class="math display">\[
+p(x_i = c \mid \mathbf{x}_{-i}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i}\exp\!\left(\mu_{ik} + k \cdot r_i\right)}
+\]</span></p>
+<p>with rest score</p>
+<p><span class="math display">\[
+r_i = 2\sum_{j \neq i} M_{ij}\, x_j + 2\,(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)_i.
+\]</span></p>
+<p>The pseudolikelihood is the product of these full conditionals across all observations and discrete variables.</p>
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>

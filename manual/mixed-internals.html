@@ -659,7 +659,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="discrete-pseudolikelihood">Discrete pseudolikelihood</h2>
 <p>The discrete full conditionals integrate out the continuous block: <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> rather than <span class="math inline">\(\log p(x_s \mid x_{-s}, y_{\text{obs}})\)</span>. The continuous block uses the GGM likelihood <span class="math inline">\(\log p(y \mid x) \propto \tfrac{n}{2}\log|\Omega| - \tfrac{1}{2}\operatorname{tr}(\Omega D^\top D)\)</span>.</p>
 <p>For a cross-model overview, see <a href="../manual/pseudolikelihood.html">Pseudolikelihood</a>.</p>
-<p>The discrete conditionals use the marginal interaction matrix <span class="math inline">\(\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top\)</span>, which must be recomputed whenever the precision or cross-type parameters change. The <span class="math inline">\(\partial\Theta/\partial\Sigma\)</span> chain rule contributes to the precision gradient via <span class="math inline">\(-2\Sigma A_{xy}^\top\bar\Theta A_{xy}\Sigma\)</span>.</p>
+<p>The discrete conditionals use the marginal interaction matrix <span class="math inline">\(M = A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top\)</span>, which must be recomputed whenever the precision or cross-type parameters change. The <span class="math inline">\(\partial M/\partial\Sigma_{yy}\)</span> chain rule contributes to the precision gradient via <span class="math inline">\(-2\Sigma_{yy} A_{xy}^\top\bar{M} A_{xy}\Sigma_{yy}\)</span>.</p>
 </section>
 <section id="missing-data" class="level2">
 <h2 class="anchored" data-anchor-id="missing-data">Missing data</h2>

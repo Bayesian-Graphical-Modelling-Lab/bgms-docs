@@ -626,7 +626,7 @@ window.Quarto = {
 </section>
 <section id="mixed-mrf-pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="mixed-mrf-pseudolikelihood">Mixed MRF pseudolikelihood</h2>
-<p>For mixed models, the pseudolikelihood combines discrete and continuous parts. The continuous block uses the GGM likelihood. The discrete full conditionals are computed by integrating out the continuous variables — i.e., <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> rather than <span class="math inline">\(\log p(x_s \mid x_{-s}, y_{\text{obs}})\)</span>. This uses the marginal interaction matrix <span class="math inline">\(\Theta = 2A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top\)</span>, which couples the discrete pseudolikelihood to the precision parameters.</p>
+<p>For mixed models, the pseudolikelihood combines discrete and continuous parts. The continuous block uses the GGM likelihood. For the discrete block, <code>bgms</code> integrates out the continuous variables to obtain a marginal MRF on <span class="math inline">\(\mathbf{x}\)</span> and applies the pseudolikelihood to that marginal model: <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> rather than <span class="math inline">\(\log p(x_s \mid x_{-s}, y_{\text{obs}})\)</span>. The marginal interaction matrix is <span class="math inline">\(M = A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top\)</span>, which couples the discrete pseudolikelihood to the precision parameters.</p>
 <p>Implementation details are documented in <a href="../manual/mixed-internals.html">Mixed MRF Internals</a>.</p>
 </section>
 <section id="group-comparison-bgmcompare" class="level2">
