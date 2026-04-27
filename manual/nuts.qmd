@@ -105,11 +105,17 @@ Each subtree returns a `BuildTreeResult` struct containing:
 
 ### Proposal selection
 
-Within a valid (non-U-turning) subtree, the proposal is selected via
-multinomial sampling weighted by the unnormalized target density. When
-two subtrees are merged, the proposed sample is drawn from the
-combined set with probability proportional to the number of valid
-states in each subtree.
+`bgms` follows Stan's `base_nuts.hpp` and uses multinomial candidate
+weighting throughout. Each leaf $i$ in a subtree carries weight
+$\log w_i = H_0 - h_i$, the Hamiltonian offset from the initial state;
+weights are accumulated with log-sum-exp. Within a subtree (`build_tree`)
+sibling subtrees are combined symmetrically: accept the new subtree
+with probability $\exp(w_{\text{new}} - \mathrm{LSE}(w_{\text{old}},\, w_{\text{new}}))$.
+At the top level (`nuts_step`) the new subtree is accepted via biased
+progressive sampling — accept with probability
+$\min(1,\, w_{\text{subtree}} / w_{\text{trajectory}})$ — so later
+subtrees are preferred on average. Divergence is detected directly by
+$h - H_0 > 1000$; no slice variable is used.
 
 ## Divergence detection
 
@@ -134,7 +140,7 @@ adaptation algorithms, and warning system — is documented in
 
 ## NUTS diagnostics
 
-Each NUTS step records four diagnostics:
+Each NUTS step records five diagnostics:
 
 - **Tree depth** — Number of doubling steps (0 to `max_tree_depth`).
   Consistently hitting the maximum indicates the step size may be
@@ -149,6 +155,12 @@ Each NUTS step records four diagnostics:
 - **Energy** — The Hamiltonian $H = -\log \pi(q) + \frac{1}{2} p^\top M^{-1} p$.
   Used to compute E-BFMI (energy Bayesian fraction of missing
   information).
+- **Mean acceptance probability** — The Metropolis acceptance
+  probability averaged over every leapfrog step in the trajectory,
+  paralleling Stan's `accept_stat__`. Surfaced as
+  `fit$nuts_diag$accept_prob` (chains × iterations) with a per-chain
+  mean in the diagnostic summary; also drives dual-averaging step-size
+  adaptation.
 
 These diagnostics are collected per chain and accessible via
 `extract_nuts_diagnostics()` in R.

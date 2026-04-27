@@ -14,7 +14,7 @@ Discovering edge clusters using the stochastic block model prior.
 
 ## Fit with SBM Prior
 
-<!-- TODO: source — bgm() with edge_prior = "stochastic-block" -->
+<!-- TODO: source — bgm() with edge_prior = sbm_prior(...) -->
 
 ## Extracting Block Structure
 

@@ -44,10 +44,11 @@ Supporting pages:
 - [Pseudolikelihood](pseudolikelihood.qmd) — Pseudolikelihood objectives for OMRF, mixed MRF, and group-comparison models, including statistical properties and the marginal pseudolikelihood used for mixed models.
 - [Fast Computation](variable-helpers.qmd) — Recursive accumulation of MRF category probabilities that avoids per-category `exp()` calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.
 
-## Edge Priors
+## Priors
 
-Prior distributions over graph structure for edge selection.
+Prior distributions on model parameters and graph structure.
 
+- [Parameter Priors](parameter-priors.qmd) — `BaseParameterPrior` polymorphic hierarchy for real-valued parameters (Cauchy, Normal, beta-prime, Gamma scale). Polymorphic dispatch replaces hard-coded prior calls in the model code.
 - [Edge Priors](edge-priors.qmd) — Overview of the edge prior framework: Bernoulli (fixed), Beta-Bernoulli (learned), and Stochastic Block Model
 - [SBM Prior](sbm-prior.qmd) — Mixture-of-finite-mixtures SBM formulation, collapsed Gibbs updates, cluster allocation sampling
 

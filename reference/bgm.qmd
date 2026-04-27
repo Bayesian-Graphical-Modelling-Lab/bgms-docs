@@ -132,7 +132,7 @@ Main components:
   - `parameter_names` — Named lists of parameter labels.
 - `arguments` --- A list of function call arguments and metadata.
 
-Additional summaries when `edge_prior = "Stochastic-Block"` [see @SekulovskiEtAl_2025_sbm]:
+Additional summaries when `edge_prior = sbm_prior(...)` [see @SekulovskiEtAl_2025_sbm]:
 
 - `posterior_summary_pairwise_allocations` --- Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for the pairwise cluster co-occurrence of the nodes. This serves to indicate whether the estimated posterior allocations, co-clustering matrix and posterior cluster probabilities have converged.
 - `posterior_coclustering_matrix` --- Symmetric matrix of pairwise proportions of occurrence of every variable. This matrix can be plotted to visually inspect the estimated number of clusters and visually inspect nodes that tend to switch clusters.

@@ -1,0 +1,81 @@
+---
+title: "Parameter Priors"
+---
+
+The parameter prior framework controls the distributions placed on
+real-valued model parameters: pairwise interactions, category thresholds,
+continuous-variable means, and the diagonal of the precision matrix. All
+priors inherit from `BaseParameterPrior` in
+[`src/priors/parameter_prior.h`](https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/blob/main/src/priors/parameter_prior.h).
+The user-facing R-side constructors are documented on the
+[Prior Constructors](../reference/priors.qmd) reference page.
+
+## BaseParameterPrior interface
+
+```cpp
+class BaseParameterPrior {
+  virtual double logp(double x) const = 0;
+  virtual double logp(double x, double scale_factor) const;
+  virtual double grad(double x) const = 0;
+  virtual double grad(double x, double scale_factor) const;
+  virtual std::unique_ptr<BaseParameterPrior> clone() const = 0;
+};
+```
+
+Each prior provides a log-density `logp(x)` and gradient `grad(x)`
+evaluated at a single point $x$, plus optional `(x, scale_factor)`
+overloads that multiply the prior's scale by a per-pair factor. The
+scaled overloads are used by the OMRF and mixed MRF when
+`standardize = TRUE`, where the prior scale on each pairwise interaction
+is adjusted by the score-product range of the variable pair (see the
+`standardize` argument of [`bgm()`](../reference/bgm.qmd)). Priors that
+have no natural scale (the beta-prime threshold prior) ignore the factor
+and delegate to the unscaled overload.
+
+`clone()` produces an independent copy for parallel chain execution.
+
+## Concrete classes
+
+| Class | Family | Hyperparameters | R constructor |
+|-------|--------|-----------------|---------------|
+| `CauchyPrior` | Cauchy(0, scale) | `scale` | [`cauchy_prior()`](../reference/priors.qmd#cauchy_prior) |
+| `NormalPrior` | Normal(0, scale) | `scale` | [`normal_prior()`](../reference/priors.qmd#normal_prior) |
+| `BetaPrimePrior` | logit-Beta($\alpha$, $\beta$) | `alpha`, `beta` | [`beta_prime_prior()`](../reference/priors.qmd#beta_prime_prior) |
+| `GammaScalePrior` | Gamma(shape, rate) on positive support | `shape`, `rate` | [`gamma_prior()`](../reference/priors.qmd#gamma_prior), [`exponential_prior()`](../reference/priors.qmd#exponential_prior) |
+
+`CauchyPrior` and `NormalPrior` implement both the unscaled and scaled
+overloads. `BetaPrimePrior` is used only for thresholds and ignores the
+scale factor. `GammaScalePrior` is used only for the precision-matrix
+diagonal where pair-specific scaling does not apply.
+
+## Factory dispatch
+
+Two inline factories at the bottom of `parameter_prior.h` map a
+`(type, hyperparameters)` triple to the concrete class:
+
+| Factory | Type strings | Returns |
+|---------|--------------|---------|
+| `create_parameter_prior(type, scale, alpha, beta)` | `"cauchy"`, `"normal"`, `"beta-prime"` | `unique_ptr<BaseParameterPrior>` |
+| `create_scale_prior(type, shape, rate)` | `"gamma"`, `"exponential"` | `unique_ptr<BaseParameterPrior>` (`GammaScalePrior`) |
+
+The R-side `unpack_parameter_prior()` and `unpack_scale_prior()` helpers
+flatten each prior object into its `(family, hyperparameters)`
+representation; the C++ bridge then calls the matching factory.
+
+## Where the priors are used
+
+Each model holds `unique_ptr<BaseParameterPrior>` members for the prior
+roles it needs:
+
+| Role | Used by | Default |
+|------|---------|---------|
+| Pairwise interactions | GGM, OMRF, mixed MRF, bgmCompare | `cauchy_prior(scale = 1)` |
+| Category thresholds | OMRF, mixed MRF, bgmCompare | `beta_prime_prior(0.5, 0.5)` |
+| Continuous means | mixed MRF | `normal_prior(scale = 1)` |
+| Precision-matrix diagonal | GGM, mixed MRF | `gamma_prior(shape = 1, rate = 1)` |
+
+The model's `logp_and_gradient()` and Metropolis update functions call
+into the held priors at every iteration. Replacing the inline
+`R::dcauchy()` / closed-form lambda calls used in earlier versions with
+this polymorphic dispatch is what allows the user to swap families
+without touching the C++ code.

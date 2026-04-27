@@ -63,14 +63,11 @@ and sets defaults for tuning parameters (`target_accept`,
 `nuts_max_depth`). It detects the number of
 available cores and resolves the progress display type.
 
-### Edge prior validation (`validate_model.R`)
+### Prior validation (`R/priors.R`, `validate_model.R`)
 
-`validate_edge_prior()` and `validate_difference_prior()` map string
-names (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) to
-validated prior configurations. For the SBM prior, the six
-hyperparameters (`beta_bernoulli_alpha`, `beta_bernoulli_beta`,
-`beta_bernoulli_alpha_between`, `beta_bernoulli_beta_between`,
-`dirichlet_alpha`, `lambda`) are checked and defaults applied.
+Priors are user-facing S3 objects ([`bgms_parameter_prior`](../reference/priors.qmd#parameter-priors), [`bgms_scale_prior`](../reference/priors.qmd#scale-priors), [`bgms_indicator_prior`](../reference/priors.qmd#indicator-priors)). Each prior constructor (`cauchy_prior()`, `gamma_prior()`, `bernoulli_prior()`, …) validates its own hyperparameters at the call site, so by the time the spec is built every prior object is already self-consistent.
+
+`unpack_parameter_prior()`, `unpack_scale_prior()`, `unpack_interaction_prior()`, `unpack_threshold_prior()`, and `unpack_indicator_prior()` flatten each prior object into the `(family, hyperparameters)` representation that the C++ bridge expects. `validate_edge_prior()` and `validate_difference_prior()` accept either a prior object or a legacy character string (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`); strings are forwarded to the matching constructor with a lifecycle warning.
 
 ## Spec construction (`bgm_spec.R`)
 

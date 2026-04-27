@@ -145,8 +145,9 @@ website:
               contents:
                 - manual/pseudolikelihood.qmd
                 - manual/variable-helpers.qmd
-        - section: "Edge Priors"
+        - section: "Priors"
           contents:
+            - manual/parameter-priors.qmd
             - manual/edge-priors.qmd
             - manual/sbm-prior.qmd
         - manual/bgmcompare-internals.qmd

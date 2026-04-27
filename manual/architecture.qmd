@@ -27,7 +27,8 @@ src/
 ├── priors/
 │   ├── edge_prior.h     # BaseEdgePrior + Bernoulli, BetaBernoulli, SBM
 │   ├── sbm_edge_prior.h # MFM-SBM Gibbs updates
-│   └── sbm_edge_prior.cpp
+│   ├── sbm_edge_prior.cpp
+│   └── parameter_prior.h # BaseParameterPrior + Cauchy, Normal, BetaPrime, GammaScale
 ├── math/
 │   ├── cholupdate.h/cpp # Rank-1 Cholesky update/downdate (Givens/hyperbolic)
 │   ├── cholesky_helpers.h # Log-determinant, Schur complement

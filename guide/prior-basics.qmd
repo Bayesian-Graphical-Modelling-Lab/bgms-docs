@@ -42,7 +42,7 @@ The sections below describe each component: the slab distribution that regulariz
 
 ## The slab: prior on effect sizes
 
-The slab distribution determines the prior plausibility of different effect sizes for edges that are present. In `bgms`, the slab is a Cauchy distribution centered at zero, with a scale parameter controlled by `pairwise_scale` (default: 1).
+The slab distribution determines the prior plausibility of different effect sizes for edges that are present. In `bgms`, the slab is set via the `interaction_prior` argument and defaults to a Cauchy distribution centered at zero with scale 1 (`cauchy_prior(scale = 1)`). Alternative slabs are available through the [prior constructors](../reference/priors.qmd): [`normal_prior()`](../reference/priors.qmd#normal_prior) for a lighter-tailed prior and [`beta_prime_prior()`](../reference/priors.qmd#beta_prime_prior) for a beta-prime parameterization.
 
 The Cauchy distribution has heavy tails, which means it allows large effects when the data support them, while the peak at zero provides moderate shrinkage toward small effects. In models with many variables and limited data, this regularization prevents extreme estimates.
 
@@ -54,7 +54,7 @@ When `standardize = TRUE`, the prior scale is adjusted based on the range of res
 
 Edge indicators $\gamma_{ij}$ govern edge inclusion in the spike-and-slab prior. Their prior determines, before seeing the data, how likely each edge is to be excluded ($\gamma_{ij}=0$) or included ($\gamma_{ij}=1$), and therefore governs overall sparsity and structure.
 
-`bgms` provides three edge priors, each encoding a different type of structural assumption. They are selected with the `edge_prior` argument.
+`bgms` provides three edge priors, each encoding a different type of structural assumption. They are selected by passing one of the [indicator-prior constructors](../reference/priors.qmd#indicator-priors) — [`bernoulli_prior()`](../reference/priors.qmd#bernoulli_prior), [`beta_bernoulli_prior()`](../reference/priors.qmd#beta_bernoulli_prior), or [`sbm_prior()`](../reference/priors.qmd#sbm_prior) — to the `edge_prior` argument.
 
 ### Bernoulli prior
 
@@ -96,11 +96,11 @@ The SBM prior introduces additional parameters: the number of blocks, the assign
 
 Beyond the spike-and-slab, `bgms` places priors on several nuisance parameters that are estimated but typically not of direct inferential interest:
 
-| Parameter | Model | Prior | Control |
-|-----------|-------|-------|---------|
-| Category thresholds | Ordinal MRF, Mixed MRF  | Beta-prime (via $\exp(\mu)$) | `main_alpha`, `main_beta` (default 0.5) |
-| Blume-Capel parameters | Ordinal MRF, Mixed MRF  | Beta-prime (via $\exp(\mu)$) | `main_alpha`, `main_beta` (default 0.5) |
-| Diagonal of precision matrix | GGM, Mixed MRF | Gamma$(1, 1)$ | Fixed |
-| Continuous variable means | Mixed MRF | Normal$(0, 1)$ | Fixed |
+| Parameter | Model | Default prior | Argument |
+|-----------|-------|---------------|----------|
+| Category thresholds | Ordinal MRF, Mixed MRF | Beta-prime$(0.5, 0.5)$ via $\exp(\mu)$ | `threshold_prior` |
+| Blume-Capel parameters | Ordinal MRF, Mixed MRF | Beta-prime$(0.5, 0.5)$ via $\exp(\mu)$ | `threshold_prior` |
+| Diagonal of precision matrix | GGM, Mixed MRF | Gamma$(1, 1)$ | `precision_scale_prior` |
+| Continuous variable means | Mixed MRF | Normal$(0, 1)$ | `means_prior` |
 
-For the category thresholds and Blume-Capel parameters, when the two shape parameters are equal the induced prior on $\mu$ is symmetric around zero. The GGM and mixed MRF priors are not user-configurable.
+Each row's prior is set by passing the corresponding constructor — [`beta_prime_prior()`](../reference/priors.qmd#beta_prime_prior), [`gamma_prior()`](../reference/priors.qmd#gamma_prior) or [`exponential_prior()`](../reference/priors.qmd#exponential_prior), and [`normal_prior()`](../reference/priors.qmd#normal_prior) — to the listed argument. For the threshold and Blume-Capel priors, when the two beta-prime shape parameters are equal the induced prior on $\mu$ is symmetric around zero.

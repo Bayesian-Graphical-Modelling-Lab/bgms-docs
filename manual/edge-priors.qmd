@@ -74,13 +74,17 @@ the current cluster assignment vector. These are stored in
 
 ## Prior selection in R
 
-The `edge_prior` argument in `bgm()` maps to these classes:
+The `edge_prior` argument in `bgm()` takes a [`bgms_indicator_prior`](../reference/priors.qmd) object. The `family` field of that object selects the C++ class:
 
-| R value | C++ class | Behavior |
-|---------|-----------|----------|
-| `"Bernoulli"` | `BernoulliEdgePrior` | Fixed inclusion probabilities |
-| `"Beta-Bernoulli"` | `BetaBernoulliEdgePrior` | Learns shared inclusion rate |
-| `"Stochastic-Block"` | `StochasticBlockEdgePrior` | Cluster-structured inclusion |
+| R constructor | `family` | C++ class | Behavior |
+|---------------|----------|-----------|----------|
+| [`bernoulli_prior()`](../reference/priors.qmd#bernoulli_prior) | `"Bernoulli"` | `BernoulliEdgePrior` | Fixed inclusion probabilities |
+| [`beta_bernoulli_prior()`](../reference/priors.qmd#beta_bernoulli_prior) | `"Beta-Bernoulli"` | `BetaBernoulliEdgePrior` | Learns shared inclusion rate |
+| [`sbm_prior()`](../reference/priors.qmd#sbm_prior) | `"Stochastic-Block"` | `StochasticBlockEdgePrior` | Cluster-structured inclusion |
+
+Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`,
+`"Stochastic-Block"`) are still accepted on the R side but emit a
+lifecycle warning and are forwarded to the equivalent constructor.
 
 When `edge_selection = FALSE`, no edge prior is instantiated and all
 edges remain included throughout sampling.
@@ -89,7 +93,8 @@ edges remain included throughout sampling.
 
 The `create_edge_prior()` factory in `edge_prior.h` maps an
 `EdgePrior` enum value to the concrete class. The enum is produced
-from the R string by `edge_prior_from_string()` in `common_helpers.h`.
+from the prior object's `family` field by `edge_prior_from_string()`
+in `common_helpers.h`.
 
 ## Execution order
 

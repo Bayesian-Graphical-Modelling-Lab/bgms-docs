@@ -125,7 +125,7 @@ extract_sbm(bgms_object)
 
 `bgms_object` must be a fitted `bgms` object.
 
-Requires `edge_selection = TRUE` and `edge_prior = "Stochastic-Block"`.
+Requires `edge_selection = TRUE` and `edge_prior = sbm_prior(...)`.
 Returns a list with:
 
 - `posterior_num_blocks` --- Posterior probabilities for each possible number

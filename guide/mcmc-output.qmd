@@ -213,7 +213,7 @@ commonly used are:
 | `extract_log_odds()` | Posterior mean log-odds matrix (ordinal / discrete block) |
 | `extract_ess()` | Effective sample sizes |
 | `extract_rhat()` | Split $\hat{R}$ values |
-| `extract_sbm()` | SBM cluster assignments and co-clustering matrix (when `edge_prior = "Stochastic-Block"`) |
+| `extract_sbm()` | SBM cluster assignments and co-clustering matrix (when `edge_prior = sbm_prior(...)`) |
 | `extract_arguments()` | Arguments used when fitting the model |
 
 ## NUTS diagnostics
@@ -226,7 +226,9 @@ str(fit$nuts_diag, max.level = 1)
 ```
 
 The `summary` field contains per-chain summaries of tree depth,
-divergences, non-reversible steps, and energy. The `warmup_check` field
+divergences, non-reversible steps, energy, and the mean Metropolis
+acceptance probability (Stan's `accept_stat__`, also stored
+per-iteration as `fit$nuts_diag$accept_prob`). The `warmup_check` field
 reports whether warmup equilibration was sufficient. These are described in detail in
 [MCMC Diagnostics](mcmc-diagnostics.qmd). If these diagnostics remain problematic after tuning, refit with `update_method = "adaptive-metropolis"`.
 

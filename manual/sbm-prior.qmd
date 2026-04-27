@@ -96,18 +96,20 @@ The computation involves:
 
 ## Hyperparameters
 
-The six SBM hyperparameters are set via `bgm()`:
+The six SBM hyperparameters are set via the
+[`sbm_prior()`](../reference/priors.qmd#sbm_prior) constructor passed to
+`edge_prior`:
 
-| Parameter | R argument | Default | Role |
-|-----------|-----------|---------|------|
-| $\alpha_w$ | `beta_bernoulli_alpha` | 1 | Beta shape for within-block inclusion |
-| $\beta_w$ | `beta_bernoulli_beta` | 1 | Beta shape for within-block inclusion |
-| $\alpha_b$ | `beta_bernoulli_alpha_between` | 1 | Beta shape for between-block inclusion |
-| $\beta_b$ | `beta_bernoulli_beta_between` | 1 | Beta shape for between-block inclusion |
+| Parameter | `sbm_prior()` argument | Default | Role |
+|-----------|------------------------|---------|------|
+| $\alpha_w$ | `alpha` | 1 | Beta shape for within-block inclusion |
+| $\beta_w$ | `beta` | 1 | Beta shape for within-block inclusion |
+| $\alpha_b$ | `alpha_between` | 1 | Beta shape for between-block inclusion |
+| $\beta_b$ | `beta_between` | 1 | Beta shape for between-block inclusion |
 | $\alpha_D$ | `dirichlet_alpha` | 1 | Dirichlet concentration for cluster proportions |
 | $\lambda$ | `lambda` | 1 | Poisson rate for number of clusters |
 
-All six hyperparameters are required when `edge_prior = "Stochastic-Block"`
+All six hyperparameters are required when `edge_prior = sbm_prior(...)`
 is selected. Validation enforces that all values are positive and finite.
 
 ## Output

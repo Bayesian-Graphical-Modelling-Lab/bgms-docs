@@ -207,6 +207,18 @@ If divergences are frequent, increase `target_accept` (which reduces the
 step size). If that does not help, try `update_method = "adaptive-metropolis"`
 and compare results.
 
+### Mean acceptance probability
+
+`fit$nuts_diag$accept_prob` is a chains × iterations matrix of the mean
+Metropolis acceptance probability across every leapfrog step in each
+trajectory, paralleling Stan's `accept_stat__`. The per-chain mean is
+also reported in `fit$nuts_diag$summary`. After warmup the per-chain
+mean should be close to `target_accept` (default 0.80); a chain whose
+mean acceptance is materially below the target is a signal that
+dual-averaging step-size adaptation did not converge — usually because
+warmup was too short or the geometry has features that warrant a higher
+target.
+
 ### Tree depth
 
 NUTS builds trajectories by repeatedly doubling their length until a
