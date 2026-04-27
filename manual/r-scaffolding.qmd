@@ -11,12 +11,14 @@ returned output into an S3 fit object.
 
 ```{mermaid}
 flowchart TD
-    A["bgm(x, ...)"] --> B["bgm_spec()"]
-    B -->|"validates, assembles sub-lists"| C["new_bgm_spec()"]
-    C -->|"asserts types and field presence"| D["validate_bgm_spec()"]
-    D -->|"cross-field invariant checks"| E["run_sampler(spec)"]
-    E -->|"dispatches to C++ via model_type"| F["build_output(spec, raw)"]
-    F -->|"normalizes raw C++ output into S3 object"| G["bgm fit object"]
+    A["<b>bgm(x, ...)</b>"]
+    B["<b>bgm_spec()</b><br/>validates, assembles sub-lists"]
+    C["<b>new_bgm_spec()</b><br/>asserts types and field presence"]
+    D["<b>validate_bgm_spec()</b><br/>cross-field invariant checks"]
+    E["<b>run_sampler(spec)</b><br/>dispatches to C++ via model_type"]
+    F["<b>build_output(spec, raw)</b><br/>normalizes raw C++ output to S3"]
+    G["<b>bgm fit object</b>"]
+    A --> B --> C --> D --> E --> F --> G
 ```
 
 Both `bgm()` and `bgmCompare()` follow this pipeline. The
