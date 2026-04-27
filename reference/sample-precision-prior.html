@@ -504,7 +504,7 @@ window.Quarto = {
 </header>
 
 
-<p>Draws precision matrices <span class="math inline">\(K\)</span> from the prior of a Gaussian graphical model using the same constrained NUTS sampler that drives <a href="../reference/bgm.html"><code>bgm()</code></a> for continuous data. Useful for simulation-based calibration (SBC) and for visualizing the prior’s implied distribution over partial correlations.</p>
+<p>Draws precision matrices <span class="math inline">\(K\)</span> from the prior of a Gaussian graphical model using the same constrained NUTS sampler that drives <a href="../reference/bgm.html"><code>bgm()</code></a> for continuous data.</p>
 <section id="description" class="level2">
 <h2 class="anchored" data-anchor-id="description">Description</h2>
 <p>Off-diagonals are placed on the association scale <span class="math inline">\(K_{yy,ij} = -K_{ij}/2\)</span> and assigned the supplied <code>interaction_prior</code>. A <code>normal_prior(scale = s)</code> therefore constrains <span class="math inline">\(K_{yy}\)</span> with standard deviation <span class="math inline">\(s\)</span>, equivalent to a <span class="math inline">\(\mathrm{Normal}(0, 2s)\)</span> prior on <span class="math inline">\(K_{ij}\)</span> itself. The diagonals <span class="math inline">\(K_{ii}\)</span> are drawn from the supplied <code>precision_scale_prior</code>. When <code>edge_indicators</code> is supplied, off-diagonals at excluded positions are constrained to zero throughout the chain via RATTLE projection.</p>

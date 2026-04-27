@@ -4,7 +4,7 @@
     "href": "reference/sample-precision-prior.html",
     "title": "sample_precision_prior()",
     "section": "",
-    "text": "Draws precision matrices \\(K\\) from the prior of a Gaussian graphical model using the same constrained NUTS sampler that drives bgm() for continuous data. Useful for simulation-based calibration (SBC) and for visualizing the prior’s implied distribution over partial correlations.",
+    "text": "Draws precision matrices \\(K\\) from the prior of a Gaussian graphical model using the same constrained NUTS sampler that drives bgm() for continuous data.",
     "crumbs": [
       "Reference",
       "Core Functions",
