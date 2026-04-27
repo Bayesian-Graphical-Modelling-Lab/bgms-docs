@@ -1,0 +1,214 @@
+---
+title: "Prior Constructors"
+---
+
+`bgms` 0.3.0 replaces the loose scalar prior arguments of earlier versions
+with a small set of prior-object constructors. Each constructor returns an
+S3 object that is passed to [`bgm()`](bgm.qmd) or
+[`bgmCompare()`](bgmCompare.qmd). Three classes of priors are exported:
+
+| Class | Used for | Constructors |
+|-------|----------|--------------|
+| `bgms_parameter_prior` | Real-valued model parameters (interactions, thresholds, continuous means) | [`cauchy_prior()`](#cauchy_prior), [`normal_prior()`](#normal_prior), [`beta_prime_prior()`](#beta_prime_prior) |
+| `bgms_scale_prior` | Positive scale parameters (precision-matrix diagonal) | [`gamma_prior()`](#gamma_prior), [`exponential_prior()`](#exponential_prior) |
+| `bgms_indicator_prior` | Inclusion indicators (edge selection, difference selection) | [`bernoulli_prior()`](#bernoulli_prior), [`beta_bernoulli_prior()`](#beta_bernoulli_prior), [`sbm_prior()`](#sbm_prior) |
+
+The legacy scalar arguments (`pairwise_scale`, `main_alpha`, `main_beta`,
+`inclusion_probability`, `beta_bernoulli_alpha/beta`,
+`beta_bernoulli_alpha_between/beta_between`, `dirichlet_alpha`, `lambda`,
+`difference_probability`) still work but emit a lifecycle warning and forward
+to the equivalent prior object.
+
+## Parameter priors {#parameter-priors}
+
+Priors on real-valued parameters. Used for `interaction_prior`,
+`threshold_prior`, and `means_prior` arguments of `bgm()` /
+`bgmCompare()`.
+
+### `cauchy_prior()` {#cauchy_prior}
+
+Cauchy(0, scale) prior. The default for pairwise interactions; produces
+heavy-tailed shrinkage toward zero.
+
+```r
+cauchy_prior(scale = 1)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `scale` | Positive numeric. Scale (half-width at half-maximum) of the Cauchy distribution. Default: `1`. |
+
+Returns a `bgms_parameter_prior` object with `family = "cauchy"`.
+
+### `normal_prior()` {#normal_prior}
+
+Normal(0, scale) prior. Lighter-tailed than Cauchy; recommended for
+simulation-based calibration (SBC) studies where Cauchy priors can
+generate data with extreme parameter values.
+
+```r
+normal_prior(scale = 1)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `scale` | Positive numeric. Standard deviation of the Normal distribution. Default: `1`. |
+
+Returns a `bgms_parameter_prior` object with `family = "normal"`.
+
+### `beta_prime_prior()` {#beta_prime_prior}
+
+Beta-prime prior, the default for threshold parameters. Parameterized
+through the logistic transformation: $\sigma(\mu) \sim \text{Beta}(\alpha, \beta)$,
+so $\mu = \text{logit}(Y)$ where $Y \sim \text{Beta}(\alpha, \beta)$.
+
+```r
+beta_prime_prior(alpha = 0.5, beta = 0.5)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `alpha` | Positive numeric. First shape parameter. Default: `0.5`. |
+| `beta` | Positive numeric. Second shape parameter. Default: `0.5`. |
+
+Returns a `bgms_parameter_prior` object with `family = "beta-prime"`.
+
+## Scale priors {#scale-priors}
+
+Priors on positive scale parameters, currently used only for the diagonal
+of the precision matrix in GGM and mixed MRF models (`precision_scale_prior`
+argument of `bgm()`).
+
+### `gamma_prior()` {#gamma_prior}
+
+Gamma(shape, rate) prior. The default `gamma_prior(1, 1)` is equivalent to
+`exponential_prior(1)`.
+
+```r
+gamma_prior(shape = 1, rate = 1)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `shape` | Positive numeric. Shape parameter of the Gamma distribution. Default: `1`. |
+| `rate`  | Positive numeric. Rate parameter of the Gamma distribution. Default: `1`. |
+
+Returns a `bgms_scale_prior` object with `family = "gamma"`.
+
+### `exponential_prior()` {#exponential_prior}
+
+Exponential(rate) prior. Convenience constructor equivalent to
+`gamma_prior(shape = 1, rate = rate)`.
+
+```r
+exponential_prior(rate = 1)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `rate` | Positive numeric. Rate parameter of the Exponential distribution. Default: `1`. |
+
+Returns a `bgms_scale_prior` object with `family = "exponential"`.
+
+## Indicator priors {#indicator-priors}
+
+Priors on inclusion indicators. Used for the `edge_prior` argument of
+`bgm()` and the `difference_prior` argument of `bgmCompare()`.
+
+### `bernoulli_prior()` {#bernoulli_prior}
+
+Fixed inclusion probability for each indicator. The simplest indicator
+prior; the inclusion probability does not change during sampling.
+
+```r
+bernoulli_prior(inclusion_probability = 0.5)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `inclusion_probability` | Numeric scalar in $(0, 1)$, or a symmetric $p \times p$ matrix for edge-specific probabilities. Default: `0.5`. |
+
+Returns a `bgms_indicator_prior` object with `family = "Bernoulli"`.
+
+### `beta_bernoulli_prior()` {#beta_bernoulli_prior}
+
+Beta-Bernoulli prior on inclusion. The shared inclusion probability is
+drawn from a Beta($\alpha$, $\beta$) prior and learned from the data.
+
+```r
+beta_bernoulli_prior(alpha = 1, beta = 1)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `alpha` | Positive numeric. First shape parameter of the Beta distribution. Default: `1`. |
+| `beta`  | Positive numeric. Second shape parameter of the Beta distribution. Default: `1`. |
+
+Returns a `bgms_indicator_prior` object with `family = "Beta-Bernoulli"`.
+
+### `sbm_prior()` {#sbm_prior}
+
+Stochastic Block Model prior. Variables are assigned to latent clusters,
+with separate Beta priors on within-cluster and between-cluster inclusion
+probabilities. See [Edge Clustering](../guide/clustering.qmd) and
+[SBM Prior](../manual/sbm-prior.qmd) for the full formulation.
+
+```r
+sbm_prior(
+  alpha           = 1,
+  beta            = 1,
+  alpha_between   = 1,
+  beta_between    = 1,
+  dirichlet_alpha = 1,
+  lambda          = 1
+)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `alpha`, `beta` | Positive numeric. Shape parameters of the Beta prior for within-cluster edge inclusion. Defaults: `1`. |
+| `alpha_between`, `beta_between` | Positive numeric. Shape parameters of the Beta prior for between-cluster edge inclusion. Defaults: `1`. |
+| `dirichlet_alpha` | Positive numeric. Concentration parameter of the Dirichlet prior on cluster assignments. Default: `1`. |
+| `lambda` | Positive numeric. Rate parameter of the zero-truncated Poisson prior on the number of clusters. Default: `1`. |
+
+Returns a `bgms_indicator_prior` object with `family = "Stochastic-Block"`.
+
+## Examples
+
+```r
+# bgm with explicit prior choices
+fit = bgm(
+  x,
+  interaction_prior = cauchy_prior(scale = 2.5),
+  threshold_prior   = beta_prime_prior(0.5, 0.5),
+  edge_prior        = beta_bernoulli_prior(1, 1)
+)
+
+# Mixed MRF with normal priors on continuous means and the precision diagonal
+fit = bgm(
+  x,
+  variable_type         = c("ordinal", "ordinal", "continuous", "continuous"),
+  means_prior           = normal_prior(scale = 0.5),
+  precision_scale_prior = exponential_prior(rate = 1)
+)
+
+# SBM-structured edge selection
+fit = bgm(
+  x,
+  edge_prior = sbm_prior(alpha = 8, beta = 1, alpha_between = 1, beta_between = 8)
+)
+
+# Group comparison with Beta-Bernoulli difference selection
+fit = bgmCompare(
+  x, y,
+  difference_prior = beta_bernoulli_prior(1, 1)
+)
+```
+
+## See also
+
+[`bgm()`](bgm.qmd), [`bgmCompare()`](bgmCompare.qmd),
+[`sample_precision_prior()`](sample-precision-prior.qmd),
+[Prior Basics](../guide/prior-basics.qmd),
+[Edge Selection](../guide/edge-selection.qmd),
+[Edge Clustering](../guide/clustering.qmd).

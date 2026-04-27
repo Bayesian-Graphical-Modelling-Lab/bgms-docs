@@ -29,13 +29,9 @@ bgmCompare(
   variable_type = "ordinal",
   baseline_category,
   difference_scale = 1,
-  difference_prior = c("Bernoulli", "Beta-Bernoulli"),
-  difference_probability = 0.5,
-  beta_bernoulli_alpha = 1,
-  beta_bernoulli_beta = 1,
-  pairwise_scale = 1,
-  main_alpha = 0.5,
-  main_beta = 0.5,
+  difference_prior = bernoulli_prior(0.5),
+  interaction_prior = cauchy_prior(scale = 1),
+  threshold_prior = beta_prime_prior(alpha = 0.5, beta = 0.5),
   iter = 1000,
   warmup = 1000,
   na_action = c("listwise", "impute"),
@@ -72,17 +68,28 @@ bgmCompare(
 | `difference_selection` | Logical. If `TRUE`, spike-and-slab priors are applied to difference parameters. Default: `TRUE`. |
 | `main_difference_selection` | Logical. If `TRUE`, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is `FALSE`. Only used when `difference_selection = TRUE`. |
 | `difference_scale` | Scale of the Cauchy prior for difference parameters. Default: `1`. |
-| `difference_prior` | Prior for difference inclusion: `"Bernoulli"` or `"Beta-Bernoulli"`. Default: `"Bernoulli"`. |
-| `difference_probability` | Prior inclusion probability for differences (Bernoulli prior). Default: `0.5`. |
-| `beta_bernoulli_alpha`, `beta_bernoulli_beta` | Shape parameters of the Beta prior for inclusion probabilities in the Beta--Bernoulli model. Defaults: `1`. |
+| `difference_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior on difference inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default) or [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior). Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`) and the scalar `difference_probability` / `beta_bernoulli_alpha` / `beta_bernoulli_beta` arguments are accepted but deprecated. Default: `bernoulli_prior(0.5)`. |
 
 ### Prior specification
 
+Priors on baseline parameters are specified via prior-object constructors (see [Prior Constructors](priors.qmd)). The legacy scalar arguments listed under the table are deprecated as of bgms 0.3.0 — they still work but emit a lifecycle warning.
+
 | Argument | Description |
 |----------|-------------|
-| `pairwise_scale` | Scale of the Cauchy prior for baseline partial associations. Default: `1`. |
-| `main_alpha`, `main_beta` | Shape parameters of the beta-prime prior for baseline threshold parameters. Defaults: `0.5`. |
-| `standardize` | Logical. If `TRUE`, the Cauchy prior scale for each partial association (both baseline and difference) is adjusted based on the range of response scores. Default: `FALSE`. |
+| `interaction_prior` | A `bgms_parameter_prior` object for baseline pairwise interactions. Allowed: [`cauchy_prior()`](priors.qmd#cauchy_prior) (default), [`normal_prior()`](priors.qmd#normal_prior). Default: `cauchy_prior(scale = 1)`. |
+| `threshold_prior` | A `bgms_parameter_prior` object for baseline threshold parameters. Allowed: [`beta_prime_prior()`](priors.qmd#beta_prime_prior) (default), [`normal_prior()`](priors.qmd#normal_prior). Default: `beta_prime_prior(alpha = 0.5, beta = 0.5)`. |
+| `standardize` | Logical. If `TRUE`, the prior scale for each partial association (both baseline and difference) is adjusted based on the range of response scores. See [`bgm()`](bgm.qmd) for the adjustment formula. Default: `FALSE`. |
+
+::: {.callout-note}
+## Deprecated scalar prior arguments
+
+| Deprecated | Replacement |
+|------------|-------------|
+| `pairwise_scale = s` | `interaction_prior = cauchy_prior(scale = s)` |
+| `main_alpha = a, main_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` |
+| `difference_probability = p` | `difference_prior = bernoulli_prior(p)` |
+| `beta_bernoulli_alpha = a, beta_bernoulli_beta = b` | `difference_prior = beta_bernoulli_prior(a, b)` |
+:::
 
 ### Sampler settings
 

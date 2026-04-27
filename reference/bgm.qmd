@@ -23,18 +23,12 @@ bgm(
   baseline_category,
   iter = 1000,
   warmup = 1000,
-  pairwise_scale = 1,
-  main_alpha = 0.5,
-  main_beta = 0.5,
+  interaction_prior = cauchy_prior(scale = 1),
+  threshold_prior = beta_prime_prior(alpha = 0.5, beta = 0.5),
+  means_prior = normal_prior(scale = 1),
+  precision_scale_prior = gamma_prior(shape = 1, rate = 1),
   edge_selection = TRUE,
-  edge_prior = c("Bernoulli", "Beta-Bernoulli", "Stochastic-Block"),
-  inclusion_probability = 0.5,
-  beta_bernoulli_alpha = 1,
-  beta_bernoulli_beta = 1,
-  beta_bernoulli_alpha_between = 1,
-  beta_bernoulli_beta_between = 1,
-  dirichlet_alpha = 1,
-  lambda = 1,
+  edge_prior = bernoulli_prior(0.5),
   na_action = c("listwise", "impute"),
   update_method = c("nuts", "adaptive-metropolis"),
   target_accept,
@@ -62,18 +56,33 @@ bgm(
 
 ### Prior specification
 
+Priors are specified by passing prior-object constructors (see [Prior Constructors](priors.qmd)). The legacy scalar arguments listed below the table (`pairwise_scale`, `main_alpha`, `main_beta`, `inclusion_probability`, `beta_bernoulli_alpha/beta`, …) are deprecated as of bgms 0.3.0; they still work but emit a lifecycle warning and forward to the equivalent prior object.
+
 | Argument | Description |
 |----------|-------------|
-| `pairwise_scale` | Double. Scale of the Cauchy prior for pairwise interaction parameters. Default: `1`. |
-| `main_alpha`, `main_beta` | Double. Shape parameters of the beta-prime prior for threshold parameters. Must be positive. If equal, the prior is symmetric. Defaults: `main_alpha = 0.5` and `main_beta = 0.5`. |
+| `interaction_prior` | A [`bgms_parameter_prior`](priors.qmd) object for pairwise interaction parameters. Allowed: [`cauchy_prior()`](priors.qmd#cauchy_prior) (default), [`normal_prior()`](priors.qmd#normal_prior), [`beta_prime_prior()`](priors.qmd#beta_prime_prior). Default: `cauchy_prior(scale = 1)`. |
+| `threshold_prior` | A `bgms_parameter_prior` object for threshold (main effect) parameters. Allowed: [`beta_prime_prior()`](priors.qmd#beta_prime_prior) (default), [`cauchy_prior()`](priors.qmd#cauchy_prior), [`normal_prior()`](priors.qmd#normal_prior). Default: `beta_prime_prior(alpha = 0.5, beta = 0.5)`. |
+| `means_prior` | A `bgms_parameter_prior` object for continuous-variable means (mixed MRF only). Allowed: `normal_prior()` (default), `cauchy_prior()`, `beta_prime_prior()`. Ignored for pure ordinal or pure GGM models. Default: `normal_prior(scale = 1)`. |
+| `precision_scale_prior` | A [`bgms_scale_prior`](priors.qmd) object for the diagonal elements of the precision matrix (GGM and mixed MRF). Allowed: [`gamma_prior()`](priors.qmd#gamma_prior) (default), [`exponential_prior()`](priors.qmd#exponential_prior). Ignored for pure ordinal models. Default: `gamma_prior(shape = 1, rate = 1)`. |
 | `edge_selection` | Logical. Whether to perform Bayesian edge selection. If `FALSE`, the model estimates all edges. Default: `TRUE`. |
-| `edge_prior` | Character. Specifies the prior for edge inclusion. Options: `"Bernoulli"`, `"Beta-Bernoulli"`, or `"Stochastic-Block"`. Default: `"Bernoulli"`. |
-| `inclusion_probability` | Numeric scalar. Prior inclusion probability of each edge (used with the Bernoulli prior). Default: `0.5`. |
-| `beta_bernoulli_alpha`, `beta_bernoulli_beta` | Double. Shape parameters for the beta distribution in the Beta--Bernoulli and Stochastic-Block priors. Must be positive. For the Stochastic-Block prior these are the shape parameters for the within-cluster edge inclusion probabilities. Defaults: `beta_bernoulli_alpha = 1` and `beta_bernoulli_beta = 1`. |
-| `beta_bernoulli_alpha_between`, `beta_bernoulli_beta_between` | Double. Shape parameters for the between-cluster edge inclusion probabilities in the Stochastic-Block prior. Must be positive. Defaults: `beta_bernoulli_alpha_between = 1` and `beta_bernoulli_beta_between = 1`. |
-| `dirichlet_alpha` | Double. Concentration parameter of the Dirichlet prior on block assignments (used with the Stochastic Block model). Default: `1`. |
-| `lambda` | Double. Rate of the zero-truncated Poisson prior on the number of clusters in the Stochastic Block Model. Default: `1`. |
-| `standardize` | Logical. If `TRUE`, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products $(x_i \cdot x_j)$, which typically correspond to smaller interaction effects $(\omega_{ij})$. Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores $0, 1, \ldots, m$. The adjusted scale for the interaction between variables $i$ and $j$ is `pairwise_scale * m_i * m_j`, so that `pairwise_scale` itself applies to the unit interval case (binary variables where $m_i = m_j = 1$). For Blume-Capel variables with reference category $b$, scores are centered as $-b, \ldots, m-b$, and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints $(0, m)$ and Blume-Capel variables use centered score endpoints $(-b, m-b)$. Default: `FALSE`. |
+| `edge_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior for edge inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), [`sbm_prior()`](priors.qmd#sbm_prior). Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) are accepted but deprecated. Default: `bernoulli_prior(0.5)`. |
+| `standardize` | Logical. If `TRUE`, the prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products $(x_i \cdot x_j)$, which typically correspond to smaller interaction effects $(\omega_{ij})$. Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores $0, 1, \ldots, m$. The adjusted scale for the interaction between variables $i$ and $j$ is `scale * m_i * m_j`, so that `scale` itself applies to the unit interval case (binary variables where $m_i = m_j = 1$). For Blume-Capel variables with reference category $b$, scores are centered as $-b, \ldots, m-b$, and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints $(0, m)$ and Blume-Capel variables use centered score endpoints $(-b, m-b)$. Default: `FALSE`. |
+
+::: {.callout-note}
+## Deprecated scalar prior arguments
+
+The following arguments are deprecated as of bgms 0.3.0. They still work
+but emit a lifecycle warning. Use the prior-object equivalents in the
+table above.
+
+| Deprecated | Replacement |
+|------------|-------------|
+| `pairwise_scale = s` | `interaction_prior = cauchy_prior(scale = s)` |
+| `main_alpha = a, main_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` |
+| `inclusion_probability = p` | `edge_prior = bernoulli_prior(p)` |
+| `beta_bernoulli_alpha = a, beta_bernoulli_beta = b` | `edge_prior = beta_bernoulli_prior(a, b)` |
+| `beta_bernoulli_alpha_between, beta_bernoulli_beta_between, dirichlet_alpha, lambda` | `edge_prior = sbm_prior(alpha_between = …, beta_between = …, dirichlet_alpha = …, lambda = …)` |
+:::
 
 ### Sampler settings
 

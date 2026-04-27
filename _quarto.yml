@@ -103,6 +103,10 @@ website:
           contents:
             - reference/bgm.qmd
             - reference/bgmCompare.qmd
+            - reference/sample-precision-prior.qmd
+        - section: "Priors"
+          contents:
+            - reference/priors.qmd
         - section: "Methods"
           contents:
             - reference/methods.qmd

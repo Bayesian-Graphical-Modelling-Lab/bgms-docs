@@ -13,6 +13,24 @@ Complete documentation for all exported functions in `bgms`.
 |----------|-------------|
 | [`bgm()`](bgm.qmd) | Estimates the main effects and pairwise interactions of a network using a Bayesian framework. |
 | [`bgmCompare()`](bgmCompare.qmd) | Estimates whether edge weights and category thresholds differ across networks of two different groups. |
+| [`sample_precision_prior()`](sample-precision-prior.qmd) | NUTS-based prior sampler for the GGM precision matrix. Used for SBC validation and prior visualization. |
+
+## Prior Constructors
+
+Prior specification objects passed to `bgm()` and `bgmCompare()` via the
+`interaction_prior`, `threshold_prior`, `means_prior`,
+`precision_scale_prior`, `edge_prior`, and `difference_prior` arguments.
+
+| Constructor | Family | Used for |
+|-------------|--------|----------|
+| [`cauchy_prior()`](priors.qmd#cauchy_prior) | Cauchy(0, scale) | Interactions, thresholds, means |
+| [`normal_prior()`](priors.qmd#normal_prior) | Normal(0, scale) | Interactions, thresholds, means |
+| [`beta_prime_prior()`](priors.qmd#beta_prime_prior) | Beta-prime | Thresholds (default), interactions |
+| [`gamma_prior()`](priors.qmd#gamma_prior) | Gamma(shape, rate) | Precision-matrix diagonal |
+| [`exponential_prior()`](priors.qmd#exponential_prior) | Exponential(rate) | Precision-matrix diagonal |
+| [`bernoulli_prior()`](priors.qmd#bernoulli_prior) | Bernoulli | Edge / difference inclusion (default) |
+| [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior) | Beta-Bernoulli | Edge / difference inclusion |
+| [`sbm_prior()`](priors.qmd#sbm_prior) | Stochastic Block Model | Edge inclusion |
 
 ## Methods
 
