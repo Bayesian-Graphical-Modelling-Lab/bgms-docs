@@ -599,34 +599,34 @@ P(B) = \frac{\lambda^B}{B!\,(\exp(\lambda) - 1)}, \quad B \geq 1
 </section>
 <section id="setting-up-the-sbm-prior" class="level2">
 <h2 class="anchored" data-anchor-id="setting-up-the-sbm-prior">Setting up the SBM prior</h2>
-<p>To use the SBM prior, set <code>edge_prior = "Stochastic-Block"</code> in <a href="../reference/bgm.html"><code>bgm()</code></a>:</p>
+<p>To use the SBM prior, pass <a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a> to the <code>edge_prior</code> argument of <a href="../reference/bgm.html"><code>bgm()</code></a>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="st">"Stochastic-Block"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">sbm_prior</span>(),</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The SBM prior has the following hyperparameters:</p>
+<p>The hyperparameters of <a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a> are:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 42%">
-<col style="width: 34%">
-<col style="width: 23%">
+<col style="width: 40%">
+<col style="width: 36%">
+<col style="width: 24%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Parameter</th>
+<th>Argument</th>
 <th>Default</th>
 <th>Role</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>beta_bernoulli_alpha</code>, <code>beta_bernoulli_beta</code></td>
+<td><code>alpha</code>, <code>beta</code></td>
 <td>1, 1</td>
 <td>Beta prior on within-cluster inclusion probability (<span class="math inline">\(\alpha_w\)</span>, <span class="math inline">\(\beta_w\)</span>)</td>
 </tr>
 <tr class="even">
-<td><code>beta_bernoulli_alpha_between</code>, <code>beta_bernoulli_beta_between</code></td>
+<td><code>alpha_between</code>, <code>beta_between</code></td>
 <td>1, 1</td>
 <td>Beta prior on between-cluster inclusion probability (<span class="math inline">\(\alpha_b\)</span>, <span class="math inline">\(\beta_b\)</span>)</td>
 </tr>
@@ -652,7 +652,7 @@ P(B) = \frac{\lambda^B}{B!\,(\exp(\lambda) - 1)}, \quad B \geq 1
 </section>
 <section id="interpreting-block-structure" class="level2">
 <h2 class="anchored" data-anchor-id="interpreting-block-structure">Interpreting block structure</h2>
-<p>The <code>extract_sbm()</code> function retrieves the clustering results for models fitted with <code>edge_prior = "Stochastic-Block"</code>:</p>
+<p>The <code>extract_sbm()</code> function retrieves the clustering results for models fitted with <code>edge_prior = sbm_prior(...)</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sbm <span class="ot">=</span> <span class="fu">extract_sbm</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This returns:</p>
 <ul>
@@ -668,24 +668,26 @@ P(B) = \frac{\lambda^B}{B!\,(\exp(\lambda) - 1)}, \quad B \geq 1
 <p><strong>When clustering is expected</strong> — set the within-cluster Beta prior to favor dense connections and the between-cluster prior to favor sparse connections:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="st">"Stochastic-Block"</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha =</span> <span class="dv">8</span>, <span class="at">beta_bernoulli_beta =</span> <span class="dv">1</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha_between =</span> <span class="dv">1</span>, <span class="at">beta_bernoulli_beta_between =</span> <span class="dv">8</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="fl">1.59</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">sbm_prior</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="dv">8</span>, <span class="at">beta =</span> <span class="dv">1</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha_between =</span> <span class="dv">1</span>, <span class="at">beta_between =</span> <span class="dv">8</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda =</span> <span class="fl">1.59</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Here <code>lambda = 1.59</code> corresponds to a prior expectation of approximately two clusters. Higher values of <code>lambda</code> shift the expectation toward more clusters (2.82 <span class="math inline">\(\approx\)</span> 3 clusters, 3.92 <span class="math inline">\(\approx\)</span> 4 clusters).</p>
 <p><strong>When no clustering is expected</strong>, or the goal is conservative inference that protects against false positive clustering, an informative between-cluster prior combined with flat within-cluster settings provides the best performance:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="st">"Stochastic-Block"</span>,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha =</span> <span class="dv">1</span>, <span class="at">beta_bernoulli_beta =</span> <span class="dv">1</span>,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha_between =</span> <span class="dv">1</span>, <span class="at">beta_bernoulli_beta_between =</span> <span class="dv">8</span>,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="dv">1</span>,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">sbm_prior</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">1</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha_between =</span> <span class="dv">1</span>, <span class="at">beta_between =</span> <span class="dv">8</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda =</span> <span class="dv">1</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This configuration discourages between-cluster edges (<span class="math inline">\(\beta_b = 8\)</span>), which protects against inferring multiple clusters when only one exists, without imposing strong assumptions about within-cluster density.</p>
-<p>The <code>dirichlet_alpha</code> parameter controls how evenly nodes are distributed across clusters. The default of 1 gives a uniform prior over partitions.</p>
+<p>The <code>dirichlet_alpha</code> argument of <a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a> controls how evenly nodes are distributed across clusters. The default of 1 gives a uniform prior over partitions.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">

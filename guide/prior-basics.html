@@ -558,7 +558,7 @@ p(\boldsymbol{\Omega} \mid \mathcal{S})
 </section>
 <section id="the-slab-prior-on-effect-sizes" class="level2">
 <h2 class="anchored" data-anchor-id="the-slab-prior-on-effect-sizes">The slab: prior on effect sizes</h2>
-<p>The slab distribution determines the prior plausibility of different effect sizes for edges that are present. In <code>bgms</code>, the slab is a Cauchy distribution centered at zero, with a scale parameter controlled by <code>pairwise_scale</code> (default: 1).</p>
+<p>The slab distribution determines the prior plausibility of different effect sizes for edges that are present. In <code>bgms</code>, the slab is set via the <code>interaction_prior</code> argument and defaults to a Cauchy distribution centered at zero with scale 1 (<code>cauchy_prior(scale = 1)</code>). Alternative slabs are available through the <a href="../reference/priors.html">prior constructors</a>: <a href="../reference/priors.html#normal_prior"><code>normal_prior()</code></a> for a lighter-tailed prior and <a href="../reference/priors.html#beta_prime_prior"><code>beta_prime_prior()</code></a> for a beta-prime parameterization.</p>
 <p>The Cauchy distribution has heavy tails, which means it allows large effects when the data support them, while the peak at zero provides moderate shrinkage toward small effects. In models with many variables and limited data, this regularization prevents extreme estimates.</p>
 <p>The scale parameter controls the width of the slab. A wider slab spreads prior probability over a larger range of effect sizes. This has a direct consequence for edge selection: because the slab is also the alternative hypothesis for the inclusion Bayes factor, a wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small.</p>
 <p>When <code>standardize = TRUE</code>, the prior scale is adjusted based on the range of response scores. Variables with more categories have larger score products, which typically correspond to smaller interaction effects. Without standardization, a fixed scale is relatively wide for high-category pairs and narrow for low-category pairs. The adjustment ensures equivalent relative shrinkage across all variable pairs.</p>
@@ -566,7 +566,7 @@ p(\boldsymbol{\Omega} \mid \mathcal{S})
 <section id="the-spike-priors-on-the-edge-indicators" class="level2">
 <h2 class="anchored" data-anchor-id="the-spike-priors-on-the-edge-indicators">The spike: priors on the edge indicators</h2>
 <p>Edge indicators <span class="math inline">\(\gamma_{ij}\)</span> govern edge inclusion in the spike-and-slab prior. Their prior determines, before seeing the data, how likely each edge is to be excluded (<span class="math inline">\(\gamma_{ij}=0\)</span>) or included (<span class="math inline">\(\gamma_{ij}=1\)</span>), and therefore governs overall sparsity and structure.</p>
-<p><code>bgms</code> provides three edge priors, each encoding a different type of structural assumption. They are selected with the <code>edge_prior</code> argument.</p>
+<p><code>bgms</code> provides three edge priors, each encoding a different type of structural assumption. They are selected by passing one of the <a href="../reference/priors.html#indicator-priors">indicator-prior constructors</a> — <a href="../reference/priors.html#bernoulli_prior"><code>bernoulli_prior()</code></a>, <a href="../reference/priors.html#beta_bernoulli_prior"><code>beta_bernoulli_prior()</code></a>, or <a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a> — to the <code>edge_prior</code> argument.</p>
 <section id="bernoulli-prior" class="level3">
 <h3 class="anchored" data-anchor-id="bernoulli-prior">Bernoulli prior</h3>
 <p>The simplest edge prior treats each edge independently: the indicator <span class="math inline">\(\gamma_{ij}\)</span> follows a Bernoulli distribution with inclusion probability <span class="math inline">\(\pi_{ij}\)</span>. Across all edges, this gives</p>
@@ -599,47 +599,47 @@ p(\mathcal{S}) = \frac{B(\alpha + \gamma_{++},\; \beta + k - \gamma_{++})}{B(\al
 <p>Beyond the spike-and-slab, <code>bgms</code> places priors on several nuisance parameters that are estimated but typically not of direct inferential interest:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 32%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 26%">
+<col style="width: 25%">
+<col style="width: 16%">
+<col style="width: 34%">
+<col style="width: 23%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Parameter</th>
 <th>Model</th>
-<th>Prior</th>
-<th>Control</th>
+<th>Default prior</th>
+<th>Argument</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>Category thresholds</td>
 <td>Ordinal MRF, Mixed MRF</td>
-<td>Beta-prime (via <span class="math inline">\(\exp(\mu)\)</span>)</td>
-<td><code>main_alpha</code>, <code>main_beta</code> (default 0.5)</td>
+<td>Beta-prime<span class="math inline">\((0.5, 0.5)\)</span> via <span class="math inline">\(\exp(\mu)\)</span></td>
+<td><code>threshold_prior</code></td>
 </tr>
 <tr class="even">
 <td>Blume-Capel parameters</td>
 <td>Ordinal MRF, Mixed MRF</td>
-<td>Beta-prime (via <span class="math inline">\(\exp(\mu)\)</span>)</td>
-<td><code>main_alpha</code>, <code>main_beta</code> (default 0.5)</td>
+<td>Beta-prime<span class="math inline">\((0.5, 0.5)\)</span> via <span class="math inline">\(\exp(\mu)\)</span></td>
+<td><code>threshold_prior</code></td>
 </tr>
 <tr class="odd">
 <td>Diagonal of precision matrix</td>
 <td>GGM, Mixed MRF</td>
 <td>Gamma<span class="math inline">\((1, 1)\)</span></td>
-<td>Fixed</td>
+<td><code>precision_scale_prior</code></td>
 </tr>
 <tr class="even">
 <td>Continuous variable means</td>
 <td>Mixed MRF</td>
 <td>Normal<span class="math inline">\((0, 1)\)</span></td>
-<td>Fixed</td>
+<td><code>means_prior</code></td>
 </tr>
 </tbody>
 </table>
-<p>For the category thresholds and Blume-Capel parameters, when the two shape parameters are equal the induced prior on <span class="math inline">\(\mu\)</span> is symmetric around zero. The GGM and mixed MRF priors are not user-configurable.</p>
+<p>Each row’s prior is set by passing the corresponding constructor — <a href="../reference/priors.html#beta_prime_prior"><code>beta_prime_prior()</code></a>, <a href="../reference/priors.html#gamma_prior"><code>gamma_prior()</code></a> or <a href="../reference/priors.html#exponential_prior"><code>exponential_prior()</code></a>, and <a href="../reference/priors.html#normal_prior"><code>normal_prior()</code></a> — to the listed argument. For the threshold and Blume-Capel priors, when the two beta-prime shape parameters are equal the induced prior on <span class="math inline">\(\mu\)</span> is symmetric around zero.</p>
 
 
 

@@ -487,12 +487,18 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Edge Priors</span></a>
+ <span class="menu-text">Priors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/parameter-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parameter Priors</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/edge-priors.html" class="sidebar-item-text sidebar-link">
@@ -599,9 +605,10 @@ ul.task-list li input[type="checkbox"] {
 <h3 class="anchored" data-anchor-id="sampler-validation-validate_sampler.r">Sampler validation (<code>validate_sampler.R</code>)</h3>
 <p><code>validate_sampler()</code> resolves the <code>update_method</code> argument into a concrete sampler type (<code>"nuts"</code> or <code>"adaptive_metropolis"</code>) and sets defaults for tuning parameters (<code>target_accept</code>, <code>nuts_max_depth</code>). It detects the number of available cores and resolves the progress display type.</p>
 </section>
-<section id="edge-prior-validation-validate_model.r" class="level3">
-<h3 class="anchored" data-anchor-id="edge-prior-validation-validate_model.r">Edge prior validation (<code>validate_model.R</code>)</h3>
-<p><code>validate_edge_prior()</code> and <code>validate_difference_prior()</code> map string names (<code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, <code>"Stochastic-Block"</code>) to validated prior configurations. For the SBM prior, the six hyperparameters (<code>beta_bernoulli_alpha</code>, <code>beta_bernoulli_beta</code>, <code>beta_bernoulli_alpha_between</code>, <code>beta_bernoulli_beta_between</code>, <code>dirichlet_alpha</code>, <code>lambda</code>) are checked and defaults applied.</p>
+<section id="prior-validation-rpriors.r-validate_model.r" class="level3">
+<h3 class="anchored" data-anchor-id="prior-validation-rpriors.r-validate_model.r">Prior validation (<code>R/priors.R</code>, <code>validate_model.R</code>)</h3>
+<p>Priors are user-facing S3 objects (<a href="../reference/priors.html#parameter-priors"><code>bgms_parameter_prior</code></a>, <a href="../reference/priors.html#scale-priors"><code>bgms_scale_prior</code></a>, <a href="../reference/priors.html#indicator-priors"><code>bgms_indicator_prior</code></a>). Each prior constructor (<code>cauchy_prior()</code>, <code>gamma_prior()</code>, <code>bernoulli_prior()</code>, …) validates its own hyperparameters at the call site, so by the time the spec is built every prior object is already self-consistent.</p>
+<p><code>unpack_parameter_prior()</code>, <code>unpack_scale_prior()</code>, <code>unpack_interaction_prior()</code>, <code>unpack_threshold_prior()</code>, and <code>unpack_indicator_prior()</code> flatten each prior object into the <code>(family, hyperparameters)</code> representation that the C++ bridge expects. <code>validate_edge_prior()</code> and <code>validate_difference_prior()</code> accept either a prior object or a legacy character string (<code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, <code>"Stochastic-Block"</code>); strings are forwarded to the matching constructor with a lifecycle warning.</p>
 </section>
 </section>
 <section id="spec-construction-bgm_spec.r" class="level2">

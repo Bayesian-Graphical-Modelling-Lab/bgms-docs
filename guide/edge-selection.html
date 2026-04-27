@@ -571,7 +571,7 @@ window.Quarto = {
 <p>For each edge <span class="math inline">\((i, j)\)</span>, an indicator variable <span class="math inline">\(\gamma_{ij} \in \{0, 1\}\)</span> governs whether the interaction is included in the model:</p>
 <ul>
 <li>When <span class="math inline">\(\gamma_{ij} = 0\)</span> (spike), the partial association <span class="math inline">\(\omega_{ij}\)</span> is set to exactly zero — the edge is absent.</li>
-<li>When <span class="math inline">\(\gamma_{ij} = 1\)</span> (slab), the partial association receives a Cauchy prior with scale <code>pairwise_scale</code> — the edge is present and the effect size is estimated.</li>
+<li>When <span class="math inline">\(\gamma_{ij} = 1\)</span> (slab), the partial association receives the slab prior set via <code>interaction_prior</code> (default <code>cauchy_prior(scale = 1)</code>) — the edge is present and the effect size is estimated.</li>
 </ul>
 <p>This is the <em>mixtures of mutually singular distributions</em> (MoMS) formulation of the spike-and-slab prior <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>. Because each edge is either exactly zero or follows a continuous distribution — with no overlap between the two components — the sampler moves between mutually exclusive subspaces rather than gradually shrinking toward zero. This discrete formulation provides model-selection consistency and avoids the need for transdimensional (reversible-jump) MCMC proposals.</p>
 <p>The prior probability of inclusion is controlled by the <code>edge_prior</code> argument. See <a href="../guide/prior-basics.html">Prior Basics</a> for the available options (Bernoulli, Beta-Bernoulli, Stochastic-Block).</p>
@@ -649,14 +649,14 @@ window.Quarto = {
 </section>
 <section id="prior-guidance-for-edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="prior-guidance-for-edge-selection">Prior guidance for edge selection</h2>
-<p>The default <code>inclusion_probability = 0.5</code> with a Bernoulli prior is a standard noninformative choice. Considerations for changing it:</p>
+<p>The default <code>edge_prior = bernoulli_prior(0.5)</code> is a standard noninformative choice. Considerations for changing it:</p>
 <ul>
-<li><strong>Sparse networks</strong>: lower the inclusion probability (e.g., 0.25) to encode a prior expectation that most edges are absent.</li>
+<li><strong>Sparse networks</strong>: lower the inclusion probability (e.g., <code>bernoulli_prior(0.25)</code>) to encode a prior expectation that most edges are absent.</li>
 <li><strong>Dense networks</strong>: raise the inclusion probability if prior knowledge suggests many edges.</li>
-<li><strong>Learned inclusion probability</strong>: use <code>edge_prior = "Beta-Bernoulli"</code> to let the data inform the overall sparsity level.</li>
-<li><strong>Structured sparsity</strong>: use <code>edge_prior = "Stochastic-Block"</code> when edges are expected to cluster (see <a href="../guide/clustering.html">Edge Clustering</a>).</li>
+<li><strong>Learned inclusion probability</strong>: use <code>edge_prior = beta_bernoulli_prior(1, 1)</code> to let the data inform the overall sparsity level.</li>
+<li><strong>Structured sparsity</strong>: use <code>edge_prior = sbm_prior(...)</code> when edges are expected to cluster (see <a href="../guide/clustering.html">Edge Clustering</a>).</li>
 </ul>
-<p>The <code>pairwise_scale</code> parameter controls the slab width. A wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small, because the prior spreads probability over a wide range. The default value is <code>1</code>.</p>
+<p>The <code>interaction_prior</code> controls the slab width. A wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small, because the prior spreads probability over a wide range. The default is <code>cauchy_prior(scale = 1)</code>.</p>
 
 
 

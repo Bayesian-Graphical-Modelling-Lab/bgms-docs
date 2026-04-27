@@ -615,9 +615,8 @@ window.Quarto = {
 <section id="prior-guidance" class="level2">
 <h2 class="anchored" data-anchor-id="prior-guidance">Prior guidance</h2>
 <ul>
-<li><strong><code>difference_scale = 1</code></strong> (default): scale of the Cauchy prior for the difference parameters. This matches the current default <code>pairwise_scale</code> (<code>1</code>) for baseline partial associations.</li>
-<li><strong><code>difference_prior = "Bernoulli"</code></strong> (default): each difference has a fixed prior inclusion probability. Set to <code>"Beta-Bernoulli"</code> to place a beta hyperprior on the inclusion probability, which provides automatic multiplicity correction — important when the number of potential group differences is large <span class="citation" data-cites="MarsmanEtAl_2025_ttest">(<a href="#ref-MarsmanEtAl_2025_ttest" role="doc-biblioref">Marsman et al., 2025</a>)</span>.</li>
-<li><strong><code>difference_probability = 0.5</code></strong> (default): prior probability that any given difference is nonzero. When <code>difference_probability = 0.5</code>, the prior odds equal one and the Bayes factor simplifies to the posterior odds.</li>
+<li><strong><code>difference_scale = 1</code></strong> (default): scale of the Cauchy slab on the difference parameters. This matches the default scale of the baseline <code>interaction_prior</code> (<code>cauchy_prior(scale = 1)</code>).</li>
+<li><strong><code>difference_prior = bernoulli_prior(0.5)</code></strong> (default): each difference has a fixed prior inclusion probability of 0.5. Pass <a href="../reference/priors.html#beta_bernoulli_prior"><code>beta_bernoulli_prior(1, 1)</code></a> to place a beta hyperprior on the inclusion probability instead — this provides automatic multiplicity correction, important when the number of potential group differences is large <span class="citation" data-cites="MarsmanEtAl_2025_ttest">(<a href="#ref-MarsmanEtAl_2025_ttest" role="doc-biblioref">Marsman et al., 2025</a>)</span>. Setting <code>bernoulli_prior(p)</code> with <code>p = 0.5</code> makes the prior odds equal to one, so the Bayes factor simplifies to the posterior odds.</li>
 </ul>
 
 

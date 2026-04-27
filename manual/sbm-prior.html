@@ -367,7 +367,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/edge-priors.html">Edge Priors</a></li><li class="breadcrumb-item"><a href="../manual/sbm-prior.html">Stochastic Block Model Prior</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/parameter-priors.html">Priors</a></li><li class="breadcrumb-item"><a href="../manual/sbm-prior.html">Stochastic Block Model Prior</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -533,12 +533,18 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Edge Priors</span></a>
+ <span class="menu-text">Priors</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/parameter-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parameter Priors</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/edge-priors.html" class="sidebar-item-text sidebar-link">
@@ -575,7 +581,7 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/edge-priors.html">Edge Priors</a></li><li class="breadcrumb-item"><a href="../manual/sbm-prior.html">Stochastic Block Model Prior</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/parameter-priors.html">Priors</a></li><li class="breadcrumb-item"><a href="../manual/sbm-prior.html">Stochastic Block Model Prior</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Stochastic Block Model Prior</h1>
 </div>
@@ -653,18 +659,18 @@ window.Quarto = {
 </section>
 <section id="hyperparameters" class="level2">
 <h2 class="anchored" data-anchor-id="hyperparameters">Hyperparameters</h2>
-<p>The six SBM hyperparameters are set via <code>bgm()</code>:</p>
+<p>The six SBM hyperparameters are set via the <a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a> constructor passed to <code>edge_prior</code>:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 29%">
-<col style="width: 29%">
-<col style="width: 24%">
-<col style="width: 16%">
+<col style="width: 22%">
+<col style="width: 48%">
+<col style="width: 18%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Parameter</th>
-<th>R argument</th>
+<th><code>sbm_prior()</code> argument</th>
 <th>Default</th>
 <th>Role</th>
 </tr>
@@ -672,25 +678,25 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(\alpha_w\)</span></td>
-<td><code>beta_bernoulli_alpha</code></td>
+<td><code>alpha</code></td>
 <td>1</td>
 <td>Beta shape for within-block inclusion</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\beta_w\)</span></td>
-<td><code>beta_bernoulli_beta</code></td>
+<td><code>beta</code></td>
 <td>1</td>
 <td>Beta shape for within-block inclusion</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\alpha_b\)</span></td>
-<td><code>beta_bernoulli_alpha_between</code></td>
+<td><code>alpha_between</code></td>
 <td>1</td>
 <td>Beta shape for between-block inclusion</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\beta_b\)</span></td>
-<td><code>beta_bernoulli_beta_between</code></td>
+<td><code>beta_between</code></td>
 <td>1</td>
 <td>Beta shape for between-block inclusion</td>
 </tr>
@@ -708,7 +714,7 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>All six hyperparameters are required when <code>edge_prior = "Stochastic-Block"</code> is selected. Validation enforces that all values are positive and finite.</p>
+<p>All six hyperparameters are required when <code>edge_prior = sbm_prior(...)</code> is selected. Validation enforces that all values are positive and finite.</p>
 </section>
 <section id="output" class="level2">
 <h2 class="anchored" data-anchor-id="output">Output</h2>

@@ -533,12 +533,18 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Edge Priors</span></a>
+ <span class="menu-text">Priors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/parameter-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parameter Priors</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/edge-priors.html" class="sidebar-item-text sidebar-link">
@@ -697,7 +703,7 @@ window.Quarto = {
 </section>
 <section id="proposal-selection" class="level3">
 <h3 class="anchored" data-anchor-id="proposal-selection">Proposal selection</h3>
-<p>Within a valid (non-U-turning) subtree, the proposal is selected via multinomial sampling weighted by the unnormalized target density. When two subtrees are merged, the proposed sample is drawn from the combined set with probability proportional to the number of valid states in each subtree.</p>
+<p><code>bgms</code> follows Stan’s <code>base_nuts.hpp</code> and uses multinomial candidate weighting throughout. Each leaf <span class="math inline">\(i\)</span> in a subtree carries weight <span class="math inline">\(\log w_i = H_0 - h_i\)</span>, the Hamiltonian offset from the initial state; weights are accumulated with log-sum-exp. Within a subtree (<code>build_tree</code>) sibling subtrees are combined symmetrically: accept the new subtree with probability <span class="math inline">\(\exp(w_{\text{new}} - \mathrm{LSE}(w_{\text{old}},\, w_{\text{new}}))\)</span>. At the top level (<code>nuts_step</code>) the new subtree is accepted via biased progressive sampling — accept with probability <span class="math inline">\(\min(1,\, w_{\text{subtree}} / w_{\text{trajectory}})\)</span> — so later subtrees are preferred on average. Divergence is detected directly by <span class="math inline">\(h - H_0 &gt; 1000\)</span>; no slice variable is used.</p>
 </section>
 </section>
 <section id="divergence-detection" class="level2">
@@ -711,12 +717,13 @@ window.Quarto = {
 </section>
 <section id="nuts-diagnostics" class="level2">
 <h2 class="anchored" data-anchor-id="nuts-diagnostics">NUTS diagnostics</h2>
-<p>Each NUTS step records four diagnostics:</p>
+<p>Each NUTS step records five diagnostics:</p>
 <ul>
 <li><strong>Tree depth</strong> — Number of doubling steps (0 to <code>max_tree_depth</code>). Consistently hitting the maximum indicates the step size may be too small.</li>
 <li><strong>Divergent</strong> — Whether a divergence was detected in any leapfrog step during tree building.</li>
 <li><strong>Non-reversible</strong> — Whether a constrained leapfrog step (RATTLE) failed the round-trip reversibility check. Only relevant for models that use the constrained integrator (e.g., edge selection with continuous variables). A non-reversible step terminates the NUTS tree, similar to a divergence.</li>
 <li><strong>Energy</strong> — The Hamiltonian <span class="math inline">\(H = -\log \pi(q) + \frac{1}{2} p^\top M^{-1} p\)</span>. Used to compute E-BFMI (energy Bayesian fraction of missing information).</li>
+<li><strong>Mean acceptance probability</strong> — The Metropolis acceptance probability averaged over every leapfrog step in the trajectory, paralleling Stan’s <code>accept_stat__</code>. Surfaced as <code>fit$nuts_diag$accept_prob</code> (chains × iterations) with a per-chain mean in the diagnostic summary; also drives dual-averaging step-size adaptation.</li>
 </ul>
 <p>These diagnostics are collected per chain and accessible via <code>extract_nuts_diagnostics()</code> in R.</p>
 

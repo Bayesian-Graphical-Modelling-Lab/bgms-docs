@@ -69,7 +69,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../manual/sbm-prior.html" rel="next">
-<link href="../manual/variable-helpers.html" rel="prev">
+<link href="../manual/parameter-priors.html" rel="prev">
 <link href="../bgms_sticker.svg" rel="icon" type="image/svg+xml">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -382,7 +382,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/edge-priors.html">Edge Priors</a></li><li class="breadcrumb-item"><a href="../manual/edge-priors.html">Edge Priors</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/parameter-priors.html">Priors</a></li><li class="breadcrumb-item"><a href="../manual/edge-priors.html">Edge Priors</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -548,12 +548,18 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Edge Priors</span></a>
+ <span class="menu-text">Priors</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/parameter-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parameter Priors</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/edge-priors.html" class="sidebar-item-text sidebar-link active">
@@ -590,7 +596,7 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/edge-priors.html">Edge Priors</a></li><li class="breadcrumb-item"><a href="../manual/edge-priors.html">Edge Priors</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../manual/parameter-priors.html">Priors</a></li><li class="breadcrumb-item"><a href="../manual/edge-priors.html">Edge Priors</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Edge Priors</h1>
 </div>
@@ -654,43 +660,43 @@ window.Quarto = {
 </section>
 <section id="prior-selection-in-r" class="level2">
 <h2 class="anchored" data-anchor-id="prior-selection-in-r">Prior selection in R</h2>
-<p>The <code>edge_prior</code> argument in <code>bgm()</code> maps to these classes:</p>
+<p>The <code>edge_prior</code> argument in <code>bgm()</code> takes a <a href="../reference/priors.html"><code>bgms_indicator_prior</code></a> object. The <code>family</code> field of that object selects the C++ class:</p>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 30%">
-<col style="width: 36%">
-<col style="width: 33%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>R value</th>
+<th>R constructor</th>
+<th><code>family</code></th>
 <th>C++ class</th>
 <th>Behavior</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td><a href="../reference/priors.html#bernoulli_prior"><code>bernoulli_prior()</code></a></td>
 <td><code>"Bernoulli"</code></td>
 <td><code>BernoulliEdgePrior</code></td>
 <td>Fixed inclusion probabilities</td>
 </tr>
 <tr class="even">
+<td><a href="../reference/priors.html#beta_bernoulli_prior"><code>beta_bernoulli_prior()</code></a></td>
 <td><code>"Beta-Bernoulli"</code></td>
 <td><code>BetaBernoulliEdgePrior</code></td>
 <td>Learns shared inclusion rate</td>
 </tr>
 <tr class="odd">
+<td><a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a></td>
 <td><code>"Stochastic-Block"</code></td>
 <td><code>StochasticBlockEdgePrior</code></td>
 <td>Cluster-structured inclusion</td>
 </tr>
 </tbody>
 </table>
+<p>Legacy character strings (<code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, <code>"Stochastic-Block"</code>) are still accepted on the R side but emit a lifecycle warning and are forwarded to the equivalent constructor.</p>
 <p>When <code>edge_selection = FALSE</code>, no edge prior is instantiated and all edges remain included throughout sampling.</p>
 </section>
 <section id="factory-dispatch" class="level2">
 <h2 class="anchored" data-anchor-id="factory-dispatch">Factory dispatch</h2>
-<p>The <code>create_edge_prior()</code> factory in <code>edge_prior.h</code> maps an <code>EdgePrior</code> enum value to the concrete class. The enum is produced from the R string by <code>edge_prior_from_string()</code> in <code>common_helpers.h</code>.</p>
+<p>The <code>create_edge_prior()</code> factory in <code>edge_prior.h</code> maps an <code>EdgePrior</code> enum value to the concrete class. The enum is produced from the prior object’s <code>family</code> field by <code>edge_prior_from_string()</code> in <code>common_helpers.h</code>.</p>
 </section>
 <section id="execution-order" class="level2">
 <h2 class="anchored" data-anchor-id="execution-order">Execution order</h2>
@@ -1168,8 +1174,8 @@ document.querySelectorAll("[data-cite-picker]").forEach(picker => {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../manual/variable-helpers.html" class="pagination-link" aria-label="Fast Computation">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Fast Computation</span>
+      <a href="../manual/parameter-priors.html" class="pagination-link" aria-label="Parameter Priors">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Parameter Priors</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

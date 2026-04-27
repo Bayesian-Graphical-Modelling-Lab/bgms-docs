@@ -483,12 +483,18 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Edge Priors</span></a>
+ <span class="menu-text">Priors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../manual/parameter-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parameter Priors</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../manual/edge-priors.html" class="sidebar-item-text sidebar-link">
@@ -587,10 +593,11 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="../manual/variable-helpers.html">Fast Computation</a> — Recursive accumulation of MRF category probabilities that avoids per-category <code>exp()</code> calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.</li>
 </ul>
 </section>
-<section id="edge-priors" class="level2">
-<h2 class="anchored" data-anchor-id="edge-priors">Edge Priors</h2>
-<p>Prior distributions over graph structure for edge selection.</p>
+<section id="priors" class="level2">
+<h2 class="anchored" data-anchor-id="priors">Priors</h2>
+<p>Prior distributions on model parameters and graph structure.</p>
 <ul>
+<li><a href="../manual/parameter-priors.html">Parameter Priors</a> — <code>BaseParameterPrior</code> polymorphic hierarchy for real-valued parameters (Cauchy, Normal, beta-prime, Gamma scale). Polymorphic dispatch replaces hard-coded prior calls in the model code.</li>
 <li><a href="../manual/edge-priors.html">Edge Priors</a> — Overview of the edge prior framework: Bernoulli (fixed), Beta-Bernoulli (learned), and Stochastic Block Model</li>
 <li><a href="../manual/sbm-prior.html">SBM Prior</a> — Mixture-of-finite-mixtures SBM formulation, collapsed Gibbs updates, cluster allocation sampling</li>
 </ul>

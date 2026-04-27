@@ -667,7 +667,7 @@ See the `easybgm` package for other summary and plotting tools.</code></pre>
 <p><strong>Category thresholds</strong> report the posterior estimates of the ordinal threshold parameters. These define the boundary between adjacent response categories on the log-odds scale. Negative values indicate that higher categories are less probable.</p>
 <p><strong>Residual variances</strong> report the posterior estimates of the residual variance <span class="math inline">\(1 / \Theta_{ii}\)</span> for each continuous variable, where <span class="math inline">\(\Theta_{ii}\)</span> is the corresponding diagonal element of the precision matrix. Use <code>extract_precision()</code> to obtain the full precision matrix.</p>
 <p><strong>Pairwise interactions</strong> report the conditional association between each pair of variables, controlling for all others. These are the edge weights in the graphical model. A value of zero means the two variables are conditionally independent. For mixed models, these span three blocks: discrete–discrete, continuous–continuous, and cross-type edges. Use <code>extract_partial_correlations()</code> for standardized partial correlations (continuous variables) and <code>extract_log_odds()</code> for log-odds ratios (discrete variables).</p>
-<p><strong>Inclusion indicators</strong> report the posterior inclusion probability of each edge. An inclusion probability near 1 indicates strong evidence for the edge; near 0 indicates strong evidence against it. Values around 0.5 are inconclusive. The transition counts (<code>n0-&gt;0</code>, <code>n0-&gt;1</code>, <code>n1-&gt;0</code>, <code>n1-&gt;1</code>) show how often the edge indicator switched between excluded (0) and included (1) states during sampling. Edges with very few transitions (fewer than 5) have unreliable mixture ESS estimates; bgms suppresses these automatically.</p>
+<p><strong>Inclusion indicators</strong> report the posterior inclusion probability of each edge. An inclusion probability near 1 indicates strong evidence for the edge; near 0 indicates strong evidence against it. Values around 0.5 are inconclusive. The transition counts (<code>n0-&gt;0</code>, <code>n0-&gt;1</code>, <code>n1-&gt;0</code>, <code>n1-&gt;1</code>) show how often the edge indicator switched between excluded (0) and included (1) states during sampling. Edges with very few transitions (fewer than 5) have unreliable mixture ESS estimates; <code>bgms</code> suppresses these automatically.</p>
 </section>
 <section id="summary-columns" class="level3">
 <h3 class="anchored" data-anchor-id="summary-columns">Summary columns</h3>
@@ -755,8 +755,7 @@ intrusion-physior 0.9997014</code></pre>
 <pre><code>List of 3
  $ main     : num [1:17, 1:4] 0.4568 -0.8175 -0.3684 0.0698 -0.6866 ...
   ..- attr(*, "dimnames")=List of 2
- $ pairwise : num [1:17, 1:17] 0 0.3686 0.16547 0.06249 0.00694 ...
-  ..- attr(*, "dimnames")=List of 2
+ $ pairwise : NULL
  $ indicator: num [1:17, 1:17] 0 1 1 0.599 0.106 ...
   ..- attr(*, "dimnames")=List of 2</code></pre>
 </div>
@@ -880,7 +879,7 @@ upset      0.06981198 -2.197320 -5.173231 -10.07425</code></pre>
 </tr>
 <tr class="even">
 <td><code>extract_sbm()</code></td>
-<td>SBM cluster assignments and co-clustering matrix (when <code>edge_prior = "Stochastic-Block"</code>)</td>
+<td>SBM cluster assignments and co-clustering matrix (when <code>edge_prior = sbm_prior(...)</code>)</td>
 </tr>
 <tr class="odd">
 <td><code>extract_arguments()</code></td>
@@ -904,7 +903,7 @@ upset      0.06981198 -2.197320 -5.173231 -10.07425</code></pre>
  $ summary     :List of 4</code></pre>
 </div>
 </div>
-<p>The <code>summary</code> field contains per-chain summaries of tree depth, divergences, non-reversible steps, and energy. The <code>warmup_check</code> field reports whether warmup equilibration was sufficient. These are described in detail in <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>. If these diagnostics remain problematic after tuning, refit with <code>update_method = "adaptive-metropolis"</code>.</p>
+<p>The <code>summary</code> field contains per-chain summaries of tree depth, divergences, non-reversible steps, energy, and the mean Metropolis acceptance probability (Stan’s <code>accept_stat__</code>, also stored per-iteration as <code>fit$nuts_diag$accept_prob</code>). The <code>warmup_check</code> field reports whether warmup equilibration was sufficient. These are described in detail in <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a>. If these diagnostics remain problematic after tuning, refit with <code>update_method = "adaptive-metropolis"</code>.</p>
 </section>
 <section id="output-from-bgmcompare" class="level2">
 <h2 class="anchored" data-anchor-id="output-from-bgmcompare">Output from <a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a></h2>
