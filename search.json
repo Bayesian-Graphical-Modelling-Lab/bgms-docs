@@ -1,5 +1,89 @@
 [
   {
+    "objectID": "reference/sample-precision-prior.html",
+    "href": "reference/sample-precision-prior.html",
+    "title": "sample_precision_prior()",
+    "section": "",
+    "text": "Draws precision matrices \\(K\\) from the prior of a Gaussian graphical model using the same constrained NUTS sampler that drives bgm() for continuous data, with the likelihood omitted (\\(n = 0\\), \\(S = 0\\)). The chain therefore targets the prior alone — useful for simulation-based calibration (SBC) and for visualizing the prior’s implied distribution over partial correlations.",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "sample_precision_prior()"
+    ]
+  },
+  {
+    "objectID": "reference/sample-precision-prior.html#description",
+    "href": "reference/sample-precision-prior.html#description",
+    "title": "sample_precision_prior()",
+    "section": "Description",
+    "text": "Description\nOff-diagonals are placed on the association scale \\(K_{yy,ij} = -K_{ij}/2\\) and assigned the supplied interaction_prior. A normal_prior(scale = s) therefore constrains \\(K_{yy}\\) with standard deviation \\(s\\), equivalent to a \\(\\mathrm{Normal}(0, 2s)\\) prior on \\(K_{ij}\\) itself. The diagonals \\(K_{ii}\\) are drawn from the supplied precision_scale_prior. When edge_indicators is supplied, off-diagonals at excluded positions are constrained to zero throughout the chain via RATTLE projection.",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "sample_precision_prior()"
+    ]
+  },
+  {
+    "objectID": "reference/sample-precision-prior.html#usage",
+    "href": "reference/sample-precision-prior.html#usage",
+    "title": "sample_precision_prior()",
+    "section": "Usage",
+    "text": "Usage\nsample_precision_prior(\n  p,\n  n_samples,\n  n_warmup              = 1000L,\n  interaction_prior     = cauchy_prior(scale = 2.5),\n  precision_scale_prior = gamma_prior(shape = 1, rate = 1),\n  step_size             = 0.1,\n  max_depth             = 10L,\n  seed                  = 1L,\n  verbose               = TRUE,\n  edge_indicators       = NULL\n)",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "sample_precision_prior()"
+    ]
+  },
+  {
+    "objectID": "reference/sample-precision-prior.html#arguments",
+    "href": "reference/sample-precision-prior.html#arguments",
+    "title": "sample_precision_prior()",
+    "section": "Arguments",
+    "text": "Arguments\n\n\n\nArgument\nDescription\n\n\n\n\np\nInteger. Dimension of the precision matrix (\\(p \\ge 2\\)).\n\n\nn_samples\nInteger. Number of post-warmup draws to keep.\n\n\nn_warmup\nInteger. NUTS warmup iterations. Default: 1000.\n\n\ninteraction_prior\nA bgms_parameter_prior for the off-diagonal entries. Allowed: cauchy_prior(), normal_prior(). beta_prime_prior() is not supported here. Default: cauchy_prior(scale = 2.5).\n\n\nprecision_scale_prior\nA bgms_scale_prior for the diagonal entries of \\(K\\). Allowed: gamma_prior(), exponential_prior(). Default: gamma_prior(1, 1).\n\n\nstep_size\nPositive numeric. Initial NUTS step size used to seed dual-averaging adaptation. Default: 0.1.\n\n\nmax_depth\nInteger. Maximum NUTS tree depth. Default: 10.\n\n\nseed\nInteger. RNG seed for the chain. Default: 1.\n\n\nverbose\nLogical. If TRUE (default), print a progress bar.\n\n\nedge_indicators\nOptional integer \\(p \\times p\\) matrix with 1 = edge included, 0 = excluded. Must be symmetric with 1s on the diagonal. Default: full graph (all edges included).",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "sample_precision_prior()"
+    ]
+  },
+  {
+    "objectID": "reference/sample-precision-prior.html#value",
+    "href": "reference/sample-precision-prior.html#value",
+    "title": "sample_precision_prior()",
+    "section": "Value",
+    "text": "Value\nA list with components:\n\n\n\n\n\n\n\nComponent\nDescription\n\n\n\n\nK_offdiag\nNumeric matrix n_samples \\(\\times\\) \\(p(p-1)/2\\) of upper-triangle off-diagonal entries of \\(K\\) for each draw, in column-major order \\((K_{12}, K_{13}, K_{23}, K_{14}, \\ldots)\\). Excluded edges are returned as 0.\n\n\nK_diag\nNumeric matrix n_samples \\(\\times\\) \\(p\\) of diagonal entries \\(K_{11}, \\ldots, K_{pp}\\).\n\n\noffdiag_names\nCharacter vector of length \\(p(p-1)/2\\) naming the columns of K_offdiag (e.g. \"K_1_2\").\n\n\ndiag_names\nCharacter vector of length \\(p\\) naming the columns of K_diag.\n\n\nstep_size\nThe initial NUTS step size used.\n\n\nedge_indicators\nThe integer edge-indicator matrix used (full graph if not supplied).",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "sample_precision_prior()"
+    ]
+  },
+  {
+    "objectID": "reference/sample-precision-prior.html#examples",
+    "href": "reference/sample-precision-prior.html#examples",
+    "title": "sample_precision_prior()",
+    "section": "Examples",
+    "text": "Examples\n# Default Cauchy(0, 2.5) off-diagonal, Gamma(1, 1) diagonal, p = 4.\ndraws = sample_precision_prior(\n  p = 4, n_samples = 200, n_warmup = 200,\n  verbose = FALSE\n)\ndim(draws$K_offdiag) # 200 x 6\ncolnames(draws$K_offdiag) = draws$offdiag_names\nhead(draws$K_offdiag)\n\n# Sparser graph: drop the (1, 4) edge.\nE = matrix(1L, 4, 4)\nE[1, 4] = E[4, 1] = 0L\ndraws = sample_precision_prior(\n  p = 4, n_samples = 200, n_warmup = 200,\n  edge_indicators = E, verbose = FALSE\n)\ncolnames(draws$K_offdiag) = draws$offdiag_names\nall(draws$K_offdiag[, \"K_1_4\"] == 0) # TRUE",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "sample_precision_prior()"
+    ]
+  },
+  {
+    "objectID": "reference/sample-precision-prior.html#see-also",
+    "href": "reference/sample-precision-prior.html#see-also",
+    "title": "sample_precision_prior()",
+    "section": "See also",
+    "text": "See also\ncauchy_prior(), normal_prior(), gamma_prior(), exponential_prior(), bgm().",
+    "crumbs": [
+      "Reference",
+      "Core Functions",
+      "sample_precision_prior()"
+    ]
+  },
+  {
     "objectID": "reference/methods.html",
     "href": "reference/methods.html",
     "title": "Methods",
@@ -300,7 +384,7 @@
     "href": "reference/bgmCompare.html#usage",
     "title": "bgmCompare()",
     "section": "Usage",
-    "text": "Usage\nbgmCompare(\n  x,\n  y,\n  group_indicator,\n  difference_selection = TRUE,\n  main_difference_selection = FALSE,\n  variable_type = \"ordinal\",\n  baseline_category,\n  difference_scale = 1,\n  difference_prior = c(\"Bernoulli\", \"Beta-Bernoulli\"),\n  difference_probability = 0.5,\n  beta_bernoulli_alpha = 1,\n  beta_bernoulli_beta = 1,\n  pairwise_scale = 1,\n  main_alpha = 0.5,\n  main_beta = 0.5,\n  iter = 1000,\n  warmup = 1000,\n  na_action = c(\"listwise\", \"impute\"),\n  update_method = c(\"nuts\", \"adaptive-metropolis\"),\n  target_accept,\n  nuts_max_depth = 10,\n  learn_mass_matrix = TRUE,\n  chains = 4,\n  cores = parallel::detectCores(),\n  display_progress = c(\"per-chain\", \"total\", \"none\"),\n  seed = NULL,\n  standardize = FALSE,\n  verbose = getOption(\"bgms.verbose\", TRUE)\n)",
+    "text": "Usage\nbgmCompare(\n  x,\n  y,\n  group_indicator,\n  difference_selection = TRUE,\n  main_difference_selection = FALSE,\n  variable_type = \"ordinal\",\n  baseline_category,\n  difference_scale = 1,\n  difference_prior = bernoulli_prior(0.5),\n  interaction_prior = cauchy_prior(scale = 1),\n  threshold_prior = beta_prime_prior(alpha = 0.5, beta = 0.5),\n  iter = 1000,\n  warmup = 1000,\n  na_action = c(\"listwise\", \"impute\"),\n  update_method = c(\"nuts\", \"adaptive-metropolis\"),\n  target_accept,\n  nuts_max_depth = 10,\n  learn_mass_matrix = TRUE,\n  chains = 4,\n  cores = parallel::detectCores(),\n  display_progress = c(\"per-chain\", \"total\", \"none\"),\n  seed = NULL,\n  standardize = FALSE,\n  verbose = getOption(\"bgms.verbose\", TRUE)\n)",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -312,7 +396,7 @@
     "href": "reference/bgmCompare.html#arguments",
     "title": "bgmCompare()",
     "section": "Arguments",
-    "text": "Arguments\n\nData and groups\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix of binary and ordinal responses for Group 1. Variables should be coded as nonnegative integers starting at 0. For ordinal variables, unused categories are collapsed; for Blume–Capel variables, all categories are retained.\n\n\ny\nOptional data frame or matrix for Group 2 (two-group designs). Must have the same variables (columns) as x.\n\n\ngroup_indicator\nOptional integer vector of group memberships for rows of x (multi-group designs). Ignored if y is supplied.\n\n\nvariable_type\nCharacter vector specifying the type of each variable: \"ordinal\" (default) or \"blume-capel\".\n\n\nbaseline_category\nInteger or vector giving the baseline category for Blume–Capel variables.\n\n\nna_action\nHow to handle missing data: \"listwise\" (drop rows) or \"impute\" (impute within Gibbs sampler, propagating uncertainty). Default: \"listwise\". See Missing Data for details.\n\n\n\n\n\nDifference selection\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\ndifference_selection\nLogical. If TRUE, spike-and-slab priors are applied to difference parameters. Default: TRUE.\n\n\nmain_difference_selection\nLogical. If TRUE, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is FALSE. Only used when difference_selection = TRUE.\n\n\ndifference_scale\nScale of the Cauchy prior for difference parameters. Default: 1.\n\n\ndifference_prior\nPrior for difference inclusion: \"Bernoulli\" or \"Beta-Bernoulli\". Default: \"Bernoulli\".\n\n\ndifference_probability\nPrior inclusion probability for differences (Bernoulli prior). Default: 0.5.\n\n\nbeta_bernoulli_alpha, beta_bernoulli_beta\nShape parameters of the Beta prior for inclusion probabilities in the Beta–Bernoulli model. Defaults: 1.\n\n\n\n\n\nPrior specification\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\npairwise_scale\nScale of the Cauchy prior for baseline partial associations. Default: 1.\n\n\nmain_alpha, main_beta\nShape parameters of the beta-prime prior for baseline threshold parameters. Defaults: 0.5.\n\n\nstandardize\nLogical. If TRUE, the Cauchy prior scale for each partial association (both baseline and difference) is adjusted based on the range of response scores. Default: FALSE.\n\n\n\n\n\nSampler settings\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\niter\nNumber of post-warmup iterations per chain. Default: 1000.\n\n\nwarmup\nNumber of warmup iterations before sampling. Default: 1000.\n\n\nupdate_method\nSampling algorithm: \"nuts\" or \"adaptive-metropolis\". Default: \"nuts\".\n\n\ntarget_accept\nTarget acceptance rate. Defaults: 0.44 (Metropolis), 0.80 (NUTS).\n\n\nnuts_max_depth\nMaximum tree depth for NUTS. Default: 10.\n\n\nlearn_mass_matrix\nLogical. If TRUE, adapts a diagonal mass matrix during warmup (NUTS only). Default: TRUE.\n\n\nchains\nNumber of parallel chains. Default: 4.\n\n\ncores\nNumber of CPU cores. Default: parallel::detectCores().\n\n\ndisplay_progress\nProgress reporting: \"per-chain\", \"total\", or \"none\". Default: \"per-chain\".\n\n\nseed\nOptional integer seed for reproducibility.\n\n\nverbose\nLogical. Print informational messages during data processing. Default: getOption(\"bgms.verbose\", TRUE).",
+    "text": "Arguments\n\nData and groups\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix of binary and ordinal responses for Group 1. Variables should be coded as nonnegative integers starting at 0. For ordinal variables, unused categories are collapsed; for Blume–Capel variables, all categories are retained.\n\n\ny\nOptional data frame or matrix for Group 2 (two-group designs). Must have the same variables (columns) as x.\n\n\ngroup_indicator\nOptional integer vector of group memberships for rows of x (multi-group designs). Ignored if y is supplied.\n\n\nvariable_type\nCharacter vector specifying the type of each variable: \"ordinal\" (default) or \"blume-capel\".\n\n\nbaseline_category\nInteger or vector giving the baseline category for Blume–Capel variables.\n\n\nna_action\nHow to handle missing data: \"listwise\" (drop rows) or \"impute\" (impute within Gibbs sampler, propagating uncertainty). Default: \"listwise\". See Missing Data for details.\n\n\n\n\n\nDifference selection\n\n\n\nArgument\nDescription\n\n\n\n\ndifference_selection\nLogical. If TRUE, spike-and-slab priors are applied to difference parameters. Default: TRUE.\n\n\nmain_difference_selection\nLogical. If TRUE, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is FALSE. Only used when difference_selection = TRUE.\n\n\ndifference_scale\nScale of the Cauchy prior for difference parameters. Default: 1.\n\n\ndifference_prior\nA bgms_indicator_prior object specifying the prior on difference inclusion. Allowed: bernoulli_prior() (default) or beta_bernoulli_prior(). Legacy character strings (\"Bernoulli\", \"Beta-Bernoulli\") and the scalar difference_probability / beta_bernoulli_alpha / beta_bernoulli_beta arguments are accepted but deprecated. Default: bernoulli_prior(0.5).\n\n\n\n\n\nPrior specification\nPriors on baseline parameters are specified via prior-object constructors (see Prior Constructors). The legacy scalar arguments listed under the table are deprecated as of bgms 0.3.0 — they still work but emit a lifecycle warning.\n\n\n\nArgument\nDescription\n\n\n\n\ninteraction_prior\nA bgms_parameter_prior object for baseline pairwise interactions. Allowed: cauchy_prior() (default), normal_prior(). Default: cauchy_prior(scale = 1).\n\n\nthreshold_prior\nA bgms_parameter_prior object for baseline threshold parameters. Allowed: beta_prime_prior() (default), normal_prior(). Default: beta_prime_prior(alpha = 0.5, beta = 0.5).\n\n\nstandardize\nLogical. If TRUE, the prior scale for each partial association (both baseline and difference) is adjusted based on the range of response scores. See bgm() for the adjustment formula. Default: FALSE.\n\n\n\n\n\n\n\n\n\nNoteDeprecated scalar prior arguments\n\n\n\n\n\n\n\n\n\n\nDeprecated\nReplacement\n\n\n\n\npairwise_scale = s\ninteraction_prior = cauchy_prior(scale = s)\n\n\nmain_alpha = a, main_beta = b\nthreshold_prior = beta_prime_prior(alpha = a, beta = b)\n\n\ndifference_probability = p\ndifference_prior = bernoulli_prior(p)\n\n\nbeta_bernoulli_alpha = a, beta_bernoulli_beta = b\ndifference_prior = beta_bernoulli_prior(a, b)\n\n\n\n\n\n\n\nSampler settings\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\niter\nNumber of post-warmup iterations per chain. Default: 1000.\n\n\nwarmup\nNumber of warmup iterations before sampling. Default: 1000.\n\n\nupdate_method\nSampling algorithm: \"nuts\" or \"adaptive-metropolis\". Default: \"nuts\".\n\n\ntarget_accept\nTarget acceptance rate. Defaults: 0.44 (Metropolis), 0.80 (NUTS).\n\n\nnuts_max_depth\nMaximum tree depth for NUTS. Default: 10.\n\n\nlearn_mass_matrix\nLogical. If TRUE, adapts a diagonal mass matrix during warmup (NUTS only). Default: TRUE.\n\n\nchains\nNumber of parallel chains. Default: 4.\n\n\ncores\nNumber of CPU cores. Default: parallel::detectCores().\n\n\ndisplay_progress\nProgress reporting: \"per-chain\", \"total\", or \"none\". Default: \"per-chain\".\n\n\nseed\nOptional integer seed for reproducibility.\n\n\nverbose\nLogical. Print informational messages during data processing. Default: getOption(\"bgms.verbose\", TRUE).",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -3716,7 +3800,7 @@
     "href": "reference/bgm.html#usage",
     "title": "bgm()",
     "section": "Usage",
-    "text": "Usage\nbgm(\n  x,\n  variable_type = \"ordinal\",\n  baseline_category,\n  iter = 1000,\n  warmup = 1000,\n  pairwise_scale = 1,\n  main_alpha = 0.5,\n  main_beta = 0.5,\n  edge_selection = TRUE,\n  edge_prior = c(\"Bernoulli\", \"Beta-Bernoulli\", \"Stochastic-Block\"),\n  inclusion_probability = 0.5,\n  beta_bernoulli_alpha = 1,\n  beta_bernoulli_beta = 1,\n  beta_bernoulli_alpha_between = 1,\n  beta_bernoulli_beta_between = 1,\n  dirichlet_alpha = 1,\n  lambda = 1,\n  na_action = c(\"listwise\", \"impute\"),\n  update_method = c(\"nuts\", \"adaptive-metropolis\"),\n  target_accept,\n  nuts_max_depth = 10,\n  learn_mass_matrix = TRUE,\n  chains = 4,\n  cores = parallel::detectCores(),\n  display_progress = c(\"per-chain\", \"total\", \"none\"),\n  seed = NULL,\n  standardize = FALSE,\n  verbose = getOption(\"bgms.verbose\", TRUE)\n)",
+    "text": "Usage\nbgm(\n  x,\n  variable_type = \"ordinal\",\n  baseline_category,\n  iter = 1000,\n  warmup = 1000,\n  interaction_prior = cauchy_prior(scale = 1),\n  threshold_prior = beta_prime_prior(alpha = 0.5, beta = 0.5),\n  means_prior = normal_prior(scale = 1),\n  precision_scale_prior = gamma_prior(shape = 1, rate = 1),\n  edge_selection = TRUE,\n  edge_prior = bernoulli_prior(0.5),\n  na_action = c(\"listwise\", \"impute\"),\n  update_method = c(\"nuts\", \"adaptive-metropolis\"),\n  target_accept,\n  nuts_max_depth = 10,\n  learn_mass_matrix = TRUE,\n  chains = 4,\n  cores = parallel::detectCores(),\n  display_progress = c(\"per-chain\", \"total\", \"none\"),\n  seed = NULL,\n  standardize = FALSE,\n  verbose = getOption(\"bgms.verbose\", TRUE)\n)",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -3728,7 +3812,7 @@
     "href": "reference/bgm.html#arguments",
     "title": "bgm()",
     "section": "Arguments",
-    "text": "Arguments\n\nData\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix with n rows and p columns. Columns may contain binary, ordinal, or continuous variables (see variable_type). Discrete variables are automatically recoded to non-negative integers (0, 1, ..., m); for regular ordinal variables, unobserved categories are collapsed, while Blume–Capel variables retain all categories. Continuous variables are column-centered internally so that the GGM likelihood is formulated with a zero-mean assumption.\n\n\nvariable_type\nCharacter or character vector. Specifies the type of each variable in x. Allowed values: \"ordinal\", \"blume-capel\", or \"continuous\". A single string applies to all variables. A per-variable vector that mixes discrete (\"ordinal\" / \"blume-capel\") and \"continuous\" types fits a mixed MRF. Binary variables are automatically treated as \"ordinal\". Default: \"ordinal\".\n\n\nbaseline_category\nInteger or vector. Baseline category used in Blume–Capel variables. Can be a single integer (applied to all) or a vector of length p. Required if at least one variable is of type \"blume-capel\".\n\n\nna_action\nCharacter. Specifies missing data handling. Either \"listwise\" (drop rows with missing values) or \"impute\" (impute within Gibbs sampler, propagating uncertainty). Default: \"listwise\". See Missing Data for details.\n\n\n\n\n\nPrior specification\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\npairwise_scale\nDouble. Scale of the Cauchy prior for pairwise interaction parameters. Default: 1.\n\n\nmain_alpha, main_beta\nDouble. Shape parameters of the beta-prime prior for threshold parameters. Must be positive. If equal, the prior is symmetric. Defaults: main_alpha = 0.5 and main_beta = 0.5.\n\n\nedge_selection\nLogical. Whether to perform Bayesian edge selection. If FALSE, the model estimates all edges. Default: TRUE.\n\n\nedge_prior\nCharacter. Specifies the prior for edge inclusion. Options: \"Bernoulli\", \"Beta-Bernoulli\", or \"Stochastic-Block\". Default: \"Bernoulli\".\n\n\ninclusion_probability\nNumeric scalar. Prior inclusion probability of each edge (used with the Bernoulli prior). Default: 0.5.\n\n\nbeta_bernoulli_alpha, beta_bernoulli_beta\nDouble. Shape parameters for the beta distribution in the Beta–Bernoulli and Stochastic-Block priors. Must be positive. For the Stochastic-Block prior these are the shape parameters for the within-cluster edge inclusion probabilities. Defaults: beta_bernoulli_alpha = 1 and beta_bernoulli_beta = 1.\n\n\nbeta_bernoulli_alpha_between, beta_bernoulli_beta_between\nDouble. Shape parameters for the between-cluster edge inclusion probabilities in the Stochastic-Block prior. Must be positive. Defaults: beta_bernoulli_alpha_between = 1 and beta_bernoulli_beta_between = 1.\n\n\ndirichlet_alpha\nDouble. Concentration parameter of the Dirichlet prior on block assignments (used with the Stochastic Block model). Default: 1.\n\n\nlambda\nDouble. Rate of the zero-truncated Poisson prior on the number of clusters in the Stochastic Block Model. Default: 1.\n\n\nstandardize\nLogical. If TRUE, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products \\((x_i \\cdot x_j)\\), which typically correspond to smaller interaction effects \\((\\omega_{ij})\\). Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores \\(0, 1, \\ldots, m\\). The adjusted scale for the interaction between variables \\(i\\) and \\(j\\) is pairwise_scale * m_i * m_j, so that pairwise_scale itself applies to the unit interval case (binary variables where \\(m_i = m_j = 1\\)). For Blume-Capel variables with reference category \\(b\\), scores are centered as \\(-b, \\ldots, m-b\\), and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints \\((0, m)\\) and Blume-Capel variables use centered score endpoints \\((-b, m-b)\\). Default: FALSE.\n\n\n\n\n\nSampler settings\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\niter\nInteger. Number of post-warmup iterations (per chain). Default: 1e3.\n\n\nwarmup\nInteger. Number of warmup iterations before collecting samples. A minimum of 1000 iterations is enforced, with a warning if a smaller value is requested. Default: 1e3.\n\n\nupdate_method\nCharacter. Specifies how the MCMC sampler updates the model parameters: \"adaptive-metropolis\" (componentwise adaptive Metropolis–Hastings with Robbins–Monro proposal adaptation) or \"nuts\" (the No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: \"nuts\".\n\n\ntarget_accept\nNumeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: 0.44 for adaptive Metropolis and 0.80 for NUTS.\n\n\nnuts_max_depth\nInteger. Maximum tree depth in NUTS. Must be positive. Default: 10.\n\n\nlearn_mass_matrix\nLogical. If TRUE, adapt a diagonal mass matrix during warmup (NUTS only). If FALSE, use the identity matrix. Default: TRUE.\n\n\nchains\nInteger. Number of parallel chains to run. Default: 4.\n\n\ncores\nInteger. Number of CPU cores for parallel execution. Default: parallel::detectCores().\n\n\ndisplay_progress\nCharacter. Controls progress reporting during sampling. Options: \"per-chain\" (separate bar per chain), \"total\" (single combined bar), or \"none\" (no progress). Default: \"per-chain\".\n\n\nseed\nOptional integer. Random seed for reproducibility. Must be a single non-negative integer.\n\n\nverbose\nLogical. If TRUE, prints informational messages during data processing (e.g., missing data handling, variable recoding). Defaults to getOption(\"bgms.verbose\", TRUE). Set options(bgms.verbose = FALSE) to suppress messages globally.",
+    "text": "Arguments\n\nData\n\n\n\nArgument\nDescription\n\n\n\n\nx\nA data frame or matrix with n rows and p columns. Columns may contain binary, ordinal, or continuous variables (see variable_type). Discrete variables are automatically recoded to non-negative integers (0, 1, ..., m); for regular ordinal variables, unobserved categories are collapsed, while Blume–Capel variables retain all categories. Continuous variables are column-centered internally so that the GGM likelihood is formulated with a zero-mean assumption.\n\n\nvariable_type\nCharacter or character vector. Specifies the type of each variable in x. Allowed values: \"ordinal\", \"blume-capel\", or \"continuous\". A single string applies to all variables. A per-variable vector that mixes discrete (\"ordinal\" / \"blume-capel\") and \"continuous\" types fits a mixed MRF. Binary variables are automatically treated as \"ordinal\". Default: \"ordinal\".\n\n\nbaseline_category\nInteger or vector. Baseline category used in Blume–Capel variables. Can be a single integer (applied to all) or a vector of length p. Required if at least one variable is of type \"blume-capel\".\n\n\nna_action\nCharacter. Specifies missing data handling. Either \"listwise\" (drop rows with missing values) or \"impute\" (impute within Gibbs sampler, propagating uncertainty). Default: \"listwise\". See Missing Data for details.\n\n\n\n\n\nPrior specification\nPriors are specified by passing prior-object constructors (see Prior Constructors). The legacy scalar arguments listed below the table (pairwise_scale, main_alpha, main_beta, inclusion_probability, beta_bernoulli_alpha/beta, …) are deprecated as of bgms 0.3.0; they still work but emit a lifecycle warning and forward to the equivalent prior object.\n\n\n\nArgument\nDescription\n\n\n\n\ninteraction_prior\nA bgms_parameter_prior object for pairwise interaction parameters. Allowed: cauchy_prior() (default), normal_prior(), beta_prime_prior(). Default: cauchy_prior(scale = 1).\n\n\nthreshold_prior\nA bgms_parameter_prior object for threshold (main effect) parameters. Allowed: beta_prime_prior() (default), cauchy_prior(), normal_prior(). Default: beta_prime_prior(alpha = 0.5, beta = 0.5).\n\n\nmeans_prior\nA bgms_parameter_prior object for continuous-variable means (mixed MRF only). Allowed: normal_prior() (default), cauchy_prior(), beta_prime_prior(). Ignored for pure ordinal or pure GGM models. Default: normal_prior(scale = 1).\n\n\nprecision_scale_prior\nA bgms_scale_prior object for the diagonal elements of the precision matrix (GGM and mixed MRF). Allowed: gamma_prior() (default), exponential_prior(). Ignored for pure ordinal models. Default: gamma_prior(shape = 1, rate = 1).\n\n\nedge_selection\nLogical. Whether to perform Bayesian edge selection. If FALSE, the model estimates all edges. Default: TRUE.\n\n\nedge_prior\nA bgms_indicator_prior object specifying the prior for edge inclusion. Allowed: bernoulli_prior() (default), beta_bernoulli_prior(), sbm_prior(). Legacy character strings (\"Bernoulli\", \"Beta-Bernoulli\", \"Stochastic-Block\") are accepted but deprecated. Default: bernoulli_prior(0.5).\n\n\nstandardize\nLogical. If TRUE, the prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products \\((x_i \\cdot x_j)\\), which typically correspond to smaller interaction effects \\((\\omega_{ij})\\). Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores \\(0, 1, \\ldots, m\\). The adjusted scale for the interaction between variables \\(i\\) and \\(j\\) is scale * m_i * m_j, so that scale itself applies to the unit interval case (binary variables where \\(m_i = m_j = 1\\)). For Blume-Capel variables with reference category \\(b\\), scores are centered as \\(-b, \\ldots, m-b\\), and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints \\((0, m)\\) and Blume-Capel variables use centered score endpoints \\((-b, m-b)\\). Default: FALSE.\n\n\n\n\n\n\n\n\n\nNoteDeprecated scalar prior arguments\n\n\n\nThe following arguments are deprecated as of bgms 0.3.0. They still work but emit a lifecycle warning. Use the prior-object equivalents in the table above.\n\n\n\n\n\n\n\nDeprecated\nReplacement\n\n\n\n\npairwise_scale = s\ninteraction_prior = cauchy_prior(scale = s)\n\n\nmain_alpha = a, main_beta = b\nthreshold_prior = beta_prime_prior(alpha = a, beta = b)\n\n\ninclusion_probability = p\nedge_prior = bernoulli_prior(p)\n\n\nbeta_bernoulli_alpha = a, beta_bernoulli_beta = b\nedge_prior = beta_bernoulli_prior(a, b)\n\n\nbeta_bernoulli_alpha_between, beta_bernoulli_beta_between, dirichlet_alpha, lambda\nedge_prior = sbm_prior(alpha_between = …, beta_between = …, dirichlet_alpha = …, lambda = …)\n\n\n\n\n\n\n\nSampler settings\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\niter\nInteger. Number of post-warmup iterations (per chain). Default: 1e3.\n\n\nwarmup\nInteger. Number of warmup iterations before collecting samples. A minimum of 1000 iterations is enforced, with a warning if a smaller value is requested. Default: 1e3.\n\n\nupdate_method\nCharacter. Specifies how the MCMC sampler updates the model parameters: \"adaptive-metropolis\" (componentwise adaptive Metropolis–Hastings with Robbins–Monro proposal adaptation) or \"nuts\" (the No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: \"nuts\".\n\n\ntarget_accept\nNumeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: 0.44 for adaptive Metropolis and 0.80 for NUTS.\n\n\nnuts_max_depth\nInteger. Maximum tree depth in NUTS. Must be positive. Default: 10.\n\n\nlearn_mass_matrix\nLogical. If TRUE, adapt a diagonal mass matrix during warmup (NUTS only). If FALSE, use the identity matrix. Default: TRUE.\n\n\nchains\nInteger. Number of parallel chains to run. Default: 4.\n\n\ncores\nInteger. Number of CPU cores for parallel execution. Default: parallel::detectCores().\n\n\ndisplay_progress\nCharacter. Controls progress reporting during sampling. Options: \"per-chain\" (separate bar per chain), \"total\" (single combined bar), or \"none\" (no progress). Default: \"per-chain\".\n\n\nseed\nOptional integer. Random seed for reproducibility. Must be a single non-negative integer.\n\n\nverbose\nLogical. If TRUE, prints informational messages during data processing (e.g., missing data handling, variable recoding). Defaults to getOption(\"bgms.verbose\", TRUE). Set options(bgms.verbose = FALSE) to suppress messages globally.",
     "crumbs": [
       "Reference",
       "Core Functions",
@@ -3843,7 +3927,18 @@
     "href": "reference/index.html#core-functions",
     "title": "Function Reference",
     "section": "Core Functions",
-    "text": "Core Functions\n\n\n\nFunction\nDescription\n\n\n\n\nbgm()\nEstimates the main effects and pairwise interactions of a network using a Bayesian framework.\n\n\nbgmCompare()\nEstimates whether edge weights and category thresholds differ across networks of two different groups.",
+    "text": "Core Functions\n\n\n\nFunction\nDescription\n\n\n\n\nbgm()\nEstimates the main effects and pairwise interactions of a network using a Bayesian framework.\n\n\nbgmCompare()\nEstimates whether edge weights and category thresholds differ across networks of two different groups.\n\n\nsample_precision_prior()\nNUTS-based prior sampler for the GGM precision matrix. Used for SBC validation and prior visualization.",
+    "crumbs": [
+      "Reference",
+      "Function Reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#prior-constructors",
+    "href": "reference/index.html#prior-constructors",
+    "title": "Function Reference",
+    "section": "Prior Constructors",
+    "text": "Prior Constructors\nPrior specification objects passed to bgm() and bgmCompare() via the interaction_prior, threshold_prior, means_prior, precision_scale_prior, edge_prior, and difference_prior arguments.\n\n\n\nConstructor\nFamily\nUsed for\n\n\n\n\ncauchy_prior()\nCauchy(0, scale)\nInteractions, thresholds, means\n\n\nnormal_prior()\nNormal(0, scale)\nInteractions, thresholds, means\n\n\nbeta_prime_prior()\nBeta-prime\nThresholds (default), interactions\n\n\ngamma_prior()\nGamma(shape, rate)\nPrecision-matrix diagonal\n\n\nexponential_prior()\nExponential(rate)\nPrecision-matrix diagonal\n\n\nbernoulli_prior()\nBernoulli\nEdge / difference inclusion (default)\n\n\nbeta_bernoulli_prior()\nBeta-Bernoulli\nEdge / difference inclusion\n\n\nsbm_prior()\nStochastic Block Model\nEdge inclusion",
     "crumbs": [
       "Reference",
       "Function Reference"
@@ -3880,6 +3975,78 @@
     "crumbs": [
       "Reference",
       "Function Reference"
+    ]
+  },
+  {
+    "objectID": "reference/priors.html",
+    "href": "reference/priors.html",
+    "title": "Prior Constructors",
+    "section": "",
+    "text": "bgms 0.3.0 replaces the loose scalar prior arguments of earlier versions with a small set of prior-object constructors. Each constructor returns an S3 object that is passed to bgm() or bgmCompare(). Three classes of priors are exported:\nThe legacy scalar arguments (pairwise_scale, main_alpha, main_beta, inclusion_probability, beta_bernoulli_alpha/beta, beta_bernoulli_alpha_between/beta_between, dirichlet_alpha, lambda, difference_probability) still work but emit a lifecycle warning and forward to the equivalent prior object.",
+    "crumbs": [
+      "Reference",
+      "Priors",
+      "Prior Constructors"
+    ]
+  },
+  {
+    "objectID": "reference/priors.html#parameter-priors",
+    "href": "reference/priors.html#parameter-priors",
+    "title": "Prior Constructors",
+    "section": "Parameter priors",
+    "text": "Parameter priors\nPriors on real-valued parameters. Used for interaction_prior, threshold_prior, and means_prior arguments of bgm() / bgmCompare().\n\ncauchy_prior()\nCauchy(0, scale) prior. The default for pairwise interactions; produces heavy-tailed shrinkage toward zero.\ncauchy_prior(scale = 1)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nscale\nPositive numeric. Scale (half-width at half-maximum) of the Cauchy distribution. Default: 1.\n\n\n\nReturns a bgms_parameter_prior object with family = \"cauchy\".\n\n\nnormal_prior()\nNormal(0, scale) prior. Lighter-tailed than Cauchy; recommended for simulation-based calibration (SBC) studies where Cauchy priors can generate data with extreme parameter values.\nnormal_prior(scale = 1)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nscale\nPositive numeric. Standard deviation of the Normal distribution. Default: 1.\n\n\n\nReturns a bgms_parameter_prior object with family = \"normal\".\n\n\nbeta_prime_prior()\nBeta-prime prior, the default for threshold parameters. Parameterized through the logistic transformation: \\(\\sigma(\\mu) \\sim \\text{Beta}(\\alpha, \\beta)\\), so \\(\\mu = \\text{logit}(Y)\\) where \\(Y \\sim \\text{Beta}(\\alpha, \\beta)\\).\nbeta_prime_prior(alpha = 0.5, beta = 0.5)\n\n\n\nArgument\nDescription\n\n\n\n\nalpha\nPositive numeric. First shape parameter. Default: 0.5.\n\n\nbeta\nPositive numeric. Second shape parameter. Default: 0.5.\n\n\n\nReturns a bgms_parameter_prior object with family = \"beta-prime\".",
+    "crumbs": [
+      "Reference",
+      "Priors",
+      "Prior Constructors"
+    ]
+  },
+  {
+    "objectID": "reference/priors.html#scale-priors",
+    "href": "reference/priors.html#scale-priors",
+    "title": "Prior Constructors",
+    "section": "Scale priors",
+    "text": "Scale priors\nPriors on positive scale parameters, currently used only for the diagonal of the precision matrix in GGM and mixed MRF models (precision_scale_prior argument of bgm()).\n\ngamma_prior()\nGamma(shape, rate) prior. The default gamma_prior(1, 1) is equivalent to exponential_prior(1).\ngamma_prior(shape = 1, rate = 1)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nshape\nPositive numeric. Shape parameter of the Gamma distribution. Default: 1.\n\n\nrate\nPositive numeric. Rate parameter of the Gamma distribution. Default: 1.\n\n\n\nReturns a bgms_scale_prior object with family = \"gamma\".\n\n\nexponential_prior()\nExponential(rate) prior. Convenience constructor equivalent to gamma_prior(shape = 1, rate = rate).\nexponential_prior(rate = 1)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nrate\nPositive numeric. Rate parameter of the Exponential distribution. Default: 1.\n\n\n\nReturns a bgms_scale_prior object with family = \"exponential\".",
+    "crumbs": [
+      "Reference",
+      "Priors",
+      "Prior Constructors"
+    ]
+  },
+  {
+    "objectID": "reference/priors.html#indicator-priors",
+    "href": "reference/priors.html#indicator-priors",
+    "title": "Prior Constructors",
+    "section": "Indicator priors",
+    "text": "Indicator priors\nPriors on inclusion indicators. Used for the edge_prior argument of bgm() and the difference_prior argument of bgmCompare().\n\nbernoulli_prior()\nFixed inclusion probability for each indicator. The simplest indicator prior; the inclusion probability does not change during sampling.\nbernoulli_prior(inclusion_probability = 0.5)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\ninclusion_probability\nNumeric scalar in \\((0, 1)\\), or a symmetric \\(p \\times p\\) matrix for edge-specific probabilities. Default: 0.5.\n\n\n\nReturns a bgms_indicator_prior object with family = \"Bernoulli\".\n\n\nbeta_bernoulli_prior()\nBeta-Bernoulli prior on inclusion. The shared inclusion probability is drawn from a Beta(\\(\\alpha\\), \\(\\beta\\)) prior and learned from the data.\nbeta_bernoulli_prior(alpha = 1, beta = 1)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nalpha\nPositive numeric. First shape parameter of the Beta distribution. Default: 1.\n\n\nbeta\nPositive numeric. Second shape parameter of the Beta distribution. Default: 1.\n\n\n\nReturns a bgms_indicator_prior object with family = \"Beta-Bernoulli\".\n\n\nsbm_prior()\nStochastic Block Model prior. Variables are assigned to latent clusters, with separate Beta priors on within-cluster and between-cluster inclusion probabilities. See Edge Clustering and SBM Prior for the full formulation.\nsbm_prior(\n  alpha           = 1,\n  beta            = 1,\n  alpha_between   = 1,\n  beta_between    = 1,\n  dirichlet_alpha = 1,\n  lambda          = 1\n)\n\n\n\n\n\n\n\nArgument\nDescription\n\n\n\n\nalpha, beta\nPositive numeric. Shape parameters of the Beta prior for within-cluster edge inclusion. Defaults: 1.\n\n\nalpha_between, beta_between\nPositive numeric. Shape parameters of the Beta prior for between-cluster edge inclusion. Defaults: 1.\n\n\ndirichlet_alpha\nPositive numeric. Concentration parameter of the Dirichlet prior on cluster assignments. Default: 1.\n\n\nlambda\nPositive numeric. Rate parameter of the zero-truncated Poisson prior on the number of clusters. Default: 1.\n\n\n\nReturns a bgms_indicator_prior object with family = \"Stochastic-Block\".",
+    "crumbs": [
+      "Reference",
+      "Priors",
+      "Prior Constructors"
+    ]
+  },
+  {
+    "objectID": "reference/priors.html#examples",
+    "href": "reference/priors.html#examples",
+    "title": "Prior Constructors",
+    "section": "Examples",
+    "text": "Examples\n# bgm with explicit prior choices\nfit = bgm(\n  x,\n  interaction_prior = cauchy_prior(scale = 2.5),\n  threshold_prior   = beta_prime_prior(0.5, 0.5),\n  edge_prior        = beta_bernoulli_prior(1, 1)\n)\n\n# Mixed MRF with normal priors on continuous means and the precision diagonal\nfit = bgm(\n  x,\n  variable_type         = c(\"ordinal\", \"ordinal\", \"continuous\", \"continuous\"),\n  means_prior           = normal_prior(scale = 0.5),\n  precision_scale_prior = exponential_prior(rate = 1)\n)\n\n# SBM-structured edge selection\nfit = bgm(\n  x,\n  edge_prior = sbm_prior(alpha = 8, beta = 1, alpha_between = 1, beta_between = 8)\n)\n\n# Group comparison with Beta-Bernoulli difference selection\nfit = bgmCompare(\n  x, y,\n  difference_prior = beta_bernoulli_prior(1, 1)\n)",
+    "crumbs": [
+      "Reference",
+      "Priors",
+      "Prior Constructors"
+    ]
+  },
+  {
+    "objectID": "reference/priors.html#see-also",
+    "href": "reference/priors.html#see-also",
+    "title": "Prior Constructors",
+    "section": "See also",
+    "text": "See also\nbgm(), bgmCompare(), sample_precision_prior(), Prior Basics, Edge Selection, Edge Clustering.",
+    "crumbs": [
+      "Reference",
+      "Priors",
+      "Prior Constructors"
     ]
   }
 ]

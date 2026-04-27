@@ -441,17 +441,40 @@ window.Quarto = {
  <span class="menu-text">bgmCompare()</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/sample-precision-prior.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sample_precision_prior()</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
- <span class="menu-text">Methods</span></a>
+ <span class="menu-text">Priors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prior Constructors</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Methods</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/methods.html" class="sidebar-item-text sidebar-link">
@@ -514,30 +537,24 @@ window.Quarto = {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  baseline_category,</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">1000</span>,</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">pairwise_scale =</span> <span class="dv">1</span>,</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">main_alpha =</span> <span class="fl">0.5</span>,</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">main_beta =</span> <span class="fl">0.5</span>,</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_selection =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">c</span>(<span class="st">"Bernoulli"</span>, <span class="st">"Beta-Bernoulli"</span>, <span class="st">"Stochastic-Block"</span>),</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">inclusion_probability =</span> <span class="fl">0.5</span>,</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha =</span> <span class="dv">1</span>,</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_beta =</span> <span class="dv">1</span>,</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_alpha_between =</span> <span class="dv">1</span>,</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">beta_bernoulli_beta_between =</span> <span class="dv">1</span>,</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">dirichlet_alpha =</span> <span class="dv">1</span>,</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="dv">1</span>,</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_action =</span> <span class="fu">c</span>(<span class="st">"listwise"</span>, <span class="st">"impute"</span>),</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">update_method =</span> <span class="fu">c</span>(<span class="st">"nuts"</span>, <span class="st">"adaptive-metropolis"</span>),</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  target_accept,</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">nuts_max_depth =</span> <span class="dv">10</span>,</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_mass_matrix =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>(),</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>),</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">interaction_prior =</span> <span class="fu">cauchy_prior</span>(<span class="at">scale =</span> <span class="dv">1</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">threshold_prior =</span> <span class="fu">beta_prime_prior</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">beta =</span> <span class="fl">0.5</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">means_prior =</span> <span class="fu">normal_prior</span>(<span class="at">scale =</span> <span class="dv">1</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">precision_scale_prior =</span> <span class="fu">gamma_prior</span>(<span class="at">shape =</span> <span class="dv">1</span>, <span class="at">rate =</span> <span class="dv">1</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_selection =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">bernoulli_prior</span>(<span class="fl">0.5</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_action =</span> <span class="fu">c</span>(<span class="st">"listwise"</span>, <span class="st">"impute"</span>),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">update_method =</span> <span class="fu">c</span>(<span class="st">"nuts"</span>, <span class="st">"adaptive-metropolis"</span>),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  target_accept,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">nuts_max_depth =</span> <span class="dv">10</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_mass_matrix =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>(),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="arguments" class="level2">
 <h2 class="anchored" data-anchor-id="arguments">Arguments</h2>
@@ -572,11 +589,8 @@ window.Quarto = {
 </section>
 <section id="prior-specification" class="level3">
 <h3 class="anchored" data-anchor-id="prior-specification">Prior specification</h3>
+<p>Priors are specified by passing prior-object constructors (see <a href="../reference/priors.html">Prior Constructors</a>). The legacy scalar arguments listed below the table (<code>pairwise_scale</code>, <code>main_alpha</code>, <code>main_beta</code>, <code>inclusion_probability</code>, <code>beta_bernoulli_alpha/beta</code>, …) are deprecated as of bgms 0.3.0; they still work but emit a lifecycle warning and forward to the equivalent prior object.</p>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 56%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Argument</th>
@@ -585,12 +599,20 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>pairwise_scale</code></td>
-<td>Double. Scale of the Cauchy prior for pairwise interaction parameters. Default: <code>1</code>.</td>
+<td><code>interaction_prior</code></td>
+<td>A <a href="../reference/priors.html"><code>bgms_parameter_prior</code></a> object for pairwise interaction parameters. Allowed: <a href="../reference/priors.html#cauchy_prior"><code>cauchy_prior()</code></a> (default), <a href="../reference/priors.html#normal_prior"><code>normal_prior()</code></a>, <a href="../reference/priors.html#beta_prime_prior"><code>beta_prime_prior()</code></a>. Default: <code>cauchy_prior(scale = 1)</code>.</td>
 </tr>
 <tr class="even">
-<td><code>main_alpha</code>, <code>main_beta</code></td>
-<td>Double. Shape parameters of the beta-prime prior for threshold parameters. Must be positive. If equal, the prior is symmetric. Defaults: <code>main_alpha = 0.5</code> and <code>main_beta = 0.5</code>.</td>
+<td><code>threshold_prior</code></td>
+<td>A <code>bgms_parameter_prior</code> object for threshold (main effect) parameters. Allowed: <a href="../reference/priors.html#beta_prime_prior"><code>beta_prime_prior()</code></a> (default), <a href="../reference/priors.html#cauchy_prior"><code>cauchy_prior()</code></a>, <a href="../reference/priors.html#normal_prior"><code>normal_prior()</code></a>. Default: <code>beta_prime_prior(alpha = 0.5, beta = 0.5)</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>means_prior</code></td>
+<td>A <code>bgms_parameter_prior</code> object for continuous-variable means (mixed MRF only). Allowed: <code>normal_prior()</code> (default), <code>cauchy_prior()</code>, <code>beta_prime_prior()</code>. Ignored for pure ordinal or pure GGM models. Default: <code>normal_prior(scale = 1)</code>.</td>
+</tr>
+<tr class="even">
+<td><code>precision_scale_prior</code></td>
+<td>A <a href="../reference/priors.html"><code>bgms_scale_prior</code></a> object for the diagonal elements of the precision matrix (GGM and mixed MRF). Allowed: <a href="../reference/priors.html#gamma_prior"><code>gamma_prior()</code></a> (default), <a href="../reference/priors.html#exponential_prior"><code>exponential_prior()</code></a>. Ignored for pure ordinal models. Default: <code>gamma_prior(shape = 1, rate = 1)</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>edge_selection</code></td>
@@ -598,34 +620,61 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td><code>edge_prior</code></td>
-<td>Character. Specifies the prior for edge inclusion. Options: <code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, or <code>"Stochastic-Block"</code>. Default: <code>"Bernoulli"</code>.</td>
+<td>A <a href="../reference/priors.html"><code>bgms_indicator_prior</code></a> object specifying the prior for edge inclusion. Allowed: <a href="../reference/priors.html#bernoulli_prior"><code>bernoulli_prior()</code></a> (default), <a href="../reference/priors.html#beta_bernoulli_prior"><code>beta_bernoulli_prior()</code></a>, <a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a>. Legacy character strings (<code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, <code>"Stochastic-Block"</code>) are accepted but deprecated. Default: <code>bernoulli_prior(0.5)</code>.</td>
 </tr>
 <tr class="odd">
-<td><code>inclusion_probability</code></td>
-<td>Numeric scalar. Prior inclusion probability of each edge (used with the Bernoulli prior). Default: <code>0.5</code>.</td>
-</tr>
-<tr class="even">
-<td><code>beta_bernoulli_alpha</code>, <code>beta_bernoulli_beta</code></td>
-<td>Double. Shape parameters for the beta distribution in the Beta–Bernoulli and Stochastic-Block priors. Must be positive. For the Stochastic-Block prior these are the shape parameters for the within-cluster edge inclusion probabilities. Defaults: <code>beta_bernoulli_alpha = 1</code> and <code>beta_bernoulli_beta = 1</code>.</td>
-</tr>
-<tr class="odd">
-<td><code>beta_bernoulli_alpha_between</code>, <code>beta_bernoulli_beta_between</code></td>
-<td>Double. Shape parameters for the between-cluster edge inclusion probabilities in the Stochastic-Block prior. Must be positive. Defaults: <code>beta_bernoulli_alpha_between = 1</code> and <code>beta_bernoulli_beta_between = 1</code>.</td>
-</tr>
-<tr class="even">
-<td><code>dirichlet_alpha</code></td>
-<td>Double. Concentration parameter of the Dirichlet prior on block assignments (used with the Stochastic Block model). Default: <code>1</code>.</td>
-</tr>
-<tr class="odd">
-<td><code>lambda</code></td>
-<td>Double. Rate of the zero-truncated Poisson prior on the number of clusters in the Stochastic Block Model. Default: <code>1</code>.</td>
-</tr>
-<tr class="even">
 <td><code>standardize</code></td>
-<td>Logical. If <code>TRUE</code>, the Cauchy prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products <span class="math inline">\((x_i \cdot x_j)\)</span>, which typically correspond to smaller interaction effects <span class="math inline">\((\omega_{ij})\)</span>. Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores <span class="math inline">\(0, 1, \ldots, m\)</span>. The adjusted scale for the interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is <code>pairwise_scale * m_i * m_j</code>, so that <code>pairwise_scale</code> itself applies to the unit interval case (binary variables where <span class="math inline">\(m_i = m_j = 1\)</span>). For Blume-Capel variables with reference category <span class="math inline">\(b\)</span>, scores are centered as <span class="math inline">\(-b, \ldots, m-b\)</span>, and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints <span class="math inline">\((0, m)\)</span> and Blume-Capel variables use centered score endpoints <span class="math inline">\((-b, m-b)\)</span>. Default: <code>FALSE</code>.</td>
+<td>Logical. If <code>TRUE</code>, the prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products <span class="math inline">\((x_i \cdot x_j)\)</span>, which typically correspond to smaller interaction effects <span class="math inline">\((\omega_{ij})\)</span>. Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores <span class="math inline">\(0, 1, \ldots, m\)</span>. The adjusted scale for the interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is <code>scale * m_i * m_j</code>, so that <code>scale</code> itself applies to the unit interval case (binary variables where <span class="math inline">\(m_i = m_j = 1\)</span>). For Blume-Capel variables with reference category <span class="math inline">\(b\)</span>, scores are centered as <span class="math inline">\(-b, \ldots, m-b\)</span>, and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints <span class="math inline">\((0, m)\)</span> and Blume-Capel variables use centered score endpoints <span class="math inline">\((-b, m-b)\)</span>. Default: <code>FALSE</code>.</td>
 </tr>
 </tbody>
 </table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Deprecated scalar prior arguments
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The following arguments are deprecated as of bgms 0.3.0. They still work but emit a lifecycle warning. Use the prior-object equivalents in the table above.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 48%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Deprecated</th>
+<th>Replacement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pairwise_scale = s</code></td>
+<td><code>interaction_prior = cauchy_prior(scale = s)</code></td>
+</tr>
+<tr class="even">
+<td><code>main_alpha = a, main_beta = b</code></td>
+<td><code>threshold_prior = beta_prime_prior(alpha = a, beta = b)</code></td>
+</tr>
+<tr class="odd">
+<td><code>inclusion_probability = p</code></td>
+<td><code>edge_prior = bernoulli_prior(p)</code></td>
+</tr>
+<tr class="even">
+<td><code>beta_bernoulli_alpha = a, beta_bernoulli_beta = b</code></td>
+<td><code>edge_prior = beta_bernoulli_prior(a, b)</code></td>
+</tr>
+<tr class="odd">
+<td><code>beta_bernoulli_alpha_between, beta_bernoulli_beta_between, dirichlet_alpha, lambda</code></td>
+<td><code>edge_prior = sbm_prior(alpha_between = …, beta_between = …, dirichlet_alpha = …, lambda = …)</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </section>
 <section id="sampler-settings" class="level3">
 <h3 class="anchored" data-anchor-id="sampler-settings">Sampler settings</h3>

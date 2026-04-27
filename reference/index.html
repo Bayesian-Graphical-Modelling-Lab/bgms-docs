@@ -356,17 +356,40 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">bgmCompare()</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/sample-precision-prior.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sample_precision_prior()</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
- <span class="menu-text">Methods</span></a>
+ <span class="menu-text">Priors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prior Constructors</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Methods</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/methods.html" class="sidebar-item-text sidebar-link">
@@ -435,6 +458,65 @@ ul.task-list li input[type="checkbox"] {
 <tr class="even">
 <td><a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a></td>
 <td>Estimates whether edge weights and category thresholds differ across networks of two different groups.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/sample-precision-prior.html"><code>sample_precision_prior()</code></a></td>
+<td>NUTS-based prior sampler for the GGM precision matrix. Used for SBC validation and prior visualization.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="prior-constructors" class="level2">
+<h2 class="anchored" data-anchor-id="prior-constructors">Prior Constructors</h2>
+<p>Prior specification objects passed to <code>bgm()</code> and <code>bgmCompare()</code> via the <code>interaction_prior</code>, <code>threshold_prior</code>, <code>means_prior</code>, <code>precision_scale_prior</code>, <code>edge_prior</code>, and <code>difference_prior</code> arguments.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Constructor</th>
+<th>Family</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/priors.html#cauchy_prior"><code>cauchy_prior()</code></a></td>
+<td>Cauchy(0, scale)</td>
+<td>Interactions, thresholds, means</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/priors.html#normal_prior"><code>normal_prior()</code></a></td>
+<td>Normal(0, scale)</td>
+<td>Interactions, thresholds, means</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/priors.html#beta_prime_prior"><code>beta_prime_prior()</code></a></td>
+<td>Beta-prime</td>
+<td>Thresholds (default), interactions</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/priors.html#gamma_prior"><code>gamma_prior()</code></a></td>
+<td>Gamma(shape, rate)</td>
+<td>Precision-matrix diagonal</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/priors.html#exponential_prior"><code>exponential_prior()</code></a></td>
+<td>Exponential(rate)</td>
+<td>Precision-matrix diagonal</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/priors.html#bernoulli_prior"><code>bernoulli_prior()</code></a></td>
+<td>Bernoulli</td>
+<td>Edge / difference inclusion (default)</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/priors.html#beta_bernoulli_prior"><code>beta_bernoulli_prior()</code></a></td>
+<td>Beta-Bernoulli</td>
+<td>Edge / difference inclusion</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a></td>
+<td>Stochastic Block Model</td>
+<td>Edge inclusion</td>
 </tr>
 </tbody>
 </table>
