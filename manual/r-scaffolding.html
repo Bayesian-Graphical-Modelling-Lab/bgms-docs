@@ -563,12 +563,14 @@ ul.task-list li input[type="checkbox"] {
 <p></p><figure class="figure"><p></p>
 <div>
 <pre class="mermaid mermaid-js">flowchart TD
-    A["bgm(x, ...)"] --&gt; B["bgm_spec()"]
-    B --&gt;|"validates, assembles sub-lists"| C["new_bgm_spec()"]
-    C --&gt;|"asserts types and field presence"| D["validate_bgm_spec()"]
-    D --&gt;|"cross-field invariant checks"| E["run_sampler(spec)"]
-    E --&gt;|"dispatches to C++ via model_type"| F["build_output(spec, raw)"]
-    F --&gt;|"normalizes raw C++ output into S3 object"| G["bgm fit object"]
+    A["&lt;b&gt;bgm(x, ...)&lt;/b&gt;"]
+    B["&lt;b&gt;bgm_spec()&lt;/b&gt;&lt;br/&gt;validates, assembles sub-lists"]
+    C["&lt;b&gt;new_bgm_spec()&lt;/b&gt;&lt;br/&gt;asserts types and field presence"]
+    D["&lt;b&gt;validate_bgm_spec()&lt;/b&gt;&lt;br/&gt;cross-field invariant checks"]
+    E["&lt;b&gt;run_sampler(spec)&lt;/b&gt;&lt;br/&gt;dispatches to C++ via model_type"]
+    F["&lt;b&gt;build_output(spec, raw)&lt;/b&gt;&lt;br/&gt;normalizes raw C++ output to S3"]
+    G["&lt;b&gt;bgm fit object&lt;/b&gt;"]
+    A --&gt; B --&gt; C --&gt; D --&gt; E --&gt; F --&gt; G
 </pre>
 </div>
 <p></p></figure><p></p>

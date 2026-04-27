@@ -3150,7 +3150,7 @@
     "href": "manual/r-scaffolding.html#data-flow",
     "title": "R Scaffolding",
     "section": "Data flow",
-    "text": "Data flow\n\n\n\n\n\nflowchart TD\n    A[\"bgm(x, ...)\"] --&gt; B[\"bgm_spec()\"]\n    B --&gt;|\"validates, assembles sub-lists\"| C[\"new_bgm_spec()\"]\n    C --&gt;|\"asserts types and field presence\"| D[\"validate_bgm_spec()\"]\n    D --&gt;|\"cross-field invariant checks\"| E[\"run_sampler(spec)\"]\n    E --&gt;|\"dispatches to C++ via model_type\"| F[\"build_output(spec, raw)\"]\n    F --&gt;|\"normalizes raw C++ output into S3 object\"| G[\"bgm fit object\"]\n\n\n\n\n\n\nBoth bgm() and bgmCompare() follow this pipeline. The bgmCompare() path adds group-specific preprocessing (projection matrices, group indices, precomputed sufficient statistics) before the spec is constructed.",
+    "text": "Data flow\n\n\n\n\n\nflowchart TD\n    A[\"&lt;b&gt;bgm(x, ...)&lt;/b&gt;\"]\n    B[\"&lt;b&gt;bgm_spec()&lt;/b&gt;&lt;br/&gt;validates, assembles sub-lists\"]\n    C[\"&lt;b&gt;new_bgm_spec()&lt;/b&gt;&lt;br/&gt;asserts types and field presence\"]\n    D[\"&lt;b&gt;validate_bgm_spec()&lt;/b&gt;&lt;br/&gt;cross-field invariant checks\"]\n    E[\"&lt;b&gt;run_sampler(spec)&lt;/b&gt;&lt;br/&gt;dispatches to C++ via model_type\"]\n    F[\"&lt;b&gt;build_output(spec, raw)&lt;/b&gt;&lt;br/&gt;normalizes raw C++ output to S3\"]\n    G[\"&lt;b&gt;bgm fit object&lt;/b&gt;\"]\n    A --&gt; B --&gt; C --&gt; D --&gt; E --&gt; F --&gt; G\n\n\n\n\n\n\nBoth bgm() and bgmCompare() follow this pipeline. The bgmCompare() path adds group-specific preprocessing (projection matrices, group indices, precomputed sufficient statistics) before the spec is constructed.",
     "crumbs": [
       "Manual",
       "Architecture",
