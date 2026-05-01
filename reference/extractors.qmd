@@ -123,9 +123,14 @@ prior.
 extract_sbm(bgms_object)
 ```
 
-`bgms_object` must be a fitted `bgms` object.
+Works on both `bgms` and `bgmCompare` fits.
 
-Requires `edge_selection = TRUE` and `edge_prior = sbm_prior(...)`.
+- For `bgms`: requires `edge_selection = TRUE` and
+  `edge_prior = sbm_prior(...)`.
+- For `bgmCompare`: requires `difference_selection = TRUE` and
+  `difference_prior = sbm_prior(...)`. The clustering applies to the
+  off-diagonal (pairwise) difference inclusions.
+
 Returns a list with:
 
 - `posterior_num_blocks` --- Posterior probabilities for each possible number

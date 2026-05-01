@@ -21,8 +21,8 @@ bgm(
   x,
   variable_type = "ordinal",
   baseline_category,
-  iter = 1000,
-  warmup = 1000,
+  iter = 2000,
+  warmup = 2000,
   interaction_prior = cauchy_prior(scale = 1),
   threshold_prior = beta_prime_prior(alpha = 0.5, beta = 0.5),
   means_prior = normal_prior(scale = 1),
@@ -88,8 +88,8 @@ table above.
 
 | Argument | Description |
 |----------|-------------|
-| `iter` | Integer. Number of post-warmup iterations (per chain). Default: `1e3`. |
-| `warmup` | Integer. Number of warmup iterations before collecting samples. A minimum of 1000 iterations is enforced, with a warning if a smaller value is requested. Default: `1e3`. |
+| `iter` | Integer. Number of post-warmup iterations (per chain). Default: `2e3`. |
+| `warmup` | Integer. Number of warmup iterations before collecting samples. Default: `2e3`. Short warmups trigger progressive warnings; see [Warmup Schedule](../manual/warmup.qmd) for the adaptation stages. |
 | `update_method` | Character. Specifies how the MCMC sampler updates the model parameters: `"adaptive-metropolis"` (componentwise adaptive Metropolis--Hastings with Robbins--Monro proposal adaptation) or `"nuts"` (the No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: `"nuts"`. |
 | `target_accept` | Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: `0.44` for adaptive Metropolis and `0.80` for NUTS. |
 | `nuts_max_depth` | Integer. Maximum tree depth in NUTS. Must be positive. Default: `10`. |

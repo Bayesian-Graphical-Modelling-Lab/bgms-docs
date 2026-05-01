@@ -32,8 +32,8 @@ bgmCompare(
   difference_prior = bernoulli_prior(0.5),
   interaction_prior = cauchy_prior(scale = 1),
   threshold_prior = beta_prime_prior(alpha = 0.5, beta = 0.5),
-  iter = 1000,
-  warmup = 1000,
+  iter = 2000,
+  warmup = 2000,
   na_action = c("listwise", "impute"),
   update_method = c("nuts", "adaptive-metropolis"),
   target_accept,
@@ -68,7 +68,7 @@ bgmCompare(
 | `difference_selection` | Logical. If `TRUE`, spike-and-slab priors are applied to difference parameters. Default: `TRUE`. |
 | `main_difference_selection` | Logical. If `TRUE`, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is `FALSE`. Only used when `difference_selection = TRUE`. |
 | `difference_scale` | Scale of the Cauchy prior for difference parameters. Default: `1`. |
-| `difference_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior on difference inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default) or [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior). Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`) and the scalar `difference_probability` / `beta_bernoulli_alpha` / `beta_bernoulli_beta` arguments are accepted but deprecated. Default: `bernoulli_prior(0.5)`. |
+| `difference_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior on difference inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), or [`sbm_prior()`](priors.qmd#sbm_prior). Under `sbm_prior()`, the SBM governs the off-diagonal (pairwise) difference inclusions; the diagonal (main-effect difference inclusions, when `main_difference_selection = TRUE`) follows a separate Beta-Bernoulli using the within-cluster `alpha` and `beta`. Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) and the scalar `difference_probability` / `beta_bernoulli_alpha` / `beta_bernoulli_beta` arguments are accepted but deprecated. Default: `bernoulli_prior(0.5)`. |
 
 ### Prior specification
 
@@ -95,8 +95,8 @@ Priors on baseline parameters are specified via prior-object constructors (see [
 
 | Argument | Description |
 |----------|-------------|
-| `iter` | Number of post-warmup iterations per chain. Default: `1000`. |
-| `warmup` | Number of warmup iterations before sampling. Default: `1000`. |
+| `iter` | Number of post-warmup iterations per chain. Default: `2000`. |
+| `warmup` | Number of warmup iterations before sampling. Default: `2000`. |
 | `update_method` | Sampling algorithm: `"nuts"` or `"adaptive-metropolis"`. Default: `"nuts"`. |
 | `target_accept` | Target acceptance rate. Defaults: `0.44` (Metropolis), `0.80` (NUTS). |
 | `nuts_max_depth` | Maximum tree depth for NUTS. Default: `10`. |
@@ -138,8 +138,21 @@ Main components:
   - `main_baseline`, `pairwise_baseline` — Baseline parameter samples.
   - `main_differences`, `pairwise_differences` — Difference parameter samples.
   - `indicator` — Difference indicator samples (if enabled).
+  - `allocations` — Cluster allocation samples (SBM difference prior only).
   - `nchains`, `niter` — Number of chains and iterations per chain.
 - `arguments` --- List of function call arguments and metadata.
+
+When `difference_prior = sbm_prior(...)`, the following SBM summaries are
+also populated (see [`extract_sbm()`](extractors.qmd#extract_sbm) for a
+helper):
+
+- `posterior_num_blocks` --- Posterior probabilities for each possible
+  number of clusters.
+- `posterior_mean_allocations` --- Posterior mean cluster allocations.
+- `posterior_mode_allocations` --- Posterior mode cluster allocations.
+- `posterior_mean_coclustering_matrix` --- Co-clustering proportion matrix.
+- `posterior_summary_pairwise_allocations` --- Pairwise allocation
+  convergence summary.
 
 NUTS diagnostics are available in `fit$nuts_diag` when
 `update_method = "nuts"`.

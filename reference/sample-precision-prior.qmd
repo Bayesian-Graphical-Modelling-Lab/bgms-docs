@@ -23,7 +23,7 @@ RATTLE projection.
 sample_precision_prior(
   p,
   n_samples,
-  n_warmup              = 1000L,
+  n_warmup              = 2000L,
   interaction_prior     = cauchy_prior(scale = 2.5),
   precision_scale_prior = gamma_prior(shape = 1, rate = 1),
   step_size             = 0.1,
@@ -40,7 +40,7 @@ sample_precision_prior(
 |----------|-------------|
 | `p` | Integer. Dimension of the precision matrix ($p \ge 2$). |
 | `n_samples` | Integer. Number of post-warmup draws to keep. |
-| `n_warmup` | Integer. NUTS warmup iterations. Default: `1000`. |
+| `n_warmup` | Integer. NUTS warmup iterations. Default: `2000`. |
 | `interaction_prior` | A [`bgms_parameter_prior`](priors.qmd) for the off-diagonal entries. Allowed: [`cauchy_prior()`](priors.qmd#cauchy_prior), [`normal_prior()`](priors.qmd#normal_prior). [`beta_prime_prior()`](priors.qmd#beta_prime_prior) is not supported here. Default: `cauchy_prior(scale = 2.5)`. |
 | `precision_scale_prior` | A [`bgms_scale_prior`](priors.qmd) for the diagonal entries of $K$. Allowed: [`gamma_prior()`](priors.qmd#gamma_prior), [`exponential_prior()`](priors.qmd#exponential_prior). Default: `gamma_prior(1, 1)`. |
 | `step_size` | Positive numeric. Initial NUTS step size used to seed dual-averaging adaptation. Default: `0.1`. |

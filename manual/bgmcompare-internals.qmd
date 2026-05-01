@@ -93,8 +93,16 @@ iteration:
    `update_pairwise_effects_metropolis_bgmcompare()`). With
    NUTS, all active parameters are updated jointly via
    the vectorized log-pseudoposterior.
-4. **Inclusion probability update** (Beta-Bernoulli prior only) —
-   Draw new inclusion probability from the conjugate Beta posterior.
+4. **Difference-prior update** (when `difference_selection = TRUE`) —
+   Branches on the prior family:
+   - **Beta-Bernoulli**: pooled scalar Beta conjugate update on the
+     shared inclusion probability.
+   - **Stochastic-Block**: pairwise off-diagonal updates delegated to
+     `BaseEdgePrior::update()` (collapsed Gibbs over allocations and
+     block probabilities); when `main_difference_selection = TRUE`, a
+     separate Beta-Bernoulli conjugate update is run on the diagonal
+     using the SBM's within-cluster `alpha` and `beta`.
+   - **Bernoulli**: no-op (fixed inclusion probability).
 
 The warmup schedule follows the same five-stage structure as the
 single-group model (see [Warmup Schedule](warmup.qmd)).
@@ -120,6 +128,7 @@ The `bgmCompareOutput` struct stores:
 | `main_samples` | Main-effect posterior samples (iterations $\times$ thresholds $\times$ groups) |
 | `pairwise_samples` | Pairwise-effect posterior samples (iterations $\times$ pairs $\times$ groups) |
 | `indicator_samples` | Contrast inclusion indicators (iterations $\times$ parameters) |
+| `allocation_samples` | Cluster allocations (iterations $\times$ variables; SBM difference prior only) |
 | `treedepth_samples` | Tree depth per iteration (NUTS only) |
 | `divergent_samples` | Divergent transition flags (NUTS only) |
 | `energy_samples` | Hamiltonian energy per iteration (NUTS only) |

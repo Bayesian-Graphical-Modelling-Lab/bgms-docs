@@ -98,7 +98,8 @@ The computation involves:
 
 The six SBM hyperparameters are set via the
 [`sbm_prior()`](../reference/priors.qmd#sbm_prior) constructor passed to
-`edge_prior`:
+`edge_prior` in [`bgm()`](../reference/bgm.qmd) or `difference_prior` in
+[`bgmCompare()`](../reference/bgmCompare.qmd):
 
 | Parameter | `sbm_prior()` argument | Default | Role |
 |-----------|------------------------|---------|------|
@@ -109,14 +110,20 @@ The six SBM hyperparameters are set via the
 | $\alpha_D$ | `dirichlet_alpha` | 1 | Dirichlet concentration for cluster proportions |
 | $\lambda$ | `lambda` | 1 | Poisson rate for number of clusters |
 
-All six hyperparameters are required when `edge_prior = sbm_prior(...)`
-is selected. Validation enforces that all values are positive and finite.
+All six hyperparameters are required when `sbm_prior(...)` is selected.
+Validation enforces that all values are positive and finite.
+
+In `bgmCompare()`, the SBM governs the off-diagonal (pairwise) difference
+inclusions; the diagonal (main-effect difference inclusions, when
+`main_difference_selection = TRUE`) follows a separate Beta-Bernoulli
+update using the within-cluster `alpha` and `beta`.
 
 ## Output
 
 The cluster allocations at each post-warmup iteration are stored in
 `ChainResult::allocation_samples` and accessible via
-`extract_sbm()` in R, which returns:
+`extract_sbm()` in R (works on both `bgms` and `bgmCompare` fits), which
+returns:
 
 - `posterior_num_blocks` — posterior distribution over the number of clusters
 - `posterior_mean_allocations` — posterior mean cluster assignments
