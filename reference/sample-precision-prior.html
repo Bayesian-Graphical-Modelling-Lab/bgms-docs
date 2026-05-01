@@ -514,7 +514,7 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample_precision_prior</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  p,</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  n_samples,</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_warmup              =</span> <span class="dv">1000</span>L,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_warmup              =</span> <span class="dv">2000</span>L,</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">interaction_prior     =</span> <span class="fu">cauchy_prior</span>(<span class="at">scale =</span> <span class="fl">2.5</span>),</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">precision_scale_prior =</span> <span class="fu">gamma_prior</span>(<span class="at">shape =</span> <span class="dv">1</span>, <span class="at">rate =</span> <span class="dv">1</span>),</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">step_size             =</span> <span class="fl">0.1</span>,</span>
@@ -544,7 +544,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td><code>n_warmup</code></td>
-<td>Integer. NUTS warmup iterations. Default: <code>1000</code>.</td>
+<td>Integer. NUTS warmup iterations. Default: <code>2000</code>.</td>
 </tr>
 <tr class="even">
 <td><code>interaction_prior</code></td>

@@ -660,7 +660,7 @@ window.Quarto = {
 </section>
 <section id="prior-selection-in-r" class="level2">
 <h2 class="anchored" data-anchor-id="prior-selection-in-r">Prior selection in R</h2>
-<p>The <code>edge_prior</code> argument in <code>bgm()</code> takes a <a href="../reference/priors.html"><code>bgms_indicator_prior</code></a> object. The <code>family</code> field of that object selects the C++ class:</p>
+<p>The <code>edge_prior</code> argument in <code>bgm()</code> takes a <a href="../reference/priors.html"><code>bgms_indicator_prior</code></a> object. The same family of constructors is also accepted by <code>bgmCompare()</code> via its <code>difference_prior</code> argument, which governs the inclusion of group differences. The <code>family</code> field of that object selects the C++ class:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">

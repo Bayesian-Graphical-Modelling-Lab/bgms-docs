@@ -623,7 +623,12 @@ window.Quarto = {
 <li><strong>Missing data imputation</strong> (if <code>na_impute = TRUE</code>) — Impute missing observations per group using the current parameters. Updates the observation matrix, category counts, Blume-Capel statistics, and pairwise statistics.</li>
 <li><strong>Contrast selection</strong> (if active) — A Metropolis step decides whether each contrast parameter is included or collapsed to zero (<code>update_indicator_differences_metropolis_bgmcompare()</code>).</li>
 <li><strong>Parameter updates</strong> — With adaptive Metropolis, main effects and pairwise effects are updated separately (<code>update_main_effects_metropolis_bgmcompare()</code>, then <code>update_pairwise_effects_metropolis_bgmcompare()</code>). With NUTS, all active parameters are updated jointly via the vectorized log-pseudoposterior.</li>
-<li><strong>Inclusion probability update</strong> (Beta-Bernoulli prior only) — Draw new inclusion probability from the conjugate Beta posterior.</li>
+<li><strong>Difference-prior update</strong> (when <code>difference_selection = TRUE</code>) — Branches on the prior family:
+<ul>
+<li><strong>Beta-Bernoulli</strong>: pooled scalar Beta conjugate update on the shared inclusion probability.</li>
+<li><strong>Stochastic-Block</strong>: pairwise off-diagonal updates delegated to <code>BaseEdgePrior::update()</code> (collapsed Gibbs over allocations and block probabilities); when <code>main_difference_selection = TRUE</code>, a separate Beta-Bernoulli conjugate update is run on the diagonal using the SBM’s within-cluster <code>alpha</code> and <code>beta</code>.</li>
+<li><strong>Bernoulli</strong>: no-op (fixed inclusion probability).</li>
+</ul></li>
 </ol>
 <p>The warmup schedule follows the same five-stage structure as the single-group model (see <a href="../manual/warmup.html">Warmup Schedule</a>).</p>
 </section>
@@ -660,14 +665,18 @@ window.Quarto = {
 <td>Contrast inclusion indicators (iterations <span class="math inline">\(\times\)</span> parameters)</td>
 </tr>
 <tr class="even">
+<td><code>allocation_samples</code></td>
+<td>Cluster allocations (iterations <span class="math inline">\(\times\)</span> variables; SBM difference prior only)</td>
+</tr>
+<tr class="odd">
 <td><code>treedepth_samples</code></td>
 <td>Tree depth per iteration (NUTS only)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>divergent_samples</code></td>
 <td>Divergent transition flags (NUTS only)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>energy_samples</code></td>
 <td>Hamiltonian energy per iteration (NUTS only)</td>
 </tr>

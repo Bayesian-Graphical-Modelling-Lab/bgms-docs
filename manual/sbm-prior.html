@@ -659,7 +659,7 @@ window.Quarto = {
 </section>
 <section id="hyperparameters" class="level2">
 <h2 class="anchored" data-anchor-id="hyperparameters">Hyperparameters</h2>
-<p>The six SBM hyperparameters are set via the <a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a> constructor passed to <code>edge_prior</code>:</p>
+<p>The six SBM hyperparameters are set via the <a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a> constructor passed to <code>edge_prior</code> in <a href="../reference/bgm.html"><code>bgm()</code></a> or <code>difference_prior</code> in <a href="../reference/bgmCompare.html"><code>bgmCompare()</code></a>:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 22%">
@@ -714,11 +714,12 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>All six hyperparameters are required when <code>edge_prior = sbm_prior(...)</code> is selected. Validation enforces that all values are positive and finite.</p>
+<p>All six hyperparameters are required when <code>sbm_prior(...)</code> is selected. Validation enforces that all values are positive and finite.</p>
+<p>In <code>bgmCompare()</code>, the SBM governs the off-diagonal (pairwise) difference inclusions; the diagonal (main-effect difference inclusions, when <code>main_difference_selection = TRUE</code>) follows a separate Beta-Bernoulli update using the within-cluster <code>alpha</code> and <code>beta</code>.</p>
 </section>
 <section id="output" class="level2">
 <h2 class="anchored" data-anchor-id="output">Output</h2>
-<p>The cluster allocations at each post-warmup iteration are stored in <code>ChainResult::allocation_samples</code> and accessible via <code>extract_sbm()</code> in R, which returns:</p>
+<p>The cluster allocations at each post-warmup iteration are stored in <code>ChainResult::allocation_samples</code> and accessible via <code>extract_sbm()</code> in R (works on both <code>bgms</code> and <code>bgmCompare</code> fits), which returns:</p>
 <ul>
 <li><code>posterior_num_blocks</code> — posterior distribution over the number of clusters</li>
 <li><code>posterior_mean_allocations</code> — posterior mean cluster assignments</li>

@@ -574,8 +574,12 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="extract_sbm">extract_sbm</h2>
 <p>Retrieve posterior summaries from a model fitted with the Stochastic Block prior.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_sbm</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>bgms_object</code> must be a fitted <code>bgms</code> object.</p>
-<p>Requires <code>edge_selection = TRUE</code> and <code>edge_prior = sbm_prior(...)</code>. Returns a list with:</p>
+<p>Works on both <code>bgms</code> and <code>bgmCompare</code> fits.</p>
+<ul>
+<li>For <code>bgms</code>: requires <code>edge_selection = TRUE</code> and <code>edge_prior = sbm_prior(...)</code>.</li>
+<li>For <code>bgmCompare</code>: requires <code>difference_selection = TRUE</code> and <code>difference_prior = sbm_prior(...)</code>. The clustering applies to the off-diagonal (pairwise) difference inclusions.</li>
+</ul>
+<p>Returns a list with:</p>
 <ul>
 <li><code>posterior_num_blocks</code> — Posterior probabilities for each possible number of clusters.</li>
 <li><code>posterior_mean_allocations</code> — Posterior mean cluster allocations.</li>
