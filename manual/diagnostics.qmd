@@ -70,7 +70,7 @@ Computes ESS for binary indicator sequences using the two-state Markov chain app
 2. Estimates transition probabilities: $\hat{a} = n_{01} / (n_{00} + n_{01})$, $\hat{b} = n_{10} / (n_{10} + n_{11})$
 3. Returns ESS = $n \cdot (a + b) / (2 - a - b)$, with $n$ the chain length as above
 
-This formula derives from the integrated autocorrelation time of a two-state Markov chain where $\rho(k) = (1-a-b)^k$ [@VanDenBerghEtAl_2026_moms].
+This formula derives from the integrated autocorrelation time of a two-state Markov chain [@VanDenBerghEtAl_2026_moms]: the lag-$k$ autocorrelation of the indicator sequence is $\rho(k) = (1-a-b)^k$, giving integrated autocorrelation time $\tau = (2 - a - b)/(a + b)$ and hence $\text{ESS} = n / \tau$.
 
 When the total number of transitions ($n_{01} + n_{10}$) is below 5, the estimate is unreliable and flagged in the output.
 

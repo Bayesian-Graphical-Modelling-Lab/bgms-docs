@@ -5,6 +5,43 @@ title: "OMRF"
 Implementation details of the ordinal Markov random field in `bgms`.
 Source: `src/models/omrf/omrf_model.h` and `omrf_model.cpp`.
 
+## Adjacent-category formulation
+
+The ordinal MRF is the multivariate model whose full conditionals are
+adjacent category logit models (see the
+[guide page](../guide/omrf.qmd) for the applied motivation). For a
+single ordinal variable $x \in \{0, \dots, m\}$, the adjacent
+category model characterizes the log-odds between successive
+categories, $\log\{p(x = c{+}1)/p(x = c)\} = \eta_c$ with
+$\eta_0 = 0$ for identifiability. The resulting probability mass
+function,
+
+$$
+p(x = c) = \frac{\exp\!\left( \sum_{k=c}^{m} \eta_k \right)}{1 + \sum_{j=1}^{m} \exp\!\left( \sum_{k=j}^{m} \eta_k \right)},
+$$
+
+is a member of the exponential family with canonical parameters
+$\eta_c$ and sufficient statistics $\mathcal{I}(x \geq c)$.
+
+For $p$ ordinal variables, each variable is regressed on the others
+by modeling the canonical parameters as
+$\eta_c = \alpha_c + \sum_{j \neq i} \beta_j\, x_j$, with
+category-specific intercepts $\alpha_c$ and common slopes $\beta_j$.
+The model depends on the ordinal variables only through the
+sufficient statistics $\mathcal{I}(x_i \geq c)$ and the interaction
+terms
+$x_i\, x_j = \sum_c \sum_{c'} \mathcal{I}(x_i \geq c)\, \mathcal{I}(x_j \geq c')$
+— cumulative indicators, so only the ordering of categories matters
+and the model is invariant under monotonic recodings.
+
+Alternative ordinal regressions (cumulative logit, continuation
+ratio) do not correspond to full conditionals of any joint
+distribution and are therefore incompatible with a multivariate MRF
+formulation [@SuggalaYangRavikumar_2017]. The adjacent category
+model does yield consistent full conditionals, and the joint
+distribution that generates them is the ordinal MRF
+[@MarsmanVandenBerghHaslbeck_2025].
+
 ## Ordinal threshold parameterization
 
 For an ordinal variable $X_i$ with $K_i + 1$ categories

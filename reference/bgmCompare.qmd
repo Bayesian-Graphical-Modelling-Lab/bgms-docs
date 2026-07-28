@@ -69,7 +69,13 @@ bgmCompare(
 | `difference_selection` | Logical. If `TRUE`, spike-and-slab priors are applied to the contrast parameters that encode group differences (for two groups, a single scaled difference; for $G > 2$ groups, $G - 1$ orthogonal contrasts). Default: `TRUE`. |
 | `main_difference_selection` | Logical. If `TRUE`, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is `FALSE`. Only used when `difference_selection = TRUE`. |
 | `difference_scale` | Scale of the Cauchy prior for the contrast parameters. Default: `1`. |
-| `difference_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior on difference inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), or [`sbm_prior()`](priors.qmd#sbm_prior). Under `sbm_prior()`, the SBM governs the off-diagonal (pairwise) difference inclusions; the diagonal (main-effect difference inclusions, when `main_difference_selection = TRUE`) follows a separate Beta-Bernoulli using the within-cluster `alpha` and `beta`. Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) and the scalar `difference_probability` / `beta_bernoulli_alpha` / `beta_bernoulli_beta` arguments are accepted but deprecated. Default: `bernoulli_prior(0.5)`. |
+| `difference_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior on difference inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), or [`sbm_prior()`](priors.qmd#sbm_prior) — see the note below the table for the SBM case. Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) and the scalar `difference_probability` / `beta_bernoulli_alpha` / `beta_bernoulli_beta` arguments are accepted but deprecated. Default: `bernoulli_prior(0.5)`. |
+
+Under `difference_prior = sbm_prior(...)`, the stochastic block model
+governs the off-diagonal (pairwise) difference inclusions; the diagonal
+(main-effect difference inclusions, when
+`main_difference_selection = TRUE`) follows a separate Beta-Bernoulli
+prior using the within-cluster `alpha` and `beta`.
 
 ### Prior specification
 

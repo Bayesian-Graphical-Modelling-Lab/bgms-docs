@@ -46,26 +46,23 @@ Two ESS measures are reported:
   output when the total number of indicator transitions ($n_{0 \to 1} +
   n_{1 \to 0}$) is below 5, though still computed and stored.
 
-The mixture ESS is derived from a two-state Markov chain representation
-of the indicator sequence [@VanDenBerghEtAl_2026_moms]. Let $a$ denote the
-probability of switching from excluded to included ($0 \to 1$) and
-$b$ the probability of switching from included to excluded ($1 \to 0$).
-The lag-$k$ autocorrelation of the indicator chain is
-$\rho(k) = (1 - a - b)^k$, which gives an integrated autocorrelation time
-of $\tau = (2 - a - b) / (a + b)$ and an effective sample size of
-$\text{ESS} = T \cdot (a + b) / (2 - a - b)$.
-In practice, $a$ and $b$ are estimated from the observed transition counts
-$n_{01}$, $n_{00}$, $n_{10}$, and $n_{11}$.
+The mixture ESS treats the on/off indicator sequence as a two-state
+process and measures how often the chain actually switches between the
+spike and the slab [@VanDenBerghEtAl_2026_moms]: frequent switching
+means the chain has explored both states well and the inclusion
+probability is precisely estimated; rare switching means the opposite.
+The formula is derived in
+[Convergence Diagnostics](../manual/diagnostics.qmd) in the Technical
+Manual.
 
-#### Limitations near the boundary
-
-The two-state Markov chain ESS has known limitations when the inclusion
-probability is near 0 or 1. In these cases the indicator is almost always
-in the same state, so transitions are rare and the estimates $\hat{a}$ and
-$\hat{b}$ are based on very few events. A single extra transition can
-change the ESS estimate substantially, making it unreliable as a
-precision diagnostic. For this reason, `n_eff_mixt` is suppressed in
-printed output when the total number of transitions is below 5.
+**Limitations near the boundary.** The mixture ESS is unreliable when
+the inclusion probability is near 0 or 1. In these cases the indicator
+is almost always in the same state, so transitions are rare and the
+estimated switching rates are based on very few events. A single extra
+transition can change the ESS estimate substantially, making it
+unreliable as a precision diagnostic. For this reason, `n_eff_mixt` is
+suppressed in printed output when the total number of transitions is
+below 5.
 
 At the extreme — when the indicator never switches — there are no
 transitions to estimate from. This does not necessarily indicate a
@@ -74,14 +71,12 @@ little uncertainty about the indicator and the inclusion probability is
 well determined even without switching.
 
 When transitions are observed but rare, the ESS estimate itself becomes
-imprecise. The transition probability estimates $\hat{a}$ and $\hat{b}$
-are each based on only a few events, giving them high relative error.
-Because the ESS formula $T (a + b) / (2 - a - b)$ depends on their
-sum, small fluctuations in the transition counts can produce large
-swings in the ESS. In these cases, plotting the cumulative inclusion
-probability across iterations provides a more informative check on
-stability: a flat trajectory indicates the estimate has settled, while a
-drifting one suggests the chain needs more iterations.
+imprecise: small fluctuations in the transition counts can produce
+large swings in the ESS. In these cases, plotting the cumulative
+inclusion probability across iterations provides a more informative
+check on stability: a flat trajectory indicates the estimate has
+settled, while a drifting one suggests the chain needs more
+iterations.
 
 ## Monte Carlo standard error (MCSE) {#sec-mcse}
 

@@ -72,14 +72,7 @@ In `bgms`, the diagonal entries are nuisance parameters. They receive a Gamma$(1
 
 ## Likelihood
 
-Unlike the ordinal MRF, whose normalizing constant is intractable and requires a pseudolikelihood approximation (see [Ordinal MRF](omrf.qmd)), the GGM has a closed-form likelihood. For $n$ observations with sufficient statistic $\mathbf{S} = \mathbf{X}^{\sf T}\mathbf{X}$, the log-likelihood is:
-
-$$
-\ell(\boldsymbol{\Theta}) = \frac{n}{2}\,\log|\boldsymbol{\Theta}|
-- \frac{1}{2}\,\operatorname{tr}(\mathbf{S}\,\boldsymbol{\Theta})
-$$
-
-The likelihood depends on the data only through $\mathbf{S}$ and $n$, not through the individual observations (see [GGM Internals](../manual/ggm-internals.qmd) for how it is evaluated).
+Unlike the ordinal MRF, whose normalizing constant is intractable and requires a pseudolikelihood approximation (see [Ordinal MRF](omrf.qmd)), the GGM has a closed-form likelihood — estimates for continuous data involve no approximation. The exact expression and how it is evaluated are given in [GGM Internals](../manual/ggm-internals.qmd).
 
 ## Edge selection
 

@@ -34,9 +34,9 @@ combining the pseudolikelihood with the prior.
 
 ## Statistical properties
 
-The pseudolikelihood and the full likelihood share the same mode: PL
-does not introduce additional bias beyond that already present in
-the full likelihood [@KeetelaarEtAl_2024_PL;
+The pseudolikelihood and the full likelihood asymptotically share the
+same mode: PL does not introduce additional bias beyond that already
+present in the full likelihood [@KeetelaarEtAl_2024_PL;
 @ArenaMarsman_2026_core]. However, the pseudolikelihood underestimates
 the variance of the parameters, producing pseudoposterior distributions
 that are too narrow compared to the true posterior
@@ -48,11 +48,12 @@ Bayes factors derived from the pseudoposterior overstate the evidence
 for or against edge inclusion because the spike-and-slab comparison
 operates on a distribution that is artificially concentrated.
 
-For the mixed MRF, the marginal pseudolikelihood (which integrates
-out the continuous block when computing discrete full conditionals)
-does not appear to underestimate the variance of the cross-type
-(discrete-continuous) interactions. `bgms` therefore uses the
-marginal pseudolikelihood for mixed models.
+For the mixed MRF, simulation evidence collected during development
+suggests that the marginal pseudolikelihood (which integrates out the
+continuous block when computing discrete full conditionals) does not
+underestimate the variance of the cross-type (discrete-continuous)
+interactions. `bgms` therefore uses the marginal pseudolikelihood for
+mixed models.
 
 ## OMRF pseudolikelihood
 
@@ -65,16 +66,55 @@ Implementation details and gradient expressions are documented in
 
 ## Mixed MRF pseudolikelihood
 
-For mixed models, the pseudolikelihood combines discrete and continuous parts.
-The continuous block uses the GGM likelihood. For the discrete block, `bgms`
-integrates out the continuous variables to obtain a marginal MRF on
-$\mathbf{x}$ and applies the pseudolikelihood to that marginal model:
-$\log p(x_s \mid x_{-s})$ rather than $\log p(x_s \mid x_{-s}, y_{\text{obs}})$.
-The marginal interaction matrix is
-$M = A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top$, which couples the
-discrete pseudolikelihood to the precision parameters.
+For mixed models, the objective combines an exact part and an
+approximate part. The continuous conditional
+$p(\mathbf{y} \mid \mathbf{x})$ is multivariate normal, so the
+continuous block uses the exact GGM likelihood. For $n$ observations:
 
-Implementation details are documented in [Mixed MRF Internals](mixed-internals.qmd).
+$$
+\log p(\mathbf{Y} \mid \mathbf{X}) = \frac{n}{2}\left(\log|\boldsymbol{\Theta}| - q\log(2\pi)\right) - \frac{1}{2}\sum_{i=1}^{n}(\mathbf{y}_i - \mathbf{m}_i)^{\sf T}\boldsymbol{\Theta}\,(\mathbf{y}_i - \mathbf{m}_i),
+$$
+
+where
+$\mathbf{m}_i = \boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}\,\mathbf{x}_i$
+is the conditional mean for observation $i$ and
+$\boldsymbol{\Sigma} = \boldsymbol{\Theta}^{-1}$.
+
+For the discrete block, `bgms` integrates out the continuous
+variables to obtain a marginal MRF on $\mathbf{x}$ and applies the
+pseudolikelihood to that marginal model:
+$\log p(x_s \mid x_{-s})$ rather than
+$\log p(x_s \mid x_{-s}, y_{\text{obs}})$. After integration, the log
+marginal density is
+
+$$
+\log p(\mathbf{x}) \propto \sum_{i=1}^{p}\sum_{c=1}^{m_i}\mathcal{I}(x_i = c)\,\mu_{ic} + \mathbf{x}^{\sf T} \mathbf{M}\, \mathbf{x} + 2(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)^{\sf T}\,\mathbf{x}
+$$
+
+with the effective (marginal) discrete-discrete interaction matrix
+
+$$
+\mathbf{M} = \boldsymbol{\Omega}_{xx} + 2\,\boldsymbol{\Omega}_{xy}\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}.
+$$
+
+The off-diagonal entries of $\mathbf{M}$ combine the direct
+discrete-discrete partial associations in $\boldsymbol{\Omega}_{xx}$ with the
+indirect associations induced through the continuous block, which is
+what couples the discrete pseudolikelihood to the precision
+parameters. The linear term
+$2(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)^{\sf T}\mathbf{x}$ shifts the discrete
+category bias by an amount depending on the cross-type interactions
+and the continuous means. The full conditional for discrete variable
+$x_i$ in this marginal MRF has the ordinal-MRF form with rest score
+
+$$
+r_i = 2\sum_{j \neq i} M_{ij}\, x_j + 2\,(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)_i.
+$$
+
+Implementation details — including the code-level names
+($\mathbf{A}_{xx}$, $\mathbf{A}_{xy}$, $\boldsymbol{\Sigma}_{yy}$ for the blocks
+above) and the gradient chain rules — are documented in
+[Mixed MRF Internals](mixed-internals.qmd).
 
 ## Group comparison (bgmCompare)
 
@@ -92,5 +132,5 @@ for efficient gradient computation. `bgms` computes these together to avoid
 redundant work and uses numerically stable paths for exponentiation-sensitive
 regions.
 
-See [Variable Helpers](variable-helpers.qmd) and
-[Numerical Considerations](numerical.qmd).
+See [Fast Computation](variable-helpers.qmd) and, for the portable
+`exp()`/`log()` implementation, [OpenLibM Integration](numerical.qmd).
