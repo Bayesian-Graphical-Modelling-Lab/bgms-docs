@@ -72,7 +72,7 @@ model reports `has_constraints() = true` and the NUTS sampler
 switches to constrained (RATTLE) integration, using
 `logp_and_gradient_full()` and projection callbacks to enforce zero
 entries for excluded edges (see
-[Constrained Leapfrog (RATTLE)](rattle.qmd)).
+[Constrained Leapfrog (RATTLE)](null-space.qmd)).
 
 Edge indicator updates (when active) operate on all three interaction
 blocks.

@@ -22,7 +22,7 @@ The GGM supports two samplers:
 
 - **NUTS** (default) — Gradient-based sampling of all continuous
   parameters simultaneously. Uses a free-element Cholesky
-  parameterization with [RATTLE](rattle.qmd) constraints when edge
+  parameterization with [RATTLE](null-space.qmd) constraints when edge
   selection is active.
 - **Adaptive Metropolis** (fallback) — Element-wise updates of
   individual $\theta_{ij}$ entries via rank-1 Cholesky updates.
@@ -51,7 +51,7 @@ $$
 
 Notation: on this page $\theta$ without subscripts is the packed
 sampler position (the $q$ of the [NUTS](nuts.qmd) and
-[Constrained Leapfrog](rattle.qmd) pages — here $q$ indexes Cholesky
+[Constrained Leapfrog](null-space.qmd) pages — here $q$ indexes Cholesky
 columns instead, mirroring the code); the doubly-subscripted
 $\theta_{ij}$ always denotes an entry of the precision matrix
 $\boldsymbol{\Theta}$. For each column $q$:
@@ -67,7 +67,7 @@ $\boldsymbol{\Theta}$. For each column $q$:
 When column $q$ has $m_q$ excluded edges ($\gamma_{iq} = 0$), the
 constraint matrix $A_q$ encodes the zero-precision requirements
 $\theta_{iq} = \sum_l \Phi_{li}\,\Phi_{lq} = 0$ (see
-[RATTLE](rattle.qmd#projection-callbacks)). The off-diagonal entries
+[RATTLE](null-space.qmd)). The off-diagonal entries
 of $\boldsymbol{\Phi}$ for column $q$ must lie in the null space of
 $A_q$. A Givens QR factorization of $A_q^\top$ produces
 an orthonormal null-space basis $N_q$, and the off-diagonal entries
@@ -97,7 +97,7 @@ When edge selection is active, NUTS operates in the full coordinate
 system (raw Cholesky entries including zeros for excluded edges).
 RATTLE projection enforces the zero-precision constraints at each
 leapfrog step. The switch between these two paths is described in
-[RATTLE: Dispatch in the sampler hierarchy](rattle.qmd#dispatch-in-the-sampler-hierarchy).
+[RATTLE: Dispatch in the sampler hierarchy](null-space.qmd).
 
 ### `GraphConstraintStructure`
 

@@ -225,7 +225,7 @@ geometry. Consider increasing `nuts_max_depth`.
 
 For models with continuous variables and edge selection, the leapfrog
 integrator enforces zero constraints through a projection step (see
-[Constrained Leapfrog](../manual/rattle.qmd) in the Technical Manual).
+[Constrained Cholesky Parameterization](../manual/null-space.qmd) in the Technical Manual).
 After each forward step, the integrator checks whether
 reversing the step returns to the starting point. When the round-trip
 error exceeds a tolerance scaled by the square of the step size, the step

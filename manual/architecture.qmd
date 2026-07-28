@@ -16,39 +16,49 @@ the execution layer orchestrates everything.
 ```
 src/
 ├── mcmc/
-│   ├── algorithms/      # Stateless: nuts_step(), leapfrog()
-│   ├── samplers/        # Stateful: NUTSSampler, MetropolisSampler
+│   ├── algorithms/      # Stateless: nuts_step(), leapfrog(), metropolis_step(),
+│   │                    #   hmc.h/cpp (kinetic energy, step-size heuristic)
+│   ├── samplers/        # Stateful: NUTSSampler, MetropolisSampler, GibbsSampler
 │   └── execution/       # Orchestration: chain_runner, warmup_schedule, chain_result
 ├── models/
 │   ├── base_model.h     # Abstract interface (30+ virtual methods)
-│   ├── ggm/             # GGMModel — precision matrix, Metropolis-only
+│   ├── zratio_gauge.h   # In-chain trust gauge accumulator (hierarchical prior)
+│   ├── ggm/             # GGMModel — NUTS, adaptive Metropolis, or conjugate Gibbs
+│   │                    #   + graph_constraint_structure.h (null-space bookkeeping),
+│   │                    #   ggm_gradient.h/cpp (theta-space forward map + adjoint),
+│   │                    #   zratio_engine.h/cpp, zratio_law.h (Z-ratio surfaces)
 │   ├── omrf/            # OMRFModel — ordinal MRF, gradient-based
-│   └── mixed/           # MixedMRFModel — mixed discrete-continuous MRF
+│   ├── mixed/           # MixedMRFModel — mixed discrete-continuous MRF
+│   └── bgmCompare/      # Group comparison sampler, helpers, logp/grad,
+│                        #   bgmCompare_state.h (sweep state), output
 ├── priors/
 │   ├── edge_prior.h     # BaseEdgePrior + Bernoulli, BetaBernoulli, SBM
+│   ├── edge_prior_correction.h # Normalizing-constant correction tables
 │   ├── sbm_edge_prior.h # MFM-SBM Gibbs updates
 │   ├── sbm_edge_prior.cpp
 │   └── parameter_prior.h # BaseParameterPrior + Cauchy, Normal, BetaPrime, GammaScale
 ├── math/
 │   ├── cholupdate.h/cpp # Rank-1 Cholesky update/downdate (Givens/hyperbolic)
 │   ├── cholesky_helpers.h # Log-determinant, Schur complement
+│   ├── log_sum_exp.h    # Stable log-sum-exp
 │   ├── custom_explog.h/cpp # OpenLibM exp/log for cross-platform consistency
 │   ├── custom_arma_explog.h # Armadillo wrappers for custom exp/log
 │   └── explog_macros.h  # Platform detection macros (MY_EXP, ARMA_MY_EXP)
 ├── utils/
 │   ├── variable_helpers.h/cpp # Numerically stable MRF probabilities
 │   ├── common_helpers.h # Enums (UpdateMethod, EdgePrior), counting helpers
-│   ├── progress_manager.h/cpp # Multi-chain progress bar
-│   └── print_mutex.h    # Thread-safe printing
+│   └── progress_manager.h/cpp # Multi-chain progress bar (main-thread contract)
 ├── rng/
 │   └── rng_utils.h      # SafeRNG wrapper around dqrng::xoshiro256plusplus
-├── bgmCompare/          # Group comparison sampler and helpers
-│   ├── bgmCompare_sampler.h/cpp
-│   ├── bgmCompare_helper.h/cpp
-│   ├── bgmCompare_logp_and_grad.h/cpp
-│   └── bgmCompare_output.h
-└── [interface files]    # Rcpp entry points: sample_ggm.cpp, sample_omrf.cpp, etc.
+└── [interface files]    # Rcpp entry points (sample_ggm.cpp, sample_omrf.cpp,
+                         #   sample_mixed.cpp, bgmCompare_interface.cpp) and
+                         #   *_test_interface.cpp unit-test hooks
 ```
+
+The `*_test_interface.cpp` files (e.g. `ggm_gibbs_test_interface.cpp`,
+`warmup_schedule_test_interface.cpp`, `zratio_test_interface.cpp`)
+expose internal C++ machinery to R-level unit tests; they are not part
+of the user-facing API.
 
 ## Layer separation
 

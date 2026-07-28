@@ -79,27 +79,43 @@ sweep and updates only the masked elements.
 
 ### Warmup boundary
 
-Adaptation runs only while `iteration < total_warmup`. After warmup
-ends, proposal standard deviations are frozen at their final values.
-See [Warmup Schedule](warmup.qmd) for how stage 3b positions this
-tuning within the warmup budget.
+Adaptation runs only during warmup. The Robbins–Monro weight for the
+edge-move proposal SDs comes from the schedule's
+`rm_weight_for_proposal_sd()`, which returns a value only on stage-3b
+iterations, so the policy of which iterations adapt lives in one
+place. After warmup ends, proposal standard deviations are frozen at
+their final values. See [Warmup Schedule](warmup.qmd) for how stage 3b
+positions this tuning within the warmup budget.
+
+## Acceptance-probability diagnostics
+
+Each sweep, the model records its mean acceptance probability across
+all updated components, exposed as
+`last_metropolis_mean_accept_prob()`. During sampling, the chain
+runner stores this per-iteration value in the chain result
+(`am_accept_prob_samples`), which reaches R as the `am_accept_prob__`
+trace. `summarize_am_diagnostics()` (in `R/diagnostics_am.R`) builds
+`fit$am_diag` from it — note that `fit$am_diag$accept_prob` is a
+separate per-parameter empirical move-rate matrix computed from the
+stored samples, not the per-iteration trace.
 
 ## Sampler dispatch
 
 The R interface passes `update_method = "adaptive-metropolis"` through
 unchanged; `resolve_sampler_spec()` in `chain_runner.cpp` maps that
 string to `SamplerKind::AdaptiveMetropolis`, and the factory constructs
-a `MetropolisSampler` from the enum. Any other string (besides
-`"nuts"`) is rejected with an error. See
-[Sampler Hierarchy](samplers.qmd) for the full dispatch flow.
+a `MetropolisSampler` from the enum. Any string other than the three
+supported ones (`"nuts"`, `"adaptive-metropolis"`, `"gibbs"`) throws a
+`std::runtime_error`. See [Sampler Hierarchy](samplers.qmd) for the
+full dispatch flow.
 
 ## Initialization
 
-`MetropolisSampler` uses lazy initialization. On the first call to
-`step()` (or via an explicit `initialize()` call from the chain runner),
-it invokes `model.init_metropolis_adaptation(schedule)`, which creates
-`MetropolisAdaptationController` instances for each parameter block
-in the model.
+The chain runner calls `initialize()` eagerly, before the MCMC loop.
+This invokes `model.init_metropolis_adaptation(schedule)`, which
+creates `MetropolisAdaptationController` instances for each parameter
+block in the model. (A lazy fallback in `step()` still guards the
+uninitialized case.)
 
 ## Source files
 
