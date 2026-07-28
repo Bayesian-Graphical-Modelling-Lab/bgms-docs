@@ -1,0 +1,247 @@
+---
+title: "Prior Samplers"
+---
+
+Functions for drawing from the priors used by [`bgm()`](bgm.qmd) before
+seeing any data: the graph level of the spike-and-slab prior
+(`sample_graph_prior()`), the stochastic block model hyperprior
+(`sample_sbm_prior()`), and the trust gauge that audits the hierarchical
+graph prior's fast approximation (`summarize_zratio_gauge()`). For drawing
+precision matrices from the GGM prior, see
+[`sample_ggm_prior()`](sample-ggm-prior.qmd).
+
+Prior draws are useful for checking what a prior actually implies — the
+edge density, the number of clusters, the spread of the partial
+associations — and for simulation studies that require data generated from
+the model's own prior.
+
+## `sample_graph_prior()` {#sample_graph_prior}
+
+Draws edge-inclusion indicators, together with any edge-prior
+hyperparameters, from the graph level of the spike-and-slab prior used by
+`bgm()` for models with continuous variables. The `spec` argument selects
+how the precision prior composes with the graph:
+
+- `"hierarchical"` (default): the graph marginal is exactly the edge
+  prior. Sampling is ancestral and exact: hyperparameters from their
+  prior, then independent pair flips.
+- `"joint"`: the graph marginal is reweighted by the per-graph normalizer
+  of the determinant-tilted precision prior,
+  $q(\Gamma \mid \text{hyper}) \propto Z(\Gamma)\,\pi(\Gamma \mid \text{hyper})$.
+  Sampling runs the zero-data $(K, \Gamma)$ chain of
+  [`sample_ggm_prior()`](sample-ggm-prior.qmd) and discards $K$; with a
+  Beta-Bernoulli or Stochastic-Block prior the hyperparameter updates
+  apply the normalizing-constant correction, so the first call for a model
+  configuration may build the correction table (cached across fits).
+
+### Usage
+
+```r
+sample_graph_prior(
+  p,
+  n_samples,
+  edge_prior            = bernoulli_prior(0.5),
+  spec                  = c("hierarchical", "joint"),
+  interaction_prior     = normal_prior(scale = 1),
+  precision_scale_prior = exponential_prior(eta = 1),
+  delta                 = NULL,
+  theta                 = NULL,
+  allocations           = NULL,
+  block_probs           = NULL,
+  n_warmup              = 2000,
+  seed                  = 1L,
+  verbose               = TRUE
+)
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `p` | Integer. Number of nodes ($p \ge 2$). |
+| `n_samples` | Integer. Number of prior draws. |
+| `edge_prior` | A [`bgms_indicator_prior`](priors.qmd) object: [`bernoulli_prior()`](priors.qmd#bernoulli_prior), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), or [`sbm_prior()`](priors.qmd#sbm_prior). Default: `bernoulli_prior(0.5)`. |
+| `spec` | One of `"hierarchical"` (default) or `"joint"`. |
+| `interaction_prior` | A [`normal_prior()`](priors.qmd#normal_prior) or [`cauchy_prior()`](priors.qmd#cauchy_prior) for the pairwise (slab) part of the precision prior. Used only when `spec = "joint"`. Default: `normal_prior(scale = 1)`, matching `bgm()`. |
+| `precision_scale_prior` | A [`gamma_prior()`](priors.qmd#gamma_prior) or [`exponential_prior()`](priors.qmd#exponential_prior) for the precision diagonal. Used only when `spec = "joint"`. |
+| `delta` | Non-negative numeric or `NULL` (default): determinant-tilt exponent; `NULL` resolves to $0.5 \log(p)$. Used only when `spec = "joint"`. |
+| `theta` | Optional numeric in $(0, 1)$: fix the inclusion probability of a Bernoulli or Beta-Bernoulli edge prior instead of sampling it. |
+| `allocations` | Optional integer vector of length `p` with 1-based block labels: fix the Stochastic-Block allocation instead of sampling it. Requires `block_probs`. |
+| `block_probs` | Optional symmetric matrix with entries in $(0, 1)$: the block-pair inclusion probabilities that go with `allocations`. |
+| `n_warmup` | Integer. Warmup iterations of the zero-data chain. Used only when `spec = "joint"`. Default: `2000`. |
+| `seed` | Integer. Seed for the draw; the caller's RNG state is restored on exit. |
+| `verbose` | Logical. Print progress of the zero-data chain and of a correction-table build. Default: `TRUE`. |
+
+Under `spec = "joint"` the tilted graph law depends on the precision prior
+through its normalizer, so `interaction_prior`, `precision_scale_prior`,
+and `delta` are part of the graph law; they are ignored under
+`spec = "hierarchical"`.
+
+### Value
+
+A list with elements:
+
+| Component | Description |
+|-----------|-------------|
+| `edge_indicators` | Integer matrix (`n_samples` $\times$ $p(p-1)/2$) of edge-inclusion indicators, columns in row-major upper-triangle order (matching `sample_ggm_prior()`'s `K_offdiag`). |
+| `pair_names` | Character vector labeling the columns as `"i-j"`. |
+| `theta` | Only with an unconditioned `beta_bernoulli_prior()`: numeric vector of sampled inclusion probabilities. |
+| `allocations` | Only with an unconditioned `sbm_prior()`: integer matrix (`n_samples` $\times$ `p`) of sampled block allocations. |
+| `spec`, `edge_prior`, `p` | The specification, edge-prior family, and node count of the draw. |
+
+### Examples
+
+```r
+# Hierarchical spec: the graph marginal is exactly the edge prior.
+g = sample_graph_prior(
+  p = 6, n_samples = 200,
+  edge_prior = bernoulli_prior(0.3), seed = 11
+)
+mean(g$edge_indicators) # about 0.3
+
+# Beta-Bernoulli: inclusion probabilities are sampled alongside.
+g = sample_graph_prior(
+  p = 6, n_samples = 200,
+  edge_prior = beta_bernoulli_prior(2, 4), seed = 11
+)
+mean(g$theta) # about 1/3
+
+# Joint spec: the graph law carries the per-graph normalizer Z(Gamma).
+g = sample_graph_prior(
+  p = 6, n_samples = 500,
+  edge_prior = bernoulli_prior(0.3), spec = "joint",
+  interaction_prior = normal_prior(scale = 0.5),
+  precision_scale_prior = exponential_prior(rate = 2),
+  seed = 11, verbose = FALSE
+)
+mean(g$edge_indicators) # shifted away from 0.3 by the Z(Gamma) tilt
+```
+
+## `sample_sbm_prior()` {#sample_sbm_prior}
+
+Ancestral draws from the hyperprior of [`sbm_prior()`](priors.qmd#sbm_prior):
+a partition of the nodes into blocks (shifted-Poisson number of components,
+Dirichlet-weighted allocation) and Beta-distributed within- and
+between-block edge-inclusion probabilities. These are the hyperparameters
+that `sample_graph_prior()` and `bgm()` integrate over when the edge prior
+is a Stochastic-Block prior.
+
+### Usage
+
+```r
+sample_sbm_prior(p, n_samples, edge_prior = sbm_prior(), seed = 1L)
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `p` | Integer. Number of nodes ($p \ge 2$). |
+| `n_samples` | Integer. Number of prior draws. |
+| `edge_prior` | An [`sbm_prior()`](priors.qmd#sbm_prior) object. Default: `sbm_prior()`. |
+| `seed` | Integer. Seed for the draw; the caller's RNG state is restored on exit. |
+
+### Value
+
+A list with elements:
+
+| Component | Description |
+|-----------|-------------|
+| `allocations` | Integer matrix (`n_samples` $\times$ `p`) of block labels. |
+| `pair_probability` | Numeric matrix (`n_samples` $\times$ $p(p-1)/2$) of implied pair-inclusion probabilities, columns in row-major upper-triangle order. |
+| `num_blocks` | Integer vector: number of occupied blocks per draw. |
+| `pair_names` | Character vector labeling the pair columns as `"i-j"`. |
+| `p` | The node count. |
+
+### Examples
+
+```r
+draws = sample_sbm_prior(p = 8, n_samples = 100, seed = 4)
+table(draws$num_blocks)
+range(draws$pair_probability)
+```
+
+## `summarize_zratio_gauge()` {#summarize_zratio_gauge}
+
+Reports the per-chain trust gauge for the hierarchical graph prior
+(`precision_graph_prior = "hierarchical"` in [`bgm()`](bgm.qmd), or
+`spec = "hierarchical"` in
+[`sample_ggm_prior()`](sample-ggm-prior.qmd)). Under that prior the
+sampler decides each edge with a fast approximation of the per-graph
+normalizer ratio; in a set of assessment sweeps after sampling, the gauge
+redoes a subset of each chain's own edge decisions with the exact
+calculation and records two statistics per chain:
+
+- **`flip_rate`** — the fraction of add/remove decisions that would come
+  out differently under the exact calculation. A chain is flagged on this
+  channel when `flip_rate` exceeds the tolerance by more than the exact
+  reference's own Monte Carlo noise. This channel detects error that
+  changed decisions the chain actually made; it is insensitive to a small
+  coherent error at chains whose decisions are far from their
+  accept/reject boundaries.
+- **`harm_pred`** — the projected distortion of the mean posterior
+  inclusion probability under the measured approximation error. This
+  channel detects coherent error whose equilibrium effect exceeds the
+  tolerance even when no individual decision visibly flips; it targets the
+  mean-inclusion shift and does not bound edge-specific distortions that
+  cancel in the mean. It is computed for Bernoulli and Beta-Bernoulli edge
+  priors; under other priors it is `NA`.
+
+In `bgm()`, the gauge is off by default; enable it with
+`options(bgms.zratio_gauge_sweeps = 2L)` before fitting, after which the
+summary is returned as `fit$zratio_diag` and flagged issues print like
+other sampler warnings. Most users read the result there rather than
+calling this function directly; the direct call is for re-summarizing
+stored sampler output at different tolerances.
+
+### Usage
+
+```r
+summarize_zratio_gauge(
+  chains,
+  threshold      = 0.01,
+  verbose        = TRUE,
+  harm_inputs    = NULL,
+  harm_threshold = 0.01
+)
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `chains` | List of per-chain sampler outputs, each carrying the gauge block that the sampler attaches under the hierarchical prior (`flip_rate`, `noise_floor`, `se_mean`, `se_sd`, `se_mcse`, `n_ent`, `n_ref`, `n_capped`). |
+| `threshold` | Numeric flag threshold on `flip_rate`. Default: `0.01`. |
+| `verbose` | Logical: message flagged chains. Default: `TRUE`. |
+| `harm_inputs` | Optional list enabling the `harm_pred` channel: `pip` (a list with one numeric vector of posterior edge-inclusion probabilities per chain) and, for a Beta-Bernoulli edge prior, its shape parameters `a` and `b` (`NULL` for a fixed inclusion probability). When `NULL` (default) the `harm_pred` columns are `NA` and only the `flip_rate` channel flags. |
+| `harm_threshold` | Numeric flag threshold on `harm_pred`, in inclusion-probability units. Default: `0.01`. |
+
+### Value
+
+An invisible named list:
+
+| Component | Description |
+|-----------|-------------|
+| `per_chain` | Data frame, one row per chain: `flip_rate` and its `flag`; the signed mean and spread of the log-ratio error (`se_mean`, `se_sd`), the reference-noise component `se_mcse` and combined standard error `se_se`; the reference `noise_floor`; the pair counts (`n_ent` non-trivial seen, `n_ref` referenced, `n_capped` cap hits); and the harm channel (`amplification`, `kappa`, `harm_pred`, `harm_flag`). |
+| `threshold` | The flag tolerance on `flip_rate`. |
+| `harm_threshold` | The flag tolerance on `harm_pred`. |
+| `flagged` | Logical: any chain flagged on either channel. |
+
+### Examples
+
+```r
+draws = sample_ggm_prior(
+  p = 8, n_samples = 100, n_warmup = 200,
+  interaction_prior = normal_prior(scale = 0.5),
+  precision_scale_prior = gamma_prior(shape = 1, rate = 2),
+  spec = "hierarchical", verbose = FALSE
+)
+draws$zratio_diagnostics$per_chain
+```
+
+## See also
+
+[`sample_ggm_prior()`](sample-ggm-prior.qmd),
+[Prior Constructors](priors.qmd),
+[`bgm()`](bgm.qmd),
+[Edge Clustering](../guide/clustering.qmd).

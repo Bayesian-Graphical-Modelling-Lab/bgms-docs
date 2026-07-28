@@ -8,24 +8,33 @@ prior alone.
 
 ## Description
 
-Two prior specifications are supported via the `spec` argument:
+Three prior specifications are supported via the `spec` argument:
 
 - `"conditional"` (default): fix a graph $\Gamma$ and sample
-  $K \mid \Gamma$ using the same constrained NUTS sampler that drives
+  $K \mid \Gamma$ using the same theta-space NUTS sampler that drives
   [`bgm()`](bgm.qmd) for continuous data. Off-diagonals at excluded
-  positions are held exactly at zero throughout the chain (see
-  [Constrained Leapfrog](../manual/rattle.qmd) for how).
+  positions are held exactly at zero throughout the chain.
 - `"joint"`: sample $(K, \Gamma)$ jointly from the un-normalised joint
-  prior, using the adaptive-Metropolis chain from [`bgm()`](bgm.qmd) with
-  edge selection on and the likelihood off. Useful for simulation-based
+  prior, using the adaptive-Metropolis (or Gibbs) chain from
+  [`bgm()`](bgm.qmd) with edge selection on and the likelihood off. The
+  marginal on $\Gamma$ is then the edge prior times a graph-dependent
+  normalizing constant, $\pi(\Gamma) \cdot Z(\Gamma)$ — the joint
+  specification, not the hierarchical one. Useful for simulation-based
   calibration of `bgm()`'s default sampler.
+- `"hierarchical"`: sample $(K, \Gamma)$ from the hierarchical
+  specification $p(\Gamma)\,p(K \mid \Gamma)$ with $p(K \mid \Gamma)$
+  normalized per graph, so the marginal on $\Gamma$ is exactly the edge
+  prior $\pi(\Gamma)$. The per-graph normalizer ratio in each between-edge
+  move is evaluated by the deterministic local Z-ratio approximation.
+  Requires `normal_prior()` or `cauchy_prior()` interactions.
 
 Priors are specified on the partial-association scale $K_{yy} = -K/2$:
 `interaction_prior` acts on $K_{yy,ij} = -K_{ij}/2$, so a
 `normal_prior(scale = s)` on the association scale is equivalent to a
 $\mathrm{Normal}(0, 2s)$ prior on $K_{ij}$ itself. Likewise
-`precision_scale_prior` acts on $K_{ii}/2$: the default `gamma_prior(1, 1)`
-implies $K_{ii}/2 \sim \mathrm{Exp}(1)$ and therefore
+`precision_scale_prior` acts on $K_{ii}/2$: the default
+`exponential_prior(eta = 1)` with the default `normal_prior(scale = 1)`
+interaction prior resolves to $K_{ii}/2 \sim \mathrm{Exp}(1)$ and therefore
 $K_{ii} \sim \mathrm{Exp}(1/2)$ (mean $2$). The same convention is used by
 [`bgm()`](bgm.qmd) and the continuous block of the mixed-MRF model, so a
 prior argument passed here means the same distribution it would mean there.
@@ -39,16 +48,20 @@ sample_ggm_prior(
   p,
   n_samples,
   n_warmup              = 2000,
-  interaction_prior     = cauchy_prior(scale = 2.5),
-  precision_scale_prior = gamma_prior(shape = 1, rate = 1),
+  interaction_prior     = normal_prior(scale = 1),
+  precision_scale_prior = exponential_prior(eta = 1),
   step_size             = 0.1,
   max_depth             = 10L,
   seed                  = 1L,
   verbose               = TRUE,
   edge_indicators       = NULL,
   delta                 = NULL,
-  spec                  = c("conditional", "joint"),
-  edge_inclusion_prob   = 0.5
+  spec                  = c("conditional", "joint", "hierarchical"),
+  edge_inclusion_prob   = 0.5,
+  update_method         = c("adaptive-metropolis", "gibbs"),
+  edge_prior            = NULL,
+  apply_correction      = TRUE,
+  zratio_diagnostics    = TRUE
 )
 ```
 
@@ -59,16 +72,20 @@ sample_ggm_prior(
 | `p` | Integer. Dimension of the precision matrix ($p \ge 2$). |
 | `n_samples` | Integer. Number of post-warmup draws to keep. |
 | `n_warmup` | Integer. NUTS warmup iterations. Default: `2000`. |
-| `interaction_prior` | A [`bgms_parameter_prior`](priors.qmd) for the partial-association off-diagonals $K_{yy,ij} = -K_{ij}/2$. Allowed: [`cauchy_prior()`](priors.qmd#cauchy_prior), [`normal_prior()`](priors.qmd#normal_prior). [`beta_prime_prior()`](priors.qmd#beta_prime_prior) is not supported here. Default: `cauchy_prior(scale = 2.5)` (i.e. $K_{ij}$ has an implied $\mathrm{Cauchy}(0, 5)$ prior). |
-| `precision_scale_prior` | A [`bgms_scale_prior`](priors.qmd) for $K_{ii}/2$. Allowed: [`gamma_prior()`](priors.qmd#gamma_prior), [`exponential_prior()`](priors.qmd#exponential_prior). Default: `gamma_prior(1, 1)`, implying $K_{ii} \sim \mathrm{Exp}(1/2)$. |
-| `step_size` | Positive numeric. Initial NUTS step size for the automatic step-size tuning (see [NUTS](../manual/nuts.qmd)). Default: `0.1`. Used only for `spec = "conditional"`; ignored on the `"joint"` path. |
+| `interaction_prior` | A [`bgms_parameter_prior`](priors.qmd) for the partial-association off-diagonals $K_{yy,ij} = -K_{ij}/2$. Allowed: [`normal_prior()`](priors.qmd#normal_prior), [`cauchy_prior()`](priors.qmd#cauchy_prior). [`beta_prime_prior()`](priors.qmd#beta_prime_prior) is not supported here. Default: `normal_prior(scale = 1)`, matching `bgm()`. |
+| `precision_scale_prior` | A [`bgms_scale_prior`](priors.qmd) for $K_{ii}/2$. Allowed: [`exponential_prior()`](priors.qmd#exponential_prior), [`gamma_prior()`](priors.qmd#gamma_prior). Both accept the rate in the raw frame (`rate`) or the standardized frame (`eta`; the raw rate is derived as `eta / s` for interaction-prior scale `s`). Default: `exponential_prior(eta = 1)`. |
+| `step_size` | Positive numeric. Initial NUTS step size used to seed dual-averaging adaptation (see [NUTS](../manual/nuts.qmd)). Default: `0.1`. Used only for `spec = "conditional"` (NUTS path); ignored otherwise. |
 | `max_depth` | Integer. Maximum NUTS tree depth. Default: `10`. Used only for `spec = "conditional"`. |
 | `seed` | Integer. RNG seed for the chain. Default: `1`. |
 | `verbose` | Logical. If `TRUE` (default), print a progress bar. |
-| `edge_indicators` | Optional integer $p \times p$ matrix with `1` = edge included, `0` = excluded. Must be symmetric with `1`s on the diagonal. Default: full graph (all edges included). Used only for `spec = "conditional"` (the chain samples $K \mid \Gamma$); ignored for `spec = "joint"`. |
+| `edge_indicators` | Optional integer $p \times p$ matrix with `1` = edge included, `0` = excluded. Must be symmetric with `1`s on the diagonal. Default: full graph (all edges included). Used only for `spec = "conditional"` (the chain samples $K \mid \Gamma$); ignored when the chain samples $\Gamma$. |
 | `delta` | Non-negative numeric, or `NULL` for the dimension-adaptive default. Determinant-tilt exponent: multiplies the prior by $|K|^{\delta}$, softly repelling the chain from the boundary of the positive-definite cone. `NULL` (default) auto-resolves to $0.5 \log(p)$. Pass `delta = 0` for the untilted prior. |
-| `spec` | One of `"conditional"` (default: sample $K \mid \Gamma$ at fixed $\Gamma$) or `"joint"` (sample $(K, \Gamma)$ jointly from the un-normalised joint prior). |
+| `spec` | One of `"conditional"` (default: sample $K \mid \Gamma$ at fixed $\Gamma$), `"joint"` (sample $(K, \Gamma)$ jointly from the un-normalised joint prior), or `"hierarchical"` (sample $(K, \Gamma)$ from the per-graph normalized specification via the Z-ratio approximation). |
 | `edge_inclusion_prob` | Probability in $(0, 1)$ for the Bernoulli edge prior used when `spec = "joint"`. Default: `0.5`. Ignored when `spec = "conditional"`. |
+| `update_method` | One of `"adaptive-metropolis"` (default) or `"gibbs"`. Sampler driving the `spec = "joint"` chain; the Gibbs chain uses the conjugate row and edge updates and needs no proposal tuning. Ignored when `spec = "conditional"` (NUTS). |
+| `edge_prior` | A [`bgms_indicator_prior`](priors.qmd) object ([`bernoulli_prior()`](priors.qmd#bernoulli_prior), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), or [`sbm_prior()`](priors.qmd#sbm_prior)), or `NULL` (default) for a Bernoulli prior with probability `edge_inclusion_prob`. Only for `spec = "joint"`. |
+| `apply_correction` | Logical. For the hierarchical edge priors (`beta_bernoulli_prior()`, `sbm_prior()`), apply the normalizing-constant correction to the hyperparameter updates (default `TRUE`; the correction table is built from the tilted prior sampler and cached across calls). With `FALSE` the plain conjugate updates are used, whose hyperparameter marginals do not match the hyperpriors under the determinant tilt. |
+| `zratio_diagnostics` | Logical (default `TRUE`). Only for `spec = "hierarchical"`: run the trust gauge ([`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge)) on the returned chain and attach the result; detected issues are printed when `verbose`. The gauge redoes a subset of the chain's edge decisions with the exact calculation and reports two alarms: how often the decision outcome differs (`flip_rate`), and the projected distortion of the mean inclusion probability from the measured error under the edge prior's feedback (`harm_pred`). Evidence-free sampling is the regime where the second alarm matters: a small consistent error can shift the graph marginal without flipping individual decisions. |
 
 ## Value
 
@@ -81,11 +98,23 @@ A list with components:
 | `offdiag_names` | Character vector of length $p(p-1)/2$ naming the columns of `K_offdiag` (e.g. `"K_1_2"`). |
 | `diag_names` | Character vector of length $p$ naming the columns of `K_diag`. |
 | `edge_indicators` | Under `spec = "conditional"`, the $p \times p$ integer matrix of fixed inclusion indicators used (full graph if not supplied). Under `spec = "joint"`, an `n_samples` $\times$ $p(p-1)/2$ integer matrix of sampled $\Gamma_{ij}$ indicators (column order matches `K_offdiag`). |
+| `theta` | Only with `beta_bernoulli_prior()`: numeric vector of length `n_samples` with the sampled inclusion probability. |
+| `allocations` | Only with `sbm_prior()`: integer matrix (`n_samples` $\times$ $p$) of sampled cluster allocations (1-based). |
+| `zratio_diagnostics` | Only with `spec = "hierarchical"` and `zratio_diagnostics = TRUE`: the trust-gauge summary from [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge). |
+
+## Details
+
+When `spec = "joint"`, the chain is initialized from an ancestral draw of
+the edge prior (hyperparameters from their prior, then indicators given the
+hyperparameters), keyed to `seed`. Under a hierarchical edge prior the
+inclusion parameter and the graph density are coupled, and a full-graph
+start could otherwise pin both near 1 for a large number of sweeps in
+zero-evidence chains.
 
 ## Examples
 
 ```r
-# Default Cauchy(0, 2.5) off-diagonal, Gamma(1, 1) diagonal, p = 4.
+# Default Normal(0, 1) off-diagonal, Exponential(1) diagonal, p = 4.
 draws = sample_ggm_prior(
   p = 4, n_samples = 200, n_warmup = 200,
   verbose = FALSE
@@ -107,8 +136,9 @@ all(draws$K_offdiag[, "K_1_4"] == 0) # TRUE
 
 ## See also
 
-[`cauchy_prior()`](priors.qmd#cauchy_prior),
 [`normal_prior()`](priors.qmd#normal_prior),
+[`cauchy_prior()`](priors.qmd#cauchy_prior),
 [`gamma_prior()`](priors.qmd#gamma_prior),
 [`exponential_prior()`](priors.qmd#exponential_prior),
+[Prior Samplers](prior-samplers.qmd),
 [`bgm()`](bgm.qmd).

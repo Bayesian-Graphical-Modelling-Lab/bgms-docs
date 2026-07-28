@@ -13,7 +13,18 @@ Complete documentation for all exported functions in `bgms`.
 |----------|-------------|
 | [`bgm()`](bgm.qmd) | Estimates the main effects and pairwise interactions of a network using a Bayesian framework. |
 | [`bgmCompare()`](bgmCompare.qmd) | Estimates whether edge weights and category thresholds differ across networks of two different groups. |
-| [`sample_ggm_prior()`](sample-ggm-prior.qmd) | Prior sampler for the GGM precision matrix. Used for prior visualization and simulation-based calibration. |
+
+## Prior Samplers
+
+Draw from the model's priors before seeing data, for prior visualization
+and simulation studies.
+
+| Function | Description |
+|----------|-------------|
+| [`sample_ggm_prior()`](sample-ggm-prior.qmd) | Prior sampler for the GGM precision matrix (conditional, joint, or hierarchical specification). |
+| [`sample_graph_prior()`](prior-samplers.qmd#sample_graph_prior) | Prior sampler for the edge-inclusion indicators and edge-prior hyperparameters. |
+| [`sample_sbm_prior()`](prior-samplers.qmd#sample_sbm_prior) | Ancestral sampler for the stochastic block model hyperprior (allocations, pair probabilities). |
+| [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge) | Trust gauge for the hierarchical graph prior's fast normalizer approximation. |
 
 ## Prior Constructors
 
@@ -23,14 +34,14 @@ Prior specification objects passed to `bgm()` and `bgmCompare()` via the
 
 | Constructor | Family | Used for |
 |-------------|--------|----------|
-| [`cauchy_prior()`](priors.qmd#cauchy_prior) | Cauchy(0, scale) | Interactions, thresholds, means |
-| [`normal_prior()`](priors.qmd#normal_prior) | Normal(0, scale) | Interactions, thresholds, means |
+| [`cauchy_prior()`](priors.qmd#cauchy_prior) | Cauchy(0, scale) | Interactions (`bgmCompare()` default), thresholds, means |
+| [`normal_prior()`](priors.qmd#normal_prior) | Normal(0, scale) | Interactions (`bgm()` default), thresholds, means |
 | [`beta_prime_prior()`](priors.qmd#beta_prime_prior) | Beta-prime | Thresholds (default), interactions |
-| [`gamma_prior()`](priors.qmd#gamma_prior) | Gamma(shape, rate) | Precision-matrix diagonal |
-| [`exponential_prior()`](priors.qmd#exponential_prior) | Exponential(rate) | Precision-matrix diagonal |
+| [`gamma_prior()`](priors.qmd#gamma_prior) | Gamma(shape, rate or eta) | Precision-matrix diagonal |
+| [`exponential_prior()`](priors.qmd#exponential_prior) | Exponential(rate or eta) | Precision-matrix diagonal (default) |
 | [`bernoulli_prior()`](priors.qmd#bernoulli_prior) | Bernoulli | Edge / difference inclusion (default) |
 | [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior) | Beta-Bernoulli | Edge / difference inclusion |
-| [`sbm_prior()`](priors.qmd#sbm_prior) | Stochastic Block Model | Edge inclusion |
+| [`sbm_prior()`](priors.qmd#sbm_prior) | Stochastic Block Model | Edge / difference inclusion |
 
 ## Methods
 
@@ -52,6 +63,7 @@ Prior specification objects passed to `bgm()` and `bgmCompare()` via the
 | [`extract_pairwise_interactions()`](extractors.qmd#extract_pairwise_interactions) | Extract posterior samples of partial association parameters |
 | [`extract_indicators()`](extractors.qmd#extract_indicators) | Extract posterior samples of edge or difference indicators |
 | [`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities) | Compute posterior inclusion probabilities from indicator samples |
+| [`extract_prior_inclusion_probabilities()`](extractors.qmd#extract_prior_inclusion_probabilities) | Compute prior inclusion probabilities, matched in shape to the posterior ones for Bayes factor computation |
 | [`extract_indicator_priors()`](extractors.qmd#extract_indicator_priors) | Retrieve the indicator prior specification (prior type and hyperparameters) |
 | [`extract_group_params()`](extractors.qmd#extract_group_params) | Extract group-specific parameters from a `bgmCompare` fit |
 | [`extract_sbm()`](extractors.qmd#extract_sbm) | Extract stochastic block model assignments and probabilities |

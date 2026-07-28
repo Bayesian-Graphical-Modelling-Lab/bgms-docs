@@ -158,6 +158,13 @@ Returns:
 - `bgms`, `posterior-sample`: list of matrices (one per draw).
 - `bgmCompare`: matrix (`nsim x p`) for the selected group.
 
+Discrete columns are returned on the original category scale of the
+training data (the values supplied to `bgm()`), not the internal `0, 1,
+..., m` recoding, so the output can be passed straight to `predict()`. For
+mixed MRF models, discrete columns contain non-negative integers and
+continuous columns contain real-valued observations, ordered as in the
+original data.
+
 ### Example
 
 ```{r}
