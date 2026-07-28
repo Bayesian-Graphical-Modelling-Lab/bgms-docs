@@ -69,7 +69,9 @@ The logic:
 - **Windows** — Uses custom exp/log by default because the Rtools
   toolchain's `std::exp`/`std::log` are much slower
 - **Linux/macOS** — Uses the system libm by default (which is fast).
-  Custom exp/log can be enabled by setting `CUSTOM_EXP_LOG=1`
+  Custom exp/log can be enabled by setting `CUSTOM_EXP_LOG=1` —
+  useful for cross-platform reproducibility, at the cost of slightly
+  slower scalar operations
 
 The `configure` and `configure.win` scripts do not control this
 flag. Platform detection is handled entirely by the C++ preprocessor
