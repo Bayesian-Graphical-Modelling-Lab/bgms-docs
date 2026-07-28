@@ -1,0 +1,149 @@
+---
+title: "Constrained Cholesky Parameterization"
+---
+
+When edge selection is active in a model with continuous variables,
+excluded edges must remain exactly zero while the precision matrix stays
+positive definite. `bgms` enforces both requirements through the
+parameterization itself: the sampler works in a set of free coordinates in
+which every point corresponds to a positive-definite precision matrix with
+exact zeros at the excluded edges. No projection, constraint solve, or
+correction step is needed during integration — NUTS runs as an ordinary
+unconstrained sampler.
+
+The implementation lives in `graph_constraint_structure.h` (the per-graph
+bookkeeping) and `ggm_gradient.cpp` (the forward map and gradient); the
+mixed MRF reuses the same engine for its continuous block.
+
+## Why constraints?
+
+Each pairwise parameter is either exactly zero (edge absent) or free
+(edge present). For models with continuous variables, the precision
+matrix $\boldsymbol{\Theta}$ must in addition be positive definite. `bgms`
+parameterizes $\boldsymbol{\Theta} = \boldsymbol{\Phi}^\top \boldsymbol{\Phi}$, where
+$\boldsymbol{\Phi}$ is the upper Cholesky factor with positive diagonal
+$\Phi_{qq} = e^{\psi_q}$. Positive definiteness is then guaranteed by
+construction.
+
+The complication is sparsity. An excluded edge ($\gamma_{iq} = 0$)
+requires $\theta_{iq} = 0$, which in Cholesky entries means
+
+$$
+\theta_{iq} = \sum_l \Phi_{li}\,\Phi_{lq} = 0.
+$$
+
+Across the whole matrix this is a quadratic constraint on
+$\boldsymbol{\Phi}$, because columns interact through the
+$\boldsymbol{\Phi}^\top \boldsymbol{\Phi}$ product. The key observation is that it
+becomes *linear* one column at a time: with the earlier columns
+$1, \ldots, q-1$ held fixed, the constraints on column $q$'s
+off-diagonal entries $x_q = \Phi_{1:q-1,\,q}$ form a linear system
+
+$$
+A_q\, x_q = 0,
+$$
+
+where each row of $A_q$ is (the leading part of) an earlier column
+$\boldsymbol{\Phi}_{\cdot i}$ for an excluded edge $(i, q)$. The set of valid
+$x_q$ is therefore a linear subspace — the null space of $A_q$ — and the
+sampler can parameterize that subspace directly.
+
+## The theta vector
+
+The free coordinates are collected in a vector $\theta$ with the layout
+
+$$
+\theta = (\psi_1,\; [f_2, \psi_2],\; [f_3, \psi_3],\; \ldots,\; [f_p, \psi_p]),
+$$
+
+where $\psi_q$ is the log-diagonal of column $q$ and $f_q$ holds that
+column's free off-diagonal coordinates. Column $q$ has
+$m_q$ excluded edges and $d_q = (q - 1) - m_q$ free coordinates, so the
+active dimension is
+
+$$
+\dim(\theta) = p + \sum_q d_q = p + |E|,
+$$
+
+with $|E|$ the number of included edges — compared to the full dimension
+$p + p(p-1)/2$ of an unconstrained upper triangle. The
+`GraphConstraintStructure` records, for each column, which rows are
+excluded and included, plus the offsets of each column's block in the
+active and full vectors. It is rebuilt only when the graph changes (an
+edge indicator toggles); its contents do not depend on the parameter
+values.
+
+## From theta to the precision matrix
+
+The forward map builds $\boldsymbol{\Phi}$ column by column:
+
+1. Set the diagonal $\Phi_{qq} = e^{\psi_q}$.
+2. Assemble $A_q^\top$ from the already-built earlier columns at the
+   excluded rows.
+3. Compute a QR decomposition of $A_q^\top$ using Givens rotations. The
+   last $d_q$ columns of $Q$ form an orthonormal basis $N_q$ of the null
+   space of $A_q$.
+4. Set the off-diagonal entries $x_q = N_q f_q$.
+
+Two special cases avoid work: a column with no excluded edges has
+$x_q = f_q$ directly ($N_q$ is the identity and is never materialized),
+and a fully constrained column has $x_q = 0$. Finally
+$\boldsymbol{\Theta} = \boldsymbol{\Phi}^\top \boldsymbol{\Phi}$.
+
+Because $N_q$ depends on the earlier columns of $\boldsymbol{\Phi}$, and those
+depend on $\theta$, the basis is recomputed inside every forward-map
+evaluation — this is cheap (Givens rotations on small per-column systems)
+and exact.
+
+### Jacobian
+
+Densities specified on $\boldsymbol{\Theta}$ (the slab on the off-diagonals,
+the scale prior on the diagonal, the determinant tilt) are evaluated
+through this map, so the log-posterior in $\theta$ carries the log
+absolute determinant of the Jacobian:
+
+$$
+\log \lvert \det J \rvert
+= p \log 2 + 2 \sum_q \psi_q + \sum_{i < p} (p - 1 - i)\, \psi_i
+  - \sum_q \sum_j \log \lvert R_{q,jj} \rvert,
+$$
+
+where the $R_{q,jj}$ are the diagonal entries of the per-column QR factor
+$R$ — the only place the constraint geometry enters the density.
+
+### Gradient
+
+The gradient of the log-posterior with respect to $\theta$ is computed by
+an adjoint (reverse-mode) pass: the derivative with respect to
+$\boldsymbol{\Phi}$ is formed first, and a reverse sweep through the stored
+Givens rotations propagates it back to the free coordinates $f_q$ and
+$\psi_q$, including the contribution from the rotation of the null-space
+basis itself. The engine keeps a per-evaluation workspace so steady-state
+calls (fixed graph between rebuilds) allocate nothing.
+
+## Where it is used
+
+- **GGM** — the entire precision matrix is parameterized this way; see
+  [GGM Internals](ggm-internals.qmd).
+- **Mixed MRF** — only the continuous-continuous block
+  $\boldsymbol{\Theta}_{yy}$ is a constrained precision matrix; the discrete
+  and cross parameters remain plain coordinates. See
+  [Mixed MRF Internals](mixed-internals.qmd).
+- **OMRF** — not applicable: purely discrete models have unconstrained
+  real parameters.
+
+From the sampler's point of view there is nothing special about the
+result: [NUTS](nuts.qmd) receives an ordinary differentiable target of
+dimension $p + |E|$, with the standard [leapfrog integrator](nuts.qmd)
+and no constraint handling. When an edge move changes the graph, the
+model rebuilds the `GraphConstraintStructure` and the active dimension
+changes with it; the [warmup schedule](warmup.qmd) accounts for this when
+adapting the mass matrix.
+
+## See also
+
+[GGM Internals](ggm-internals.qmd),
+[Mixed MRF Internals](mixed-internals.qmd),
+[NUTS](nuts.qmd),
+[Sampler Hierarchy](samplers.qmd),
+[Model Classes](model-classes.qmd).

@@ -67,12 +67,11 @@ five blocks) in a single NUTS step. The `logp_and_gradient()` method
 computes the log-pseudoposterior and gradient for the entire vector,
 including the Cholesky block with its log-determinant Jacobian.
 
-When edge selection is active (or the initial graph is sparse), the
-model reports `has_constraints() = true` and the NUTS sampler
-switches to constrained (RATTLE) integration, using
-`logp_and_gradient_full()` and projection callbacks to enforce zero
-entries for excluded edges (see
-[Constrained Leapfrog (RATTLE)](rattle.qmd)).
+Excluded edges need no special integration: discrete-discrete and
+cross edges are dropped from the active vector, and excluded
+continuous-continuous edges are held exactly at zero by the
+[constrained Cholesky parameterization](null-space.qmd) of the
+$\boldsymbol{\Theta}_{yy}$ block.
 
 Edge indicator updates (when active) operate on all three interaction
 blocks.

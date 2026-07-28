@@ -9,10 +9,10 @@ This page documents the C++ implementation of convergence diagnostics in `bgms`.
 After sampling, `bgms` computes convergence diagnostics for all parameters:
 
 - **Effective sample size (ESS)** — equivalent number of independent draws
-- **R-hat** — between-chain vs within-chain variance ratio
+- **Split-R-hat** — between-chain vs within-chain variance ratio, computed on half-chains [@VehtariEtAl_2021]
 - **Monte Carlo standard error (MCSE)** — precision of the posterior mean estimate
 
-The C++ implementation matches `coda::effectiveSize` for ESS and `coda::gelman.diag` for R-hat, but runs in parallel across parameters for speed.
+The C++ implementation matches `coda::effectiveSize` for ESS and computes the classic split-R-hat for convergence, running in parallel across parameters for speed; the R layer splits each chain in half before calling the R-hat kernel.
 
 ## C++ implementation
 
@@ -39,7 +39,7 @@ The per-chain algorithm follows @PlummerEtAl_2006_coda:
 
 This matches `coda::spectrum0.ar` + `coda::effectiveSize`.
 
-### Gelman-Rubin R-hat
+### Split-R-hat
 
 ```cpp
 // [[Rcpp::export(.compute_rhat_cpp)]]
@@ -48,14 +48,32 @@ Rcpp::NumericVector compute_rhat_cpp(Rcpp::NumericVector array3d);
 
 Computes R-hat for a 3D array `[niter x nchains x nparam]`. Returns `NA` for single-chain input.
 
-The algorithm follows @GelmanRubin_1992 with the degrees-of-freedom adjustment from `coda::gelman.diag`:
+The C++ kernel computes the classic statistic [@GelmanRubin_1992]:
 
 1. Compute per-chain means $\bar{x}_c$ and variances $s^2_c$
 2. Within-chain variance: $W = \frac{1}{m} \sum_c s^2_c$
 3. Between-chain variance: $B = \frac{n}{m-1} \sum_c (\bar{x}_c - \bar{x})^2$
 4. Pooled variance estimate: $\hat{V} = \frac{n-1}{n} W + \frac{1}{n} B$
-5. Degrees-of-freedom adjustment via estimated variance of $\hat{V}$
-6. R-hat = $\sqrt{\frac{df + 3}{df + 1} \cdot \frac{\hat{V}}{W}}$
+5. R-hat = $\sqrt{\hat{V} / W}$
+
+The Brooks–Gelman degrees-of-freedom adjustment that `coda::gelman.diag`
+applies is deliberately omitted: on a nearly-saturated binary indicator
+chain (one half-chain carries a brief excursion, the rest stay
+constant) the adjustment's degrees of freedom degenerate and R-hat
+converges to $\sqrt{5/3} \approx 1.29$ regardless of the data, making
+decisive edges look unconverged. Degenerate inputs are handled
+explicitly instead: all sub-chains constant and equal returns `NA`,
+while constant-but-unequal sub-chains (chains stuck in different
+states) return `+Inf`, so a real failure is loud rather than silent.
+
+The R layer feeds this kernel *split* chains: `split_chains()` in
+`R/mcmc_summary.R` halves each chain into two sub-chains (dropping the
+middle draw of an odd-length chain so the halves match), so the
+statistic reported everywhere — `summary()` tables and
+`extract_rhat()` — is the split-R-hat of @VehtariEtAl_2021. Splitting
+makes within-chain drift visible: a chain whose first and second half
+disagree inflates R-hat even when whole-chain means happen to agree
+across chains.
 
 ### Mixture ESS for indicators
 

@@ -60,10 +60,15 @@ lowest observed category.
 ### Sampler validation (`validate_sampler.R`)
 
 `validate_sampler()` resolves the `update_method` argument into a
-concrete sampler type (`"nuts"` or `"adaptive-metropolis"`)
-and sets defaults for tuning parameters (`target_accept`,
-`nuts_max_depth`). It detects the number of
-available cores and resolves the progress display type.
+concrete sampler type (`"nuts"`, `"adaptive-metropolis"`, or
+`"gibbs"`) and sets defaults for tuning parameters (`target_accept`,
+`nuts_max_depth`). The Gibbs sampler is gated here: it requires
+all-continuous data with a Normal or Cauchy interaction prior and a
+Gamma-family scale prior, and its `target_accept` is recorded as
+`NA_real_` — an exact draw has no acceptance target, and the C++ side
+ignores the value for Gibbs. The function also issues the progressive
+short-warmup warnings (see [Warmup Schedule](warmup.qmd)), detects the
+number of available cores, and resolves the progress display type.
 
 ### Prior validation (`R/priors.R`, `validate_model.R`)
 
@@ -114,6 +119,24 @@ Each C++ function receives an R list of arguments, constructs model
 and prior objects, and calls `run_mcmc_sampler()` from the chain
 runner. The return value is a list of per-chain raw output.
 
+For continuous and mixed models with edge selection, `run_sampler()`
+also prepares the graph-prior machinery before the C++ call, and the
+two paths are mutually exclusive:
+
+- Under `precision_graph_prior = "hierarchical"`, it assembles the
+  **Z-ratio spec**: the analytic cell constants
+  (`zratio_cell_constants()`, from `delta`, the slab family and scale,
+  and the diagonal prior's rate frame), the Option-B absolute-moment
+  surface built once for the analysis (`zratio_build_surfaces()`; if
+  the build fails or the diagonal's Gamma shape is non-unit, the
+  engine falls back to the coarser additive path with a message), and
+  the trust-gauge option (`options(bgms.zratio_gauge_sweeps = ...)`).
+- Under the default `"joint"` composition with a Beta-Bernoulli or SBM
+  edge prior, it builds or loads the **normalizing-constant correction
+  table** (`ggm_edge_prior_correction()`), cached on disk via
+  `tools::R_user_dir("bgms", "cache")` so later fits of the same
+  configuration skip the build.
+
 ## Output assembly (`build_output.R`)
 
 `build_output()` transforms raw C++ output into the S3 objects
@@ -129,10 +152,20 @@ The GGM and OMRF paths share a unified builder. Key operations:
 3. **Compute inclusion probabilities** — Average indicator samples (when
    edge selection is active)
 4. **Assemble `$raw_samples`** — Per-chain lists of `main`, `pairwise`,
-   `indicator`, and `allocations` matrices
-5. **NUTS diagnostics** — When available, collect tree depth, divergence,
-   and energy samples into `$nuts_diagnostics`
-6. **Warmup check** — Collect `$warmup_check` from C++
+   `indicator`, and `allocations` matrices; with a Beta-Bernoulli edge
+   prior on a continuous or mixed model, also the per-chain sampled
+   inclusion probability (surfaced as
+   `fit$inclusion_parameter_samples`)
+5. **Sampler diagnostics** — Under NUTS, `summarize_nuts_diagnostics()`
+   builds `fit$nuts_diag` from the tree-depth, divergence, energy, and
+   acceptance traces, including the R-side energy-based warmup
+   completeness check. Under adaptive Metropolis,
+   `summarize_am_diagnostics()` builds `fit$am_diag` from the stored
+   samples and the acceptance trace
+6. **Z-ratio diagnostics** — Under the hierarchical graph prior with
+   the trust gauge enabled, `summarize_zratio_gauge()` builds
+   `fit$zratio_diag` from the per-chain gauge blocks; flagged issues
+   print alongside the other sampler warnings
 
 ### Mixed MRF (`build_output_mixed_mrf()`)
 

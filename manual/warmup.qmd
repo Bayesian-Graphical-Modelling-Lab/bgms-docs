@@ -7,12 +7,10 @@ parameters before collecting posterior samples. The three core
 stages (1, 2, 3a) follow Stan's warmup scheme for NUTS. Stages 3b
 and 3c are `bgms` extensions that accommodate the spike-and-slab
 edge selection machinery. The schedule is defined in
-`src/mcmc/execution/warmup_schedule.h`.
+`src/mcmc/execution/warmup_schedule.h`, and its staging depends on
+which sampler hosts it (see [Budget allocation](#budget-allocation)).
 
-## Five stages
-
-The warmup period is divided into five stages. Stages 3b and 3c
-only apply when edge selection is enabled.
+## The stages
 
 | Stage | Name | Purpose |
 |-------|------|---------|
@@ -20,7 +18,10 @@ only apply when edge selection is enabled.
 | 2 | Adaptation windows | Tune step size (dual averaging) and mass matrix (Welford) |
 | 3a | Terminal step-size tuning | Final step-size pass with frozen mass matrix |
 | 3b | Proposal-SD tuning | Tune element-wise Metropolis proposal SDs (edge selection not yet active) |
-| 3c | Re-adaptation under edge selection | Re-tune step size after edge selection changes the geometry |
+| 3c | Selection-active warmup | Warmup iterations with edge selection running |
+
+Stages 3b and 3c only apply when edge selection is enabled, and which
+of them actually run depends on the sampler.
 
 ### Stage 1: Initial step-size adaptation
 
@@ -36,7 +37,12 @@ acceptance rate.
 
 The step size and mass matrix are tuned in expanding windows. The
 first window has 25 iterations. Each subsequent window doubles in
-size (25 → 50 → 100 → ...) until the Stage 3a boundary is reached.
+size (25 → 50 → 100 → ...) until the Stage 3a boundary is reached;
+following Stan's `windowed_adaptation`, a final window that would
+overshoot the boundary is stretched to absorb the remaining budget
+rather than emitted as a small trailing window (each window end
+triggers a mass-matrix update and step-size reinitialization, and an
+extra small window would disrupt dual averaging).
 
 Within each window, a Welford running variance accumulates the
 sampled parameter vectors. At the end of each window, the diagonal
@@ -56,6 +62,11 @@ $w = 5$. After each mass-matrix update:
 2. Dual averaging restarts
 3. The Welford accumulator resets for the next window
 
+Under edge selection, the mass matrix is accumulated on the full
+(zero-padded) parameter layout so entries keep their slots when the
+active set changes; see
+[NUTS — Mass matrix](nuts.qmd#mass-matrix-full-versus-active-layout).
+
 ### Stage 3a: Terminal step-size tuning
 
 The mass matrix is frozen. Dual averaging continues to give the
@@ -65,58 +76,80 @@ dual-averaging estimate.
 
 ### Stage 3b: Proposal-SD tuning
 
-Step-size adaptation is frozen. For models with element-wise
-Metropolis proposals (e.g., the OMRF's category parameters), the
-proposal standard deviations are tuned via additive Robbins–Monro
-updates (see [Adaptive Metropolis](metropolis.qmd)):
+Step-size adaptation is frozen. The proposal standard deviations of
+the edge-move Metropolis proposals (and any other element-wise
+proposals) are tuned via additive Robbins–Monro updates (see
+[Adaptive Metropolis](metropolis.qmd)):
 
 $$
 \sigma_{k+1} = \sigma_k + w_k (\alpha_k - \alpha^*)
 $$
 
 where $\alpha_k$ is the observed acceptance probability, $\alpha^*
-= 0.44$ is the target, and $w_k = t^{-0.75}$ is the decay weight.
-The result is clamped to $[0.001, 2.0]$, and NaN values are reset
-to 1.0. The 0.44 target is fixed under NUTS (the user's
-`target_accept` argument governs the step-size adaptation target
-instead); only under `update_method = "adaptive-metropolis"` does
-`target_accept` set the Metropolis target directly.
-Edge selection is not yet active in this stage.
+= 0.44$ is the target, and $w_k = t^{-0.75}$ is the decay weight
+($t$ counts iterations since stage 3b began). The result is clamped
+to $[0.001, 2.0]$, and NaN values are reset to 1.0. The weight comes
+from a single source of truth, `rm_weight_for_proposal_sd(iter)` on
+the schedule, which returns a value only on iterations where
+adaptation should run — every model's `tune_proposal_sd` consults it
+rather than computing the weight inline. The 0.44 target is fixed
+under NUTS (the user's `target_accept` argument governs the
+step-size adaptation target instead); only under
+`update_method = "adaptive-metropolis"` does `target_accept` set the
+Metropolis target directly. Edge selection is not yet active in this
+stage.
 
-### Stage 3c: Re-adaptation under edge selection
+### Stage 3c: Selection-active warmup
 
 Edge selection is activated. Edge indicators $\gamma_{ij}$ are
-updated every iteration, changing the effective parameter space.
-Dual averaging restarts to re-tune $\epsilon$ for the new
-geometry. For models with constraints, the constrained step-size
-heuristic (using [RATTLE](rattle.qmd)) is used.
+updated every iteration, changing the active parameter space. On the
+NUTS host, dual averaging restarts to re-tune $\epsilon$ for the new
+geometry. On the Gibbs host, stage 3c covers most of the warmup (see
+below) — there is nothing to adapt, but the graph and precision
+matrix burn in together.
 
-## Budget allocation
+## Budget allocation {#budget-allocation}
 
-When edge selection is active, the total warmup budget is split as:
+How the warmup budget is divided depends on the sampler hosting the
+schedule (the `SamplerSpec` fields `learn_sd` and the Gibbs
+`select_during_warmup` flag; see [Sampler Hierarchy](samplers.qmd)):
 
-- **Stages 1–3a**: 85% of total warmup
-- **Stage 3b**: 10% (skipped if fewer than 20 iterations)
-- **Stage 3c**: ~5%
-
-When edge selection is inactive, stages 3b and 3c are skipped and
-the full budget is allocated to stages 1–3a.
+- **NUTS with edge selection** — split 85% (stages 1-3a) / 10%
+  (stage 3b) / ~5% (stage 3c). If stage 3b would get fewer than 20
+  iterations it is skipped entirely (default proposal SDs are used).
+- **Gibbs with edge selection** — there is no adaptation to run, so
+  the schedule reduces to a settle-then-select split: the first 15%
+  of warmup runs the full model (all edges included, selection off)
+  so the precision matrix settles, and stage 3c covers the remaining
+  85% with selection active. Both windows scale with the warmup
+  budget.
+- **Adaptive Metropolis with edge selection** — stage 3c is empty;
+  selection activates at the first sampling iteration.
+- **No edge selection** (any sampler) — the full budget goes to the
+  core stages 1-3a.
 
 ## Warning system
 
-The `WarmupSchedule` tracks a `warning_type` field that records
-when the warmup budget is insufficient:
+The `WarmupSchedule` records a `warning_type` code when the warmup
+budget is insufficient:
 
 | Code | Meaning |
 |------|---------|
 | 0 | No warning |
-| 1 | Warmup too short for the standard schedule |
-| 2 | Proportional fallback used (reduced window sizes) |
+| 1 | Warmup extremely short (core budget < 20, or < 50 with edge selection) |
+| 2 | Proportional fallback used for the core stages (15%/75%/10% instead of fixed buffers) |
 | 3 | Limited proposal-SD tuning (edge selection with warmup < 300) |
-| 4 | Proposal SD learning skipped (stage 3b dropped) |
+| 4 | Stage 3b skipped (would have fewer than 20 iterations) |
 
-The `warmup_check` table returned by `bgm()` reports these warnings
-per chain, accessible via `fit$warmup_check` in R.
+These codes are computed in C++ but are not currently surfaced to R.
+What the user actually sees are the progressive short-warmup warnings
+issued by `validate_sampler()` at fit time (NUTS only): with edge
+selection, thresholds at warmup < 50 (very short), < 200 (proposal-SD
+tuning skipped), and < 300 (limited tuning); without, at < 20 (no
+mass-matrix estimation) and < 150 (proportional allocation). After
+sampling there is additionally the energy-based warmup-completeness
+check in `fit$nuts_diag` (`warmup_incomplete`; see
+[Diagnostics](diagnostics.qmd)).
 
 ## Dual averaging
 
@@ -139,9 +172,13 @@ bool in_stage3a(int i) const;
 bool in_stage3b(int i) const;
 bool in_stage3c(int i) const;
 bool sampling(int i) const;          // i >= total_warmup
-bool selection_enabled(int i) const; // i >= stage3b_start (or never)
+bool selection_enabled(int i) const; // stage 3c or sampling
+std::optional<double> rm_weight_for_proposal_sd(int i) const;
 ```
 
 These predicates control when the adaptation controller accumulates
 samples, when edge selection is turned on, and when the chain
-transitions from warmup to sampling.
+transitions from warmup to sampling. `selection_enabled()` is true
+during stage 3c and throughout sampling — under the
+adaptive-Metropolis host, where stage 3c is empty, that means
+selection starts only when sampling does.

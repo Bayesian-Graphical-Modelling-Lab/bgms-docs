@@ -26,6 +26,17 @@ clone-and-dispatch pattern:
 4. **Collect** — Results are gathered and returned as a vector of
    `ChainResult` objects.
 
+After a chain's main loop finishes, two post-loop steps run before the
+chain returns. If the Z-ratio trust gauge is enabled
+(`options(bgms.zratio_gauge_sweeps = ...)` under the hierarchical
+graph prior), the chain runs the configured number of assessment
+sweeps on the frozen kernel — deployed selection passes that also
+reference non-trivial edge moves against the exact block-local
+calculation; no stored samples are touched. Then
+`model.collect_chain_diagnostics(chain_result)` copies run-level
+diagnostic state (Z-ratio counters, frozen constants, gauge results)
+into the `ChainResult`.
+
 ## Model and prior cloning
 
 Both `BaseModel::clone()` and `BaseEdgePrior::clone()` perform deep
@@ -92,16 +103,19 @@ The seed for chain $k$ is `config.seed + k`, ensuring:
 The `ProgressManager` class handles progress display and user
 interrupt detection across threads.
 
-- **Progress bar** — Updated by each chain independently. The
-  manager aggregates progress across chains and displays a single
-  bar (or per-chain bars, depending on `progress_type`).
+- **Progress bar** — Every chain counts its iterations into atomic
+  per-chain counters. The manager aggregates them and displays a
+  single bar (or per-chain bars, depending on `progress_type`).
 - **User interrupts** — Each chain checks `pm.shouldExit()` between
   iterations. If the user presses Ctrl-C, the flag is set and all
   chains exit their sampling loops. The partial results are still
   returned (with a warning) rather than discarded.
-- **Thread safety** — Progress updates and interrupt checks use
-  `ProgressManager`'s internal `std::mutex` to prevent garbled
-  console output.
+- **Thread contract** — The manager must be constructed on the R main
+  thread, and all R API interaction — the interrupt check, console
+  output, and the R-level progress callback — happens only on that
+  thread. The main thread always participates in the chain pool, so
+  its `update()` calls drive the display; worker threads only bump
+  their atomic counters and never touch the R interpreter.
 
 ## ChainResult storage
 
@@ -112,10 +126,18 @@ Each chain writes its output into a preallocated `ChainResult`:
 | `samples` | param_dim × n_iter | Parameter samples (post-warmup) |
 | `indicator_samples` | n_edges × n_iter | Edge indicators (if edge selection) |
 | `allocation_samples` | n_vars × n_iter | SBM cluster allocations (if SBM prior) |
+| `inclusion_parameter_samples` | n_iter | Sampled inclusion probability (if Beta-Bernoulli edge prior on a continuous or mixed model) |
 | `treedepth_samples` | n_iter | NUTS tree depth (if NUTS) |
 | `divergent_samples` | n_iter | Divergence flags (if NUTS) |
-| `non_reversible_samples` | n_iter | Non-reversible step flags (if NUTS) |
 | `energy_samples` | n_iter | Hamiltonian energy (if NUTS) |
+| `accept_prob_samples` | n_iter | NUTS mean per-trajectory acceptance probability (if NUTS) |
+| `am_accept_prob_samples` | n_iter | Mean per-iteration acceptance across updated components (if adaptive Metropolis) |
+| `zratio_addc`, `zratio_counters`, `zratio_gauge_*` | — | Z-ratio engine state and trust-gauge results (if hierarchical graph prior) |
+
+Storage is preallocated with "not sampled" sentinels — `-1` for the
+integer buffers, NaN for the floating ones — so an interrupted run
+returns recognizable placeholders rather than uninitialized values
+for iterations that never ran.
 
 The `ChainResult` also carries error status and user interrupt flags
 per chain. These are checked by the R output builder to decide

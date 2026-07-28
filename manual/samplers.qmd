@@ -4,8 +4,9 @@ title: "Sampler Hierarchy"
 
 The sampler classes in `src/mcmc/samplers/` are header-only wrappers
 that own adaptation state and delegate to the stateless algorithm
-functions in `src/mcmc/algorithms/`. The chain runner interacts with
-samplers through the `SamplerBase` interface.
+functions in `src/mcmc/algorithms/` (or to model-specific update code).
+The chain runner interacts with samplers through the `SamplerBase`
+interface.
 
 ## Class hierarchy
 
@@ -19,15 +20,19 @@ classDiagram
     }
     class MetropolisSampler {
         element-wise MH
+        eager adaptation init
     }
     class NUTSSampler {
         owns NUTSAdaptationController
         adaptive tree depth
-        -do_unconstrained_step()
-        -do_constrained_step()
+    }
+    class GibbsSampler {
+        conjugate row sweep
+        exact draw, accept_prob 1
     }
     SamplerBase <|-- MetropolisSampler
     SamplerBase <|-- NUTSSampler
+    SamplerBase <|-- GibbsSampler
 ```
 
 One sampler instance drives the whole model: the chain runner issues a
@@ -36,7 +41,8 @@ parameter blocks — including the mixed MRF's five blocks (thresholds,
 means, and the three interaction blocks) — are updated jointly in one
 trajectory (see [Model Classes](model-classes.qmd)). The models' own
 element-wise Metropolis code runs only when the user selects
-`update_method = "adaptive-metropolis"`.
+`update_method = "adaptive-metropolis"`, and the GGM's conjugate sweep
+only under `update_method = "gibbs"`.
 
 ## SamplerBase interface
 
@@ -52,18 +58,25 @@ class SamplerBase {
 containing the accepted parameter vector, acceptance probability,
 and optional NUTS diagnostics.
 
-`initialize()` is called once before the first iteration. For
-gradient-based samplers, it runs the step-size heuristic that finds
-a reasonable initial step size by iteratively doubling or halving
-until the acceptance probability is near the target (default 0.8).
+`initialize()` is called once by the chain runner before the MCMC loop.
+For NUTS it runs the step-size heuristic that finds a reasonable initial
+step size by iteratively doubling or halving until the acceptance
+probability is near the target (default 0.8). For Metropolis it eagerly
+sets up the model's proposal-SD adaptation controllers
+(`init_metropolis_adaptation`). For Gibbs it switches the model's
+between-model step to the conjugate edge proposal
+(`set_conjugate_edge_proposal(true)`).
 
 ## MetropolisSampler
 
-The simplest sampler. Each call to `step()` invokes
-`model.do_one_metropolis_step(iteration)`, which performs a full
-sweep of element-wise proposals, and returns the result. Edge
-selection is handled by the chain runner before the sampler step,
-not by `MetropolisSampler` itself.
+Each call to `step()` invokes `model.do_one_metropolis_step(iteration)`,
+which performs a full sweep of element-wise proposals, and returns the
+model's mean acceptance probability over the sweep
+(`last_metropolis_mean_accept_prob()`). That per-iteration value is
+stored as the `am_accept_prob__` trace during sampling and summarized in
+`fit$am_diag` (see [Metropolis Updates](metropolis.qmd)). Edge selection
+is handled by the chain runner before the sampler step, not by
+`MetropolisSampler` itself.
 
 Proposal standard deviations are tuned during warmup via Robbins-Monro
 updates (see [Warmup Schedule](warmup.qmd)).
@@ -73,25 +86,47 @@ updates (see [Warmup Schedule](warmup.qmd)).
 Uses the No-U-Turn criterion to adapt trajectory length
 automatically. The maximum tree depth is set from
 `config.max_tree_depth` (default 10). Returns NUTS diagnostics
-(tree depth, divergence flag, energy) with each step. See
-[NUTS Algorithm](nuts.qmd) for the tree-building details.
+(tree depth, divergence flag, energy, mean acceptance probability) with
+each step. See [NUTS Algorithm](nuts.qmd) for the tree-building details.
 
 `NUTSSampler` owns a `NUTSAdaptationController` that manages:
 
 - **Dual averaging** for step-size adaptation
 - **Diagonal mass matrix** accumulation via Welford's online algorithm
-  (a numerically stable running-variance estimate)
+  (a numerically stable running-variance estimate), estimated on the
+  full (zero-padded) parameter layout (see
+  [NUTS — Mass matrix](nuts.qmd#mass-matrix-full-versus-active-layout))
 
 Each call to `step()`:
 
-1. Dispatches inline to `do_unconstrained_step()` or
-   `do_constrained_step()` based on `model.has_constraints()`
+1. Runs one NUTS trajectory in the active (theta-space)
+   parameterization — graph constraints are enforced by the models'
+   [null-space coordinates](null-space.qmd), so there is no separate
+   constrained path
 2. Passes the acceptance probability to the adaptation controller
 3. If the mass matrix was just updated (end of a warmup window),
-   reinitializes the step size with the heuristic
+   reinitializes the step size with the heuristic; at the stage-3c
+   boundary (edge selection activating), restarts dual averaging
 
 After warmup, the adaptation controller freezes and returns the
 smoothed step size from dual averaging.
+
+## GibbsSampler
+
+A thin wrapper for the GGM's conjugate updates
+(`update_method = "gibbs"`; see [GGM Internals](ggm-internals.qmd) for
+the row-block draw). Each call to `step()` invokes
+`model.do_one_gibbs_step(iteration)` — an exact conjugate row sweep —
+and reports `accept_prob = 1` (an exact draw always "accepts"). With
+edge selection, the between-model step uses the full-conditional edge
+birth/death proposal, which needs no tuning. `create_sampler()` gates
+this sampler to models whose full conditionals are conjugate (currently
+the GGM); the R layer additionally validates the prior family
+(Normal or Cauchy slab, Gamma diagonal).
+
+Warmup staging under Gibbs is minimal: a short full-model settle
+window, then selection-active warmup for the remainder (see
+[Warmup Schedule](warmup.qmd)).
 
 ## Factory dispatch
 
@@ -102,11 +137,18 @@ maps it to a typed `SamplerSpec` (any other string is an error):
 ```cpp
 SamplerSpec resolve_sampler_spec(const std::string& sampler_type) {
   if (sampler_type == "nuts") {
-    return SamplerSpec{SamplerKind::NUTS, /*learn_sd=*/true, ...};
+    return SamplerSpec{SamplerKind::NUTS, /*learn_sd=*/true,
+                       /*nuts_diag=*/true, /*am_diag=*/false};
   } else if (sampler_type == "adaptive-metropolis") {
-    return SamplerSpec{SamplerKind::AdaptiveMetropolis, /*learn_sd=*/false, ...};
+    return SamplerSpec{SamplerKind::AdaptiveMetropolis, /*learn_sd=*/false,
+                       /*nuts_diag=*/false, /*am_diag=*/true};
+  } else if (sampler_type == "gibbs") {
+    return SamplerSpec{SamplerKind::Gibbs, /*learn_sd=*/false,
+                       /*nuts_diag=*/false, /*am_diag=*/false};
   } else {
-    Rcpp::stop("Unknown sampler_type: '%s'", sampler_type.c_str());
+    // std::runtime_error rather than Rcpp::stop: this runs on worker
+    // threads, where constructing an Rcpp exception is not safe.
+    throw std::runtime_error("Unknown sampler_type: '" + sampler_type + "'");
   }
 }
 ```
@@ -122,17 +164,25 @@ unique_ptr<SamplerBase> create_sampler(SamplerKind kind,
       return make_unique<NUTSSampler>(config, schedule);
     case SamplerKind::AdaptiveMetropolis:
       return make_unique<MetropolisSampler>(config, schedule);
+    case SamplerKind::Gibbs:
+      return make_unique<GibbsSampler>(config, schedule);
   }
+  throw std::runtime_error("Unhandled SamplerKind");
 }
 ```
 
-The `SamplerSpec` also records which diagnostics the sampler produces
-and whether proposal-SD learning applies, which the warmup schedule
-consumes.
+The `SamplerSpec` records which diagnostics the sampler produces
+(`nuts_diag` for NUTS, `am_diag` for adaptive Metropolis — the
+per-iteration mean-acceptance trace) and whether proposal-SD learning
+applies (`learn_sd`), which the warmup schedule consumes. The spec also
+determines the warmup staging host: the schedule is built with
+`select_during_warmup = (kind == Gibbs)`, which switches it to the
+Gibbs settle-then-select staging (see [Warmup Schedule](warmup.qmd)).
 
-All three model types (GGM, OMRF, mixed MRF) default to NUTS.
-The user can select Metropolis via
-`update_method = "adaptive-metropolis"`.
+All three model types (GGM, OMRF, mixed MRF) default to NUTS. The user
+can select Metropolis via `update_method = "adaptive-metropolis"` for
+any model, and the conjugate Gibbs sweep via `update_method = "gibbs"`
+for all-continuous (GGM) data.
 
 ## Step-size and mass-matrix adaptation
 
@@ -148,24 +198,7 @@ deviations via Robbins–Monro updates targeting an acceptance rate of
 target also governs the models' edge-move proposals during NUTS runs;
 the user's `target_accept` argument applies to the Metropolis tuner
 only under `update_method = "adaptive-metropolis"` (under NUTS it sets
-the step-size adaptation target instead).
+the step-size adaptation target instead, and under Gibbs it is unused —
+exact draws have no acceptance target).
 
-## Constrained integration dispatch
-
-When `model.has_constraints()` returns `true`, `NUTSSampler`
-switches from the unconstrained leapfrog to RATTLE integration:
-
-- **Unconstrained path** — Uses `get_vectorized_parameters()` and
-  `logp_and_gradient()` on the active parameter subset. Used by the
-  OMRF, which handles edge selection by adjusting its active
-  parameter dimension instead.
-- **Constrained path** — Uses `get_full_position()` and
-  `logp_and_gradient_full()` on the complete parameter vector.
-  The sampler wraps the model's `project_position` and
-  `project_momentum` methods into lambda callbacks passed to
-  `nuts_step()`.
-
-The RATTLE algorithm itself is documented in
-[Constrained Leapfrog (RATTLE)](rattle.qmd). The model-side
-projection functions are described in
-[Model Classes — Constraint projection](model-classes.qmd#constraint-projection).
+`GibbsSampler` performs no adaptation at all.

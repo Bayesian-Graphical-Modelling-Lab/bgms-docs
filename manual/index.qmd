@@ -19,17 +19,17 @@ How the R front-end and C++ back-end fit together.
 
 The sampling algorithms available in `bgms`.
 
-- [Adaptive Metropolis](metropolis.qmd) — Scalar random-walk Metropolis–Hastings with Robbins–Monro proposal adaptation. The alternative sampler, selected via `update_method = "adaptive-metropolis"`; its proposal machinery also drives edge moves during NUTS runs.
-- [NUTS](nuts.qmd) — No-U-Turn Sampler: adaptive-length Hamiltonian Monte Carlo with binary tree expansion and U-turn termination. The default sampler for all model types.
-- [Constrained Leapfrog](rattle.qmd) — RATTLE integrator for Hamiltonian dynamics under precision-matrix constraints. Required for mixed models where the precision matrix must remain positive definite.
+- [Adaptive Metropolis](metropolis.qmd) — Scalar random-walk Metropolis–Hastings with Robbins–Monro proposal adaptation. An alternative sampler, selected via `update_method = "adaptive-metropolis"`; its proposal machinery also drives edge moves during NUTS runs.
+- [NUTS](nuts.qmd) — No-U-Turn Sampler: adaptive-length Hamiltonian Monte Carlo with binary tree expansion and U-turn termination. The default sampler for all model types. A conjugate Gibbs sweep for the GGM (`update_method = "gibbs"`) is documented under [Sampler Classes](samplers.qmd).
+- [Constrained Cholesky Parameterization](null-space.qmd) — how excluded edges are held exactly at zero, and the precision matrix positive definite, through per-column null-space coordinates rather than constrained integration.
 
 ## Sampler Infrastructure
 
 Shared machinery that supports all samplers.
 
 - [Sampler Classes](samplers.qmd) — The `SamplerBase` interface, gradient-based sampler hierarchy, and factory dispatch
-- [Warmup Schedule](warmup.qmd) — Five-stage adaptation: step-size search, mass matrix estimation, dual averaging
-- [Convergence Diagnostics](diagnostics.qmd) — C++ implementation of ESS (AR spectral) and R-hat (Gelman–Rubin)
+- [Warmup Schedule](warmup.qmd) — Multi-stage adaptation with sampler-dependent staging: step-size search, mass matrix estimation, dual averaging, selection-active warmup
+- [Convergence Diagnostics](diagnostics.qmd) — C++ implementation of ESS (AR spectral) and split-R-hat
 
 ## Model Internals
 
@@ -37,7 +37,7 @@ How each model type computes likelihoods, gradients, and parameter updates.
 
 - [GGM](ggm-internals.qmd) — Free-element Cholesky parameterization of the precision matrix, gradient computation, and edge selection
 - [OMRF](omrf-internals.qmd) — Ordinal threshold parameterization, Blume–Capel model, residual matrix bookkeeping, and pseudolikelihood gradients
-- [Mixed MRF](mixed-internals.qmd) — Block structure for discrete-continuous interactions, joint parameter updates, and RATTLE constraints
+- [Mixed MRF](mixed-internals.qmd) — Block structure for discrete-continuous interactions, joint parameter updates, and the constrained continuous block
 
 Supporting pages:
 

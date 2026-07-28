@@ -130,7 +130,7 @@ website:
           contents:
             - manual/metropolis.qmd
             - manual/nuts.qmd
-            - manual/rattle.qmd
+            - manual/null-space.qmd
         - section: "Sampler Infrastructure"
           contents:
             - manual/samplers.qmd

@@ -19,145 +19,176 @@ groups are:
 
 ### Capability queries
 
-These methods tell the sampler what the model supports. The chain
-runner and sampler factory use them to select the correct algorithm.
+```cpp
+virtual bool has_edge_selection() const;
+virtual bool has_missing_data() const;
+virtual bool gauge_available() const;
+```
 
-| Method | Default | GGMModel | OMRFModel | MixedMRFModel |
-|--------|---------|----------|-----------|---------------|
-| `has_gradient()` | `false` | `true` | `true` | `true` |
-| `has_adaptive_metropolis()` | `false` | `true` | `true` | `true` |
-| `has_nuts()` | `has_gradient()` | `true` | `true` | `true` |
-| `has_edge_selection()` | `false` | `true` | `true` | `true` |
-| `has_missing_data()` | `false` | `true` | `true` | `true` |
-| `has_constraints()` | `false` | `true`^†^ | `false` | `true`^†^ |
-
-^†^ Returns `true` when `edge_selection_` or `has_sparse_graph_` is
-active. For GGMModel this triggers RATTLE constrained integration
-for the NUTS sampler. For MixedMRFModel it likewise switches the
-NUTS sampler to constrained (RATTLE) integration.
+The interface does not ask models what sampler they support: the
+sampler choice is configuration-driven. The R layer validates the
+combination of `update_method`, variable types, and priors
+(`validate_sampler()`), and the chain runner dispatches on the
+resulting `SamplerSpec` (see [Sampler Hierarchy](samplers.qmd)). What
+remains are queries about model features: whether spike-and-slab edge
+selection applies, whether missing-data imputation is active, and
+whether a Z-ratio trust gauge is attached (hierarchical graph prior
+only).
 
 ### Sampling methods
 
 ```cpp
+virtual pair<double, vec> logp_and_gradient(const vec& parameters);
 virtual void do_one_metropolis_step(int iteration) = 0;
-virtual vec gradient(vec parameters);
-virtual pair<double, vec> logp_and_gradient(vec parameters);
+virtual void do_one_gibbs_step(int iteration);
+virtual void set_conjugate_edge_proposal(bool enable);
+virtual double last_metropolis_mean_accept_prob() const;
+virtual void set_metropolis_target_accept(double target);
 ```
 
-Every model must implement `do_one_metropolis_step()`. Models that
-support gradient-based samplers (NUTS) also override `gradient()`
-and `logp_and_gradient()`. The joint function is more efficient because
-the log-posterior and gradient share intermediate computations.
+Every model must implement `do_one_metropolis_step()`, a full sweep of
+element-wise proposals. Models that support NUTS override
+`logp_and_gradient()`; the joint function is more efficient than
+separate calls because the log-posterior and gradient share
+intermediate computations. `do_one_gibbs_step()` defaults to a throw:
+only models with an exact conjugate full-conditional sweep override it
+(currently the GGM row-block Gibbs), and `set_conjugate_edge_proposal()`
+switches the GGM's between-model step from the random-walk proposal to
+the full-conditional edge birth/death used by the Gibbs sampler.
+
+`last_metropolis_mean_accept_prob()` reports the mean acceptance
+probability of the most recent Metropolis sweep (NaN for models
+without one); the adaptive-Metropolis sampler stores it per iteration
+as the `am_accept_prob__` trace. `set_metropolis_target_accept()`
+receives the resolved acceptance target before the MCMC loop — the
+user's `target_accept` under `update_method = "adaptive-metropolis"`,
+or the fixed 0.44 edge-move target under NUTS.
+
+### Lifecycle hooks
+
+```cpp
+virtual void prepare_iteration();
+virtual void collect_chain_diagnostics(ChainResult& chain_result) const;
+```
+
+`prepare_iteration()` runs at the start of every iteration (e.g., to
+shuffle the edge-update order). `collect_chain_diagnostics()` runs
+once at the end of the chain and copies run-level diagnostic state
+(e.g., the Z-ratio engine's counters and calibration anchors) into
+the `ChainResult`.
+
+### Trust-gauge hooks
+
+```cpp
+virtual bool gauge_available() const;
+virtual void set_gauge_active(bool on, int n_draws, int cap);
+virtual void gauge_begin_sweep();
+virtual void gauge_end_sweep();
+```
+
+Under the hierarchical graph prior, the sampler decides edge moves with
+a fast normalizer-ratio approximation, and an optional trust gauge
+audits those decisions after sampling (see
+[`summarize_zratio_gauge()`](../reference/prior-samplers.qmd#summarize_zratio_gauge)).
+While the gauge is active, `update_edge_indicators()` also references
+non-trivial edge moves against a block-local exact calculation; the
+begin/end hooks bracket each assessment sweep. All four methods are
+no-ops for models without a Z-ratio engine.
 
 ### Parameter access
 
 ```cpp
 virtual vec get_vectorized_parameters() const = 0;
-virtual void set_vectorized_parameters(const vec& params) = 0;
-virtual vec get_full_vectorized_parameters() const;
+virtual void set_vectorized_parameters(const vec& params);
+virtual vec get_full_vectorized_parameters() const = 0;
 virtual vec get_storage_vectorized_parameters() const;
 virtual size_t parameter_dimension() const = 0;
 virtual size_t full_parameter_dimension() const;
 virtual size_t storage_dimension() const;
 ```
 
-`get_vectorized_parameters()` returns the parameters that the
-gradient-based sampler updates. `get_storage_vectorized_parameters()`
-returns all parameters in a fixed-size vector for saving to output.
+Three vector layouts serve three consumers:
 
-For the mixed MRF, `get_vectorized_parameters()` packs the Cholesky
-factor of the continuous precision matrix (diagonal on the log
-scale), while `get_storage_vectorized_parameters()` stores the raw
-precision entries. The two representations differ, but both include
-the continuous-continuous block.
+- **Active** (`get_vectorized_parameters()`, `parameter_dimension()`) —
+  the free coordinates the sampler updates. Under edge selection this
+  dimension changes when the graph changes.
+- **Full** (`get_full_vectorized_parameters()`,
+  `full_parameter_dimension()`) — the zero-padded layout in which every
+  possible coordinate keeps a fixed slot. The NUTS adaptation
+  controller estimates the mass matrix on this layout so entries
+  survive active-set changes (see
+  [NUTS — Mass matrix](nuts.qmd#mass-matrix-full-versus-active-layout)).
+- **Storage** (`get_storage_vectorized_parameters()`,
+  `storage_dimension()`) — the fixed-size layout saved to output each
+  retained iteration, chosen to match what the R layer expects.
+
+For the GGM the three are: active $p + |E|$ (log-diagonals plus
+null-space coordinates of included edges), full $p + p(p-1)/2$, and
+storage $p(p+1)/2$ — the upper triangle of the precision matrix
+$\boldsymbol{\Theta}$ itself, not the theta coordinates.
 
 ### Edge selection
 
 ```cpp
-virtual void update_edge_indicators();
-virtual void initialize_graph();
+virtual void update_edge_indicators() = 0;
 virtual void set_edge_selection_active(bool active);
+virtual const arma::imat& get_edge_indicators() const = 0;
+virtual arma::mat& get_inclusion_probability() = 0;
 ```
 
 When edge selection is active, `update_edge_indicators()` performs a
-full scan over all edges, proposing add/delete moves using the MoMS
-framework [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms].
-Excluded edges are represented as parameters fixed at zero within a
-fixed-dimensional space. `initialize_graph()` draws starting edge
-indicators from the prior inclusion probabilities.
+full scan over all edges, proposing add/delete moves
+[@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms]. Excluded edges
+are represented as parameters fixed at zero. The chain runner calls
+this before the sampler step on iterations where the
+[warmup schedule](warmup.qmd) enables selection, and passes the
+indicator matrix and inclusion probabilities to the edge-prior update
+afterwards.
 
 ### Adaptation support
 
 ```cpp
-virtual void init_metropolis_adaptation(WarmupSchedule& schedule);
-virtual void tune_proposal_sd(int iteration, WarmupSchedule& schedule);
-virtual void prepare_iteration();
+virtual void init_metropolis_adaptation(const WarmupSchedule& schedule);
+virtual void tune_proposal_sd(int iteration, const WarmupSchedule& schedule);
 ```
 
-Models with element-wise Metropolis proposals (GGM, OMRF, mixed MRF)
-implement these methods to tune proposal standard deviations during
-warmup using Robbins-Monro updates.
-
-### Constraint projection {#constraint-projection}
-
-When `has_constraints()` returns `true`, the NUTS sampler uses
-constrained (RATTLE) leapfrog integration. The model must implement
-the following methods to provide the projection functions:
-
-```cpp
-virtual bool has_constraints() const;
-virtual arma::vec get_full_position() const;
-virtual void set_full_position(const arma::vec& position);
-virtual std::pair<double, arma::vec>
-    logp_and_gradient_full(const arma::vec& position);
-virtual void project_position(arma::vec& position,
-                              const arma::vec& inv_mass);
-virtual void project_momentum(arma::vec& momentum,
-                              const arma::vec& position,
-                              const arma::vec& inv_mass);
-virtual void reset_projection_cache();
-```
-
-| Method | Purpose |
-|--------|---------|
-| `get_full_position()` | Returns the complete parameter vector including constrained (zero) entries |
-| `set_full_position()` | Sets all parameters from the full vector |
-| `logp_and_gradient_full()` | Log-posterior and gradient over the full parameter space |
-| `project_position()` | SHAKE step: projects position onto the constraint manifold (zeros excluded edges) |
-| `project_momentum()` | RATTLE step: projects momentum onto the cotangent space of the manifold |
-| `reset_projection_cache()` | Clears cached projection data at the start of each NUTS step |
-
-The `get_full_position()` / `set_full_position()` pair operates on
-the full NUTS-block parameter vector (including entries fixed at
-zero), while `get_vectorized_parameters()` /
-`set_vectorized_parameters()` operates on the active subset only.
-
-The OMRF does not implement these methods. It handles edge selection
-by adjusting the dimension of its active parameter vector instead,
-so the unconstrained NUTS path suffices.
+Models with element-wise Metropolis proposals implement these to tune
+proposal standard deviations during warmup stage 3b, using the
+Robbins-Monro weight supplied by the schedule's
+`rm_weight_for_proposal_sd()` (see [Warmup Schedule](warmup.qmd)).
 
 ### Mass matrix access
 
 ```cpp
-virtual arma::vec get_inv_mass() const;
 virtual void set_inv_mass(const arma::vec& inv_mass);
+virtual const arma::vec& get_inv_mass() const;
 virtual arma::vec get_active_inv_mass() const;
 ```
 
-`get_inv_mass()` returns the diagonal inverse mass matrix for the
-full parameter space (used by the constrained path).
-`get_active_inv_mass()` returns the subset corresponding to active
-parameters only (used by the unconstrained path).
+The stored inverse-mass diagonal lives on the full layout;
+`get_active_inv_mass()` gathers the entries for the currently active
+coordinates, which is what the integrator receives.
 
 ### Infrastructure
 
 ```cpp
 virtual void set_seed(int seed) = 0;
 virtual unique_ptr<BaseModel> clone() const = 0;
+virtual SafeRNG& get_rng() = 0;
 ```
 
 `clone()` produces an independent deep copy for parallel chain
 execution. Each clone gets its own RNG state via `set_seed()`.
+
+## Graph constraints
+
+There is no constraint-projection interface. Models with continuous
+variables enforce excluded edges and positive definiteness through the
+[constrained Cholesky parameterization](null-space.qmd): the active
+parameter vector contains only free coordinates, every value of which
+maps to a valid precision matrix. The sampler never sees a constraint —
+NUTS runs its standard unconstrained integrator on the active vector
+for every model type.
 
 ## GGMModel
 
@@ -167,19 +198,22 @@ Defined in `src/models/ggm/ggm_model.h` and `ggm_model.cpp`.
 $\boldsymbol{\Theta}$ (inverse covariance). The model maintains an upper-triangular
 Cholesky factor $\boldsymbol{\Phi}$ such that $\boldsymbol{\Phi}^\top\boldsymbol{\Phi} = \boldsymbol{\Theta}$
 (see [GGM Internals](ggm-internals.qmd) and
-[Constrained Leapfrog](rattle.qmd), which use the same convention).
+[Constrained Cholesky Parameterization](null-space.qmd), which use the
+same convention).
 
-**Sampling.** The GGM supports both NUTS and element-wise
-Metropolis-Hastings. For NUTS, the model uses a free-element
-Cholesky parameterization: the diagonal entries are stored on the
-log scale to enforce positivity, and the off-diagonal entries are
-expressed in a null-space basis that respects excluded edges.
-The `logp_and_gradient()` method computes the gradient in this
-parameterization. For Metropolis-Hastings, each off-diagonal element
-$\omega_{ij}$ is proposed from a Gaussian centered on the current
-value, and the Cholesky factor is updated via a rank-1 Givens
-rotation (or hyperbolic rotation for downdates), avoiding a full
-$O(p^3)$ decomposition.
+**Sampling.** The GGM supports three update methods. Under NUTS, the
+model works in theta space: log-scale diagonals for positivity and
+per-column null-space coordinates for the off-diagonals, so excluded
+edges stay exactly zero without projection; `logp_and_gradient()`
+computes the gradient in this parameterization. Under element-wise
+Metropolis-Hastings, each off-diagonal element is proposed from a
+Gaussian centered on the current value, and the Cholesky factor is
+updated via a rank-1 Givens rotation (or hyperbolic rotation for
+downdates), avoiding a full $O(p^3)$ decomposition. Under Gibbs
+(`update_method = "gibbs"`), `do_one_gibbs_step()` performs an exact
+conjugate row-block sweep, and the between-model step uses the
+full-conditional edge birth/death proposal (see
+[GGM Internals](ggm-internals.qmd)).
 
 **Sufficient statistics.** For complete data, the GGM only needs the
 sufficient statistic $\mathbf{X}^\top\mathbf{X}$, not the raw data matrix.
@@ -188,7 +222,8 @@ recomputed after each imputation step.
 
 **Spike-and-slab.** Edge indicators $\gamma_{ij} \in \{0, 1\}$ control
 whether edge $(i,j)$ is included. When $\gamma_{ij} = 0$, the
-corresponding precision element is fixed at zero.
+corresponding precision element is exactly zero by construction of the
+null-space coordinates.
 
 ## OMRFModel
 
@@ -213,10 +248,12 @@ the contribution of pairwise interactions to each variable's
 conditional distribution. This matrix is updated incrementally when
 a single interaction changes.
 
-**Edge selection.** Edge indicators are updated via add/delete
-MoMS moves [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms],
-independent of the parameter sampler. The OMRF also provides an
-element-wise adaptive Metropolis fallback for parameter updates
+**Edge selection.** Edge indicators are updated via add/delete moves
+[@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms],
+independent of the parameter sampler. Because all parameters are
+unconstrained reals, the OMRF handles an excluded edge by simply
+dropping it from the active parameter vector. The OMRF also provides
+an element-wise adaptive Metropolis fallback for parameter updates
 (used during warmup proposal-SD tuning and as a user-selectable
 alternative to NUTS).
 
@@ -238,27 +275,26 @@ and cross-type pairwise interaction matrices (see the
 interpretation).
 
 **Sampling.** All five parameter blocks are updated jointly by NUTS.
-The continuous precision matrix is parameterized through its Cholesky
-factor (diagonal entries on the log scale) so that positive
-definiteness is guaranteed by construction. The gradient includes the
-Jacobian of the Cholesky-to-precision mapping. The model also provides
+The continuous precision block uses the same constrained Cholesky
+parameterization as the GGM — log-scale diagonals plus null-space
+coordinates for the off-diagonals — so positive definiteness and
+excluded continuous-continuous edges are handled by construction; the
+gradient includes the Jacobian of the theta-to-precision mapping.
+Discrete-discrete and cross edges are plain coordinates that are
+dropped from the active vector when excluded. The model also provides
 a component-wise adaptive Metropolis fallback
 (`do_one_metropolis_step()`) used when the sampler is set to
 `"adaptive-metropolis"`.
 
-**Three dimension concepts.** All three include the Cholesky block:
+**Three dimension concepts.**
 
-- `parameter_dimension()` — Active parameters (excludes inactive edges, includes full Cholesky block)
-- `full_parameter_dimension()` — All parameters including inactive edges
-- `storage_dimension()` — Same layout as the full vector (what gets saved to output)
+- `parameter_dimension()` — Active parameters: thresholds, means,
+  included discrete and cross edges, plus the continuous block's
+  $q + |E_{yy}|$ theta coordinates
+- `full_parameter_dimension()` — The zero-padded layout with a slot for
+  every possible parameter
+- `storage_dimension()` — The fixed output layout (raw precision
+  entries for the continuous block)
 
-When edge selection is active, `has_constraints()` returns `true`
-and the NUTS sampler uses the constrained integration path. The
-`get_full_position()` and `logp_and_gradient_full()` methods operate
-on the `full_parameter_dimension()` vector. Projection functions
-enforce zero entries for excluded edges at each leapfrog step.
-
-**Discrete pseudolikelihood.** The discrete full conditionals are
-computed by integrating out the continuous block. See
-[Mixed MRF Internals](mixed-internals.qmd#discrete-pseudolikelihood)
-for details.
+See [Mixed MRF Internals](mixed-internals.qmd) for the block layout
+and the discrete pseudolikelihood.
