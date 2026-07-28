@@ -166,9 +166,49 @@ chain quality, see [MCMC Output](../guide/mcmc-output.qmd) and
 ## Examples
 
 ```{r}
-#| eval: false
-fit = bgm(x = Wenchuan, chains = 2)
+#| label: load-fixtures
+#| echo: false
+resolve_fixture = function(name) {
+ input_dir = dirname(knitr::current_input(dir = TRUE))
+ candidates = c(
+   file.path(input_dir, "..", "fixtures", name),
+   file.path(input_dir, "fixtures", name),
+   file.path("fixtures", name),
+   file.path("..", "fixtures", name)
+ )
+ hit = candidates[file.exists(candidates)][1]
+ if (is.na(hit)) {
+   stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+ }
+ hit
+}
+library(bgms)
+fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
 ```
+
+Fit an ordinal MRF to the [Wenchuan](datasets.qmd#wenchuan) PTSD data
+(the model below was run in advance; fitting takes a few minutes):
+
+```{r}
+#| eval: false
+library(bgms)
+fit = bgm(Wenchuan, chains = 2, seed = 1234)
+```
+
+```{r}
+summary(fit)
+```
+
+The threshold and pairwise tables report the posterior mean, Monte
+Carlo standard error (`mcse`), posterior standard deviation, effective
+sample size, and R-hat for each parameter. In the pairwise table, an
+estimate of exactly `0.000` (e.g. `intrusion-avoidth`) is an edge that
+edge selection excluded in essentially every draw. The inclusion table
+(further down the printed output) gives each edge's posterior
+inclusion probability in the `mean` column. See
+[MCMC Output](../guide/mcmc-output.qmd) for a walkthrough of every
+component and [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) for
+how to act on `n_eff` and `Rhat`.
 
 ## See also
 

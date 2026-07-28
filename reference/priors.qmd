@@ -58,9 +58,15 @@ Returns a `bgms_parameter_prior` object with `family = "normal"`.
 
 ### `beta_prime_prior()` {#beta_prime_prior}
 
-Beta-prime prior, the default for threshold parameters. Parameterized
-through the logistic transformation: $\sigma(\mu) \sim \text{Beta}(\alpha, \beta)$,
-so $\mu = \text{logit}(Y)$ where $Y \sim \text{Beta}(\alpha, \beta)$.
+Beta-prime prior, the default for threshold parameters. A threshold
+$\mu$ has this prior when its logistic transform follows a Beta
+distribution: $\mu = \text{logit}(Y)$ with
+$Y \sim \text{Beta}(\alpha, \beta)$. The name comes from the
+equivalent formulation $e^{\mu} = Y/(1-Y) \sim \text{Beta-prime}(\alpha, \beta)$.
+The shape parameters control where prior mass sits: $\alpha$ governs
+the upper tail (large thresholds) and $\beta$ the lower tail; the
+default $\alpha = \beta = 0.5$ gives a heavy-tailed prior symmetric
+around $\mu = 0$.
 
 ```r
 beta_prime_prior(alpha = 0.5, beta = 0.5)

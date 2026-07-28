@@ -36,3 +36,10 @@ saveRDS(fit_compare_adhd, file.path(fixtures_dir, "fit_compare_adhd.rds"))
 cat("  Saved fixtures/fit_compare_adhd.rds\n")
 
 cat("Done.\n")
+
+# --- Wenchuan SBM (edge clustering, 17 items, 2 chains) --------------------
+
+cat("Fitting Wenchuan with SBM edge prior (2 chains)...\n")
+fit_wenchuan_sbm = bgm(Wenchuan, edge_prior = sbm_prior(), chains = 2, seed = 1234)
+saveRDS(fit_wenchuan_sbm, file.path(fixtures_dir, "fit_wenchuan_sbm.rds"))
+cat("  Saved fixtures/fit_wenchuan_sbm.rds\n")

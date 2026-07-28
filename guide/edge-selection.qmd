@@ -33,11 +33,7 @@ $$
 \text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{1 - p(\gamma_{ij} = 1 \mid \mathbf{x})}
 $$
 
-For other prior inclusion probabilities, the Bayes factor accounts for the prior odds:
-
-$$
-\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x}) \;/\; p(\gamma_{ij} = 0 \mid \mathbf{x})}{p(\gamma_{ij} = 1) \;/\; p(\gamma_{ij} = 0)}
-$$
+For other prior inclusion probabilities, the Bayes factor divides the posterior inclusion odds by the prior inclusion odds — see [The Bayesian Approach](bayesian-approach.qmd) for the general identity.
 
 The reciprocal $1 / \text{BF}_{10}$ quantifies the evidence for edge absence, i.e., conditional independence [@SekulovskiEtAl_2024]. Values of $\text{BF}_{10}$ close to one indicate that the data do not discriminate between the two hypotheses — absence of evidence rather than evidence of absence.
 
@@ -85,6 +81,65 @@ The same scale applies for evidence of absence using $1 / \text{BF}_{10}$. These
 As an illustration from psychology, @HuthEtAl_2026_evidence reanalyzed 293 networks from 126 studies and found that the network structure is highly uncertain: for the majority of edges, the data do not clearly decide whether the edge should be present or absent. Only about one in five edges was supported by strong evidence; for the rest, the evidence was weak or inconclusive. The exact proportions depend on the evidence thresholds used, but the overall picture is clear — uncertainty about individual edges is the norm, not the exception.
 
 This is precisely why a Bayesian approach matters. Without it, a missing edge in an estimated network is ambiguous: did the method find evidence that the edge is absent, or was there simply not enough data to detect it? The Bayes factor makes this distinction explicit. When the evidence is inconclusive, it says so — and that information is just as valuable as a decisive result, because it prevents conclusions that the data cannot support.
+
+## A worked example
+
+```{r}
+#| label: load-fixtures
+#| echo: false
+resolve_fixture = function(name) {
+ input_dir = dirname(knitr::current_input(dir = TRUE))
+ candidates = c(
+   file.path(input_dir, "..", "fixtures", name),
+   file.path(input_dir, "fixtures", name),
+   file.path("fixtures", name),
+   file.path("..", "fixtures", name)
+ )
+ hit = candidates[file.exists(candidates)][1]
+ if (is.na(hit)) {
+   stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+ }
+ hit
+}
+library(bgms)
+fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
+```
+
+To see these quantities on real output, fit the
+[Wenchuan](../reference/datasets.qmd#wenchuan) PTSD data (run in
+advance here; this takes a few minutes):
+
+```{r}
+#| eval: false
+library(bgms)
+fit = bgm(Wenchuan, chains = 2, seed = 1234)
+```
+
+The `summary(fit)$indicator` table holds the posterior inclusion
+probability of every edge in its `mean` column. With the default prior
+inclusion probability of 0.5, the inclusion Bayes factor is the
+posterior odds:
+
+```{r}
+ind = summary(fit)$indicator
+edges = ind[c("intrusion-dreams", "intrusion-upset", "intrusion-avoidact"),
+            "mean", drop = FALSE]
+edges$BF10 = edges$mean / (1 - edges$mean)
+round(edges, 3)
+```
+
+Three different conclusions, one from each row:
+
+- **`intrusion-dreams`**: included in every retained draw, so the
+  Bayes factor overflows to infinity. With 2,000 draws per chain, read
+  this as $\text{BF}_{10}$ larger than a few thousand — strong
+  evidence that the edge is present, not literally infinite evidence.
+- **`intrusion-upset`**: an inclusion probability of about 0.6 gives
+  $\text{BF}_{10} \approx 1.5$ — the data do not decide this edge
+  either way (absence of evidence).
+- **`intrusion-avoidact`**: an inclusion probability of about 0.01
+  gives $\text{BF}_{01} \approx 80$ — strong evidence that this edge
+  is *absent* (evidence of absence).
 
 ## Median probability model
 

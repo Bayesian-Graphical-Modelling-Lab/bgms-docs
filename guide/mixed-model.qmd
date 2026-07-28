@@ -76,9 +76,7 @@ In practice this means mixed-model estimates keep the exact Gaussian information
 
 ## Edge selection
 
-When `edge_selection = TRUE` (the default), `bgms` applies spike-and-slab priors to all three types of partial associations. The spike sets $\omega_{ij} = 0$, enforcing the absence of the edge. The slab places a Cauchy prior on $\omega_{ij}$, allowing the effect size to be estimated from the data. See [Prior Basics](prior-basics.qmd) for the spike-and-slab specification.
-
-The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See [Edge Selection](edge-selection.qmd).
+When `edge_selection = TRUE` (the default), every partial association — discrete–discrete, continuous–continuous, and cross-type alike — receives a spike-and-slab prior, so an edge is either exactly absent or estimated from the data. The prior specification is described in [Prior Basics](prior-basics.qmd), and how to read the resulting inclusion probabilities and Bayes factors in [Edge Selection](edge-selection.qmd).
 
 ## Missing data
 
@@ -113,10 +111,10 @@ The `summary()` and `coef()` methods work the same as for single-type models. `c
 
 To obtain model-specific parameterizations, use the dedicated extractors:
 
-- `extract_main_effects(fit)` — returns category thresholds (discrete) and continuous means.
-- `extract_precision(fit)` — returns the precision matrix $\boldsymbol{\Theta}$ for the continuous block.
-- `extract_partial_correlations(fit)` — returns partial correlations for the continuous block.
-- `extract_log_odds(fit)` — returns log adjacent-category odds ratios $2\omega_{ij}^{xx}$ for the discrete block.
+- [`extract_main_effects(fit)`](../reference/extractors.qmd#extract_main_effects) — returns category thresholds (discrete) and continuous means.
+- [`extract_precision(fit)`](../reference/extractors.qmd#extract_precision) — returns the precision matrix $\boldsymbol{\Theta}$ for the continuous block.
+- [`extract_partial_correlations(fit)`](../reference/extractors.qmd#extract_partial_correlations) — returns partial correlations for the continuous block.
+- [`extract_log_odds(fit)`](../reference/extractors.qmd#extract_log_odds) — returns log adjacent-category odds ratios $2\omega_{ij}^{xx}$ for the discrete block.
 
 ::: {.callout-note}
 ## Extractor requirements
