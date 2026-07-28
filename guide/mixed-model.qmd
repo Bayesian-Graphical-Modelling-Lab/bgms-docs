@@ -65,43 +65,14 @@ When $\omega_{ij} = 0$ for any of the three types, the two variables are conditi
 
 To obtain model-specific parameterizations: `extract_precision(fit)` returns $\boldsymbol{\Theta}$, `extract_partial_correlations(fit)` returns partial correlations for the continuous block, and `extract_log_odds(fit)` returns the log adjacent-category odds ratios $2\omega_{ij}^{xx}$ for the discrete block.
 
-## Pseudolikelihood
+## How the model is estimated
 
-The continuous conditional $p(\mathbf{y} \mid \mathbf{x})$ is a multivariate normal with a closed-form likelihood. For $n$ observations:
+The two blocks are treated differently during estimation:
 
-$$
-\log p(\mathbf{Y} \mid \mathbf{X}) = \frac{n}{2}\left(\log|\boldsymbol{\Theta}| - q\log(2\pi)\right) - \frac{1}{2}\sum_{i=1}^{n}(\mathbf{y}_i - \mathbf{M}_i)^{\sf T}\boldsymbol{\Theta}\,(\mathbf{y}_i - \mathbf{M}_i)
-$$
+- **Continuous block: exact.** Given the discrete variables, the continuous variables are multivariate normal, so their likelihood has a closed form and is computed exactly — no approximation is involved.
+- **Discrete block: pseudolikelihood.** `bgms` first integrates the continuous variables out, which yields an ordinal MRF on the discrete variables whose effective interactions combine the direct discrete–discrete associations with the indirect associations that run through the continuous block. That marginal model is then estimated with the same pseudolikelihood approximation used for the [Ordinal MRF](omrf.qmd).
 
-where $\mathbf{M}_i = \boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}\,\mathbf{x}_i$ is the conditional mean for observation $i$. This expression is computed exactly — no pseudolikelihood approximation is needed for the continuous block.
-
-For the discrete block, `bgms` integrates out the continuous variables to obtain a marginal MRF on $\mathbf{x}$ and applies a pseudolikelihood approximation to that marginal MRF. After integration, the log marginal density is
-
-$$
-\log p(\mathbf{x}) \propto \sum_{i=1}^{p}\sum_{c=1}^{m_i}\mathcal{I}(x_i = c)\,\mu_{ic} + \mathbf{x}^{\sf T} \mathbf{M}\, \mathbf{x} + 2(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)^{\sf T}\,\mathbf{x}
-$$
-
-with effective discrete–discrete interaction matrix
-
-$$
-\mathbf{M} = \boldsymbol{\Omega}_{xx} + 2\,\boldsymbol{\Omega}_{xy}\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}.
-$$
-
-The off-diagonal entries of $\mathbf{M}$ combine the direct discrete–discrete partial associations in $\boldsymbol{\Omega}_{xx}$ with the indirect associations induced through the continuous block. The linear term $2(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)^{\sf T}\mathbf{x}$ shifts the discrete category bias by an amount that depends on the cross-type interactions and the continuous means.
-
-The full conditional for discrete variable $x_i$ in this marginal MRF has the same ordinal-MRF form as in the [Ordinal MRF](omrf.qmd):
-
-$$
-p(x_i = c \mid \mathbf{x}_{-i}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i}\exp\!\left(\mu_{ik} + k \cdot r_i\right)}
-$$
-
-with rest score
-
-$$
-r_i = 2\sum_{j \neq i} M_{ij}\, x_j + 2\,(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)_i.
-$$
-
-The pseudolikelihood is the product of these full conditionals across all observations and discrete variables.
+In practice this means mixed-model estimates keep the exact Gaussian information for continuous pairs, while the discrete side retains the familiar ordinal-MRF interpretation. The full derivation — the marginal density, the effective interaction matrix, and the rest score — is in [Pseudolikelihood](../manual/pseudolikelihood.qmd) in the Technical Manual.
 
 ## Edge selection
 

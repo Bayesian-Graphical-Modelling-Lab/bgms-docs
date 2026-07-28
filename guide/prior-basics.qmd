@@ -15,17 +15,17 @@ The [Bayesian Approach](bayesian-approach.qmd) page introduced two prior distrib
 
 The idea is that each edge in the network is either absent or present. When the edge is absent, the partial association is exactly zero ($\omega_{ij} = 0$). When the edge is present, the partial association is free to take any nonzero value ($\omega_{ij} \in \mathbb{R} \setminus \{0\}$). A binary indicator $\gamma_{ij}$ tracks the state of each edge: $\gamma_{ij} = 0$ means the edge is absent and $\gamma_{ij} = 1$ means it is present. Together, the collection of indicators forms the network structure $\mathcal{S}$.
 
-We use a formulation of the spike-and-slab prior [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms] that designates a mixture of two mutually exclusive components:
+The prior on each partial association follows directly [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms]:
 
 $$
-p(\omega_{ij} \mid \gamma_{ij})
-= (1 - \gamma_{ij})\;\mathbf{1}_{\{0\}}(\omega_{ij})
-\;+\; \gamma_{ij}\;p_{\text{slab}}(\omega_{ij})\;\mathbf{1}_{\mathbb{R}\setminus\{0\}}(\omega_{ij})
+p(\omega_{ij} \mid \gamma_{ij}) =
+\begin{cases}
+\text{all probability at } \omega_{ij} = 0 & \text{if } \gamma_{ij} = 0 \quad \text{(the spike)}\\[2pt]
+p_{\text{slab}}(\omega_{ij}) & \text{if } \gamma_{ij} = 1 \quad \text{(the slab)}
+\end{cases}
 $$
 
-Here $\mathbf{1}_{A}(\omega_{ij})$ is the indicator function that equals one when $\omega_{ij} \in A$ and zero otherwise. The two indicator functions make the disjoint support of the components explicit: the first component assigns all probability to $\omega_{ij} \in \{0\}$, the second to $\omega_{ij} \in \mathbb{R}\setminus\{0\}$.
-
-The first component is the **spike**: when $\gamma_{ij} = 0$, all prior probability is concentrated on the value $\omega_{ij} = 0$, enforcing the absence of the edge. The second component is the **slab**: when $\gamma_{ij} = 1$, the partial association receives a continuous distribution over nonzero values, which determines what effect sizes are considered plausible for present edges.
+The **spike** enforces the absence of the edge: all prior probability sits on exactly zero. The **slab** is a continuous distribution over nonzero values that determines what effect sizes are considered plausible for present edges. The two components do not overlap — the slab places no probability on exactly zero — and this separation is what lets the model conclude that an edge is genuinely absent rather than merely small.
 
 The spike-and-slab above is specified for a single edge. The joint prior on all partial associations is the product of independent spike-and-slab priors across edges:
 
@@ -36,7 +36,9 @@ $$
 
 This is the prior $p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S})$ from the [Bayesian Approach](bayesian-approach.qmd) page. For a given structure $\mathcal{S}$, the spike components fix all excluded edges to zero, and the slab components provide independent priors on the partial associations of the included edges. The joint prior therefore reduces to a product of slab distributions over the edges in $\mathcal{S}$.
 
-The spike-and-slab prior decomposes inference into two questions.^[When `edge_selection = TRUE` (the default), both questions are answered simultaneously during estimation. When `edge_selection = FALSE`, the structural question is bypassed: all edges are present, and only the slab prior is active.] The first is a structural question: *is the edge present?* This is governed by $\gamma_{ij}$ and its prior, which together define $p(\mathcal{S})$. The second is a question about effect size: *given that the edge is present, how strong is it?* This is governed by the slab distribution, which defines $p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S})$ for the nonzero entries.
+The spike-and-slab prior decomposes inference into two questions. The first is a structural question: *is the edge present?* This is governed by $\gamma_{ij}$ and its prior, which together define $p(\mathcal{S})$. The second is a question about effect size: *given that the edge is present, how strong is it?* This is governed by the slab distribution, which defines $p(\boldsymbol{\Omega}_\mathcal{S} \mid \mathcal{S})$ for the nonzero entries.
+
+When `edge_selection = TRUE` (the default), both questions are answered simultaneously during estimation. When `edge_selection = FALSE`, the structural question is bypassed: all edges are present, and only the slab prior is active.
 
 The sections below describe each component: the slab distribution that regularizes effect sizes, and the edge priors that govern which edges are included.
 

@@ -22,8 +22,8 @@ The GGM supports two samplers:
 
 - **NUTS** (default) — Gradient-based sampling of all continuous
   parameters simultaneously. Uses a free-element Cholesky
-  parameterization with RATTLE constraints when edge selection is
-  active.
+  parameterization with [RATTLE](rattle.qmd) constraints when edge
+  selection is active.
 - **Adaptive Metropolis** (fallback) — Element-wise updates of
   individual $\theta_{ij}$ entries via rank-1 Cholesky updates.
 
@@ -49,7 +49,12 @@ $$
 \theta = (\psi_1,\; f_2, \psi_2,\; f_3, \psi_3,\; \ldots,\; f_p, \psi_p),
 $$
 
-where for each column $q$:
+Notation: on this page $\theta$ without subscripts is the packed
+sampler position (the $q$ of the [NUTS](nuts.qmd) and
+[Constrained Leapfrog](rattle.qmd) pages — here $q$ indexes Cholesky
+columns instead, mirroring the code); the doubly-subscripted
+$\theta_{ij}$ always denotes an entry of the precision matrix
+$\boldsymbol{\Theta}$. For each column $q$:
 
 - $\psi_q = \log(\Phi_{qq})$ — the log-transformed diagonal entry,
   ensuring $\Phi_{qq} > 0$.
@@ -153,8 +158,12 @@ $$
 The backward pass runs in two phases:
 
 1. **Phase 1 (data + priors → $\bar{\boldsymbol{\Phi}}$)** — Computes
-   the adjoint of the Cholesky factor from the data likelihood, Cauchy
-   prior on off-diagonals, and Gamma prior on diagonals.
+   the adjoint of the Cholesky factor from the data likelihood, the
+   interaction prior on off-diagonals (default Cauchy), and the scale
+   prior on diagonals (default Gamma); see
+   [Parameter Priors](parameter-priors.qmd). Throughout, a bar denotes
+   the reverse-mode adjoint: $\bar{A} = \partial \log p / \partial A$,
+   the sensitivity of the log-posterior to that quantity.
 2. **Phase 2 (right-to-left column sweep)** — Propagates
    $\bar{\boldsymbol{\Phi}}$ through the stored Givens rotations to
    extract $\partial\log p / \partial f_q$ and
@@ -271,11 +280,13 @@ $\boldsymbol{\Phi}$).
 ## Edge selection {#edge-selection}
 
 When edge selection is active, each edge $(i,j)$ has a binary
-indicator $\gamma_{ij}$. Edge indicators are updated via MoMS
-(Mixtures of Mutually Singular distributions) add/delete moves
+indicator $\gamma_{ij}$. Edge indicators are updated via
+mixtures-of-mutually-singular-distributions (MoMS) add/delete moves
 [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms], reusing
 the same Roverato constants and in-place Cholesky machinery
-described above.
+described above. In the proposals below, $c_3$ denotes the Roverato
+scaling constant (`constants_[3]`) that relates a proposal on the
+Cholesky scale to the resulting precision entry.
 
 ### Delete move ($\gamma_{ij} = 1 \to 0$)
 
@@ -299,9 +310,6 @@ constraint curve. The acceptance ratio includes:
 - The Cauchy slab prior $\log p_{\text{Cauchy}}(\theta_{ij}^*)$
 - The reverse proposal density $-\log \phi(\epsilon;\, 0,\, \sigma_{ij}) + \log c_3$
 - The Gamma(1,1) prior ratio on $\theta_{jj}$
-
-Here $c_3$ is the Roverato scaling constant (`constants_[3]`)
-relating the Cholesky proposal to the precision entry.
 
 ### Iteration order
 

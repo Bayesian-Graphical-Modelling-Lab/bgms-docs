@@ -26,11 +26,31 @@ Each prior provides a log-density `logp(x)` and gradient `grad(x)`
 evaluated at a single point $x$, plus optional `(x, scale_factor)`
 overloads that multiply the prior's scale by a per-pair factor. The
 scaled overloads are used by the OMRF and mixed MRF when
-`standardize = TRUE`, where the prior scale on each pairwise interaction
-is adjusted by the score-product range of the variable pair (see the
-`standardize` argument of [`bgm()`](../reference/bgm.qmd)). Priors that
-have no natural scale (the beta-prime threshold prior) ignore the factor
-and delegate to the unscaled overload.
+`standardize = TRUE` (see below). Priors that have no natural scale
+(the beta-prime threshold prior) ignore the factor and delegate to the
+unscaled overload.
+
+### The `standardize` scale adjustment
+
+With `standardize = TRUE` in [`bgm()`](../reference/bgm.qmd), the
+prior scale for each pairwise interaction is adjusted to the range of
+the response scores. Variables with more response categories have
+larger score products $(x_i \cdot x_j)$, which typically correspond to
+smaller interaction effects $\omega_{ij}$; without standardization, a
+fixed prior scale is relatively wide for these smaller effects,
+yielding less shrinkage for high-category pairs and more for
+low-category pairs. Standardization scales the prior proportionally to
+the maximum score product, equalizing relative shrinkage across pairs.
+
+After internal recoding, regular ordinal variables have scores
+$0, 1, \ldots, m$. The adjusted scale for the interaction between
+variables $i$ and $j$ is `scale * m_i * m_j`, so that `scale` itself
+applies to the unit-interval case (binary variables, where
+$m_i = m_j = 1$). For Blume-Capel variables with reference category
+$b$, scores are centered as $-b, \ldots, m-b$, and the adjustment uses
+the maximum absolute product of the score endpoints. For mixed pairs,
+ordinal variables use raw score endpoints $(0, m)$ and Blume-Capel
+variables use centered score endpoints $(-b, m-b)$.
 
 `clone()` produces an independent copy for parallel chain execution.
 

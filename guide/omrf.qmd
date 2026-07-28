@@ -18,37 +18,17 @@ where $\mu_{ic}$ is the category threshold parameter for category $c$ of variabl
 
 ## Why the adjacent category model?
 
-The ordinal MRF can be understood as a multivariate generalization of the adjacent category logit model for ordinal responses [@Agresti_2010].
-
-### The univariate case
-
-Consider a single ordinal variable $x \in \{0, \dots, m\}$, where the category index reflects only the ordering of the response labels. The adjacent category model characterizes the log-odds between successive categories:
+The ordinal MRF is the multivariate generalization of the adjacent category logit model for ordinal responses [@Agresti_2010]. For a single ordinal variable with categories $0, \dots, m$, that model describes the log-odds between each pair of successive categories:
 
 $$
-\log\!\left( \frac{p(x = c+1)}{p(x = c)} \right) = \eta_c, \quad c = 0, \dots, m-1
+\log\!\left( \frac{p(x = c+1)}{p(x = c)} \right) = \eta_c, \quad c = 0, \dots, m-1.
 $$
 
-with $\eta_0 = 0$ for identifiability. The resulting probability mass function,
+Each parameter compares one category to the next; nothing in the model treats the category labels as numbers.
 
-$$
-p(x = c) = \frac{\exp\!\left( \sum_{k=c}^{m} \eta_k \right)}{1 + \sum_{j=1}^{m} \exp\!\left( \sum_{k=j}^{m} \eta_k \right)}
-$$
+This choice has a practical payoff: the model uses only the *ordering* of the categories, not their numeric labels or spacing. Whether you code a five-point scale as 0–4 or 1–5, or the distances between response options are unequal, the estimates are the same — no interval-scale measurement is assumed.
 
-is a member of the exponential family with canonical parameters $\eta_c$ and sufficient statistics $\mathcal{I}(x \geq c)$.
-
-### The multivariate extension
-
-For $p$ ordinal variables, we regress each variable $x_i$ on the others by modeling the canonical parameters as
-
-$$
-\eta_c = \alpha_c + \sum_{j \neq i} \beta_j\, x_j
-$$
-
-where $\alpha_c$ are category-specific intercepts and $\beta_j$ are common slopes. Crucially, the model depends on the ordinal variables only through the sufficient statistics $\mathcal{I}(x_i \geq c)$ and the interaction terms $x_i\, x_j = \sum_c \sum_{c'} \mathcal{I}(x_i \geq c)\, \mathcal{I}(x_j \geq c')$. Because these terms are computed from cumulative indicators, the model captures only the ordering of the categories, without relying on any numeric interpretation or spacing of the labels. It is therefore invariant under monotonic recodings and does not assume interval-scale measurement.
-
-Other ordinal regression models, such as the cumulative logit and continuation ratio models [@Agresti_2010], do not share this property. As shown by @SuggalaYangRavikumar_2017, these models do not correspond to full conditionals of a joint distribution, and are therefore incompatible with a multivariate MRF formulation.
-
-The adjacent category model does yield consistent full conditionals, and the joint distribution that generates them is the ordinal MRF [@MarsmanVandenBerghHaslbeck_2025].
+It is also the choice that makes a network model possible at all. Other ordinal regressions, such as the cumulative logit or continuation ratio models, cannot serve as building blocks of a joint network: their conditional distributions are incompatible with any joint distribution [@SuggalaYangRavikumar_2017]. The adjacent category model's conditionals are compatible, and the joint distribution they generate is exactly the ordinal MRF above [@MarsmanVandenBerghHaslbeck_2025]. The formal development is in [OMRF Internals](../manual/omrf-internals.qmd).
 
 ## Connection to the MRF framework
 
@@ -119,7 +99,7 @@ The thresholds are nuisance parameters — they are estimated during MCMC sampli
 
 ## Pseudolikelihood
 
-The normalizing constant of the ordinal MRF involves a sum over all possible configurations of $p$ ordinal variables, which is intractable for all but the smallest networks. `bgms` uses a pseudolikelihood approximation [@MarsmanVandenBerghHaslbeck_2025]: the product of full conditional distributions replaces the joint distribution. 
+The normalizing constant of the ordinal MRF involves a sum over all possible configurations of $p$ ordinal variables, which is intractable for all but the smallest networks. `bgms` uses a pseudolikelihood approximation [@MarsmanVandenBerghHaslbeck_2025]: the joint distribution is replaced by the product of each variable's conditional distribution given all the others (its *full conditional*).
 
 The full conditional distribution for variable $i$ given all other variables is:
 
@@ -127,7 +107,7 @@ $$
 p(x_i = c \mid \mathbf{x}_{-i}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i} \exp\!\left(\mu_{ik} + k \cdot r_i\right)}
 $$
 
-where $r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}$ is the residual score — a sufficient reduction that summarizes the influence of all other variables on $x_i$. The pseudolikelihood is the product of these conditionals across all observations and variables.
+where $r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}$ is the residual score — a single summary of the influence of all other variables on $x_i$. The pseudolikelihood is the product of these conditionals across all observations and variables.
 
 ## Edge selection
 
