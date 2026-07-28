@@ -10,8 +10,10 @@ background on MCMC convergence diagnostics and choosing the number of
 iterations, chains, and warmup length, see @MargossianGelman_2024.
 
 ESS estimates match `coda::effectiveSize` [@PlummerEtAl_2006_coda] and
-R-hat follows the Gelman-Rubin formula [@GelmanRubin_1992]. For how
-they are computed, see the [Technical Manual](../manual/diagnostics.qmd).
+R-hat is the split-R-hat of @VehtariEtAl_2021: each chain is cut in
+half and the halves are compared as if they were separate chains. For
+how both are computed, see the
+[Technical Manual](../manual/diagnostics.qmd).
 
 ## Effective sample size (ESS) {#sec-ess}
 
@@ -102,12 +104,24 @@ estimates; a large MCSE suggests that more iterations are needed.
 
 R-hat compares the between-chain and within-chain variance
 [@GelmanRubin_1992]. Values close to 1.0 indicate that the chains
-have converged to the same distribution. Earlier guidance recommended
-thresholds of 1.1 or 1.2; more recent recommendations suggest 1.01
-as a stricter threshold. Values above 1.01 suggest that the chains have not
-mixed and should be run longer.
+have converged to the same distribution; values above 1.01 suggest
+that the chains have not mixed and should be run longer
+[@VehtariEtAl_2021].
 
-`bgms` reports R-hat in `summary()` output and through `extract_rhat()`.
+`bgms` computes the *split* version of R-hat [@VehtariEtAl_2021]:
+each chain is cut in half and the halves enter the comparison as
+separate chains. This makes the diagnostic sensitive to within-chain
+drift — a single chain that slowly trends will disagree with its own
+second half, even if all chains happen to end up in the same place.
+
+R-hat is reported in `summary()` output and through `extract_rhat()`.
+It is `NA` when only one chain was run, and when a parameter is
+constant at the same value in every chain — for example, a pairwise
+effect whose edge was never included in any chain, so every draw is
+zero. Constant chains carry no mixing information, so no value is
+reported rather than a misleading one. If chains are instead stuck at
+*different* constant values, R-hat is `+Inf`: that is a real mixing
+failure, and it is reported loudly rather than hidden.
 
 ## Trace plots
 
@@ -240,12 +254,52 @@ the first and second halves of the post-warmup samples:
 | `ebfmi_second_half` | E-BFMI for the second half |
 | `var_ratio` | Ratio of energy variance (first half / second half); > 2 suggests settling |
 
+Each field is a vector with one entry per chain. With very short runs
+— fewer than 20 usable post-warmup iterations in a chain — there is
+too little energy history to split and assess, so the diagnostics for
+that chain are `NA` and no flag is raised. An `NA` here means "not
+enough draws to check", not "no problem found".
+
 If these diagnostics suggest the chain was still settling, increase `warmup`
 and refit. If diagnostics remain problematic after doubling or tripling
 warmup, try refitting with `update_method = "adaptive-metropolis"` and
 compare posterior summaries. If the two samplers produce similar results,
 the estimates are likely trustworthy despite the warnings; if they differ,
 further investigation is warranted.
+
+## Trust gauge for the hierarchical graph prior {#sec-trust-gauge}
+
+This check applies only to continuous (GGM) models fitted with
+`precision_graph_prior = "hierarchical"`. Under that prior, every
+edge move evaluates a normalizing-constant ratio through a fast
+approximation built at the start of the analysis (see the
+[Technical Manual](../manual/zratio-hierarchical.qmd)). The trust
+gauge audits that approximation after sampling: in a few extra
+assessment sweeps it redoes a subset of each chain's own edge
+decisions with the exact calculation and checks whether the
+approximation changed any of them.
+
+The gauge is off by default. Enable it before fitting with:
+
+```r
+options(bgms.zratio_gauge_sweeps = 2L)
+fit = bgm(data, precision_graph_prior = "hierarchical", ...)
+fit$zratio_diag
+```
+
+The summary reports two channels per chain:
+
+- **`flip_rate`** — the fraction of audited add/remove decisions that
+  would have come out differently under the exact calculation.
+- **`harm_pred`** — the projected distortion of the mean posterior
+  inclusion probability, in probability units.
+
+Small values on both channels mean the approximation did not
+meaningfully affect the sampled graphs. A flagged chain prints a
+warning-style message; in that case treat the edge inclusion
+probabilities with caution. See
+[`summarize_zratio_gauge()`](../reference/prior-samplers.qmd#summarize_zratio_gauge)
+for the full output format and thresholds.
 
 ## Run-length settings {#sec-run-length}
 
@@ -268,10 +322,16 @@ When diagnostics indicate a problem, match the remedy to the symptom:
 1. **Inspect `summary()`**: check R-hat (< 1.01) and ESS (≥ 100) for all
    parameters.
 2. **Check NUTS diagnostics**: `fit$nuts_diag$summary` for divergences,
-   tree depth saturation, and E-BFMI.
-3. **Check warmup**: `fit$nuts_diag$warmup_check` for signs of
+   tree depth saturation, E-BFMI, and a mean acceptance probability
+   (`mean_accept_prob`) close to `target_accept`. The
+   `fit$nuts_diag$has_issues` flag is `TRUE` when any of these checks
+   raised a concern.
+3. **Check warmup**: `fit$nuts_diag$summary$warmup_incomplete` and the
+   per-chain detail in `fit$nuts_diag$warmup_check` for signs of
    incomplete equilibration.
 4. **Plot traces**: visually inspect a few key parameters for mixing and
    stationarity.
-5. **If problems are found**: increase `warmup` and/or `iter`, adjust
+5. **With the hierarchical graph prior**: if the trust gauge was enabled,
+   check `fit$zratio_diag` for flagged chains.
+6. **If problems are found**: increase `warmup` and/or `iter`, adjust
    `target_accept`, or switch samplers.

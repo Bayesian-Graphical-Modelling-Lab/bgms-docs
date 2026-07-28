@@ -44,13 +44,11 @@ The sections below describe each component: the slab distribution that regulariz
 
 ## The slab: prior on effect sizes
 
-The slab distribution determines the prior plausibility of different effect sizes for edges that are present. In `bgms`, the slab is set via the `interaction_prior` argument and defaults to a Cauchy distribution centered at zero with scale 1 (`cauchy_prior(scale = 1)`). Alternative slabs are available through the [prior constructors](../reference/priors.qmd): [`normal_prior()`](../reference/priors.qmd#normal_prior) for a lighter-tailed prior and [`beta_prime_prior()`](../reference/priors.qmd#beta_prime_prior) for a beta-prime parameterization.
+The slab distribution determines the prior plausibility of different effect sizes for edges that are present. In `bgms`, the slab is set via the `interaction_prior` argument and defaults to a Normal distribution centered at zero with scale 1 (`normal_prior(scale = 1)`). Alternative slabs are available through the [prior constructors](../reference/priors.qmd): [`cauchy_prior()`](../reference/priors.qmd#cauchy_prior) for a heavier-tailed prior and [`beta_prime_prior()`](../reference/priors.qmd#beta_prime_prior) for a beta-prime parameterization.
 
-The Cauchy distribution has heavy tails, which means it allows large effects when the data support them, while the peak at zero provides moderate shrinkage toward small effects. In models with many variables and limited data, this regularization prevents extreme estimates.
+The Normal slab concentrates prior mass on moderate effect sizes: its peak at zero provides shrinkage toward small effects, and its light tails discourage extreme estimates. The Cauchy alternative has heavy tails, which allows occasional large effects when the data support them at the cost of weaker regularization; it is the default for the baseline effects in [`bgmCompare()`](../reference/bgmCompare.qmd).
 
 The scale parameter controls the width of the slab. A wider slab spreads prior probability over a larger range of effect sizes. This has a direct consequence for edge selection: because the slab is also the alternative hypothesis for the inclusion Bayes factor, a wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small.
-
-When `standardize = TRUE`, the prior scale is adjusted based on the range of response scores. Variables with more categories have larger score products, which typically correspond to smaller interaction effects. Without standardization, a fixed scale is relatively wide for high-category pairs and narrow for low-category pairs. The adjustment ensures equivalent relative shrinkage across all variable pairs.
 
 ## The spike: priors on the edge indicators
 
@@ -94,6 +92,12 @@ When there is only one block, the SBM reduces to the standard Beta-Bernoulli pri
 
 The SBM prior introduces additional parameters: the number of blocks, the assignment of variables to blocks, and the within- and between-block Beta hyperparameters. These are estimated from the data by default. See [Edge Clustering](clustering.qmd) for the full specification, hyperparameter guidance, and interpretation of results.
 
+### Edge priors on continuous data {#sec-edge-priors-continuous}
+
+For continuous (GGM) data — and for the continuous block of a mixed model — the edge prior does not act alone: excluding an edge also constrains the precision matrix, whose prior must respect positive definiteness. Under the default specification (`precision_graph_prior = "joint"` in [`bgm()`](../reference/bgm.qmd)), the two priors are combined in un-normalized form, and the resulting prior probability that a continuous edge is included is *not* exactly the nominal value from the edge prior — a Bernoulli prior with $\pi = 0.5$ does not translate into a 50% prior inclusion probability for continuous edges. Use [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities) to obtain the effective prior probabilities, which are also the correct denominators for inclusion Bayes factors (see [Edge Selection](edge-selection.qmd)).
+
+Alternatively, `precision_graph_prior = "hierarchical"` normalizes the precision prior per graph, so that the prior over structures is exactly the edge prior — at the cost of a fast normalizer approximation inside the sampler (see [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-trust-gauge) for the accompanying trust gauge). For discrete (ordinal) data none of this arises: the edge prior is the structure prior, exactly as written above.
+
 ## Nuisance parameter priors
 
 Beyond the spike-and-slab, `bgms` places priors on several nuisance parameters that are estimated but typically not of direct inferential interest:
@@ -102,7 +106,11 @@ Beyond the spike-and-slab, `bgms` places priors on several nuisance parameters t
 |-----------|-------|---------------|----------|
 | Category thresholds | Ordinal MRF, Mixed MRF | Beta-prime$(0.5, 0.5)$ via $\exp(\mu)$ | `threshold_prior` |
 | Blume-Capel parameters | Ordinal MRF, Mixed MRF | Beta-prime$(0.5, 0.5)$ via $\exp(\mu)$ | `threshold_prior` |
-| Diagonal of precision matrix | GGM, Mixed MRF | Gamma$(1, 1)$ | `precision_scale_prior` |
+| Diagonal of precision matrix | GGM, Mixed MRF | Exponential$(\eta = 1)$ | `precision_scale_prior` |
 | Continuous variable means | Mixed MRF | Normal$(0, 1)$ | `means_prior` |
 
 Each row's prior is set by passing the corresponding constructor — [`beta_prime_prior()`](../reference/priors.qmd#beta_prime_prior), [`gamma_prior()`](../reference/priors.qmd#gamma_prior) or [`exponential_prior()`](../reference/priors.qmd#exponential_prior), and [`normal_prior()`](../reference/priors.qmd#normal_prior) — to the listed argument. For the threshold and Blume-Capel priors, when the two beta-prime shape parameters are equal the induced prior on $\mu$ is symmetric around zero.
+
+### The standardized rate `eta` {#sec-eta-frame}
+
+The Gamma-family priors on the precision-matrix diagonal accept their rate in two frames. With `rate`, the value applies to the diagonal as-is. With `eta`, the value is interpreted in a standardized frame where the interaction slab has unit scale: at fit time, the actual rate is resolved as `eta` divided by the slab scale. The advantage of the `eta` frame is that graph and partial-association inference is unaffected by jointly rescaling the slab and the diagonal prior — so fixing `eta` keeps the prior's geometry unchanged when you widen or narrow the slab, rather than requiring a matching manual adjustment of the rate. The default `exponential_prior(eta = 1)` uses this frame. See the [prior constructors](../reference/priors.qmd#scale-priors) for both signatures.

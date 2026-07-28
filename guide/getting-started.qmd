@@ -119,7 +119,7 @@ In this plot, edges with posterior inclusion probability below 0.5 are set to ze
 
 ## Continuous data
 
-For continuous variables, `bgms` fits a Gaussian graphical model. The interface is identical; only the `variable_type` argument changes.
+For continuous variables, `bgms` fits a Gaussian graphical model. The interface is identical; only the `variable_type` argument changes. (All-continuous data also admit a dedicated Gibbs sampler via `update_method = "gibbs"`, which draws from exact conditionals with nothing to tune — see [Gaussian Graphical Model](ggm.qmd).)
 
 As a continuous-data example, we use the classic examination marks dataset from @MardiaKentBibby_1979. The data contain scores of 88 students on five examinations:
 

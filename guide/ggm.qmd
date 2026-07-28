@@ -68,7 +68,7 @@ When comparing the strength of associations across variable pairs — identifyin
 
 The diagonal entries of the precision matrix, $\theta_{ii}$, are the inverse of the residual variance of variable $i$ — the variance that remains after regressing $x_i$ on all other variables. A small residual variance $1 / \theta_{ii}$ means the variable is well predicted by the rest of the network.
 
-In `bgms`, the diagonal entries are nuisance parameters. They receive a Gamma$(1, 1)$ prior and are estimated during MCMC sampling, but they are not subject to edge selection. The off-diagonal entries — or equivalently the partial associations — are the primary inferential targets.
+In `bgms`, the diagonal entries are nuisance parameters. They receive an exponential prior by default (`exponential_prior(eta = 1)`, with the rate given in the standardized frame described in [Prior Basics](prior-basics.qmd#sec-eta-frame)) and are estimated during MCMC sampling, but they are not subject to edge selection. The off-diagonal entries — or equivalently the partial associations — are the primary inferential targets.
 
 ## Likelihood
 
@@ -77,6 +77,17 @@ Unlike the ordinal MRF, whose normalizing constant is intractable and requires a
 ## Edge selection
 
 When `edge_selection = TRUE` (the default), each partial association $\omega_{ij}$ — and therefore each precision entry $\theta_{ij}$ — receives a spike-and-slab prior, so an edge is either exactly absent or estimated from the data. The prior specification is described in [Prior Basics](prior-basics.qmd), and how to read the resulting inclusion probabilities and Bayes factors in [Edge Selection](edge-selection.qmd).
+
+For continuous data, the edge prior interacts with the precision-matrix prior, because excluding an edge constrains a matrix that must remain positive definite. The `precision_graph_prior` argument of [`bgm()`](../reference/bgm.qmd) controls how the two priors compose:
+
+- **`"joint"` (the default)** combines them in un-normalized form. The prior probability that an edge is included then differs from the nominal edge-prior value; use [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities) for the effective values when computing Bayes factors (see [Edge Selection](edge-selection.qmd#sec-bf-continuous)). With `beta_bernoulli_prior()` or `sbm_prior()`, the hyperparameter updates additionally carry a normalizing-constant correction. The correction table is built from the prior at the first fit of a model configuration — a one-time cost of the order of minutes, announced when `verbose = TRUE` — and cached on disk, so later fits of the same configuration skip the build. With `beta_bernoulli_prior()`, the sampled inclusion probability is returned per chain in `fit$inclusion_parameter_samples`.
+- **`"hierarchical"`** normalizes the precision prior per graph, so the prior over structures is exactly the edge prior and nominal prior inclusion probabilities apply. Each edge move then evaluates a normalizer ratio through a fast approximation; an optional trust gauge can audit that approximation after sampling (see [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-trust-gauge)).
+
+## Sampling with the Gibbs sampler
+
+Besides the default NUTS sampler and adaptive Metropolis, all-continuous data admit a third option: `update_method = "gibbs"`. It updates the precision matrix row by row from exact conjugate conditional distributions, and — under edge selection — updates the graph with a full-conditional birth/death step between parameter updates. It requires a Normal or Cauchy interaction prior and a Gamma-family prior on the precision diagonal (the defaults qualify).
+
+Because every draw comes from an exact conditional, there are no step sizes or acceptance targets to tune — `target_accept` is ignored — and the warmup is spent settling rather than adapting: with edge selection, the first 15% of warmup runs the full model so the precision matrix settles, and selection is active for the remaining 85%. See [GGM Internals](../manual/ggm-internals.qmd) for the update formulas.
 
 ## Missing data
 
