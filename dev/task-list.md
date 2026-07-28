@@ -11,6 +11,13 @@ If another note conflicts with this file, this file wins.
 - Technical sign-off owner: Maarten.
 - Readability sign-off owner: Emily.
 
+## docs/develop Branch
+
+Long-lived branch tracking bgms `develop` (audited against 4e508ed9 on
+2026-07-28). Work plan: `dev/audit-develop-2026-07-28.md` (phases A-F).
+Rules: never merge into main until the package develop ships; periodically
+merge main into it; re-sweep against bgms develop HEAD at each sync.
+
 ## Current Cycle Focus
 
 - Build trusted docs with automation-first QA.
