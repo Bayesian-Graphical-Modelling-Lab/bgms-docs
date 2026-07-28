@@ -25,7 +25,7 @@ virtual bool has_missing_data() const;
 virtual bool gauge_available() const;
 ```
 
-The interface no longer asks models what sampler they support: the
+The interface does not ask models what sampler they support: the
 sampler choice is configuration-driven. The R layer validates the
 combination of `update_method`, variable types, and priors
 (`validate_sampler()`), and the chain runner dispatches on the
@@ -188,9 +188,7 @@ variables enforce excluded edges and positive definiteness through the
 parameter vector contains only free coordinates, every value of which
 maps to a valid precision matrix. The sampler never sees a constraint —
 NUTS runs its standard unconstrained integrator on the active vector
-for every model type. (The projection callbacks, full-position
-interface, and RATTLE dispatch used during development — never in a
-CRAN release — are gone.)
+for every model type.
 
 ## GGMModel
 

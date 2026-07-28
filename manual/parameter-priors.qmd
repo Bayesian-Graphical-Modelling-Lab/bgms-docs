@@ -95,7 +95,5 @@ roles it needs:
 | Precision-matrix diagonal | GGM, mixed MRF | `gamma_prior(shape = 1, rate = 1)` |
 
 The model's `logp_and_gradient()` and Metropolis update functions call
-into the held priors at every iteration. Replacing the inline
-`R::dcauchy()` / closed-form lambda calls used in earlier versions with
-this polymorphic dispatch is what allows the user to swap families
-without touching the C++ code.
+into the held priors at every iteration. This polymorphic dispatch is
+what allows the user to swap families without touching the C++ code.

@@ -221,23 +221,6 @@ benefit from longer trajectories. Hitting the maximum depth occasionally is
 normal; hitting it on most iterations may indicate challenging posterior
 geometry. Consider increasing `nuts_max_depth`.
 
-### Non-reversible steps
-
-For models with continuous variables and edge selection, the leapfrog
-integrator enforces zero constraints through a projection step (see
-[Constrained Cholesky Parameterization](../manual/null-space.qmd) in the Technical Manual).
-After each forward step, the integrator checks whether
-reversing the step returns to the starting point. When the round-trip
-error exceeds a tolerance scaled by the square of the step size, the step
-is flagged as non-reversible.
-
-A small number of non-reversible steps is not a concern. A large number
-indicates that the step size is too large for the constraint geometry.
-Because the step size is tuned during warmup, the most effective remedy is
-to increase `warmup` so the adapter has more time to find an appropriate
-step size. If non-reversible steps persist after increasing warmup, switch
-to `update_method = "adaptive-metropolis"`.
-
 ## Warmup equilibration check
 
 In models with edge selection, the discrete graph structure may take longer
@@ -277,7 +260,7 @@ Three [`bgm()`](../reference/bgm.qmd) arguments control how much sampling is don
 When diagnostics indicate a problem, match the remedy to the symptom:
 
 - **Low ESS or an MCSE that is large relative to the effects you care about** — increase `iter`; precision grows with the number of retained draws.
-- **Warmup warnings in `fit$warmup_check`, persistent divergences, or acceptance below target** — increase `warmup`; the sampler needs more adaptation time, and extra post-warmup draws will not fix a poorly tuned sampler.
+- **Warmup warnings in `fit$nuts_diag$warmup_check`, persistent divergences, or acceptance below target** — increase `warmup`; the sampler needs more adaptation time, and extra post-warmup draws will not fix a poorly tuned sampler.
 - **R-hat above 1.01** — first check the trace plots; if chains disagree, longer `warmup` (and sometimes longer `iter`) is the remedy. Keep at least two chains — with a single chain, R-hat cannot be computed.
 
 ## Recommended workflow
@@ -285,7 +268,7 @@ When diagnostics indicate a problem, match the remedy to the symptom:
 1. **Inspect `summary()`**: check R-hat (< 1.01) and ESS (≥ 100) for all
    parameters.
 2. **Check NUTS diagnostics**: `fit$nuts_diag$summary` for divergences,
-   non-reversible steps, tree depth saturation, and E-BFMI.
+   tree depth saturation, and E-BFMI.
 3. **Check warmup**: `fit$nuts_diag$warmup_check` for signs of
    incomplete equilibration.
 4. **Plot traces**: visually inspect a few key parameters for mixing and

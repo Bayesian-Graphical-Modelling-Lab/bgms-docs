@@ -15,20 +15,6 @@ The implementation lives in `graph_constraint_structure.h` (the per-graph
 bookkeeping) and `ggm_gradient.cpp` (the forward map and gradient); the
 mixed MRF reuses the same engine for its continuous block.
 
-::: {.callout-note}
-## History
-
-During development, `bgms` first enforced these constraints inside the
-integrator, with a RATTLE/SHAKE constrained leapfrog scheme that
-projected each step back onto the constraint manifold and verified
-reversibility after the fact. That approach worked well, but the
-projection solves and reversibility checks made it slower than
-parameterizing the constraints away, and it never shipped in a CRAN
-release. Its machinery — projection callbacks, the reversibility check,
-and the `non_reversible` diagnostic — has been removed; the
-parameterization described here replaces it.
-:::
-
 ## Why constraints?
 
 Each pairwise parameter is either exactly zero (edge absent) or free

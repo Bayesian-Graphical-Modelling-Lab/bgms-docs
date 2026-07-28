@@ -21,9 +21,10 @@ $\mathbf{S} = \mathbf{X}^\top \mathbf{X}$.
 The GGM supports two samplers:
 
 - **NUTS** (default) — Gradient-based sampling of all continuous
-  parameters simultaneously. Uses a free-element Cholesky
-  parameterization with [RATTLE](null-space.qmd) constraints when edge
-  selection is active.
+  parameters simultaneously. Uses the
+  [constrained Cholesky parameterization](null-space.qmd), whose
+  null-space coordinates keep excluded edges exactly zero under edge
+  selection.
 - **Adaptive Metropolis** (fallback) — Element-wise updates of
   individual $\theta_{ij}$ entries via rank-1 Cholesky updates.
 
@@ -51,7 +52,8 @@ $$
 
 Notation: on this page $\theta$ without subscripts is the packed
 sampler position (the $q$ of the [NUTS](nuts.qmd) and
-[Constrained Leapfrog](null-space.qmd) pages — here $q$ indexes Cholesky
+[Constrained Cholesky Parameterization](null-space.qmd) pages — here
+$q$ indexes Cholesky
 columns instead, mirroring the code); the doubly-subscripted
 $\theta_{ij}$ always denotes an entry of the precision matrix
 $\boldsymbol{\Theta}$. For each column $q$:
@@ -67,7 +69,7 @@ $\boldsymbol{\Theta}$. For each column $q$:
 When column $q$ has $m_q$ excluded edges ($\gamma_{iq} = 0$), the
 constraint matrix $A_q$ encodes the zero-precision requirements
 $\theta_{iq} = \sum_l \Phi_{li}\,\Phi_{lq} = 0$ (see
-[RATTLE](null-space.qmd)). The off-diagonal entries
+[Constrained Cholesky Parameterization](null-space.qmd)). The off-diagonal entries
 of $\boldsymbol{\Phi}$ for column $q$ must lie in the null space of
 $A_q$. A Givens QR factorization of $A_q^\top$ produces
 an orthonormal null-space basis $N_q$, and the off-diagonal entries
@@ -78,32 +80,24 @@ off-diagonal slot while satisfying all $m_q$ constraints exactly.
 When $m_q = 0$ (no excluded edges in column $q$), $N_q$ is the
 identity and $f_q = x_q$ directly.
 
-### Two coordinate systems
+### Active and full layouts
 
-The GGM operates in two coordinate systems depending on whether
-constraints are active:
-
-| Coordinate system | Dimension | Used by |
-|-------------------|-----------|---------|
-| **Active** $(f_q, \psi_q)$ | $p + \lvert E\rvert$ | Unconstrained NUTS (no edge selection) |
-| **Full** $(\Phi_{iq}, \psi_q)$ | $p(p+1)/2$ | Constrained NUTS with RATTLE |
-
-When edge selection is inactive, NUTS operates in the active
-coordinate system — the null-space rotation $N_q f_q$ maps free
-parameters to Cholesky entries, and the sampler never sees the
-excluded dimensions.
-
-When edge selection is active, NUTS operates in the full coordinate
-system (raw Cholesky entries including zeros for excluded edges).
-RATTLE projection enforces the zero-precision constraints at each
-leapfrog step. The switch between these two paths is described in
-[RATTLE: Dispatch in the sampler hierarchy](null-space.qmd).
+NUTS always integrates in the active coordinates $(f_q, \psi_q)$, of
+dimension $p + \lvert E\rvert$ — the null-space rotation $N_q f_q$
+maps free parameters to Cholesky entries, so the sampler never sees
+the excluded dimensions, with or without edge selection. The full
+(zero-padded) layout of dimension $p + p(p-1)/2$ exists only as a
+fixed-slot frame: the mass matrix is estimated there so entries keep
+their positions when edge moves change the active set (see
+[NUTS — Mass matrix](nuts.qmd#mass-matrix-full-versus-active-layout)),
+and sample storage uses the $p(p+1)/2$ upper triangle of
+$\boldsymbol{\Theta}$ itself.
 
 ### `GraphConstraintStructure`
 
 The `GraphConstraintStructure` in `graph_constraint_structure.h`
-precomputes the index maps needed by both the parameterization and
-the RATTLE projections. For each column $q$ it stores:
+precomputes the index maps needed by the parameterization. For each
+column $q$ it stores:
 
 - `excluded_indices` / `included_indices` — which rows are
   constrained vs. free
@@ -170,15 +164,6 @@ The backward pass runs in two phases:
    $\partial\log p / \partial \psi_q$. Reverse-mode differentiation
    through the QR factorization captures cross-column dependencies
    automatically.
-
-### Full-space gradient (RATTLE mode)
-
-When RATTLE is active, the gradient operates in the full coordinate
-system (raw Cholesky entries) rather than the $(f_q, \psi_q)$ active
-coordinates. The full-space gradient in `logp_and_gradient_full()`
-is simpler: off-diagonal adjoints are used directly without the
-null-space rotation, and the QR Jacobian terms are omitted (RATTLE
-preserves the correct measure on the constraint manifold).
 
 ## Element-wise Metropolis {#metropolis}
 

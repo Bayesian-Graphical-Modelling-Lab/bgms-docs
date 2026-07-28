@@ -108,16 +108,6 @@ geometry. On the Gibbs host, stage 3c covers most of the warmup (see
 below) — there is nothing to adapt, but the graph and precision
 matrix burn in together.
 
-::: {.callout-note}
-An earlier design appended a "stage 3d" calibration window after the
-user's warmup budget, meant to feed selection-warm iterations to a
-warmup-time Z-ratio calibrator. The Option-B surfaces (built once
-before sampling) made that machinery unnecessary, and the scaffolding
-— the `calibration_window` constructor parameter, `stage3d_start`,
-and `in_stage3d()` — was removed; no caller had ever passed a
-non-zero window.
-:::
-
 ## Budget allocation {#budget-allocation}
 
 How the warmup budget is divided depends on the sampler hosting the

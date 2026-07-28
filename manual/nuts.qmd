@@ -57,16 +57,6 @@ precision matrix with exact zeros at excluded edges. NUTS therefore
 always runs the standard unconstrained leapfrog integrator, for every
 model type.
 
-::: {.callout-note}
-An earlier development version of `bgms` (never released on CRAN)
-instead used a RATTLE/SHAKE constrained leapfrog with projection steps
-and a runtime reversibility check (and a `non_reversible` diagnostic).
-It worked well but was slower than the current approach, and has been
-removed; see
-[Constrained Cholesky Parameterization](null-space.qmd) for the
-replacement.
-:::
-
 ## Binary tree construction
 
 NUTS builds a balanced binary tree by doubling the trajectory in a
