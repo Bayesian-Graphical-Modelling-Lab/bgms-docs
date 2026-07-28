@@ -57,12 +57,11 @@ update.
 
 The OMRF uses a pseudolikelihood approximation: the product of full
 conditional distributions rather than the intractable joint
-distribution. The log-pseudolikelihood is:
-
-For a cross-model overview, see [Pseudolikelihood](pseudolikelihood.qmd).
+distribution (for a cross-model overview, see
+[Pseudolikelihood](pseudolikelihood.qmd)). The log-pseudolikelihood is:
 
 $$
-\text{PL}(\boldsymbol{\theta}) = \sum_{i=1}^{p} \sum_{n=1}^{N} \log P(X_{ni} = x_{ni} \mid \text{rest})
+\log \text{PL}(\boldsymbol{\theta}) = \sum_{i=1}^{p} \sum_{n=1}^{N} \log P(X_{ni} = x_{ni} \mid \text{rest})
 $$
 
 The gradient of the log-pseudolikelihood with respect to each
@@ -98,9 +97,9 @@ interaction parameters live in a fixed-dimensional space; excluded
 edges are represented as parameters fixed at zero rather than
 removed from the model.
 
-When edge selection is active, the model performs a full scan over
-all $p(p-1)/2$ edges after each gradient-based step. For each edge
-$(i, j)$:
+When edge selection is active, the chain runner performs a full scan
+over all $p(p-1)/2$ edges at the start of each iteration, before the
+parameter update step. For each edge $(i, j)$:
 
 **Add move** ($\gamma_{ij} = 0 \to 1$). Propose a new interaction
 value $\omega_{ij}^\star \sim \mathcal{N}(\omega_{ij},\, \sigma_{ij}^2)$

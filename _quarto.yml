@@ -85,6 +85,7 @@ website:
             - guide/edge-selection.qmd
             - guide/group-comparison.qmd
             - guide/clustering.qmd
+            - guide/missing-data.qmd
         - section: "Output & Diagnostics"
           contents:
             - guide/mcmc-output.qmd
@@ -101,7 +102,7 @@ website:
           contents:
             - reference/bgm.qmd
             - reference/bgmCompare.qmd
-            - reference/sample-precision-prior.qmd
+            - reference/sample-ggm-prior.qmd
         - section: "Priors"
           contents:
             - reference/priors.qmd

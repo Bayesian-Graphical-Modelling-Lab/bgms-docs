@@ -42,7 +42,7 @@ In summary, the full hierarchical specification is:
 - $\pi_{ab} \mid B \sim \text{Beta}(\alpha_b, \beta_b)$ for $a \neq b$ (between-cluster)
 - $\gamma_{ij} \mid \boldsymbol{\pi}, \mathbf{z}, B \sim \text{Bernoulli}(\pi_{z_i z_j})$
 
-Both $B$ and $\boldsymbol{\delta}$ are analytically marginalized out using the Mixtures of Finite Mixtures (MFM) framework [@MillerHarrison_2018], following the implementation of @GengEtAl_2019 for the SBM. This avoids transdimensional sampling while providing consistent estimation of the number of clusters. For details, see @SekulovskiEtAl_2025_sbm. The C++ implementation is documented in [Stochastic Block Model Prior](../manual/sbm-prior.qmd).
+Both $B$ and $\boldsymbol{\delta}$ are analytically marginalized out using the Mixtures of Finite Mixtures (MFM) framework [@MillerHarrison_2018], following the implementation of @GengEtAl_2019 for the SBM. This provides consistent estimation of the number of clusters without the sampler ever having to change dimension. For details, see @SekulovskiEtAl_2025_sbm and, for the technical formulation, [Stochastic Block Model Prior](../manual/sbm-prior.qmd).
 
 ## Setting up the SBM prior
 

@@ -67,14 +67,20 @@ dual-averaging estimate.
 
 Step-size adaptation is frozen. For models with element-wise
 Metropolis proposals (e.g., the OMRF's category parameters), the
-proposal standard deviations are tuned via Robbins–Monro updates:
+proposal standard deviations are tuned via additive Robbins–Monro
+updates (see [Adaptive Metropolis](metropolis.qmd)):
 
 $$
-\sigma_{k+1} = \sigma_k \cdot \exp\!\bigl(w_k (\alpha_k - \alpha^*)\bigr)
+\sigma_{k+1} = \sigma_k + w_k (\alpha_k - \alpha^*)
 $$
 
 where $\alpha_k$ is the observed acceptance probability, $\alpha^*
-= 0.44$ is the target, and $w_k = k^{-0.75}$ is the decay weight.
+= 0.44$ is the target, and $w_k = t^{-0.75}$ is the decay weight.
+The result is clamped to $[0.001, 2.0]$, and NaN values are reset
+to 1.0. The 0.44 target is fixed under NUTS (the user's
+`target_accept` argument governs the step-size adaptation target
+instead); only under `update_method = "adaptive-metropolis"` does
+`target_accept` set the Metropolis target directly.
 Edge selection is not yet active in this stage.
 
 ### Stage 3c: Re-adaptation under edge selection
@@ -106,7 +112,7 @@ when the warmup budget is insufficient:
 | 0 | No warning |
 | 1 | Warmup too short for the standard schedule |
 | 2 | Proportional fallback used (reduced window sizes) |
-| 3 | Limited tuning (fewer adaptation windows) |
+| 3 | Limited proposal-SD tuning (edge selection with warmup < 300) |
 | 4 | Proposal SD learning skipped (stage 3b dropped) |
 
 The `warmup_check` table returned by `bgm()` reports these warnings
@@ -116,7 +122,10 @@ per chain, accessible via `fit$warmup_check` in R.
 
 The step-size update follows Algorithm 6 in @HoffmanGelman_2014_nuts
 with parameters $\gamma = 0.05$, $t_0 = 10$, $\kappa = 0.75$, and
-bias target $\mu = \log(10\,\epsilon_0)$.
+bias target $\mu = \log(10\,\epsilon_0)$. (Here $\gamma$ and $\mu$
+are the Hoffman–Gelman tuning constants, not the edge indicators
+$\gamma_{ij}$ or category thresholds $\mu_{ic}$ used elsewhere on
+this site.)
 
 ## Querying the schedule
 

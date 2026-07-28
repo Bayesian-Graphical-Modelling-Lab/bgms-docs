@@ -74,7 +74,7 @@ the current cluster assignment vector. These are stored in
 
 ## Prior selection in R
 
-The `edge_prior` argument in `bgm()` takes a [`bgms_indicator_prior`](../reference/priors.qmd) object. The same family of constructors is also accepted by `bgmCompare()` via its `difference_prior` argument, which governs the inclusion of group differences. The `family` field of that object selects the C++ class:
+The `edge_prior` argument in `bgm()` takes a [`bgms_indicator_prior`](../reference/priors.qmd) object. The same family of constructors is also accepted by `bgmCompare()` via its `difference_prior` argument, which governs the inclusion of contrast parameters (difference selection). The `family` field of that object selects the C++ class:
 
 | R constructor | `family` | C++ class | Behavior |
 |---------------|----------|-----------|----------|

@@ -44,7 +44,8 @@ bgmCompare(
   display_progress = c("per-chain", "total", "none"),
   seed = NULL,
   standardize = FALSE,
-  verbose = getOption("bgms.verbose", TRUE)
+  verbose = getOption("bgms.verbose", TRUE),
+  progress_callback = NULL
 )
 ```
 
@@ -65,9 +66,9 @@ bgmCompare(
 
 | Argument | Description |
 |----------|-------------|
-| `difference_selection` | Logical. If `TRUE`, spike-and-slab priors are applied to difference parameters. Default: `TRUE`. |
+| `difference_selection` | Logical. If `TRUE`, spike-and-slab priors are applied to the contrast parameters that encode group differences (for two groups, a single scaled difference; for $G > 2$ groups, $G - 1$ orthogonal contrasts). Default: `TRUE`. |
 | `main_difference_selection` | Logical. If `TRUE`, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is `FALSE`. Only used when `difference_selection = TRUE`. |
-| `difference_scale` | Scale of the Cauchy prior for difference parameters. Default: `1`. |
+| `difference_scale` | Scale of the Cauchy prior for the contrast parameters. Default: `1`. |
 | `difference_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior on difference inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), or [`sbm_prior()`](priors.qmd#sbm_prior). Under `sbm_prior()`, the SBM governs the off-diagonal (pairwise) difference inclusions; the diagonal (main-effect difference inclusions, when `main_difference_selection = TRUE`) follows a separate Beta-Bernoulli using the within-cluster `alpha` and `beta`. Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) and the scalar `difference_probability` / `beta_bernoulli_alpha` / `beta_bernoulli_beta` arguments are accepted but deprecated. Default: `bernoulli_prior(0.5)`. |
 
 ### Prior specification
@@ -89,6 +90,15 @@ Priors on baseline parameters are specified via prior-object constructors (see [
 | `main_alpha = a, main_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` |
 | `difference_probability = p` | `difference_prior = bernoulli_prior(p)` |
 | `beta_bernoulli_alpha = a, beta_bernoulli_beta = b` | `difference_prior = beta_bernoulli_prior(a, b)` |
+| `pairwise_difference_scale, main_difference_scale` | `difference_scale` |
+| `pairwise_difference_prior, main_difference_prior` | `difference_prior` |
+| `pairwise_difference_probability, main_difference_probability` | `difference_prior = bernoulli_prior(p)` |
+| `pairwise_beta_bernoulli_alpha/beta, main_beta_bernoulli_alpha/beta` | `difference_prior = beta_bernoulli_prior(a, b)` |
+| `main_difference_model, reference_category` | No replacement (removed model options) |
+| `interaction_scale = s` | `interaction_prior = cauchy_prior(scale = s)` (deprecated since 0.1.6.0) |
+| `threshold_alpha = a, threshold_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` (deprecated since 0.1.6.0) |
+| `burnin = n` | `warmup = n` (deprecated since 0.1.6.0) |
+| `save` | No replacement; raw samples are always stored (deprecated since 0.1.6.0) |
 :::
 
 ### Sampler settings
@@ -106,6 +116,7 @@ Priors on baseline parameters are specified via prior-object constructors (see [
 | `display_progress` | Progress reporting: `"per-chain"`, `"total"`, or `"none"`. Default: `"per-chain"`. |
 | `seed` | Optional integer seed for reproducibility. |
 | `verbose` | Logical. Print informational messages during data processing. Default: `getOption("bgms.verbose", TRUE)`. |
+| `progress_callback` | Optional R function with signature `function(completed, total)`, called at regular intervals during sampling with the number of completed and total iterations across all chains. Useful for external front-ends (e.g., JASP). Default: `NULL` (no callback). |
 
 ## Value
 
@@ -119,8 +130,8 @@ Main components:
   Data frames with posterior summaries (mean, sd, MCSE, ESS, Rhat) for
   baseline threshold and partial association parameters.
 - `posterior_summary_main_differences`, `posterior_summary_pairwise_differences`
-  --- Data frames with posterior summaries for group differences in 
-  thresholds and partial associations. Includes posterior inclusion
+  --- Data frames with posterior summaries for the contrast parameters
+  of thresholds and partial associations. Includes posterior inclusion
   probabilities when `difference_selection = TRUE`.
 - `posterior_summary_indicator` --- Data frame with posterior summaries for
   difference inclusion indicators (if `difference_selection = TRUE`).

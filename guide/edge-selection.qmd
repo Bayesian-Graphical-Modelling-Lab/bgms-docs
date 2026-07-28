@@ -11,7 +11,7 @@ For each edge $(i, j)$, an indicator variable $\gamma_{ij} \in \{0, 1\}$ governs
 - When $\gamma_{ij} = 0$ (spike), the partial association $\omega_{ij}$ is set to exactly zero — the edge is absent.
 - When $\gamma_{ij} = 1$ (slab), the partial association receives the slab prior set via `interaction_prior` (default `cauchy_prior(scale = 1)`) — the edge is present and the effect size is estimated.
 
-This is the *mixtures of mutually singular distributions* (MoMS) formulation of the spike-and-slab prior [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms]. Because each edge is either exactly zero or follows a continuous distribution — with no overlap between the two components — the sampler moves between mutually exclusive subspaces rather than gradually shrinking toward zero. This discrete formulation provides model-selection consistency and avoids the need for transdimensional (reversible-jump) MCMC proposals.
+In this formulation of the spike-and-slab prior [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms], each edge is either exactly zero or follows a continuous distribution — with no overlap between the two components. An excluded edge is genuinely absent from the model, not merely shrunk toward zero, which is what makes exact statements like "the data support excluding this edge" possible.
 
 The prior probability of inclusion is controlled by the `edge_prior` argument. See [Prior Basics](prior-basics.qmd) for the available options (Bernoulli, Beta-Bernoulli, Stochastic-Block).
 

@@ -60,7 +60,7 @@ lowest observed category.
 ### Sampler validation (`validate_sampler.R`)
 
 `validate_sampler()` resolves the `update_method` argument into a
-concrete sampler type (`"nuts"` or `"adaptive_metropolis"`)
+concrete sampler type (`"nuts"` or `"adaptive-metropolis"`)
 and sets defaults for tuning parameters (`target_accept`,
 `nuts_max_depth`). It detects the number of
 available cores and resolves the progress display type.
@@ -73,7 +73,7 @@ Priors are user-facing S3 objects ([`bgms_parameter_prior`](../reference/priors.
 
 ## Spec construction (`bgm_spec.R`)
 
-`bgm_spec()` is the user-facing constructor. It calls all validators,
+`bgm_spec()` is the internal constructor. It calls all validators,
 then delegates to one of four model-specific builders:
 
 | Model type | Builder | Key additions |

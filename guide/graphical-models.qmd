@@ -19,7 +19,7 @@ Conditional independence is distinct from marginal independence. Two variables m
 
 ## Markov Random Fields
 
-A Markov random field (MRF) is an undirected graphical model in which the joint distribution factorizes according to the graph structure. For $p$ variables with observations $\mathbf{x} = (x_1, \ldots, x_p)$, the MRF specifies:
+A Markov random field (MRF) is an undirected graphical model in which the joint distribution factorizes according to the graph structure — it can be written as a product of pieces that each involve only connected variables. For $p$ variables with observations $\mathbf{x} = (x_1, \ldots, x_p)$, the MRF specifies:
 
 $$
 p(\mathbf{x}) \propto \exp\left(\sum_{i} \mu_i(x_i) +

@@ -27,7 +27,7 @@ The GGM supports two samplers:
 - **Adaptive Metropolis** (fallback) — Element-wise updates of
   individual $\theta_{ij}$ entries via rank-1 Cholesky updates.
 
-The sampler is selected by the `interaction` argument in `bgm()`.
+The sampler is selected by the `update_method` argument in `bgm()`.
 Edge indicators $\gamma_{ij}$ are always updated by Metropolis–Hastings
 moves, regardless of the continuous-parameter sampler. Within each
 iteration, edge indicator updates run first, then the continuous

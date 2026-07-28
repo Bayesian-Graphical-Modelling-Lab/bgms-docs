@@ -86,7 +86,8 @@ categories are less probable.
 **Residual variances** report the posterior estimates of the residual
 variance $1 / \Theta_{ii}$ for each continuous variable, where
 $\Theta_{ii}$ is the corresponding diagonal element of the precision
-matrix. Use `extract_precision()` to obtain the full precision matrix.
+matrix (see [Gaussian Graphical Model](ggm.qmd)). Use
+`extract_precision()` to obtain the full precision matrix.
 
 **Pairwise interactions** report the conditional association between each
 pair of variables, controlling for all others. These are the edge weights
@@ -226,9 +227,9 @@ str(fit$nuts_diag, max.level = 1)
 ```
 
 The `summary` field contains per-chain summaries of tree depth,
-divergences, non-reversible steps, energy, and the mean Metropolis
-acceptance probability (Stan's `accept_stat__`, also stored
-per-iteration as `fit$nuts_diag$accept_prob`). The `warmup_check` field
+divergences, non-reversible steps, energy, and the mean
+acceptance probability (also stored per-iteration as
+`fit$nuts_diag$accept_prob`). The `warmup_check` field
 reports whether warmup equilibration was sufficient. These are described in detail in
 [MCMC Diagnostics](mcmc-diagnostics.qmd). If these diagnostics remain problematic after tuning, refit with `update_method = "adaptive-metropolis"`.
 

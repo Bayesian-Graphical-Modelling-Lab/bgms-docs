@@ -80,7 +80,7 @@ The `gradient()` function combines three components:
 `run_gibbs_sampler_bgmCompare()` orchestrates one MCMC chain. Each
 iteration:
 
-1. **Missing data imputation** (if `na_impute = TRUE`) — Impute
+1. **Missing data imputation** (if `na_action = "impute"`) — Impute
    missing observations per group using the current parameters.
    Updates the observation matrix, category counts, Blume-Capel
    statistics, and pairwise statistics.

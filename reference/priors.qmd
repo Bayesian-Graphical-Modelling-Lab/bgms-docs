@@ -208,7 +208,7 @@ fit = bgmCompare(
 ## See also
 
 [`bgm()`](bgm.qmd), [`bgmCompare()`](bgmCompare.qmd),
-[`sample_precision_prior()`](sample-precision-prior.qmd),
+[`sample_ggm_prior()`](sample-ggm-prior.qmd),
 [Prior Basics](../guide/prior-basics.qmd),
 [Edge Selection](../guide/edge-selection.qmd),
 [Edge Clustering](../guide/clustering.qmd).

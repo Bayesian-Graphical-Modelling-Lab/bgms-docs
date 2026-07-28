@@ -148,9 +148,9 @@ extract_ess(bgms_object)
 ```
 
 Returns a named list with ESS values for each parameter type present in the
-model (e.g., `main`, `pairwise`, `indicator`). ESS is computed in C++ using
-the AR spectral density method, matching `coda::effectiveSize`. For
-implementation details, see the [Technical Manual](../manual/diagnostics.qmd).
+model (e.g., `main`, `pairwise`, `indicator`). ESS values match
+`coda::effectiveSize`. For implementation details, see the
+[Technical Manual](../manual/diagnostics.qmd).
 
 ## extract_rhat {#extract_rhat}
 
@@ -161,15 +161,9 @@ extract_rhat(bgms_object)
 ```
 
 Returns a named list with R-hat values for each parameter type present in
-the model (e.g., `main`, `pairwise`, `indicator`). R-hat is computed in C++
-using the Gelman-Rubin formula, matching `coda::gelman.diag`. For
+the model (e.g., `main`, `pairwise`, `indicator`). R-hat follows the
+Gelman-Rubin formula, matching `coda::gelman.diag`. For
 implementation details, see [diagnostics](../manual/diagnostics.qmd) in the Technical Manual.
-
-## Deprecated functions
-
-- `extract_category_thresholds()` --- Renamed to `extract_main_effects()`.
-- `extract_edge_indicators()` --- Renamed to `extract_indicators()`.
-- `extract_pairwise_thresholds()` --- Renamed to `extract_main_effects()`.
 
 ## extract_precision {#extract_precision}
 
@@ -211,6 +205,12 @@ extract_log_odds(bgms_object)
 
 Returns a symmetric matrix of log adjacent-category odds ratios. For the
 ordinal MRF, $\text{log-odds}_{ij} = 2 \omega_{ij}$.
+
+## Deprecated functions
+
+- `extract_category_thresholds()` --- Renamed to `extract_main_effects()`.
+- `extract_edge_indicators()` --- Renamed to `extract_indicators()`.
+- `extract_pairwise_thresholds()` --- Renamed to `extract_main_effects()`.
 
 ## See also
 
