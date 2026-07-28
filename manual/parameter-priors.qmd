@@ -17,23 +17,20 @@ class BaseParameterPrior {
   virtual double logp(double x) const = 0;
   virtual double grad(double x) const = 0;
   virtual std::unique_ptr<BaseParameterPrior> clone() const = 0;
-  virtual double scale() const;              // throws if no scale
-  virtual void set_scale(double scale);      // throws if no scale
 };
 ```
 
 Each prior provides a log-density `logp(x)` and gradient `grad(x)`
 evaluated at a single point $x$; `clone()` produces an independent
-copy for parallel chain execution. Scale-family priors (Cauchy,
-Normal) additionally expose a `scale()` accessor and a `set_scale()`
-mutator, and `GammaScalePrior` exposes `shape()` and `rate()`. These
-accessors are what the samplers consult beyond plain density
-evaluation: the GGM's Gibbs eligibility check and slab-variance
-formulas read `scale()`, the conjugate edge move and row-block Gibbs
-read the Gamma `shape()`/`rate()`, the Cauchy scale-mixture weights
-are refreshed against `scale()`, the standardized `eta` frame resolves
-the diagonal rate from the slab's `scale()`, and the
-[random slab scale](#random-slab-scale) drives `set_scale()`.
+copy for parallel chain execution. The scale-family classes (Cauchy,
+Normal) additionally expose a `scale()` accessor, and
+`GammaScalePrior` exposes `shape()` and `rate()`. These accessors are
+what the samplers consult beyond plain density evaluation: the GGM's
+Gibbs eligibility check and slab-variance formulas read `scale()`,
+the conjugate edge move and row-block Gibbs read the Gamma
+`shape()`/`rate()`, the Cauchy scale-mixture weights are refreshed
+against `scale()`, and the standardized `eta` frame resolves the
+diagonal rate from the slab's `scale()`.
 
 ## Concrete classes
 
@@ -95,20 +92,3 @@ when the user widens or narrows the slab. The standardized cell
 $(\delta, \eta, \alpha)$ is also the frame in which the
 [Z-ratio constants](zratio-hierarchical.qmd) and correction tables are
 built, which is why one table serves every slab scale.
-
-## Random slab scale {#random-slab-scale}
-
-The `interaction_scale_prior` argument of `bgm()` turns the slab scale
-into a sampled hyperparameter for prior-sensitivity analysis. The
-scale is parameterized multiplicatively, $s = s_0\, u$, with $s_0$ the
-scale from `interaction_prior` and $u$ following the supplied mean-one
-Gamma or exponential hyperprior. Each model adds a one-dimensional
-Metropolis-within-Gibbs update: a log-normal random walk on $u$,
-accepted against the hyperprior and the summed slab log-densities of
-the currently included interactions, applied through `set_scale()`.
-Supported for the ordinal, mixed, and GGM models with a Normal slab;
-on continuous data it requires the default joint graph specification
-(the [hierarchical specification](zratio-hierarchical.qmd) freezes its
-Z-ratio constants at a fixed scale, which is inconsistent with a
-sampled one). The per-iteration scale draws are returned with the
-chain output.

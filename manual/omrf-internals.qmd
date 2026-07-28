@@ -187,12 +187,3 @@ adaptive Metropolis proposals for use during warmup stage 3b (proposal
 SD learning) and as a user-selectable alternative via
 `update_method = "adaptive-metropolis"`. The proposal SDs are tuned by
 Robbins-Monro targeting 0.44 acceptance, clamped to $[0.001, 2.0]$.
-
-## Random interaction-slab scale
-
-With `interaction_scale_prior` set (Normal slab required), the OMRF
-adds the same one-dimensional Metropolis-within-Gibbs update of the
-slab scale as the continuous models — a log-normal random walk on the
-multiplicative factor $u$, accepted against the mean-one hyperprior
-and the summed slab densities of the included interactions; see
-[Parameter Priors — Random slab scale](parameter-priors.qmd#random-slab-scale).

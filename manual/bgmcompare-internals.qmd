@@ -113,13 +113,6 @@ iteration:
    matrix, hence no determinant tilt (see
    [SBM Prior](sbm-prior.qmd#corrected-sweeps-on-continuous-data)).
 
-With `difference_scale_prior` set (Normal difference slab required),
-the sampler additionally runs a one-dimensional
-Metropolis-within-Gibbs update of the difference slab scale, the
-analogue of the single-group
-[random slab scale](parameter-priors.qmd#random-slab-scale) for the
-contrast parameters.
-
 The warmup schedule follows the same multi-stage structure as the
 single-group model (see [Warmup Schedule](warmup.qmd)).
 

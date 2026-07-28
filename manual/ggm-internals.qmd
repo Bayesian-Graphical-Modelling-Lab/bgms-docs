@@ -350,19 +350,6 @@ likelihood ratio plus tilt, prior odds $\log\{\pi_{ij} / (1 -
 the slab density of the new entry (with the $-\log 2$ Jacobian),
 minus the proposal density, plus the same diagonal-prior ratio.
 
-### Rao-Blackwellized inclusion draws
-
-Each sweep records, per edge, the raw acceptance probability
-$\alpha$ of its birth/death proposal and the pre-move indicator
-state. From these the model derives a **Rao-Blackwellized inclusion
-draw**: $J_e = \alpha$ for a proposed birth, $1 - \alpha$ for a
-proposed death — the conditional probability that the edge ends the
-sweep included, given the rest of the state. Averaging $J_e$ over
-iterations estimates the posterior inclusion probability with lower
-variance than averaging the binary indicators themselves. The
-per-sweep draws are surfaced to the output layer alongside the
-indicator samples.
-
 ### Iteration order
 
 The order of edge updates is randomized at each iteration via
@@ -428,18 +415,6 @@ The log-determinant is computed from the Cholesky factor as
 $\log|\boldsymbol{\Theta}| = 2\sum_q \log \Phi_{qq}$ (and advanced
 incrementally between refreshes). The trace term uses the precomputed
 sufficient statistic $\mathbf{S}$.
-
-## Random interaction-slab scale
-
-When the slab scale is turned into a hyperparameter (an optional
-hyperprior on a multiplicative factor $u$ of the base scale; see
-[Parameter Priors](parameter-priors.qmd)), the model adds a
-one-dimensional Metropolis-within-Gibbs update: a log-normal random
-walk on $u$, accepted against the mean-one hyperprior on $u$ and the
-summed slab densities of the currently included partial associations
-$-\theta_{ij}/2$. The diagonal's Gamma prior stays anchored at the
-base scale. The sampled scale is reported per iteration in the chain
-output.
 
 ## Missing data imputation
 
