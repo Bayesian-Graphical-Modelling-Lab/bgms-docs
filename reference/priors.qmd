@@ -27,8 +27,9 @@ Priors on real-valued parameters. Used for `interaction_prior`,
 
 ### `cauchy_prior()` {#cauchy_prior}
 
-Cauchy(0, scale) prior. The default for pairwise interactions; produces
-heavy-tailed shrinkage toward zero.
+Cauchy(0, scale) prior. Produces heavy-tailed shrinkage toward zero. The
+default for baseline pairwise interactions in `bgmCompare()`; in `bgm()`
+the default interaction prior is [`normal_prior()`](#normal_prior).
 
 ```r
 cauchy_prior(scale = 1)
@@ -42,9 +43,10 @@ Returns a `bgms_parameter_prior` object with `family = "cauchy"`.
 
 ### `normal_prior()` {#normal_prior}
 
-Normal(0, scale) prior. Lighter-tailed than Cauchy; recommended for
-simulation-based calibration (SBC) studies where Cauchy priors can
-generate data with extreme parameter values.
+Normal(0, scale) prior. Lighter-tailed than Cauchy, and the default for
+pairwise interactions in `bgm()`. The lighter tails also make it the
+better choice for simulation studies, where a Cauchy prior can generate
+data with extreme parameter values.
 
 ```r
 normal_prior(scale = 1)
@@ -85,34 +87,55 @@ Priors on positive scale parameters, currently used only for the diagonal
 of the precision matrix in GGM and mixed MRF models (`precision_scale_prior`
 argument of `bgm()`).
 
+Both constructors accept the rate in one of two frames — supply one of the
+two arguments, not both:
+
+- **`rate`** (raw frame): the prior applies to the precision diagonal as-is.
+- **`eta`** (standardized frame): the rate on the diagonal in the coordinate
+  system where the pairwise (slab) prior has unit scale. `eta` fixes the
+  scale of the diagonal *relative to the slab*, and the raw rate is derived
+  at fit time as `eta / s`, where `s` is the scale of the
+  `interaction_prior`. At fixed `eta`, graph and partial-correlation
+  inference is invariant to the slab scale, so the standardized frame keeps
+  the prior geometry fixed when the slab scale changes. It requires an
+  interaction prior with a scale parameter (`normal_prior()` or
+  `cauchy_prior()`).
+
+With neither argument supplied, the default is the standardized frame with
+`eta = 1`. Small `eta` places the prior mass well inside the
+positive-definite cone; large `eta` places mass near the cone boundary.
+
 ### `gamma_prior()` {#gamma_prior}
 
-Gamma(shape, rate) prior. The default `gamma_prior(1, 1)` is equivalent to
-`exponential_prior(1)`.
+Gamma(shape, rate) prior. `gamma_prior(shape = 1)` is equivalent to
+`exponential_prior()` with the same rate argument.
 
 ```r
-gamma_prior(shape = 1, rate = 1)
+gamma_prior(shape = 1, rate = NULL, eta = NULL)
 ```
 
 | Argument | Description |
 |----------|-------------|
 | `shape` | Positive numeric. Shape parameter of the Gamma distribution. Default: `1`. |
-| `rate`  | Positive numeric. Rate parameter of the Gamma distribution. Default: `1`. |
+| `rate`  | Positive numeric. Rate parameter in the raw frame. Mutually exclusive with `eta`. |
+| `eta`   | Positive numeric. Rate parameter in the standardized frame (unit slab scale). Mutually exclusive with `rate`. Default when neither is supplied: `1`. |
 
 Returns a `bgms_scale_prior` object with `family = "gamma"`.
 
 ### `exponential_prior()` {#exponential_prior}
 
-Exponential(rate) prior. Convenience constructor equivalent to
-`gamma_prior(shape = 1, rate = rate)`.
+Exponential prior. Convenience constructor equivalent to
+`gamma_prior(shape = 1)` with the same rate argument. The default
+`precision_scale_prior` in `bgm()` is `exponential_prior(eta = 1)`.
 
 ```r
-exponential_prior(rate = 1)
+exponential_prior(rate = NULL, eta = NULL)
 ```
 
 | Argument | Description |
 |----------|-------------|
-| `rate` | Positive numeric. Rate parameter of the Exponential distribution. Default: `1`. |
+| `rate` | Positive numeric. Rate parameter in the raw frame. Mutually exclusive with `eta`. |
+| `eta`  | Positive numeric. Rate parameter in the standardized frame (unit slab scale). Mutually exclusive with `rate`. Default when neither is supplied: `1`. |
 
 Returns a `bgms_scale_prior` object with `family = "exponential"`.
 
@@ -175,7 +198,7 @@ sbm_prior(
 | `alpha`, `beta` | Positive numeric. Shape parameters of the Beta prior for within-cluster edge inclusion. Defaults: `1`. |
 | `alpha_between`, `beta_between` | Positive numeric. Shape parameters of the Beta prior for between-cluster edge inclusion. Defaults: `1`. |
 | `dirichlet_alpha` | Positive numeric. Concentration parameter of the Dirichlet prior on cluster assignments. Default: `1`. |
-| `lambda` | Positive numeric. Rate parameter of the zero-truncated Poisson prior on the number of clusters. Default: `1`. |
+| `lambda` | Positive numeric. Rate parameter of the shifted-Poisson prior on the number of clusters $B$, under which $B - 1 \sim \text{Poisson}(\lambda)$, so that the prior expectation is $1 + \lambda$ clusters. Default: `1`. |
 
 Returns a `bgms_indicator_prior` object with `family = "Stochastic-Block"`.
 
@@ -195,7 +218,15 @@ fit = bgm(
   x,
   variable_type         = c("ordinal", "ordinal", "continuous", "continuous"),
   means_prior           = normal_prior(scale = 0.5),
-  precision_scale_prior = exponential_prior(rate = 1)
+  precision_scale_prior = exponential_prior(rate = 1)  # raw frame
+)
+
+# GGM with a wider slab; eta keeps the prior geometry fixed relative to it
+fit = bgm(
+  x,
+  variable_type         = "continuous",
+  interaction_prior     = normal_prior(scale = 2.5),
+  precision_scale_prior = exponential_prior(eta = 1)  # standardized frame
 )
 
 # SBM-structured edge selection
@@ -215,6 +246,8 @@ fit = bgmCompare(
 
 [`bgm()`](bgm.qmd), [`bgmCompare()`](bgmCompare.qmd),
 [`sample_ggm_prior()`](sample-ggm-prior.qmd),
+[Prior Samplers](prior-samplers.qmd) (draw from
+`sbm_prior()` / edge priors before seeing data),
 [Prior Basics](../guide/prior-basics.qmd),
 [Edge Selection](../guide/edge-selection.qmd),
 [Edge Clustering](../guide/clustering.qmd).

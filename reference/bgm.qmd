@@ -23,15 +23,16 @@ bgm(
   baseline_category,
   iter = 2000,
   warmup = 2000,
-  interaction_prior = cauchy_prior(scale = 1),
+  interaction_prior = normal_prior(scale = 1),
   threshold_prior = beta_prime_prior(alpha = 0.5, beta = 0.5),
   means_prior = normal_prior(scale = 1),
-  precision_scale_prior = gamma_prior(shape = 1, rate = 1),
+  precision_scale_prior = exponential_prior(eta = 1),
   delta = NULL,
   edge_selection = TRUE,
   edge_prior = bernoulli_prior(0.5),
+  precision_graph_prior = c("joint", "hierarchical"),
   na_action = c("listwise", "impute"),
-  update_method = c("nuts", "adaptive-metropolis"),
+  update_method = c("nuts", "adaptive-metropolis", "gibbs"),
   target_accept,
   nuts_max_depth = 10,
   learn_mass_matrix = TRUE,
@@ -39,7 +40,6 @@ bgm(
   cores = parallel::detectCores(),
   display_progress = c("per-chain", "total", "none"),
   seed = NULL,
-  standardize = FALSE,
   verbose = getOption("bgms.verbose", TRUE),
   progress_callback = NULL
 )
@@ -62,14 +62,33 @@ Priors are specified by passing prior-object constructors (see [Prior Constructo
 
 | Argument | Description |
 |----------|-------------|
-| `interaction_prior` | A [`bgms_parameter_prior`](priors.qmd) object for pairwise interaction parameters. Allowed: [`cauchy_prior()`](priors.qmd#cauchy_prior) (default), [`normal_prior()`](priors.qmd#normal_prior), [`beta_prime_prior()`](priors.qmd#beta_prime_prior). Default: `cauchy_prior(scale = 1)`. |
+| `interaction_prior` | A [`bgms_parameter_prior`](priors.qmd) object for pairwise interaction parameters. Allowed: [`normal_prior()`](priors.qmd#normal_prior) (default), [`cauchy_prior()`](priors.qmd#cauchy_prior), [`beta_prime_prior()`](priors.qmd#beta_prime_prior). Default: `normal_prior(scale = 1)`. |
 | `threshold_prior` | A `bgms_parameter_prior` object for threshold (main effect) parameters. Allowed: [`beta_prime_prior()`](priors.qmd#beta_prime_prior) (default), [`cauchy_prior()`](priors.qmd#cauchy_prior), [`normal_prior()`](priors.qmd#normal_prior). Default: `beta_prime_prior(alpha = 0.5, beta = 0.5)`. |
 | `means_prior` | A `bgms_parameter_prior` object for continuous-variable means (mixed MRF only). Allowed: `normal_prior()` (default), `cauchy_prior()`, `beta_prime_prior()`. Ignored for pure ordinal or pure GGM models. Default: `normal_prior(scale = 1)`. |
-| `precision_scale_prior` | A [`bgms_scale_prior`](priors.qmd) object for the diagonal elements of the precision matrix (GGM and mixed MRF). Allowed: [`gamma_prior()`](priors.qmd#gamma_prior) (default), [`exponential_prior()`](priors.qmd#exponential_prior). Ignored for pure ordinal models. Default: `gamma_prior(shape = 1, rate = 1)`. |
+| `precision_scale_prior` | A [`bgms_scale_prior`](priors.qmd) object for the diagonal elements of the precision matrix (GGM and mixed MRF). Allowed: [`exponential_prior()`](priors.qmd#exponential_prior) (default), [`gamma_prior()`](priors.qmd#gamma_prior). Both constructors accept the rate in one of two frames: `rate` (raw) or `eta` (standardized). `eta` is the rate on the diagonal in the coordinate system where the pairwise slab prior has unit scale; the raw rate is derived at fit time as `eta / s`, with `s` the scale of the `interaction_prior`. At fixed `eta`, graph and partial-correlation inference is invariant to the slab scale. The `eta` frame requires an `interaction_prior` with a scale parameter (`normal_prior()` or `cauchy_prior()`). Ignored for pure ordinal models. Default: `exponential_prior(eta = 1)`. |
 | `delta` | Non-negative numeric, or `NULL` for the dimension-adaptive default. Determinant-tilt exponent on the continuous-block precision matrix $K$ (GGM) or $K_{yy}$ (mixed MRF): multiplies the prior by $|K|^{\delta}$, softly repelling the chain from the boundary of the positive-definite cone. `NULL` (default) auto-resolves to $0.5 \log(p)$, with $p$ the number of continuous variables. Pass `delta = 0` for the untilted prior. Ignored for pure ordinal models. |
 | `edge_selection` | Logical. Whether to perform Bayesian edge selection. If `FALSE`, the model estimates all edges. Default: `TRUE`. |
-| `edge_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior for edge inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), [`sbm_prior()`](priors.qmd#sbm_prior). Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) are accepted but deprecated. Default: `bernoulli_prior(0.5)`. |
-| `standardize` | Logical. If `TRUE`, the prior scale for each pairwise interaction is adjusted to the range of the response scores, so that shrinkage is comparable across variable pairs with different numbers of categories. The adjusted scale for the interaction between variables $i$ and $j$ is `scale * m_i * m_j` (with $m_i$ the maximum score after recoding); `scale` itself then applies to the binary case. See [Parameter Priors](../manual/parameter-priors.qmd#the-standardize-scale-adjustment) for the Blume-Capel and mixed-pair rules. Default: `FALSE`. |
+| `edge_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior for edge inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), [`sbm_prior()`](priors.qmd#sbm_prior). Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) are accepted but deprecated. For continuous and mixed models with `beta_bernoulli_prior()` or `sbm_prior()`, the hyperparameter updates carry a normalizing-constant correction; see the note below. Default: `bernoulli_prior(0.5)`. |
+| `precision_graph_prior` | Character. How the precision prior composes with the edge prior under edge selection for continuous (GGM) data. `"joint"` (default): the un-normalized joint specification, whose graph marginal is the edge prior times a graph-dependent normalizing constant; with `beta_bernoulli_prior()` or `sbm_prior()` the hyperparameter updates then carry the normalizing-constant correction described in the note below. `"hierarchical"`: the hierarchical specification $p(\Gamma)\,p(K \mid \Gamma)$ with the precision prior normalized per graph, so that the graph marginal is exactly the edge prior. Each edge move then evaluates a normalizer ratio with a fast local approximation, built once at the start of the analysis. An optional trust gauge (off by default; enable with `options(bgms.zratio_gauge_sweeps = 2L)` before fitting) audits the approximation after sampling; its summary is returned as `fit$zratio_diag` (see [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge)). Requires `edge_selection = TRUE`, a `normal_prior()` or `cauchy_prior()` interaction prior, and continuous data — all-continuous, or mixed with at least two continuous variables (the normalizer then lives on the continuous block, and only continuous-continuous edge moves are affected). Default: `"joint"`. |
+
+::: {.callout-note}
+## Edge-prior correction for continuous models
+
+For continuous (GGM) and mixed models with `beta_bernoulli_prior()` or
+`sbm_prior()` under the default `precision_graph_prior = "joint"`, the
+hyperparameter updates carry a normalizing-constant correction: under the
+determinant-tilted precision prior, the plain conjugate updates would target
+the wrong marginals for the inclusion probability and the block structure. In
+mixed models the tilt acts on the continuous precision block, so the
+correction reads continuous-continuous edges only; with fewer than two
+continuous variables the plain conjugate updates apply unchanged. The
+correction table is built from the prior distribution at the first fit of a
+model configuration — a one-time cost of the order of minutes, announced when
+`verbose = TRUE` — and cached on disk via
+`tools::R_user_dir("bgms", "cache")`, so later fits of the same configuration
+skip the build. With `beta_bernoulli_prior()` the sampled inclusion
+probability is returned per chain in `fit$inclusion_parameter_samples`.
+:::
 
 ::: {.callout-note}
 ## Deprecated scalar prior arguments
@@ -96,13 +115,13 @@ table above.
 | Argument | Description |
 |----------|-------------|
 | `iter` | Integer. Number of post-warmup iterations (per chain). Default: `2000`. |
-| `warmup` | Integer. Number of warmup iterations before collecting samples. Default: `2000`. Short warmups trigger progressive warnings; see [Warmup Schedule](../manual/warmup.qmd) for the adaptation stages. |
-| `update_method` | Character. Specifies how the MCMC sampler updates the model parameters: `"adaptive-metropolis"` (componentwise adaptive Metropolis--Hastings with Robbins--Monro proposal adaptation) or `"nuts"` (the No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: `"nuts"`. |
-| `target_accept` | Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: `0.44` for adaptive Metropolis and `0.80` for NUTS. Under `update_method = "nuts"` this governs the step-size adaptation; the edge-move Metropolis proposals then use a fixed 0.44 target regardless of this argument. |
+| `warmup` | Integer. Number of warmup iterations before collecting samples. Default: `2000`. Short warmups trigger progressive warnings (NUTS only); see [Warmup Schedule](../manual/warmup.qmd) for the adaptation stages. With `update_method = "gibbs"` and edge selection, the first 15% of the warmup runs the full model (all edges included) so the precision matrix settles, and edge selection is active for the remaining 85%; both windows scale with the warmup budget. |
+| `update_method` | Character. Specifies how the MCMC sampler updates the model parameters. `"nuts"` (default): the No-U-Turn Sampler, a gradient-based sampler available for all variable types, including under edge selection; continuous precision blocks use a free-element Cholesky parameterization that keeps the precision matrix positive-definite and encodes excluded edges through per-column null-space coordinates. `"adaptive-metropolis"`: componentwise adaptive Metropolis--Hastings with Robbins--Monro proposal adaptation. `"gibbs"`: a Gibbs sampler for the Gaussian graphical model, with a conjugate row-block draw of the precision matrix; available only for all-continuous data with a Normal or Cauchy interaction prior and a Gamma scale prior on the precision diagonal. Edge selection is supported for both slabs; the graph is updated by a full-conditional birth/death between-step (a Cauchy slab uses its scale-mixture representation). |
+| `target_accept` | Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: `0.44` for adaptive Metropolis and `0.80` for NUTS. Under `update_method = "nuts"` this governs the step-size adaptation; the edge-move Metropolis proposals then use a fixed 0.44 target regardless of this argument. Ignored for `"gibbs"`, which draws from exact conditionals and has no acceptance target. |
 | `nuts_max_depth` | Integer. Maximum tree depth in NUTS. Must be positive. Default: `10`. |
 | `learn_mass_matrix` | Logical. If `TRUE`, adapt a diagonal mass matrix during warmup (NUTS only). If `FALSE`, use the identity matrix. Default: `TRUE`. |
 | `chains` | Integer. Number of parallel chains to run. Default: `4`. |
-| `cores` | Integer. Number of CPU cores for parallel execution. Default: `parallel::detectCores()`. |
+| `cores` | Integer. Number of CPU cores for parallel execution. Sampling uses `min(cores, chains)`; some computations outside of sampling (such as building the edge-selection prior correction table) use all `cores`. Default: `parallel::detectCores()`. |
 | `display_progress` | Character. Controls progress reporting during sampling. Options: `"per-chain"` (separate bar per chain), `"total"` (single combined bar), or `"none"` (no progress). Default: `"per-chain"`. |
 | `seed` | Optional integer. Random seed for reproducibility. Must be a single non-negative integer. |
 | `verbose` | Logical. If `TRUE`, prints informational messages during data processing (e.g., missing data handling, variable recoding). Defaults to `getOption("bgms.verbose", TRUE)`. Set `options(bgms.verbose = FALSE)` to suppress messages globally. |
@@ -146,10 +165,22 @@ Additional summaries when `edge_prior = sbm_prior(...)` [see @SekulovskiEtAl_202
 - `posterior_mean_coclustering_matrix` --- Symmetric matrix of pairwise proportions of occurrence of every variable. This matrix can be plotted to visually inspect the estimated number of clusters and visually inspect nodes that tend to switch clusters.
 - `posterior_mean_allocations` --- A vector with the posterior mean of the cluster allocations of the nodes.
 - `posterior_mode_allocations` --- A vector with the posterior mode of the cluster allocations of the nodes.
-- `posterior_num_blocks` --- A data frame with the estimated posterior inclusion probabilities for all the possible number of clusters.
+- `posterior_num_blocks` --- A data frame with the estimated posterior probabilities for all the possible numbers of clusters, computed under the shifted-Poisson prior on the number of clusters (see [Edge Clustering](../guide/clustering.qmd)).
 
-NUTS diagnostics (tree depth, divergences, energy, E-BFMI) are available in
-`fit$nuts_diag` when `update_method = "nuts"`.
+Fields tied to specific settings:
+
+- `inclusion_parameter_samples` --- Per-chain draws of the sampled inclusion
+  probability, present for continuous and mixed models with
+  `edge_prior = beta_bernoulli_prior(...)`.
+- `zratio_diag` --- Trust-gauge summary for
+  `precision_graph_prior = "hierarchical"` when the gauge is enabled with
+  `options(bgms.zratio_gauge_sweeps = 2L)`; `NULL` otherwise. See
+  [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge).
+- `nuts_diag` --- NUTS diagnostics (tree depth, divergences, acceptance
+  probabilities, energy, E-BFMI, and a warmup-completeness check), present
+  when `update_method = "nuts"`. Its summary includes `mean_accept_prob`,
+  `warmup_incomplete`, and an overall `has_issues` flag that triggers a
+  printed warning after fitting.
 
 ## Details
 

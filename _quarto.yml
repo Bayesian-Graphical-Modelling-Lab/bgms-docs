@@ -102,10 +102,11 @@ website:
           contents:
             - reference/bgm.qmd
             - reference/bgmCompare.qmd
-            - reference/sample-ggm-prior.qmd
         - section: "Priors"
           contents:
             - reference/priors.qmd
+            - reference/sample-ggm-prior.qmd
+            - reference/prior-samplers.qmd
         - section: "Methods"
           contents:
             - reference/methods.qmd

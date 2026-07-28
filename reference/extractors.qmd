@@ -117,6 +117,50 @@ Bayes factors.
   off-diagonal entries are pairwise difference inclusion probabilities.
   Requires `difference_selection = TRUE`.
 
+## extract_prior_inclusion_probabilities {#extract_prior_inclusion_probabilities}
+
+Compute prior inclusion probabilities, in the same shape and orientation as
+[`extract_posterior_inclusion_probabilities()`](#extract_posterior_inclusion_probabilities),
+so the two can be combined element-wise into prior and posterior inclusion
+odds — and from there into inclusion Bayes factors.
+
+```r
+extract_prior_inclusion_probabilities(
+  bgms_object,
+  iter      = 4000L,
+  warmup    = 1000L,
+  recompute = FALSE
+)
+```
+
+`bgms_object` must be a fitted `bgms` object with `edge_selection = TRUE`.
+Returns a symmetric matrix of prior inclusion probabilities with the
+variable names as row and column names and a zero diagonal.
+
+For models without a continuous block of at least two variables (ordinal
+MRFs, mixed models with a single continuous variable), the prior inclusion
+probability is simply the edge prior's marginal: the fixed probability for
+`bernoulli_prior()`, $\alpha / (\alpha + \beta)$ for
+`beta_bernoulli_prior()`, and the mixture of the within- and between-block
+means for `sbm_prior()`.
+
+Under the default joint spike-and-slab prior on a continuous block
+(`precision_graph_prior = "joint"` in [`bgm()`](bgm.qmd)), the graph
+marginal is reweighted by a per-graph normalizing constant, so the prior
+inclusion probability of a continuous-continuous edge differs from the
+edge-prior marginal — even at `delta = 0`. This function returns the actual
+reweighted probabilities: for `bernoulli_prior()` and
+`beta_bernoulli_prior()` they are read from the same cached
+normalizing-constant table that corrects the fit's hyperparameter updates;
+for `sbm_prior()` (and slab families without a table) they are estimated by
+a prior-only chain run with the fit's own prior settings, controlled by
+`iter` and `warmup`. That estimate is cached on the fit, and
+`recompute = TRUE` re-runs it.
+
+In mixed models only continuous-continuous edges live in the joint block,
+so the matrix carries up to three distinct values: discrete-discrete,
+continuous-continuous, and cross edges.
+
 ## extract_indicator_priors {#extract_indicator_priors}
 
 Retrieve the prior specification used for inclusion indicators.
@@ -168,7 +212,8 @@ Works on both `bgms` and `bgmCompare` fits.
 Returns a list with:
 
 - `posterior_num_blocks` --- Posterior probabilities for each possible number
-  of clusters.
+  of clusters, computed under the shifted-Poisson prior on the number of
+  clusters (see [Edge Clustering](../guide/clustering.qmd)).
 - `posterior_mean_allocations` --- Posterior mean cluster allocations.
 - `posterior_mode_allocations` --- Posterior mode cluster allocations.
 - `posterior_mean_coclustering_matrix` --- Co-clustering proportion matrix.
@@ -205,8 +250,10 @@ extract_rhat(bgms_object)
 ```
 
 Returns a named list with R-hat values for each parameter type present in
-the model (e.g., `main`, `pairwise`, `indicator`). R-hat follows the
-Gelman-Rubin formula, matching `coda::gelman.diag`. For
+the model (e.g., `main`, `pairwise`, `indicator`). The statistic is
+split-R-hat [@VehtariEtAl_2021]: each chain is split in half and the
+Gelman-Rubin formula is applied to the half-chains, so that within-chain
+drift is detected as well as between-chain disagreement. For
 implementation details, see [diagnostics](../manual/diagnostics.qmd) in the Technical Manual.
 
 ## extract_precision {#extract_precision}
