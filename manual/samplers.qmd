@@ -30,11 +30,13 @@ classDiagram
     SamplerBase <|-- NUTSSampler
 ```
 
-The mixed MRF combines a NUTS step for the main parameter block
-(thresholds, discrete interactions, means, cross-type interactions)
-with an element-wise Metropolis step for the continuous precision
-elements. The chain runner orchestrates this; there is no combined
-sampler class.
+One sampler instance drives the whole model: the chain runner issues a
+single `sampler->step(model, iter)` per iteration, and under NUTS all
+parameter blocks — including the mixed MRF's five blocks (thresholds,
+means, and the three interaction blocks) — are updated jointly in one
+trajectory (see [Model Classes](model-classes.qmd)). The models' own
+element-wise Metropolis code runs only when the user selects
+`update_method = "adaptive-metropolis"`.
 
 ## SamplerBase interface
 
@@ -78,6 +80,7 @@ automatically. The maximum tree depth is set from
 
 - **Dual averaging** for step-size adaptation
 - **Diagonal mass matrix** accumulation via Welford's online algorithm
+  (a numerically stable running-variance estimate)
 
 Each call to `step()`:
 
@@ -92,24 +95,40 @@ smoothed step size from dual averaging.
 
 ## Factory dispatch
 
-`create_sampler()` in `chain_runner.cpp` constructs the right sampler
-based on the model's capabilities and the user's choice:
+Dispatch happens in two steps in `chain_runner.cpp`. The R layer passes
+the `update_method` string through unchanged; `resolve_sampler_spec()`
+maps it to a typed `SamplerSpec` (any other string is an error):
 
 ```cpp
-unique_ptr<SamplerBase> create_sampler(const SamplerConfig& config,
-                                        WarmupSchedule& schedule) {
-  if (config.sampler_type == "nuts") {
-    return make_unique<NUTSSampler>(config, schedule);
-  } else if (config.sampler_type == "mh" ||
-             config.sampler_type == "adaptive-metropolis") {
-    return make_unique<MetropolisSampler>(config, schedule);
+SamplerSpec resolve_sampler_spec(const std::string& sampler_type) {
+  if (sampler_type == "nuts") {
+    return SamplerSpec{SamplerKind::NUTS, /*learn_sd=*/true, ...};
+  } else if (sampler_type == "adaptive-metropolis") {
+    return SamplerSpec{SamplerKind::AdaptiveMetropolis, /*learn_sd=*/false, ...};
+  } else {
+    Rcpp::stop("Unknown sampler_type: '%s'", sampler_type.c_str());
   }
 }
 ```
 
-The R layer (`validate_sampler.R`) resolves `"adaptive-metropolis"`
-before it reaches C++, so in practice the factory receives `"nuts"`
-or `"mh"`.
+`create_sampler()` then switches on the enum:
+
+```cpp
+unique_ptr<SamplerBase> create_sampler(SamplerKind kind,
+                                       const SamplerConfig& config,
+                                       WarmupSchedule& schedule) {
+  switch (kind) {
+    case SamplerKind::NUTS:
+      return make_unique<NUTSSampler>(config, schedule);
+    case SamplerKind::AdaptiveMetropolis:
+      return make_unique<MetropolisSampler>(config, schedule);
+  }
+}
+```
+
+The `SamplerSpec` also records which diagnostics the sampler produces
+and whether proposal-SD learning applies, which the warmup schedule
+consumes.
 
 All three model types (GGM, OMRF, mixed MRF) default to NUTS.
 The user can select Metropolis via
@@ -117,17 +136,19 @@ The user can select Metropolis via
 
 ## Step-size and mass-matrix adaptation
 
-`NUTSSampler` owns a `NUTSAdaptationController` that
-coordinates dual averaging for $\epsilon$ and Welford variance
-estimation for the diagonal mass matrix $M$. The full adaptation
-schedule — stage boundaries, doubling windows, blending formula,
-and dual-averaging parameters — is documented in
+The full adaptation schedule for the `NUTSAdaptationController`
+introduced above — stage boundaries, doubling windows, blending
+formula, and dual-averaging parameters — is documented in
 [Warmup Schedule](warmup.qmd).
 
 `MetropolisSampler` uses a separate
 `MetropolisAdaptationController` that tunes proposal standard
-deviations via Robbins–Monro updates targeting an acceptance rate
-of 0.44.
+deviations via Robbins–Monro updates targeting an acceptance rate of
+0.44, the componentwise random-walk optimum. Note that the same 0.44
+target also governs the models' edge-move proposals during NUTS runs;
+the user's `target_accept` argument applies to the Metropolis tuner
+only under `update_method = "adaptive-metropolis"` (under NUTS it sets
+the step-size adaptation target instead).
 
 ## Constrained integration dispatch
 

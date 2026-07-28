@@ -124,7 +124,7 @@ Hamiltonian error $\Delta H = H' - H_0 > 1000$. Divergences
 indicate that the step size is too large relative to the local
 curvature of the posterior. The number of divergent transitions is
 recorded in `StepResult::NUTSDiagnostics` and surfaced to the user
-via `extract_nuts_diagnostics()`.
+via `fit$nuts_diag`.
 
 ## Warmup {#warmup}
 
@@ -163,6 +163,7 @@ Each NUTS step records five diagnostics:
   adaptation.
 
 These diagnostics are collected per chain and accessible via
-`extract_nuts_diagnostics()` in R.
+`fit$nuts_diag` in R (built by `summarize_nuts_diagnostics()` in
+`R/diagnostics_nuts.R`).
 
 

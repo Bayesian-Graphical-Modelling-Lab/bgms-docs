@@ -84,10 +84,12 @@ ends, proposal standard deviations are frozen at their final values.
 
 ## Sampler dispatch
 
-The chain runner factory in `chain_runner.cpp` maps two string
-identifiers to `MetropolisSampler`: `"mh"` and `"adaptive-metropolis"`.
-The R interface uses `"adaptive-metropolis"` as the `update_method`
-value.
+The R interface passes `update_method = "adaptive-metropolis"` through
+unchanged; `resolve_sampler_spec()` in `chain_runner.cpp` maps that
+string to `SamplerKind::AdaptiveMetropolis`, and the factory constructs
+a `MetropolisSampler` from the enum. Any other string (besides
+`"nuts"`) is rejected with an error. See
+[Sampler Hierarchy](samplers.qmd) for the full dispatch flow.
 
 ## Initialization
 
