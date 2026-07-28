@@ -153,6 +153,7 @@ Main components:
   - `main` — List of main effect samples.
   - `pairwise` — List of pairwise effect samples.
   - `indicator` — List of indicator samples (if edge selection enabled).
+  - `rb_inclusion`, `rb_counts` — Rao-Blackwellized inclusion draws (aligned with the indicator samples) and the per-edge odds accumulators behind them (if edge selection enabled); see [`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities) and [`extract_inclusion_bf()`](extractors.qmd#extract_inclusion_bf).
   - `allocations` — List of cluster allocations (if SBM prior used).
   - `nchains` — Number of chains.
   - `niter` — Number of post-warmup iterations per chain.

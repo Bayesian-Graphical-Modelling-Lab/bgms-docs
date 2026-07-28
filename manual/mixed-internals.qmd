@@ -84,7 +84,10 @@ continuous subgraph (`continuous_subgraph()`); the edge-prior
 [normalizing-constant correction](edge-priors.qmd#normalizing-constant-corrections)
 likewise reads continuous-continuous pairs only, through the per-node
 continuous mask. Discrete and cross edge moves are plain
-spike-and-slab updates.
+spike-and-slab updates. All three blocks record Rao-Blackwellized
+inclusion draws and odds accumulators, aligned to the indicator vector
+order — see
+[Rao-Blackwellized inclusion draws](ggm-internals.qmd#rao-blackwellized-inclusion-draws).
 
 The model also provides a component-wise adaptive Metropolis fallback
 (`do_one_metropolis_step()`), used when the sampler is set to

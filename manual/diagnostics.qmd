@@ -92,6 +92,23 @@ This formula derives from the integrated autocorrelation time of a two-state Mar
 
 When the total number of transitions ($n_{01} + n_{10}$) is below 5, the estimate is unreliable and flagged in the output.
 
+### Indicator summaries and the RB chain
+
+When the fit carries Rao-Blackwellized inclusion draws (see
+[GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws)),
+the printed indicator summary estimates the inclusion probability and
+its MCSE from that continuous $J$-chain (`summarize_rb_inclusion()`),
+with ESS and R-hat computed on the same chain; the mixture ESS and the
+directional transition counts (`n0->1`, `n1->0`) continue to come from
+the binary indicator draws. The two ESS columns are read as a pair:
+the RB `n_eff` measures precision *conditional on* exploration and
+cannot see a stuck sampler, while `n_eff_mixt` measures the
+exploration itself. For edges with no transitions at all — or a
+machine-constant $J$-chain — the RB `mcse`/`n_eff`/`Rhat` are masked
+to `NA`, since they would otherwise reassure without evidence. The
+raw-indicator average remains available through
+`extract_posterior_inclusion_probabilities(fit, estimator = "raw")`.
+
 ## Parallelization
 
 Diagnostics are computed in parallel across parameters using RcppParallel (TBB). Each parameter's ESS and R-hat can be computed independently:
