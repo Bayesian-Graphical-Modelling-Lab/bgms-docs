@@ -81,6 +81,8 @@ sweep and updates only the masked elements.
 
 Adaptation runs only while `iteration < total_warmup`. After warmup
 ends, proposal standard deviations are frozen at their final values.
+See [Warmup Schedule](warmup.qmd) for how stage 3b positions this
+tuning within the warmup budget.
 
 ## Sampler dispatch
 

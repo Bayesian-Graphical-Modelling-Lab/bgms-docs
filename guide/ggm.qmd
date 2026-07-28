@@ -76,9 +76,7 @@ Unlike the ordinal MRF, whose normalizing constant is intractable and requires a
 
 ## Edge selection
 
-When `edge_selection = TRUE` (the default), `bgms` applies spike-and-slab priors to the partial associations $\omega_{ij}$. The spike sets $\omega_{ij} = 0$ (and therefore $\theta_{ij} = 0$), enforcing the absence of the edge. The slab places a Cauchy prior on $\omega_{ij}$, allowing the effect size to be estimated from the data. See [Prior Basics](prior-basics.qmd) for the spike-and-slab specification.
-
-The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See [Edge Selection](edge-selection.qmd).
+When `edge_selection = TRUE` (the default), each partial association $\omega_{ij}$ — and therefore each precision entry $\theta_{ij}$ — receives a spike-and-slab prior, so an edge is either exactly absent or estimated from the data. The prior specification is described in [Prior Basics](prior-basics.qmd), and how to read the resulting inclusion probabilities and Bayes factors in [Edge Selection](edge-selection.qmd).
 
 ## Missing data
 
@@ -96,5 +94,5 @@ The `summary()` and `coef()` methods work the same as for ordinal and mixed mode
 
 To obtain model-specific parameterizations, use the dedicated extractors:
 
-- `extract_precision(fit)` — returns the full precision matrix $\boldsymbol{\Theta}$.
-- `extract_partial_correlations(fit)` — returns the partial correlation matrix.
+- [`extract_precision(fit)`](../reference/extractors.qmd#extract_precision) — returns the full precision matrix $\boldsymbol{\Theta}$.
+- [`extract_partial_correlations(fit)`](../reference/extractors.qmd#extract_partial_correlations) — returns the partial correlation matrix.

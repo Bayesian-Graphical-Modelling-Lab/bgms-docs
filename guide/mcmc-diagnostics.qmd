@@ -264,6 +264,22 @@ compare posterior summaries. If the two samplers produce similar results,
 the estimates are likely trustworthy despite the warnings; if they differ,
 further investigation is warranted.
 
+## Run-length settings {#sec-run-length}
+
+Three [`bgm()`](../reference/bgm.qmd) arguments control how much sampling is done:
+
+| Argument | Default | What it controls |
+|----------|---------|------------------|
+| `warmup` | `2000` | Adaptation iterations per chain (discarded) |
+| `iter` | `2000` | Post-warmup draws kept per chain |
+| `chains` | `4` | Independent chains run in parallel |
+
+When diagnostics indicate a problem, match the remedy to the symptom:
+
+- **Low ESS or an MCSE that is large relative to the effects you care about** — increase `iter`; precision grows with the number of retained draws.
+- **Warmup warnings in `fit$warmup_check`, persistent divergences, or acceptance below target** — increase `warmup`; the sampler needs more adaptation time, and extra post-warmup draws will not fix a poorly tuned sampler.
+- **R-hat above 1.01** — first check the trace plots; if chains disagree, longer `warmup` (and sometimes longer `iter`) is the remedy. Keep at least two chains — with a single chain, R-hat cannot be computed.
+
 ## Recommended workflow
 
 1. **Inspect `summary()`**: check R-hat (< 1.01) and ESS (≥ 100) for all

@@ -5,7 +5,9 @@ title: "Parallel Chains"
 `bgms` runs multiple MCMC chains in parallel using Intel TBB (Threading
 Building Blocks), accessed through the RcppParallel package. The
 implementation is in `src/mcmc/execution/chain_runner.h` and
-`chain_runner.cpp`.
+`chain_runner.cpp`. Within each chain, the iteration loop drives the
+samplers described in [Sampler Hierarchy](samplers.qmd) under the
+adaptation schedule described in [Warmup Schedule](warmup.qmd).
 
 ## Design
 

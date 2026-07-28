@@ -93,18 +93,6 @@ Armadillo matrices and vectors. It wraps `custom_arma_exp()` and
 `custom_arma_log()` from `custom_arma_explog.h`, which iterate over
 matrix elements and call the scalar `__ieee754_exp`/`__ieee754_log`.
 
-## Performance
-
-On Windows, the Rtools `std::exp`/`std::log` are much slower than
-the OpenLibM replacements, making the custom path essential for
-acceptable MCMC runtimes. `bgms` enables the custom path on Windows by
-default.
-
-On macOS and Linux, the system libm is already fast, so `bgms` uses
-the system implementations by default. The custom path can be
-enabled for cross-platform reproducibility, at the cost of slightly
-slower scalar operations.
-
 ## EXP_BOUND and overflow prevention
 
 The [variable helpers](variable-helpers.qmd) use `EXP_BOUND = 709`
@@ -131,8 +119,6 @@ functions to R:
 | `rcpp_ieee754_log(x)` | Vectorised log via `MY_LOG` |
 
 On the standard path, `rcpp_ieee754_exp()` and `rcpp_ieee754_log()`
-call `std::exp` and `std::log` despite the `ieee754` naming.
-
-The `explog_interface.cpp` file exposes the custom exp/log functions
-to R for testing purposes. This allows verification that the custom
-implementations match expected values in R-level unit tests.
+call `std::exp` and `std::log` despite the `ieee754` naming. These
+exports exist for R-level unit tests, which verify that the custom
+implementations match expected values.

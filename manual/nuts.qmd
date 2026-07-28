@@ -25,20 +25,12 @@ vector of inverse diagonal elements (`inv_mass_diag`).
 
 ### Memoizer
 
-The `Memoizer` class in `leapfrog.h` caches a single
-$(\log \pi, \nabla \log \pi)$ pair keyed by the position vector $q$.
-During NUTS tree building, each leapfrog step produces a new unique
-$q$, so the cache avoids redundant evaluations at tree-node
-boundaries where the same $q$ appears as both the end of one
-subtree and the start of another.
-
-When RATTLE is active, the SHAKE projection moves $q$ to a
-new point on the constraint manifold, making the cached gradient
-stale. The Memoizer is explicitly invalidated after projection,
-forcing a fresh gradient evaluation at the projected position.
-The reversibility check in `leapfrog_constrained_checked()` uses a
-separate Memoizer instance for its backward verification step, so
-the caller's cache remains pointed at the forward-step result.
+The `Memoizer` class caches a single $(\log \pi, \nabla \log \pi)$
+pair keyed by the position vector $q$, avoiding redundant evaluations
+at tree-node boundaries where the same $q$ ends one subtree and
+starts the next. Its design, joint-evaluation interface, and
+invalidation after constraint projection are documented in
+[Constrained Leapfrog — Memoizer](rattle.qmd#memoizer).
 
 ## Constrained leapfrog (RATTLE) {#constrained-leapfrog-rattle}
 

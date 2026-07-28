@@ -118,7 +118,10 @@ Validation enforces that all values are positive and finite.
 In `bgmCompare()`, the SBM governs the off-diagonal (pairwise) difference
 inclusions; the diagonal (main-effect difference inclusions, when
 `main_difference_selection = TRUE`) follows a separate Beta-Bernoulli
-update using the within-cluster `alpha` and `beta`.
+update using the within-cluster `alpha` and `beta`. This is the
+canonical statement of that behavior — the
+[bgmCompare Engine](bgmcompare-internals.qmd) page describes the
+update mechanics.
 
 ## Output
 

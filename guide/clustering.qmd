@@ -108,7 +108,7 @@ fit = bgm(
 )
 ```
 
-Here `lambda = 1.59` corresponds to a prior expectation of approximately two clusters. Higher values of `lambda` shift the expectation toward more clusters (2.82 $\approx$ 3 clusters, 3.92 $\approx$ 4 clusters).
+Here `lambda = 1.59` corresponds to a prior expectation of approximately two clusters; higher values shift the expectation toward more clusters (see the $\lambda$-to-cluster mapping above).
 
 **When no clustering is expected**, or the goal is conservative inference that protects against false positive clustering, an informative between-cluster prior combined with flat within-cluster settings provides the best performance:
 

@@ -89,7 +89,7 @@ Edge selection is activated. Edge indicators $\gamma_{ij}$ are
 updated every iteration, changing the effective parameter space.
 Dual averaging restarts to re-tune $\epsilon$ for the new
 geometry. For models with constraints, the constrained step-size
-heuristic (using RATTLE) is used.
+heuristic (using [RATTLE](rattle.qmd)) is used.
 
 ## Budget allocation
 
@@ -120,7 +120,7 @@ per chain, accessible via `fit$warmup_check` in R.
 
 ## Dual averaging
 
-The step-size update follows Algorithm 6 in @HoffmanGelman_2014_nuts
+The step-size update for the [NUTS sampler](nuts.qmd) follows Algorithm 6 in @HoffmanGelman_2014_nuts
 with parameters $\gamma = 0.05$, $t_0 = 10$, $\kappa = 0.75$, and
 bias target $\mu = \log(10\,\epsilon_0)$. (Here $\gamma$ and $\mu$
 are the Hoffman–Gelman tuning constants, not the edge indicators

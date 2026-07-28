@@ -33,11 +33,7 @@ $$
 \text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{1 - p(\gamma_{ij} = 1 \mid \mathbf{x})}
 $$
 
-For other prior inclusion probabilities, the Bayes factor accounts for the prior odds:
-
-$$
-\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x}) \;/\; p(\gamma_{ij} = 0 \mid \mathbf{x})}{p(\gamma_{ij} = 1) \;/\; p(\gamma_{ij} = 0)}
-$$
+For other prior inclusion probabilities, the Bayes factor divides the posterior inclusion odds by the prior inclusion odds — see [The Bayesian Approach](bayesian-approach.qmd) for the general identity.
 
 The reciprocal $1 / \text{BF}_{10}$ quantifies the evidence for edge absence, i.e., conditional independence [@SekulovskiEtAl_2024]. Values of $\text{BF}_{10}$ close to one indicate that the data do not discriminate between the two hypotheses — absence of evidence rather than evidence of absence.
 

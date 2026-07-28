@@ -212,6 +212,9 @@ leapfrog), $q$ is modified in place. The cached gradient refers
 to the pre-projection $q$ and must be discarded.
 `leapfrog_constrained()` calls `memo.invalidate()` immediately after
 the projection, before the second half-step requests a fresh gradient.
+The reversibility check in `leapfrog_constrained_checked()` uses a
+separate Memoizer instance for its backward verification step, so the
+caller's cache remains pointed at the forward-step result.
 
 ## Projection callbacks {#projection-callbacks}
 
