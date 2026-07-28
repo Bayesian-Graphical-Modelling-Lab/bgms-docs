@@ -38,34 +38,42 @@ whether the residual score times the maximum category exceeds the
 For an ordinal variable with categories $0, 1, \ldots, K$ and
 residual $r$:
 
-1. Precompute $e_r = \exp(r)$, $e_b = \exp(-b)$, and
+Let $B = K \cdot r$ denote the per-person stabilization bound — the
+largest exponent the accumulation can reach (see
+[the EXP_BOUND section](#the-exp_bound-709-threshold) for how it
+gates the FAST path). Then:
+
+1. Precompute $e_r = \exp(r)$, $e_B = \exp(-B)$, and
    $e_\mu(c) = \exp(\mu(c))$ for each category (once per variable)
 2. Accumulate the denominator with a running power $P$:
 
 $$
 \begin{aligned}
 P &\leftarrow e_r \\
-D &\leftarrow e_b \\
+D &\leftarrow e_B \\
 \text{for } c &= 1, \ldots, K: \\
-  D &\leftarrow D + e_\mu(c) \cdot P \cdot e_b \\
+  D &\leftarrow D + e_\mu(c) \cdot P \cdot e_B \\
   P &\leftarrow P \cdot e_r
 \end{aligned}
 $$
 
-Only two per-person `exp()` calls are needed ($e_r$ and $e_b$),
+Only two per-person `exp()` calls are needed ($e_r$ and $e_B$),
 plus $K$ for the main effects. The running product $P = e_r^{\,c}$
 replaces the $K$ per-category `exp()` calls that a naive
 implementation would require.
 
 ### SAFE path detail
 
-When the FAST path would overflow or underflow:
+When the FAST path would overflow or underflow, the exponents are
+shifted before exponentiating — the log-sum-exp technique. The shift
+differs by variable type:
 
-1. Compute $s_c = \mu(c) + c \cdot r$ for each category
-2. Find $s_{\max} = \max_c s_c$
-3. Compute $D = \exp(s_{\max}) \sum_c \exp(s_c - s_{\max})$
-
-This is the standard log-sum-exp computation, applied per person.
+- **Ordinal**: the category exponents $s_c = \mu(c) + c \cdot r$ are
+  shifted by the precomputed bound $B = K \cdot r$:
+  $D = \exp(B) \sum_c \exp(s_c - B)$.
+- **Blume-Capel**: the shift is the per-person maximum category
+  score, $s_{\max} = \max_c s_c$, the classic log-sum-exp form:
+  $D = \exp(s_{\max}) \sum_c \exp(s_c - s_{\max})$.
 
 ### Block scanning
 
@@ -98,8 +106,8 @@ normalization step.
 
 Handles the Blume-Capel parameterization, where the category score
 involves both linear and quadratic terms:
-$\mu(c) = \alpha(c - b) + \beta(c - b)^2$. The precomputation of
-$\theta_c = \alpha(c - b) + \beta(c - b)^2$ is done once per
+$\mu(c) = \alpha(c - b) + \beta(c - b)^2$, with $b$ the baseline
+(reference) category. The scores $\mu(c)$ are precomputed once per
 variable, and the FAST/SAFE split proceeds as for ordinal variables.
 
 ### `compute_probs_blume_capel()`
@@ -125,9 +133,10 @@ same pass.
 The bound that triggers the SAFE path is set to 709, derived from
 IEEE 754 double precision: $\exp(709) \approx 8.2 \times 10^{307}$
 is the largest representable value, while $\exp(710) = \text{Inf}$.
-The FAST path checks whether $|b_i| \le 709$ before proceeding,
-where $b_i = K \cdot r_i$ for ordinal variables. For the joint
-log-normalizer functions, the threshold is reduced to
-$709 - \max_c |\theta_c|$ to account for intermediate overflow
-risk in the power chain. The Blume–Capel variants additionally
-check $|K \cdot r_i - b_i| \le 709$.
+The FAST path checks whether $|B_i| \le 709$ before proceeding,
+where $B_i = K \cdot r_i$ for ordinal variables and, for
+Blume–Capel variables, the per-person maximum category score. For
+the joint log-normalizer functions, the threshold is reduced to
+$709 - \max_c |\mu(c)|$ to account for intermediate overflow risk
+in the power chain. The Blume–Capel variants additionally check
+$|K \cdot r_i - B_i| \le 709$.

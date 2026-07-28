@@ -165,7 +165,9 @@ Defined in `src/models/ggm/ggm_model.h` and `ggm_model.cpp`.
 
 **Parameterization.** The GGM is parameterized by the precision matrix
 $\boldsymbol{\Theta}$ (inverse covariance). The model maintains an upper-triangular
-Cholesky factor $\mathbf{R}$ such that $\mathbf{R}^\top\mathbf{R} = \boldsymbol{\Theta}$.
+Cholesky factor $\boldsymbol{\Phi}$ such that $\boldsymbol{\Phi}^\top\boldsymbol{\Phi} = \boldsymbol{\Theta}$
+(see [GGM Internals](ggm-internals.qmd) and
+[Constrained Leapfrog](rattle.qmd), which use the same convention).
 
 **Sampling.** The GGM supports both NUTS and element-wise
 Metropolis-Hastings. For NUTS, the model uses a free-element
@@ -206,7 +208,7 @@ computed by the [variable helpers](variable-helpers.qmd), which use
 a FAST/SAFE dual-path strategy for numerical stability.
 
 **Residual matrix.** The model maintains a precomputed residual matrix
-$\mathbf{R}_{ni} = 2\sum_{j \neq i} x_{nj} \omega_{ij}$ that caches
+$r_{ni} = 2\sum_{j \neq i} x_{nj} \omega_{ij}$ that caches
 the contribution of pairwise interactions to each variable's
 conditional distribution. This matrix is updated incrementally when
 a single interaction changes.

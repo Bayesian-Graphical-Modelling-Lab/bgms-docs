@@ -18,23 +18,23 @@ each pairwise parameter is either exactly zero (edge absent) or free
 (edge present). For models with continuous variables (GGM, Mixed MRF),
 the precision matrix $\boldsymbol{\Theta}$ must be positive definite.
 `bgms` enforces this through a Cholesky parameterization
-$\boldsymbol{\Theta} = L^\top L$, where the sampler operates on the
-entries of $L$. Positive definiteness is then guaranteed by
-construction.
+$\boldsymbol{\Theta} = \boldsymbol{\Phi}^\top \boldsymbol{\Phi}$, where $\boldsymbol{\Phi}$ is the upper
+Cholesky factor and the sampler operates on its entries. Positive
+definiteness is then guaranteed by construction.
 
 The complication is sparsity. An excluded edge ($\gamma_{ij} = 0$)
 requires $\theta_{ij} = 0$, which in Cholesky entries means
 
 $$
-\sum_l L_{li}\,L_{lj} = 0.
+\sum_l \Phi_{li}\,\Phi_{lj} = 0.
 $$
 
-This is a nonlinear (quadratic) constraint on the entries of $L$,
-because different columns of $L$ interact through the $L^\top L$
-product. The constraint manifold is
+This is a nonlinear (quadratic) constraint on the entries of
+$\boldsymbol{\Phi}$, because different columns of $\boldsymbol{\Phi}$ interact through
+the $\boldsymbol{\Phi}^\top \boldsymbol{\Phi}$ product. The constraint manifold is
 
 $$
-\mathcal{M} = \bigl\{L : \theta_{ij} = \textstyle\sum_l L_{li}\,L_{lj} = 0
+\mathcal{M} = \bigl\{\boldsymbol{\Phi} : \theta_{ij} = \textstyle\sum_l \Phi_{li}\,\Phi_{lj} = 0
 \;\text{for all }\; \gamma_{ij} = 0\bigr\}.
 $$
 
@@ -63,13 +63,13 @@ Each constrained leapfrog step has seven phases:
 
 In mathematical notation:
 
-1. **Half-step momentum** — $r \leftarrow r + \tfrac{\epsilon}{2}\,\nabla\log p(x)$
-2. **Project momentum** — Project $r$ onto the cotangent space of $\mathcal{M}$ at $x$. This ensures the momentum does not push the trajectory off the constraint surface.
-3. **Full-step position** — $x \leftarrow x + \epsilon\,M^{-1} r$
-4. **SHAKE (position projection)** [@RyckaertEtAl_1977] — Set excluded entries of $x$ back to zero. Record the displacement $\Delta x = x_{\text{after}} - x_{\text{before}}$.
-5. **Momentum correction** — Account for the constraint forces that produced the position snap: $r \leftarrow r + \Delta x \,/\, (\epsilon\,M^{-1})$
-6. **Second half-step momentum** — $r \leftarrow r + \tfrac{\epsilon}{2}\,\nabla\log p(x)$
-7. **Project momentum** — Project $r$ onto the cotangent space again.
+1. **Half-step momentum** — $p \leftarrow p + \tfrac{\epsilon}{2}\,\nabla\log \pi(q)$
+2. **Project momentum** — Project $p$ onto the cotangent space of $\mathcal{M}$ at $q$ — the space of momenta that keep the trajectory on the constraint surface.
+3. **Full-step position** — $q \leftarrow q + \epsilon\,M^{-1} p$
+4. **SHAKE (position projection)** [@RyckaertEtAl_1977] — Set excluded entries of $q$ back to zero. Record the displacement $\Delta q = q_{\text{after}} - q_{\text{before}}$.
+5. **Momentum correction** — Account for the constraint forces that produced the position snap: $p \leftarrow p + \Delta q \,/\, (\epsilon\,M^{-1})$
+6. **Second half-step momentum** — $p \leftarrow p + \tfrac{\epsilon}{2}\,\nabla\log \pi(q)$
+7. **Project momentum** — Project $p$ onto the cotangent space again.
 
 Steps 2 and 7 keep the momentum tangent to the constraint manifold.
 Step 4 snaps the position back after the unconstrained update.
@@ -78,8 +78,8 @@ by the position snap.
 
 ### Memoizer cache invalidation
 
-The `Memoizer` (see [below](#memoizer)) caches $(x, \log p, \nabla\log p)$
-from the most recent evaluation. After step 4 changes $x$
+The `Memoizer` (see [below](#memoizer)) caches $(q, \log \pi, \nabla\log \pi)$
+from the most recent evaluation. After step 4 changes $q$
 in place, the cached gradient refers to the pre-projection position and
 is invalid. The cache is explicitly invalidated between steps 4 and 6,
 forcing a fresh evaluation when step 6 requests the gradient.
@@ -95,38 +95,35 @@ branch on the backward step [@ZappaEtAl_2018; @LelievreEtAl_2019].
 
 ### Why the projection is approximate
 
-The sparsity constraint on the precision matrix
-$\boldsymbol{\Theta} = L^\top L$ requires
-$\theta_{ij} = \sum_l L_{li}\,L_{lj} = 0$ for every excluded
-edge $(\gamma_{ij} = 0)$. This is nonlinear in the Cholesky entries
-of $L$ because different columns interact through the $L^\top L$
-product.
+As derived [above](#why-constraints), each excluded edge imposes the
+quadratic constraint $\theta_{ij} = \sum_l \Phi_{li}\,\Phi_{lj} = 0$ on
+the Cholesky entries.
 
 The SHAKE projection in step 4 solves these constraints with a
-left-to-right column sweep: for each column $q$, it computes the
-exact linear correction that satisfies the constraints involving
-column $q$, given the already-projected earlier columns.
+left-to-right column sweep: for each column $j$ of $\boldsymbol{\Phi}$, it
+computes the exact linear correction that satisfies the constraints
+involving column $j$, given the already-projected earlier columns.
 Within a single call, the sweep is exact — each column's
-constraint $A_q x_q = 0$ is linear in $x_q$ when earlier columns
-are held fixed.
+constraint $A_j \phi_j = 0$ is linear in the column entries $\phi_j$
+when earlier columns are held fixed.
 
 The approximation enters because the position has moved $O(\epsilon)$
 off the manifold, and the column sweep solves the linearized
-constraints in one pass. Cross-column coupling through $L^\top L$
-means that correcting column $q$ can shift the residual of constraints
-involving later columns. This one-step Newton-like correction on an
+constraints in one pass. Cross-column coupling through
+$\boldsymbol{\Phi}^\top \boldsymbol{\Phi}$ means that correcting column $j$ can shift
+the residual of constraints involving later columns. This one-step Newton-like correction on an
 $O(\epsilon)$ perturbation leaves a residual of order $O(\epsilon^2)$
 — the standard truncation order for a single Newton step.
 
 `leapfrog_constrained_checked()` in `leapfrog.cpp` detects these
 failures at runtime:
 
-1. Perform the forward constrained step: $(x, r) \to (x', r')$.
-2. Negate momentum and perform a second constrained step: $(x', -r') \to (x'', r'')$.
-3. Compute the round-trip error: $\|x'' - x\|_\infty$.
-4. If the error exceeds $\tau \cdot \epsilon^2$, flag the step as non-reversible.
+1. Perform the forward constrained step: $(q, p) \to (q', p')$.
+2. Negate momentum and perform a second constrained step: $(q', -p') \to (q'', p'')$.
+3. Compute the round-trip error: $\|q'' - q\|_\infty$.
+4. If the error exceeds $c_{\text{tol}} \cdot \epsilon^2$, flag the step as non-reversible.
 
-The tolerance factor $\tau$ defaults to $0.5$ (`reverse_check_tol`
+The tolerance factor $c_{\text{tol}}$ defaults to $0.5$ (`reverse_check_tol`
 in `sampler_config.h`). The $\epsilon^2$ scaling matches the
 $O(\epsilon^2)$ residual from the column-sweep projection.
 
@@ -183,36 +180,36 @@ count across all chains and iterations.
 ## Memoizer {#memoizer}
 
 The `Memoizer` class in `leapfrog.h` is a single-entry cache for
-$(\log p(x), \nabla\log p(x))$ evaluations.
+$(\log \pi(q), \nabla\log \pi(q))$ evaluations.
 
 ### Why a single-entry cache?
 
 NUTS tree building calls the gradient repeatedly as it extends the
-trajectory. Each leapfrog step produces a new unique $x$, so a
+trajectory. Each leapfrog step produces a new unique $q$, so a
 multi-entry hash map would almost never hit — and hashing an
 `arma::vec` element-by-element is expensive. A single-entry cache
-exploits the fact that at tree-node boundaries the same $x$
+exploits the fact that at tree-node boundaries the same $q$
 appears as both the end of one subtree and the start of the next.
 The cache uses `memcmp` for equality, which is a single comparison
 per step.
 
 ### Joint evaluation
 
-Models often share computation between $\log p$ and $\nabla\log p$
+Models often share computation between $\log \pi$ and $\nabla\log \pi$
 (e.g., normalization constants, sufficient statistics). The Memoizer
-accepts a joint function `(x) → (logp, grad)` and caches both values
+accepts a joint function `(q) → (logp, grad)` and caches both values
 from a single call. Two access methods retrieve the cached values:
 
-- `cached_log_post(x)` — returns $\log p(x)$
-- `cached_grad(x)` — returns $\nabla\log p(x)$
+- `cached_log_post(q)` — returns $\log \pi(q)$
+- `cached_grad(q)` — returns $\nabla\log \pi(q)$
 
 Both trigger a joint evaluation if the cache misses.
 
 ### Invalidation
 
 After the SHAKE position projection (step 4 of the constrained
-leapfrog), $x$ is modified in place. The cached gradient refers
-to the pre-projection $x$ and must be discarded.
+leapfrog), $q$ is modified in place. The cached gradient refers
+to the pre-projection $q$ and must be discarded.
 `leapfrog_constrained()` calls `memo.invalidate()` immediately after
 the projection, before the second half-step requests a fresh gradient.
 
