@@ -56,6 +56,16 @@ The two primary interfaces are `summary()` for tabular diagnostics and
 `coef()` for posterior means in matrix form. Raw samples are available in
 `fit$raw_samples` for custom analyses.
 
+Some components are present only for particular configurations:
+`fit$inclusion_parameter_samples` holds per-chain draws of the shared
+inclusion probability for continuous models with
+`beta_bernoulli_prior()` (see [Gaussian Graphical Model](ggm.qmd)),
+and `fit$zratio_diag` holds the trust-gauge summary for
+`precision_graph_prior = "hierarchical"` fits when the gauge is
+enabled (see
+[MCMC Diagnostics](mcmc-diagnostics.qmd#sec-trust-gauge)); both are
+`NULL` otherwise.
+
 ## Posterior summaries {#sec-posterior-summaries}
 
 Calling `summary()` prints formatted tables of posterior statistics.
@@ -209,6 +219,7 @@ commonly used are:
 | `extract_main_effects()` | Raw main effect samples |
 | `extract_indicators()` | Raw indicator samples |
 | `extract_posterior_inclusion_probabilities()` | Posterior inclusion probabilities |
+| `extract_prior_inclusion_probabilities()` | Effective prior inclusion probabilities — the denominators for inclusion Bayes factors on continuous data (see [Edge Selection](edge-selection.qmd#sec-bf-continuous)) |
 | `extract_precision()` | Posterior mean precision matrix (GGM / continuous block) |
 | `extract_partial_correlations()` | Posterior mean partial correlation matrix (GGM / continuous block) |
 | `extract_log_odds()` | Posterior mean log-odds matrix (ordinal / discrete block) |
@@ -226,11 +237,14 @@ stored in `fit$nuts_diag`:
 str(fit$nuts_diag, max.level = 1)
 ```
 
-The `summary` field contains per-chain summaries of tree depth,
-divergences, energy, and the mean
-acceptance probability (also stored per-iteration as
-`fit$nuts_diag$accept_prob`). The `warmup_check` field
-reports whether warmup equilibration was sufficient. These are described in detail in
+The `summary` field aggregates the headline numbers — total divergences,
+maximum-tree-depth hits, the minimum E-BFMI across chains, the mean
+acceptance probability, and whether any chain's warmup looked
+incomplete. The per-iteration detail behind them is stored alongside:
+tree depths, divergence flags, energies, and acceptance probabilities
+(`fit$nuts_diag$accept_prob`), plus the per-chain `warmup_check`
+diagnostics. The `has_issues` flag is `TRUE` when any check raised a
+concern. These are described in detail in
 [MCMC Diagnostics](mcmc-diagnostics.qmd). If these diagnostics remain problematic after tuning, refit with `update_method = "adaptive-metropolis"`.
 
 ## Output from [`bgmCompare()`](../reference/bgmCompare.qmd)

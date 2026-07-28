@@ -78,6 +78,8 @@ In practice this means mixed-model estimates keep the exact Gaussian information
 
 When `edge_selection = TRUE` (the default), every partial association — discrete–discrete, continuous–continuous, and cross-type alike — receives a spike-and-slab prior, so an edge is either exactly absent or estimated from the data. The prior specification is described in [Prior Basics](prior-basics.qmd), and how to read the resulting inclusion probabilities and Bayes factors in [Edge Selection](edge-selection.qmd).
 
+With at least two continuous variables, the continuous-continuous edges inherit the continuous-data considerations from the [Gaussian Graphical Model](ggm.qmd) page: under the default `precision_graph_prior = "joint"`, their effective prior inclusion probabilities differ from the nominal edge-prior value (use [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities) for Bayes factors), and with `beta_bernoulli_prior()` or `sbm_prior()` the hyperparameter updates carry a normalizing-constant correction that reads the continuous-continuous edges only. The `"hierarchical"` alternative is likewise available and affects only continuous-continuous edge moves. Discrete–discrete and cross-type edges are untouched by all of this.
+
 ## Missing data
 
 Missing values can be handled via listwise deletion (the default) or imputed within the Gibbs sampler by setting `na_action = "impute"`. For mixed data, missing discrete entries are drawn from their full conditional categorical distribution and missing continuous entries from their conditional normal distribution at each MCMC iteration. See [Missing Data](missing-data.qmd) for details on both approaches and recommendations.

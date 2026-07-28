@@ -25,17 +25,17 @@ $$
 
 Setting $\alpha_w > \beta_w$ and $\alpha_b < \beta_b$ encodes the expectation that within-cluster connections are dense and between-cluster connections are sparse. When $B = 1$, the SBM reduces to the standard Beta-Bernoulli prior with hyperparameters $\alpha_w$ and $\beta_w$.
 
-The block assignments are modeled using a categorical distribution with prior probability $P(z_i = b \mid \boldsymbol{\delta}, B) = \delta_b$, where the assignment probabilities $\boldsymbol{\delta}$ receive a Dirichlet$(\epsilon_1, \dots, \epsilon_B)$ prior with default $\epsilon_b = 1$. The number of blocks $B$ is itself a parameter and receives a zero-truncated Poisson prior,
+The block assignments are modeled using a categorical distribution with prior probability $P(z_i = b \mid \boldsymbol{\delta}, B) = \delta_b$, where the assignment probabilities $\boldsymbol{\delta}$ receive a Dirichlet$(\epsilon_1, \dots, \epsilon_B)$ prior with default $\epsilon_b = 1$. The number of blocks $B$ is itself a parameter and receives a shifted-Poisson prior: $B - 1$ follows a Poisson distribution with rate $\lambda$, so that
 
 $$
-P(B) = \frac{\lambda^B}{B!\,(\exp(\lambda) - 1)}, \quad B \geq 1
+P(B) = \frac{\lambda^{B-1} \exp(-\lambda)}{(B-1)!}, \quad B \geq 1
 $$
 
-with rate $\lambda$ controlling the expected number of clusters. The rate parameter $\lambda$ does not exactly equal the expected number of clusters but approximates it: $\lambda = 1.59$ corresponds to approximately 2 clusters, $\lambda = 2.82$ to 3, $\lambda = 3.92$ to 4, and $\lambda = 4.96$ to 5. For 6 or more expected clusters, $\lambda$ can be set equal to the expected number of clusters.
+Under this prior the expected number of clusters is simply $E[B] = 1 + \lambda$: the default `lambda = 1` corresponds to a prior expectation of two clusters, $\lambda = 2$ to three, and so on.
 
 In summary, the full hierarchical specification is:
 
-- $B \sim \text{Poisson}^+(\lambda)$
+- $B - 1 \sim \text{Poisson}(\lambda)$
 - $\boldsymbol{\delta} \mid B \sim \text{Dirichlet}(\epsilon_1, \dots, \epsilon_B)$
 - $z_i \mid \boldsymbol{\delta}, B \sim \text{Categorical}(\boldsymbol{\delta})$
 - $\pi_{ab} \mid B \sim \text{Beta}(\alpha_w, \beta_w)$ for $a = b$ (within-cluster)
@@ -63,15 +63,15 @@ The hyperparameters of [`sbm_prior()`](../reference/priors.qmd#sbm_prior) are:
 | `alpha`, `beta` | 1, 1 | Beta prior on within-cluster inclusion probability ($\alpha_w$, $\beta_w$) |
 | `alpha_between`, `beta_between` | 1, 1 | Beta prior on between-cluster inclusion probability ($\alpha_b$, $\beta_b$) |
 | `dirichlet_alpha` | 1 | Concentration of the Dirichlet prior on block assignments |
-| `lambda` | 1 | Rate of the zero-truncated Poisson prior on the number of clusters |
+| `lambda` | 1 | Rate of the shifted-Poisson prior on the number of clusters ($B - 1 \sim \text{Poisson}(\lambda)$; prior expectation $1 + \lambda$ clusters) |
 
 ## Testing for clustering
 
 Since $B$ is analytically marginalized out, the MCMC sampler does not produce direct samples of $B$. Instead, the posterior probability of each number of clusters is computed from the sampled block allocations $\mathbf{z}$ using the conditional posterior $P(B = b \mid |\mathcal{C}|)$, where $|\mathcal{C}|$ is the number of non-empty clusters implied by $\mathbf{z}$ [see @MillerHarrison_2018, Eq. 3.7]. These posterior cluster probabilities support two types of Bayes factor tests.
 
-**Clustering vs. no clustering.** The first test compares $\mathcal{H}_1\!: B > 1$ against $\mathcal{H}_0\!: B = 1$. The posterior probability of clustering is obtained by summing the posterior probabilities for all $B > 1$, and the prior odds follow directly from the truncated Poisson: $\lambda / (\exp(\lambda) - 1 - \lambda)$. A Bayes factor greater than one indicates that the data favor a clustered structure; a Bayes factor less than one indicates evidence for a single-cluster solution. Values near one mean the data do not discriminate — absence of evidence rather than evidence of absence.
+**Clustering vs. no clustering.** The first test compares $\mathcal{H}_1\!: B > 1$ against $\mathcal{H}_0\!: B = 1$. The posterior probability of clustering is obtained by summing the posterior probabilities for all $B > 1$, and the prior odds follow directly from the shifted Poisson: since $P(B = 1) = \exp(-\lambda)$, the prior odds of clustering are $\exp(\lambda) - 1$. A Bayes factor greater than one indicates that the data favor a clustered structure; a Bayes factor less than one indicates evidence for a single-cluster solution. Values near one mean the data do not discriminate — absence of evidence rather than evidence of absence.
 
-**Comparing specific cluster counts.** The second test compares two point hypotheses — for example $\mathcal{H}_1\!: B = b_1$ versus $\mathcal{H}_2\!: B = b_2$ — with prior odds $\lambda^{b_1 - b_2} \cdot b_2! \,/\, b_1!$. This allows a finer-grained assessment of the evidence for a particular clustering solution.
+**Comparing specific cluster counts.** The second test compares two point hypotheses — for example $\mathcal{H}_1\!: B = b_1$ versus $\mathcal{H}_2\!: B = b_2$ — with prior odds $\lambda^{b_1 - b_2} \,(b_2 - 1)! \,/\, (b_1 - 1)!$. This allows a finer-grained assessment of the evidence for a particular clustering solution.
 
 Both tests are computed from the posterior cluster probabilities returned by `extract_sbm()` (see below). For the simulation performance and practical recommendations for both Bayes factors, see @SekulovskiEtAl_2025_sbm.
 
@@ -85,7 +85,7 @@ sbm = extract_sbm(fit)
 
 This returns:
 
-- **`posterior_num_blocks`**: a data frame of posterior probabilities for each number of clusters. These probabilities serve as the basis for computing clustering Bayes factors.
+- **`posterior_num_blocks`**: a data frame of posterior probabilities for each number of clusters, computed from the sampled allocations through the MFM conditional under the shifted-Poisson prior. These probabilities serve as the basis for computing clustering Bayes factors.
 - **`posterior_mean_allocations`**: the estimated cluster assignment for each node, obtained by selecting the allocation that best approximates the average co-clustering structure across MCMC iterations.
 - **`posterior_mode_allocations`**: the most frequently occurring cluster assignment across MCMC iterations.
 - **`posterior_mean_coclustering_matrix`**: a symmetric matrix where entry $(i, j)$ is the proportion of iterations in which nodes $i$ and $j$ were assigned to the same cluster. Coherent blocks indicate stable clusters; diffuse patterns indicate nodes with uncertain membership.
@@ -166,13 +166,13 @@ fit = bgm(
   edge_prior = sbm_prior(
     alpha = 8, beta = 1,
     alpha_between = 1, beta_between = 8,
-    lambda = 1.59
+    lambda = 1
   ),
   seed = 1234
 )
 ```
 
-Here `lambda = 1.59` corresponds to a prior expectation of approximately two clusters; higher values shift the expectation toward more clusters (see the $\lambda$-to-cluster mapping above).
+Here `lambda = 1` corresponds to a prior expectation of two clusters ($E[B] = 1 + \lambda$); higher values shift the expectation toward more clusters.
 
 **When no clustering is expected**, or the goal is conservative inference that protects against false positive clustering, an informative between-cluster prior combined with flat within-cluster settings provides the best performance:
 
