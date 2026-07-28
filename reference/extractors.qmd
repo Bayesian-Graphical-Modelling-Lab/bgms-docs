@@ -95,8 +95,23 @@ indicator, containing binary (0/1) samples:
 Compute posterior inclusion probabilities.
 
 ```r
-extract_posterior_inclusion_probabilities(bgms_object)
+extract_posterior_inclusion_probabilities(
+  bgms_object,
+  estimator = c("rb", "raw")
+)
 ```
+
+Two estimators of the same quantity are available. The default `"rb"`
+(Rao-Blackwellized) averages the one-step inclusion draw
+$J_t = \gamma_t + (1 - 2\gamma_t)\,\alpha_t$ recorded at each
+birth/death proposal, where $\gamma_t$ is the indicator state before
+the move and $\alpha_t$ the proposal's acceptance probability; `"raw"`
+averages the binary indicator draws themselves. The RB average has
+lower variance and, in exact arithmetic, always lies strictly inside
+$(0, 1)$ — though for edges with overwhelming per-iteration evidence
+it still rounds to exactly 0 or 1 in double precision. It changes only
+the summary, not the sampler: it inherits the chain's mixing and does
+not rescue a chain that failed to explore the model space.
 
 Returns a symmetric p x p matrix of posterior inclusion probabilities:
 
@@ -108,14 +123,67 @@ pip = extract_posterior_inclusion_probabilities(fit)
 round(pip[1:4, 1:4], 2)
 ```
 
-Here the `intrusion`–`dreams` edge is included in every posterior draw
-(probability 1), while `intrusion`–`upset` is included in about 60% of
-draws — the data do not clearly decide that edge. See
-[Edge Selection](../guide/edge-selection.qmd) for turning these into
-Bayes factors.
+Here the `intrusion`–`dreams` edge saturates at probability 1, while
+`intrusion`–`upset` sits around 0.75 — the data do not clearly decide
+that edge. See [Edge Selection](../guide/edge-selection.qmd) for
+turning these into Bayes factors, and
+[`extract_inclusion_bf()`](#extract_inclusion_bf) for a Bayes-factor
+estimator that stays finite even for saturated edges.
 - **`bgmCompare`**: Diagonal entries are main-effect inclusion probabilities;
   off-diagonal entries are pairwise difference inclusion probabilities.
-  Requires `difference_selection = TRUE`.
+  Requires `difference_selection = TRUE`. With `estimator = "rb"`,
+  indicators that were not selected (e.g. main-effect differences when
+  `main_difference_selection = FALSE`) are returned as `NA`.
+
+## extract_inclusion_bf {#extract_inclusion_bf}
+
+Compute log inclusion Bayes factors from the Rao-Blackwellized odds
+accumulators recorded during sampling.
+
+```r
+extract_inclusion_bf(bgms_object)
+```
+
+For each indicator, the sampler accumulates the birth/death acceptance
+probabilities on the acceptance-probability scale, so the posterior
+inclusion odds follow from the exact identity
+
+$$
+\frac{\bar{J}}{1 - \bar{J}}
+  = \frac{n_{01} + n_1 - n_{10}}{n_0 - n_{01} + n_{10}},
+$$
+
+where $n_{01}$ and $n_{10}$ sum the acceptance probabilities of birth
+and death proposals and $n_0$, $n_1$ count them. Because $1 - \alpha$
+is never formed per draw, the odds stay finite down to log acceptance
+probabilities of about $-745$: edges whose inclusion-probability
+average rounds to 0 or 1 still receive a finite Bayes factor here.
+
+The prior inclusion odds are divided out edge by edge, so the returned
+value is the natural log of the inclusion Bayes factor rather than the
+posterior odds (the two coincide only at a prior inclusion probability
+of $\tfrac{1}{2}$). For `bgm()` fits the prior odds come from
+[`extract_prior_inclusion_probabilities()`](#extract_prior_inclusion_probabilities);
+for continuous or stochastic-block models that call may run and cache a
+short prior-only chain. For `bgmCompare()` fits the exchangeable
+difference prior supplies a single prior inclusion probability; a
+stochastic-block difference prior has no single marginal, so the result
+is left as posterior odds there.
+
+Returns a symmetric p x p matrix of log inclusion Bayes factors
+(natural log). Entries are `NA` for indicators that were never
+updated, `+Inf` when no exclusion evidence remains, and `-Inf` when no
+inclusion evidence remains. For `bgms` the diagonal is `NA`; for
+`bgmCompare` the diagonal holds main-effect difference Bayes factors.
+
+```{r}
+bf = extract_inclusion_bf(fit)
+round(bf[1:4, 1:4], 2)
+```
+
+The `intrusion`–`dreams` edge, whose inclusion probability saturates
+at 1 above, here receives a finite log Bayes factor of about 317 —
+astronomically strong evidence, but quantified rather than `Inf`.
 
 ## extract_prior_inclusion_probabilities {#extract_prior_inclusion_probabilities}
 

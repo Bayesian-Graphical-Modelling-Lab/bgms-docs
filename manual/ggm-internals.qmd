@@ -350,6 +350,43 @@ likelihood ratio plus tilt, prior odds $\log\{\pi_{ij} / (1 -
 the slab density of the new entry (with the $-\log 2$ Jacobian),
 minus the proposal density, plus the same diagonal-prior ratio.
 
+### Rao-Blackwellized inclusion draws
+
+Each edge indicator update — the Metropolis edge move and the
+conjugate birth/death alike — already forms the log acceptance
+probability of its proposal. Before the accept decision, the sampler
+also records the one-step draw
+
+$$
+J = \gamma + (1 - 2\gamma)\,\alpha,
+$$
+
+with $\gamma$ the pre-move indicator state and
+$\alpha = \exp(\min(0, \log \text{accept}))$: the conditional
+probability that the edge ends the sweep included, given the rest of
+the state ($J = \alpha$ for a proposed birth, $1 - \alpha$ for a
+proposed death). $J$ must be formed here because it uses the pre-move
+state, which differs from the stored post-sweep indicator on accepted
+moves. Averaging $J$ over iterations estimates the posterior inclusion
+probability with lower variance than averaging the binary indicators.
+
+The draws fill a `rb_inclusion` array in `ChainResult` through a
+`get_vectorized_rb_inclusion()` hook on `BaseModel`, aligned to the
+indicator vector order; the OMRF, mixed MRF, and bgmCompare samplers
+implement the same hook for their indicator updates. Alongside the
+per-iteration draws, `ChainResult` keeps per-edge accumulators
+(`rb_counts`) that sum the acceptance probabilities of birth and death
+proposals separately on the acceptance-probability scale — never
+forming $1 - \alpha$ per draw — so posterior inclusion odds stay
+finite even when the averaged draws round to 0 or 1. On the R side the
+draws surface as `fit$raw_samples$rb_inclusion` and back the default
+`"rb"` estimator of
+[`extract_posterior_inclusion_probabilities()`](../reference/extractors.qmd#extract_posterior_inclusion_probabilities);
+the accumulators back
+[`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf).
+Accept/reject behaviour and the RNG stream are unchanged by the
+recording.
+
 ### Iteration order
 
 The order of edge updates is randomized at each iteration via

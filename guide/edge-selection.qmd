@@ -35,6 +35,8 @@ $$
 
 For other prior inclusion probabilities, the Bayes factor divides the posterior inclusion odds by the prior inclusion odds — see [The Bayesian Approach](bayesian-approach.qmd) for the general identity.
 
+In practice, the recommended tool is [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf), which returns the log inclusion Bayes factor for every edge with the prior odds already divided out. It is computed from Rao-Blackwellized odds accumulators recorded during sampling, so it remains finite even for edges whose posterior inclusion probability saturates at 0 or 1 — exactly the edges where the transformation above overflows to $\infty$ or collapses to 0.
+
 The reciprocal $1 / \text{BF}_{10}$ quantifies the evidence for edge absence, i.e., conditional independence [@SekulovskiEtAl_2024]. Values of $\text{BF}_{10}$ close to one indicate that the data do not discriminate between the two hypotheses — absence of evidence rather than evidence of absence.
 
 ### Continuous data: use the effective prior probabilities {#sec-bf-continuous}
@@ -133,7 +135,8 @@ fit = bgm(Wenchuan, chains = 2, seed = 1234)
 ```
 
 The `summary(fit)$indicator` table holds the posterior inclusion
-probability of every edge in its `mean` column. With the default prior
+probability of every edge in its `mean` column (the Rao-Blackwellized
+estimate; see [Model Output](mcmc-output.qmd)). With the default prior
 inclusion probability of 0.5, the inclusion Bayes factor is the
 posterior odds:
 
@@ -147,16 +150,28 @@ round(edges, 3)
 
 Three different conclusions, one from each row:
 
-- **`intrusion-dreams`**: included in every retained draw, so the
-  Bayes factor overflows to infinity. With 2,000 draws per chain, read
-  this as $\text{BF}_{10}$ larger than a few thousand — strong
-  evidence that the edge is present, not literally infinite evidence.
-- **`intrusion-upset`**: an inclusion probability of about 0.6 gives
-  $\text{BF}_{10} \approx 1.5$ — the data do not decide this edge
-  either way (absence of evidence).
-- **`intrusion-avoidact`**: an inclusion probability of about 0.01
-  gives $\text{BF}_{01} \approx 80$ — strong evidence that this edge
+- **`intrusion-dreams`**: the inclusion probability rounds to 1 —
+  every sweep left this edge included — so the posterior-odds
+  transformation overflows to infinity.
+- **`intrusion-upset`**: an inclusion probability of about 0.74 gives
+  $\text{BF}_{10} \approx 2.8$ — the data lean toward including this
+  edge, but the evidence is weak.
+- **`intrusion-avoidact`**: an inclusion probability of about 0.03
+  gives $\text{BF}_{01} \approx 35$ — strong evidence that this edge
   is *absent* (evidence of absence).
+
+For the saturated edge, [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf)
+recovers a finite answer from the odds accumulators:
+
+```{r}
+bf = extract_inclusion_bf(fit)
+round(bf["intrusion", c("dreams", "upset", "avoidact")], 2)
+```
+
+On the log scale, `intrusion-dreams` gets a Bayes factor of about
+$e^{317}$ — astronomically strong evidence, but now an actual number —
+while the other two entries agree with the posterior-odds
+calculation above ($\log 2.8 \approx 1.0$, $\log(1/35) \approx -3.5$).
 
 ## Median probability model
 

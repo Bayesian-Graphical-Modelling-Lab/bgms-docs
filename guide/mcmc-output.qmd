@@ -109,13 +109,18 @@ discrete–discrete, continuous–continuous, and cross-type edges. Use
 (discrete variables).
 
 **Inclusion indicators** report the posterior inclusion probability of
-each edge. An inclusion probability near 1 indicates strong evidence
-for the edge; near 0 indicates strong evidence against it. Values around
-0.5 are inconclusive. The transition counts (`n0->0`, `n0->1`, `n1->0`,
-`n1->1`) show how often the edge indicator switched between excluded
-(0) and included (1) states during sampling. Edges with very few
-transitions (fewer than 5) have unreliable mixture ESS estimates; `bgms`
-suppresses these automatically.
+each edge — estimated, by default, from the Rao-Blackwellized
+inclusion draws rather than the raw 0/1 indicators, which gives the
+same quantity with less Monte Carlo noise. An inclusion probability
+near 1 indicates strong evidence for the edge; near 0 indicates strong
+evidence against it. Values around 0.5 are inconclusive. The
+directional transition counts (`n0->1`, `n1->0`) show how often the
+edge indicator switched between excluded (0) and included (1) states
+during sampling. Edges with very few transitions (fewer than 5) have
+unreliable mixture ESS estimates; `bgms` suppresses these
+automatically, and for edges that never switched at all, the
+RB-based precision columns (`mcse`, `n_eff`, `Rhat`) are reported as
+`NA`.
 
 ### Summary columns
 
@@ -179,6 +184,14 @@ Each element is a list of matrices, one per chain, with rows = iterations
 and columns = parameters. The chains are stored separately to allow
 per-chain diagnostics.
 
+With edge selection, `fit$raw_samples$rb_inclusion` additionally holds
+the Rao-Blackwellized inclusion draws: for each edge and iteration,
+the conditional probability that the edge ends the sweep included,
+given the rest of the state. Averaging these gives a lower-variance
+estimate of the inclusion probability than averaging the binary
+indicators — it is the default estimator behind `summary()` and
+[`extract_posterior_inclusion_probabilities()`](../reference/extractors.qmd#extract_posterior_inclusion_probabilities).
+
 ### Example: posterior density for an edge
 
 To extract the posterior samples for the intrusion--dreams interaction
@@ -220,6 +233,7 @@ commonly used are:
 | `extract_indicators()` | Raw indicator samples |
 | `extract_posterior_inclusion_probabilities()` | Posterior inclusion probabilities |
 | `extract_prior_inclusion_probabilities()` | Effective prior inclusion probabilities — the denominators for inclusion Bayes factors on continuous data (see [Edge Selection](edge-selection.qmd#sec-bf-continuous)) |
+| `extract_inclusion_bf()` | Log inclusion Bayes factors, computed from Rao-Blackwellized odds accumulators; finite even for edges whose inclusion probability saturates at 0 or 1 |
 | `extract_precision()` | Posterior mean precision matrix (GGM / continuous block) |
 | `extract_partial_correlations()` | Posterior mean partial correlation matrix (GGM / continuous block) |
 | `extract_log_odds()` | Posterior mean log-odds matrix (ordinal / discrete block) |

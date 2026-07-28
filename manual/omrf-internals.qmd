@@ -166,6 +166,10 @@ $$
 The scan order is randomized at each iteration via
 `prepare_iteration()`, which calls `arma_randperm()`.
 
+Each edge move also records a Rao-Blackwellized inclusion draw and
+feeds the per-edge odds accumulators, exactly as in the GGM — see
+[Rao-Blackwellized inclusion draws](ggm-internals.qmd#rao-blackwellized-inclusion-draws).
+
 ### Cached denominators
 
 The pseudolikelihood ratios above are served by cached Metropolis

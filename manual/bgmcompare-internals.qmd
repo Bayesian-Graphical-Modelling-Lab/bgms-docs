@@ -90,6 +90,10 @@ iteration:
 2. **Contrast selection** (if active) — A Metropolis step decides
    whether each contrast parameter is included or collapsed
    to zero (`update_indicator_differences_metropolis_bgmcompare()`).
+   Each decision also records a Rao-Blackwellized inclusion draw and
+   feeds the per-indicator odds accumulators, as in the single-group
+   samplers (see
+   [Rao-Blackwellized inclusion draws](ggm-internals.qmd#rao-blackwellized-inclusion-draws)).
 3. **Parameter updates** — With adaptive Metropolis, main effects
    and pairwise effects are updated separately
    (`update_main_effects_metropolis_bgmcompare()`, then

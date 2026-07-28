@@ -152,7 +152,12 @@ The GGM and OMRF paths share a unified builder. Key operations:
 3. **Compute inclusion probabilities** — Average indicator samples (when
    edge selection is active)
 4. **Assemble `$raw_samples`** — Per-chain lists of `main`, `pairwise`,
-   `indicator`, and `allocations` matrices; with a Beta-Bernoulli edge
+   `indicator`, and `allocations` matrices; under edge selection, also
+   the Rao-Blackwellized inclusion draws and odds accumulators
+   (`rb_inclusion`, `rb_counts` — see
+   [GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws)),
+   mapped with the same transpose and off-diagonal ordering as the
+   indicator draws; with a Beta-Bernoulli edge
    prior on a continuous or mixed model, also the per-chain sampled
    inclusion probability (surfaced as
    `fit$inclusion_parameter_samples`)

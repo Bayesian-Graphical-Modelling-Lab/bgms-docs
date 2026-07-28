@@ -155,6 +155,7 @@ Main components:
   - `main_baseline`, `pairwise_baseline` — Baseline parameter samples.
   - `main_differences`, `pairwise_differences` — Difference parameter samples.
   - `indicator` — Difference indicator samples (if enabled).
+  - `rb_inclusion`, `rb_counts` — Rao-Blackwellized inclusion draws for the difference indicators and the per-indicator odds accumulators behind them (if enabled); see [`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities) and [`extract_inclusion_bf()`](extractors.qmd#extract_inclusion_bf).
   - `allocations` — Cluster allocation samples (SBM difference prior only).
   - `nchains`, `niter` — Number of chains and iterations per chain.
 - `arguments` --- List of function call arguments and metadata.
