@@ -111,4 +111,4 @@ on continuous data it requires the default joint graph specification
 (the [hierarchical specification](zratio-hierarchical.qmd) freezes its
 Z-ratio constants at a fixed scale, which is inconsistent with a
 sampled one). The per-iteration scale draws are returned with the
-chain output and feed `prior_sensitivity_check()`.
+chain output.
