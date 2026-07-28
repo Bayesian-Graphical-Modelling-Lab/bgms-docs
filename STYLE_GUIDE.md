@@ -236,7 +236,35 @@ Do **not** use `τ` for proposal SDs.
 | `ρ_{ij·rest}` | Partial correlation |
 | `Φ` (bold) | Upper Cholesky factor of `Θ` (GGM internals) |
 
+### Precision-diagonal prior and the `eta` frame
+
+| Symbol | Meaning |
+|--------|---------|
+| `η` | Standardized rate of the Gamma-family prior on the precision diagonal: the rate in the frame where the slab has unit scale (raw rate = `η / s`, `s` the slab scale) |
+| `δ` | Determinant-tilt exponent on the continuous-block precision matrix (`bgm()` argument `delta`; prior multiplied by `|K|^δ`) |
+
+### Edge clustering (SBM)
+
+| Symbol | Meaning |
+|--------|---------|
+| `B` | Number of blocks/clusters (guide pages); manual pages use `K` |
+| `λ` | Rate of the shifted-Poisson prior on the number of clusters: `B − 1 ~ Poisson(λ)`, so `E[B] = 1 + λ` |
+
+Always say **shifted Poisson** (`B − 1 ~ Poisson(λ)`), never zero-truncated Poisson — the convention changed on develop.
+
+### Hierarchical graph prior (Z-ratio)
+
+Manual-only symbols (zratio-hierarchical.qmd and pages linking to it):
+
+| Symbol | Meaning |
+|--------|---------|
+| `Z(Γ)` | Per-graph normalizing constant of the precision prior |
+| `J` | Normalizer ratio carried by an edge move: `J = Z(Γ⁻)/Z(Γ⁺)` |
+| `(δ, η, α)` | Standardized cell in which the constants and correction tables are built: tilt exponent, standardized diagonal rate, and slab shape |
+
 ### Known overloads (acceptable)
 
 - `α`, `β` — Blume-Capel effects in model pages; Beta prior shape parameters in prior/clustering pages. Context disambiguates.
-- `δ` — Contrast parameters in group-comparison pages; cluster assignment probabilities in clustering.qmd. Different page contexts, no within-page collision.
+- `δ` — Contrast parameters in group-comparison pages; cluster assignment probabilities in clustering.qmd; determinant-tilt exponent in GGM/mixed and Z-ratio pages. Different page contexts, no within-page collision.
+- `η` — Standardized diagonal rate in prior pages; adjacent-category canonical parameter `η_c` in omrf-internals.qmd. Context disambiguates.
+- `λ` — Shifted-Poisson rate in clustering/SBM pages only.
