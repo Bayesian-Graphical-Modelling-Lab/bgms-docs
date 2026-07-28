@@ -38,8 +38,9 @@ whether the residual score times the maximum category exceeds the
 For an ordinal variable with categories $0, 1, \ldots, K$ and
 residual $r$:
 
-Let $B = K \cdot r$ denote the per-person stabilization bound — the
-largest exponent the accumulation can reach (see
+Let $B = \max(0,\, K \cdot r)$ denote the per-person stabilization
+bound — the largest exponent the accumulation can reach, clamped at
+zero so the shift never amplifies a negative residual (see
 [the EXP_BOUND section](#the-exp_bound-709-threshold) for how it
 gates the FAST path). Then:
 
@@ -69,7 +70,7 @@ shifted before exponentiating — the log-sum-exp technique. The shift
 differs by variable type:
 
 - **Ordinal**: the category exponents $s_c = \mu(c) + c \cdot r$ are
-  shifted by the precomputed bound $B = K \cdot r$:
+  shifted by the precomputed bound $B = \max(0,\, K \cdot r)$:
   $D = \exp(B) \sum_c \exp(s_c - B)$.
 - **Blume-Capel**: the shift is the per-person maximum category
   score, $s_{\max} = \max_c s_c$, the classic log-sum-exp form:
@@ -134,7 +135,7 @@ The bound that triggers the SAFE path is set to 709, derived from
 IEEE 754 double precision: $\exp(709) \approx 8.2 \times 10^{307}$
 is the largest representable value, while $\exp(710) = \text{Inf}$.
 The FAST path checks whether $|B_i| \le 709$ before proceeding,
-where $B_i = K \cdot r_i$ for ordinal variables and, for
+where $B_i = \max(0,\, K \cdot r_i)$ for ordinal variables and, for
 Blume–Capel variables, the per-person maximum category score. For
 the joint log-normalizer functions, the threshold is reduced to
 $709 - \max_c |\mu(c)|$ to account for intermediate overflow risk

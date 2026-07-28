@@ -150,6 +150,7 @@ website:
             - manual/parameter-priors.qmd
             - manual/edge-priors.qmd
             - manual/sbm-prior.qmd
+            - manual/zratio-hierarchical.qmd
         - manual/bgmcompare-internals.qmd
         - manual/numerical.qmd
 

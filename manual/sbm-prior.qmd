@@ -16,7 +16,8 @@ background and usage guidance, see
 The prior has three levels:
 
 1. **Cluster count** — The number of clusters $K$ follows a
-   zero-truncated Poisson($\lambda$) prior, with a
+   shifted-Poisson prior, $K - 1 \sim \text{Poisson}(\lambda)$ (prior
+   expectation $1 + \lambda$ clusters), with a
    mixture-of-finite-mixtures (MFM) correction that accounts for the
    combinatorial allocation structure.
 
@@ -57,8 +58,9 @@ assignment $z_i$ by collapsed Gibbs sampling. For each variable $i$:
      $i$ and all other variables, given the block probabilities
 3. Sample $z_i$ from the resulting categorical distribution
 
-Empty clusters are removed, and the cluster labels are relabeled
-to be contiguous.
+The allocation weights are accumulated in log space and max-shifted
+at the draw for numerical stability. Empty clusters are removed, and
+the cluster labels are relabeled to be contiguous.
 
 ### 2. Block probabilities
 
@@ -79,6 +81,31 @@ hyperparameters $\alpha_{kl}$ and $\beta_{kl}$ differ for within-block
 The updated block probabilities are broadcast to the full
 $p \times p$ inclusion probability matrix based on the current
 cluster assignments.
+
+## Corrected sweeps on continuous data
+
+On continuous (GGM) and mixed models under the default joint graph
+specification, the sweeps above run in a corrected form: the
+determinant-tilted precision prior reweights the graph marginal, so
+the plain collapsed updates would target the wrong block structure
+(see [Edge Priors — Normalizing-constant
+corrections](edge-priors.qmd#normalizing-constant-corrections)). The
+correction enters the SBM locally:
+
+- each allocation move adds a per-edge tilt term, the slope
+  $f'(d)$ of the correction curve evaluated at the edge's
+  min-endpoint expected degree density;
+- the new-cluster collapsed marginal integrates the corrected
+  per-pair curve $f(\theta)$ over a quadrature grid instead of the
+  plain Beta marginal.
+
+On mixed data the tilt acts on the continuous block only, so the
+correction terms read continuous-continuous pairs exclusively (a
+per-node continuous mask is attached); with fewer than two continuous
+variables the sweeps reduce to the plain updates. Discrete models
+always use the plain updates. In `bgmCompare()`, the SBM difference
+prior is always uncorrected — there is no precision matrix, hence no
+tilt.
 
 ## Log partition coefficients
 
@@ -109,7 +136,7 @@ The six SBM hyperparameters are set via the
 | $\alpha_b$ | `alpha_between` | 1 | Beta shape for between-block inclusion |
 | $\beta_b$ | `beta_between` | 1 | Beta shape for between-block inclusion |
 | $\alpha_D$ | `dirichlet_alpha` | 1 | Dirichlet concentration for cluster proportions |
-| $\lambda$ | `lambda` | 1 | Poisson rate for number of clusters |
+| $\lambda$ | `lambda` | 1 | Rate of the shifted-Poisson prior on the number of clusters ($K - 1 \sim \text{Poisson}(\lambda)$) |
 
 All six hyperparameters default to 1; `sbm_prior()` with no arguments
 is valid.
@@ -123,6 +150,26 @@ canonical statement of that behavior — the
 [bgmCompare Engine](bgmcompare-internals.qmd) page describes the
 update mechanics.
 
+## Prior simulation
+
+Two exported functions draw from the SBM prior without data:
+
+- [`sample_sbm_prior()`](../reference/prior-samplers.qmd#sample_sbm_prior)
+  makes ancestral draws from the hyperprior alone — a shifted-Poisson
+  number of components, Dirichlet-weighted allocation, and
+  Beta-distributed within/between block probabilities — returning
+  allocations, occupied-block counts, and the implied pair-inclusion
+  probabilities.
+- [`sample_graph_prior()`](../reference/prior-samplers.qmd#sample_graph_prior)
+  with `edge_prior = sbm_prior(...)` additionally draws the edge
+  indicators, either ancestrally (hierarchical specification: the
+  graph marginal is exactly the SBM) or through the zero-data chain
+  (joint specification: the marginal is reweighted by the per-graph
+  normalizer, with the corrected sweeps above).
+
+These are useful for checking what a hyperparameter choice implies
+about cluster counts and edge densities before fitting.
+
 ## Output
 
 The cluster allocations at each post-warmup iteration are stored in
@@ -130,7 +177,7 @@ The cluster allocations at each post-warmup iteration are stored in
 `extract_sbm()` in R (works on both `bgms` and `bgmCompare` fits), which
 returns:
 
-- `posterior_num_blocks` — posterior distribution over the number of clusters
+- `posterior_num_blocks` — posterior distribution over the number of clusters, computed from the sampled allocations through the MFM conditional under the shifted-Poisson prior
 - `posterior_mean_allocations` — posterior mean cluster assignments
 - `posterior_mode_allocations` — posterior mode cluster assignments
 - `posterior_mean_coclustering_matrix` — proportion of iterations where

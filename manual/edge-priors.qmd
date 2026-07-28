@@ -17,6 +17,8 @@ class BaseEdgePrior {
   virtual std::unique_ptr<BaseEdgePrior> clone() const = 0;
   virtual bool has_allocations() const { return false; }
   virtual arma::ivec get_allocations() const { return arma::ivec(); }
+  virtual bool has_inclusion_parameter() const { return false; }
+  virtual double get_inclusion_parameter() const { return NA_REAL; }
 };
 ```
 
@@ -27,6 +29,10 @@ probabilities are used by the model's `update_edge_indicators()`
 method for the next round of edge proposals.
 
 `clone()` produces an independent copy for parallel chain execution.
+`has_inclusion_parameter()` marks priors that carry a sampled shared
+inclusion probability (the Beta-Bernoulli $\pi$); when true, the chain
+runner stores `get_inclusion_parameter()` each retained iteration,
+surfaced in R as `fit$inclusion_parameter_samples`.
 
 ## BernoulliEdgePrior
 
@@ -44,12 +50,19 @@ the data. At each iteration:
 
 1. Count the number of included edges: $k = \sum_{i<j} \gamma_{ij}$
 2. Count the total number of possible edges: $m = p(p-1)/2$
-3. Draw a new inclusion probability:
-   $\pi \sim \text{Beta}(\alpha + k,\; \beta + m - k)$
+3. Draw a new inclusion probability from its full conditional. On
+   discrete models this is the plain conjugate draw
+   $\pi \sim \text{Beta}(\alpha + k,\; \beta + m - k)$. On continuous
+   and mixed models under the default joint specification, a
+   [correction table](#normalizing-constant-corrections) is attached
+   and the draw instead targets the corrected conditional carrying
+   the $1/C(\pi)$ factor.
 4. Set all entries of the inclusion probability matrix to $\pi$
 
 The hyperparameters $\alpha$ and $\beta$ default to 1 (uniform prior
-on the inclusion probability).
+on the inclusion probability). The sampled $\pi$ is exposed through
+`has_inclusion_parameter()` / `get_inclusion_parameter()` and stored
+per iteration.
 
 ## StochasticBlockEdgePrior
 
@@ -66,11 +79,60 @@ The `StochasticBlockEdgePrior` class stores:
 
 Its `update()` method runs collapsed Gibbs sampling to update cluster
 assignments and block probabilities (delegated to functions in
-`sbm_edge_prior.cpp`).
+`sbm_edge_prior.cpp`). On continuous and mixed models under the joint
+specification, the sweeps read the attached
+[correction data](#normalizing-constant-corrections): a per-edge tilt
+slope enters each allocation move, and the new-cluster collapsed
+marginal integrates the corrected per-pair curve (see
+[SBM Prior](sbm-prior.qmd)).
 
 `has_allocations()` returns `true`, and `get_allocations()` returns
 the current cluster assignment vector. These are stored in
 `ChainResult::allocation_samples` for post-hoc analysis.
+
+## Normalizing-constant corrections {#normalizing-constant-corrections}
+
+On continuous (GGM) and mixed models under the default
+`precision_graph_prior = "joint"`, the graph marginal of the
+spike-and-slab prior is not the edge prior $\pi(\Gamma)$ but
+$\pi(\Gamma)\, Z(\Gamma)$ — the edge prior reweighted by each graph's
+share of the determinant-tilted precision prior's mass (see
+[GGM Internals — Determinant tilt](ggm-internals.qmd#determinant-tilt)).
+For the hierarchical edge priors this bias propagates into the
+hyperparameter updates: the graph-prior mean of the normalizer,
+$C(\theta)$, enters the full conditional of the inclusion probability
+and of the block structure, so the plain conjugate draws would target
+the wrong marginals.
+
+The correction machinery (`edge_prior_correction.h`, built at fit
+setup in `R/correction_tables.R` from the tilted prior sampler and
+cached on disk via `tools::R_user_dir("bgms", "cache")`) supplies:
+
+- **Beta-Bernoulli** — the whole-graph $\log C(\theta)$ curve. The
+  corrected conditional
+  $p(\theta \mid \Gamma) \propto \theta^{a-1}(1-\theta)^{b-1}
+  e^{-\log C(\theta)}$ is drawn by inverse-CDF on a fine grid
+  ($N = 401$) centered at the current $\theta$ with half-width ten
+  conjugate-posterior standard deviations, so resolution in
+  posterior-SD units is constant as $\theta$ approaches the
+  boundaries. Only differences of $\log C$ enter, so the curve's
+  additive constant is immaterial; outside the tabulated range it is
+  extended linearly with the boundary slope.
+- **SBM** — local reads of the same table: the per-edge tilt slope
+  $f'(d)$ evaluated at the edge's min-endpoint expected degree
+  density (extended as constants beyond the tabulated range), and the
+  per-pair $f(\theta)$ curve pre-interpolated onto a uniform
+  quadrature grid for the new-cluster collapsed marginal.
+
+On the mixed-MRF path the tilt acts on the continuous precision block
+only, so the correction reads continuous-continuous pairs exclusively
+(a per-node mask carries the variable types); with fewer than two
+continuous variables no edge is tilted and the plain conjugate
+updates apply unchanged. Under
+[`precision_graph_prior = "hierarchical"`](zratio-hierarchical.qmd)
+no correction is needed at all — the per-graph normalization makes the
+graph marginal exactly $\pi(\Gamma)$ and the conjugate updates are
+already correct; the cost moves into the edge moves instead.
 
 ## Prior selection in R
 
@@ -101,7 +163,7 @@ in `common_helpers.h`.
 Within each MCMC iteration, the edge prior update runs **after** the
 model's edge indicator and parameter updates:
 
-1. `model.update_edge_indicators()` — MoMS add/delete moves using the
+1. `model.update_edge_indicators()` — add/delete moves using the
    current inclusion probability matrix
 2. `sampler->step(model, iteration)` — parameter updates
 3. `edge_prior.update(...)` — update the inclusion probability matrix

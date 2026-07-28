@@ -120,17 +120,19 @@ above) and the gradient chain rules — are documented in
 
 The group-comparison engine uses the same pseudolikelihood idea but evaluates
 it per group under the baseline-plus-differences parameterization. Gradient
-contributions are then projected through the contrast structure.
-
-Implementation details are documented in
-[bgmCompare Engine](bgmcompare-internals.qmd).
+contributions are then projected through the contrast structure. Its
+Metropolis path caches the per-person, per-variable log-normalizers in a
+sweep state and invalidates only the entries a proposal touches, rather than
+recomputing them per move (see [bgmCompare Engine](bgmcompare-internals.qmd)).
 
 ## Numerical and gradient considerations
 
 In discrete blocks, both log-normalizers and category probabilities are needed
 for efficient gradient computation. `bgms` computes these together to avoid
 redundant work and uses numerically stable paths for exponentiation-sensitive
-regions.
+regions: the log-sum-exp shift is clamped at zero,
+$B = \max(0,\, K \cdot r)$, so a negative rest score is never amplified
+(see [Fast Computation](variable-helpers.qmd)).
 
 See [Fast Computation](variable-helpers.qmd) and, for the portable
 `exp()`/`log()` implementation, [OpenLibM Integration](numerical.qmd).

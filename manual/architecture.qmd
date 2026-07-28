@@ -17,7 +17,7 @@ the execution layer orchestrates everything.
 src/
 ├── mcmc/
 │   ├── algorithms/      # Stateless: nuts_step(), leapfrog(), metropolis_step(),
-│   │                    #   hmc.h/cpp (kinetic energy, step-size heuristic)
+│   │                    #   hamiltonian_utils.h/cpp (kinetic energy, step-size heuristic)
 │   ├── samplers/        # Stateful: NUTSSampler, MetropolisSampler, GibbsSampler
 │   └── execution/       # Orchestration: chain_runner, warmup_schedule, chain_result
 ├── models/

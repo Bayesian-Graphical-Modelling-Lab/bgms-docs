@@ -15,44 +15,22 @@ The user-facing R-side constructors are documented on the
 ```cpp
 class BaseParameterPrior {
   virtual double logp(double x) const = 0;
-  virtual double logp(double x, double scale_factor) const;
   virtual double grad(double x) const = 0;
-  virtual double grad(double x, double scale_factor) const;
   virtual std::unique_ptr<BaseParameterPrior> clone() const = 0;
 };
 ```
 
 Each prior provides a log-density `logp(x)` and gradient `grad(x)`
-evaluated at a single point $x$, plus optional `(x, scale_factor)`
-overloads that multiply the prior's scale by a per-pair factor. The
-scaled overloads are used by the OMRF and mixed MRF when
-`standardize = TRUE` (see below). Priors that have no natural scale
-(the beta-prime threshold prior) ignore the factor and delegate to the
-unscaled overload.
-
-### The `standardize` scale adjustment
-
-With `standardize = TRUE` in [`bgm()`](../reference/bgm.qmd), the
-prior scale for each pairwise interaction is adjusted to the range of
-the response scores. Variables with more response categories have
-larger score products $(x_i \cdot x_j)$, which typically correspond to
-smaller interaction effects $\omega_{ij}$; without standardization, a
-fixed prior scale is relatively wide for these smaller effects,
-yielding less shrinkage for high-category pairs and more for
-low-category pairs. Standardization scales the prior proportionally to
-the maximum score product, equalizing relative shrinkage across pairs.
-
-After internal recoding, regular ordinal variables have scores
-$0, 1, \ldots, m$. The adjusted scale for the interaction between
-variables $i$ and $j$ is `scale * m_i * m_j`, so that `scale` itself
-applies to the unit-interval case (binary variables, where
-$m_i = m_j = 1$). For Blume-Capel variables with reference category
-$b$, scores are centered as $-b, \ldots, m-b$, and the adjustment uses
-the maximum absolute product of the score endpoints. For mixed pairs,
-ordinal variables use raw score endpoints $(0, m)$ and Blume-Capel
-variables use centered score endpoints $(-b, m-b)$.
-
-`clone()` produces an independent copy for parallel chain execution.
+evaluated at a single point $x$; `clone()` produces an independent
+copy for parallel chain execution. The scale-family classes (Cauchy,
+Normal) additionally expose a `scale()` accessor, and
+`GammaScalePrior` exposes `shape()` and `rate()`. These accessors are
+what the samplers consult beyond plain density evaluation: the GGM's
+Gibbs eligibility check and slab-variance formulas read `scale()`,
+the conjugate edge move and row-block Gibbs read the Gamma
+`shape()`/`rate()`, the Cauchy scale-mixture weights are refreshed
+against `scale()`, and the standardized `eta` frame resolves the
+diagonal rate from the slab's `scale()`.
 
 ## Concrete classes
 
@@ -63,10 +41,9 @@ variables use centered score endpoints $(-b, m-b)$.
 | `BetaPrimePrior` | logit-Beta($\alpha$, $\beta$) | `alpha`, `beta` | [`beta_prime_prior()`](../reference/priors.qmd#beta_prime_prior) |
 | `GammaScalePrior` | Gamma(shape, rate) on positive support | `shape`, `rate` | [`gamma_prior()`](../reference/priors.qmd#gamma_prior), [`exponential_prior()`](../reference/priors.qmd#exponential_prior) |
 
-`CauchyPrior` and `NormalPrior` implement both the unscaled and scaled
-overloads. `BetaPrimePrior` is used only for thresholds and ignores the
-scale factor. `GammaScalePrior` is used only for the precision-matrix
-diagonal where pair-specific scaling does not apply.
+`BetaPrimePrior` is used only for thresholds and has no scale
+accessor. `GammaScalePrior` is used only for the precision-matrix
+diagonal.
 
 ## Factory dispatch
 
@@ -89,11 +66,29 @@ roles it needs:
 
 | Role | Used by | Default |
 |------|---------|---------|
-| Pairwise interactions | GGM, OMRF, mixed MRF, bgmCompare | `cauchy_prior(scale = 1)` |
+| Pairwise interactions | GGM, OMRF, mixed MRF | `normal_prior(scale = 1)` |
+| Baseline pairwise interactions | bgmCompare | `cauchy_prior(scale = 1)` |
 | Category thresholds | OMRF, mixed MRF, bgmCompare | `beta_prime_prior(0.5, 0.5)` |
 | Continuous means | mixed MRF | `normal_prior(scale = 1)` |
-| Precision-matrix diagonal | GGM, mixed MRF | `gamma_prior(shape = 1, rate = 1)` |
+| Precision-matrix diagonal | GGM, mixed MRF | `exponential_prior(eta = 1)` |
 
 The model's `logp_and_gradient()` and Metropolis update functions call
 into the held priors at every iteration. This polymorphic dispatch is
 what allows the user to swap families without touching the C++ code.
+
+## The standardized `eta` frame {#eta-frame}
+
+The diagonal's Gamma-family rate can be given in two frames (the
+`rate` and `eta` arguments of
+[`gamma_prior()`/`exponential_prior()`](../reference/priors.qmd#scale-priors)).
+In the raw frame the rate applies to $\theta_{ii}/2$ as-is. In the
+standardized frame, `eta` is the rate in the coordinate system where
+the slab has unit scale: the R layer resolves the raw rate at fit time
+as `eta / s`, with `s` the slab's `scale()`. Because graph and
+partial-correlation inference is invariant to a joint rescaling of
+slab and diagonal, fixing `eta` keeps the prior geometry — how far the
+prior mass sits from the positive-definite cone boundary — unchanged
+when the user widens or narrows the slab. The standardized cell
+$(\delta, \eta, \alpha)$ is also the frame in which the
+[Z-ratio constants](zratio-hierarchical.qmd) and correction tables are
+built, which is why one table serves every slab scale.

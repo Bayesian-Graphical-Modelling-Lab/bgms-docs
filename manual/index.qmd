@@ -51,6 +51,7 @@ Prior distributions on model parameters and graph structure.
 - [Parameter Priors](parameter-priors.qmd) — `BaseParameterPrior` polymorphic hierarchy for real-valued parameters (Cauchy, Normal, beta-prime, Gamma scale). Polymorphic dispatch replaces hard-coded prior calls in the model code.
 - [Edge Priors](edge-priors.qmd) — Overview of the edge prior framework: Bernoulli (fixed), Beta-Bernoulli (learned), and Stochastic Block Model
 - [SBM Prior](sbm-prior.qmd) — Mixture-of-finite-mixtures SBM formulation, collapsed Gibbs updates, cluster allocation sampling
+- [Hierarchical Graph Prior and the Z-Ratio Engine](zratio-hierarchical.qmd) — Per-graph normalized precision prior: the per-edge normalizer ratio, its deterministic estimator, and the trust gauge
 
 ## Group Comparison
 
