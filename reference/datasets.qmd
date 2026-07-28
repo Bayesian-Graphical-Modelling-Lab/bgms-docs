@@ -18,7 +18,7 @@ checklist includes 18 items: 9 Inattentive (I) and 9 Hyperactive/Impulsive
 data("ADHD")
 ```
 
-A matrix with 355 rows and 19 columns:
+A data frame with 355 rows and 19 columns:
 
 | Column | Description |
 |--------|-------------|
@@ -58,7 +58,7 @@ or French @MartarelliEtAl_2023_boredom.
 data("Boredom")
 ```
 
-A matrix with 986 rows and 9 columns:
+A data frame with 986 rows and 9 columns:
 
 | Column | Description |
 |--------|-------------|

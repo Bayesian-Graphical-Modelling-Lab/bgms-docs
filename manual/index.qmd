@@ -19,8 +19,8 @@ How the R front-end and C++ back-end fit together.
 
 The sampling algorithms available in `bgms`.
 
-- [Adaptive Metropolis](metropolis.qmd) — Scalar random-walk Metropolis–Hastings with Robbins–Monro step-size adaptation. Used for discrete parameters (thresholds, interactions) in OMRF and mixed models.
-- [NUTS](nuts.qmd) — No-U-Turn Sampler: adaptive-length Hamiltonian Monte Carlo with binary tree expansion and U-turn termination. The default sampler for continuous parameters in mixed models.
+- [Adaptive Metropolis](metropolis.qmd) — Scalar random-walk Metropolis–Hastings with Robbins–Monro proposal adaptation. The alternative sampler, selected via `update_method = "adaptive-metropolis"`; its proposal machinery also drives edge moves during NUTS runs.
+- [NUTS](nuts.qmd) — No-U-Turn Sampler: adaptive-length Hamiltonian Monte Carlo with binary tree expansion and U-turn termination. The default sampler for all model types.
 - [Constrained Leapfrog](rattle.qmd) — RATTLE integrator for Hamiltonian dynamics under precision-matrix constraints. Required for mixed models where the precision matrix must remain positive definite.
 
 ## Sampler Infrastructure
@@ -58,5 +58,5 @@ Prior distributions on model parameters and graph structure.
 
 ## Cross-Platform Math
 
-- [OpenLibM Integration](numerical.qmd) — Ships a portable `exp()` and `log()` implementations because the Windows C runtime versions are 4--5x slower than macOS/Linux. See [Numerical Considerations](numerical.qmd) for benchmark details.
+- [OpenLibM Integration](numerical.qmd) — Ships portable `exp()` and `log()` implementations because the Windows C runtime versions are 4--5x slower than macOS/Linux; includes benchmark details.
 

@@ -16,8 +16,9 @@ background and usage guidance, see
 The prior has three levels:
 
 1. **Cluster count** — The number of clusters $K$ follows a
-   Poisson($\lambda$) prior, with a mixture-of-finite-mixtures (MFM)
-   correction that accounts for the combinatorial allocation structure.
+   zero-truncated Poisson($\lambda$) prior, with a
+   mixture-of-finite-mixtures (MFM) correction that accounts for the
+   combinatorial allocation structure.
 
 2. **Cluster assignments** — Each variable $i$ is assigned to cluster
    $z_i \in \{1, \ldots, K\}$ with a symmetric Dirichlet prior
@@ -110,7 +111,8 @@ The six SBM hyperparameters are set via the
 | $\alpha_D$ | `dirichlet_alpha` | 1 | Dirichlet concentration for cluster proportions |
 | $\lambda$ | `lambda` | 1 | Poisson rate for number of clusters |
 
-All six hyperparameters are required when `sbm_prior(...)` is selected.
+All six hyperparameters default to 1; `sbm_prior()` with no arguments
+is valid.
 Validation enforces that all values are positive and finite.
 
 In `bgmCompare()`, the SBM governs the off-diagonal (pairwise) difference
