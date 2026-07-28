@@ -79,7 +79,7 @@ $$
 - \frac{1}{2}\,\operatorname{tr}(\mathbf{S}\,\boldsymbol{\Theta})
 $$
 
-The likelihood depends on the data only through $\mathbf{S}$ and $n$, not through the individual observations. The log-determinant $\log|\boldsymbol{\Theta}|$ is computed efficiently from the Cholesky factor of the precision matrix.
+The likelihood depends on the data only through $\mathbf{S}$ and $n$, not through the individual observations (see [GGM Internals](../manual/ggm-internals.qmd) for how it is evaluated).
 
 ## Edge selection
 

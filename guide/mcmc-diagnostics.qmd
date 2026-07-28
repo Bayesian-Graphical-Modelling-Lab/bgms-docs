@@ -9,10 +9,9 @@ chapter describes how to do so with the diagnostic tools in `bgms`. For
 background on MCMC convergence diagnostics and choosing the number of
 iterations, chains, and warmup length, see @MargossianGelman_2024.
 
-All diagnostics are computed in C++ for speed. ESS uses the AR spectral
-density method [@PlummerEtAl_2006_coda] and R-hat uses the Gelman-Rubin
-formula [@GelmanRubin_1992]. For implementation details, see the
-[Technical Manual](../manual/diagnostics.qmd).
+ESS estimates match `coda::effectiveSize` [@PlummerEtAl_2006_coda] and
+R-hat follows the Gelman-Rubin formula [@GelmanRubin_1992]. For how
+they are computed, see the [Technical Manual](../manual/diagnostics.qmd).
 
 ## Effective sample size (ESS) {#sec-ess}
 
@@ -210,14 +209,13 @@ and compare results.
 ### Mean acceptance probability
 
 `fit$nuts_diag$accept_prob` is a chains × iterations matrix of the mean
-Metropolis acceptance probability across every leapfrog step in each
-trajectory, paralleling Stan's `accept_stat__`. The per-chain mean is
-also reported in `fit$nuts_diag$summary`. After warmup the per-chain
-mean should be close to `target_accept` (default 0.80); a chain whose
-mean acceptance is materially below the target is a signal that
-dual-averaging step-size adaptation did not converge — usually because
-warmup was too short or the geometry has features that warrant a higher
-target.
+acceptance probability across every leapfrog step in each trajectory.
+The per-chain mean is also reported in `fit$nuts_diag$summary`. After
+warmup the per-chain mean should be close to `target_accept` (default
+0.80); a chain whose mean acceptance is materially below the target is
+a signal that the automatic step-size tuning did not converge — usually
+because warmup was too short or the geometry has features that warrant
+a higher target.
 
 ### Tree depth
 
@@ -231,8 +229,9 @@ geometry. Consider increasing `nuts_max_depth`.
 ### Non-reversible steps
 
 For models with continuous variables and edge selection, the leapfrog
-integrator enforces zero constraints through a projection step (the
-RATTLE scheme). After each forward step, the integrator checks whether
+integrator enforces zero constraints through a projection step (see
+[Constrained Leapfrog](../manual/rattle.qmd) in the Technical Manual).
+After each forward step, the integrator checks whether
 reversing the step returns to the starting point. When the round-trip
 error exceeds a tolerance scaled by the square of the step size, the step
 is flagged as non-reversible.
