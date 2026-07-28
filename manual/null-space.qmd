@@ -18,12 +18,15 @@ mixed MRF reuses the same engine for its continuous block.
 ::: {.callout-note}
 ## History
 
-Versions of `bgms` up to 0.2.0 enforced these constraints inside the
-integrator instead, with a RATTLE/SHAKE constrained leapfrog scheme that
+During development, `bgms` first enforced these constraints inside the
+integrator, with a RATTLE/SHAKE constrained leapfrog scheme that
 projected each step back onto the constraint manifold and verified
-reversibility after the fact. That machinery — projection callbacks, the
-reversibility check, and the `non_reversible` diagnostic — has been
-removed; the parameterization described here replaces it.
+reversibility after the fact. That approach worked well, but the
+projection solves and reversibility checks made it slower than
+parameterizing the constraints away, and it never shipped in a CRAN
+release. Its machinery — projection callbacks, the reversibility check,
+and the `non_reversible` diagnostic — has been removed; the
+parameterization described here replaces it.
 :::
 
 ## Why constraints?

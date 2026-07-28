@@ -58,9 +58,11 @@ always runs the standard unconstrained leapfrog integrator, for every
 model type.
 
 ::: {.callout-note}
-Versions of `bgms` up to 0.2.0 instead used a RATTLE/SHAKE constrained
-leapfrog with projection steps and a runtime reversibility check (and a
-`non_reversible` diagnostic). That machinery has been removed; see
+An earlier development version of `bgms` (never released on CRAN)
+instead used a RATTLE/SHAKE constrained leapfrog with projection steps
+and a runtime reversibility check (and a `non_reversible` diagnostic).
+It worked well but was slower than the current approach, and has been
+removed; see
 [Constrained Cholesky Parameterization](null-space.qmd) for the
 replacement.
 :::

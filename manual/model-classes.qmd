@@ -192,7 +192,8 @@ parameter vector contains only free coordinates, every value of which
 maps to a valid precision matrix. The sampler never sees a constraint —
 NUTS runs its standard unconstrained integrator on the active vector
 for every model type. (The projection callbacks, full-position
-interface, and RATTLE dispatch that earlier versions used are gone.)
+interface, and RATTLE dispatch used during development — never in a
+CRAN release — are gone.)
 
 ## GGMModel
 
