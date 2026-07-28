@@ -1,0 +1,114 @@
+---
+title: "sample_ggm_prior()"
+---
+
+Draws precision matrices $K$ from the prior of a Gaussian graphical model.
+The likelihood is omitted ($n = 0$, $S = 0$), so the chain targets the
+prior alone.
+
+## Description
+
+Two prior specifications are supported via the `spec` argument:
+
+- `"conditional"` (default): fix a graph $\Gamma$ and sample
+  $K \mid \Gamma$ using the same constrained NUTS sampler that drives
+  [`bgm()`](bgm.qmd) for continuous data. Off-diagonals at excluded
+  positions are held exactly at zero throughout the chain (see
+  [Constrained Leapfrog](../manual/rattle.qmd) for how).
+- `"joint"`: sample $(K, \Gamma)$ jointly from the un-normalised joint
+  prior, using the adaptive-Metropolis chain from [`bgm()`](bgm.qmd) with
+  edge selection on and the likelihood off. Useful for simulation-based
+  calibration of `bgm()`'s default sampler.
+
+Priors are specified on the partial-association scale $K_{yy} = -K/2$:
+`interaction_prior` acts on $K_{yy,ij} = -K_{ij}/2$, so a
+`normal_prior(scale = s)` on the association scale is equivalent to a
+$\mathrm{Normal}(0, 2s)$ prior on $K_{ij}$ itself. Likewise
+`precision_scale_prior` acts on $K_{ii}/2$: the default `gamma_prior(1, 1)`
+implies $K_{ii}/2 \sim \mathrm{Exp}(1)$ and therefore
+$K_{ii} \sim \mathrm{Exp}(1/2)$ (mean $2$). The same convention is used by
+[`bgm()`](bgm.qmd) and the continuous block of the mixed-MRF model, so a
+prior argument passed here means the same distribution it would mean there.
+Output samples are reported as entries of $K$; convert with
+$K_{yy} = -K/2$ if you want them on the partial-association scale.
+
+## Usage
+
+```r
+sample_ggm_prior(
+  p,
+  n_samples,
+  n_warmup              = 2000,
+  interaction_prior     = cauchy_prior(scale = 2.5),
+  precision_scale_prior = gamma_prior(shape = 1, rate = 1),
+  step_size             = 0.1,
+  max_depth             = 10L,
+  seed                  = 1L,
+  verbose               = TRUE,
+  edge_indicators       = NULL,
+  delta                 = NULL,
+  spec                  = c("conditional", "joint"),
+  edge_inclusion_prob   = 0.5
+)
+```
+
+## Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `p` | Integer. Dimension of the precision matrix ($p \ge 2$). |
+| `n_samples` | Integer. Number of post-warmup draws to keep. |
+| `n_warmup` | Integer. NUTS warmup iterations. Default: `2000`. |
+| `interaction_prior` | A [`bgms_parameter_prior`](priors.qmd) for the partial-association off-diagonals $K_{yy,ij} = -K_{ij}/2$. Allowed: [`cauchy_prior()`](priors.qmd#cauchy_prior), [`normal_prior()`](priors.qmd#normal_prior). [`beta_prime_prior()`](priors.qmd#beta_prime_prior) is not supported here. Default: `cauchy_prior(scale = 2.5)` (i.e. $K_{ij}$ has an implied $\mathrm{Cauchy}(0, 5)$ prior). |
+| `precision_scale_prior` | A [`bgms_scale_prior`](priors.qmd) for $K_{ii}/2$. Allowed: [`gamma_prior()`](priors.qmd#gamma_prior), [`exponential_prior()`](priors.qmd#exponential_prior). Default: `gamma_prior(1, 1)`, implying $K_{ii} \sim \mathrm{Exp}(1/2)$. |
+| `step_size` | Positive numeric. Initial NUTS step size for the automatic step-size tuning (see [NUTS](../manual/nuts.qmd)). Default: `0.1`. Used only for `spec = "conditional"`; ignored on the `"joint"` path. |
+| `max_depth` | Integer. Maximum NUTS tree depth. Default: `10`. Used only for `spec = "conditional"`. |
+| `seed` | Integer. RNG seed for the chain. Default: `1`. |
+| `verbose` | Logical. If `TRUE` (default), print a progress bar. |
+| `edge_indicators` | Optional integer $p \times p$ matrix with `1` = edge included, `0` = excluded. Must be symmetric with `1`s on the diagonal. Default: full graph (all edges included). Used only for `spec = "conditional"` (the chain samples $K \mid \Gamma$); ignored for `spec = "joint"`. |
+| `delta` | Non-negative numeric, or `NULL` for the dimension-adaptive default. Determinant-tilt exponent: multiplies the prior by $|K|^{\delta}$, softly repelling the chain from the boundary of the positive-definite cone. `NULL` (default) auto-resolves to $0.5 \log(p)$. Pass `delta = 0` for the untilted prior. |
+| `spec` | One of `"conditional"` (default: sample $K \mid \Gamma$ at fixed $\Gamma$) or `"joint"` (sample $(K, \Gamma)$ jointly from the un-normalised joint prior). |
+| `edge_inclusion_prob` | Probability in $(0, 1)$ for the Bernoulli edge prior used when `spec = "joint"`. Default: `0.5`. Ignored when `spec = "conditional"`. |
+
+## Value
+
+A list with components:
+
+| Component | Description |
+|-----------|-------------|
+| `K_offdiag` | Numeric matrix `n_samples` $\times$ $p(p-1)/2$ of upper-triangle off-diagonal entries of $K$ for each draw, in row-major order (the upper triangle traversed by row): $(K_{12}, K_{13}, \ldots, K_{1p}, K_{23}, \ldots, K_{2p}, K_{34}, \ldots)$. Under `spec = "conditional"`, excluded edges are returned as `0`; under `spec = "joint"`, off-diagonals at excluded edges are sampled at `0` per the inclusion indicator. |
+| `K_diag` | Numeric matrix `n_samples` $\times$ $p$ of diagonal entries $K_{11}, \ldots, K_{pp}$. |
+| `offdiag_names` | Character vector of length $p(p-1)/2$ naming the columns of `K_offdiag` (e.g. `"K_1_2"`). |
+| `diag_names` | Character vector of length $p$ naming the columns of `K_diag`. |
+| `edge_indicators` | Under `spec = "conditional"`, the $p \times p$ integer matrix of fixed inclusion indicators used (full graph if not supplied). Under `spec = "joint"`, an `n_samples` $\times$ $p(p-1)/2$ integer matrix of sampled $\Gamma_{ij}$ indicators (column order matches `K_offdiag`). |
+
+## Examples
+
+```r
+# Default Cauchy(0, 2.5) off-diagonal, Gamma(1, 1) diagonal, p = 4.
+draws = sample_ggm_prior(
+  p = 4, n_samples = 200, n_warmup = 200,
+  verbose = FALSE
+)
+dim(draws$K_offdiag) # 200 x 6
+colnames(draws$K_offdiag) = draws$offdiag_names
+head(draws$K_offdiag)
+
+# Sparser graph: drop the (1, 4) edge.
+E = matrix(1L, 4, 4)
+E[1, 4] = E[4, 1] = 0L
+draws = sample_ggm_prior(
+  p = 4, n_samples = 200, n_warmup = 200,
+  edge_indicators = E, verbose = FALSE
+)
+colnames(draws$K_offdiag) = draws$offdiag_names
+all(draws$K_offdiag[, "K_1_4"] == 0) # TRUE
+```
+
+## See also
+
+[`cauchy_prior()`](priors.qmd#cauchy_prior),
+[`normal_prior()`](priors.qmd#normal_prior),
+[`gamma_prior()`](priors.qmd#gamma_prior),
+[`exponential_prior()`](priors.qmd#exponential_prior),
+[`bgm()`](bgm.qmd).

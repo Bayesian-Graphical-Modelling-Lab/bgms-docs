@@ -13,7 +13,7 @@ Complete documentation for all exported functions in `bgms`.
 |----------|-------------|
 | [`bgm()`](bgm.qmd) | Estimates the main effects and pairwise interactions of a network using a Bayesian framework. |
 | [`bgmCompare()`](bgmCompare.qmd) | Estimates whether edge weights and category thresholds differ across networks of two different groups. |
-| [`sample_precision_prior()`](sample-precision-prior.qmd) | NUTS-based prior sampler for the GGM precision matrix. Used for SBC validation and prior visualization. |
+| [`sample_ggm_prior()`](sample-ggm-prior.qmd) | Prior sampler for the GGM precision matrix. Used for prior visualization and simulation-based calibration. |
 
 ## Prior Constructors
 

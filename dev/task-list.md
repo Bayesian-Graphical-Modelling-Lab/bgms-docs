@@ -68,24 +68,30 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | guide/clustering.qmd | Medium | Not started | No | No | - |
 | guide/mcmc-output.qmd | Medium | Populated | No | No | - |
 | guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | - |
+| guide/missing-data.qmd | Medium | Populated | No | No | Not in _quarto.yml sidebar |
 | **Reference** | | | | | |
 | reference/index.qmd | Low | Scaffolded | No | No | - |
-| reference/bgm.qmd | High | Scaffolded | No | No | - |
-| reference/bgmCompare.qmd | High | Scaffolded | No | No | - |
-| reference/methods.qmd | Medium | Scaffolded | No | No | - |
-| reference/extractors.qmd | Medium | Scaffolded | No | No | - |
-| reference/datasets.qmd | Low | Scaffolded | No | No | - |
+| reference/bgm.qmd | High | Populated | No | No | - |
+| reference/bgmCompare.qmd | High | Populated | No | No | - |
+| reference/sample-precision-prior.qmd | High | Populated | No | No | Rename to sample_ggm_prior (audit 2026-07-28 §1.1) |
+| reference/priors.qmd | High | Populated | No | No | - |
+| reference/methods.qmd | Medium | Populated | No | No | - |
+| reference/extractors.qmd | Medium | Populated | No | No | - |
+| reference/datasets.qmd | Low | Populated | No | No | - |
 | **Manual** | | | | | |
 | manual/index.qmd | Low | Scaffolded | No | No | - |
 | manual/architecture.qmd | Medium | Populated | No | No | - |
 | manual/r-scaffolding.qmd | Medium | Not started | No | No | - |
 | manual/model-classes.qmd | High | Contradiction-checked | No | No | - |
-| manual/samplers.qmd | High | Populated | No | No | - |
+| manual/samplers.qmd | High | Populated | No | No | Stale vs refactored dispatch (audit 2026-07-28 §1.2) |
 | manual/nuts.qmd | High | Populated | No | No | - |
-| manual/hmc.qmd | Medium | Populated | No | No | Deprecated sampler |
+| manual/rattle.qmd | High | Populated | No | No | - |
 | manual/metropolis.qmd | High | Populated | No | No | - |
 | manual/warmup.qmd | High | Populated | No | No | - |
-| manual/parallel-chains.qmd | Medium | Not started | No | No | - |
+| manual/diagnostics.qmd | High | Populated | No | No | - |
+| manual/pseudolikelihood.qmd | Medium | Populated | No | No | - |
+| manual/parameter-priors.qmd | High | Populated | No | No | - |
+| manual/parallel-chains.qmd | Medium | Populated | No | No | - |
 | manual/ggm-internals.qmd | High | Contradiction-checked | No | No | - |
 | manual/omrf-internals.qmd | High | Contradiction-checked | No | No | - |
 | manual/variable-helpers.qmd | High | Contradiction-checked | No | No | - |
@@ -93,15 +99,11 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | manual/edge-priors.qmd | High | Contradiction-checked | No | No | - |
 | manual/sbm-prior.qmd | High | Contradiction-checked | No | No | - |
 | manual/bgmcompare-internals.qmd | High | Contradiction-checked | No | No | - |
-| manual/numerical.qmd | High | Scaffolded | No | No | - |
-| **Examples** | | | | | |
-| examples/index.qmd | Low | Not started | No | No | - |
-| examples/binary-network.qmd | Medium | Not started | No | No | - |
-| examples/ordinal-network.qmd | Medium | Not started | No | No | - |
-| examples/continuous-network.qmd | Medium | Not started | No | No | - |
-| examples/mixed-network.qmd | Medium | Not started | No | No | - |
-| examples/group-comparison.qmd | Medium | Not started | No | No | - |
-| examples/clustering.qmd | Medium | Not started | No | No | - |
+| manual/numerical.qmd | High | Populated | No | No | - |
+
+Note: the Examples section was removed from the website (undeveloped); its
+seven pages are dropped from this board. Full audit findings per page:
+`dev/audit-2026-07-28.md`.
 
 ## Secondary Backlog (Not Part of A -> B Review Sequence)
 
