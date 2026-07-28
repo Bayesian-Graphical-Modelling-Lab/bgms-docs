@@ -67,6 +67,70 @@ The `coef()` method returns:
 - `$main_effects_groups`: group-specific posterior mean thresholds.
 - `$indicator`: posterior inclusion probabilities for the group differences.
 
+## A worked example
+
+```{r}
+#| label: load-fixtures
+#| echo: false
+resolve_fixture = function(name) {
+ input_dir = dirname(knitr::current_input(dir = TRUE))
+ candidates = c(
+   file.path(input_dir, "..", "fixtures", name),
+   file.path(input_dir, "fixtures", name),
+   file.path("fixtures", name),
+   file.path("..", "fixtures", name)
+ )
+ hit = candidates[file.exists(candidates)][1]
+ if (is.na(hit)) {
+   stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+ }
+ hit
+}
+library(bgms)
+fit = readRDS(resolve_fixture("fit_compare_adhd.rds"))
+```
+
+The [ADHD](../reference/datasets.qmd#adhd) data contain 19 symptom
+ratings with a group column. Compare the two groups (run in advance
+here; this takes several minutes):
+
+```{r}
+#| eval: false
+library(bgms)
+fit = bgmCompare(
+  x = ADHD[, -1],
+  group_indicator = ADHD$group,
+  variable_type = "ordinal",
+  chains = 2,
+  seed = 1234
+)
+```
+
+The `summary(fit)$indicator` table reports, for each threshold and
+each partial association, the posterior probability that the contrast
+parameters are included — that is, that the groups differ on that
+parameter. With the default `bernoulli_prior(0.5)`, the difference
+Bayes factor is again the posterior odds:
+
+```{r}
+ind = summary(fit)$indicator
+rows = ind$parameter %in% c("motor-seat (pairwise)",
+                            "avoid-closeatt (pairwise)",
+                            "forget-talks (pairwise)")
+diffs = ind[rows, c("parameter", "mean")]
+diffs$BF10 = diffs$mean / (1 - diffs$mean)
+print(diffs, digits = 3, row.names = FALSE)
+```
+
+- **`motor-seat`**: an inclusion probability of 0.999 gives
+  $\text{BF}_{10} \approx 1000$ — strong evidence that the partial
+  association between these two symptoms differs between the groups.
+- **`avoid-closeatt`**: $\text{BF}_{10} \approx 5$ — moderate evidence
+  for a group difference.
+- **`forget-talks`**: an inclusion probability of about 0.27 gives
+  $\text{BF}_{01} \approx 2.7$ — the data lean toward invariance, but
+  the evidence is weak.
+
 ## Prior guidance
 
 - **`difference_scale = 1`** (default): scale of the Cauchy slab on the contrast parameters. This matches the default scale of the baseline `interaction_prior` (`cauchy_prior(scale = 1)`).

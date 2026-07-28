@@ -90,6 +90,70 @@ This returns:
 - **`posterior_mode_allocations`**: the most frequently occurring cluster assignment across MCMC iterations.
 - **`posterior_mean_coclustering_matrix`**: a symmetric matrix where entry $(i, j)$ is the proportion of iterations in which nodes $i$ and $j$ were assigned to the same cluster. Coherent blocks indicate stable clusters; diffuse patterns indicate nodes with uncertain membership.
 
+## A worked example
+
+```{r}
+#| label: load-fixtures
+#| echo: false
+resolve_fixture = function(name) {
+ input_dir = dirname(knitr::current_input(dir = TRUE))
+ candidates = c(
+   file.path(input_dir, "..", "fixtures", name),
+   file.path(input_dir, "fixtures", name),
+   file.path("fixtures", name),
+   file.path("..", "fixtures", name)
+ )
+ hit = candidates[file.exists(candidates)][1]
+ if (is.na(hit)) {
+   stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+ }
+ hit
+}
+library(bgms)
+fit = readRDS(resolve_fixture("fit_wenchuan_sbm.rds"))
+```
+
+Fit the [Wenchuan](../reference/datasets.qmd#wenchuan) PTSD data with
+the SBM edge prior (run in advance here; this takes several minutes):
+
+```{r}
+#| eval: false
+library(bgms)
+fit = bgm(Wenchuan, edge_prior = sbm_prior(), chains = 2, seed = 1234)
+```
+
+```{r}
+sbm = extract_sbm(fit)
+round(head(sbm$posterior_num_blocks, 4), 3)
+```
+
+The posterior puts most of its mass on one or two clusters. The
+posterior probability of no clustering ($B = 1$) is about 0.43, so the
+clustering-vs-no-clustering Bayes factor provides no compelling
+evidence for block structure among these PTSD symptoms — a finding in
+itself, and a caution against over-reading apparent groupings in the
+network plot.
+
+The co-clustering matrix tells the same story:
+
+```{r}
+#| fig-width: 7
+#| fig-height: 7
+cm = sbm$posterior_mean_coclustering_matrix
+p = nrow(cm)
+op = par(mar = c(6.5, 6.5, 1, 1))
+image(1:p, 1:p, cm[, p:1], col = hcl.colors(20, "Blues", rev = TRUE),
+      axes = FALSE, xlab = "", ylab = "")
+axis(1, at = 1:p, labels = rownames(cm), las = 2, cex.axis = 0.7)
+axis(2, at = p:1, labels = colnames(cm), las = 1, cex.axis = 0.7)
+par(op)
+```
+
+Most pairs co-cluster in a large share of iterations — consistent with
+one big cluster rather than separated blocks. In a dataset with real
+block structure, this plot shows distinct dark diagonal blocks of
+variables that always cluster together.
+
 ## Choosing hyperparameters
 
 The choice of hyperparameters encodes how strongly the prior favors a clustered solution and the expected shape of that solution. @SekulovskiEtAl_2025_sbm provide simulation-based recommendations.
