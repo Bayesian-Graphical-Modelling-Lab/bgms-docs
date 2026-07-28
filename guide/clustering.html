@@ -667,30 +667,69 @@ P(B) = \frac{\lambda^B}{B!\,(\exp(\lambda) - 1)}, \quad B \geq 1
 <li><strong><code>posterior_mean_coclustering_matrix</code></strong>: a symmetric matrix where entry <span class="math inline">\((i, j)\)</span> is the proportion of iterations in which nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> were assigned to the same cluster. Coherent blocks indicate stable clusters; diffuse patterns indicate nodes with uncertain membership.</li>
 </ul>
 </section>
+<section id="a-worked-example" class="level2">
+<h2 class="anchored" data-anchor-id="a-worked-example">A worked example</h2>
+<p>Fit the <a href="../reference/datasets.html#wenchuan">Wenchuan</a> PTSD data with the SBM edge prior (run in advance here; this takes several minutes):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bgms)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(Wenchuan, <span class="at">edge_prior =</span> <span class="fu">sbm_prior</span>(), <span class="at">chains =</span> <span class="dv">2</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sbm <span class="ot">=</span> <span class="fu">extract_sbm</span>(fit)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">head</span>(sbm<span class="sc">$</span>posterior_num_blocks, <span class="dv">4</span>), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  probability
+1       0.434
+2       0.347
+3       0.163
+4       0.045</code></pre>
+</div>
+</div>
+<p>The posterior puts most of its mass on one or two clusters. The posterior probability of no clustering (<span class="math inline">\(B = 1\)</span>) is about 0.43, so the clustering-vs-no-clustering Bayes factor provides no compelling evidence for block structure among these PTSD symptoms — a finding in itself, and a caution against over-reading apparent groupings in the network plot.</p>
+<p>The co-clustering matrix tells the same story:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cm <span class="ot">=</span> sbm<span class="sc">$</span>posterior_mean_coclustering_matrix</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">=</span> <span class="fu">nrow</span>(cm)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>op <span class="ot">=</span> <span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">6.5</span>, <span class="fl">6.5</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">image</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="dv">1</span><span class="sc">:</span>p, cm[, p<span class="sc">:</span><span class="dv">1</span>], <span class="at">col =</span> <span class="fu">hcl.colors</span>(<span class="dv">20</span>, <span class="st">"Blues"</span>, <span class="at">rev =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="dv">1</span><span class="sc">:</span>p, <span class="at">labels =</span> <span class="fu">rownames</span>(cm), <span class="at">las =</span> <span class="dv">2</span>, <span class="at">cex.axis =</span> <span class="fl">0.7</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">at =</span> p<span class="sc">:</span><span class="dv">1</span>, <span class="at">labels =</span> <span class="fu">colnames</span>(cm), <span class="at">las =</span> <span class="dv">1</span>, <span class="at">cex.axis =</span> <span class="fl">0.7</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="clustering_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Most pairs co-cluster in a large share of iterations — consistent with one big cluster rather than separated blocks. In a dataset with real block structure, this plot shows distinct dark diagonal blocks of variables that always cluster together.</p>
+</section>
 <section id="choosing-hyperparameters" class="level2">
 <h2 class="anchored" data-anchor-id="choosing-hyperparameters">Choosing hyperparameters</h2>
 <p>The choice of hyperparameters encodes how strongly the prior favors a clustered solution and the expected shape of that solution. <span class="citation" data-cites="SekulovskiEtAl_2025_sbm">Sekulovski et al. (<a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">2025</a>)</span> provide simulation-based recommendations.</p>
 <p><strong>When clustering is expected</strong> — set the within-cluster Beta prior to favor dense connections and the between-cluster prior to favor sparse connections:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">sbm_prior</span>(</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="dv">8</span>, <span class="at">beta =</span> <span class="dv">1</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha_between =</span> <span class="dv">1</span>, <span class="at">beta_between =</span> <span class="dv">8</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda =</span> <span class="fl">1.59</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Here <code>lambda = 1.59</code> corresponds to a prior expectation of approximately two clusters. Higher values of <code>lambda</code> shift the expectation toward more clusters (2.82 <span class="math inline">\(\approx\)</span> 3 clusters, 3.92 <span class="math inline">\(\approx\)</span> 4 clusters).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">sbm_prior</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="dv">8</span>, <span class="at">beta =</span> <span class="dv">1</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha_between =</span> <span class="dv">1</span>, <span class="at">beta_between =</span> <span class="dv">8</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda =</span> <span class="fl">1.59</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Here <code>lambda = 1.59</code> corresponds to a prior expectation of approximately two clusters; higher values shift the expectation toward more clusters (see the <span class="math inline">\(\lambda\)</span>-to-cluster mapping above).</p>
 <p><strong>When no clustering is expected</strong>, or the goal is conservative inference that protects against false positive clustering, an informative between-cluster prior combined with flat within-cluster settings provides the best performance:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">sbm_prior</span>(</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">1</span>,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha_between =</span> <span class="dv">1</span>, <span class="at">beta_between =</span> <span class="dv">8</span>,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda =</span> <span class="dv">1</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> data,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">sbm_prior</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">1</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha_between =</span> <span class="dv">1</span>, <span class="at">beta_between =</span> <span class="dv">8</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda =</span> <span class="dv">1</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This configuration discourages between-cluster edges (<span class="math inline">\(\beta_b = 8\)</span>), which protects against inferring multiple clusters when only one exists, without imposing strong assumptions about within-cluster density.</p>
 <p>The <code>dirichlet_alpha</code> argument of <a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a> controls how evenly nodes are distributed across clusters. The default of 1 gives a uniform prior over partitions.</p>
 <div class="callout callout-style-default callout-tip callout-titled">

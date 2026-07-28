@@ -714,7 +714,7 @@ window.Quarto = {
 </section>
 <section id="stage-3c-re-adaptation-under-edge-selection" class="level3">
 <h3 class="anchored" data-anchor-id="stage-3c-re-adaptation-under-edge-selection">Stage 3c: Re-adaptation under edge selection</h3>
-<p>Edge selection is activated. Edge indicators <span class="math inline">\(\gamma_{ij}\)</span> are updated every iteration, changing the effective parameter space. Dual averaging restarts to re-tune <span class="math inline">\(\epsilon\)</span> for the new geometry. For models with constraints, the constrained step-size heuristic (using RATTLE) is used.</p>
+<p>Edge selection is activated. Edge indicators <span class="math inline">\(\gamma_{ij}\)</span> are updated every iteration, changing the effective parameter space. Dual averaging restarts to re-tune <span class="math inline">\(\epsilon\)</span> for the new geometry. For models with constraints, the constrained step-size heuristic (using <a href="../manual/rattle.html">RATTLE</a>) is used.</p>
 </section>
 </section>
 <section id="budget-allocation" class="level2">
@@ -764,7 +764,7 @@ window.Quarto = {
 </section>
 <section id="dual-averaging" class="level2">
 <h2 class="anchored" data-anchor-id="dual-averaging">Dual averaging</h2>
-<p>The step-size update follows Algorithm 6 in <span class="citation" data-cites="HoffmanGelman_2014_nuts">Hoffman &amp; Gelman (<a href="#ref-HoffmanGelman_2014_nuts" role="doc-biblioref">2014</a>)</span> with parameters <span class="math inline">\(\gamma = 0.05\)</span>, <span class="math inline">\(t_0 = 10\)</span>, <span class="math inline">\(\kappa = 0.75\)</span>, and bias target <span class="math inline">\(\mu = \log(10\,\epsilon_0)\)</span>. (Here <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\mu\)</span> are the Hoffman–Gelman tuning constants, not the edge indicators <span class="math inline">\(\gamma_{ij}\)</span> or category thresholds <span class="math inline">\(\mu_{ic}\)</span> used elsewhere on this site.)</p>
+<p>The step-size update for the <a href="../manual/nuts.html">NUTS sampler</a> follows Algorithm 6 in <span class="citation" data-cites="HoffmanGelman_2014_nuts">Hoffman &amp; Gelman (<a href="#ref-HoffmanGelman_2014_nuts" role="doc-biblioref">2014</a>)</span> with parameters <span class="math inline">\(\gamma = 0.05\)</span>, <span class="math inline">\(t_0 = 10\)</span>, <span class="math inline">\(\kappa = 0.75\)</span>, and bias target <span class="math inline">\(\mu = \log(10\,\epsilon_0)\)</span>. (Here <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\mu\)</span> are the Hoffman–Gelman tuning constants, not the edge indicators <span class="math inline">\(\gamma_{ij}\)</span> or category thresholds <span class="math inline">\(\mu_{ic}\)</span> used elsewhere on this site.)</p>
 </section>
 <section id="querying-the-schedule" class="level2">
 <h2 class="anchored" data-anchor-id="querying-the-schedule">Querying the schedule</h2>

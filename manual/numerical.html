@@ -692,7 +692,7 @@ window.Quarto = {
 <p>The logic:</p>
 <ul>
 <li><strong>Windows</strong> — Uses custom exp/log by default because the Rtools toolchain’s <code>std::exp</code>/<code>std::log</code> are much slower</li>
-<li><strong>Linux/macOS</strong> — Uses the system libm by default (which is fast). Custom exp/log can be enabled by setting <code>CUSTOM_EXP_LOG=1</code></li>
+<li><strong>Linux/macOS</strong> — Uses the system libm by default (which is fast). Custom exp/log can be enabled by setting <code>CUSTOM_EXP_LOG=1</code> — useful for cross-platform reproducibility, at the cost of slightly slower scalar operations</li>
 </ul>
 <p>The <code>configure</code> and <code>configure.win</code> scripts do not control this flag. Platform detection is handled entirely by the C++ preprocessor via <code>_WIN32</code>. Users can override the default by adding <code>-DCUSTOM_EXP_LOG=1</code> (to enable custom on non-Windows) or by omitting the flag (to keep the platform default).</p>
 </section>
@@ -731,11 +731,6 @@ window.Quarto = {
 </tbody>
 </table>
 <p>The <code>ARMA_MY_EXP</code> variant applies element-wise custom exp/log to Armadillo matrices and vectors. It wraps <code>custom_arma_exp()</code> and <code>custom_arma_log()</code> from <code>custom_arma_explog.h</code>, which iterate over matrix elements and call the scalar <code>__ieee754_exp</code>/<code>__ieee754_log</code>.</p>
-</section>
-<section id="performance" class="level2">
-<h2 class="anchored" data-anchor-id="performance">Performance</h2>
-<p>On Windows, the Rtools <code>std::exp</code>/<code>std::log</code> are much slower than the OpenLibM replacements, making the custom path essential for acceptable MCMC runtimes. <code>bgms</code> enables the custom path on Windows by default.</p>
-<p>On macOS and Linux, the system libm is already fast, so <code>bgms</code> uses the system implementations by default. The custom path can be enabled for cross-platform reproducibility, at the cost of slightly slower scalar operations.</p>
 </section>
 <section id="exp_bound-and-overflow-prevention" class="level2">
 <h2 class="anchored" data-anchor-id="exp_bound-and-overflow-prevention">EXP_BOUND and overflow prevention</h2>
@@ -777,8 +772,7 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>On the standard path, <code>rcpp_ieee754_exp()</code> and <code>rcpp_ieee754_log()</code> call <code>std::exp</code> and <code>std::log</code> despite the <code>ieee754</code> naming.</p>
-<p>The <code>explog_interface.cpp</code> file exposes the custom exp/log functions to R for testing purposes. This allows verification that the custom implementations match expected values in R-level unit tests.</p>
+<p>On the standard path, <code>rcpp_ieee754_exp()</code> and <code>rcpp_ieee754_log()</code> call <code>std::exp</code> and <code>std::log</code> despite the <code>ieee754</code> naming. These exports exist for R-level unit tests, which verify that the custom implementations match expected values.</p>
 
 
 </section>

@@ -534,26 +534,28 @@ window.Quarto = {
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  x,</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable_type =</span> <span class="st">"ordinal"</span>,</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  baseline_category,</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">1000</span>,</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">2000</span>,</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">interaction_prior =</span> <span class="fu">cauchy_prior</span>(<span class="at">scale =</span> <span class="dv">1</span>),</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">threshold_prior =</span> <span class="fu">beta_prime_prior</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">beta =</span> <span class="fl">0.5</span>),</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">means_prior =</span> <span class="fu">normal_prior</span>(<span class="at">scale =</span> <span class="dv">1</span>),</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">precision_scale_prior =</span> <span class="fu">gamma_prior</span>(<span class="at">shape =</span> <span class="dv">1</span>, <span class="at">rate =</span> <span class="dv">1</span>),</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_selection =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">bernoulli_prior</span>(<span class="fl">0.5</span>),</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_action =</span> <span class="fu">c</span>(<span class="st">"listwise"</span>, <span class="st">"impute"</span>),</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">update_method =</span> <span class="fu">c</span>(<span class="st">"nuts"</span>, <span class="st">"adaptive-metropolis"</span>),</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  target_accept,</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">nuts_max_depth =</span> <span class="dv">10</span>,</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_mass_matrix =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>(),</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>),</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">delta =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_selection =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge_prior =</span> <span class="fu">bernoulli_prior</span>(<span class="fl">0.5</span>),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_action =</span> <span class="fu">c</span>(<span class="st">"listwise"</span>, <span class="st">"impute"</span>),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">update_method =</span> <span class="fu">c</span>(<span class="st">"nuts"</span>, <span class="st">"adaptive-metropolis"</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  target_accept,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">nuts_max_depth =</span> <span class="dv">10</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_mass_matrix =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>(),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">display_progress =</span> <span class="fu">c</span>(<span class="st">"per-chain"</span>, <span class="st">"total"</span>, <span class="st">"none"</span>),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"bgms.verbose"</span>, <span class="cn">TRUE</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">progress_callback =</span> <span class="cn">NULL</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="arguments" class="level2">
 <h2 class="anchored" data-anchor-id="arguments">Arguments</h2>
@@ -614,16 +616,20 @@ window.Quarto = {
 <td>A <a href="../reference/priors.html"><code>bgms_scale_prior</code></a> object for the diagonal elements of the precision matrix (GGM and mixed MRF). Allowed: <a href="../reference/priors.html#gamma_prior"><code>gamma_prior()</code></a> (default), <a href="../reference/priors.html#exponential_prior"><code>exponential_prior()</code></a>. Ignored for pure ordinal models. Default: <code>gamma_prior(shape = 1, rate = 1)</code>.</td>
 </tr>
 <tr class="odd">
+<td><code>delta</code></td>
+<td>Non-negative numeric, or <code>NULL</code> for the dimension-adaptive default. Determinant-tilt exponent on the continuous-block precision matrix <span class="math inline">\(K\)</span> (GGM) or <span class="math inline">\(K_{yy}\)</span> (mixed MRF): multiplies the prior by <span class="math inline">\(|K|^{\delta}\)</span>, softly repelling the chain from the boundary of the positive-definite cone. <code>NULL</code> (default) auto-resolves to <span class="math inline">\(0.5 \log(p)\)</span>, with <span class="math inline">\(p\)</span> the number of continuous variables. Pass <code>delta = 0</code> for the untilted prior. Ignored for pure ordinal models.</td>
+</tr>
+<tr class="even">
 <td><code>edge_selection</code></td>
 <td>Logical. Whether to perform Bayesian edge selection. If <code>FALSE</code>, the model estimates all edges. Default: <code>TRUE</code>.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>edge_prior</code></td>
 <td>A <a href="../reference/priors.html"><code>bgms_indicator_prior</code></a> object specifying the prior for edge inclusion. Allowed: <a href="../reference/priors.html#bernoulli_prior"><code>bernoulli_prior()</code></a> (default), <a href="../reference/priors.html#beta_bernoulli_prior"><code>beta_bernoulli_prior()</code></a>, <a href="../reference/priors.html#sbm_prior"><code>sbm_prior()</code></a>. Legacy character strings (<code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, <code>"Stochastic-Block"</code>) are accepted but deprecated. Default: <code>bernoulli_prior(0.5)</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>standardize</code></td>
-<td>Logical. If <code>TRUE</code>, the prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products <span class="math inline">\((x_i \cdot x_j)\)</span>, which typically correspond to smaller interaction effects <span class="math inline">\((\omega_{ij})\)</span>. Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores <span class="math inline">\(0, 1, \ldots, m\)</span>. The adjusted scale for the interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is <code>scale * m_i * m_j</code>, so that <code>scale</code> itself applies to the unit interval case (binary variables where <span class="math inline">\(m_i = m_j = 1\)</span>). For Blume-Capel variables with reference category <span class="math inline">\(b\)</span>, scores are centered as <span class="math inline">\(-b, \ldots, m-b\)</span>, and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints <span class="math inline">\((0, m)\)</span> and Blume-Capel variables use centered score endpoints <span class="math inline">\((-b, m-b)\)</span>. Default: <code>FALSE</code>.</td>
+<td>Logical. If <code>TRUE</code>, the prior scale for each pairwise interaction is adjusted to the range of the response scores, so that shrinkage is comparable across variable pairs with different numbers of categories. The adjusted scale for the interaction between variables <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is <code>scale * m_i * m_j</code> (with <span class="math inline">\(m_i\)</span> the maximum score after recoding); <code>scale</code> itself then applies to the binary case. See <a href="../manual/parameter-priors.html#the-standardize-scale-adjustment">Parameter Priors</a> for the Blume-Capel and mixed-pair rules. Default: <code>FALSE</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -670,6 +676,22 @@ window.Quarto = {
 <td><code>beta_bernoulli_alpha_between, beta_bernoulli_beta_between, dirichlet_alpha, lambda</code></td>
 <td><code>edge_prior = sbm_prior(alpha_between = …, beta_between = …, dirichlet_alpha = …, lambda = …)</code></td>
 </tr>
+<tr class="even">
+<td><code>interaction_scale = s</code></td>
+<td><code>interaction_prior = cauchy_prior(scale = s)</code> (deprecated since 0.1.6.0)</td>
+</tr>
+<tr class="odd">
+<td><code>threshold_alpha = a, threshold_beta = b</code></td>
+<td><code>threshold_prior = beta_prime_prior(alpha = a, beta = b)</code> (deprecated since 0.1.6.0)</td>
+</tr>
+<tr class="even">
+<td><code>burnin = n</code></td>
+<td><code>warmup = n</code> (deprecated since 0.1.6.0)</td>
+</tr>
+<tr class="odd">
+<td><code>save</code></td>
+<td>No replacement; raw samples are always stored in <code>raw_samples</code> (deprecated since 0.1.6.0)</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -678,10 +700,6 @@ window.Quarto = {
 <section id="sampler-settings" class="level3">
 <h3 class="anchored" data-anchor-id="sampler-settings">Sampler settings</h3>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 56%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Argument</th>
@@ -691,11 +709,11 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td><code>iter</code></td>
-<td>Integer. Number of post-warmup iterations (per chain). Default: <code>1e3</code>.</td>
+<td>Integer. Number of post-warmup iterations (per chain). Default: <code>2000</code>.</td>
 </tr>
 <tr class="even">
 <td><code>warmup</code></td>
-<td>Integer. Number of warmup iterations before collecting samples. A minimum of 1000 iterations is enforced, with a warning if a smaller value is requested. Default: <code>1e3</code>.</td>
+<td>Integer. Number of warmup iterations before collecting samples. Default: <code>2000</code>. Short warmups trigger progressive warnings; see <a href="../manual/warmup.html">Warmup Schedule</a> for the adaptation stages.</td>
 </tr>
 <tr class="odd">
 <td><code>update_method</code></td>
@@ -703,7 +721,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td><code>target_accept</code></td>
-<td>Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: <code>0.44</code> for adaptive Metropolis and <code>0.80</code> for NUTS.</td>
+<td>Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: <code>0.44</code> for adaptive Metropolis and <code>0.80</code> for NUTS. Under <code>update_method = "nuts"</code> this governs the step-size adaptation; the edge-move Metropolis proposals then use a fixed 0.44 target regardless of this argument.</td>
 </tr>
 <tr class="odd">
 <td><code>nuts_max_depth</code></td>
@@ -733,6 +751,10 @@ window.Quarto = {
 <td><code>verbose</code></td>
 <td>Logical. If <code>TRUE</code>, prints informational messages during data processing (e.g., missing data handling, variable recoding). Defaults to <code>getOption("bgms.verbose", TRUE)</code>. Set <code>options(bgms.verbose = FALSE)</code> to suppress messages globally.</td>
 </tr>
+<tr class="even">
+<td><code>progress_callback</code></td>
+<td>Optional R function with signature <code>function(completed, total)</code>, called at regular intervals during sampling with the number of completed and total iterations across all chains. Useful for external front-ends (e.g., JASP) that supply their own progress reporting. Default: <code>NULL</code> (no callback).</td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -743,7 +765,7 @@ window.Quarto = {
 <p>Main components:</p>
 <ul>
 <li><code>posterior_summary_main</code> — Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for main-effect parameters. For OMRF models these are category thresholds; for mixed MRF models these are discrete thresholds and continuous means. <code>NULL</code> for GGM models.</li>
-<li><code>posterior_summary_quadratic</code> — Data frame with posterior summaries for the precision matrix diagonal (GGM and mixed MRF). <code>NULL</code> for OMRF models.</li>
+<li><code>posterior_summary_quadratic</code> — Data frame with posterior summaries for the residual variance parameters (GGM and mixed MRF). <code>NULL</code> for OMRF models.</li>
 <li><code>posterior_summary_pairwise</code> — Data frame with posterior summaries for partial association parameters.</li>
 <li><code>posterior_summary_indicator</code> — Data frame with posterior summaries for edge inclusion indicators (if <code>edge_selection = TRUE</code>).</li>
 <li><code>posterior_mean_main</code> — Posterior mean of main-effect parameters. <code>NULL</code> for GGM models. For OMRF: a matrix (p x max_categories) of category thresholds. For mixed MRF: a list with <code>$discrete</code> (threshold matrix) and <code>$continuous</code> (q x 1 matrix of means).</li>
@@ -762,10 +784,10 @@ window.Quarto = {
 </ul></li>
 <li><code>arguments</code> — A list of function call arguments and metadata.</li>
 </ul>
-<p>Additional summaries when <code>edge_prior = "Stochastic-Block"</code> <span class="citation" data-cites="SekulovskiEtAl_2025_sbm">(see <a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">Sekulovski et al., 2025</a>)</span>:</p>
+<p>Additional summaries when <code>edge_prior = sbm_prior(...)</code> <span class="citation" data-cites="SekulovskiEtAl_2025_sbm">(see <a href="#ref-SekulovskiEtAl_2025_sbm" role="doc-biblioref">Sekulovski et al., 2025</a>)</span>:</p>
 <ul>
 <li><code>posterior_summary_pairwise_allocations</code> — Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for the pairwise cluster co-occurrence of the nodes. This serves to indicate whether the estimated posterior allocations, co-clustering matrix and posterior cluster probabilities have converged.</li>
-<li><code>posterior_coclustering_matrix</code> — Symmetric matrix of pairwise proportions of occurrence of every variable. This matrix can be plotted to visually inspect the estimated number of clusters and visually inspect nodes that tend to switch clusters.</li>
+<li><code>posterior_mean_coclustering_matrix</code> — Symmetric matrix of pairwise proportions of occurrence of every variable. This matrix can be plotted to visually inspect the estimated number of clusters and visually inspect nodes that tend to switch clusters.</li>
 <li><code>posterior_mean_allocations</code> — A vector with the posterior mean of the cluster allocations of the nodes.</li>
 <li><code>posterior_mode_allocations</code> — A vector with the posterior mode of the cluster allocations of the nodes.</li>
 <li><code>posterior_num_blocks</code> — A data frame with the estimated posterior inclusion probabilities for all the possible number of clusters.</li>
@@ -778,9 +800,55 @@ window.Quarto = {
 </section>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
+<p>Fit an ordinal MRF to the <a href="../reference/datasets.html#wenchuan">Wenchuan</a> PTSD data (the model below was run in advance; fitting takes a few minutes):</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(<span class="at">x =</span> Wenchuan, <span class="at">chains =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bgms)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(Wenchuan, <span class="at">chains =</span> <span class="dv">2</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Posterior summaries from Bayesian estimation:
+
+Category thresholds: 
+                 mean  mcse    sd   n_eff  Rhat
+intrusion (1)   0.457 0.010 0.250 580.592 1.009
+intrusion (2)  -2.035 0.024 0.387 259.263 1.006
+intrusion (3)  -5.276 0.045 0.661 214.646 1.006
+intrusion (4) -10.347 0.066 1.038 248.274 1.003
+dreams (1)     -0.817 0.008 0.212 675.187 1.000
+dreams (2)     -4.379 0.020 0.420 436.475 1.001
+... (use `summary(fit)$main` to see full output)
+
+Pairwise interactions:
+                    mean    sd  mcse   n_eff  Rhat
+intrusion-dreams   0.369 0.001 0.037 848.100 1.000
+intrusion-flash    0.165 0.001 0.034 623.634 1.055
+intrusion-upset    0.062 0.055 0.008  46.612 1.058
+intrusion-physior  0.007 0.020 0.002 151.748 1.000
+intrusion-avoidth  0.000 0.000 0.000  84.121 1.000
+intrusion-avoidact 0.000 0.001 0.000 146.722 1.000
+... (use `summary(fit)$pairwise` to see full output)
+
+Inclusion probabilities:
+                    mean    sd  mcse n0-&gt;0 n0-&gt;1 n1-&gt;0 n1-&gt;1    n_eff  Rhat
+intrusion-dreams   1.000 0.000           0     0     0  1999               
+intrusion-flash    1.000 0.000           0     0     0  1999               
+intrusion-upset    0.599 0.490 0.076   781    19    20  1179   41.265 1.116
+intrusion-physior  0.106 0.308 0.025  1760    27    27   185  153.394     1
+intrusion-avoidth  0.008 0.089 0.002  1969    14    14     2  1578.01  1.03
+intrusion-avoidact 0.012 0.109 0.003  1957    18    18     6 1223.503  1.03
+... (use `summary(fit)$indicator` to see full output)
+Note: NA values are suppressed in the print table; they occur for indicators
+that were not updated or whose draws are constant, so ESS/Rhat are undefined.
+`summary(fit)$indicator` still contains all computed values.
+
+Use `summary(fit)$&lt;component&gt;` to access full results.
+Use `extract_log_odds(fit)` for log odds ratios.
+See the `easybgm` package for other summary and plotting tools.</code></pre>
+</div>
+</div>
+<p>The threshold and pairwise tables report the posterior mean, Monte Carlo standard error (<code>mcse</code>), posterior standard deviation, effective sample size, and R-hat for each parameter. In the pairwise table, an estimate of exactly <code>0.000</code> (e.g.&nbsp;<code>intrusion-avoidth</code>) is an edge that edge selection excluded in essentially every draw. The inclusion table (further down the printed output) gives each edge’s posterior inclusion probability in the <code>mean</code> column. See <a href="../guide/mcmc-output.html">MCMC Output</a> for a walkthrough of every component and <a href="../guide/mcmc-diagnostics.html">MCMC Diagnostics</a> for how to act on <code>n_eff</code> and <code>Rhat</code>.</p>
 </section>
 <section id="see-also" class="level2">
 <h2 class="anchored" data-anchor-id="see-also">See also</h2>

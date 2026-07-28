@@ -503,7 +503,7 @@ window.Quarto = {
 </header>
 
 
-<p>Functions to extract specific components from fitted <code>bgms</code> and <code>bgmCompare</code> objects.</p>
+<p>Functions to extract specific components from fitted <code>bgms</code> and <code>bgmCompare</code> objects. Executed examples on this page use a <code>bgm()</code> fit of the <a href="../reference/datasets.html#wenchuan">Wenchuan</a> data (<code>fit = bgm(Wenchuan, chains = 2, seed = 1234)</code>).</p>
 <p>Unless noted otherwise, extractor functions use one argument:</p>
 <ul>
 <li><code>bgms_object</code>: a fitted <code>bgms</code> or <code>bgmCompare</code> object.</li>
@@ -549,13 +549,24 @@ window.Quarto = {
 <p>Returns a symmetric p x p matrix of posterior inclusion probabilities:</p>
 <ul>
 <li><strong><code>bgms</code></strong>: Off-diagonal entries are edge inclusion probabilities. Requires <code>edge_selection = TRUE</code>.</li>
-<li><strong><code>bgmCompare</code></strong>: Diagonal entries are main-effect inclusion probabilities; off-diagonal entries are pairwise difference inclusion probabilities. Requires <code>difference_selection = TRUE</code>.</li>
 </ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pip <span class="ot">=</span> <span class="fu">extract_posterior_inclusion_probabilities</span>(fit)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(pip[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          intrusion dreams flash upset
+intrusion       0.0   1.00  1.00  0.60
+dreams          1.0   0.00  1.00  0.77
+flash           1.0   1.00  0.00  0.02
+upset           0.6   0.77  0.02  0.00</code></pre>
+</div>
+</div>
+<p>Here the <code>intrusion</code>–<code>dreams</code> edge is included in every posterior draw (probability 1), while <code>intrusion</code>–<code>upset</code> is included in about 60% of draws — the data do not clearly decide that edge. See <a href="../guide/edge-selection.html">Edge Selection</a> for turning these into Bayes factors. - <strong><code>bgmCompare</code></strong>: Diagonal entries are main-effect inclusion probabilities; off-diagonal entries are pairwise difference inclusion probabilities. Requires <code>difference_selection = TRUE</code>.</p>
 </section>
 <section id="extract_indicator_priors" class="level2">
 <h2 class="anchored" data-anchor-id="extract_indicator_priors">extract_indicator_priors</h2>
 <p>Retrieve the prior specification used for inclusion indicators.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_indicator_priors</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_indicator_priors</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Returns a named list describing the prior structure, including the prior type and hyperparameters:</p>
 <ul>
 <li><strong><code>bgms</code></strong>: Requires <code>edge_selection = TRUE</code>. Returns the prior type (<code>"Bernoulli"</code>, <code>"Beta-Bernoulli"</code>, or <code>"Stochastic-Block"</code>) and associated hyperparameters.</li>
@@ -565,14 +576,14 @@ window.Quarto = {
 <section id="extract_group_params" class="level2">
 <h2 class="anchored" data-anchor-id="extract_group_params">extract_group_params</h2>
 <p>Compute group-specific parameter estimates by combining baseline parameters and group differences.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_group_params</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_group_params</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>bgms_object</code> must be a fitted <code>bgmCompare</code> object.</p>
 <p>Returns a list with <code>main_effects_groups</code> (main effects per group) and <code>pairwise_effects_groups</code> (pairwise effects per group).</p>
 </section>
 <section id="extract_sbm" class="level2">
 <h2 class="anchored" data-anchor-id="extract_sbm">extract_sbm</h2>
 <p>Retrieve posterior summaries from a model fitted with the Stochastic Block prior.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_sbm</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_sbm</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Works on both <code>bgms</code> and <code>bgmCompare</code> fits.</p>
 <ul>
 <li>For <code>bgms</code>: requires <code>edge_selection = TRUE</code> and <code>edge_prior = sbm_prior(...)</code>.</li>
@@ -589,26 +600,37 @@ window.Quarto = {
 <section id="extract_ess" class="level2">
 <h2 class="anchored" data-anchor-id="extract_ess">extract_ess</h2>
 <p>Retrieve effective sample size estimates for all parameters.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_ess</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_ess</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Returns a named list with ESS values for each parameter type present in the model (e.g., <code>main</code>, <code>pairwise</code>, <code>indicator</code>). ESS values match <code>coda::effectiveSize</code>. For implementation details, see the <a href="../manual/diagnostics.html">Technical Manual</a>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ess <span class="ot">=</span> <span class="fu">extract_ess</span>(fit)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">head</span>(ess<span class="sc">$</span>pairwise), <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  intrusion-dreams    intrusion-flash    intrusion-upset  intrusion-physior 
+               848                624                 47                152 
+ intrusion-avoidth intrusion-avoidact 
+                84                147 </code></pre>
+</div>
+</div>
+<p>Low values relative to the total number of retained draws signal slow mixing for that parameter; see <a href="../guide/mcmc-diagnostics.html#sec-ess">MCMC Diagnostics</a> for guidance.</p>
 </section>
 <section id="extract_rhat" class="level2">
 <h2 class="anchored" data-anchor-id="extract_rhat">extract_rhat</h2>
 <p>Retrieve R-hat convergence diagnostics for all parameters.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_rhat</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_rhat</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Returns a named list with R-hat values for each parameter type present in the model (e.g., <code>main</code>, <code>pairwise</code>, <code>indicator</code>). R-hat follows the Gelman-Rubin formula, matching <code>coda::gelman.diag</code>. For implementation details, see <a href="../manual/diagnostics.html">diagnostics</a> in the Technical Manual.</p>
 </section>
 <section id="extract_precision" class="level2">
 <h2 class="anchored" data-anchor-id="extract_precision">extract_precision</h2>
 <p>Retrieve the posterior mean precision matrix.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_precision</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_precision</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>bgms_object</code> must be a fitted <code>bgms</code> object (GGM or mixed MRF).</p>
 <p>Returns a symmetric p x p matrix (or the continuous block submatrix for mixed MRFs) containing the posterior mean precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span>.</p>
 </section>
 <section id="extract_partial_correlations" class="level2">
 <h2 class="anchored" data-anchor-id="extract_partial_correlations">extract_partial_correlations</h2>
 <p>Retrieve the posterior mean partial correlation matrix.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_partial_correlations</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_partial_correlations</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>bgms_object</code> must be a fitted <code>bgms</code> object (GGM or mixed MRF).</p>
 <p>Returns a symmetric matrix of partial correlations, computed by standardizing the precision matrix: <span class="math inline">\(\rho_{ij} = -\Theta_{ij} / \sqrt{\Theta_{ii}
 \Theta_{jj}}\)</span>.</p>
@@ -616,7 +638,7 @@ window.Quarto = {
 <section id="extract_log_odds" class="level2">
 <h2 class="anchored" data-anchor-id="extract_log_odds">extract_log_odds</h2>
 <p>Retrieve the posterior mean log-odds matrix.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_log_odds</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_log_odds</span>(bgms_object)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>bgms_object</code> must be a fitted <code>bgms</code> object (OMRF or mixed MRF).</p>
 <p>Returns a symmetric matrix of log adjacent-category odds ratios. For the ordinal MRF, <span class="math inline">\(\text{log-odds}_{ij} = 2 \omega_{ij}\)</span>.</p>
 </section>

@@ -614,7 +614,7 @@ window.Quarto = {
 </header>
 
 
-<p><code>bgms</code> runs multiple MCMC chains in parallel using Intel TBB (Threading Building Blocks), accessed through the RcppParallel package. The implementation is in <code>src/mcmc/execution/chain_runner.h</code> and <code>chain_runner.cpp</code>.</p>
+<p><code>bgms</code> runs multiple MCMC chains in parallel using Intel TBB (Threading Building Blocks), accessed through the RcppParallel package. The implementation is in <code>src/mcmc/execution/chain_runner.h</code> and <code>chain_runner.cpp</code>. Within each chain, the iteration loop drives the samplers described in <a href="../manual/samplers.html">Sampler Hierarchy</a> under the adaptation schedule described in <a href="../manual/warmup.html">Warmup Schedule</a>.</p>
 <section id="design" class="level2">
 <h2 class="anchored" data-anchor-id="design">Design</h2>
 <p>The entry point is <code>run_mcmc_sampler()</code>, which takes a prototype model, a prototype edge prior, and a sampler configuration. It follows a clone-and-dispatch pattern:</p>

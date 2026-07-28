@@ -714,7 +714,7 @@ window.Quarto = {
 </tbody>
 </table>
 <p>All six hyperparameters default to 1; <code>sbm_prior()</code> with no arguments is valid. Validation enforces that all values are positive and finite.</p>
-<p>In <code>bgmCompare()</code>, the SBM governs the off-diagonal (pairwise) difference inclusions; the diagonal (main-effect difference inclusions, when <code>main_difference_selection = TRUE</code>) follows a separate Beta-Bernoulli update using the within-cluster <code>alpha</code> and <code>beta</code>.</p>
+<p>In <code>bgmCompare()</code>, the SBM governs the off-diagonal (pairwise) difference inclusions; the diagonal (main-effect difference inclusions, when <code>main_difference_selection = TRUE</code>) follows a separate Beta-Bernoulli update using the within-cluster <code>alpha</code> and <code>beta</code>. This is the canonical statement of that behavior — the <a href="../manual/bgmcompare-internals.html">bgmCompare Engine</a> page describes the update mechanics.</p>
 </section>
 <section id="output" class="level2">
 <h2 class="anchored" data-anchor-id="output">Output</h2>

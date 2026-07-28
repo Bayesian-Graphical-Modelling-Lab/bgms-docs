@@ -612,8 +612,7 @@ window.Quarto = {
 <p>The implementation uses a diagonal mass matrix <span class="math inline">\(M\)</span>, stored as the vector of inverse diagonal elements (<code>inv_mass_diag</code>).</p>
 <section id="memoizer" class="level3">
 <h3 class="anchored" data-anchor-id="memoizer">Memoizer</h3>
-<p>The <code>Memoizer</code> class in <code>leapfrog.h</code> caches a single <span class="math inline">\((\log \pi, \nabla \log \pi)\)</span> pair keyed by the position vector <span class="math inline">\(q\)</span>. During NUTS tree building, each leapfrog step produces a new unique <span class="math inline">\(q\)</span>, so the cache avoids redundant evaluations at tree-node boundaries where the same <span class="math inline">\(q\)</span> appears as both the end of one subtree and the start of another.</p>
-<p>When RATTLE is active, the SHAKE projection moves <span class="math inline">\(q\)</span> to a new point on the constraint manifold, making the cached gradient stale. The Memoizer is explicitly invalidated after projection, forcing a fresh gradient evaluation at the projected position. The reversibility check in <code>leapfrog_constrained_checked()</code> uses a separate Memoizer instance for its backward verification step, so the caller’s cache remains pointed at the forward-step result.</p>
+<p>The <code>Memoizer</code> class caches a single <span class="math inline">\((\log \pi, \nabla \log \pi)\)</span> pair keyed by the position vector <span class="math inline">\(q\)</span>, avoiding redundant evaluations at tree-node boundaries where the same <span class="math inline">\(q\)</span> ends one subtree and starts the next. Its design, joint-evaluation interface, and invalidation after constraint projection are documented in <a href="../manual/rattle.html#memoizer">Constrained Leapfrog — Memoizer</a>.</p>
 </section>
 </section>
 <section id="constrained-leapfrog-rattle" class="level2">

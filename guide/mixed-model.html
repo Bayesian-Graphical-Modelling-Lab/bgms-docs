@@ -630,8 +630,7 @@ p(\mathbf{z}) \propto \exp\!\left(\sum_{i} \mu_i(z_i) +
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>
-<p>When <code>edge_selection = TRUE</code> (the default), <code>bgms</code> applies spike-and-slab priors to all three types of partial associations. The spike sets <span class="math inline">\(\omega_{ij} = 0\)</span>, enforcing the absence of the edge. The slab places a Cauchy prior on <span class="math inline">\(\omega_{ij}\)</span>, allowing the effect size to be estimated from the data. See <a href="../guide/prior-basics.html">Prior Basics</a> for the spike-and-slab specification.</p>
-<p>The posterior inclusion probability for each edge quantifies the evidence for a direct association, averaged across all possible configurations of the remaining edges. A posterior inclusion probability exceeding 0.5 shows evidence for the presence of the corresponding edge, while a probability below 0.5 shows evidence for the exclusion of the corresponding edge. See <a href="../guide/edge-selection.html">Edge Selection</a>.</p>
+<p>When <code>edge_selection = TRUE</code> (the default), every partial association — discrete–discrete, continuous–continuous, and cross-type alike — receives a spike-and-slab prior, so an edge is either exactly absent or estimated from the data. The prior specification is described in <a href="../guide/prior-basics.html">Prior Basics</a>, and how to read the resulting inclusion probabilities and Bayes factors in <a href="../guide/edge-selection.html">Edge Selection</a>.</p>
 </section>
 <section id="missing-data" class="level2">
 <h2 class="anchored" data-anchor-id="missing-data">Missing data</h2>
@@ -657,10 +656,10 @@ p(\mathbf{z}) \propto \exp\!\left(\sum_{i} \mu_i(z_i) +
 <p>The <code>summary()</code> and <code>coef()</code> methods work the same as for single-type models. <code>coef(fit)$pairwise</code> returns all partial associations on a unified scale, and <code>coef(fit)$indicator</code> returns the posterior inclusion probabilities.</p>
 <p>To obtain model-specific parameterizations, use the dedicated extractors:</p>
 <ul>
-<li><code>extract_main_effects(fit)</code> — returns category thresholds (discrete) and continuous means.</li>
-<li><code>extract_precision(fit)</code> — returns the precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span> for the continuous block.</li>
-<li><code>extract_partial_correlations(fit)</code> — returns partial correlations for the continuous block.</li>
-<li><code>extract_log_odds(fit)</code> — returns log adjacent-category odds ratios <span class="math inline">\(2\omega_{ij}^{xx}\)</span> for the discrete block.</li>
+<li><a href="../reference/extractors.html#extract_main_effects"><code>extract_main_effects(fit)</code></a> — returns category thresholds (discrete) and continuous means.</li>
+<li><a href="../reference/extractors.html#extract_precision"><code>extract_precision(fit)</code></a> — returns the precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span> for the continuous block.</li>
+<li><a href="../reference/extractors.html#extract_partial_correlations"><code>extract_partial_correlations(fit)</code></a> — returns partial correlations for the continuous block.</li>
+<li><a href="../reference/extractors.html#extract_log_odds"><code>extract_log_odds(fit)</code></a> — returns log adjacent-category odds ratios <span class="math inline">\(2\omega_{ij}^{xx}\)</span> for the discrete block.</li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">

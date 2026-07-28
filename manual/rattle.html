@@ -756,7 +756,7 @@ window.Quarto = {
 </section>
 <section id="invalidation" class="level3">
 <h3 class="anchored" data-anchor-id="invalidation">Invalidation</h3>
-<p>After the SHAKE position projection (step 4 of the constrained leapfrog), <span class="math inline">\(q\)</span> is modified in place. The cached gradient refers to the pre-projection <span class="math inline">\(q\)</span> and must be discarded. <code>leapfrog_constrained()</code> calls <code>memo.invalidate()</code> immediately after the projection, before the second half-step requests a fresh gradient.</p>
+<p>After the SHAKE position projection (step 4 of the constrained leapfrog), <span class="math inline">\(q\)</span> is modified in place. The cached gradient refers to the pre-projection <span class="math inline">\(q\)</span> and must be discarded. <code>leapfrog_constrained()</code> calls <code>memo.invalidate()</code> immediately after the projection, before the second half-step requests a fresh gradient. The reversibility check in <code>leapfrog_constrained_checked()</code> uses a separate Memoizer instance for its backward verification step, so the caller’s cache remains pointed at the forward-step result.</p>
 </section>
 </section>
 <section id="projection-callbacks" class="level2">

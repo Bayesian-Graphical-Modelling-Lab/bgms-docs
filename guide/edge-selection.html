@@ -597,10 +597,7 @@ window.Quarto = {
 <p><span class="math display">\[
 \text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x})}{1 - p(\gamma_{ij} = 1 \mid \mathbf{x})}
 \]</span></p>
-<p>For other prior inclusion probabilities, the Bayes factor accounts for the prior odds:</p>
-<p><span class="math display">\[
-\text{BF}_{10} = \frac{p(\gamma_{ij} = 1 \mid \mathbf{x}) \;/\; p(\gamma_{ij} = 0 \mid \mathbf{x})}{p(\gamma_{ij} = 1) \;/\; p(\gamma_{ij} = 0)}
-\]</span></p>
+<p>For other prior inclusion probabilities, the Bayes factor divides the posterior inclusion odds by the prior inclusion odds — see <a href="../guide/bayesian-approach.html">The Bayesian Approach</a> for the general identity.</p>
 <p>The reciprocal <span class="math inline">\(1 / \text{BF}_{10}\)</span> quantifies the evidence for edge absence, i.e., conditional independence <span class="citation" data-cites="SekulovskiEtAl_2024">(<a href="#ref-SekulovskiEtAl_2024" role="doc-biblioref"><span class="nocase">Sekulovski et al.</span>, 2024</a>)</span>. Values of <span class="math inline">\(\text{BF}_{10}\)</span> close to one indicate that the data do not discriminate between the two hypotheses — absence of evidence rather than evidence of absence.</p>
 </section>
 <section id="other-approaches-to-testing-conditional-independence" class="level2">
@@ -646,11 +643,39 @@ window.Quarto = {
 <p>As an illustration from psychology, <span class="citation" data-cites="HuthEtAl_2026_evidence"><span class="nocase">Huth et al.</span> (<a href="#ref-HuthEtAl_2026_evidence" role="doc-biblioref">2026</a>)</span> reanalyzed 293 networks from 126 studies and found that the network structure is highly uncertain: for the majority of edges, the data do not clearly decide whether the edge should be present or absent. Only about one in five edges was supported by strong evidence; for the rest, the evidence was weak or inconclusive. The exact proportions depend on the evidence thresholds used, but the overall picture is clear — uncertainty about individual edges is the norm, not the exception.</p>
 <p>This is precisely why a Bayesian approach matters. Without it, a missing edge in an estimated network is ambiguous: did the method find evidence that the edge is absent, or was there simply not enough data to detect it? The Bayes factor makes this distinction explicit. When the evidence is inconclusive, it says so — and that information is just as valuable as a decisive result, because it prevents conclusions that the data cannot support.</p>
 </section>
+<section id="a-worked-example" class="level2">
+<h2 class="anchored" data-anchor-id="a-worked-example">A worked example</h2>
+<p>To see these quantities on real output, fit the <a href="../reference/datasets.html#wenchuan">Wenchuan</a> PTSD data (run in advance here; this takes a few minutes):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bgms)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">bgm</span>(Wenchuan, <span class="at">chains =</span> <span class="dv">2</span>, <span class="at">seed =</span> <span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The <code>summary(fit)$indicator</code> table holds the posterior inclusion probability of every edge in its <code>mean</code> column. With the default prior inclusion probability of 0.5, the inclusion Bayes factor is the posterior odds:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ind <span class="ot">=</span> <span class="fu">summary</span>(fit)<span class="sc">$</span>indicator</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>edges <span class="ot">=</span> ind[<span class="fu">c</span>(<span class="st">"intrusion-dreams"</span>, <span class="st">"intrusion-upset"</span>, <span class="st">"intrusion-avoidact"</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>            <span class="st">"mean"</span>, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>edges<span class="sc">$</span>BF10 <span class="ot">=</span> edges<span class="sc">$</span>mean <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> edges<span class="sc">$</span>mean)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(edges, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                    mean  BF10
+intrusion-dreams   1.000   Inf
+intrusion-upset    0.599 1.497
+intrusion-avoidact 0.012 0.012</code></pre>
+</div>
+</div>
+<p>Three different conclusions, one from each row:</p>
+<ul>
+<li><strong><code>intrusion-dreams</code></strong>: included in every retained draw, so the Bayes factor overflows to infinity. With 2,000 draws per chain, read this as <span class="math inline">\(\text{BF}_{10}\)</span> larger than a few thousand — strong evidence that the edge is present, not literally infinite evidence.</li>
+<li><strong><code>intrusion-upset</code></strong>: an inclusion probability of about 0.6 gives <span class="math inline">\(\text{BF}_{10} \approx 1.5\)</span> — the data do not decide this edge either way (absence of evidence).</li>
+<li><strong><code>intrusion-avoidact</code></strong>: an inclusion probability of about 0.01 gives <span class="math inline">\(\text{BF}_{01} \approx 80\)</span> — strong evidence that this edge is <em>absent</em> (evidence of absence).</li>
+</ul>
+</section>
 <section id="median-probability-model" class="level2">
 <h2 class="anchored" data-anchor-id="median-probability-model">Median probability model</h2>
 <p>A common summary of the posterior network is the median probability model <span class="citation" data-cites="BarbieriBerger_2004">(<a href="#ref-BarbieriBerger_2004" role="doc-biblioref">Barbieri &amp; Berger, 2004</a>)</span>: retain all edges with posterior inclusion probability above 0.5. This corresponds to including edges for which there is more evidence for presence than absence.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>network <span class="ot">=</span> <span class="fu">coef</span>(fit)<span class="sc">$</span>pairwise</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>network[<span class="fu">coef</span>(fit)<span class="sc">$</span>indicator <span class="sc">&lt;</span> <span class="fl">0.5</span>] <span class="ot">=</span> <span class="dv">0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>network <span class="ot">=</span> <span class="fu">coef</span>(fit)<span class="sc">$</span>pairwise</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>network[<span class="fu">coef</span>(fit)<span class="sc">$</span>indicator <span class="sc">&lt;</span> <span class="fl">0.5</span>] <span class="ot">=</span> <span class="dv">0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="prior-guidance-for-edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="prior-guidance-for-edge-selection">Prior guidance for edge selection</h2>
