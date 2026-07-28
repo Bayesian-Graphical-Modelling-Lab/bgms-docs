@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -77,14 +80,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-70be5ccd51f03de5ce195d75fadf0882.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3419ea62b3ca2d77d3d547f86109e84e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-eaeb381c6b7494c50009502241a4985c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3419ea62b3ca2d77d3d547f86109e84e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-727c311c0671326a6a83aefdf25e74e3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-6da56e2590d068457896cf1b1a36524a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-27e333d33e6914644635f1f90f79dd55.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-6da56e2590d068457896cf1b1a36524a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -116,35 +119,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
 <link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -357,10 +331,6 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link active" href="../manual/index.html" aria-current="page"> 
 <span class="menu-text">Manual</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../examples/index.qmd"> 
-<span class="menu-text">Examples</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
@@ -650,7 +620,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>The mixed MRF combines a NUTS step for the main parameter block (thresholds, discrete interactions, means, cross-type interactions) with an element-wise Metropolis step for the continuous precision elements. The chain runner orchestrates this; there is no combined sampler class.</p>
+<p>One sampler instance drives the whole model: the chain runner issues a single <code>sampler-&gt;step(model, iter)</code> per iteration, and under NUTS all parameter blocks — including the mixed MRF’s five blocks (thresholds, means, and the three interaction blocks) — are updated jointly in one trajectory (see <a href="../manual/model-classes.html">Model Classes</a>). The models’ own element-wise Metropolis code runs only when the user selects <code>update_method = "adaptive-metropolis"</code>.</p>
 </section>
 <section id="samplerbase-interface" class="level2">
 <h2 class="anchored" data-anchor-id="samplerbase-interface">SamplerBase interface</h2>
@@ -673,7 +643,7 @@ window.Quarto = {
 <p><code>NUTSSampler</code> owns a <code>NUTSAdaptationController</code> that manages:</p>
 <ul>
 <li><strong>Dual averaging</strong> for step-size adaptation</li>
-<li><strong>Diagonal mass matrix</strong> accumulation via Welford’s online algorithm</li>
+<li><strong>Diagonal mass matrix</strong> accumulation via Welford’s online algorithm (a numerically stable running-variance estimate)</li>
 </ul>
 <p>Each call to <code>step()</code>:</p>
 <ol type="1">
@@ -685,23 +655,34 @@ window.Quarto = {
 </section>
 <section id="factory-dispatch" class="level2">
 <h2 class="anchored" data-anchor-id="factory-dispatch">Factory dispatch</h2>
-<p><code>create_sampler()</code> in <code>chain_runner.cpp</code> constructs the right sampler based on the model’s capabilities and the user’s choice:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>unique_ptr<span class="op">&lt;</span>SamplerBase<span class="op">&gt;</span> create_sampler<span class="op">(</span><span class="at">const</span> SamplerConfig<span class="op">&amp;</span> config<span class="op">,</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                                        WarmupSchedule<span class="op">&amp;</span> schedule<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"nuts"</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> make_unique<span class="op">&lt;</span>NUTSSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span>config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"mh"</span> <span class="op">||</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>             config<span class="op">.</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"adaptive-metropolis"</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> make_unique<span class="op">&lt;</span>MetropolisSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
+<p>Dispatch happens in two steps in <code>chain_runner.cpp</code>. The R layer passes the <code>update_method</code> string through unchanged; <code>resolve_sampler_spec()</code> maps it to a typed <code>SamplerSpec</code> (any other string is an error):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>SamplerSpec resolve_sampler_spec<span class="op">(</span><span class="at">const</span> <span class="bu">std::</span>string<span class="op">&amp;</span> <span class="dt">sampler_type</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"nuts"</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> SamplerSpec<span class="op">{</span>SamplerKind<span class="op">::</span>NUTS<span class="op">,</span> <span class="co">/*learn_sd=*/</span><span class="kw">true</span><span class="op">,</span> <span class="op">...};</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span><span class="dt">sampler_type</span> <span class="op">==</span> <span class="st">"adaptive-metropolis"</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> SamplerSpec<span class="op">{</span>SamplerKind<span class="op">::</span>AdaptiveMetropolis<span class="op">,</span> <span class="co">/*learn_sd=*/</span><span class="kw">false</span><span class="op">,</span> <span class="op">...};</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    Rcpp<span class="op">::</span>stop<span class="op">(</span><span class="st">"Unknown sampler_type: '</span><span class="sc">%s</span><span class="st">'"</span><span class="op">,</span> <span class="dt">sampler_type</span><span class="op">.</span>c_str<span class="op">());</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The R layer (<code>validate_sampler.R</code>) resolves <code>"adaptive-metropolis"</code> before it reaches C++, so in practice the factory receives <code>"nuts"</code> or <code>"mh"</code>.</p>
+<p><code>create_sampler()</code> then switches on the enum:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>unique_ptr<span class="op">&lt;</span>SamplerBase<span class="op">&gt;</span> create_sampler<span class="op">(</span>SamplerKind kind<span class="op">,</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">const</span> SamplerConfig<span class="op">&amp;</span> config<span class="op">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                                       WarmupSchedule<span class="op">&amp;</span> schedule<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">switch</span> <span class="op">(</span>kind<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> SamplerKind<span class="op">::</span>NUTS<span class="op">:</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> make_unique<span class="op">&lt;</span>NUTSSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> SamplerKind<span class="op">::</span>AdaptiveMetropolis<span class="op">:</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> make_unique<span class="op">&lt;</span>MetropolisSampler<span class="op">&gt;(</span>config<span class="op">,</span> schedule<span class="op">);</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>SamplerSpec</code> also records which diagnostics the sampler produces and whether proposal-SD learning applies, which the warmup schedule consumes.</p>
 <p>All three model types (GGM, OMRF, mixed MRF) default to NUTS. The user can select Metropolis via <code>update_method = "adaptive-metropolis"</code>.</p>
 </section>
 <section id="step-size-and-mass-matrix-adaptation" class="level2">
 <h2 class="anchored" data-anchor-id="step-size-and-mass-matrix-adaptation">Step-size and mass-matrix adaptation</h2>
-<p><code>NUTSSampler</code> owns a <code>NUTSAdaptationController</code> that coordinates dual averaging for <span class="math inline">\(\epsilon\)</span> and Welford variance estimation for the diagonal mass matrix <span class="math inline">\(M\)</span>. The full adaptation schedule — stage boundaries, doubling windows, blending formula, and dual-averaging parameters — is documented in <a href="../manual/warmup.html">Warmup Schedule</a>.</p>
-<p><code>MetropolisSampler</code> uses a separate <code>MetropolisAdaptationController</code> that tunes proposal standard deviations via Robbins–Monro updates targeting an acceptance rate of 0.44.</p>
+<p>The full adaptation schedule for the <code>NUTSAdaptationController</code> introduced above — stage boundaries, doubling windows, blending formula, and dual-averaging parameters — is documented in <a href="../manual/warmup.html">Warmup Schedule</a>.</p>
+<p><code>MetropolisSampler</code> uses a separate <code>MetropolisAdaptationController</code> that tunes proposal standard deviations via Robbins–Monro updates targeting an acceptance rate of 0.44, the componentwise random-walk optimum. Note that the same 0.44 target also governs the models’ edge-move proposals during NUTS runs; the user’s <code>target_accept</code> argument applies to the Metropolis tuner only under <code>update_method = "adaptive-metropolis"</code> (under NUTS it sets the step-size adaptation target instead).</p>
 </section>
 <section id="constrained-integration-dispatch" class="level2">
 <h2 class="anchored" data-anchor-id="constrained-integration-dispatch">Constrained integration dispatch</h2>

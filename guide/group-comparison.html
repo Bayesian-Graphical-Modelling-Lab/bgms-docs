@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -97,14 +100,14 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-70be5ccd51f03de5ce195d75fadf0882.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3419ea62b3ca2d77d3d547f86109e84e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-eaeb381c6b7494c50009502241a4985c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3419ea62b3ca2d77d3d547f86109e84e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-727c311c0671326a6a83aefdf25e74e3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-6da56e2590d068457896cf1b1a36524a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-27e333d33e6914644635f1f90f79dd55.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-6da56e2590d068457896cf1b1a36524a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -134,7 +137,7 @@ div.csl-indent {
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -375,10 +378,6 @@ window.Quarto = {
     <a class="nav-link" href="../manual/index.html"> 
 <span class="menu-text">Manual</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../examples/index.qmd"> 
-<span class="menu-text">Examples</span></a>
-  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
@@ -511,6 +510,12 @@ window.Quarto = {
  <span class="menu-text">Edge Clustering</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../guide/missing-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Missing Data</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -572,8 +577,8 @@ window.Quarto = {
 <p><span class="math display">\[
 \omega_{ij}^{(g)} = \omega_{ij} + \sum_{k=1}^{G-1} c_{gk}\,\delta_{ij}^{(k)}
 \]</span></p>
-<p>where <span class="math inline">\(\omega_{ij}\)</span> is the overall partial association — the value that would be obtained if all groups were combined — and <span class="math inline">\(\delta_{ij}^{(k)}\)</span> are the difference parameters, one for each of the <span class="math inline">\(G - 1\)</span> orthogonal contrasts. The coefficients <span class="math inline">\(c_{gk}\)</span> come from an orthonormal projection matrix that maps the contrast parameters to group-specific effects. Category thresholds are decomposed in the same way.</p>
-<p>For two groups, the projection matrix reduces to <span class="math inline">\(c = (-\tfrac{1}{2},\; +\tfrac{1}{2})^\top\)</span>, so that <span class="math inline">\(\omega_{ij}^{(g)} = \omega_{ij} \pm \tfrac{1}{2}\,\delta_{ij}\)</span>. This is the centered parameterization of the Bayesian independent-samples <span class="math inline">\(t\)</span>-test <span class="citation" data-cites="RouderEtAl_2009">(<a href="#ref-RouderEtAl_2009" role="doc-biblioref">Rouder et al., 2009</a>)</span>, where the overall effect and the group difference are separated. For more than two groups, the projection generalizes the idea to an ANOVA-like design with <span class="math inline">\(G - 1\)</span> orthogonal contrasts <span class="citation" data-cites="RouderEtAl_2012">(<a href="#ref-RouderEtAl_2012" role="doc-biblioref">Rouder et al., 2012</a>)</span>. In each case, making the differences explicit parameters — rather than computing them post hoc from separate group estimates — allows each difference to receive its own prior distribution and its own hypothesis test.</p>
+<p>where <span class="math inline">\(\omega_{ij}\)</span> is the overall partial association — the value that would be obtained if all groups were combined — and <span class="math inline">\(\delta_{ij}^{(k)}\)</span> are the contrast parameters, one for each of the <span class="math inline">\(G - 1\)</span> orthogonal contrasts. The coefficients <span class="math inline">\(c_{gk}\)</span> come from an orthonormal projection matrix (a fixed recipe that maps the contrast parameters to group-specific effects). Category thresholds are decomposed in the same way.</p>
+<p>For two groups, the projection matrix reduces to <span class="math inline">\(c = (-\tfrac{1}{2},\; +\tfrac{1}{2})^\top\)</span>, so that <span class="math inline">\(\omega_{ij}^{(g)} = \omega_{ij} \pm \tfrac{1}{2}\,\delta_{ij}\)</span> — the single contrast parameter is then simply a scaled group difference. This is the centered parameterization of the Bayesian independent-samples <span class="math inline">\(t\)</span>-test <span class="citation" data-cites="RouderEtAl_2009">(<a href="#ref-RouderEtAl_2009" role="doc-biblioref">Rouder et al., 2009</a>)</span>, where the overall effect and the group difference are separated. For more than two groups, the projection generalizes the idea to an ANOVA-like design with <span class="math inline">\(G - 1\)</span> orthogonal contrasts <span class="citation" data-cites="RouderEtAl_2012">(<a href="#ref-RouderEtAl_2012" role="doc-biblioref">Rouder et al., 2012</a>)</span>; the contrast parameters are then projections onto orthogonal basis directions, not pairwise group differences. In each case, making the differences explicit parameters — rather than computing them post hoc from separate group estimates — allows each difference to receive its own prior distribution and its own hypothesis test.</p>
 </section>
 <section id="defining-groups" class="level2">
 <h2 class="anchored" data-anchor-id="defining-groups">Defining groups</h2>
@@ -585,10 +590,10 @@ window.Quarto = {
 </section>
 <section id="difference-selection" class="level2">
 <h2 class="anchored" data-anchor-id="difference-selection">Difference selection</h2>
-<p>When <code>difference_selection = TRUE</code> (the default), spike-and-slab priors are placed on the group difference parameters. For each pairwise interaction, a binary indicator <span class="math inline">\(\gamma_{ij}\)</span> governs whether the difference is included in the model:</p>
+<p>When <code>difference_selection = TRUE</code> (the default), spike-and-slab priors are placed on the contrast parameters. For each pairwise interaction, a binary indicator <span class="math inline">\(\gamma_{ij}\)</span> — here indexing difference inclusion, not the edge inclusion it denotes in <code>bgm()</code> — governs whether the contrast parameters are included in the model:</p>
 <ul>
-<li>When <span class="math inline">\(\gamma_{ij} = 0\)</span> (spike), the difference is exactly zero — all groups have the same partial association.</li>
-<li>When <span class="math inline">\(\gamma_{ij} = 1\)</span> (slab), the difference receives a Cauchy prior with scale <code>difference_scale</code> and is estimated from the data.</li>
+<li>When <span class="math inline">\(\gamma_{ij} = 0\)</span> (spike), the contrast parameters are exactly zero — all groups have the same partial association.</li>
+<li>When <span class="math inline">\(\gamma_{ij} = 1\)</span> (slab), each contrast parameter receives a Cauchy prior with scale <code>difference_scale</code> and is estimated from the data.</li>
 </ul>
 <p>By default, only pairwise interaction differences are selected (<code>main_difference_selection = FALSE</code>). Threshold differences are always included as free parameters. This default reflects that thresholds are typically nuisance parameters: their selection can interfere with pairwise selection under the Beta-Bernoulli prior, and group differences in thresholds are rarely the primary research question.</p>
 </section>
@@ -604,10 +609,10 @@ window.Quarto = {
 </section>
 <section id="interpreting-the-output" class="level2">
 <h2 class="anchored" data-anchor-id="interpreting-the-output">Interpreting the output</h2>
-<p>The <code>summary()</code> method reports posterior summaries for the shared parameters <span class="math inline">\(\omega_{ij}\)</span> and the group difference parameters <span class="math inline">\(\delta_{ij}\)</span>, including posterior inclusion probabilities and Bayes factors.</p>
+<p>The <code>summary()</code> method reports posterior summaries for the shared parameters <span class="math inline">\(\omega_{ij}\)</span> and the contrast parameters <span class="math inline">\(\delta_{ij}\)</span>, including posterior inclusion probabilities and Bayes factors.</p>
 <p>The <code>coef()</code> method returns:</p>
 <ul>
-<li><code>$pairwise_effects_groups</code>: group-specific posterior mean partial associations, reconstructed from the overall effects and the projection of the difference parameters.</li>
+<li><code>$pairwise_effects_groups</code>: group-specific posterior mean partial associations, reconstructed from the overall effects and the projection of the contrast parameters.</li>
 <li><code>$main_effects_groups</code>: group-specific posterior mean thresholds.</li>
 <li><code>$indicator</code>: posterior inclusion probabilities for the group differences.</li>
 </ul>
@@ -615,7 +620,7 @@ window.Quarto = {
 <section id="prior-guidance" class="level2">
 <h2 class="anchored" data-anchor-id="prior-guidance">Prior guidance</h2>
 <ul>
-<li><strong><code>difference_scale = 1</code></strong> (default): scale of the Cauchy slab on the difference parameters. This matches the default scale of the baseline <code>interaction_prior</code> (<code>cauchy_prior(scale = 1)</code>).</li>
+<li><strong><code>difference_scale = 1</code></strong> (default): scale of the Cauchy slab on the contrast parameters. This matches the default scale of the baseline <code>interaction_prior</code> (<code>cauchy_prior(scale = 1)</code>).</li>
 <li><strong><code>difference_prior = bernoulli_prior(0.5)</code></strong> (default): each difference has a fixed prior inclusion probability of 0.5. Pass <a href="../reference/priors.html#beta_bernoulli_prior"><code>beta_bernoulli_prior(1, 1)</code></a> to place a beta hyperprior on the inclusion probability instead — this provides automatic multiplicity correction, important when the number of potential group differences is large <span class="citation" data-cites="MarsmanEtAl_2025_ttest">(<a href="#ref-MarsmanEtAl_2025_ttest" role="doc-biblioref">Marsman et al., 2025</a>)</span>. Setting <code>bernoulli_prior(p)</code> with <code>p = 0.5</code> makes the prior odds equal to one, so the Bayes factor simplifies to the posterior odds.</li>
 <li><strong><code>difference_prior = sbm_prior(...)</code></strong>: a stochastic block model on the off-diagonal differences, with cluster-structured inclusion probabilities. Useful when group differences are expected to concentrate within latent clusters of variables. The diagonal (main-effect difference inclusions, when <code>main_difference_selection = TRUE</code>) follows a separate Beta-Bernoulli using the within-cluster <code>alpha</code> and <code>beta</code>. See <a href="../guide/clustering.html">Edge Clustering</a> and <a href="../manual/sbm-prior.html">SBM Prior</a> for the formulation; cluster summaries are accessible via <a href="../reference/extractors.html#extract_sbm"><code>extract_sbm()</code></a>.</li>
 </ul>

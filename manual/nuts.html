@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -62,14 +65,14 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-70be5ccd51f03de5ce195d75fadf0882.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cad2a2f8a56dfe71ee895a68e79c9b9a.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3419ea62b3ca2d77d3d547f86109e84e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-eaeb381c6b7494c50009502241a4985c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3419ea62b3ca2d77d3d547f86109e84e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-727c311c0671326a6a83aefdf25e74e3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d0ed716bfd5c50ac2bc6892a5fdedb41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-6da56e2590d068457896cf1b1a36524a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-27e333d33e6914644635f1f90f79dd55.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-6da56e2590d068457896cf1b1a36524a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -99,7 +102,7 @@ div.csl-indent {
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -339,10 +342,6 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link active" href="../manual/index.html" aria-current="page"> 
 <span class="menu-text">Manual</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../examples/index.qmd"> 
-<span class="menu-text">Examples</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
@@ -708,7 +707,7 @@ window.Quarto = {
 </section>
 <section id="divergence-detection" class="level2">
 <h2 class="anchored" data-anchor-id="divergence-detection">Divergence detection</h2>
-<p>A divergence occurs when a single leapfrog step produces a Hamiltonian error <span class="math inline">\(\Delta H = H' - H_0 &gt; 1000\)</span>. Divergences indicate that the step size is too large relative to the local curvature of the posterior. The number of divergent transitions is recorded in <code>StepResult::NUTSDiagnostics</code> and surfaced to the user via <code>extract_nuts_diagnostics()</code>.</p>
+<p>A divergence occurs when a single leapfrog step produces a Hamiltonian error <span class="math inline">\(\Delta H = H' - H_0 &gt; 1000\)</span>. Divergences indicate that the step size is too large relative to the local curvature of the posterior. The number of divergent transitions is recorded in <code>StepResult::NUTSDiagnostics</code> and surfaced to the user via <code>fit$nuts_diag</code>.</p>
 </section>
 <section id="warmup" class="level2">
 <h2 class="anchored" data-anchor-id="warmup">Warmup</h2>
@@ -725,7 +724,7 @@ window.Quarto = {
 <li><strong>Energy</strong> — The Hamiltonian <span class="math inline">\(H = -\log \pi(q) + \frac{1}{2} p^\top M^{-1} p\)</span>. Used to compute E-BFMI (energy Bayesian fraction of missing information).</li>
 <li><strong>Mean acceptance probability</strong> — The Metropolis acceptance probability averaged over every leapfrog step in the trajectory, paralleling Stan’s <code>accept_stat__</code>. Surfaced as <code>fit$nuts_diag$accept_prob</code> (chains × iterations) with a per-chain mean in the diagnostic summary; also drives dual-averaging step-size adaptation.</li>
 </ul>
-<p>These diagnostics are collected per chain and accessible via <code>extract_nuts_diagnostics()</code> in R.</p>
+<p>These diagnostics are collected per chain and accessible via <code>fit$nuts_diag</code> in R (built by <code>summarize_nuts_diagnostics()</code> in <code>R/diagnostics_nuts.R</code>).</p>
 
 
 
