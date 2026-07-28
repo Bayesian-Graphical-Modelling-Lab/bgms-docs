@@ -620,9 +620,9 @@ window.Quarto = {
 </section>
 <section id="statistical-properties" class="level2">
 <h2 class="anchored" data-anchor-id="statistical-properties">Statistical properties</h2>
-<p>The pseudolikelihood and the full likelihood share the same mode: PL does not introduce additional bias beyond that already present in the full likelihood <span class="citation" data-cites="KeetelaarEtAl_2024_PL ArenaMarsman_2026_core">(<a href="#ref-ArenaMarsman_2026_core" role="doc-biblioref">Arena &amp; Marsman, 2026</a>; <a href="#ref-KeetelaarEtAl_2024_PL" role="doc-biblioref">Keetelaar et al., 2024</a>)</span>. However, the pseudolikelihood underestimates the variance of the parameters, producing pseudoposterior distributions that are too narrow compared to the true posterior <span class="citation" data-cites="Miller_2021_PLconsistency KeetelaarEtAl_2024_PL ArenaMarsman_2026_core">(<a href="#ref-ArenaMarsman_2026_core" role="doc-biblioref">Arena &amp; Marsman, 2026</a>; <a href="#ref-KeetelaarEtAl_2024_PL" role="doc-biblioref">Keetelaar et al., 2024</a>; <a href="#ref-Miller_2021_PLconsistency" role="doc-biblioref">Miller, 2021</a>)</span>.</p>
+<p>The pseudolikelihood and the full likelihood asymptotically share the same mode: PL does not introduce additional bias beyond that already present in the full likelihood <span class="citation" data-cites="KeetelaarEtAl_2024_PL ArenaMarsman_2026_core">(<a href="#ref-ArenaMarsman_2026_core" role="doc-biblioref">Arena &amp; Marsman, 2026</a>; <a href="#ref-KeetelaarEtAl_2024_PL" role="doc-biblioref">Keetelaar et al., 2024</a>)</span>. However, the pseudolikelihood underestimates the variance of the parameters, producing pseudoposterior distributions that are too narrow compared to the true posterior <span class="citation" data-cites="Miller_2021_PLconsistency KeetelaarEtAl_2024_PL ArenaMarsman_2026_core">(<a href="#ref-ArenaMarsman_2026_core" role="doc-biblioref">Arena &amp; Marsman, 2026</a>; <a href="#ref-KeetelaarEtAl_2024_PL" role="doc-biblioref">Keetelaar et al., 2024</a>; <a href="#ref-Miller_2021_PLconsistency" role="doc-biblioref">Miller, 2021</a>)</span>.</p>
 <p>This variance underestimation has consequences for edge selection. Bayes factors derived from the pseudoposterior overstate the evidence for or against edge inclusion because the spike-and-slab comparison operates on a distribution that is artificially concentrated.</p>
-<p>For the mixed MRF, the marginal pseudolikelihood (which integrates out the continuous block when computing discrete full conditionals) does not appear to underestimate the variance of the cross-type (discrete-continuous) interactions. <code>bgms</code> therefore uses the marginal pseudolikelihood for mixed models.</p>
+<p>For the mixed MRF, simulation evidence collected during development suggests that the marginal pseudolikelihood (which integrates out the continuous block when computing discrete full conditionals) does not underestimate the variance of the cross-type (discrete-continuous) interactions. <code>bgms</code> therefore uses the marginal pseudolikelihood for mixed models.</p>
 </section>
 <section id="omrf-pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="omrf-pseudolikelihood">OMRF pseudolikelihood</h2>
@@ -631,8 +631,24 @@ window.Quarto = {
 </section>
 <section id="mixed-mrf-pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="mixed-mrf-pseudolikelihood">Mixed MRF pseudolikelihood</h2>
-<p>For mixed models, the pseudolikelihood combines discrete and continuous parts. The continuous block uses the GGM likelihood. For the discrete block, <code>bgms</code> integrates out the continuous variables to obtain a marginal MRF on <span class="math inline">\(\mathbf{x}\)</span> and applies the pseudolikelihood to that marginal model: <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> rather than <span class="math inline">\(\log p(x_s \mid x_{-s}, y_{\text{obs}})\)</span>. The marginal interaction matrix is <span class="math inline">\(M = A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top\)</span>, which couples the discrete pseudolikelihood to the precision parameters.</p>
-<p>Implementation details are documented in <a href="../manual/mixed-internals.html">Mixed MRF Internals</a>.</p>
+<p>For mixed models, the objective combines an exact part and an approximate part. The continuous conditional <span class="math inline">\(p(\mathbf{y} \mid \mathbf{x})\)</span> is multivariate normal, so the continuous block uses the exact GGM likelihood. For <span class="math inline">\(n\)</span> observations:</p>
+<p><span class="math display">\[
+\log p(\mathbf{Y} \mid \mathbf{X}) = \frac{n}{2}\left(\log|\boldsymbol{\Theta}| - q\log(2\pi)\right) - \frac{1}{2}\sum_{i=1}^{n}(\mathbf{y}_i - \mathbf{m}_i)^{\sf T}\boldsymbol{\Theta}\,(\mathbf{y}_i - \mathbf{m}_i),
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{m}_i = \boldsymbol{\mu}_y + 2\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}\,\mathbf{x}_i\)</span> is the conditional mean for observation <span class="math inline">\(i\)</span> and <span class="math inline">\(\boldsymbol{\Sigma} = \boldsymbol{\Theta}^{-1}\)</span>.</p>
+<p>For the discrete block, <code>bgms</code> integrates out the continuous variables to obtain a marginal MRF on <span class="math inline">\(\mathbf{x}\)</span> and applies the pseudolikelihood to that marginal model: <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> rather than <span class="math inline">\(\log p(x_s \mid x_{-s}, y_{\text{obs}})\)</span>. After integration, the log marginal density is</p>
+<p><span class="math display">\[
+\log p(\mathbf{x}) \propto \sum_{i=1}^{p}\sum_{c=1}^{m_i}\mathcal{I}(x_i = c)\,\mu_{ic} + \mathbf{x}^{\sf T} \mathbf{M}\, \mathbf{x} + 2(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)^{\sf T}\,\mathbf{x}
+\]</span></p>
+<p>with the effective (marginal) discrete-discrete interaction matrix</p>
+<p><span class="math display">\[
+\mathbf{M} = \boldsymbol{\Omega}_{xx} + 2\,\boldsymbol{\Omega}_{xy}\,\boldsymbol{\Sigma}\,\boldsymbol{\Omega}_{xy}^{\sf T}.
+\]</span></p>
+<p>The off-diagonal entries of <span class="math inline">\(\mathbf{M}\)</span> combine the direct discrete-discrete partial associations in <span class="math inline">\(\boldsymbol{\Omega}_{xx}\)</span> with the indirect associations induced through the continuous block, which is what couples the discrete pseudolikelihood to the precision parameters. The linear term <span class="math inline">\(2(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)^{\sf T}\mathbf{x}\)</span> shifts the discrete category bias by an amount depending on the cross-type interactions and the continuous means. The full conditional for discrete variable <span class="math inline">\(x_i\)</span> in this marginal MRF has the ordinal-MRF form with rest score</p>
+<p><span class="math display">\[
+r_i = 2\sum_{j \neq i} M_{ij}\, x_j + 2\,(\boldsymbol{\Omega}_{xy}\boldsymbol{\mu}_y)_i.
+\]</span></p>
+<p>Implementation details — including the code-level names (<span class="math inline">\(\mathbf{A}_{xx}\)</span>, <span class="math inline">\(\mathbf{A}_{xy}\)</span>, <span class="math inline">\(\boldsymbol{\Sigma}_{yy}\)</span> for the blocks above) and the gradient chain rules — are documented in <a href="../manual/mixed-internals.html">Mixed MRF Internals</a>.</p>
 </section>
 <section id="group-comparison-bgmcompare" class="level2">
 <h2 class="anchored" data-anchor-id="group-comparison-bgmcompare">Group comparison (bgmCompare)</h2>
@@ -642,7 +658,7 @@ window.Quarto = {
 <section id="numerical-and-gradient-considerations" class="level2">
 <h2 class="anchored" data-anchor-id="numerical-and-gradient-considerations">Numerical and gradient considerations</h2>
 <p>In discrete blocks, both log-normalizers and category probabilities are needed for efficient gradient computation. <code>bgms</code> computes these together to avoid redundant work and uses numerically stable paths for exponentiation-sensitive regions.</p>
-<p>See <a href="../manual/variable-helpers.html">Variable Helpers</a> and <a href="../manual/numerical.html">Numerical Considerations</a>.</p>
+<p>See <a href="../manual/variable-helpers.html">Fast Computation</a> and, for the portable <code>exp()</code>/<code>log()</code> implementation, <a href="../manual/numerical.html">OpenLibM Integration</a>.</p>
 
 
 

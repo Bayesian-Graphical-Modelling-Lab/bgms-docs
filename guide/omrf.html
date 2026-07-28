@@ -582,29 +582,13 @@ p(\mathbf{x}) \propto \exp\!\left(\sum_{i=1}^{p} \sum_{c=1}^{m_i} \mathcal{I}(x_
 </section>
 <section id="why-the-adjacent-category-model" class="level2">
 <h2 class="anchored" data-anchor-id="why-the-adjacent-category-model">Why the adjacent category model?</h2>
-<p>The ordinal MRF can be understood as a multivariate generalization of the adjacent category logit model for ordinal responses <span class="citation" data-cites="Agresti_2010">(<a href="#ref-Agresti_2010" role="doc-biblioref">Agresti, 2010</a>)</span>.</p>
-<section id="the-univariate-case" class="level3">
-<h3 class="anchored" data-anchor-id="the-univariate-case">The univariate case</h3>
-<p>Consider a single ordinal variable <span class="math inline">\(x \in \{0, \dots, m\}\)</span>, where the category index reflects only the ordering of the response labels. The adjacent category model characterizes the log-odds between successive categories:</p>
+<p>The ordinal MRF is the multivariate generalization of the adjacent category logit model for ordinal responses <span class="citation" data-cites="Agresti_2010">(<a href="#ref-Agresti_2010" role="doc-biblioref">Agresti, 2010</a>)</span>. For a single ordinal variable with categories <span class="math inline">\(0, \dots, m\)</span>, that model describes the log-odds between each pair of successive categories:</p>
 <p><span class="math display">\[
-\log\!\left( \frac{p(x = c+1)}{p(x = c)} \right) = \eta_c, \quad c = 0, \dots, m-1
+\log\!\left( \frac{p(x = c+1)}{p(x = c)} \right) = \eta_c, \quad c = 0, \dots, m-1.
 \]</span></p>
-<p>with <span class="math inline">\(\eta_0 = 0\)</span> for identifiability. The resulting probability mass function,</p>
-<p><span class="math display">\[
-p(x = c) = \frac{\exp\!\left( \sum_{k=c}^{m} \eta_k \right)}{1 + \sum_{j=1}^{m} \exp\!\left( \sum_{k=j}^{m} \eta_k \right)}
-\]</span></p>
-<p>is a member of the exponential family with canonical parameters <span class="math inline">\(\eta_c\)</span> and sufficient statistics <span class="math inline">\(\mathcal{I}(x \geq c)\)</span>.</p>
-</section>
-<section id="the-multivariate-extension" class="level3">
-<h3 class="anchored" data-anchor-id="the-multivariate-extension">The multivariate extension</h3>
-<p>For <span class="math inline">\(p\)</span> ordinal variables, we regress each variable <span class="math inline">\(x_i\)</span> on the others by modeling the canonical parameters as</p>
-<p><span class="math display">\[
-\eta_c = \alpha_c + \sum_{j \neq i} \beta_j\, x_j
-\]</span></p>
-<p>where <span class="math inline">\(\alpha_c\)</span> are category-specific intercepts and <span class="math inline">\(\beta_j\)</span> are common slopes. Crucially, the model depends on the ordinal variables only through the sufficient statistics <span class="math inline">\(\mathcal{I}(x_i \geq c)\)</span> and the interaction terms <span class="math inline">\(x_i\, x_j = \sum_c \sum_{c'} \mathcal{I}(x_i \geq c)\, \mathcal{I}(x_j \geq c')\)</span>. Because these terms are computed from cumulative indicators, the model captures only the ordering of the categories, without relying on any numeric interpretation or spacing of the labels. It is therefore invariant under monotonic recodings and does not assume interval-scale measurement.</p>
-<p>Other ordinal regression models, such as the cumulative logit and continuation ratio models <span class="citation" data-cites="Agresti_2010">(<a href="#ref-Agresti_2010" role="doc-biblioref">Agresti, 2010</a>)</span>, do not share this property. As shown by <span class="citation" data-cites="SuggalaYangRavikumar_2017">Suggala et al. (<a href="#ref-SuggalaYangRavikumar_2017" role="doc-biblioref">2017</a>)</span>, these models do not correspond to full conditionals of a joint distribution, and are therefore incompatible with a multivariate MRF formulation.</p>
-<p>The adjacent category model does yield consistent full conditionals, and the joint distribution that generates them is the ordinal MRF <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref"><span class="nocase">Marsman et al.</span>, 2025</a>)</span>.</p>
-</section>
+<p>Each parameter compares one category to the next; nothing in the model treats the category labels as numbers.</p>
+<p>This choice has a practical payoff: the model uses only the <em>ordering</em> of the categories, not their numeric labels or spacing. Whether you code a five-point scale as 0–4 or 1–5, or the distances between response options are unequal, the estimates are the same — no interval-scale measurement is assumed.</p>
+<p>It is also the choice that makes a network model possible at all. Other ordinal regressions, such as the cumulative logit or continuation ratio models, cannot serve as building blocks of a joint network: their conditional distributions are incompatible with any joint distribution <span class="citation" data-cites="SuggalaYangRavikumar_2017">(<a href="#ref-SuggalaYangRavikumar_2017" role="doc-biblioref">Suggala et al., 2017</a>)</span>. The adjacent category model’s conditionals are compatible, and the joint distribution they generate is exactly the ordinal MRF above <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref"><span class="nocase">Marsman et al.</span>, 2025</a>)</span>. The formal development is in <a href="../manual/omrf-internals.html">OMRF Internals</a>.</p>
 </section>
 <section id="connection-to-the-mrf-framework" class="level2">
 <h2 class="anchored" data-anchor-id="connection-to-the-mrf-framework">Connection to the MRF framework</h2>
@@ -658,12 +642,12 @@ p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
 </section>
 <section id="pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="pseudolikelihood">Pseudolikelihood</h2>
-<p>The normalizing constant of the ordinal MRF involves a sum over all possible configurations of <span class="math inline">\(p\)</span> ordinal variables, which is intractable for all but the smallest networks. <code>bgms</code> uses a pseudolikelihood approximation <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref"><span class="nocase">Marsman et al.</span>, 2025</a>)</span>: the product of full conditional distributions replaces the joint distribution.</p>
+<p>The normalizing constant of the ordinal MRF involves a sum over all possible configurations of <span class="math inline">\(p\)</span> ordinal variables, which is intractable for all but the smallest networks. <code>bgms</code> uses a pseudolikelihood approximation <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref"><span class="nocase">Marsman et al.</span>, 2025</a>)</span>: the joint distribution is replaced by the product of each variable’s conditional distribution given all the others (its <em>full conditional</em>).</p>
 <p>The full conditional distribution for variable <span class="math inline">\(i\)</span> given all other variables is:</p>
 <p><span class="math display">\[
 p(x_i = c \mid \mathbf{x}_{-i}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right)}{\sum_{k=0}^{m_i} \exp\!\left(\mu_{ik} + k \cdot r_i\right)}
 \]</span></p>
-<p>where <span class="math inline">\(r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}\)</span> is the residual score — a sufficient reduction that summarizes the influence of all other variables on <span class="math inline">\(x_i\)</span>. The pseudolikelihood is the product of these conditionals across all observations and variables.</p>
+<p>where <span class="math inline">\(r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}\)</span> is the residual score — a single summary of the influence of all other variables on <span class="math inline">\(x_i\)</span>. The pseudolikelihood is the product of these conditionals across all observations and variables.</p>
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>

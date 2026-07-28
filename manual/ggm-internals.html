@@ -605,7 +605,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="sampling-overview">Sampling overview</h2>
 <p>The GGM supports two samplers:</p>
 <ul>
-<li><strong>NUTS</strong> (default) — Gradient-based sampling of all continuous parameters simultaneously. Uses a free-element Cholesky parameterization with RATTLE constraints when edge selection is active.</li>
+<li><strong>NUTS</strong> (default) — Gradient-based sampling of all continuous parameters simultaneously. Uses a free-element Cholesky parameterization with <a href="../manual/rattle.html">RATTLE</a> constraints when edge selection is active.</li>
 <li><strong>Adaptive Metropolis</strong> (fallback) — Element-wise updates of individual <span class="math inline">\(\theta_{ij}\)</span> entries via rank-1 Cholesky updates.</li>
 </ul>
 <p>The sampler is selected by the <code>update_method</code> argument in <code>bgm()</code>. Edge indicators <span class="math inline">\(\gamma_{ij}\)</span> are always updated by Metropolis–Hastings moves, regardless of the continuous-parameter sampler. Within each iteration, edge indicator updates run first, then the continuous sampler runs with the graph held fixed. See <a href="../manual/samplers.html">Sampler Hierarchy</a> for the full dispatch logic.</p>
@@ -619,7 +619,7 @@ window.Quarto = {
 <p><span class="math display">\[
 \theta = (\psi_1,\; f_2, \psi_2,\; f_3, \psi_3,\; \ldots,\; f_p, \psi_p),
 \]</span></p>
-<p>where for each column <span class="math inline">\(q\)</span>:</p>
+<p>Notation: on this page <span class="math inline">\(\theta\)</span> without subscripts is the packed sampler position (the <span class="math inline">\(q\)</span> of the <a href="../manual/nuts.html">NUTS</a> and <a href="../manual/rattle.html">Constrained Leapfrog</a> pages — here <span class="math inline">\(q\)</span> indexes Cholesky columns instead, mirroring the code); the doubly-subscripted <span class="math inline">\(\theta_{ij}\)</span> always denotes an entry of the precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span>. For each column <span class="math inline">\(q\)</span>:</p>
 <ul>
 <li><span class="math inline">\(\psi_q = \log(\Phi_{qq})\)</span> — the log-transformed diagonal entry, ensuring <span class="math inline">\(\Phi_{qq} &gt; 0\)</span>.</li>
 <li><span class="math inline">\(f_q \in \mathbb{R}^{d_q}\)</span> — free parameters for column <span class="math inline">\(q\)</span>’s off-diagonal entries, with <span class="math inline">\(d_q\)</span> equal to the number of included edges in column <span class="math inline">\(q\)</span>.</li>
@@ -705,7 +705,7 @@ window.Quarto = {
 \]</span></p>
 <p>The backward pass runs in two phases:</p>
 <ol type="1">
-<li><strong>Phase 1 (data + priors → <span class="math inline">\(\bar{\boldsymbol{\Phi}}\)</span>)</strong> — Computes the adjoint of the Cholesky factor from the data likelihood, Cauchy prior on off-diagonals, and Gamma prior on diagonals.</li>
+<li><strong>Phase 1 (data + priors → <span class="math inline">\(\bar{\boldsymbol{\Phi}}\)</span>)</strong> — Computes the adjoint of the Cholesky factor from the data likelihood, the interaction prior on off-diagonals (default Cauchy), and the scale prior on diagonals (default Gamma); see <a href="../manual/parameter-priors.html">Parameter Priors</a>. Throughout, a bar denotes the reverse-mode adjoint: <span class="math inline">\(\bar{A} = \partial \log p / \partial A\)</span>, the sensitivity of the log-posterior to that quantity.</li>
 <li><strong>Phase 2 (right-to-left column sweep)</strong> — Propagates <span class="math inline">\(\bar{\boldsymbol{\Phi}}\)</span> through the stored Givens rotations to extract <span class="math inline">\(\partial\log p / \partial f_q\)</span> and <span class="math inline">\(\partial\log p / \partial \psi_q\)</span>. Reverse-mode differentiation through the QR factorization captures cross-column dependencies automatically.</li>
 </ol>
 </section>
@@ -754,7 +754,7 @@ window.Quarto = {
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>
-<p>When edge selection is active, each edge <span class="math inline">\((i,j)\)</span> has a binary indicator <span class="math inline">\(\gamma_{ij}\)</span>. Edge indicators are updated via MoMS (Mixtures of Mutually Singular distributions) add/delete moves <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>, reusing the same Roverato constants and in-place Cholesky machinery described above.</p>
+<p>When edge selection is active, each edge <span class="math inline">\((i,j)\)</span> has a binary indicator <span class="math inline">\(\gamma_{ij}\)</span>. Edge indicators are updated via mixtures-of-mutually-singular-distributions (MoMS) add/delete moves <span class="citation" data-cites="GottardoRaftery_2008 VanDenBerghEtAl_2026_moms">(<a href="#ref-GottardoRaftery_2008" role="doc-biblioref">Gottardo &amp; Raftery, 2008</a>; <a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>, reusing the same Roverato constants and in-place Cholesky machinery described above. In the proposals below, <span class="math inline">\(c_3\)</span> denotes the Roverato scaling constant (<code>constants_[3]</code>) that relates a proposal on the Cholesky scale to the resulting precision entry.</p>
 <section id="delete-move-gamma_ij-1-to-0" class="level3">
 <h3 class="anchored" data-anchor-id="delete-move-gamma_ij-1-to-0">Delete move (<span class="math inline">\(\gamma_{ij} = 1 \to 0\)</span>)</h3>
 <p>Propose to set <span class="math inline">\(\theta_{ij} = 0\)</span> and <span class="math inline">\(\theta_{jj}\)</span> to its constrained value. The acceptance ratio includes:</p>
@@ -776,7 +776,6 @@ window.Quarto = {
 <li>The reverse proposal density <span class="math inline">\(-\log \phi(\epsilon;\, 0,\, \sigma_{ij}) + \log c_3\)</span></li>
 <li>The Gamma(1,1) prior ratio on <span class="math inline">\(\theta_{jj}\)</span></li>
 </ul>
-<p>Here <span class="math inline">\(c_3\)</span> is the Roverato scaling constant (<code>constants_[3]</code>) relating the Cholesky proposal to the precision entry.</p>
 </section>
 <section id="iteration-order" class="level3">
 <h3 class="anchored" data-anchor-id="iteration-order">Iteration order</h3>

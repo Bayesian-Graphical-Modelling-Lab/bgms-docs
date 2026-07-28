@@ -623,12 +623,7 @@ p(\mathbf{x}) \propto \exp\!\left(
 </section>
 <section id="likelihood" class="level2">
 <h2 class="anchored" data-anchor-id="likelihood">Likelihood</h2>
-<p>Unlike the ordinal MRF, whose normalizing constant is intractable and requires a pseudolikelihood approximation (see <a href="../guide/omrf.html">Ordinal MRF</a>), the GGM has a closed-form likelihood. For <span class="math inline">\(n\)</span> observations with sufficient statistic <span class="math inline">\(\mathbf{S} = \mathbf{X}^{\sf T}\mathbf{X}\)</span>, the log-likelihood is:</p>
-<p><span class="math display">\[
-\ell(\boldsymbol{\Theta}) = \frac{n}{2}\,\log|\boldsymbol{\Theta}|
-- \frac{1}{2}\,\operatorname{tr}(\mathbf{S}\,\boldsymbol{\Theta})
-\]</span></p>
-<p>The likelihood depends on the data only through <span class="math inline">\(\mathbf{S}\)</span> and <span class="math inline">\(n\)</span>, not through the individual observations (see <a href="../manual/ggm-internals.html">GGM Internals</a> for how it is evaluated).</p>
+<p>Unlike the ordinal MRF, whose normalizing constant is intractable and requires a pseudolikelihood approximation (see <a href="../guide/omrf.html">Ordinal MRF</a>), the GGM has a closed-form likelihood — estimates for continuous data involve no approximation. The exact expression and how it is evaluated are given in <a href="../manual/ggm-internals.html">GGM Internals</a>.</p>
 </section>
 <section id="edge-selection" class="level2">
 <h2 class="anchored" data-anchor-id="edge-selection">Edge selection</h2>

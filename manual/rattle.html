@@ -641,14 +641,14 @@ window.Quarto = {
 <p>The implementation lives in <code>leapfrog.h</code> and <code>leapfrog.cpp</code>.</p>
 <section id="why-constraints" class="level2">
 <h2 class="anchored" data-anchor-id="why-constraints">Why constraints?</h2>
-<p>In the MoMS edge-selection framework <span class="citation" data-cites="VanDenBerghEtAl_2026_moms">(<a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>, each pairwise parameter is either exactly zero (edge absent) or free (edge present). For models with continuous variables (GGM, Mixed MRF), the precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span> must be positive definite. <code>bgms</code> enforces this through a Cholesky parameterization <span class="math inline">\(\boldsymbol{\Theta} = L^\top L\)</span>, where the sampler operates on the entries of <span class="math inline">\(L\)</span>. Positive definiteness is then guaranteed by construction.</p>
+<p>In the MoMS edge-selection framework <span class="citation" data-cites="VanDenBerghEtAl_2026_moms">(<a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>, each pairwise parameter is either exactly zero (edge absent) or free (edge present). For models with continuous variables (GGM, Mixed MRF), the precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span> must be positive definite. <code>bgms</code> enforces this through a Cholesky parameterization <span class="math inline">\(\boldsymbol{\Theta} = \boldsymbol{\Phi}^\top \boldsymbol{\Phi}\)</span>, where <span class="math inline">\(\boldsymbol{\Phi}\)</span> is the upper Cholesky factor and the sampler operates on its entries. Positive definiteness is then guaranteed by construction.</p>
 <p>The complication is sparsity. An excluded edge (<span class="math inline">\(\gamma_{ij} = 0\)</span>) requires <span class="math inline">\(\theta_{ij} = 0\)</span>, which in Cholesky entries means</p>
 <p><span class="math display">\[
-\sum_l L_{li}\,L_{lj} = 0.
+\sum_l \Phi_{li}\,\Phi_{lj} = 0.
 \]</span></p>
-<p>This is a nonlinear (quadratic) constraint on the entries of <span class="math inline">\(L\)</span>, because different columns of <span class="math inline">\(L\)</span> interact through the <span class="math inline">\(L^\top L\)</span> product. The constraint manifold is</p>
+<p>This is a nonlinear (quadratic) constraint on the entries of <span class="math inline">\(\boldsymbol{\Phi}\)</span>, because different columns of <span class="math inline">\(\boldsymbol{\Phi}\)</span> interact through the <span class="math inline">\(\boldsymbol{\Phi}^\top \boldsymbol{\Phi}\)</span> product. The constraint manifold is</p>
 <p><span class="math display">\[
-\mathcal{M} = \bigl\{L : \theta_{ij} = \textstyle\sum_l L_{li}\,L_{lj} = 0
+\mathcal{M} = \bigl\{\boldsymbol{\Phi} : \theta_{ij} = \textstyle\sum_l \Phi_{li}\,\Phi_{lj} = 0
 \;\text{for all }\; \gamma_{ij} = 0\bigr\}.
 \]</span></p>
 <p>Standard leapfrog preserves the Hamiltonian but not this nonlinear constraint: after an unconstrained position update, excluded precision entries drift away from zero. RATTLE adds projection steps that snap the trajectory back onto <span class="math inline">\(\mathcal{M}\)</span> after each leapfrog sub-step.</p>
@@ -669,18 +669,18 @@ window.Quarto = {
        └──────────────────────────────────────────┘</code></pre>
 <p>In mathematical notation:</p>
 <ol type="1">
-<li><strong>Half-step momentum</strong> — <span class="math inline">\(r \leftarrow r + \tfrac{\epsilon}{2}\,\nabla\log p(x)\)</span></li>
-<li><strong>Project momentum</strong> — Project <span class="math inline">\(r\)</span> onto the cotangent space of <span class="math inline">\(\mathcal{M}\)</span> at <span class="math inline">\(x\)</span>. This ensures the momentum does not push the trajectory off the constraint surface.</li>
-<li><strong>Full-step position</strong> — <span class="math inline">\(x \leftarrow x + \epsilon\,M^{-1} r\)</span></li>
-<li><strong>SHAKE (position projection)</strong> <span class="citation" data-cites="RyckaertEtAl_1977">(<a href="#ref-RyckaertEtAl_1977" role="doc-biblioref">Ryckaert et al., 1977</a>)</span> — Set excluded entries of <span class="math inline">\(x\)</span> back to zero. Record the displacement <span class="math inline">\(\Delta x = x_{\text{after}} - x_{\text{before}}\)</span>.</li>
-<li><strong>Momentum correction</strong> — Account for the constraint forces that produced the position snap: <span class="math inline">\(r \leftarrow r + \Delta x \,/\, (\epsilon\,M^{-1})\)</span></li>
-<li><strong>Second half-step momentum</strong> — <span class="math inline">\(r \leftarrow r + \tfrac{\epsilon}{2}\,\nabla\log p(x)\)</span></li>
-<li><strong>Project momentum</strong> — Project <span class="math inline">\(r\)</span> onto the cotangent space again.</li>
+<li><strong>Half-step momentum</strong> — <span class="math inline">\(p \leftarrow p + \tfrac{\epsilon}{2}\,\nabla\log \pi(q)\)</span></li>
+<li><strong>Project momentum</strong> — Project <span class="math inline">\(p\)</span> onto the cotangent space of <span class="math inline">\(\mathcal{M}\)</span> at <span class="math inline">\(q\)</span> — the space of momenta that keep the trajectory on the constraint surface.</li>
+<li><strong>Full-step position</strong> — <span class="math inline">\(q \leftarrow q + \epsilon\,M^{-1} p\)</span></li>
+<li><strong>SHAKE (position projection)</strong> <span class="citation" data-cites="RyckaertEtAl_1977">(<a href="#ref-RyckaertEtAl_1977" role="doc-biblioref">Ryckaert et al., 1977</a>)</span> — Set excluded entries of <span class="math inline">\(q\)</span> back to zero. Record the displacement <span class="math inline">\(\Delta q = q_{\text{after}} - q_{\text{before}}\)</span>.</li>
+<li><strong>Momentum correction</strong> — Account for the constraint forces that produced the position snap: <span class="math inline">\(p \leftarrow p + \Delta q \,/\, (\epsilon\,M^{-1})\)</span></li>
+<li><strong>Second half-step momentum</strong> — <span class="math inline">\(p \leftarrow p + \tfrac{\epsilon}{2}\,\nabla\log \pi(q)\)</span></li>
+<li><strong>Project momentum</strong> — Project <span class="math inline">\(p\)</span> onto the cotangent space again.</li>
 </ol>
 <p>Steps 2 and 7 keep the momentum tangent to the constraint manifold. Step 4 snaps the position back after the unconstrained update. Step 5 adjusts the momentum to reflect the constraint forces implied by the position snap.</p>
 <section id="memoizer-cache-invalidation" class="level3">
 <h3 class="anchored" data-anchor-id="memoizer-cache-invalidation">Memoizer cache invalidation</h3>
-<p>The <code>Memoizer</code> (see <a href="#memoizer">below</a>) caches <span class="math inline">\((x, \log p, \nabla\log p)\)</span> from the most recent evaluation. After step 4 changes <span class="math inline">\(x\)</span> in place, the cached gradient refers to the pre-projection position and is invalid. The cache is explicitly invalidated between steps 4 and 6, forcing a fresh evaluation when step 6 requests the gradient.</p>
+<p>The <code>Memoizer</code> (see <a href="#memoizer">below</a>) caches <span class="math inline">\((q, \log \pi, \nabla\log \pi)\)</span> from the most recent evaluation. After step 4 changes <span class="math inline">\(q\)</span> in place, the cached gradient refers to the pre-projection position and is invalid. The cache is explicitly invalidated between steps 4 and 6, forcing a fresh evaluation when step 6 requests the gradient.</p>
 </section>
 </section>
 <section id="reversibility-check" class="level2">
@@ -688,17 +688,17 @@ window.Quarto = {
 <p>A symplectic integrator must be reversible: stepping forward and then backward with negated momentum should recover the original position exactly (up to floating-point rounding). Once projection enters the integrator, reversibility cannot be taken for granted: the nonlinear projection solve may fail to converge or may converge to a different branch on the backward step <span class="citation" data-cites="ZappaEtAl_2018 LelievreEtAl_2019">(<a href="#ref-LelievreEtAl_2019" role="doc-biblioref">Lelièvre et al., 2019</a>; <a href="#ref-ZappaEtAl_2018" role="doc-biblioref">Zappa et al., 2018</a>)</span>.</p>
 <section id="why-the-projection-is-approximate" class="level3">
 <h3 class="anchored" data-anchor-id="why-the-projection-is-approximate">Why the projection is approximate</h3>
-<p>The sparsity constraint on the precision matrix <span class="math inline">\(\boldsymbol{\Theta} = L^\top L\)</span> requires <span class="math inline">\(\theta_{ij} = \sum_l L_{li}\,L_{lj} = 0\)</span> for every excluded edge <span class="math inline">\((\gamma_{ij} = 0)\)</span>. This is nonlinear in the Cholesky entries of <span class="math inline">\(L\)</span> because different columns interact through the <span class="math inline">\(L^\top L\)</span> product.</p>
-<p>The SHAKE projection in step 4 solves these constraints with a left-to-right column sweep: for each column <span class="math inline">\(q\)</span>, it computes the exact linear correction that satisfies the constraints involving column <span class="math inline">\(q\)</span>, given the already-projected earlier columns. Within a single call, the sweep is exact — each column’s constraint <span class="math inline">\(A_q x_q = 0\)</span> is linear in <span class="math inline">\(x_q\)</span> when earlier columns are held fixed.</p>
-<p>The approximation enters because the position has moved <span class="math inline">\(O(\epsilon)\)</span> off the manifold, and the column sweep solves the linearized constraints in one pass. Cross-column coupling through <span class="math inline">\(L^\top L\)</span> means that correcting column <span class="math inline">\(q\)</span> can shift the residual of constraints involving later columns. This one-step Newton-like correction on an <span class="math inline">\(O(\epsilon)\)</span> perturbation leaves a residual of order <span class="math inline">\(O(\epsilon^2)\)</span> — the standard truncation order for a single Newton step.</p>
+<p>As derived <a href="#why-constraints">above</a>, each excluded edge imposes the quadratic constraint <span class="math inline">\(\theta_{ij} = \sum_l \Phi_{li}\,\Phi_{lj} = 0\)</span> on the Cholesky entries.</p>
+<p>The SHAKE projection in step 4 solves these constraints with a left-to-right column sweep: for each column <span class="math inline">\(j\)</span> of <span class="math inline">\(\boldsymbol{\Phi}\)</span>, it computes the exact linear correction that satisfies the constraints involving column <span class="math inline">\(j\)</span>, given the already-projected earlier columns. Within a single call, the sweep is exact — each column’s constraint <span class="math inline">\(A_j \phi_j = 0\)</span> is linear in the column entries <span class="math inline">\(\phi_j\)</span> when earlier columns are held fixed.</p>
+<p>The approximation enters because the position has moved <span class="math inline">\(O(\epsilon)\)</span> off the manifold, and the column sweep solves the linearized constraints in one pass. Cross-column coupling through <span class="math inline">\(\boldsymbol{\Phi}^\top \boldsymbol{\Phi}\)</span> means that correcting column <span class="math inline">\(j\)</span> can shift the residual of constraints involving later columns. This one-step Newton-like correction on an <span class="math inline">\(O(\epsilon)\)</span> perturbation leaves a residual of order <span class="math inline">\(O(\epsilon^2)\)</span> — the standard truncation order for a single Newton step.</p>
 <p><code>leapfrog_constrained_checked()</code> in <code>leapfrog.cpp</code> detects these failures at runtime:</p>
 <ol type="1">
-<li>Perform the forward constrained step: <span class="math inline">\((x, r) \to (x', r')\)</span>.</li>
-<li>Negate momentum and perform a second constrained step: <span class="math inline">\((x', -r') \to (x'', r'')\)</span>.</li>
-<li>Compute the round-trip error: <span class="math inline">\(\|x'' - x\|_\infty\)</span>.</li>
-<li>If the error exceeds <span class="math inline">\(\tau \cdot \epsilon^2\)</span>, flag the step as non-reversible.</li>
+<li>Perform the forward constrained step: <span class="math inline">\((q, p) \to (q', p')\)</span>.</li>
+<li>Negate momentum and perform a second constrained step: <span class="math inline">\((q', -p') \to (q'', p'')\)</span>.</li>
+<li>Compute the round-trip error: <span class="math inline">\(\|q'' - q\|_\infty\)</span>.</li>
+<li>If the error exceeds <span class="math inline">\(c_{\text{tol}} \cdot \epsilon^2\)</span>, flag the step as non-reversible.</li>
 </ol>
-<p>The tolerance factor <span class="math inline">\(\tau\)</span> defaults to <span class="math inline">\(0.5\)</span> (<code>reverse_check_tol</code> in <code>sampler_config.h</code>). The <span class="math inline">\(\epsilon^2\)</span> scaling matches the <span class="math inline">\(O(\epsilon^2)\)</span> residual from the column-sweep projection.</p>
+<p>The tolerance factor <span class="math inline">\(c_{\text{tol}}\)</span> defaults to <span class="math inline">\(0.5\)</span> (<code>reverse_check_tol</code> in <code>sampler_config.h</code>). The <span class="math inline">\(\epsilon^2\)</span> scaling matches the <span class="math inline">\(O(\epsilon^2)\)</span> residual from the column-sweep projection.</p>
 </section>
 <section id="phase-aware-enforcement" class="level3">
 <h3 class="anchored" data-anchor-id="phase-aware-enforcement">Phase-aware enforcement</h3>
@@ -740,23 +740,23 @@ window.Quarto = {
 </section>
 <section id="memoizer" class="level2">
 <h2 class="anchored" data-anchor-id="memoizer">Memoizer</h2>
-<p>The <code>Memoizer</code> class in <code>leapfrog.h</code> is a single-entry cache for <span class="math inline">\((\log p(x), \nabla\log p(x))\)</span> evaluations.</p>
+<p>The <code>Memoizer</code> class in <code>leapfrog.h</code> is a single-entry cache for <span class="math inline">\((\log \pi(q), \nabla\log \pi(q))\)</span> evaluations.</p>
 <section id="why-a-single-entry-cache" class="level3">
 <h3 class="anchored" data-anchor-id="why-a-single-entry-cache">Why a single-entry cache?</h3>
-<p>NUTS tree building calls the gradient repeatedly as it extends the trajectory. Each leapfrog step produces a new unique <span class="math inline">\(x\)</span>, so a multi-entry hash map would almost never hit — and hashing an <code>arma::vec</code> element-by-element is expensive. A single-entry cache exploits the fact that at tree-node boundaries the same <span class="math inline">\(x\)</span> appears as both the end of one subtree and the start of the next. The cache uses <code>memcmp</code> for equality, which is a single comparison per step.</p>
+<p>NUTS tree building calls the gradient repeatedly as it extends the trajectory. Each leapfrog step produces a new unique <span class="math inline">\(q\)</span>, so a multi-entry hash map would almost never hit — and hashing an <code>arma::vec</code> element-by-element is expensive. A single-entry cache exploits the fact that at tree-node boundaries the same <span class="math inline">\(q\)</span> appears as both the end of one subtree and the start of the next. The cache uses <code>memcmp</code> for equality, which is a single comparison per step.</p>
 </section>
 <section id="joint-evaluation" class="level3">
 <h3 class="anchored" data-anchor-id="joint-evaluation">Joint evaluation</h3>
-<p>Models often share computation between <span class="math inline">\(\log p\)</span> and <span class="math inline">\(\nabla\log p\)</span> (e.g., normalization constants, sufficient statistics). The Memoizer accepts a joint function <code>(x) → (logp, grad)</code> and caches both values from a single call. Two access methods retrieve the cached values:</p>
+<p>Models often share computation between <span class="math inline">\(\log \pi\)</span> and <span class="math inline">\(\nabla\log \pi\)</span> (e.g., normalization constants, sufficient statistics). The Memoizer accepts a joint function <code>(q) → (logp, grad)</code> and caches both values from a single call. Two access methods retrieve the cached values:</p>
 <ul>
-<li><code>cached_log_post(x)</code> — returns <span class="math inline">\(\log p(x)\)</span></li>
-<li><code>cached_grad(x)</code> — returns <span class="math inline">\(\nabla\log p(x)\)</span></li>
+<li><code>cached_log_post(q)</code> — returns <span class="math inline">\(\log \pi(q)\)</span></li>
+<li><code>cached_grad(q)</code> — returns <span class="math inline">\(\nabla\log \pi(q)\)</span></li>
 </ul>
 <p>Both trigger a joint evaluation if the cache misses.</p>
 </section>
 <section id="invalidation" class="level3">
 <h3 class="anchored" data-anchor-id="invalidation">Invalidation</h3>
-<p>After the SHAKE position projection (step 4 of the constrained leapfrog), <span class="math inline">\(x\)</span> is modified in place. The cached gradient refers to the pre-projection <span class="math inline">\(x\)</span> and must be discarded. <code>leapfrog_constrained()</code> calls <code>memo.invalidate()</code> immediately after the projection, before the second half-step requests a fresh gradient.</p>
+<p>After the SHAKE position projection (step 4 of the constrained leapfrog), <span class="math inline">\(q\)</span> is modified in place. The cached gradient refers to the pre-projection <span class="math inline">\(q\)</span> and must be discarded. <code>leapfrog_constrained()</code> calls <code>memo.invalidate()</code> immediately after the projection, before the second half-step requests a fresh gradient.</p>
 </section>
 </section>
 <section id="projection-callbacks" class="level2">

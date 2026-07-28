@@ -582,7 +582,7 @@ window.Quarto = {
 <p>Implementation details of the mixed Markov random field in bgms. Source: <code>src/models/mixed/mixed_mrf_model.h</code> and four <code>.cpp</code> files (<code>mixed_mrf_model.cpp</code>, <code>mixed_mrf_gradient.cpp</code>, <code>mixed_mrf_likelihoods.cpp</code>, <code>mixed_mrf_metropolis.cpp</code>).</p>
 <section id="block-structure" class="level2">
 <h2 class="anchored" data-anchor-id="block-structure">Block structure</h2>
-<p>The mixed MRF handles <span class="math inline">\(p\)</span> discrete and <span class="math inline">\(q\)</span> continuous variables. The parameter space is organized into three interaction blocks plus main effects:</p>
+<p>The mixed MRF handles <span class="math inline">\(p\)</span> discrete and <span class="math inline">\(q\)</span> continuous variables. The parameter space is organized into five blocks — two main-effect blocks and three interaction blocks:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 29%">
@@ -598,28 +598,33 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td>Main effects</td>
-<td>Discrete thresholds + continuous means</td>
-<td><span class="math inline">\(\text{thresholds} + q\)</span></td>
+<td>Thresholds</td>
+<td>Discrete category thresholds</td>
+<td><span class="math inline">\(\text{thresholds}\)</span></td>
 </tr>
 <tr class="even">
+<td>Means</td>
+<td>Continuous variable means</td>
+<td><span class="math inline">\(q\)</span></td>
+</tr>
+<tr class="odd">
 <td>Discrete-discrete</td>
 <td>Pairwise discrete interactions (symmetric)</td>
 <td><span class="math inline">\(p(p-1)/2\)</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Cross-type</td>
 <td>Discrete-continuous interactions</td>
 <td><span class="math inline">\(p \times q\)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Continuous-continuous</td>
 <td>Cholesky factor of the precision matrix</td>
 <td><span class="math inline">\(q(q+1)/2\)</span></td>
 </tr>
 </tbody>
 </table>
-<p>All five blocks are updated jointly by NUTS. The continuous precision matrix is parameterized through its Cholesky factor <span class="math inline">\(R\)</span> (with diagonal entries on the log scale) so that positive definiteness is guaranteed by construction. The gradient includes the Jacobian of the Cholesky-to-precision mapping.</p>
+<p>All five blocks are updated jointly by NUTS. The continuous-block precision matrix <span class="math inline">\(\boldsymbol{\Theta}\)</span> is parameterized through its upper Cholesky factor <span class="math inline">\(\boldsymbol{\Phi}\)</span> with <span class="math inline">\(\boldsymbol{\Theta} = \boldsymbol{\Phi}^\top \boldsymbol{\Phi}\)</span> (diagonal entries on the log scale, the same convention as <a href="../manual/ggm-internals.html">GGM Internals</a>), so that positive definiteness is guaranteed by construction. The gradient includes the Jacobian of the Cholesky-to-precision mapping.</p>
 </section>
 <section id="parameter-vector-layout" class="level2">
 <h2 class="anchored" data-anchor-id="parameter-vector-layout">Parameter vector layout</h2>
@@ -655,16 +660,19 @@ window.Quarto = {
 <li><strong>Discrete conditionals</strong> — Category probabilities via <a href="../manual/variable-helpers.html">Variable Helpers</a>, contributing gradients for thresholds and discrete pairwise interactions</li>
 <li><strong>Cross-type terms</strong> — Contributions from discrete-continuous interactions to both discrete and continuous conditional distributions</li>
 <li><strong>Continuous means</strong> — Gradient of the continuous-variable contribution to the pseudolikelihood</li>
-<li><strong>Cholesky block</strong> — The precision gradient <span class="math inline">\(\bar{\Omega}\)</span> is computed from the GGM conditional contribution and the conditional-mean coupling, then mapped to the Cholesky gradient <span class="math inline">\(\bar{R} = R(\bar{\Omega} + \bar{\Omega}^\top)\)</span>. Diagonal entries use the log-scale Jacobian: <span class="math inline">\(\partial\ell / \partial\psi_j =
-\bar{R}_{jj} R_{jj} + (q - j + 1)\)</span>.</li>
+<li><strong>Cholesky block</strong> — The precision gradient <span class="math inline">\(\bar{\boldsymbol{\Theta}}\)</span> is computed from the GGM conditional contribution and the conditional-mean coupling, then mapped to the Cholesky gradient <span class="math inline">\(\bar{\boldsymbol{\Phi}} = \boldsymbol{\Phi}(\bar{\boldsymbol{\Theta}} + \bar{\boldsymbol{\Theta}}^\top)\)</span>. Diagonal entries use the log-scale Jacobian: <span class="math inline">\(\partial\ell / \partial\psi_j = \bar{\Phi}_{jj} \Phi_{jj} + (q - j + 1)\)</span>, where <span class="math inline">\(\psi_j = \log \Phi_{jj}\)</span> and <span class="math inline">\(j\)</span> runs over the <span class="math inline">\(q\)</span> continuous variables (<span class="math inline">\(j = 1, \ldots, q\)</span>). Throughout, a bar denotes the reverse-mode adjoint <span class="math inline">\(\bar{A} = \partial \ell / \partial A\)</span> (as in <a href="../manual/ggm-internals.html#gradient">GGM Internals</a>).</li>
 </ol>
-<p>The log-prior gradient adds Cauchy penalties on off-diagonal precision entries and Gamma(1,1) penalties on diagonal entries.</p>
+<p>The log-prior gradient adds the interaction-prior penalties (default Cauchy) on off-diagonal precision entries and the scale-prior penalties (default Gamma(1, 1)) on diagonal entries; see <a href="../manual/parameter-priors.html">Parameter Priors</a>.</p>
 </section>
 <section id="discrete-pseudolikelihood" class="level2">
 <h2 class="anchored" data-anchor-id="discrete-pseudolikelihood">Discrete pseudolikelihood</h2>
-<p>The discrete full conditionals integrate out the continuous block: <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> rather than <span class="math inline">\(\log p(x_s \mid x_{-s}, y_{\text{obs}})\)</span>. The continuous block uses the GGM likelihood <span class="math inline">\(\log p(y \mid x) \propto \tfrac{n}{2}\log|\Omega| - \tfrac{1}{2}\operatorname{tr}(\Omega D^\top D)\)</span>.</p>
-<p>For a cross-model overview, see <a href="../manual/pseudolikelihood.html">Pseudolikelihood</a>.</p>
-<p>The discrete conditionals use the marginal interaction matrix <span class="math inline">\(M = A_{xx} + 2A_{xy}\Sigma_{yy}A_{xy}^\top\)</span>, which must be recomputed whenever the precision or cross-type parameters change. The <span class="math inline">\(\partial M/\partial\Sigma_{yy}\)</span> chain rule contributes to the precision gradient via <span class="math inline">\(-2\Sigma_{yy} A_{xy}^\top\bar{M} A_{xy}\Sigma_{yy}\)</span>.</p>
+<p>Write <span class="math inline">\(x_s\)</span> for discrete variable <span class="math inline">\(s\)</span>, <span class="math inline">\(x_{-s}\)</span> for the remaining discrete variables, and <span class="math inline">\(\mathbf{D}\)</span> for the <span class="math inline">\(n \times q\)</span> column-centered continuous data matrix. The discrete full conditionals integrate out the continuous block: the model uses <span class="math inline">\(\log p(x_s \mid x_{-s})\)</span> rather than conditioning on the observed continuous values. The continuous block uses the exact GGM likelihood <span class="math inline">\(\log p(y \mid x) \propto \tfrac{n}{2}\log|\boldsymbol{\Theta}| - \tfrac{1}{2}\operatorname{tr}(\boldsymbol{\Theta} \mathbf{D}^\top \mathbf{D})\)</span>.</p>
+<p>For a cross-model overview and the derivation of the marginal form, see <a href="../manual/pseudolikelihood.html">Pseudolikelihood</a>.</p>
+<p>After integrating out the continuous block, the discrete conditionals use the marginal interaction matrix</p>
+<p><span class="math display">\[
+\mathbf{M} = \mathbf{A}_{xx} + 2\,\mathbf{A}_{xy}\,\boldsymbol{\Sigma}_{yy}\,\mathbf{A}_{xy}^\top,
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{A}_{xx}\)</span> is the discrete-discrete interaction block, <span class="math inline">\(\mathbf{A}_{xy}\)</span> the cross-type (discrete-continuous) interaction block, and <span class="math inline">\(\boldsymbol{\Sigma}_{yy} = \boldsymbol{\Theta}^{-1}\)</span> the conditional covariance of the continuous variables. (In the notation of the <a href="../guide/mixed-model.html">mixed-model guide page</a>, these are the <span class="math inline">\(\boldsymbol{\Omega}^{xx}\)</span> and <span class="math inline">\(\boldsymbol{\Omega}^{xy}\)</span> blocks of the interaction matrix.) <span class="math inline">\(\mathbf{M}\)</span> must be recomputed whenever the precision or cross-type parameters change. The <span class="math inline">\(\partial \mathbf{M}/\partial\boldsymbol{\Sigma}_{yy}\)</span> chain rule contributes to the precision gradient via <span class="math inline">\(-2\boldsymbol{\Sigma}_{yy} \mathbf{A}_{xy}^\top\bar{\mathbf{M}} \mathbf{A}_{xy}\boldsymbol{\Sigma}_{yy}\)</span>.</p>
 </section>
 <section id="missing-data" class="level2">
 <h2 class="anchored" data-anchor-id="missing-data">Missing data</h2>

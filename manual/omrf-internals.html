@@ -600,6 +600,16 @@ window.Quarto = {
 
 
 <p>Implementation details of the ordinal Markov random field in <code>bgms</code>. Source: <code>src/models/omrf/omrf_model.h</code> and <code>omrf_model.cpp</code>.</p>
+<section id="adjacent-category-formulation" class="level2">
+<h2 class="anchored" data-anchor-id="adjacent-category-formulation">Adjacent-category formulation</h2>
+<p>The ordinal MRF is the multivariate model whose full conditionals are adjacent category logit models (see the <a href="../guide/omrf.html">guide page</a> for the applied motivation). For a single ordinal variable <span class="math inline">\(x \in \{0, \dots, m\}\)</span>, the adjacent category model characterizes the log-odds between successive categories, <span class="math inline">\(\log\{p(x = c{+}1)/p(x = c)\} = \eta_c\)</span> with <span class="math inline">\(\eta_0 = 0\)</span> for identifiability. The resulting probability mass function,</p>
+<p><span class="math display">\[
+p(x = c) = \frac{\exp\!\left( \sum_{k=c}^{m} \eta_k \right)}{1 + \sum_{j=1}^{m} \exp\!\left( \sum_{k=j}^{m} \eta_k \right)},
+\]</span></p>
+<p>is a member of the exponential family with canonical parameters <span class="math inline">\(\eta_c\)</span> and sufficient statistics <span class="math inline">\(\mathcal{I}(x \geq c)\)</span>.</p>
+<p>For <span class="math inline">\(p\)</span> ordinal variables, each variable is regressed on the others by modeling the canonical parameters as <span class="math inline">\(\eta_c = \alpha_c + \sum_{j \neq i} \beta_j\, x_j\)</span>, with category-specific intercepts <span class="math inline">\(\alpha_c\)</span> and common slopes <span class="math inline">\(\beta_j\)</span>. The model depends on the ordinal variables only through the sufficient statistics <span class="math inline">\(\mathcal{I}(x_i \geq c)\)</span> and the interaction terms <span class="math inline">\(x_i\, x_j = \sum_c \sum_{c'} \mathcal{I}(x_i \geq c)\, \mathcal{I}(x_j \geq c')\)</span> — cumulative indicators, so only the ordering of categories matters and the model is invariant under monotonic recodings.</p>
+<p>Alternative ordinal regressions (cumulative logit, continuation ratio) do not correspond to full conditionals of any joint distribution and are therefore incompatible with a multivariate MRF formulation <span class="citation" data-cites="SuggalaYangRavikumar_2017">(<a href="#ref-SuggalaYangRavikumar_2017" role="doc-biblioref">Suggala et al., 2017</a>)</span>. The adjacent category model does yield consistent full conditionals, and the joint distribution that generates them is the ordinal MRF <span class="citation" data-cites="MarsmanVandenBerghHaslbeck_2025">(<a href="#ref-MarsmanVandenBerghHaslbeck_2025" role="doc-biblioref"><span class="nocase">Marsman et al.</span>, 2025</a>)</span>.</p>
+</section>
 <section id="ordinal-threshold-parameterization" class="level2">
 <h2 class="anchored" data-anchor-id="ordinal-threshold-parameterization">Ordinal threshold parameterization</h2>
 <p>For an ordinal variable <span class="math inline">\(X_i\)</span> with <span class="math inline">\(K_i + 1\)</span> categories <span class="math inline">\((0, 1, \ldots, K_i)\)</span>, the model assigns <span class="math inline">\(K_i\)</span> threshold parameters <span class="math inline">\(\mu_i(1), \ldots, \mu_i(K_i)\)</span>. Category <span class="math inline">\(c = 0\)</span> serves as the reference with <span class="math inline">\(\mu_i(0) = 0\)</span>. The conditional probability of observing category <span class="math inline">\(c\)</span> for person <span class="math inline">\(n\)</span> is:</p>
@@ -676,6 +686,12 @@ r_{ni} = 2\sum_{j \neq i} x_{nj}\, \omega_{ij}
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
 <div id="ref-GottardoRaftery_2008" class="csl-entry" role="listitem">
 Gottardo, R., &amp; Raftery, A. E. (2008). Markov chain <span>Monte Carlo</span> with mixtures of mutually singular distributions. <em>Journal of Computational and Graphical Statistics</em>, <em>17</em>(4), 949–975. <a href="https://doi.org/10.1198/106186008X386102">https://doi.org/10.1198/106186008X386102</a>
+</div>
+<div id="ref-MarsmanVandenBerghHaslbeck_2025" class="csl-entry" role="listitem">
+<span class="nocase">Marsman, M., van den Bergh, D., &amp; Haslbeck, J. M. B.</span> (2025). Bayesian analysis of the ordinal <span>M</span>arkov random field. <em>Psychometrika</em>, <em>90</em>(1), 146–182. <a href="https://doi.org/10.1017/psy.2024.4">https://doi.org/10.1017/psy.2024.4</a>
+</div>
+<div id="ref-SuggalaYangRavikumar_2017" class="csl-entry" role="listitem">
+Suggala, A. S., Yang, E., &amp; Ravikumar, P. (2017). Ordinal graphical models: A tale of two approaches. In D. Precup &amp; Y. W. Teh (Eds.), <em>Proceedings of the 34th international conference on machine learning</em> (Vol. 70, pp. 3260–3269). PMLR.
 </div>
 <div id="ref-VanDenBerghEtAl_2026_moms" class="csl-entry" role="listitem">
 <span class="nocase">van den Bergh, D., Clyde, M. A., Raftery, A. E., &amp; Marsman, M.</span> (2026). Reversible jump <span>MCMC</span> with no regrets: <span>B</span>ayesian variable selection using mixtures of mutually singular distributions. <em>Manuscript in Preparation</em>.

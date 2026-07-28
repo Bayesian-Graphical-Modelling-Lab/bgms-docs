@@ -688,7 +688,7 @@ window.Quarto = {
 <li>Estimates transition probabilities: <span class="math inline">\(\hat{a} = n_{01} / (n_{00} + n_{01})\)</span>, <span class="math inline">\(\hat{b} = n_{10} / (n_{10} + n_{11})\)</span></li>
 <li>Returns ESS = <span class="math inline">\(n \cdot (a + b) / (2 - a - b)\)</span>, with <span class="math inline">\(n\)</span> the chain length as above</li>
 </ol>
-<p>This formula derives from the integrated autocorrelation time of a two-state Markov chain where <span class="math inline">\(\rho(k) = (1-a-b)^k\)</span> <span class="citation" data-cites="VanDenBerghEtAl_2026_moms">(<a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>.</p>
+<p>This formula derives from the integrated autocorrelation time of a two-state Markov chain <span class="citation" data-cites="VanDenBerghEtAl_2026_moms">(<a href="#ref-VanDenBerghEtAl_2026_moms" role="doc-biblioref"><span class="nocase">van den Bergh et al.</span>, 2026</a>)</span>: the lag-<span class="math inline">\(k\)</span> autocorrelation of the indicator sequence is <span class="math inline">\(\rho(k) = (1-a-b)^k\)</span>, giving integrated autocorrelation time <span class="math inline">\(\tau = (2 - a - b)/(a + b)\)</span> and hence <span class="math inline">\(\text{ESS} = n / \tau\)</span>.</p>
 <p>When the total number of transitions (<span class="math inline">\(n_{01} + n_{10}\)</span>) is below 5, the estimate is unreliable and flagged in the output.</p>
 </section>
 </section>

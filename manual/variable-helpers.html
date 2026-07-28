@@ -595,30 +595,29 @@ window.Quarto = {
 <section id="fast-path-detail" class="level3">
 <h3 class="anchored" data-anchor-id="fast-path-detail">FAST path detail</h3>
 <p>For an ordinal variable with categories <span class="math inline">\(0, 1, \ldots, K\)</span> and residual <span class="math inline">\(r\)</span>:</p>
+<p>Let <span class="math inline">\(B = K \cdot r\)</span> denote the per-person stabilization bound — the largest exponent the accumulation can reach (see <a href="#the-exp_bound-709-threshold">the EXP_BOUND section</a> for how it gates the FAST path). Then:</p>
 <ol type="1">
-<li>Precompute <span class="math inline">\(e_r = \exp(r)\)</span>, <span class="math inline">\(e_b = \exp(-b)\)</span>, and <span class="math inline">\(e_\mu(c) = \exp(\mu(c))\)</span> for each category (once per variable)</li>
+<li>Precompute <span class="math inline">\(e_r = \exp(r)\)</span>, <span class="math inline">\(e_B = \exp(-B)\)</span>, and <span class="math inline">\(e_\mu(c) = \exp(\mu(c))\)</span> for each category (once per variable)</li>
 <li>Accumulate the denominator with a running power <span class="math inline">\(P\)</span>:</li>
 </ol>
 <p><span class="math display">\[
 \begin{aligned}
 P &amp;\leftarrow e_r \\
-D &amp;\leftarrow e_b \\
+D &amp;\leftarrow e_B \\
 \text{for } c &amp;= 1, \ldots, K: \\
-  D &amp;\leftarrow D + e_\mu(c) \cdot P \cdot e_b \\
+  D &amp;\leftarrow D + e_\mu(c) \cdot P \cdot e_B \\
   P &amp;\leftarrow P \cdot e_r
 \end{aligned}
 \]</span></p>
-<p>Only two per-person <code>exp()</code> calls are needed (<span class="math inline">\(e_r\)</span> and <span class="math inline">\(e_b\)</span>), plus <span class="math inline">\(K\)</span> for the main effects. The running product <span class="math inline">\(P = e_r^{\,c}\)</span> replaces the <span class="math inline">\(K\)</span> per-category <code>exp()</code> calls that a naive implementation would require.</p>
+<p>Only two per-person <code>exp()</code> calls are needed (<span class="math inline">\(e_r\)</span> and <span class="math inline">\(e_B\)</span>), plus <span class="math inline">\(K\)</span> for the main effects. The running product <span class="math inline">\(P = e_r^{\,c}\)</span> replaces the <span class="math inline">\(K\)</span> per-category <code>exp()</code> calls that a naive implementation would require.</p>
 </section>
 <section id="safe-path-detail" class="level3">
 <h3 class="anchored" data-anchor-id="safe-path-detail">SAFE path detail</h3>
-<p>When the FAST path would overflow or underflow:</p>
-<ol type="1">
-<li>Compute <span class="math inline">\(s_c = \mu(c) + c \cdot r\)</span> for each category</li>
-<li>Find <span class="math inline">\(s_{\max} = \max_c s_c\)</span></li>
-<li>Compute <span class="math inline">\(D = \exp(s_{\max}) \sum_c \exp(s_c - s_{\max})\)</span></li>
-</ol>
-<p>This is the standard log-sum-exp computation, applied per person.</p>
+<p>When the FAST path would overflow or underflow, the exponents are shifted before exponentiating — the log-sum-exp technique. The shift differs by variable type:</p>
+<ul>
+<li><strong>Ordinal</strong>: the category exponents <span class="math inline">\(s_c = \mu(c) + c \cdot r\)</span> are shifted by the precomputed bound <span class="math inline">\(B = K \cdot r\)</span>: <span class="math inline">\(D = \exp(B) \sum_c \exp(s_c - B)\)</span>.</li>
+<li><strong>Blume-Capel</strong>: the shift is the per-person maximum category score, <span class="math inline">\(s_{\max} = \max_c s_c\)</span>, the classic log-sum-exp form: <span class="math inline">\(D = \exp(s_{\max}) \sum_c \exp(s_c - s_{\max})\)</span>.</li>
+</ul>
 </section>
 <section id="block-scanning" class="level3">
 <h3 class="anchored" data-anchor-id="block-scanning">Block scanning</h3>
@@ -640,7 +639,7 @@ D &amp;\leftarrow e_b \\
 <h2 class="anchored" data-anchor-id="blume-capel-variables">Blume-Capel variables</h2>
 <section id="compute_denom_blume_capel" class="level3">
 <h3 class="anchored" data-anchor-id="compute_denom_blume_capel"><code>compute_denom_blume_capel()</code></h3>
-<p>Handles the Blume-Capel parameterization, where the category score involves both linear and quadratic terms: <span class="math inline">\(\mu(c) = \alpha(c - b) + \beta(c - b)^2\)</span>. The precomputation of <span class="math inline">\(\theta_c = \alpha(c - b) + \beta(c - b)^2\)</span> is done once per variable, and the FAST/SAFE split proceeds as for ordinal variables.</p>
+<p>Handles the Blume-Capel parameterization, where the category score involves both linear and quadratic terms: <span class="math inline">\(\mu(c) = \alpha(c - b) + \beta(c - b)^2\)</span>, with <span class="math inline">\(b\)</span> the baseline (reference) category. The scores <span class="math inline">\(\mu(c)\)</span> are precomputed once per variable, and the FAST/SAFE split proceeds as for ordinal variables.</p>
 </section>
 <section id="compute_probs_blume_capel" class="level3">
 <h3 class="anchored" data-anchor-id="compute_probs_blume_capel"><code>compute_probs_blume_capel()</code></h3>
@@ -654,7 +653,7 @@ D &amp;\leftarrow e_b \\
 </section>
 <section id="the-exp_bound-709-threshold" class="level2">
 <h2 class="anchored" data-anchor-id="the-exp_bound-709-threshold">The EXP_BOUND = 709 threshold</h2>
-<p>The bound that triggers the SAFE path is set to 709, derived from IEEE 754 double precision: <span class="math inline">\(\exp(709) \approx 8.2 \times 10^{307}\)</span> is the largest representable value, while <span class="math inline">\(\exp(710) = \text{Inf}\)</span>. The FAST path checks whether <span class="math inline">\(|b_i| \le 709\)</span> before proceeding, where <span class="math inline">\(b_i = K \cdot r_i\)</span> for ordinal variables. For the joint log-normalizer functions, the threshold is reduced to <span class="math inline">\(709 - \max_c |\theta_c|\)</span> to account for intermediate overflow risk in the power chain. The Blume–Capel variants additionally check <span class="math inline">\(|K \cdot r_i - b_i| \le 709\)</span>.</p>
+<p>The bound that triggers the SAFE path is set to 709, derived from IEEE 754 double precision: <span class="math inline">\(\exp(709) \approx 8.2 \times 10^{307}\)</span> is the largest representable value, while <span class="math inline">\(\exp(710) = \text{Inf}\)</span>. The FAST path checks whether <span class="math inline">\(|B_i| \le 709\)</span> before proceeding, where <span class="math inline">\(B_i = K \cdot r_i\)</span> for ordinal variables and, for Blume–Capel variables, the per-person maximum category score. For the joint log-normalizer functions, the threshold is reduced to <span class="math inline">\(709 - \max_c |\mu(c)|\)</span> to account for intermediate overflow risk in the power chain. The Blume–Capel variants additionally check <span class="math inline">\(|K \cdot r_i - B_i| \le 709\)</span>.</p>
 
 
 </section>
