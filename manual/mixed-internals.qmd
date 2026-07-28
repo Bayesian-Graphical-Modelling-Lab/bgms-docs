@@ -19,16 +19,20 @@ blocks and three interaction blocks:
 | Means | Continuous variable means | $q$ |
 | Discrete-discrete | Pairwise discrete interactions (symmetric) | $p(p-1)/2$ |
 | Cross-type | Discrete-continuous interactions | $p \times q$ |
-| Continuous-continuous | Cholesky factor of the precision matrix | $q(q+1)/2$ |
+| Continuous-continuous | Null-space theta block of the precision matrix | $q + \lvert E_{yy} \rvert$ active |
 
 All five blocks are updated jointly by NUTS. The continuous-block
-precision matrix $\boldsymbol{\Theta}$ is parameterized through its upper
-Cholesky factor $\boldsymbol{\Phi}$ with
-$\boldsymbol{\Theta} = \boldsymbol{\Phi}^\top \boldsymbol{\Phi}$ (diagonal entries on the
-log scale, the same convention as
-[GGM Internals](ggm-internals.qmd)), so that positive definiteness is
-guaranteed by construction. The gradient includes the Jacobian of the
-Cholesky-to-precision mapping.
+precision matrix $\boldsymbol{\Theta}$ is parameterized exactly as in the
+GGM: an upper Cholesky factor
+$\boldsymbol{\Theta} = \boldsymbol{\Phi}^\top \boldsymbol{\Phi}$ with log-scale
+diagonals $\psi_q$ and per-column null-space coordinates $f_q$ for the
+off-diagonals, so positive definiteness and excluded
+continuous-continuous edges are guaranteed by construction (see
+[Constrained Cholesky Parameterization](null-space.qmd)). The model
+owns its own `GraphConstraintStructure` for the continuous subgraph
+and reuses the GGM's gradient engine (`yy_engine_`, a
+`GGMGradientEngine` instance) for the forward map and the theta
+gradient of this block.
 
 ## Parameter vector layout
 
@@ -37,28 +41,27 @@ The model distinguishes three vector types:
 ### Active vector (`parameter_dimension()`)
 
 Contains the parameters that NUTS updates, excluding edges set to
-zero by edge selection. The Cholesky block is always fully included:
+zero by edge selection:
 
 ```
-[ thresholds | discrete interactions (active) | means | cross-type (active) | Cholesky (all) ]
+[ thresholds | discrete interactions (active) | means | cross-type (active) | (f_q, psi_q) theta block (q + |E_yy|) ]
 ```
 
-The mass matrix and gradient are dimensioned to this vector.
+The gradient is dimensioned to this vector; discrete-discrete and
+cross edges are dropped entirely when excluded, and the continuous
+block shrinks through its null-space coordinates.
 
 ### Full vector (`full_parameter_dimension()`)
 
-Contains all parameters including inactive edges:
-
-```
-[ thresholds | discrete interactions (all) | means | cross-type (all) | Cholesky (all) ]
-```
-
-Used for storage and initialization.
+The zero-padded fixed-slot layout with a slot for every possible
+parameter, used for mass-matrix estimation (see
+[NUTS — Mass matrix](nuts.qmd#mass-matrix-full-versus-active-layout)).
 
 ### Storage vector (`storage_dimension()`)
 
-Identical layout to the full vector. This is what gets saved to
-`ChainResult::samples` at each iteration.
+The fixed output layout saved to `ChainResult::samples` at each
+iteration; the continuous block is stored as raw precision entries,
+not theta coordinates.
 
 ## Sampling strategy
 
@@ -74,14 +77,23 @@ continuous-continuous edges are held exactly at zero by the
 $\boldsymbol{\Theta}_{yy}$ block.
 
 Edge indicator updates (when active) operate on all three interaction
-blocks.
+blocks. Under the
+[hierarchical graph prior](zratio-hierarchical.qmd), only the
+continuous-continuous moves carry a Z-ratio term, evaluated on the
+continuous subgraph (`continuous_subgraph()`); the edge-prior
+[normalizing-constant correction](edge-priors.qmd#normalizing-constant-corrections)
+likewise reads continuous-continuous pairs only, through the per-node
+continuous mask. Discrete and cross edge moves are plain
+spike-and-slab updates.
 
 The model also provides a component-wise adaptive Metropolis fallback
 (`do_one_metropolis_step()`), used when the sampler is set to
 `"adaptive-metropolis"`. In Metropolis mode, each parameter is
 updated individually with Robbins–Monro-tuned proposal SDs targeting
-an acceptance rate of 0.44. Off-diagonal precision updates use a
-rank-2 Cholesky update; diagonal updates use rank-1.
+an acceptance rate of 0.44. Precision-block updates reuse the GGM's
+in-place machinery — per-sweep caches of the covariance and
+log-determinant advanced by Sherman–Morrison–Woodbury rank-1/rank-2
+updates, with one Cholesky refresh at the end of the sweep.
 
 ## Gradient computation
 
@@ -95,23 +107,26 @@ blocks in the NUTS vector. It involves:
    interactions to both discrete and continuous conditional distributions
 3. **Continuous means** — Gradient of the continuous-variable
    contribution to the pseudolikelihood
-4. **Cholesky block** — The precision gradient
+4. **Theta block** — The precision adjoint
    $\bar{\boldsymbol{\Theta}}$ is computed from the GGM conditional
-   contribution and the conditional-mean coupling, then mapped to the
-   Cholesky gradient
-   $\bar{\boldsymbol{\Phi}} = \boldsymbol{\Phi}(\bar{\boldsymbol{\Theta}} + \bar{\boldsymbol{\Theta}}^\top)$.
-   Diagonal entries use the log-scale Jacobian:
-   $\partial\ell / \partial\psi_j = \bar{\Phi}_{jj} \Phi_{jj} + (q - j + 1)$,
-   where $\psi_j = \log \Phi_{jj}$ and $j$ runs over the $q$
-   continuous variables ($j = 1, \ldots, q$). Throughout, a bar
+   contribution, the conditional-mean coupling, the priors, and the
+   determinant tilt, then mapped to the Cholesky adjoint
+   $\bar{\boldsymbol{\Phi}}$ and handed to the shared gradient engine
+   (`yy_engine_.theta_gradient_from_phi_bar()`), which propagates it
+   through the stored Givens rotations to the $(f_q, \psi_q)$
+   coordinates — including the null-space basis rotation and the QR
+   Jacobian terms, exactly as in
+   [GGM Internals](ggm-internals.qmd#gradient). Throughout, a bar
    denotes the reverse-mode adjoint
-   $\bar{A} = \partial \ell / \partial A$ (as in
-   [GGM Internals](ggm-internals.qmd#gradient)).
+   $\bar{A} = \partial \ell / \partial A$.
 
 The log-prior gradient adds the interaction-prior penalties (default
-Cauchy) on off-diagonal precision entries and the scale-prior
-penalties (default Gamma(1, 1)) on diagonal entries; see
-[Parameter Priors](parameter-priors.qmd).
+Normal) on the partial-association scale and the scale-prior
+penalties (default exponential, `eta` frame) on diagonal entries; see
+[Parameter Priors](parameter-priors.qmd). The determinant tilt
+$|\boldsymbol{\Theta}_{yy}|^{\delta}$ applies to the continuous block
+only — the auto-resolved default $\delta = 0.5 \log q$ counts the
+continuous variables, not all variables.
 
 ## Discrete pseudolikelihood
 

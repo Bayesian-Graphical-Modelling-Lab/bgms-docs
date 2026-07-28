@@ -58,26 +58,30 @@ The macro system in `explog_macros.h` controls when custom exp/log
 is used:
 
 ```cpp
-#if (defined(_WIN32) && (!defined(CUSTOM_EXP_LOG) || CUSTOM_EXP_LOG == 0)) \
-  || (!defined(_WIN32) && defined(CUSTOM_EXP_LOG) && CUSTOM_EXP_LOG != 0)
+#if (defined(CUSTOM_EXP_LOG) && CUSTOM_EXP_LOG != 0) \
+  || (!defined(CUSTOM_EXP_LOG) && defined(_WIN32))
   #define USE_CUSTOM_LOG 1
+#else
+  #define USE_CUSTOM_LOG 0
 #endif
 ```
 
-The logic:
+The logic: an explicit `-DCUSTOM_EXP_LOG` value wins on every
+platform — `=1` forces OpenLibM, `=0` forces the standard library.
+With no flag, Windows defaults to OpenLibM (the Rtools toolchain's
+`std::exp`/`std::log` are much slower) and macOS/Linux default to the
+system libm (which is fast). Forcing OpenLibM on non-Windows is
+useful for cross-platform reproducibility, at the cost of slightly
+slower scalar operations:
 
-- **Windows** — Uses custom exp/log by default because the Rtools
-  toolchain's `std::exp`/`std::log` are much slower
-- **Linux/macOS** — Uses the system libm by default (which is fast).
-  Custom exp/log can be enabled by setting `CUSTOM_EXP_LOG=1` —
-  useful for cross-platform reproducibility, at the cost of slightly
-  slower scalar operations
+```r
+Sys.setenv("PKG_CPPFLAGS" = "-DCUSTOM_EXP_LOG=1")  # force OpenLibM
+Sys.setenv("PKG_CPPFLAGS" = "-DCUSTOM_EXP_LOG=0")  # force std
+```
 
 The `configure` and `configure.win` scripts do not control this
-flag. Platform detection is handled entirely by the C++ preprocessor
-via `_WIN32`. Users can override the default by adding
-`-DCUSTOM_EXP_LOG=1` (to enable custom on non-Windows) or by
-omitting the flag (to keep the platform default).
+flag; platform detection is handled entirely by the C++ preprocessor
+via `_WIN32`.
 
 ## Usage in C++ code
 

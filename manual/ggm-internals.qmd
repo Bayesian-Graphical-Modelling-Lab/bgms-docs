@@ -16,21 +16,31 @@ throughout sampling. For complete data, the likelihood depends on
 the data only through the sufficient statistic
 $\mathbf{S} = \mathbf{X}^\top \mathbf{X}$.
 
+Priors are specified on the partial-association scale: the slab
+(`interaction_prior`) acts on $-\theta_{ij}/2$ and the scale prior
+(`precision_scale_prior`) on $\theta_{ii}/2$, matching the convention
+of [`sample_ggm_prior()`](../reference/sample-ggm-prior.qmd). Both are
+polymorphic prior objects (see [Parameter Priors](parameter-priors.qmd));
+the defaults are a Normal slab and an exponential diagonal.
+
 ## Sampling overview
 
-The GGM supports two samplers:
+The GGM supports three update methods:
 
 - **NUTS** (default) — Gradient-based sampling of all continuous
   parameters simultaneously. Uses the
   [constrained Cholesky parameterization](null-space.qmd), whose
   null-space coordinates keep excluded edges exactly zero under edge
   selection.
-- **Adaptive Metropolis** (fallback) — Element-wise updates of
-  individual $\theta_{ij}$ entries via rank-1 Cholesky updates.
+- **Adaptive Metropolis** — Element-wise updates of individual
+  $\theta_{ij}$ entries via rank-1 Cholesky updates.
+- **Gibbs** — An exact conjugate [row-block sweep](#row-block-gibbs);
+  with edge selection, the between-model step switches to the
+  [conjugate edge birth/death proposal](#conjugate-edge-move).
 
 The sampler is selected by the `update_method` argument in `bgm()`.
-Edge indicators $\gamma_{ij}$ are always updated by Metropolis–Hastings
-moves, regardless of the continuous-parameter sampler. Within each
+Edge indicators $\gamma_{ij}$ are updated by Metropolis–Hastings
+moves regardless of the continuous-parameter sampler. Within each
 iteration, edge indicator updates run first, then the continuous
 sampler runs with the graph held fixed. See
 [Sampler Hierarchy](samplers.qmd) for the full dispatch logic.
@@ -145,16 +155,20 @@ The log-posterior being differentiated is
 $$
 \log p = \tfrac{n}{2}\log|\boldsymbol{\Theta}|
        - \tfrac{1}{2}\operatorname{tr}(\boldsymbol{\Theta}\mathbf{S})
+       + \delta \log|\boldsymbol{\Theta}|
        + \log p_{\text{prior}}(\boldsymbol{\Theta})
-       + \log|J|.
+       + \log|J|,
 $$
 
-The backward pass runs in two phases:
+where $\delta \log|\boldsymbol{\Theta}|$ is the
+[determinant tilt](#determinant-tilt) and the prior term sums the
+polymorphic slab and scale priors over the included entries. The
+backward pass runs in two phases:
 
 1. **Phase 1 (data + priors → $\bar{\boldsymbol{\Phi}}$)** — Computes
    the adjoint of the Cholesky factor from the data likelihood, the
-   interaction prior on off-diagonals (default Cauchy), and the scale
-   prior on diagonals (default Gamma); see
+   tilt, the interaction prior on off-diagonals, and the scale
+   prior on diagonals; see
    [Parameter Priors](parameter-priors.qmd). Throughout, a bar denotes
    the reverse-mode adjoint: $\bar{A} = \partial \log p / \partial A$,
    the sensitivity of the log-posterior to that quantity.
@@ -164,6 +178,23 @@ The backward pass runs in two phases:
    $\partial\log p / \partial \psi_q$. Reverse-mode differentiation
    through the QR factorization captures cross-column dependencies
    automatically.
+
+## Determinant tilt {#determinant-tilt}
+
+The prior on $\boldsymbol{\Theta}$ is multiplied by
+$|\boldsymbol{\Theta}|^{\delta}$ with $\delta \ge 0$ (the `delta`
+argument of `bgm()`; `NULL` auto-resolves to $0.5 \log p$). The tilt
+softly repels the chain from the boundary of the positive-definite
+cone, where the null-space geometry degenerates. It enters every
+update path: the NUTS gradient adds $\delta$ times the log-determinant
+adjoint, the element-wise Metropolis and edge moves add
+$\delta \cdot \Delta \log|\boldsymbol{\Theta}|$ to their acceptance
+ratios (an $O(p)$ rank-2 determinant-lemma computation), and the
+row-block Gibbs absorbs it as a shift in the $\xi$ Gamma shape (see
+below). The tilt also reshapes the graph marginal of the joint
+spike-and-slab prior, which is what the edge-prior
+[normalizing-constant corrections](edge-priors.qmd) and the
+[hierarchical specification](zratio-hierarchical.qmd) account for.
 
 ## Element-wise Metropolis {#metropolis}
 
@@ -219,91 +250,171 @@ For a single off-diagonal element $\theta_{ij}$:
    \sigma_{ij}^2)$ and set $\theta_{jj}^*$ deterministically.
 3. **Likelihood ratio** via the matrix-determinant lemma —
    the log-determinant ratio and trace update both use $O(1)$
-   covariance entries, not a fresh factorization.
+   covariance entries, not a fresh factorization; the tilt adds
+   $\delta$ times the same log-determinant ratio.
 4. **Accept or reject** via Metropolis–Hastings.
-5. **On accept** — update $\boldsymbol{\Theta}$ and apply a
-   rank-2 Cholesky update to $\boldsymbol{\Phi}$ (one Givens
-   update + one hyperbolic downdate, $O(p^2)$), then refresh
-   $\boldsymbol{\Sigma}$.
+5. **On accept** — update $\boldsymbol{\Theta}$, advance the running
+   $\log|\boldsymbol{\Theta}|$ by the determinant-lemma ratio, and
+   apply a Sherman–Morrison–Woodbury rank-2 update to
+   $\boldsymbol{\Sigma}$ ($O(p^2)$), mirroring the result to exact
+   symmetry.
+
+The Cholesky factor itself is *not* maintained per accept: the sweep
+reads only $\boldsymbol{\Sigma}$ and the incrementally maintained
+log-determinant, and one `refresh_cholesky()` call at the end of the
+sweep restores the factor, an exact $\boldsymbol{\Sigma}$, and an
+exact log-determinant for the between-model step and sample recording
+that follow. A cheap consistency probe on the touched rows of
+$\boldsymbol{\Sigma}\boldsymbol{\Theta} = \mathbf{I}$ guards the SMW
+update through near-singular passages: when accuracy is lost, the
+cache is repaired immediately from $\boldsymbol{\Theta}$.
 
 The proposal standard deviations $\sigma_{ij}$ are tuned during
 warmup by Robbins–Monro updates targeting an acceptance rate of
-0.44.
+0.44 (stage 3b under NUTS uses the same moves through
+`tune_proposal_sd()`, consuming the schedule's Robbins–Monro weight).
 
-### Rank-2 Cholesky update
+## Row-block Gibbs {#row-block-gibbs}
 
-Changing $\theta_{ij}$ and $\theta_{jj}$ simultaneously gives a
-symmetric rank-2 perturbation
-$\boldsymbol{\Theta}' = \boldsymbol{\Theta} + \Delta\boldsymbol{\Theta}$
-that decomposes into one rank-1 **update** (Givens rotations) and
-one rank-1 **downdate** (hyperbolic rotations):
+Under `update_method = "gibbs"`, `do_one_gibbs_step()` sweeps the rows
+$i = 1, \ldots, p$, drawing each row's active entries from their exact
+joint full conditional. Eligibility requires a Normal or Cauchy slab
+and a Gamma-family scale prior; neither the determinant tilt nor a
+non-unit Gamma shape gates it (both are handled inside the draw).
 
-$$
-\boldsymbol{\Theta}' = \boldsymbol{\Theta}
-  + \mathbf{u}_1\mathbf{u}_1^\top
-  - \mathbf{u}_2\mathbf{u}_2^\top,
-$$
+Write $\beta = \Theta_{N_i, i}$ for the active entries of row $i$
+(neighbours $N_i$, $q = |N_i|$), $A = \Theta_{-i,-i}$, and
+$C = (A^{-1})_{N_i, N_i}$, computed from the cached covariance by a
+Schur complement. With slab standard deviation $\sigma$ (on the
+$-\theta_{ij}/2$ scale), diagonal Gamma rate $\beta_0$, per-edge
+Cauchy mixture weights $\omega_k$ (fixed at 1 for a Normal slab), and
+$s_{ii} = S_{ii}$:
 
-where $\mathbf{u}_1$ and $\mathbf{u}_2$ are derived from the
-change in $\theta_{ij}$ and $\theta_{jj}$. Each rank-1 operation
-costs $O(p^2)$. If the downdate would destroy positive
-definiteness (detected by a negative radicand), a sentinel value
-(`Phi(1,0) = -2.0`) is set and the proposal is rejected.
+- $M = (\beta_0 + s_{ii})\, C + \operatorname{diag}\!\big(1 / (4
+  \sigma^2 \omega_k)\big)$,
+- $\beta \mid \cdot \sim \mathcal{N}\!\big(-M^{-1} S_{N_i, i},\;
+  M^{-1}\big)$, drawn by triangular solves against the Cholesky
+  factor of $M$,
+- $\xi \sim \text{Gamma}\!\big(\tfrac{n}{2} + \delta + 1,\;
+  \tfrac{\beta_0 + s_{ii}}{2}\big)$ and
+  $\theta_{ii} = \xi + \beta^\top C\, \beta$.
 
-The Cholesky update/downdate code in `src/math/cholupdate.cpp` is
-ported from Simon Wood's mgcv package (GPL).
-
-The standard approach to element-wise updates permutes the precision
-matrix and refactorizes at $O(p^3)$ per element. The in-place
-approach replaces the two most expensive operations — constant
-extraction and likelihood evaluation — with $O(1)$ covariance
-lookups, and the Cholesky maintenance with an $O(p^2)$ rank-2
-update. The remaining $O(p^3)$ cost per element is the covariance
-refresh (recomputing $\boldsymbol{\Sigma}$ from
-$\boldsymbol{\Phi}$).
+The determinant tilt enters purely as the $+\delta$ shift in the
+$\xi$ shape (since $|\boldsymbol{\Theta}| = |A|\,\xi$). For a Gamma
+shape $\alpha \neq 1$, the extra $(\theta_{ii}/2)^{\alpha-1}$ prior
+factor does not factorize over $(\beta, \xi)$; the $\alpha = 1$ draw
+is then used as an independence proposal and corrected by a
+Metropolis–Hastings accept. For a Cauchy slab, the per-edge
+scale-mixture weights $\omega_{ij}$ are refreshed from their inverse-Gamma
+full conditionals each sweep (excluded edges keep prior draws so an
+edge add can condition on a valid weight). Accepted rows update
+$\boldsymbol{\Theta}$ and $\boldsymbol{\Sigma}$ through the same
+rank-2 SMW machinery as the Metropolis path.
 
 ## Edge selection {#edge-selection}
 
 When edge selection is active, each edge $(i,j)$ has a binary
-indicator $\gamma_{ij}$. Edge indicators are updated via
-mixtures-of-mutually-singular-distributions (MoMS) add/delete moves
-[@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms], reusing
-the same Roverato constants and in-place Cholesky machinery
-described above. In the proposals below, $c_3$ denotes the Roverato
-scaling constant (`constants_[3]`) that relates a proposal on the
-Cholesky scale to the resulting precision entry.
+indicator $\gamma_{ij}$, updated by add/delete moves
+[@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms] that reuse the
+Roverato constants and in-place machinery described above. In the
+proposals below, $c_3$ denotes the Roverato scaling constant
+(`constants_[3]`) that relates a proposal on the Cholesky scale to
+the resulting precision entry.
 
 ### Delete move ($\gamma_{ij} = 1 \to 0$)
 
 Propose to set $\theta_{ij} = 0$ and $\theta_{jj}$ to its
-constrained value. The acceptance ratio includes:
+constrained value. The log-acceptance ratio sums:
 
-- The $O(1)$ likelihood ratio via the matrix-determinant lemma
-- The prior odds $(1 - \pi_{ij}) / \pi_{ij}$
-- The reverse proposal density $\phi(\theta_{ij}^{\text{curr}} / c_3;\, 0,\, \sigma_{ij}) / c_3$
-- The Cauchy slab prior $-\log p_{\text{Cauchy}}(\theta_{ij}^{\text{curr}})$
-- The Gamma(1,1) prior ratio on $\theta_{jj}$
+- The $O(1)$ likelihood ratio via the matrix-determinant lemma, plus
+  $\delta$ times the same log-determinant ratio (the tilt)
+- The prior odds $\log\{(1 - \pi_{ij}) / \pi_{ij}\}$
+- $-\log J$ under the
+  [hierarchical specification](zratio-hierarchical.qmd) (absent under
+  the default joint specification)
+- The reverse proposal density
+  $+\log\{\phi(\theta_{ij}^{\text{curr}} / c_3;\, 0,\, \sigma_{ij}) / c_3\}$
+- Minus the slab density of the removed entry, evaluated on the
+  partial-association scale with its Jacobian:
+  $-\log p_{\text{slab}}(-\theta_{ij}^{\text{curr}}/2) + \log 2$
+- The scale-prior ratio on the slaved diagonal,
+  $\log p_{\text{diag}}(\theta_{jj}^*/2) - \log p_{\text{diag}}(\theta_{jj}/2)$
 
 ### Add move ($\gamma_{ij} = 0 \to 1$)
 
 Sample $\epsilon \sim \mathcal{N}(0,\, \sigma_{ij})$ and propose
 $\theta_{ij}^* = c_3 \epsilon$, with $\theta_{jj}^*$ set from the
-constraint curve. The acceptance ratio includes:
+constraint curve. The log-acceptance ratio is the mirror image:
+likelihood ratio plus tilt, prior odds $\log\{\pi_{ij} / (1 -
+\pi_{ij})\}$, $+\log J$ under the hierarchical specification, plus
+the slab density of the new entry (with the $-\log 2$ Jacobian),
+minus the proposal density, plus the same diagonal-prior ratio.
 
-- The $O(1)$ likelihood ratio
-- The prior odds $\pi_{ij} / (1 - \pi_{ij})$
-- The Cauchy slab prior $\log p_{\text{Cauchy}}(\theta_{ij}^*)$
-- The reverse proposal density $-\log \phi(\epsilon;\, 0,\, \sigma_{ij}) + \log c_3$
-- The Gamma(1,1) prior ratio on $\theta_{jj}$
+### Rao-Blackwellized inclusion draws
+
+Each sweep records, per edge, the raw acceptance probability
+$\alpha$ of its birth/death proposal and the pre-move indicator
+state. From these the model derives a **Rao-Blackwellized inclusion
+draw**: $J_e = \alpha$ for a proposed birth, $1 - \alpha$ for a
+proposed death — the conditional probability that the edge ends the
+sweep included, given the rest of the state. Averaging $J_e$ over
+iterations estimates the posterior inclusion probability with lower
+variance than averaging the binary indicators themselves. The
+per-sweep draws are surfaced to the output layer alongside the
+indicator samples.
 
 ### Iteration order
 
 The order of edge updates is randomized at each iteration via
 `prepare_iteration()`, which shuffles the flat edge index with
-`arma_randperm()`. After all edge indicator updates complete,
-the `constraint_dirty_` flag is set and the constraint structure
-is rebuilt lazily at the next gradient evaluation. This ensures
-NUTS operates on an up-to-date graph.
+`arma_randperm()`. After all edge indicator updates complete, one
+`refresh_cholesky()` restores exact state, the `constraint_dirty_`
+flag is set, and the constraint structure is rebuilt lazily at the
+next gradient evaluation. This ensures NUTS operates on an
+up-to-date graph.
+
+## Conjugate edge birth/death (Gibbs path) {#conjugate-edge-move}
+
+The Gibbs sampler replaces the random-walk edge proposal with a
+full-conditional birth/death move
+(`update_edge_indicator_conjugate()`), enabled by
+`set_conjugate_edge_proposal(true)`. The move works in the cofactor
+coordinate of the Roverato parameterization, where toggling the edge
+preserves $|\boldsymbol{\Theta}|$ — the determinant tilt and the
+likelihood determinant term cancel exactly — so the full conditional
+of the edge entry is Gaussian and can be proposed from directly. The
+acceptance ratio then reduces to the inclusion odds times
+$p_{\text{slab}}(0) / q(0)$, evaluated at the spike: it does not
+depend on the proposed value, and no tuning is needed. A Cauchy slab
+enters through its current mixture weight $\omega_{ij}$; a Gamma
+shape $\alpha \neq 1$ adds the independence-proposal correction
+$(\theta_{jj}/\theta_{jj}^{(0)})^{\alpha - 1}$; and under the
+hierarchical specification the same $\pm \log J$ Z-ratio term applies
+as in the random-walk moves.
+
+## Warm starts and initialization
+
+With data present, the precision matrix is initialized from a
+regularized MLE: $\boldsymbol{\Theta}_0 = n\,(\mathbf{S} + \delta_0
+\mathbf{I})^{-1}$ with $\delta_0 = \operatorname{tr}(\mathbf{S}) /
+(p\, n)$, shrinking toward the identity at a scale-appropriate rate.
+If the initial graph excludes edges, the excluded entries are zeroed
+and the diagonal is inflated to diagonal dominance so the start stays
+positive definite. If the inversion fails, the identity is kept.
+
+## Prior-only mode
+
+With $n = 0$ (used by
+[`sample_ggm_prior()`](../reference/sample-ggm-prior.qmd)), the
+likelihood terms vanish and the same machinery samples the prior
+alone. One safeguard becomes necessary: with data, the
+$\tfrac{n}{2}\log|\boldsymbol{\Theta}|$ term vetoes proposals that
+leave the positive-definite cone, but without data that anchor is
+gone, and floating-point drift in the incrementally maintained
+covariance can hand a non-positive-definite proposal a finite
+acceptance probability. The Metropolis moves therefore run an
+explicit positive-definiteness check on the proposal when $n = 0$ and
+reject failures outright.
 
 ## Log-likelihood
 
@@ -314,8 +425,21 @@ $$
 $$
 
 The log-determinant is computed from the Cholesky factor as
-$\log|\boldsymbol{\Theta}| = 2\sum_q \log \Phi_{qq}$. The trace term
-uses the precomputed sufficient statistic $\mathbf{S}$.
+$\log|\boldsymbol{\Theta}| = 2\sum_q \log \Phi_{qq}$ (and advanced
+incrementally between refreshes). The trace term uses the precomputed
+sufficient statistic $\mathbf{S}$.
+
+## Random interaction-slab scale
+
+When the slab scale is turned into a hyperparameter (an optional
+hyperprior on a multiplicative factor $u$ of the base scale; see
+[Parameter Priors](parameter-priors.qmd)), the model adds a
+one-dimensional Metropolis-within-Gibbs update: a log-normal random
+walk on $u$, accepted against the mean-one hyperprior on $u$ and the
+summed slab densities of the currently included partial associations
+$-\theta_{ij}/2$. The diagonal's Gamma prior stays anchored at the
+base scale. The sampled scale is reported per iteration in the chain
+output.
 
 ## Missing data imputation
 
@@ -323,3 +447,11 @@ When `na_action = "impute"`, the GGM imputes missing values using
 the conditional normal distribution implied by the current precision
 matrix. After imputation, the sufficient statistic $\mathbf{S}$ is
 recomputed for the next likelihood evaluation.
+
+## See also
+
+[Constrained Cholesky Parameterization](null-space.qmd),
+[Hierarchical Graph Prior and the Z-Ratio Engine](zratio-hierarchical.qmd),
+[Edge Priors](edge-priors.qmd),
+[Parameter Priors](parameter-priors.qmd),
+[Sampler Hierarchy](samplers.qmd).

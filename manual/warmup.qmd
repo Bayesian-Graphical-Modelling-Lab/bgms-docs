@@ -130,25 +130,14 @@ schedule (the `SamplerSpec` fields `learn_sd` and the Gibbs
 
 ## Warning system
 
-The `WarmupSchedule` records a `warning_type` code when the warmup
-budget is insufficient:
-
-| Code | Meaning |
-|------|---------|
-| 0 | No warning |
-| 1 | Warmup extremely short (core budget < 20, or < 50 with edge selection) |
-| 2 | Proportional fallback used for the core stages (15%/75%/10% instead of fixed buffers) |
-| 3 | Limited proposal-SD tuning (edge selection with warmup < 300) |
-| 4 | Stage 3b skipped (would have fewer than 20 iterations) |
-
-These codes are computed in C++ but are not currently surfaced to R.
-What the user actually sees are the progressive short-warmup warnings
-issued by `validate_sampler()` at fit time (NUTS only): with edge
-selection, thresholds at warmup < 50 (very short), < 200 (proposal-SD
-tuning skipped), and < 300 (limited tuning); without, at < 20 (no
-mass-matrix estimation) and < 150 (proportional allocation). After
-sampling there is additionally the energy-based warmup-completeness
-check in `fit$nuts_diag` (`warmup_incomplete`; see
+Short-warmup warnings are the responsibility of `validate_sampler()`
+on the R side, issued at fit time (NUTS only): with edge selection,
+thresholds at warmup < 50 (very short), < 200 (proposal-SD tuning
+skipped), and < 300 (limited tuning); without, at < 20 (no mass-matrix
+estimation) and < 150 (proportional allocation). The schedule itself
+records only `stage3b_skipped`, which its own stage predicates
+consult. After sampling there is additionally the energy-based
+warmup-completeness check in `fit$nuts_diag` (`warmup_incomplete`; see
 [Diagnostics](diagnostics.qmd)).
 
 ## Dual averaging

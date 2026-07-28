@@ -1,0 +1,202 @@
+---
+title: "Hierarchical Graph Prior and the Z-Ratio Engine"
+---
+
+For continuous data with edge selection, `bgm()` offers two ways to
+compose the precision prior with the edge prior
+(`precision_graph_prior`; see [`bgm()`](../reference/bgm.qmd)). This
+page documents the machinery behind the `"hierarchical"` option: the
+per-edge normalizing-constant ratio, the deterministic estimator that
+evaluates it inside every edge move, and the trust gauge that audits
+the estimator after sampling.
+
+Source: `src/models/ggm/zratio_engine.{h,cpp}`, `src/models/zratio_gauge.h`,
+and the fit-time builders in `R/zratio_tables.R` and
+`R/zratio_surfaces.R`.
+
+## Joint versus hierarchical specification
+
+Write $\rho_\Gamma(\Theta)$ for the un-normalized precision prior under
+graph $\Gamma$: the slab on the included off-diagonals, the scale prior
+on the diagonal, the determinant tilt $|\Theta|^{\delta}$, and the
+positive-definite-cone indicator with zeros at excluded edges.
+
+- **Joint** (default): $p(\Theta, \Gamma) \propto \rho_\Gamma(\Theta)\,
+  \pi(\Gamma)$. Nothing is normalized per graph, so the implied graph
+  marginal is $\pi(\Gamma)\, Z(\Gamma)$ with
+  $Z(\Gamma) = \int \rho_\Gamma(\Theta)\, d\Theta$ — the edge prior
+  reweighted by how much prior mass the cone leaves each graph. With a
+  Beta-Bernoulli or SBM edge prior the hyperparameter updates then
+  need the normalizing-constant correction described in
+  [Edge Priors](edge-priors.qmd).
+- **Hierarchical**: $p(\Gamma)\, p(\Theta \mid \Gamma)$ with
+  $p(\Theta \mid \Gamma) = \rho_\Gamma(\Theta) / Z(\Gamma)$ normalized
+  per graph. The graph marginal is exactly the edge prior, and the
+  hyperparameter updates stay clean conjugate — but every between-model
+  move that toggles an edge now carries the ratio
+
+$$
+J = \frac{Z(\Gamma^-)}{Z(\Gamma^+)},
+$$
+
+where $\Gamma^-$ and $\Gamma^+$ are the graphs without and with the
+candidate edge. Evaluating $Z(\Gamma)$ exactly is intractable; the
+Z-ratio engine estimates $\log J$ deterministically, fast enough to sit
+inside the acceptance step of every edge move.
+
+## The mediating block
+
+The ratio $J$ is a *local* quantity: toggling edge $(i, j)$ changes the
+normalizer only through the neighbourhood that couples the two
+endpoints. The engine extracts this **mediating block** for each
+candidate edge:
+
+- the common neighbours of $i$ and $j$,
+- plus the endpoints of 2-hop bridges between the exclusive neighbour
+  sets of $i$ and $j$,
+
+together with the block's adjacency and three integer counts: the
+number of common-neighbour nodes, the edges among them, and the bridge
+edges between the exclusive sides. The toggled edge's own state never
+enters, so a single $\log J$ value serves the add move and (negated)
+the delete move. When one side of the block is empty, the ratio reduces
+to a precomputed isolated-edge constant $\psi_0$.
+
+## The additive-counts saddle
+
+The baseline estimator maps the three counts to $\log J$ through a
+**two-moment saddle**: per-channel moment constants (one $(S_1, S_2)$
+pair each for common-neighbour nodes, CN–CN edges, and bridge edges)
+are summed according to the counts, and the resulting total moments are
+pushed through a saddle-point map over cosine-transform tables of the
+tilted prior's pair integrals. All of these constants are built once at
+fit time in R (`zratio_cell_constants()` in `R/zratio_tables.R`):
+closed-form Bessel and quadrature pair integrals, their
+cosine-transform tables on a fixed grid, the six additive moment
+constants, and $\psi_0$.
+
+No sampling runs inside the acceptance step, and distinct count tuples
+are evaluated once and served from a persistent cache whose counters
+are returned with the chain diagnostics.
+
+### The standardized cell
+
+The between-graph ratio is invariant under diagonal rescaling of
+$\Theta$, so the constants do not depend on the user's slab scale
+choice directly. They are built in the **standardized cell**: unit slab
+scale ($\sigma = 1$), diagonal rate $\eta$, tilt $\delta$, and diagonal
+shape $\alpha$ (with $\alpha = 1$ the exponential default). In `bgms`
+parameter units $\eta$ resolves to `pairwise_scale * scale_rate`, and
+the same $(\delta, \eta, \alpha)$ cell serves every user scale choice.
+A Cauchy slab is handled through its scale-mixture-of-normals
+representation: the block couplings run omega-augmented, matching the
+marginal-Cauchy normalizer that the tables integrate.
+
+## Option-B absolute-moment surfaces
+
+The additive-counts saddle treats the mediating block through totals,
+which coarsens when blocks have structure. The deployed refinement —
+"Option B" — replaces the additive moments with **per-component
+surface predictions**:
+
+1. At fit time, `zratio_build_surfaces()` fits one smooth surface per
+   component family — common-neighbour cluster and bipartite bridge —
+   predicting the absolute per-component $\log S_1$ and $\log S_2$
+   from (size, density). Each surface is a bivariate quadratic in
+   $(\log \text{size}, \text{density})$ over nine monomials, fit to
+   **block-Gibbs anchors**: short runs of the sampler's own conjugate
+   row-wise kernel on synthetic components, Rao-Blackwellized through
+   cross-resolvent trace moments. Short chains suffice because the
+   low-order fit denoises the Monte Carlo noise across anchors.
+2. At sampling time, the engine decomposes each mediating block into
+   disjoint components, predicts each component's moments from its
+   family surface, sums them, and applies the same saddle map.
+
+The surface is built once at the analysis's own $(\eta, \delta)$ —
+$\eta$ is a build parameter, not a switch. Predictions are clamped to
+the trained hull in (size, density) and to the trained log-moment range
+($\pm 0.1$), and components smaller than the smallest trained size fall
+back to the additive per-component moment, which is exact for the
+trivial sizes that land there. Deploy-time results are cached per
+component and per edge.
+
+Deployment is fenced to the validated $\alpha = 1$ diagonal (Normal or
+Cauchy slab). With a non-unit Gamma diagonal shape the surface build
+returns `NULL` and the engine keeps the additive path; a failed build
+at $\alpha = 1$ falls back the same way, with a message suggesting the
+trust gauge (see [R Scaffolding](r-scaffolding.qmd) for the fit-time
+flow and messages).
+
+## Hookup into the edge moves
+
+- **GGM** — `update_edge_indicators()` adds $\log J$ to the
+  Metropolis-Hastings log-acceptance ratio of each add move and
+  subtracts it for each delete move; the conjugate edge birth/death
+  proposal used by the Gibbs sampler carries the same term. See
+  [GGM Internals](ggm-internals.qmd).
+- **Mixed MRF** — the normalizer lives on the continuous block
+  $\Theta_{yy}$, so only continuous-continuous edge moves carry a
+  Z-ratio, evaluated on the continuous subgraph
+  (`continuous_subgraph()`); discrete and cross edges are unchanged.
+  Requires at least two continuous variables. See
+  [Mixed MRF Internals](mixed-internals.qmd).
+
+The engine is cloned per chain along with the model, and each chain's
+cache counters and frozen constants are copied into its `ChainResult`
+at the end of the run (see [Parallel Chains](parallel-chains.qmd)).
+
+## The trust gauge
+
+The estimator is deterministic and fast, but approximate. The optional
+**trust gauge** quantifies whether the approximation could have
+mattered. It is off by default; enable it with
+`options(bgms.zratio_gauge_sweeps = 2L)` before fitting.
+
+After sampling, each chain runs the configured number of assessment
+sweeps on the frozen kernel: deployed selection passes that re-decide a
+subset of the chain's own edge moves while also evaluating a
+**block-local exact reference** — a Monte Carlo evaluation of the
+block's normalizer ratio with the full product transform over all
+cross-resolvent singular values, common random numbers across
+numerator and denominator, and a batch-means Monte Carlo standard
+error. Two per-chain statistics result:
+
+- **`flip_rate`** — the fraction of add/remove decisions that would
+  come out differently under the exact calculation. Flagged when it
+  exceeds its tolerance by more than the reference's own Monte Carlo
+  noise (the *noise floor*). Sensitive to error that changed actual
+  decisions; insensitive to small coherent error at edges far from
+  their accept/reject boundaries.
+- **`harm_pred`** — the projected distortion of the mean posterior
+  inclusion probability implied by the measured signed log-ratio
+  errors, a first-order quantity targeted at exactly that coherent
+  error, including the feedback amplification under a Beta-Bernoulli
+  edge prior. Flagged when it exceeds its tolerance and the weighted
+  error is resolved above twice its standard error.
+
+`summarize_zratio_gauge()` pools the per-chain gauge blocks into
+`fit$zratio_diag`; flagged chains print alongside the other sampler
+warnings. See the
+[function reference](../reference/prior-samplers.qmd#summarize_zratio_gauge)
+for the returned fields.
+
+## Prior-only sampling
+
+The same machinery drives zero-data chains:
+[`sample_ggm_prior()`](../reference/sample-ggm-prior.qmd) with
+`spec = "hierarchical"` samples $(\Theta, \Gamma)$ from the per-graph
+normalized prior via the Z-ratio engine and runs the gauge by default,
+and [`sample_graph_prior()`](../reference/prior-samplers.qmd) draws
+graph marginals under either specification. Prior chains are the
+regime where `harm_pred` matters most: with no likelihood, a small
+coherent error can shift the graph marginal without flipping any
+individual decision.
+
+## See also
+
+[GGM Internals](ggm-internals.qmd),
+[Edge Priors](edge-priors.qmd),
+[Mixed MRF Internals](mixed-internals.qmd),
+[R Scaffolding](r-scaffolding.qmd),
+[`bgm()`](../reference/bgm.qmd),
+[`summarize_zratio_gauge()`](../reference/prior-samplers.qmd#summarize_zratio_gauge).

@@ -4,7 +4,7 @@ title: "bgmCompare Internals"
 
 How `bgmCompare()` works under the hood: multi-group posterior,
 contrast parameterization, and sampler implementation. Source:
-`src/bgmCompare/` directory.
+`src/models/bgmCompare/` directory.
 
 ## Differences from single-group bgm
 
@@ -71,9 +71,12 @@ The `gradient()` function combines three components:
 - **Expected-data gradient** — computed inline within `gradient()`
   by building group-specific parameters via the contrast projection,
   evaluating softmax probabilities, and subtracting expected counts.
-- **Prior gradient** — Cauchy penalties on both baseline and
-  contrast pairwise parameters, with scale adjusted by the number
-  of observations.
+- **Prior gradient** — penalties on both baseline and contrast
+  pairwise parameters through the polymorphic prior objects: the
+  baseline family comes from `interaction_prior` (Cauchy default) and
+  the contrast family from `difference_family` (`"Cauchy"` default or
+  `"Normal"`) at scale `difference_scale`. See
+  [Parameter Priors](parameter-priors.qmd).
 
 ## Sampler implementation
 
@@ -104,8 +107,37 @@ iteration:
      using the SBM's within-cluster `alpha` and `beta`.
    - **Bernoulli**: no-op (fixed inclusion probability).
 
-The warmup schedule follows the same five-stage structure as the
+   The difference-prior updates are always the plain (uncorrected)
+   conjugate forms: the normalizing-constant corrections of the
+   continuous models do not apply here because there is no precision
+   matrix, hence no determinant tilt (see
+   [SBM Prior](sbm-prior.qmd#corrected-sweeps-on-continuous-data)).
+
+With `difference_scale_prior` set (Normal difference slab required),
+the sampler additionally runs a one-dimensional
+Metropolis-within-Gibbs update of the difference slab scale, the
+analogue of the single-group
+[random slab scale](parameter-priors.qmd#random-slab-scale) for the
+contrast parameters.
+
+The warmup schedule follows the same multi-stage structure as the
 single-group model (see [Warmup Schedule](warmup.qmd)).
+
+### Sweep state and normalizer cache
+
+The Metropolis sweeps share a persistent `CompareSweepState`
+(`bgmCompare_state.h`): the per-group observation matrices, the
+group-specific effective pairwise weights, and the rest-score
+matrices, kept consistent incrementally — an accepted pairwise or
+indicator move updates the weights and two residual columns per
+group, imputation and NUTS updates trigger a full weight rebuild.
+The state also caches the per-variable, per-group log-normalizer
+sums of the pseudolikelihood; a variable's row stays valid while its
+main effects and residual columns are unchanged, accepted moves
+store the proposed-state normalizers, and indicator flips invalidate
+only the affected variables. This turns the per-move cost of a sweep
+from a full normalizer recomputation into two column updates and a
+cache read.
 
 ## Active parameter tracking
 
@@ -132,6 +164,10 @@ The `bgmCompareOutput` struct stores:
 | `treedepth_samples` | Tree depth per iteration (NUTS only) |
 | `divergent_samples` | Divergent transition flags (NUTS only) |
 | `energy_samples` | Hamiltonian energy per iteration (NUTS only) |
+
+As in the single-group `ChainResult`, buffers are preallocated with
+"not sampled" sentinels (−1 for integer fields, NaN for floating
+ones), so interrupted runs return recognizable placeholders.
 
 The R output builder (`build_output_compare()`) splits the posterior
 means into:

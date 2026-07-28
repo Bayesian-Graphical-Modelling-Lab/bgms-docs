@@ -23,7 +23,7 @@ approximately preserves the Hamiltonian $H(q, p) = -\log \pi(q) + \frac{1}{2} p^
 The implementation uses a diagonal mass matrix $M$, stored as the
 vector of inverse diagonal elements (`inv_mass_diag`). The integrator
 lives in `leapfrog.h`/`leapfrog.cpp`; the kinetic-energy and
-initial-step-size helpers live in `hmc.h`/`hmc.cpp`.
+initial-step-size helpers live in `hamiltonian_utils.h`/`hamiltonian_utils.cpp`.
 
 ### Memoizer {#memoizer}
 

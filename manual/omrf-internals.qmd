@@ -149,7 +149,8 @@ $$
 \right\}
 $$
 where the posterior ratio includes the pseudolikelihood ratio, the
-Cauchy slab prior on $\omega_{ij}^\star$, and the prior inclusion
+slab prior on $\omega_{ij}^\star$ (default Normal; see
+[Parameter Priors](parameter-priors.qmd)), and the prior inclusion
 odds.
 
 **Delete move** ($\gamma_{ij} = 1 \to 0$). Set $\omega_{ij}^\star = 0$
@@ -165,6 +166,20 @@ $$
 The scan order is randomized at each iteration via
 `prepare_iteration()`, which calls `arma_randperm()`.
 
+### Cached denominators
+
+The pseudolikelihood ratios above are served by cached Metropolis
+primitives: `log_denominator_cache_` holds the per-variable log
+normalizers of the current state, so each pairwise move
+(`mh_pairwise_step()`) evaluates only the two shifted denominators of
+the proposal and, on accept, writes them back into the cache instead
+of recomputing all $p$ normalizers. The same primitives serve the
+element-wise Metropolis sweep and the edge moves.
+
+Note that the determinant tilt (`delta`) does not apply to the pure
+ordinal model — there is no precision matrix to tilt — and `bgm()`
+rejects the argument for ordinal-only data.
+
 ## Adaptive Metropolis fallback
 
 Even when NUTS is the primary sampler, the OMRF implements element-wise
@@ -172,3 +187,12 @@ adaptive Metropolis proposals for use during warmup stage 3b (proposal
 SD learning) and as a user-selectable alternative via
 `update_method = "adaptive-metropolis"`. The proposal SDs are tuned by
 Robbins-Monro targeting 0.44 acceptance, clamped to $[0.001, 2.0]$.
+
+## Random interaction-slab scale
+
+With `interaction_scale_prior` set (Normal slab required), the OMRF
+adds the same one-dimensional Metropolis-within-Gibbs update of the
+slab scale as the continuous models — a log-normal random walk on the
+multiplicative factor $u$, accepted against the mean-one hyperprior
+and the summed slab densities of the included interactions; see
+[Parameter Priors — Random slab scale](parameter-priors.qmd#random-slab-scale).
