@@ -13,9 +13,9 @@ $$
 \omega_{ij}^{(g)} = \omega_{ij} + \sum_{k=1}^{G-1} c_{gk}\,\delta_{ij}^{(k)}
 $$
 
-where $\omega_{ij}$ is the overall partial association — the value that would be obtained if all groups were combined — and $\delta_{ij}^{(k)}$ are the difference parameters, one for each of the $G - 1$ orthogonal contrasts. The coefficients $c_{gk}$ come from an orthonormal projection matrix that maps the contrast parameters to group-specific effects. Category thresholds are decomposed in the same way.
+where $\omega_{ij}$ is the overall partial association — the value that would be obtained if all groups were combined — and $\delta_{ij}^{(k)}$ are the contrast parameters, one for each of the $G - 1$ orthogonal contrasts. The coefficients $c_{gk}$ come from an orthonormal projection matrix (a fixed recipe that maps the contrast parameters to group-specific effects). Category thresholds are decomposed in the same way.
 
-For two groups, the projection matrix reduces to $c = (-\tfrac{1}{2},\; +\tfrac{1}{2})^\top$, so that $\omega_{ij}^{(g)} = \omega_{ij} \pm \tfrac{1}{2}\,\delta_{ij}$. This is the centered parameterization of the Bayesian independent-samples $t$-test [@RouderEtAl_2009], where the overall effect and the group difference are separated. For more than two groups, the projection generalizes the idea to an ANOVA-like design with $G - 1$ orthogonal contrasts [@RouderEtAl_2012]. In each case, making the differences explicit parameters — rather than computing them post hoc from separate group estimates — allows each difference to receive its own prior distribution and its own hypothesis test.
+For two groups, the projection matrix reduces to $c = (-\tfrac{1}{2},\; +\tfrac{1}{2})^\top$, so that $\omega_{ij}^{(g)} = \omega_{ij} \pm \tfrac{1}{2}\,\delta_{ij}$ — the single contrast parameter is then simply a scaled group difference. This is the centered parameterization of the Bayesian independent-samples $t$-test [@RouderEtAl_2009], where the overall effect and the group difference are separated. For more than two groups, the projection generalizes the idea to an ANOVA-like design with $G - 1$ orthogonal contrasts [@RouderEtAl_2012]; the contrast parameters are then projections onto orthogonal basis directions, not pairwise group differences. In each case, making the differences explicit parameters — rather than computing them post hoc from separate group estimates — allows each difference to receive its own prior distribution and its own hypothesis test.
 
 ## Defining groups
 
@@ -35,10 +35,10 @@ fit = bgmCompare(x = data, group_indicator = groups, seed = 1234)
 
 ## Difference selection
 
-When `difference_selection = TRUE` (the default), spike-and-slab priors are placed on the group difference parameters. For each pairwise interaction, a binary indicator $\gamma_{ij}$ governs whether the difference is included in the model:
+When `difference_selection = TRUE` (the default), spike-and-slab priors are placed on the contrast parameters. For each pairwise interaction, a binary indicator $\gamma_{ij}$ — here indexing difference inclusion, not the edge inclusion it denotes in `bgm()` — governs whether the contrast parameters are included in the model:
 
-- When $\gamma_{ij} = 0$ (spike), the difference is exactly zero — all groups have the same partial association.
-- When $\gamma_{ij} = 1$ (slab), the difference receives a Cauchy prior with scale `difference_scale` and is estimated from the data.
+- When $\gamma_{ij} = 0$ (spike), the contrast parameters are exactly zero — all groups have the same partial association.
+- When $\gamma_{ij} = 1$ (slab), each contrast parameter receives a Cauchy prior with scale `difference_scale` and is estimated from the data.
 
 By default, only pairwise interaction differences are selected (`main_difference_selection = FALSE`). Threshold differences are always included as free parameters. This default reflects that thresholds are typically nuisance parameters: their selection can interfere with pairwise selection under the Beta-Bernoulli prior, and group differences in thresholds are rarely the primary research question.
 
@@ -57,16 +57,16 @@ As with edge selection, the inclusion Bayes factor averages over all possible co
 
 ## Interpreting the output
 
-The `summary()` method reports posterior summaries for the shared parameters $\omega_{ij}$ and the group difference parameters $\delta_{ij}$, including posterior inclusion probabilities and Bayes factors.
+The `summary()` method reports posterior summaries for the shared parameters $\omega_{ij}$ and the contrast parameters $\delta_{ij}$, including posterior inclusion probabilities and Bayes factors.
 
 The `coef()` method returns:
 
-- `$pairwise_effects_groups`: group-specific posterior mean partial associations, reconstructed from the overall effects and the projection of the difference parameters.
+- `$pairwise_effects_groups`: group-specific posterior mean partial associations, reconstructed from the overall effects and the projection of the contrast parameters.
 - `$main_effects_groups`: group-specific posterior mean thresholds.
 - `$indicator`: posterior inclusion probabilities for the group differences.
 
 ## Prior guidance
 
-- **`difference_scale = 1`** (default): scale of the Cauchy slab on the difference parameters. This matches the default scale of the baseline `interaction_prior` (`cauchy_prior(scale = 1)`).
+- **`difference_scale = 1`** (default): scale of the Cauchy slab on the contrast parameters. This matches the default scale of the baseline `interaction_prior` (`cauchy_prior(scale = 1)`).
 - **`difference_prior = bernoulli_prior(0.5)`** (default): each difference has a fixed prior inclusion probability of 0.5. Pass [`beta_bernoulli_prior(1, 1)`](../reference/priors.qmd#beta_bernoulli_prior) to place a beta hyperprior on the inclusion probability instead — this provides automatic multiplicity correction, important when the number of potential group differences is large [@MarsmanEtAl_2025_ttest]. Setting `bernoulli_prior(p)` with `p = 0.5` makes the prior odds equal to one, so the Bayes factor simplifies to the posterior odds.
 - **`difference_prior = sbm_prior(...)`**: a stochastic block model on the off-diagonal differences, with cluster-structured inclusion probabilities. Useful when group differences are expected to concentrate within latent clusters of variables. The diagonal (main-effect difference inclusions, when `main_difference_selection = TRUE`) follows a separate Beta-Bernoulli using the within-cluster `alpha` and `beta`. See [Edge Clustering](clustering.qmd) and [SBM Prior](../manual/sbm-prior.qmd) for the formulation; cluster summaries are accessible via [`extract_sbm()`](../reference/extractors.qmd#extract_sbm).
