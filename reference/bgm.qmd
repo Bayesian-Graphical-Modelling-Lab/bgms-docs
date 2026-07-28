@@ -27,6 +27,7 @@ bgm(
   threshold_prior = beta_prime_prior(alpha = 0.5, beta = 0.5),
   means_prior = normal_prior(scale = 1),
   precision_scale_prior = gamma_prior(shape = 1, rate = 1),
+  delta = NULL,
   edge_selection = TRUE,
   edge_prior = bernoulli_prior(0.5),
   na_action = c("listwise", "impute"),
@@ -39,7 +40,8 @@ bgm(
   display_progress = c("per-chain", "total", "none"),
   seed = NULL,
   standardize = FALSE,
-  verbose = getOption("bgms.verbose", TRUE)
+  verbose = getOption("bgms.verbose", TRUE),
+  progress_callback = NULL
 )
 ```
 
@@ -64,6 +66,7 @@ Priors are specified by passing prior-object constructors (see [Prior Constructo
 | `threshold_prior` | A `bgms_parameter_prior` object for threshold (main effect) parameters. Allowed: [`beta_prime_prior()`](priors.qmd#beta_prime_prior) (default), [`cauchy_prior()`](priors.qmd#cauchy_prior), [`normal_prior()`](priors.qmd#normal_prior). Default: `beta_prime_prior(alpha = 0.5, beta = 0.5)`. |
 | `means_prior` | A `bgms_parameter_prior` object for continuous-variable means (mixed MRF only). Allowed: `normal_prior()` (default), `cauchy_prior()`, `beta_prime_prior()`. Ignored for pure ordinal or pure GGM models. Default: `normal_prior(scale = 1)`. |
 | `precision_scale_prior` | A [`bgms_scale_prior`](priors.qmd) object for the diagonal elements of the precision matrix (GGM and mixed MRF). Allowed: [`gamma_prior()`](priors.qmd#gamma_prior) (default), [`exponential_prior()`](priors.qmd#exponential_prior). Ignored for pure ordinal models. Default: `gamma_prior(shape = 1, rate = 1)`. |
+| `delta` | Non-negative numeric, or `NULL` for the dimension-adaptive default. Determinant-tilt exponent on the continuous-block precision matrix $K$ (GGM) or $K_{yy}$ (mixed MRF): multiplies the prior by $|K|^{\delta}$, softly repelling the chain from the boundary of the positive-definite cone. `NULL` (default) auto-resolves to $0.5 \log(p)$, with $p$ the number of continuous variables. Pass `delta = 0` for the untilted prior. Ignored for pure ordinal models. |
 | `edge_selection` | Logical. Whether to perform Bayesian edge selection. If `FALSE`, the model estimates all edges. Default: `TRUE`. |
 | `edge_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior for edge inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), [`sbm_prior()`](priors.qmd#sbm_prior). Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) are accepted but deprecated. Default: `bernoulli_prior(0.5)`. |
 | `standardize` | Logical. If `TRUE`, the prior scale for each pairwise interaction is adjusted based on the range of response scores. Variables with more response categories have larger score products $(x_i \cdot x_j)$, which typically correspond to smaller interaction effects $(\omega_{ij})$. Without standardization, a fixed prior scale is relatively wide for these smaller effects, resulting in less shrinkage for high-category pairs and more shrinkage for low-category pairs. Standardization scales the prior proportionally to the maximum score product, ensuring equivalent relative shrinkage across all pairs. After internal recoding, regular ordinal variables have scores $0, 1, \ldots, m$. The adjusted scale for the interaction between variables $i$ and $j$ is `scale * m_i * m_j`, so that `scale` itself applies to the unit interval case (binary variables where $m_i = m_j = 1$). For Blume-Capel variables with reference category $b$, scores are centered as $-b, \ldots, m-b$, and the adjustment uses the maximum absolute product of the score endpoints. For mixed pairs, ordinal variables use raw score endpoints $(0, m)$ and Blume-Capel variables use centered score endpoints $(-b, m-b)$. Default: `FALSE`. |
@@ -82,16 +85,20 @@ table above.
 | `inclusion_probability = p` | `edge_prior = bernoulli_prior(p)` |
 | `beta_bernoulli_alpha = a, beta_bernoulli_beta = b` | `edge_prior = beta_bernoulli_prior(a, b)` |
 | `beta_bernoulli_alpha_between, beta_bernoulli_beta_between, dirichlet_alpha, lambda` | `edge_prior = sbm_prior(alpha_between = …, beta_between = …, dirichlet_alpha = …, lambda = …)` |
+| `interaction_scale = s` | `interaction_prior = cauchy_prior(scale = s)` (deprecated since 0.1.6.0) |
+| `threshold_alpha = a, threshold_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` (deprecated since 0.1.6.0) |
+| `burnin = n` | `warmup = n` (deprecated since 0.1.6.0) |
+| `save` | No replacement; raw samples are always stored in `raw_samples` (deprecated since 0.1.6.0) |
 :::
 
 ### Sampler settings
 
 | Argument | Description |
 |----------|-------------|
-| `iter` | Integer. Number of post-warmup iterations (per chain). Default: `2e3`. |
-| `warmup` | Integer. Number of warmup iterations before collecting samples. Default: `2e3`. Short warmups trigger progressive warnings; see [Warmup Schedule](../manual/warmup.qmd) for the adaptation stages. |
+| `iter` | Integer. Number of post-warmup iterations (per chain). Default: `2000`. |
+| `warmup` | Integer. Number of warmup iterations before collecting samples. Default: `2000`. Short warmups trigger progressive warnings; see [Warmup Schedule](../manual/warmup.qmd) for the adaptation stages. |
 | `update_method` | Character. Specifies how the MCMC sampler updates the model parameters: `"adaptive-metropolis"` (componentwise adaptive Metropolis--Hastings with Robbins--Monro proposal adaptation) or `"nuts"` (the No-U-Turn Sampler with dynamically chosen trajectory lengths). Default: `"nuts"`. |
-| `target_accept` | Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: `0.44` for adaptive Metropolis and `0.80` for NUTS. |
+| `target_accept` | Numeric between 0 and 1. Target acceptance rate for the sampler. Defaults are set automatically if not supplied: `0.44` for adaptive Metropolis and `0.80` for NUTS. Under `update_method = "nuts"` this governs the step-size adaptation; the edge-move Metropolis proposals then use a fixed 0.44 target regardless of this argument. |
 | `nuts_max_depth` | Integer. Maximum tree depth in NUTS. Must be positive. Default: `10`. |
 | `learn_mass_matrix` | Logical. If `TRUE`, adapt a diagonal mass matrix during warmup (NUTS only). If `FALSE`, use the identity matrix. Default: `TRUE`. |
 | `chains` | Integer. Number of parallel chains to run. Default: `4`. |
@@ -99,6 +106,7 @@ table above.
 | `display_progress` | Character. Controls progress reporting during sampling. Options: `"per-chain"` (separate bar per chain), `"total"` (single combined bar), or `"none"` (no progress). Default: `"per-chain"`. |
 | `seed` | Optional integer. Random seed for reproducibility. Must be a single non-negative integer. |
 | `verbose` | Logical. If `TRUE`, prints informational messages during data processing (e.g., missing data handling, variable recoding). Defaults to `getOption("bgms.verbose", TRUE)`. Set `options(bgms.verbose = FALSE)` to suppress messages globally. |
+| `progress_callback` | Optional R function with signature `function(completed, total)`, called at regular intervals during sampling with the number of completed and total iterations across all chains. Useful for external front-ends (e.g., JASP) that supply their own progress reporting. Default: `NULL` (no callback). |
 
 ## Value
 
@@ -113,7 +121,7 @@ Main components:
   category thresholds; for mixed MRF models these are discrete thresholds
   and continuous means. `NULL` for GGM models.
 - `posterior_summary_quadratic` --- Data frame with posterior summaries for
-  the precision matrix diagonal (GGM and mixed MRF). `NULL` for OMRF models.
+  the residual variance parameters (GGM and mixed MRF). `NULL` for OMRF models.
 - `posterior_summary_pairwise` --- Data frame with posterior summaries for
   partial association parameters.
 - `posterior_summary_indicator` --- Data frame with posterior summaries for
@@ -135,7 +143,7 @@ Main components:
 Additional summaries when `edge_prior = sbm_prior(...)` [see @SekulovskiEtAl_2025_sbm]:
 
 - `posterior_summary_pairwise_allocations` --- Data frame with posterior summaries (mean, sd, MCSE, ESS, Rhat) for the pairwise cluster co-occurrence of the nodes. This serves to indicate whether the estimated posterior allocations, co-clustering matrix and posterior cluster probabilities have converged.
-- `posterior_coclustering_matrix` --- Symmetric matrix of pairwise proportions of occurrence of every variable. This matrix can be plotted to visually inspect the estimated number of clusters and visually inspect nodes that tend to switch clusters.
+- `posterior_mean_coclustering_matrix` --- Symmetric matrix of pairwise proportions of occurrence of every variable. This matrix can be plotted to visually inspect the estimated number of clusters and visually inspect nodes that tend to switch clusters.
 - `posterior_mean_allocations` --- A vector with the posterior mean of the cluster allocations of the nodes.
 - `posterior_mode_allocations` --- A vector with the posterior mode of the cluster allocations of the nodes.
 - `posterior_num_blocks` --- A data frame with the estimated posterior inclusion probabilities for all the possible number of clusters.

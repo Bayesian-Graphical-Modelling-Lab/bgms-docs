@@ -44,7 +44,8 @@ bgmCompare(
   display_progress = c("per-chain", "total", "none"),
   seed = NULL,
   standardize = FALSE,
-  verbose = getOption("bgms.verbose", TRUE)
+  verbose = getOption("bgms.verbose", TRUE),
+  progress_callback = NULL
 )
 ```
 
@@ -89,6 +90,15 @@ Priors on baseline parameters are specified via prior-object constructors (see [
 | `main_alpha = a, main_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` |
 | `difference_probability = p` | `difference_prior = bernoulli_prior(p)` |
 | `beta_bernoulli_alpha = a, beta_bernoulli_beta = b` | `difference_prior = beta_bernoulli_prior(a, b)` |
+| `pairwise_difference_scale, main_difference_scale` | `difference_scale` |
+| `pairwise_difference_prior, main_difference_prior` | `difference_prior` |
+| `pairwise_difference_probability, main_difference_probability` | `difference_prior = bernoulli_prior(p)` |
+| `pairwise_beta_bernoulli_alpha/beta, main_beta_bernoulli_alpha/beta` | `difference_prior = beta_bernoulli_prior(a, b)` |
+| `main_difference_model, reference_category` | No replacement (removed model options) |
+| `interaction_scale = s` | `interaction_prior = cauchy_prior(scale = s)` (deprecated since 0.1.6.0) |
+| `threshold_alpha = a, threshold_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` (deprecated since 0.1.6.0) |
+| `burnin = n` | `warmup = n` (deprecated since 0.1.6.0) |
+| `save` | No replacement; raw samples are always stored (deprecated since 0.1.6.0) |
 :::
 
 ### Sampler settings
@@ -106,6 +116,7 @@ Priors on baseline parameters are specified via prior-object constructors (see [
 | `display_progress` | Progress reporting: `"per-chain"`, `"total"`, or `"none"`. Default: `"per-chain"`. |
 | `seed` | Optional integer seed for reproducibility. |
 | `verbose` | Logical. Print informational messages during data processing. Default: `getOption("bgms.verbose", TRUE)`. |
+| `progress_callback` | Optional R function with signature `function(completed, total)`, called at regular intervals during sampling with the number of completed and total iterations across all chains. Useful for external front-ends (e.g., JASP). Default: `NULL` (no callback). |
 
 ## Value
 

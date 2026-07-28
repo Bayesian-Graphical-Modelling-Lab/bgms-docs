@@ -14,7 +14,7 @@ density method [@PlummerEtAl_2006_coda] and R-hat uses the Gelman-Rubin
 formula [@GelmanRubin_1992]. For implementation details, see the
 [Technical Manual](../manual/diagnostics.qmd).
 
-## Effective sample size (ESS)
+## Effective sample size (ESS) {#sec-ess}
 
 The effective sample size estimates how many independent draws the MCMC
 chain is equivalent to. Correlated draws reduce the effective information
@@ -31,7 +31,7 @@ $\hat{R}$ and the ESS estimate itself become unreliable
 required, more iterations or chains are needed: two significant digits
 require an ESS on the order of 10,000 [@MargossianGelman_2024].
 
-### Mixture ESS for edge-selected parameters
+### Mixture ESS for edge-selected parameters {#sec-mixture-ess}
 
 When edge selection is active, pairwise effects are governed by
 spike-and-slab priors. The parameter is set to exactly zero when the edge
@@ -84,7 +84,7 @@ probability across iterations provides a more informative check on
 stability: a flat trajectory indicates the estimate has settled, while a
 drifting one suggests the chain needs more iterations.
 
-## Monte Carlo standard error (MCSE)
+## Monte Carlo standard error (MCSE) {#sec-mcse}
 
 The MCSE measures the additional variability introduced by using a finite
 number of MCMC draws instead of the exact posterior. It depends on both
