@@ -48,11 +48,11 @@ Prior specification objects passed to `bgm()` and `bgmCompare()` via the
 | Function | Description |
 |----------|-------------|
 | [`extract_arguments()`](extractors.qmd#extract_arguments) | Retrieve the arguments used when fitting a model |
-| [`extract_main_effects()`](extractors.qmd#extract_main_effects) | Extract posterior samples of category threshold parameters |
+| [`extract_main_effects()`](extractors.qmd#extract_main_effects) | Extract main-effect parameters: posterior means for `bgms` fits, posterior samples for `bgmCompare` fits |
 | [`extract_pairwise_interactions()`](extractors.qmd#extract_pairwise_interactions) | Extract posterior samples of partial association parameters |
 | [`extract_indicators()`](extractors.qmd#extract_indicators) | Extract posterior samples of edge or difference indicators |
 | [`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities) | Compute posterior inclusion probabilities from indicator samples |
-| [`extract_indicator_priors()`](extractors.qmd#extract_indicator_priors) | Retrieve prior inclusion probabilities for indicators |
+| [`extract_indicator_priors()`](extractors.qmd#extract_indicator_priors) | Retrieve the indicator prior specification (prior type and hyperparameters) |
 | [`extract_group_params()`](extractors.qmd#extract_group_params) | Extract group-specific parameters from a `bgmCompare` fit |
 | [`extract_sbm()`](extractors.qmd#extract_sbm) | Extract stochastic block model assignments and probabilities |
 | [`extract_ess()`](extractors.qmd#extract_ess) | Compute effective sample sizes for model parameters |

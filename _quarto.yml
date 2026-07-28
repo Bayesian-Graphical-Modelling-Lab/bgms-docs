@@ -85,6 +85,7 @@ website:
             - guide/edge-selection.qmd
             - guide/group-comparison.qmd
             - guide/clustering.qmd
+            - guide/missing-data.qmd
         - section: "Output & Diagnostics"
           contents:
             - guide/mcmc-output.qmd
