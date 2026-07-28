@@ -19,10 +19,9 @@ which sampler hosts it (see [Budget allocation](#budget-allocation)).
 | 3a | Terminal step-size tuning | Final step-size pass with frozen mass matrix |
 | 3b | Proposal-SD tuning | Tune element-wise Metropolis proposal SDs (edge selection not yet active) |
 | 3c | Selection-active warmup | Warmup iterations with edge selection running |
-| 3d | Calibration window | Appended selection-active window (currently dormant; see below) |
 
-Stages 3b-3d only apply when edge selection is enabled, and which of
-them actually run depends on the sampler.
+Stages 3b and 3c only apply when edge selection is enabled, and which
+of them actually run depends on the sampler.
 
 ### Stage 1: Initial step-size adaptation
 
@@ -109,16 +108,15 @@ geometry. On the Gibbs host, stage 3c covers most of the warmup (see
 below) — there is nothing to adapt, but the graph and precision
 matrix burn in together.
 
-### Stage 3d: Calibration window (dormant)
-
-The schedule supports an appended selection-active calibration
-window after the user's warmup budget (`total_warmup = warmup +
-calibration_window`), intended to feed selection-warm iterations to
-the Z-ratio calibration machinery on every host — including
-adaptive Metropolis, whose regular schedule has no selection-active
-warmup at all. The chain runner currently constructs the schedule
-with a zero-length window, so stage 3d is dormant: `stage3d_start ==
-total_warmup` and the predicates never fire.
+::: {.callout-note}
+An earlier design appended a "stage 3d" calibration window after the
+user's warmup budget, meant to feed selection-warm iterations to a
+warmup-time Z-ratio calibrator. The Option-B surfaces (built once
+before sampling) made that machinery unnecessary, and the scaffolding
+— the `calibration_window` constructor parameter, `stage3d_start`,
+and `in_stage3d()` — was removed; no caller had ever passed a
+non-zero window.
+:::
 
 ## Budget allocation {#budget-allocation}
 
@@ -183,15 +181,14 @@ bool in_stage2(int i) const;
 bool in_stage3a(int i) const;
 bool in_stage3b(int i) const;
 bool in_stage3c(int i) const;
-bool in_stage3d(int i) const;
 bool sampling(int i) const;          // i >= total_warmup
-bool selection_enabled(int i) const; // stage 3c, 3d, or sampling
+bool selection_enabled(int i) const; // stage 3c or sampling
 std::optional<double> rm_weight_for_proposal_sd(int i) const;
 ```
 
 These predicates control when the adaptation controller accumulates
 samples, when edge selection is turned on, and when the chain
 transitions from warmup to sampling. `selection_enabled()` is true
-during stages 3c and 3d and throughout sampling — under the
+during stage 3c and throughout sampling — under the
 adaptive-Metropolis host, where stage 3c is empty, that means
 selection starts only when sampling does.

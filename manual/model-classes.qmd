@@ -68,17 +68,14 @@ or the fixed 0.44 edge-move target under NUTS.
 
 ```cpp
 virtual void prepare_iteration();
-virtual void on_warmup_end();
 virtual void collect_chain_diagnostics(ChainResult& chain_result) const;
 ```
 
 `prepare_iteration()` runs at the start of every iteration (e.g., to
-shuffle the edge-update order). `on_warmup_end()` runs once at the
-warmup/sampling boundary; models with warmup-calibrated state — such
-as the GGM's Z-ratio engine — freeze it here.
-`collect_chain_diagnostics()` runs once at the end of the chain and
-copies run-level diagnostic state (e.g., the Z-ratio engine's counters
-and calibration anchors) into the `ChainResult`.
+shuffle the edge-update order). `collect_chain_diagnostics()` runs
+once at the end of the chain and copies run-level diagnostic state
+(e.g., the Z-ratio engine's counters and calibration anchors) into
+the `ChainResult`.
 
 ### Trust-gauge hooks
 
