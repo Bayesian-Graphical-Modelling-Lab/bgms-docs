@@ -73,7 +73,7 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | reference/index.qmd | Low | Scaffolded | No | No | - |
 | reference/bgm.qmd | High | Populated | No | No | - |
 | reference/bgmCompare.qmd | High | Populated | No | No | - |
-| reference/sample-precision-prior.qmd | High | Populated | No | No | Rename to sample_ggm_prior (audit 2026-07-28 §1.1) |
+| reference/sample-ggm-prior.qmd | High | Populated | No | No | - |
 | reference/priors.qmd | High | Populated | No | No | - |
 | reference/methods.qmd | Medium | Populated | No | No | - |
 | reference/extractors.qmd | Medium | Populated | No | No | - |
