@@ -3,6 +3,9 @@
 /_site/
 /docs/
 
+# Companion scripts, written by scripts/extract-example-code.R at render time
+examples/R/
+
 # Development
 dev/
 
