@@ -85,8 +85,12 @@ install.packages("bgms")
 ### Development Version
 
 ```r
-remotes::install_github(...)
+remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms@develop")
 ```
+
+Always pin `@develop` in install snippets. The bare call installs the
+default branch, which is the released CRAN lineage, not the development
+version.
 
 ## Basic Example
 
@@ -160,6 +164,109 @@ Citations if applicable.
 3. **No orphan headings** - every heading should have content below it
 4. **Code comments are not headings** - `# comment` inside code blocks is fine
 5. **Cross-reference with IDs** when needed: `## Overview {#overview}`
+
+---
+
+## Network Figures
+
+Convention settled 2026-07-30 (MM). It mirrors the figure practice of the
+tutorial paper; it is not a site invention. Every network figure on the
+site follows it.
+
+### The rule
+
+**The canonical result display is the edge evidence plot: the network
+split by evidence.** A network drawn as one picture has to make every
+pair either an edge or a blank, and a blank cannot distinguish a pair the
+data ruled out from a pair the data could not decide. Reporting the bare
+median-probability network and reading its blanks as absence is exactly
+the conflation the tutorial paper corrects.
+
+A traditional weighted or median-probability network may appear **only**
+as an explicit estimation-workflow foil, labelled as such in the
+surrounding prose, and never as a page's final display. It must not
+appear on Getting Started at all.
+
+### Panel structure
+
+Three panels, drawn left to right in this order, on **one shared
+layout** so the panels match node for node:
+
+| Panel | Contents | Edge styling |
+|-------|----------|--------------|
+| evidence of presence | pairs with inclusion Bayes factor at or above the threshold | weighted by the posterior mean partial association; solid; `theme = "TeamFortress"`, `edge.width = 1.1` |
+| evidence of absence | pairs with inclusion Bayes factor at or below the reciprocal threshold | uniform width; dashed; `edge.color = "#A66A1E"`, `lty = 2`, `edge.width = 1.1` |
+| undecided | everything else | uniform width; dotted; `edge.color = "#8A8578"`, `lty = 3`, `edge.width = 1.4` |
+
+Only the presence panel is weighted. For the other two the classification,
+not a weight, is the result, so their edges carry no width information.
+
+The shared layout is non-negotiable. Compute it once from **all** pairs,
+so that no single panel sets the geometry, and pass the same coordinates
+to all three:
+
+```r
+set.seed(1234)
+shared = qgraph(abs(coef(fit)$pairwise), layout = "spring",
+                repulsion = 0.9, DoNotPlot = TRUE)$layout
+```
+
+Each panel is titled with its category name and its edge count, for
+example `evidence of absence: 5`. Do not omit the counts; an empty panel
+is a result and must be visible as one.
+
+### Categories
+
+Categories come from [`extract_inclusion_bf()`](reference/extractors.qmd),
+at an inclusion Bayes factor of **10** in either direction: at or above 10
+is presence, at or below 1/10 is absence, everything between is undecided.
+This matches the `evidence_threshold` default of
+`prior_sensitivity_check()` and the verdict names the package itself uses
+(`"presence"`, `"absence"`, `"undecided"`).
+
+Never classify from the posterior inclusion probability alone. For
+continuous and mixed models the prior inclusion probability of a
+continuous edge is not 0.5 under the default `precision_graph_prior`, so
+the posterior odds are not the Bayes factor; `extract_inclusion_bf()`
+divides the prior odds out.
+
+### Caption duties
+
+The prose around the figure must state, in the site's own register, what
+each panel licenses the reader to say:
+
+- Presence: the data favour a direct association that survives
+  conditioning on the rest of the network.
+- Absence: a **positive statement of conditional independence**. Say so,
+  and say that it is the statement an estimation workflow cannot make.
+- Undecided: the pairs these data have too little to say about. Never
+  fold these in with absence.
+
+Where a page has just shown, or could plausibly show, a thresholded
+network, say explicitly that a blank there is not evidence of absence.
+
+### Reference implementation
+
+`guide/getting-started.qmd` defines `plot_edge_evidence()` and applies it
+to both an ordinal and a continuous fit. Copy it rather than re-deriving
+the styling.
+
+### Single-edge display
+
+For a page that discusses one edge's weight rather than the whole
+network, the companion figure is the **prior-to-posterior (spike-and-slab)
+plot**: the two-part distribution of that edge weight, with the spike
+drawn as a lollipop whose height is the probability of exactly zero and
+the slab as a filled curve on the same probability-per-bin scale, so the
+two are commensurable. Not required on Getting Started; it enters the
+palette when a page first needs parameter-level display.
+
+### Rendering
+
+Site figures are R-generated PNGs with an opaque white background, so
+they read the same in light and dark mode. Keep ink dark and rely on
+line style, not on hue alone, to separate the categories. Render the
+three-panel figure at `fig-width: 9.5`, `fig-height: 3.7`.
 
 ---
 
