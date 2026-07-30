@@ -8,8 +8,14 @@ project:
   # Regenerates examples/R/NN-slug.R from the Examples pages, so the companion
   # script published beside a page always matches that page.
   pre-render: scripts/extract-example-code.R
-  # Writes the stubs that keep the previous pkgdown site's URLs alive.
-  post-render: scripts/redirects.R
+  # Writes the stubs that keep the previous pkgdown site's URLs alive, then the
+  # version index the navbar switcher reads, then the marking that tells a
+  # development build apart from the released one. Order matters: the marking
+  # runs last so it reaches the stubs as well as the pages.
+  post-render:
+    - scripts/redirects.R
+    - scripts/versions.R
+    - scripts/dev-build.R
 
 execute:
   freeze: true

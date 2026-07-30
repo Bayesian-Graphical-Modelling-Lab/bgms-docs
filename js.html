@@ -44,4 +44,176 @@ document.querySelectorAll("[data-cite-picker]").forEach(picker => {
    });
 });
 
+// development-build banner: dismissable, and remembered once dismissed
+(function () {
+   const banner = document.getElementById("bgms-dev-banner");
+   if (!banner) return;
+
+   const store = (() => {
+      try { return window.localStorage; } catch (e) { return null; }
+   })();
+   const KEY = "bgms-dev-banner-dismissed";
+
+   const hide = () => {
+      banner.remove();
+      document.body.classList.remove("bgms-dev-build");
+      document.documentElement.style.removeProperty("--bgms-dev-banner-height");
+   };
+
+   if (store && store.getItem(KEY) === "1") {
+      hide();
+      return;
+   }
+
+   // The banner sits above the fixed navbar, so its real height has to reach
+   // the CSS that pushes the navbar and the page down.
+   const setHeight = () => {
+      document.documentElement.style.setProperty(
+         "--bgms-dev-banner-height", banner.offsetHeight + "px");
+   };
+   setHeight();
+   window.addEventListener("resize", setHeight);
+
+   banner.querySelector(".bgms-dev-banner-dismiss").addEventListener("click", () => {
+      hide();
+      if (store) { try { store.setItem(KEY, "1"); } catch (e) { /* private mode */ } }
+   });
+})();
+
+// version switcher: a navbar dropdown built from versions.json at the site
+// root. Missing or unreadable file (a local preview, say) means no dropdown.
+(function () {
+   const offset = document.querySelector('meta[name="quarto:offset"]');
+   const navbar = document.querySelector("#quarto-header .navbar-nav.ms-auto");
+   if (!offset || !navbar) return;
+
+   // Where this build's own root is: /bgms/, /bgms/dev/, /bgms/v0.2.0.0/, ...
+   const buildBase = new URL(offset.content, window.location.href).pathname;
+   const parentOf = (path) => path.replace(/[^/]+\/$/, "");
+
+   const readJson = async (url) => {
+      try {
+         const response = await fetch(url, { cache: "no-cache" });
+         if (!response.ok) return null;
+         return await response.json();
+      } catch (e) {
+         return null;
+      }
+   };
+
+   const exists = async (url) => {
+      try {
+         const response = await fetch(url, { method: "HEAD" });
+         return response.ok;
+      } catch (e) {
+         return false;
+      }
+   };
+
+   const render = (siteRoot, entries, current) => {
+      const pagePath = window.location.pathname.slice(buildBase.length);
+
+      const item = document.createElement("li");
+      item.className = "nav-item dropdown bgms-version-switcher";
+
+      const toggle = document.createElement("a");
+      toggle.className = "nav-link dropdown-toggle";
+      toggle.setAttribute("role", "button");
+      toggle.setAttribute("href", "#");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-haspopup", "true");
+      toggle.title = "Documentation version";
+      toggle.innerHTML = '<span class="menu-text"></span>';
+      toggle.querySelector(".menu-text").textContent = current.version;
+
+      const menu = document.createElement("ul");
+      menu.className = "dropdown-menu dropdown-menu-end";
+
+      entries.forEach(entry => {
+         const li = document.createElement("li");
+         const link = document.createElement("a");
+         link.className = "dropdown-item" + (entry === current ? " active" : "");
+         link.href = siteRoot + entry.dir;
+         link.innerHTML = '<span></span><span class="bgms-version-kind"></span>';
+         link.children[0].textContent = entry.version;
+         link.children[1].textContent = entry.kind === "release" ? "release" : "";
+         if (entry === current) link.setAttribute("aria-current", "true");
+
+         // Keep the reader on the same page across versions when that version
+         // has it, and send them to its homepage when it does not.
+         link.addEventListener("click", async (event) => {
+            event.preventDefault();
+            const home = siteRoot + entry.dir;
+            if (!pagePath) { window.location.href = home; return; }
+            const target = siteRoot + entry.dir + pagePath;
+            window.location.href =
+               (await exists(target)) ? target + window.location.hash : home;
+         });
+
+         li.appendChild(link);
+         menu.appendChild(li);
+      });
+
+      const close = () => {
+         menu.classList.remove("show");
+         toggle.setAttribute("aria-expanded", "false");
+      };
+      toggle.addEventListener("click", (event) => {
+         event.preventDefault();
+         const open = menu.classList.toggle("show");
+         toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      document.addEventListener("click", (event) => {
+         if (!item.contains(event.target)) close();
+      });
+      document.addEventListener("keydown", (event) => {
+         if (event.key === "Escape") close();
+      });
+
+      item.appendChild(toggle);
+      item.appendChild(menu);
+      navbar.insertBefore(item, navbar.firstChild);
+   };
+
+   (async function () {
+      // The index lives at the site root. A build one directory down, such as
+      // /dev/, finds it one level up.
+      let base = buildBase;
+      let index = await readJson(base + "versions.json");
+      if (!index) {
+         const up = parentOf(buildBase);
+         if (!up || up === buildBase) return;
+         base = up;
+         index = await readJson(base + "versions.json");
+      }
+      if (!index || typeof index.root !== "string" ||
+          !Array.isArray(index.versions)) return;
+
+      // The file names the root it belongs to. An archived build carries a
+      // frozen copy of it, so prefer the live one when this is not it.
+      let siteRoot = base;
+      if (index.root !== base && buildBase.startsWith(index.root)) {
+         siteRoot = index.root;
+         const live = await readJson(siteRoot + "versions.json");
+         if (live && Array.isArray(live.versions)) index = live;
+      }
+
+      const entries = index.versions
+         .filter(entry => typeof entry.path === "string" &&
+                          entry.path.startsWith(index.root))
+         .map(entry => ({
+            version: entry.version,
+            kind: entry.kind,
+            dir: entry.path.slice(index.root.length)
+         }));
+      if (entries.length === 0) return;
+
+      const current = entries.find(
+         entry => entry.dir === buildBase.slice(siteRoot.length));
+      if (!current) return;
+
+      render(siteRoot, entries, current);
+   })();
+})();
+
 </script>
