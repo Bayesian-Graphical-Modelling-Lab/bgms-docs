@@ -6,6 +6,7 @@
 # PDF build of the Examples series (make examples-pdf)
 /_pdf/
 /_pdf-src/
+/_freeze/_pdf-src/
 
 # Companion scripts, written by scripts/extract-example-code.R at render time
 examples/R/
