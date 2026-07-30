@@ -1,0 +1,39 @@
+---
+title: "News"
+---
+
+Release notes for `bgms` and for this documentation site, newest first. The
+package's complete change log, including breaking changes and bug fixes, is
+[NEWS.md](https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/blob/main/NEWS.md)
+in the package repository.
+
+## 2026-07-30: bgms 0.2.0.0 on CRAN
+
+The headline addition is
+[`prior_sensitivity_check()`](reference/prior-sensitivity.qmd). It recovers
+each edge's inclusion Bayes factor as a continuous curve across the
+interaction slab scale, anchored at a handful of fixed-scale refits and filled
+in between them by importance reweighting, and then tells you which edge
+verdicts actually depend on your prior choice. Verdicts that only wobble
+between reruns of the same prior are reported as wobble rather than as prior
+sensitivity, so you can separate a real dependence on the slab scale from
+Monte Carlo noise.
+
+This release also brings Gaussian and mixed graphical models to
+[`bgm()`](reference/bgm.qmd) through `variable_type = "continuous"` and
+per-variable type vectors, Rao-Blackwellized edge inclusion probabilities as
+the default estimator in
+[`extract_posterior_inclusion_probabilities()`](reference/extractors.qmd#extract_posterior_inclusion_probabilities),
+missing-data imputation during sampling, and a rewritten C++ backend with
+shared NUTS infrastructure across model types.
+
+## 2026-07-30: Documentation site launched
+
+This site replaces the reference-only pages that used to live at this address.
+It adds a [User's Guide](guide/index.qmd) that explains the modelling and prior
+choices behind a fit, a [Reference](reference/index.qmd) grouped by topic
+rather than by help file, and a [Manual](manual/index.qmd) that documents the
+C++ internals for contributors.
+
+Links to the old pages redirect here, so existing bookmarks and citations keep
+working.
