@@ -8,12 +8,25 @@ name: Build and Deploy Documentation
 # repository's own Pages site, .../bgms-docs/, serves only the redirect in
 # redirect/.
 #
-# Both deploy steps are guarded on main, so a workflow_dispatch run from a
-# docs/* branch renders and stops without touching either Pages site.
+# The documentation is versioned, so that branch holds more than one site:
+#
+#   /        the current release, deployed from main
+#   /dev/    the development documentation, deployed from docs/develop
+#   /vX.Y.Z/ frozen archives, from the release after 0.2.0.0 onwards
+#
+# The root deploy must therefore replace the root without touching dev/ or any
+# vX.Y.Z/. peaceiris/actions-gh-pages cannot express that, so both deploys to
+# the bgms repository go through scripts/deploy-gh-pages.sh, which says why in
+# its header and which scripts/simulate-deploy.sh proves. The redirect deploy to
+# this repository's own Pages site is a plain root deploy and still uses the
+# action.
+#
+# Every deploy step is guarded on a branch, so a workflow_dispatch run from any
+# other branch renders and stops.
 
 on:
   push:
-    branches: [main]
+    branches: [main, docs/develop]
   workflow_dispatch:
 
 jobs:
@@ -21,6 +34,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      # One flag decides what this build is: the version it stamps, the version
+      # index it writes, and whether it carries the development marking. See
+      # scripts/doc-build.R.
+      BGMS_DOC_CHANNEL: ${{ github.ref == 'refs/heads/docs/develop' && 'dev' || 'release' }}
+      # And it documents the matching bgms build, which is where the version
+      # string comes from.
+      BGMS_PACKAGE_REF: ${{ github.ref == 'refs/heads/docs/develop' && 'develop' || 'main' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -36,24 +57,25 @@ jobs:
             any::knitr
             any::rmarkdown
             any::qgraph
-            github::Bayesian-Graphical-Modelling-Lab/bgms
+            github::Bayesian-Graphical-Modelling-Lab/bgms@${{ env.BGMS_PACKAGE_REF }}
 
       - name: Render site
-        env:
-          # Documented release. Drives the citation picker on the homepage.
-          BGMS_DOC_VERSION: 0.2.0.0
         run: quarto render --profile ci
 
-      - name: Deploy canonical site to the bgms repository
-        if: github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
+      - name: Publish the development build to /dev/
+        if: github.ref == 'refs/heads/docs/develop'
+        env:
           # SSH deploy key with write access to the bgms repository only.
-          deploy_key: ${{ secrets.BGMS_SITE_DEPLOY_KEY }}
-          external_repository: Bayesian-Graphical-Modelling-Lab/bgms
-          publish_branch: gh-pages
-          publish_dir: ./docs
-          commit_message: "Deploy bgms-docs ${{ github.sha }}"
+          DEPLOY_KEY: ${{ secrets.BGMS_SITE_DEPLOY_KEY }}
+          DEPLOY_MESSAGE: "Deploy bgms-docs dev ${{ github.sha }}"
+        run: scripts/deploy-gh-pages.sh dev
+
+      - name: Publish the release build to the canonical site root
+        if: github.ref == 'refs/heads/main'
+        env:
+          DEPLOY_KEY: ${{ secrets.BGMS_SITE_DEPLOY_KEY }}
+          DEPLOY_MESSAGE: "Deploy bgms-docs ${{ github.sha }}"
+        run: scripts/deploy-gh-pages.sh release
 
       - name: Deploy redirect stub to this repository's Pages site
         if: github.ref == 'refs/heads/main'
