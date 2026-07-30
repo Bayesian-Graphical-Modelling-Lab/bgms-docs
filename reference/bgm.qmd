@@ -91,7 +91,7 @@ probability is returned per chain in `fit$inclusion_parameter_samples`.
 :::
 
 ::: {.callout-note}
-## Deprecated scalar prior arguments
+## Deprecated arguments
 
 The following arguments are deprecated as of bgms 0.2.0. They still work
 but emit a lifecycle warning. Use the prior-object equivalents in the
@@ -99,6 +99,7 @@ table above.
 
 | Deprecated | Replacement |
 |------------|-------------|
+| `standardize` | No replacement; see the note below the table |
 | `pairwise_scale = s` | `interaction_prior = cauchy_prior(scale = s)` |
 | `main_alpha = a, main_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` |
 | `inclusion_probability = p` | `edge_prior = bernoulli_prior(p)` |
@@ -108,6 +109,13 @@ table above.
 | `threshold_alpha = a, threshold_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` (deprecated since 0.1.6.0) |
 | `burnin = n` | `warmup = n` (deprecated since 0.1.6.0) |
 | `save` | No replacement; raw samples are always stored in `raw_samples` (deprecated since 0.1.6.0) |
+
+`standardize` scaled each pair's interaction prior by the product of the
+two variables' maximum scores; pairwise interactions are now on the
+association scale and share one prior scale, so the adjustment is gone.
+`standardize = FALSE`, the old default, is what the sampler does, so it
+warns and fits; `standardize = TRUE` errors and points you at setting the
+scale directly through `interaction_prior`.
 :::
 
 ### Sampler settings
