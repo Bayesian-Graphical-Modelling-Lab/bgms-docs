@@ -186,7 +186,7 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | **Examples** | | | | | |
 | examples/index.qmd | Low | Scaffolded | No | No | B0: section wired and the series contract written; the seven entries below stay unlinked plain text in the index prose until their pages ship. The PDF download link stays commented until the first one does; uncommenting it also means adding the `make examples-pdf` step to publish.yml, after the render and before the deploy, since a site render rewrites `docs/` |
 | examples/estimation-to-evidence.qmd | High | Not started | No | No | B1; D3 gate (ship at launch vs hold for the tutorial preprint) |
-| examples/reading-the-output.qmd | Medium | Not started | No | No | B2 |
+| examples/reading-the-output.qmd | Medium | Populated | No | No | B2: summary() of the Wenchuan fit walked block by block, all column claims verified against R/mcmc_summary.R and src/mcmc_diagnostics.cpp on the release build. Template deviation, with reason: the payoff slot holds the full printed summary() instead of a figure (the printout is the artifact this page teaches), and the fit mirror precedes it so the companion script runs in order. The brief's "partial correlations" row in Where-is-X is split per model type: extract_partial_correlations() returns NULL on this all-ordinal fit, so the ordinal row points at extract_log_odds(). Closing bgmCompare pointer goes to guide/group-comparison.qmd until the B4 example ships. guide/mcmc-output.qmd gained the top-of-page pointer here |
 | examples/check-your-priors.qmd | High | Not started | No | No | B3; reads ps_wenchuan.rds |
 | examples/comparing-groups.qmd | Medium | Not started | No | No | B4 |
 | examples/edge-clustering.qmd | Medium | Not started | No | No | B5 |
