@@ -75,6 +75,27 @@ The 2b decision did not change `precision_graph_prior`: the installed
 release build still defaults to `"joint"`, so the effective-prior workaround
 on guide/edge-selection.qmd § sec-bf-continuous stands as written.
 
+## Network Figure Convention (brief A6, 2026-07-30)
+
+D2 (MM, 2026-07-30): the canonical network display on this site is the
+**edge evidence plot**, the network split into evidence of presence,
+evidence of absence, and undecided, on one shared layout, with categories
+from `extract_inclusion_bf()` at a Bayes factor of 10 either way. It
+mirrors the tutorial paper's own figure practice (R/18); it is not a site
+invention. A traditional weighted or median-probability network may appear
+only as an explicit estimation-workflow foil, never as a page's final
+display, and never on Getting Started. The prior-to-posterior
+(spike-and-slab) plot of R/21 joins the palette for pages that discuss a
+single edge's weight. Codified in `STYLE_GUIDE.md` § Network Figures;
+reference implementation `plot_edge_evidence()` in
+`guide/getting-started.qmd`.
+
+Rendering note: `_freeze` invalidates on code changes only, so a
+prose-only edit to a page with code chunks is served stale by a project
+render. Re-render each edited page individually first
+(`quarto render <page>.qmd --profile ci`, which always executes), then run
+the project render.
+
 ## Current Cycle Focus
 
 - Build trusted docs with automation-first QA.
@@ -119,21 +140,21 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | Page | Risk | Status | Technical sign-off (Maarten) | Readability sign-off (Emily) | Blocking issue |
 |---|---|---|---|---|---|
 | **Site** | | | | | |
-| news.qmd | Low | Populated | No | No | A3: the "bgms 0.2.0.0 on CRAN" entry and both entry dates (2026-07-30) are launch-gated; correct the dates if CRAN acceptance lands on another day |
+| news.qmd | Low | Populated | No | No | A6: the 0.2.0.0 entry was reweighted to NEWS.md's own emphasis (model-class expansion, predict/simulate, NUTS backend, RB inclusion, prior constructors, sensitivity check last); MM reviews the wording. A3: the "bgms 0.2.0.0 on CRAN" entry and both entry dates (2026-07-30) are launch-gated; correct the dates if CRAN acceptance lands on another day |
 | **Guide** | | | | | |
 | guide/index.qmd | Low | Not started | No | No | - |
-| guide/getting-started.qmd | Medium | Scaffolded | No | No | A4: numbers moved (the hidden fits ran `chains = 2` while the shown calls used the four-chain default; the hidden chunks now match the shown calls) |
+| guide/getting-started.qmd | Medium | Scaffolded | No | No | A6: both median-probability plots replaced by the three-panel edge evidence plot (D2); ordinal splits 8 presence / 1 absence / 1 undecided, GGM 3 / 5 / 2. The shown chunks now execute rather than mirroring a hidden twin, so the `qgraph` soft guard is gone (qgraph is a CI dependency). Install snippet pinned to `@develop`. MM re-reviews the figures. A4: numbers moved (the hidden fits ran `chains = 2` while the shown calls used the four-chain default; the hidden chunks now match the shown calls) |
 | guide/graphical-models.qmd | Low | Not started | No | No | - |
 | guide/bayesian-approach.qmd | Low | Not started | No | No | - |
 | guide/prior-basics.qmd | Medium | Not started | No | No | Renamed from prior-guide.qmd |
 | guide/ggm.qmd | Medium | Scaffolded | No | No | - |
 | guide/omrf.qmd | High | Scaffolded | No | No | - |
 | guide/mixed-model.qmd | Medium | Not started | No | No | - |
-| guide/edge-selection.qmd | Medium | Scaffolded | No | No | A5: fixture baked on 0e116079, numbers unchanged from A4; the saturated-edge readout is now the Bayes factor (about 2e119) with the log scale (274.76) shown beside it. A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, BF10 2.8 -> 2.0, BF01 35 -> 33, log BF 317 -> 275) |
+| guide/edge-selection.qmd | Medium | Scaffolded | No | No | A6: the median-probability section now says it is a summary, not a display, and points at the edge evidence plot (D2). A5: fixture baked on 0e116079, numbers unchanged from A4; the saturated-edge readout is now the Bayes factor (about 2e119) with the log scale (274.76) shown beside it. A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, BF10 2.8 -> 2.0, BF01 35 -> 33, log BF 317 -> 275) |
 | guide/group-comparison.qmd | Medium | Scaffolded | No | No | A5: fixture baked on 0e116079, numbers unchanged. A4: numbers moved to the defaults fixture (BF10 290 -> 305, 3.5 -> 3.3, BF01 2.6 -> 2.5) |
 | guide/clustering.qmd | Medium | Not started | No | No | A5: fixture baked on 0e116079, numbers unchanged. A4: numbers moved to the defaults fixture (P(B=1) 0.43 -> 0.42) |
 | guide/mcmc-output.qmd | Medium | Populated | No | No | A5: fixtures baked on 0e116079, numbers unchanged; the extractor table now states both extractor scales. A4: numbers moved to the manuscript-grade fixture; the credible-interval example now pools all four chains instead of the first two |
-| guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | A5: fixture baked on 0e116079, fixture numbers unchanged, but the indicator ESS the page prints moved from the transition ESS to the RB one (min 1122 -> 995) because `extract_ess()` changed its default; the transition reading is now shown explicitly. A4: numbers moved to the manuscript-grade fixture; new subsection reads the warmup flag this fit now raises |
+| guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | A6: the `n_eff_mixt` gloss was wrong ("frequent switching means precisely estimated") and is corrected against `src/mcmc_diagnostics.cpp:375-387`: the statistic compares switch rates with an independent chain at the same inclusion probability, so absolute flip frequency is not a quality measure (a2-review-findings 1). A5: fixture baked on 0e116079, fixture numbers unchanged, but the indicator ESS the page prints moved from the transition ESS to the RB one (min 1122 -> 995) because `extract_ess()` changed its default; the transition reading is now shown explicitly. A4: numbers moved to the manuscript-grade fixture; new subsection reads the warmup flag this fit now raises |
 | guide/missing-data.qmd | Medium | Populated | No | No | - |
 | **Reference** | | | | | |
 | reference/index.qmd | Low | Scaffolded | No | No | A5: the `extract_inclusion_bf()` and `extract_ess()` rows now name the release defaults |
@@ -142,7 +163,7 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | reference/sample-ggm-prior.qmd | High | Populated | No | No | - |
 | reference/priors.qmd | High | Populated | No | No | - |
 | reference/methods.qmd | Medium | Populated | No | No | A5: fixtures baked on 0e116079, numbers unchanged. A4: numbers moved to the manuscript-grade fixture |
-| reference/prior-sensitivity.qmd | High | Populated | No | No | A5: fixture baked on 0e116079; every statistic unchanged, only the reported refit wall-clock moved (166 s -> 129 s). A4: numbers moved to the manuscript-grade fixture (91 of 136 verdicts robust, 8 not certifiable) |
+| reference/prior-sensitivity.qmd | High | Populated | No | No | A6: the page no longer claims the method is that of @BartosEtAl_2026_sensitivity; the citation stays as the single-fit approach the design departs from, per `R/prior_sensitivity.R:11-14`. A5: fixture baked on 0e116079; every statistic unchanged, only the reported refit wall-clock moved (166 s -> 129 s). A4: numbers moved to the manuscript-grade fixture (91 of 136 verdicts robust, 8 not certifiable) |
 | reference/extractors.qmd | Medium | Populated | No | No | A5: fixture baked on 0e116079, numbers unchanged; the extract_inclusion_bf and extract_ess entries carry the release signatures and both scales. A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, log BF 317 -> 275) |
 | reference/datasets.qmd | Low | Populated | No | No | - |
 | **Manual** | | | | | |
@@ -304,6 +325,10 @@ Governance and traceability:
 
 ## Settled Decisions
 
+- D2 (MM, 2026-07-30): the edge evidence plot is the site's canonical
+  network display; the median-probability network is never a final
+  display. Implemented under brief A6; see the Network Figure Convention
+  section above and STYLE_GUIDE.md § Network Figures.
 - D1 (MM, 2026-07-30): the canonical documentation URL is
   https://bayesian-graphical-modelling-lab.github.io/bgms/. The Quarto site
   supersedes the pkgdown site served there, and

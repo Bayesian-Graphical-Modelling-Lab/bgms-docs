@@ -25,8 +25,12 @@ install.packages("bgms")
 if(!requireNamespace("remotes")) {
   install.packages("remotes")
 }
-remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms")
+remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms@develop")
 ```
+
+The `@develop` suffix matters. Without it `install_github()` takes the
+default branch, which carries the released CRAN lineage rather than the
+development version.
 
 ## Fitting a model
 
@@ -72,49 +76,60 @@ coef(fit)
 
 `coef()` returns posterior mean matrices: `$pairwise` contains the partial associations and `$indicator` contains edge inclusion probabilities.
 
-## Network plot
+## The network, split by evidence
 
-To visualize the estimated network, we select the edges with posterior inclusion probabilities 0.5 or up, and plot the result using the `qgraph` package [@EpskampEtAl_2012_qgraph].
+A single network drawing has to make every pair either an edge or a blank, and a blank cannot say whether the data ruled the pair out or simply had too little to say about it. Because `bgms` returns an inclusion Bayes factor for every pair, you do not have to make that choice. The network is drawn as three panels on one shared layout: the pairs the data support, the pairs the data rule out, and the pairs the data cannot decide. This is the **edge evidence plot**, and it is the display this documentation uses for every network result.
+
+The categories come from [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) at an inclusion Bayes factor of 10 in either direction. See [Edge Selection](edge-selection.qmd) for why the Bayes factor, and not the inclusion probability on its own, is what licenses a claim about an edge. The drawing uses the `qgraph` package [@EpskampEtAl_2012_qgraph].
 
 ```{r}
-#| eval: false
-#| fig-width: 5.25
-#| fig-height: 5.25
+#| fig-width: 9.5
+#| fig-height: 3.7
 library(qgraph)
 
-median_probability_network = coef(fit)$pairwise
-median_probability_network[coef(fit)$indicator < 0.5] = 0.0
+plot_edge_evidence = function(fit, labels, node_color, threshold = 10,
+                              seed = 1234) {
+  bf = extract_inclusion_bf(fit)
+  weights = coef(fit)$pairwise
 
-qgraph(median_probability_network,
-  theme = "TeamFortress",
-  maximum = 1,
-  fade = FALSE,
-  color = c("#f0ae0e"), vsize = 10, repulsion = .9,
-  label.cex = 1, label.scale = "FALSE",
-  labels = colnames(Wenchuan)[1:5]
-)
-```
+  presence = bf >= threshold
+  absence = bf <= 1 / threshold
+  undecided = !presence & !absence
+  diag(presence) = diag(absence) = diag(undecided) = FALSE
 
-```{r}
-#| echo: false
-#| fig-width: 5.25
-#| fig-height: 5.25
-if (requireNamespace("qgraph", quietly = TRUE)) {
-  median_probability_network = coef(fit)$pairwise
-  median_probability_network[coef(fit)$indicator < 0.5] = 0.0
+  # One layout, computed from every pair, so the three panels match node
+  # for node.
+  set.seed(seed)
+  shared = qgraph(abs(weights), layout = "spring", repulsion = 0.9,
+                  DoNotPlot = TRUE)$layout
 
-  qgraph::qgraph(median_probability_network,
-    theme = "TeamFortress",
-    maximum = 1,
-    fade = FALSE,
-    color = c("#f0ae0e"), vsize = 10, repulsion = .9,
-    label.cex = 1, label.scale = "FALSE",
-    labels = colnames(Wenchuan)[1:5]
-  )
+  panel = function(edges, label, count, ...) {
+    qgraph(edges, layout = shared, labels = labels, fade = FALSE,
+           color = node_color, vsize = 17, label.scale.equal = TRUE,
+           border.color = "grey30", mar = c(3, 4, 8, 4), ...)
+    mtext(sprintf("%s: %d", label, count), side = 3, line = 1.2,
+          cex = 0.95, font = 2)
+  }
+
+  par(mfrow = c(1, 3))
+  panel(weights * presence, "evidence of presence", sum(presence) / 2,
+        theme = "TeamFortress", edge.width = 1.1)
+  panel(absence * 1, "evidence of absence", sum(absence) / 2,
+        edge.color = "#A66A1E", lty = 2, edge.width = 1.1)
+  panel(undecided * 1, "undecided", sum(undecided) / 2,
+        edge.color = "#8A8578", lty = 3, edge.width = 1.4)
 }
+
+plot_edge_evidence(fit, colnames(Wenchuan)[1:5], "#f0ae0e")
 ```
 
-In this plot, edges with posterior inclusion probability below 0.5 are set to zero. Practically, this means that a shown edge indicates evidence for a direct conditional association between two symptoms after accounting for the others in the network, whereas a missing edge indicates evidence that this direct association is absent at the selected threshold. Because the cutoff is 0.5, this reflects minimum evidence for inclusion (i.e., an inclusion Bayes factor threshold of 1 when prior inclusion probability is 0.5); higher posterior inclusion probabilities indicate stronger evidence for inclusion.
+Each panel licenses a different statement.
+
+- **Evidence of presence.** For these eight pairs the data favour a direct association, one that survives conditioning on the other three symptoms. Only this panel is weighted: line width is the posterior mean partial association, so the effect sizes live here.
+- **Evidence of absence.** `dreams-physior` is the one pair the data actively rule out, with an inclusion Bayes factor of about 0.08, or roughly 12 to 1 against. That is a positive statement of conditional independence, and it is the statement an estimation workflow cannot make: there, a missing edge might just as well mean too little data. The panel is drawn dashed and at uniform width because for these pairs the classification, not a weight, is the result.
+- **Undecided.** `flash-upset` is the pair these data have too little to say about. Its Bayes factor of about 0.11 sits just inside the undecided band, so it is neither supported nor ruled out.
+
+This is why the site does not draw the bare thresholded network. Keeping only the edges with posterior inclusion probability of 0.5 or more, the median probability model, would reproduce exactly the eight edges of the first panel and leave `dreams-physior` and `flash-upset` equally blank. One of those two blanks is a finding; the other is an open question, and the drawing would not tell you which is which.
 
 ## Continuous data
 
@@ -169,47 +184,21 @@ fit_ggm = bgm(marks, variable_type = "continuous", seed = 1234,
 summary(fit_ggm)
 ```
 
-### GGM network plot
+### The GGM network, split by evidence
+
+The same three panels, the same rule, the same function:
 
 ```{r}
-#| eval: false
-#| fig-width: 5.25
-#| fig-height: 5.25
-library(qgraph)
-
-ggm_network = coef(fit_ggm)$pairwise
-ggm_network[coef(fit_ggm)$indicator < 0.5] = 0.0
-
-qgraph(ggm_network,
-  theme = "TeamFortress",
-  maximum = 1,
-  fade = FALSE,
-  color = c("#5DA5DA"), vsize = 10, repulsion = .9,
-  label.cex = 1, label.scale = "FALSE",
-  labels = colnames(marks)
-)
+#| fig-width: 9.5
+#| fig-height: 3.7
+plot_edge_evidence(fit_ggm, colnames(marks), "#5DA5DA")
 ```
 
-```{r}
-#| echo: false
-#| fig-width: 5.25
-#| fig-height: 5.25
-if (requireNamespace("qgraph", quietly = TRUE)) {
-  ggm_network = coef(fit_ggm)$pairwise
-  ggm_network[coef(fit_ggm)$indicator < 0.5] = 0.0
+Eighty-eight students is not much data for ten pairs, and the display says so. Three pairs are supported, and all three run through `algebra`. Five are ruled out: the four pairs that cross between the `mechanics`-`vectors` side and the `analysis`-`statistics` side, plus `analysis-statistics` itself. Two are left undecided, `mechanics-vectors` and `mechanics-algebra`, with Bayes factors of about 2.7 and 1.1.
 
-  qgraph::qgraph(ggm_network,
-    theme = "TeamFortress",
-    maximum = 1,
-    fade = FALSE,
-    color = c("#5DA5DA"), vsize = 10, repulsion = .9,
-    label.cex = 1, label.scale = "FALSE",
-    labels = colnames(marks)
-  )
-}
-```
+A non-empty undecided panel is a feature of this display, not a defect of the fit. Those two pairs are exactly where a thresholded drawing would have misled you: `mechanics-vectors` has a posterior inclusion probability of 0.64, so the median probability model would have drawn it as a present edge, and `mechanics-algebra` sits at 0.40, so it would have been left blank. Two pairs the data cannot decide would have been reported as one decided each way.
 
-This plot shows the estimated conditional association network for the continuous variables; edges are retained when their posterior inclusion probability is at least 0.5.
+One caution specific to continuous data: here the Bayes factor is not the posterior inclusion odds. Under the default `precision_graph_prior = "joint"` the prior inclusion probability of a continuous edge is not 0.5 but about 0.39 in this model, so the two differ. [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) divides the prior odds out for you; see [Edge Selection](edge-selection.qmd#sec-bf-continuous) for what to do if you compute the Bayes factor by hand.
 
 
 ## Next steps

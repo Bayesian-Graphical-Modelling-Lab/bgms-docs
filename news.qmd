@@ -9,23 +9,18 @@ in the package repository.
 
 ## 2026-07-30: bgms 0.2.0.0 on CRAN
 
-The headline addition is
-[`prior_sensitivity_check()`](reference/prior-sensitivity.qmd). It recovers
-each edge's inclusion Bayes factor as a continuous curve across the
-interaction slab scale, anchored at a handful of fixed-scale refits and filled
-in between them by importance reweighting, and then tells you which edge
-verdicts actually depend on your prior choice. Verdicts that only wobble
-between reruns of the same prior are reported as wobble rather than as prior
-sensitivity, so you can separate a real dependence on the slab scale from
-Monte Carlo noise.
-
-This release also brings Gaussian and mixed graphical models to
-[`bgm()`](reference/bgm.qmd) through `variable_type = "continuous"` and
-per-variable type vectors, Rao-Blackwellized edge inclusion probabilities as
-the default estimator in
-[`extract_posterior_inclusion_probabilities()`](reference/extractors.qmd#extract_posterior_inclusion_probabilities),
-missing-data imputation during sampling, and a rewritten C++ backend with
-shared NUTS infrastructure across model types.
+This release widens the model class. [`bgm()`](reference/bgm.qmd) now fits
+Gaussian graphical models with `variable_type = "continuous"`, and mixed
+networks of binary, ordinal, and continuous variables from a per-variable
+type vector. Fitted models gained `predict()` and `simulate()` methods. The
+C++ backend was rewritten around a shared NUTS sampler running its chains in
+parallel; inclusion probabilities are Rao-Blackwellized by default, and
+[`extract_inclusion_bf()`](reference/extractors.qmd#extract_inclusion_bf)
+reports inclusion Bayes factors that stay finite where the raw average
+saturates. Priors are now built with constructor functions such as
+`normal_prior()` and `beta_bernoulli_prior()`. New as well:
+[`prior_sensitivity_check()`](reference/prior-sensitivity.qmd), which reports
+which edge verdicts depend on the slab scale you chose.
 
 ## 2026-07-30: Documentation site launched
 

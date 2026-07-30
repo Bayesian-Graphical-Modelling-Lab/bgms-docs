@@ -47,11 +47,17 @@ Two ESS measures are reported:
   uncertainty from the spike-and-slab switching.
 
 The mixture ESS treats the on/off indicator sequence as a two-state
-process and measures how often the chain actually switches between the
-spike and the slab [@VanDenBerghEtAl_2026_moms]: frequent switching
-means the chain has explored both states well and the inclusion
-probability is precisely estimated; rare switching means the opposite.
-The formula is derived in
+process and compares the chain's switch rates with those of an
+independent chain having the same inclusion probability
+[@VanDenBerghEtAl_2026_moms]. An independent chain earns the full $N$ at
+any inclusion probability; a chain that lingers in its current state
+longer than its own inclusion probability warrants earns less. What is
+penalized is stickiness relative to that probability, not a low flip
+count as such. How often the indicator flips in absolute terms mainly
+reflects the inclusion probability itself, being highest near 0.5, and
+is not on its own a measure of quality: an edge with an inclusion
+probability near 0 or 1 flips rarely even under perfect mixing. The
+formula is derived in
 [Convergence Diagnostics](../manual/diagnostics.qmd) in the Technical
 Manual.
 
