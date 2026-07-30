@@ -64,6 +64,8 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 
 | Page | Risk | Status | Technical sign-off (Maarten) | Readability sign-off (Emily) | Blocking issue |
 |---|---|---|---|---|---|
+| **Site** | | | | | |
+| news.qmd | Low | Populated | No | No | A3: the "bgms 0.2.0.0 on CRAN" entry and both entry dates (2026-07-30) are launch-gated; correct the dates if CRAN acceptance lands on another day |
 | **Guide** | | | | | |
 | guide/index.qmd | Low | Not started | No | No | - |
 | guide/getting-started.qmd | Medium | Scaffolded | No | No | - |
@@ -131,10 +133,20 @@ These tasks are important but are not part of the core review flow above.
 
 ### P2 - Infrastructure
 
-- [ ] Host the documentation from bgms-docs while keeping the public URL at https://bayesian-graphical-modelling-lab.github.io/bgms/.
-- [ ] Add GitHub Actions workflow in bgms-docs to render Quarto and deploy to the publishing target used by the bgms website.
-- [ ] Configure deployment credentials (fine-grained PAT or GitHub App) with least-privilege access.
-- [ ] Document deployment and rollback steps for maintainers.
+Closed under brief A3 (branch `docs/a3-launch-mechanics`). Decision D1 (MM,
+2026-07-30): the canonical URL is
+https://bayesian-graphical-modelling-lab.github.io/bgms/, the Quarto site
+supersedes the pkgdown site currently served there, and /bgms-docs/ redirects
+to it.
+
+- [x] Host the documentation from bgms-docs while keeping the public URL at https://bayesian-graphical-modelling-lab.github.io/bgms/.
+- [x] Add GitHub Actions workflow in bgms-docs to render Quarto and deploy to the publishing target used by the bgms website. `publish.yml` publishes `docs/` to the `gh-pages` branch of the bgms repo; both deploy steps are guarded on `main`.
+- [x] Redirect stubs for the pkgdown URL layout: `scripts/redirects.R` (project `post-render`) writes 104 stubs with canonical link tags; `redirect/` holds the /bgms-docs/ root and deep-path stubs.
+- [x] Version stamp: `BGMS_DOC_VERSION=0.2.0.0` in the CI render environment; `index.qmd` keeps the same value as its in-source fallback.
+- [x] Document deployment and rollback steps for maintainers (README.md § Deployment).
+- [ ] BLOCKED on MM: configure deployment credentials with least-privilege access. Needs an SSH deploy key pair, the public half as a write-enabled deploy key on the bgms repo, the private half as the `BGMS_SITE_DEPLOY_KEY` secret here, and Pages on the bgms repo set to the `gh-pages` branch. Exact steps: README.md § Deployment → One-time setup.
+- [ ] BLOCKED on MM or the bgms companion agent, before the first deploy: retire pkgdown in the bgms repo (delete `.github/workflows/pkgdown.yaml` and `_pkgdown.yml`), or its next push rebuilds pkgdown over the new site. Also point the DESCRIPTION `URL` field and the README badge at the canonical site.
+- [ ] Open: no custom 404 page on the canonical site. Unmapped paths fall through to the GitHub Pages default. A `404.qmd` offering navigation would close the last of the BGGM failure mode.
 
 ### P3 - Notation consistency fixes\n\nSee STYLE_GUIDE.md \u00a7 Mathematical Notation for the authoritative conventions.\nAll notation fixes have been applied.
 
@@ -232,3 +244,11 @@ Governance and traceability:
 ## Open Decisions
 
 - None currently.
+
+## Settled Decisions
+
+- D1 (MM, 2026-07-30): the canonical documentation URL is
+  https://bayesian-graphical-modelling-lab.github.io/bgms/. The Quarto site
+  supersedes the pkgdown site served there, and
+  https://bayesian-graphical-modelling-lab.github.io/bgms-docs/ redirects to
+  it. Implemented under brief A3; see README.md § Deployment.
