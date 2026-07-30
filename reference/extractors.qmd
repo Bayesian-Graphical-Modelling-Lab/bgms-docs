@@ -25,8 +25,8 @@ fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
 
 Functions to extract specific components from fitted `bgms` and `bgmCompare`
 objects. Executed examples on this page use a `bgm()` fit of the
-[Wenchuan](datasets.qmd#wenchuan) data (`fit = bgm(Wenchuan, chains = 2,
-seed = 1234)`).
+[Wenchuan](datasets.qmd#wenchuan) data (`fit = bgm(Wenchuan, iter = 1e4,
+warmup = 5e3, seed = 123)`).
 
 Unless noted otherwise, extractor functions use one argument:
 
@@ -124,7 +124,7 @@ round(pip[1:4, 1:4], 2)
 ```
 
 Here the `intrusion`–`dreams` edge saturates at probability 1, while
-`intrusion`–`upset` sits around 0.74 — the data do not clearly decide
+`intrusion`–`upset` sits around 0.66 — the data do not clearly decide
 that edge. See [Edge Selection](../guide/edge-selection.qmd) for
 turning these into Bayes factors, and
 [`extract_inclusion_bf()`](#extract_inclusion_bf) for a Bayes-factor
@@ -182,7 +182,7 @@ round(bf[1:4, 1:4], 2)
 ```
 
 The `intrusion`–`dreams` edge, whose inclusion probability saturates
-at 1 above, here receives a finite log Bayes factor of about 317 —
+at 1 above, here receives a finite log Bayes factor of about 275 —
 astronomically strong evidence, but quantified rather than `Inf`.
 
 ## extract_prior_inclusion_probabilities {#extract_prior_inclusion_probabilities}

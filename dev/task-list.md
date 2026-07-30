@@ -21,6 +21,39 @@ inclusion machinery, and the refit-based `prior_sensitivity_check()`).
 Rules: never merge into main until the package develop ships; periodically
 merge main into it; re-sweep against bgms develop HEAD at each sync.
 
+## Fixture Configuration (brief A4, 2026-07-30)
+
+The Wenchuan fit and its prior sensitivity check are baked at the tutorial
+paper's manuscript-grade configuration: `bgm(Wenchuan, iter = 1e4,
+warmup = 5e3, seed = 123)` and `prior_sensitivity_check(fit, seed = 123)`,
+read from the tutorial repo's `R/01-worked-example.R` and
+`R/16-run-sensitivity-check.R`. Same build (c1e52c8e), seed, settings, and
+data as the paper, so the site and the paper quote one set of numbers by
+construction, not by coordination. Verified identical against the tutorial's
+`tables/` outputs from its 2026-07-30 run: evidence verdicts 35 presence /
+39 undecided / 62 absence, per-edge inclusion probabilities agreeing to
+5e-16 and log Bayes factors to 4e-13.
+
+The SBM fit and the ADHD group comparison are not manuscript analyses and run
+at package defaults with the same seed. No 2-chain fixtures remain. Rebake and
+re-render together; the bake costs about ten minutes (see `fixtures/bake.R`).
+
+Two bgms-side changes will require a rebake and a sweep when they land, both
+open at the time of this brief:
+
+- BGMS-2, the `extract_ess()` RB alignment. A4's sequencing note asked for it
+  first, but it is not merged on any bgms branch, so A4 baked against c1e52c8e.
+  On that build `extract_ess()$indicator` is the transition ESS (`n_eff_mixt`),
+  which is what reference/extractors.qmd § extract_ess and the new
+  guide/mcmc-diagnostics.qmd warmup subsection say; both need rewording once
+  the indicator element becomes the RB `n_eff` by default.
+- PR #186, merged to bgms develop as cc3410f0 after A4's build was installed.
+  It gives `extract_inclusion_bf()` a `log` argument defaulting to `FALSE`, so
+  the function returns the Bayes factor rather than its natural log. On
+  c1e52c8e it returns the log, which is what reference/extractors.qmd
+  § extract_inclusion_bf and guide/edge-selection.qmd document. Both pages
+  quote log-scale values (log BF 275) and will need the new default applied.
+
 ## Current Cycle Focus
 
 - Build trusted docs with automation-first QA.
@@ -68,28 +101,28 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | news.qmd | Low | Populated | No | No | A3: the "bgms 0.2.0.0 on CRAN" entry and both entry dates (2026-07-30) are launch-gated; correct the dates if CRAN acceptance lands on another day |
 | **Guide** | | | | | |
 | guide/index.qmd | Low | Not started | No | No | - |
-| guide/getting-started.qmd | Medium | Scaffolded | No | No | - |
+| guide/getting-started.qmd | Medium | Scaffolded | No | No | A4: numbers moved (the hidden fits ran `chains = 2` while the shown calls used the four-chain default; the hidden chunks now match the shown calls) |
 | guide/graphical-models.qmd | Low | Not started | No | No | - |
 | guide/bayesian-approach.qmd | Low | Not started | No | No | - |
 | guide/prior-basics.qmd | Medium | Not started | No | No | Renamed from prior-guide.qmd |
 | guide/ggm.qmd | Medium | Scaffolded | No | No | - |
 | guide/omrf.qmd | High | Scaffolded | No | No | - |
 | guide/mixed-model.qmd | Medium | Not started | No | No | - |
-| guide/edge-selection.qmd | Medium | Scaffolded | No | No | - |
-| guide/group-comparison.qmd | Medium | Scaffolded | No | No | - |
-| guide/clustering.qmd | Medium | Not started | No | No | - |
-| guide/mcmc-output.qmd | Medium | Populated | No | No | - |
-| guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | - |
+| guide/edge-selection.qmd | Medium | Scaffolded | No | No | A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, BF10 2.8 -> 2.0, BF01 35 -> 33, log BF 317 -> 275) |
+| guide/group-comparison.qmd | Medium | Scaffolded | No | No | A4: numbers moved to the defaults fixture (BF10 290 -> 305, 3.5 -> 3.3, BF01 2.6 -> 2.5) |
+| guide/clustering.qmd | Medium | Not started | No | No | A4: numbers moved to the defaults fixture (P(B=1) 0.43 -> 0.42) |
+| guide/mcmc-output.qmd | Medium | Populated | No | No | A4: numbers moved to the manuscript-grade fixture; the credible-interval example now pools all four chains instead of the first two |
+| guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | A4: numbers moved to the manuscript-grade fixture; new subsection reads the warmup flag this fit now raises |
 | guide/missing-data.qmd | Medium | Populated | No | No | - |
 | **Reference** | | | | | |
 | reference/index.qmd | Low | Scaffolded | No | No | - |
-| reference/bgm.qmd | High | Populated | No | No | - |
+| reference/bgm.qmd | High | Populated | No | No | A4: numbers moved to the manuscript-grade fixture |
 | reference/bgmCompare.qmd | High | Populated | No | No | - |
 | reference/sample-ggm-prior.qmd | High | Populated | No | No | - |
 | reference/priors.qmd | High | Populated | No | No | - |
-| reference/methods.qmd | Medium | Populated | No | No | - |
-| reference/prior-sensitivity.qmd | High | Populated | No | No | - |
-| reference/extractors.qmd | Medium | Populated | No | No | - |
+| reference/methods.qmd | Medium | Populated | No | No | A4: numbers moved to the manuscript-grade fixture |
+| reference/prior-sensitivity.qmd | High | Populated | No | No | A4: numbers moved to the manuscript-grade fixture (91 of 136 verdicts robust, 8 not certifiable) |
+| reference/extractors.qmd | Medium | Populated | No | No | A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, log BF 317 -> 275) |
 | reference/datasets.qmd | Low | Populated | No | No | - |
 | **Manual** | | | | | |
 | manual/index.qmd | Low | Scaffolded | No | No | - |
@@ -148,7 +181,10 @@ to it.
 - [ ] BLOCKED on MM or the bgms companion agent, before the first deploy: retire pkgdown in the bgms repo (delete `.github/workflows/pkgdown.yaml` and `_pkgdown.yml`), or its next push rebuilds pkgdown over the new site. Also point the DESCRIPTION `URL` field and the README badge at the canonical site.
 - [ ] Open: no custom 404 page on the canonical site. Unmapped paths fall through to the GitHub Pages default. A `404.qmd` offering navigation would close the last of the BGGM failure mode.
 
-### P3 - Notation consistency fixes\n\nSee STYLE_GUIDE.md \u00a7 Mathematical Notation for the authoritative conventions.\nAll notation fixes have been applied.
+### P3 - Notation consistency fixes
+
+See STYLE_GUIDE.md \u00a7 Mathematical Notation for the authoritative conventions.
+All notation fixes have been applied.
 
 ### P2 - Documentation maintenance
 

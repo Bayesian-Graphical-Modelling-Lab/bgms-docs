@@ -36,6 +36,13 @@ R_LIBS=dev/lib-bgms-develop Rscript fixtures/bake.R
 changes, then re-render so the summaries, figures, and prose numbers stay in
 sync with the package.
 
+The Wenchuan fit and its prior sensitivity check run at the tutorial paper's
+configuration, so the site and the paper quote one set of numbers rather than
+two compatible ones. That costs about ten minutes of baking and roughly 160 MB
+of `.rds` on disk (gitignored). Everything else in the script runs at package
+defaults. See the header of `fixtures/bake.R` for the reasoning and the
+measured per-fixture timings.
+
 ## Contributing
 
 1. Edit `.qmd` files in the appropriate directory

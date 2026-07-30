@@ -90,9 +90,9 @@ library(bgms)
 fit = readRDS(resolve_fixture("fit_compare_adhd.rds"))
 ```
 
-The [ADHD](../reference/datasets.qmd#adhd) data contain 19 symptom
-ratings with a group column. Compare the two groups (run in advance
-here; this takes several minutes):
+The [ADHD](../reference/datasets.qmd#adhd) data contain 18 binary symptom
+ratings for 355 respondents, plus a group column. Compare the two groups
+(run in advance here; this takes several minutes):
 
 ```{r}
 #| eval: false
@@ -101,10 +101,12 @@ fit = bgmCompare(
   x = ADHD[, -1],
   group_indicator = ADHD$group,
   variable_type = "ordinal",
-  chains = 2,
-  seed = 1234
+  seed = 123
 )
 ```
+
+That is [`bgmCompare()`](../reference/bgmCompare.qmd) at its defaults plus a
+seed, so the numbers below are what the defaults give you on these data.
 
 The `summary(fit)$indicator` table reports, for each threshold and
 each partial association, the posterior probability that the contrast
@@ -123,12 +125,12 @@ print(diffs, digits = 3, row.names = FALSE)
 ```
 
 - **`motor-seat`**: an inclusion probability of 0.997 gives
-  $\text{BF}_{10} \approx 290$ — strong evidence that the partial
+  $\text{BF}_{10} \approx 305$ — strong evidence that the partial
   association between these two symptoms differs between the groups.
-- **`avoid-closeatt`**: $\text{BF}_{10} \approx 3.5$ — modest evidence
+- **`avoid-closeatt`**: $\text{BF}_{10} \approx 3.3$ — modest evidence
   for a group difference.
 - **`forget-talks`**: an inclusion probability of about 0.28 gives
-  $\text{BF}_{01} \approx 2.6$ — the data lean toward invariance, but
+  $\text{BF}_{01} \approx 2.5$ — the data lean toward invariance, but
   the evidence is weak.
 
 ## Prior guidance

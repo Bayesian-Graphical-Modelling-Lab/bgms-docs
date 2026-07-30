@@ -41,7 +41,7 @@ items):
 
 ```r
 library(bgms)
-fit = bgm(Wenchuan, chains = 2, seed = 1234)
+fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
 ```
 
 ## The fit object
@@ -212,9 +212,7 @@ and compute a 95% credible interval:
 # Combine chains for one parameter
 edge = "intrusion-dreams"
 col_idx = which(fit$raw_samples$parameter_names$pairwise == edge)
-samples_c1 = fit$raw_samples$pairwise[[1]][, col_idx]
-samples_c2 = fit$raw_samples$pairwise[[2]][, col_idx]
-samples = c(samples_c1, samples_c2)
+samples = unlist(lapply(fit$raw_samples$pairwise, function(ch) ch[, col_idx]))
 
 cat("Posterior mean:", round(mean(samples), 3), "\n")
 cat("95% CI: [", round(quantile(samples, 0.025), 3), ",",
@@ -283,8 +281,7 @@ fit_compare = bgmCompare(
   x = ADHD[, -1],
   group_indicator = ADHD$group,
   variable_type = "ordinal",
-  chains = 2,
-  seed = 1234
+  seed = 123
 )
 ```
 

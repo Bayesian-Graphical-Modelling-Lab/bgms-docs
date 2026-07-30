@@ -119,8 +119,12 @@ the SBM edge prior (run in advance here; this takes several minutes):
 ```{r}
 #| eval: false
 library(bgms)
-fit = bgm(Wenchuan, edge_prior = sbm_prior(), chains = 2, seed = 1234)
+fit = bgm(Wenchuan, edge_prior = sbm_prior(), seed = 123)
 ```
+
+Apart from the edge prior and the seed this is [`bgm()`](../reference/bgm.qmd)
+at its defaults, so what follows is what the defaults give you on these
+data.
 
 ```{r}
 sbm = extract_sbm(fit)
@@ -128,7 +132,7 @@ round(head(sbm$posterior_num_blocks, 4), 3)
 ```
 
 The posterior puts most of its mass on one or two clusters. The
-posterior probability of no clustering ($B = 1$) is about 0.43, so the
+posterior probability of no clustering ($B = 1$) is about 0.42, so the
 clustering-vs-no-clustering Bayes factor provides no compelling
 evidence for block structure among these PTSD symptoms — a finding in
 itself, and a caution against over-reading apparent groupings in the

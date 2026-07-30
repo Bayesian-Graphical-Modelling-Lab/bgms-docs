@@ -224,8 +224,12 @@ Fit an ordinal MRF to the [Wenchuan](datasets.qmd#wenchuan) PTSD data
 ```{r}
 #| eval: false
 library(bgms)
-fit = bgm(Wenchuan, chains = 2, seed = 1234)
+fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
 ```
+
+Only the run length departs from the defaults; the longer run resolves the
+inclusion probabilities precisely enough to read as evidence (see
+[Edge Selection](../guide/edge-selection.qmd#a-worked-example)).
 
 ```{r}
 summary(fit)
