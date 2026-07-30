@@ -1,0 +1,172 @@
+---
+title: "<Analysis name, not a topic name>"
+---
+
+<!--
+  TEMPLATE for a page in examples/. Not part of the render: dev/ is excluded
+  from the ci profile, and every chunk below carries `eval: false` so the
+  template never executes. Copy this file to examples/<slug>.qmd, delete this
+  comment, drop the `eval: false` from the chunks that are meant to run, and
+  replace every slot. The comment above each slot says what that slot owes the
+  reader.
+
+  The shape is fixed (STYLE_GUIDE.md, Example Pages). Deviate only with a
+  reason you can state on the board.
+
+  Layer discipline: this page type owns code and workflow. The reasoning behind
+  a method belongs in the Guide, the argument-by-argument contract in the
+  Reference. Where you feel the urge to explain why a method works, write one
+  orienting sentence and link out.
+
+  TITLE. Name the analysis the reader came to run: "Comparing groups", "Check
+  your priors". Not "Group comparison in bgms", not a concept name. The YAML
+  title is the H1; never write a `#` heading (STYLE_GUIDE, Heading Hierarchy).
+-->
+
+<!--
+  SETUP, HIDDEN. Physically first so everything below can use `fit`, but shown
+  to nobody: the reader-facing version of this call is the mirror chunk in the
+  fit section. `purl: false` keeps the fixture machinery out of the companion
+  script, which runs the fit for real.
+-->
+
+```{r}
+#| echo: false
+#| message: false
+#| purl: false
+#| eval: false
+library(bgms)
+
+# Fixture loader, copied verbatim from the guide pages.
+resolve_fixture = function(name) {
+  input_dir = dirname(knitr::current_input(dir = TRUE))
+  candidates = c(
+    file.path(input_dir, "..", "fixtures", name),
+    file.path(input_dir, "fixtures", name),
+    file.path("fixtures", name),
+    file.path("..", "fixtures", name)
+  )
+  hit = candidates[file.exists(candidates)][1]
+  if (is.na(hit)) {
+    stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+  }
+  hit
+}
+
+fit = readRDS(resolve_fixture("<fixture>.rds"))
+```
+
+<!--
+  PAYOFF FIGURE, FIRST. Before any prose beyond the title, show the result the
+  page produces. For a whole-network result that figure is the edge evidence
+  plot, three panels on one shared layout (STYLE_GUIDE, Network Figures); for a
+  page about a single edge weight it is the prior-to-posterior plot. Never open
+  with a weighted or median-probability network.
+
+  Caption duty: one sentence per panel in the prose directly under the figure,
+  saying what that panel licenses the reader to say.
+-->
+
+```{r}
+#| fig-width: 9.5
+#| fig-height: 3.7
+#| echo: false
+#| eval: false
+# Reuse plot_edge_evidence() from guide/getting-started.qmd rather than
+# re-deriving the styling.
+plot_edge_evidence(fit, colnames(<data>), "#f0ae0e")
+```
+
+<One sentence per panel: what the presence panel supports, what the absence
+panel rules out, what the undecided panel leaves open.>
+
+<!--
+  THE QUESTION. One paragraph, second person, about five sentences at most.
+  State the question the analysis answers and what it costs a reader to get it
+  wrong. This is the paragraph that tells a scanner whether to stay, so it
+  carries the page's promise, not its background.
+-->
+
+<Question paragraph.>
+
+## The fit
+
+<!--
+  THE MIRROR. `eval: false`, showing the exact call a reader types. It must
+  match the call baked in fixtures/bake.R argument for argument: the page's
+  numbers come from that bake, so a mismatch here is a page that lies about how
+  its own numbers were made.
+
+  This chunk is also the head of the companion script, which is why the library
+  calls belong here and not in the hidden chunk above. Everything the script
+  needs must appear in a chunk a reader can see; anything a reader cannot see
+  carries `purl: false` and is therefore absent from the script.
+
+  If the analysis needs a new fixture, add the bake step to fixtures/bake.R
+  with its comment naming this page, and rebake before you quote a number.
+-->
+
+```{r}
+#| eval: false
+library(bgms)
+
+fit = bgm(<data>, seed = 123)
+```
+
+<One or two sentences on what the call does and what it costs to run. Link the
+Reference for the arguments; do not restate them.>
+
+## <Walk-through section>
+
+<!--
+  WALK-THROUGH. One section per step of the analysis, in the order a reader
+  performs them. Each section shows its output in full first, then reads it.
+  Never paraphrase output you have not shown, and never show output you do not
+  read. Numbers in the prose come from the fresh render, never from a
+  manuscript and never from an earlier bake.
+
+  One concept per page. If a section starts working through a second analysis,
+  it belongs on its own page.
+-->
+
+```{r}
+#| eval: false
+summary(fit)
+```
+
+<Reading of that output. Say which numbers are the result and which are
+housekeeping.>
+
+## What to report
+
+<!--
+  WHAT TO REPORT. The closing block, and the reason an applied reader keeps the
+  page open. Give the sentences they can write, with <placeholders> where a
+  reader substitutes their own numbers. Cover the claims this analysis
+  licenses, and the neighbouring claim it does not.
+
+  Keep these sentences in agreement with examples/reporting.qmd once that page
+  ships: it reuses them rather than forking its own.
+-->
+
+::: {.callout-note appearance="simple"}
+## What to report
+
+- <Template sentence for the main claim.>
+- <Template sentence for the secondary claim.>
+- <The claim this analysis does not license, stated plainly.>
+:::
+
+## Where to next
+
+<!--
+  CROSS-LINK FOOTER. Three lines, in this order: the Guide page that carries
+  the reasoning, the Reference page that carries the contract, and the papers
+  that carry the citable record. Add a fourth line only for the next page in
+  the series.
+-->
+
+- [<Guide page>](../guide/<page>.qmd) for why the method works this way.
+- [<Reference page>](../reference/<page>.qmd) for the arguments and return
+  values.
+- <Citation> for the citable record.
