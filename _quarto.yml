@@ -82,6 +82,7 @@ website:
       align: left
       contents:
         - examples/index.qmd
+        - examples/reading-the-output.qmd
 
     - id: guide
       title: "User's Guide"

@@ -35,6 +35,8 @@ computed from these samples, posterior mean matrices, the raw MCMC draws
 themselves, and sampler
 diagnostics. This chapter describes how to access and interpret each of
 these components. For diagnostics related to the sampler itself, see [MCMC Diagnostics](mcmc-diagnostics.qmd).
+For a walkthrough of a real output, block by block on a fitted model, see
+[Reading the output](../examples/reading-the-output.qmd).
 
 The examples use a fit to the Wenchuan earthquake data (17 ordinal PTSD
 items):
