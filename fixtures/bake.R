@@ -20,9 +20,12 @@
 #     Normal(scale = 1) slab). The paper's scripts pre-filter the data with
 #     complete.cases(); bgm()'s default na_action = "listwise" drops the
 #     same 18 rows, so passing Wenchuan directly gives bit-identical draws.
-#     Because the build (c1e52c8e), seed, settings, and data all match, the
-#     numbers on this site and the numbers in the paper are the same numbers,
-#     not merely compatible ones.
+#     Because the seed, settings, and data all match, the numbers on this
+#     site and the numbers in the paper are the same numbers, not merely
+#     compatible ones. The current bake is on bgms develop 0e116079, whose
+#     release-run draws are bit-identical to the c1e52c8e run the tutorial
+#     used: the changes since then are in the extractors and in argument
+#     validation, not in the samplers.
 #
 #   * The SBM fit and the ADHD group comparison are not manuscript analyses,
 #     so they run at package defaults with the same seed. What the site shows
