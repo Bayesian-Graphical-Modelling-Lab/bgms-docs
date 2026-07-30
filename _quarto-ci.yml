@@ -10,6 +10,8 @@ website:
         href: index.qmd
       - text: "Get Started"
         href: guide/getting-started.qmd
+      - text: "Examples"
+        href: examples/index.qmd
       - text: "Guide"
         href: guide/index.qmd
       - text: "Reference"

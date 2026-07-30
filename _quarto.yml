@@ -3,6 +3,11 @@ project:
   output-dir: docs
   resources:
     - icons/
+    # Companion scripts for the Examples series, written by the pre-render step.
+    - examples/R/
+  # Regenerates examples/R/NN-slug.R from the Examples pages, so the companion
+  # script published beside a page always matches that page.
+  pre-render: scripts/extract-example-code.R
   # Writes the stubs that keep the previous pkgdown site's URLs alive.
   post-render: scripts/redirects.R
 
@@ -45,6 +50,8 @@ website:
         href: index.qmd
       - text: "Get Started"
         href: guide/getting-started.qmd
+      - text: "Examples"
+        href: examples/index.qmd
       - text: "Guide"
         href: guide/index.qmd
       - text: "Reference"
@@ -66,6 +73,16 @@ website:
         aria-label: BGM Lab
 
   sidebar:
+    # Lists only pages that exist. The full series, including the entries not
+    # yet published, lives in the prose of examples/index.qmd.
+    - id: examples
+      title: "Worked analyses"
+      style: "floating"
+      collapse-level: 1
+      align: left
+      contents:
+        - examples/index.qmd
+
     - id: guide
       title: "User's Guide"
       style: "floating"

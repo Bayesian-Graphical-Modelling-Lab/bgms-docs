@@ -96,6 +96,33 @@ render. Re-render each edited page individually first
 (`quarto render <page>.qmd --profile ci`, which always executes), then run
 the project render.
 
+## Examples Section Scaffold (brief B0, 2026-07-30)
+
+D2 (MM, 2026-07-30): navbar label **Examples**, index title **Worked
+analyses**. The section is wired and empty: navbar item between Get Started and
+Guide, an `examples` sidebar listing only pages that exist, and
+`examples/index.qmd` carrying the eight-entry series contract with the
+unpublished entries as plain text.
+
+Three conventions ship with it, all of them generated rather than
+hand-maintained, and all of them documented in `STYLE_GUIDE.md` § Example
+Pages:
+
+- **Page template**: `dev/templates/example-page.qmd`, one comment per slot.
+  Payoff figure first, and for a whole-network result that figure is the edge
+  evidence plot (D2, § Network Figures), never a generic network plot.
+- **Companion scripts**: `scripts/extract-example-code.R` tangles each page to
+  `examples/R/NN-slug.R` as the project pre-render step. Chunks marked
+  `purl: false` stay out; `eval: false` mirrors go in as runnable code, so the
+  `library()` calls must live in a chunk the reader can see.
+- **PDF**: `make examples-pdf` (profile `_quarto-pdf.yml`) assembles the index
+  and the published pages, in series order, into one PDF. It renders to `_pdf/`
+  and cannot disturb the site render; `scripts/redirects.R` now stands down for
+  any render whose output directory is not `docs/`.
+
+Series order has one home, `scripts/examples-series.R`; adding a page means
+listing it there, in the `examples` sidebar, and in the index prose.
+
 ## Current Cycle Focus
 
 - Build trusted docs with automation-first QA.
@@ -156,6 +183,15 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | guide/mcmc-output.qmd | Medium | Populated | No | No | A5: fixtures baked on 0e116079, numbers unchanged; the extractor table now states both extractor scales. A4: numbers moved to the manuscript-grade fixture; the credible-interval example now pools all four chains instead of the first two |
 | guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | A6: the `n_eff_mixt` gloss was wrong ("frequent switching means precisely estimated") and is corrected against `src/mcmc_diagnostics.cpp:375-387`: the statistic compares switch rates with an independent chain at the same inclusion probability, so absolute flip frequency is not a quality measure (a2-review-findings 1). A5: fixture baked on 0e116079, fixture numbers unchanged, but the indicator ESS the page prints moved from the transition ESS to the RB one (min 1122 -> 995) because `extract_ess()` changed its default; the transition reading is now shown explicitly. A4: numbers moved to the manuscript-grade fixture; new subsection reads the warmup flag this fit now raises |
 | guide/missing-data.qmd | Medium | Populated | No | No | - |
+| **Examples** | | | | | |
+| examples/index.qmd | Low | Scaffolded | No | No | B0: section wired and the series contract written; the seven entries below stay unlinked plain text in the index prose until their pages ship. The PDF download link stays commented until the first one does; uncommenting it also means adding the `make examples-pdf` step to publish.yml, after the render and before the deploy, since a site render rewrites `docs/` |
+| examples/estimation-to-evidence.qmd | High | Not started | No | No | B1; D3 gate (ship at launch vs hold for the tutorial preprint) |
+| examples/reading-the-output.qmd | Medium | Not started | No | No | B2 |
+| examples/check-your-priors.qmd | High | Not started | No | No | B3; reads ps_wenchuan.rds |
+| examples/comparing-groups.qmd | Medium | Not started | No | No | B4 |
+| examples/edge-clustering.qmd | Medium | Not started | No | No | B5 |
+| examples/from-bootnet-qgraph.qmd | High | Not started | No | No | B6; terminology sync with the tutorial manuscript (NS) |
+| examples/reporting.qmd | High | Not started | No | No | B7; GATED on the guidelines terminology freeze (NS) |
 | **Reference** | | | | | |
 | reference/index.qmd | Low | Scaffolded | No | No | A5: the `extract_inclusion_bf()` and `extract_ess()` rows now name the release defaults |
 | reference/bgm.qmd | High | Populated | No | No | A5: fixture baked on 0e116079, numbers unchanged; `standardize` added to the deprecated-arguments callout. A4: numbers moved to the manuscript-grade fixture |
@@ -191,8 +227,9 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | manual/bgmcompare-internals.qmd | High | Contradiction-checked | No | No | - |
 | manual/numerical.qmd | High | Populated | No | No | - |
 
-Note: the Examples section was removed from the website (undeveloped); its
-seven pages are dropped from this board. Full audit findings per page:
+Note: the Examples section rows above are the rebuilt section (brief B0), not
+the seven undeveloped pages removed in c1cb840; those are gone for good and
+share nothing with these. Full audit findings per page:
 `dev/audit-2026-07-28.md`.
 
 ## Secondary Backlog (Not Part of A -> B Review Sequence)

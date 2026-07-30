@@ -7,6 +7,7 @@ Documentation site for the [bgms](https://github.com/Bayesian-Graphical-Modellin
 ## Structure
 
 - `guide/` — User's Guide (tutorials, statistical concepts)
+- `examples/` — Worked analyses (one analysis per page, code and workflow)
 - `reference/` — Function reference (API documentation)
 - `manual/` — Reference Manual (C++ backend, algorithms)
 
@@ -23,6 +24,37 @@ quarto render
 ```
 
 Output goes to `docs/`.
+
+The `Makefile` wraps the builds that need more than a bare `quarto render`, and
+takes `QUARTO=` if Quarto is not on your `PATH` (the RStudio-bundled binary
+lives under `/Applications/RStudio.app/Contents/Resources/app/quarto/bin`):
+
+```bash
+make site             # render the whole site with the ci profile
+make fixtures         # rebake the .rds fixtures (about ten minutes)
+make example-scripts  # regenerate the Examples companion scripts
+make examples-pdf     # the Examples series as one PDF
+```
+
+### The Examples section
+
+`examples/` holds the worked analyses. Two of its build steps are generated,
+never hand-maintained:
+
+- **Companion scripts.** Each page's code is tangled to `examples/R/NN-slug.R`
+  by `scripts/extract-example-code.R`, which runs as the project `pre-render`
+  step, so the script published beside a page always matches it. The scripts
+  are gitignored build artifacts.
+- **The PDF.** `make examples-pdf` renders the index and every published
+  example page, in series order, into one PDF and copies it to
+  `docs/examples/bgms-worked-analyses.pdf`. It uses the `pdf` Quarto profile
+  (`_quarto-pdf.yml`), writes to `_pdf/`, and leaves the site render alone. Run
+  it after the site render, which rewrites `docs/`; `make all` does both in
+  that order.
+
+The series order lives in `scripts/examples-series.R`. See STYLE_GUIDE.md
+§ Example Pages for the page shape and the chunk conventions the two steps
+rely on.
 
 Pages that report model output read baked `.rds` fixtures instead of refitting.
 The fixtures are not in the repository; bake them once, pointing R at the bgms

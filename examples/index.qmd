@@ -1,0 +1,63 @@
+---
+title: "Worked analyses"
+subtitle: "One analysis per page, from the call you type to the sentence you write"
+toc: false
+---
+
+Each page in this section runs one analysis end to end on data that ships with
+the package. You see the figure first, then the code that produced it, then the
+output it prints, then the claims that output licenses. Everything on a page is
+reproducible: the code you read is the code that ran, and each page comes with a
+companion script that reruns it in your own session.
+
+These pages give you just enough to run and report each analysis; the Guide
+carries the reasoning, the Reference the details.
+
+## The series
+
+1. **[Your first network](../guide/getting-started.qmd).** Install `bgms`, fit
+   your first model, and read the network split by evidence. Afterwards you can
+   fit [`bgm()`](../reference/bgm.qmd) to your own data and produce the figure
+   this site treats as the canonical result display.
+2. **From estimation to evidence.** The full Wenchuan network, estimated first
+   and then weighed pair by pair with an inclusion Bayes factor. Afterwards you
+   can say which associations your data support, which they rule out, and which
+   they leave open.
+3. **Reading the output.** The `summary()` of a real fit, walked block by block.
+   Afterwards you can tell whether a fit is trustworthy and where every number
+   you need lives.
+4. **Check your priors.** [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd)
+   run on a fitted model, with its report and its curve read in full. Afterwards
+   you can answer the question of whether your prior drove your conclusions, and
+   report the answer.
+5. **Comparing groups.** Two groups compared with
+   [`bgmCompare()`](../reference/bgmCompare.qmd). Afterwards you can state both
+   kinds of claim the method separates: this association differs between groups,
+   and this one is credibly the same.
+6. **Edge clustering.** The stochastic block model prior on the same data.
+   Afterwards you can report clusters of variables together with the uncertainty
+   in the allocations.
+7. **Coming from bootnet and qgraph.** Your current workflow mapped onto `bgms`,
+   call by call. Afterwards you know which function replaces which step, what is
+   new, and what has no direct analogue.
+8. **Reporting your results.** Checklists and template paragraphs per analysis
+   type. Afterwards you can assemble a Methods and Results section that a
+   reviewer can follow.
+
+Entries without a link are still in preparation.
+
+## How to use a page
+
+Read the figure and the opening question first: they tell you whether the page
+answers the question you arrived with. The code chunks are shown in the order
+they ran, so you can work through a page from top to bottom in your own session.
+Where a page needs the reasoning behind a choice, it links to the
+[Guide](../guide/index.qmd); where it needs an argument, a default, or a return
+value, it links to the [Reference](../reference/index.qmd).
+
+<!-- PDF download. Uncomment once the first example pages ship; until then the
+     PDF profile renders this index alone and the link would offer a one-page
+     download. Build it with `make examples-pdf` (see STYLE_GUIDE.md, Example
+     Pages).
+[Download the series as a PDF](bgms-worked-analyses.pdf)
+-->
