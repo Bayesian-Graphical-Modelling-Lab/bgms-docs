@@ -1,0 +1,40 @@
+# PDF profile: the Examples series as one document.
+#
+#   make examples-pdf
+#
+# which is `quarto render --profile pdf --to pdf` followed by a copy of the
+# result to docs/examples/, where the download link on examples/index.qmd
+# expects it. `--to pdf` is not optional: without it the html format inherited
+# from _quarto.yml is rendered as well.
+#
+# The profile renders exactly one input, _pdf-src/worked-analyses.qmd, which
+# the pre-render step assembles from examples/index.qmd and the example pages
+# in series order (scripts/build-examples-pdf.R). The leading underscore keeps
+# the assembled file out of the website render, and the output goes to _pdf/,
+# so a PDF build never touches docs/ and never interferes with a site render.
+# Both directories are gitignored build artifacts.
+#
+# Adding a page to the PDF needs no change here: the series order lives in
+# scripts/examples-series.R.
+
+project:
+  type: default
+  output-dir: _pdf
+  render:
+    - _pdf-src/worked-analyses.qmd
+  pre-render: scripts/build-examples-pdf.R
+  # The redirect stubs belong to the site render; scripts/redirects.R checks
+  # the output directory and stands down for this one.
+  post-render: []
+
+format:
+  pdf:
+    documentclass: scrreprt
+    papersize: a4
+    geometry:
+      - margin=1in
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    colorlinks: true
+    fig-pos: "H"

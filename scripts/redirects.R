@@ -22,6 +22,15 @@
 out_dir = Sys.getenv("QUARTO_PROJECT_OUTPUT_DIR", unset = "docs")
 project_dir = Sys.getenv("QUARTO_PROJECT_DIR", unset = ".")
 
+# The stubs describe the website's URL layout, so they belong to a render that
+# produces the website. The pdf profile renders the Examples series into _pdf/
+# and must not collect 104 HTML stubs on the way.
+if(basename(out_dir) != "docs") {
+  cat("redirects: output directory is", out_dir,
+      "- not the website render, no stubs written\n")
+  quit(save = "no")
+}
+
 # Canonical site URL, read from _quarto.yml so there is one source of truth.
 site_url = "https://bayesian-graphical-modelling-lab.github.io/bgms"
 quarto_yml = file.path(project_dir, "_quarto.yml")
