@@ -13,8 +13,11 @@ If another note conflicts with this file, this file wins.
 
 ## docs/develop Branch
 
-Long-lived branch tracking bgms `develop` (audited against 4e508ed9 on
-2026-07-28). Work plan: `dev/audit-develop-2026-07-28.md` (phases A-F).
+Long-lived branch tracking bgms `develop`. First audited against 4e508ed9 on
+2026-07-28 (work plan: `dev/audit-develop-2026-07-28.md`, phases A-F);
+re-swept against develop HEAD c1e52c8e on 2026-07-30 under brief A1
+(PRs #176-#185, including the split-Rhat fix, the Rao-Blackwellized
+inclusion machinery, and the refit-based `prior_sensitivity_check()`).
 Rules: never merge into main until the package develop ships; periodically
 merge main into it; re-sweep against bgms develop HEAD at each sync.
 
@@ -75,7 +78,7 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | guide/clustering.qmd | Medium | Not started | No | No | - |
 | guide/mcmc-output.qmd | Medium | Populated | No | No | - |
 | guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | - |
-| guide/missing-data.qmd | Medium | Populated | No | No | Not in _quarto.yml sidebar |
+| guide/missing-data.qmd | Medium | Populated | No | No | - |
 | **Reference** | | | | | |
 | reference/index.qmd | Low | Scaffolded | No | No | - |
 | reference/bgm.qmd | High | Populated | No | No | - |
@@ -83,21 +86,24 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | reference/sample-ggm-prior.qmd | High | Populated | No | No | - |
 | reference/priors.qmd | High | Populated | No | No | - |
 | reference/methods.qmd | Medium | Populated | No | No | - |
+| reference/prior-sensitivity.qmd | High | Populated | No | No | - |
 | reference/extractors.qmd | Medium | Populated | No | No | - |
 | reference/datasets.qmd | Low | Populated | No | No | - |
 | **Manual** | | | | | |
 | manual/index.qmd | Low | Scaffolded | No | No | - |
 | manual/architecture.qmd | Medium | Populated | No | No | - |
-| manual/r-scaffolding.qmd | Medium | Not started | No | No | - |
-| manual/model-classes.qmd | High | Contradiction-checked | No | No | - |
-| manual/samplers.qmd | High | Populated | No | No | Stale vs refactored dispatch (audit 2026-07-28 §1.2) |
+| manual/r-scaffolding.qmd | Medium | Not started | No | No | A1: no walkthrough for the #183 R files (`prior_sensitivity.R`, `refit_engine.R`, `anchor_curve.R`) |
+| manual/model-classes.qmd | High | Contradiction-checked | No | No | A1: `base_model.h` gained warm-start (`set_warm_step_size`, `get_final_inv_mass`, ...) and RB-inclusion accessors in #182/#183; `set_gauge_active` signature changed and `on_warmup_end` was dropped |
+| manual/samplers.qmd | High | Populated | No | No | Stale vs refactored dispatch (audit 2026-07-28 §1.2); also A1: warm-start hooks added to `sampler_base.h` (#183) |
 | manual/nuts.qmd | High | Populated | No | No | - |
+| manual/null-space.qmd | High | Populated | No | No | A1: page is in the sidebar but was missing from this board |
 | manual/rattle.qmd | High | Populated | No | No | - |
 | manual/metropolis.qmd | High | Populated | No | No | - |
 | manual/warmup.qmd | High | Populated | No | No | - |
-| manual/diagnostics.qmd | High | Populated | No | No | - |
+| manual/diagnostics.qmd | High | Populated | No | No | A1: stale claim that `n_eff_mixt` is "flagged in the output" below 5 transitions; that suppression was removed in bgms #182 |
 | manual/pseudolikelihood.qmd | Medium | Populated | No | No | - |
-| manual/parameter-priors.qmd | High | Populated | No | No | - |
+| manual/parameter-priors.qmd | High | Populated | No | No | A1: needs a pointer to `prior_sensitivity_check()`. Commit 794569b removed the old one, which said the per-iteration scale draws "feed" the check; #183 made the check refit-based, so the old sentence must not be restored verbatim |
+| manual/zratio-hierarchical.qmd | High | Populated | No | No | A1: page is in the sidebar but was missing from this board. Stale source path (`src/models/zratio_gauge.h` moved under `src/models/ggm/` in #180); the one-time surface build now announces itself and its elapsed time (#173) |
 | manual/parallel-chains.qmd | Medium | Populated | No | No | - |
 | manual/ggm-internals.qmd | High | Contradiction-checked | No | No | - |
 | manual/omrf-internals.qmd | High | Contradiction-checked | No | No | - |
