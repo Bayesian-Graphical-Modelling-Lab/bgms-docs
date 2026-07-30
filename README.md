@@ -101,11 +101,104 @@ measured per-fixture timings.
 
 The canonical site is <https://bayesian-graphical-modelling-lab.github.io/bgms/>,
 which is GitHub Pages for the **bgms package repository**. This repository owns
-the content; the package repository owns the URL. On a push to `main`,
+the content; the package repository owns the URL.
 [`.github/workflows/publish.yml`](.github/workflows/publish.yml) renders the
 site here and publishes it to the `gh-pages` branch of
-`Bayesian-Graphical-Modelling-Lab/bgms`. Both deploy steps are guarded on
-`main`, so a manual run from any other branch renders and stops.
+`Bayesian-Graphical-Modelling-Lab/bgms`.
+
+The documentation is versioned, so that branch holds more than one site:
+
+| Path | What it is | Deployed by |
+|---|---|---|
+| `/` | the current release | every push to `main` |
+| `/dev/` | the development documentation | every push to `docs/develop` |
+| `/vX.Y.Z/` | a frozen archive of a past release | by hand on release day, starting with the release after 0.2.0.0 |
+
+Every deploy step is guarded on a branch, so a manual run from any other branch
+renders and stops. A push to `docs/develop` publishes to `/dev/` straight away:
+that documentation is public, and every page of it says so.
+
+### The root-exclusion invariant
+
+**A root deploy must never touch `dev/` or any `vX.Y.Z/`.** It replaces the
+root, deleting whatever the render no longer produces, and leaves the other
+sites alone. A dev deploy is the mirror image: it replaces `dev/` and reads or
+writes nothing outside it.
+
+`peaceiris/actions-gh-pages` cannot express that. It cleans its destination with
+`git rm -r --ignore-unmatch *` before copying, and with no `destination_dir` the
+destination is the whole branch, which would take `dev/` and every archive with
+it; `exclude_assets` filters the source, not the destination. So both deploys to
+the bgms repository go through
+[`scripts/deploy-gh-pages.sh`](scripts/deploy-gh-pages.sh), which clears the
+root by name and keeps `.git`, `dev/`, and any `vX.Y.Z/` directory. Its header
+carries the reasoning.
+
+[`scripts/simulate-deploy.sh`](scripts/simulate-deploy.sh) proves both
+directions against a throwaway repository holding a released site, a `dev/`
+build, and a `v0.1.0/` archive. It needs no network and no credentials. Run it
+after any change to the deploy script:
+
+```bash
+scripts/simulate-deploy.sh
+```
+
+### What a build knows about itself
+
+One environment variable, `BGMS_DOC_CHANNEL`, tells a render which of the two
+sites it is: `release` (the default) or `dev`. Everything that differs hangs off
+it, through [`scripts/doc-build.R`](scripts/doc-build.R):
+
+- The version the citation picker prints is read from the installed bgms
+  DESCRIPTION, never written down in a page. The release job installs bgms from
+  the package's `main` branch and the dev job from `develop`, so each build
+  stamps what it documents. `BGMS_DOC_VERSION` overrides it if a render ever has
+  to claim another version.
+- `versions.json`, the version index at the site root, is written by
+  [`scripts/versions.R`](scripts/versions.R) and only by the release build: it
+  describes the whole family, and only the build that owns the root can speak
+  for the family. The dev build reads the root copy one directory up.
+- The navbar version switcher is built from that file by the script in
+  `js.html`. If the file is missing, as in a local preview, there is no
+  dropdown and nothing else changes.
+- A dev build is marked as one by
+  [`scripts/dev-build.R`](scripts/dev-build.R): a dismissable banner on every
+  page, `<meta name="robots" content="noindex">`, and a canonical link to the
+  same page under the site root, so search traffic collects on the release
+  docs. It also drops `sitemap.xml` and `robots.txt`, which describe the root's
+  URLs and not its own. A release render gets none of this.
+
+To see a development build locally:
+
+```bash
+BGMS_DOC_CHANNEL=dev make site
+```
+
+### Release day
+
+The order matters, because the root deploy overwrites the outgoing release.
+
+1. **Archive the outgoing release first** (from the release after 0.2.0.0
+   onwards; there is nothing to archive at 0.2.0.0). In a clone of the bgms
+   repository, on `gh-pages`, copy the root into its version directory and push:
+
+   ```bash
+   mkdir vX.Y.Z
+   rsync -a --exclude '/.git/' --exclude '/dev/' --exclude '/v[0-9]*/' ./ vX.Y.Z/
+   git add vX.Y.Z && git commit -m "Archive the X.Y.Z documentation" && git push
+   ```
+
+   The copy keeps the `versions.json` it was built with. That is harmless: the
+   switcher notices the file belongs to the root and reloads the live one.
+2. Add the archived version to `ARCHIVED` in
+   [`scripts/versions.R`](scripts/versions.R), one line, newest first.
+3. Merge `docs/develop` into `main` and push. The push renders and deploys the
+   root, which now also publishes the new `versions.json`.
+4. Verify: the root serves the new release, `/dev/` is still there and still
+   intact, the switcher lists every entry, and the archived version still
+   answers at `/vX.Y.Z/`.
+
+### The redirect site
 
 This repository's own Pages site,
 <https://bayesian-graphical-modelling-lab.github.io/bgms-docs/>, serves only

@@ -123,6 +123,48 @@ Pages:
 Series order has one home, `scripts/examples-series.R`; adding a page means
 listing it there, in the `examples` sidebar, and in the index prose.
 
+## Versioned Deployment (brief A7, 2026-07-30)
+
+D4 (MM, 2026-07-30): the documentation is versioned, Documenter style. The
+site ROOT serves the current release directly, with no /stable/ indirection;
+/dev/ serves the development documentation and is deployed on every push to
+docs/develop; a frozen /vX.Y.Z/ archive is added per CRAN release, starting
+with the release AFTER 0.2.0.0, so this brief builds no v-directories. The
+minimum shipped now is root + /dev/ + a two-entry version switcher.
+
+The load-bearing rule is the **root-exclusion invariant**: a root deploy
+replaces the root and never touches dev/ or any vX.Y.Z/; a dev deploy
+replaces dev/ and touches nothing outside it.
+`peaceiris/actions-gh-pages` cannot express it (it cleans its destination
+with `git rm -r --ignore-unmatch *`, and with no `destination_dir` that is
+the whole branch; `exclude_assets` filters the source, not the destination),
+so both deploys to the bgms repository go through
+`scripts/deploy-gh-pages.sh`. `scripts/simulate-deploy.sh` proves both
+directions against a throwaway repository and needs no network; run it after
+any change to the deploy script.
+
+One flag, `BGMS_DOC_CHANNEL` (`release` or `dev`), decides everything that
+differs between the two builds, through `scripts/doc-build.R`: the version
+the citation picker prints (read from the installed bgms DESCRIPTION, so the
+version string is never written down in a page), the version index
+`versions.json` (written by `scripts/versions.R`, and only by the release
+build, which is the one that can speak for the family), and the
+development-build marking (`scripts/dev-build.R`: banner, `noindex`,
+canonical links to the root equivalents, no sitemap or robots.txt). The
+navbar switcher lives in `js.html` and degrades to no dropdown when
+versions.json is unreachable, as in a local preview.
+
+`index.qmd` is now `freeze: false`, because the citation version has to come
+from the build rather than from a stored result.
+
+Release-day sequence, how to add an archive entry, and the invariant:
+README.md § Deployment.
+
+Side effect, intended: merging this to docs/develop puts the development
+documentation at .../bgms/dev/ in public, while the pkgdown site keeps
+serving the root until the acceptance-day deploy. The switcher only appears
+once main has deployed the root versions.json.
+
 ## Current Cycle Focus
 
 - Build trusted docs with automation-first QA.
@@ -252,10 +294,11 @@ supersedes the pkgdown site currently served there, and /bgms-docs/ redirects
 to it.
 
 - [x] Host the documentation from bgms-docs while keeping the public URL at https://bayesian-graphical-modelling-lab.github.io/bgms/.
-- [x] Add GitHub Actions workflow in bgms-docs to render Quarto and deploy to the publishing target used by the bgms website. `publish.yml` publishes `docs/` to the `gh-pages` branch of the bgms repo; both deploy steps are guarded on `main`.
+- [x] Add GitHub Actions workflow in bgms-docs to render Quarto and deploy to the publishing target used by the bgms website. `publish.yml` publishes `docs/` to the `gh-pages` branch of the bgms repo; every deploy step is guarded on a branch.
 - [x] Redirect stubs for the pkgdown URL layout: `scripts/redirects.R` (project `post-render`) writes 104 stubs with canonical link tags; `redirect/` holds the /bgms-docs/ root and deep-path stubs.
-- [x] Version stamp: `BGMS_DOC_VERSION=0.2.0.0` in the CI render environment; `index.qmd` keeps the same value as its in-source fallback.
-- [x] Document deployment and rollback steps for maintainers (README.md § Deployment).
+- [x] Version stamp: read from the installed bgms DESCRIPTION at render time (A7, `scripts/doc-build.R`), so the release build and the dev build each print their own. `BGMS_DOC_VERSION` remains as an override and is no longer set in CI; the hardcoded 0.2.0.0 fallback in `index.qmd` is gone.
+- [x] Versioned deployment (A7): root = release, `/dev/` = development docs on every push to docs/develop, `/vX.Y.Z/` archives from the release after 0.2.0.0. `scripts/deploy-gh-pages.sh` holds the root-exclusion invariant, `scripts/simulate-deploy.sh` proves it, `scripts/versions.R` writes the version index and `js.html` renders the switcher.
+- [x] Document deployment and rollback steps for maintainers (README.md § Deployment), including the release-day archive recipe and how to add a versions.json entry.
 - [ ] BLOCKED on MM: configure deployment credentials with least-privilege access. Needs an SSH deploy key pair, the public half as a write-enabled deploy key on the bgms repo, the private half as the `BGMS_SITE_DEPLOY_KEY` secret here, and Pages on the bgms repo set to the `gh-pages` branch. Exact steps: README.md § Deployment → One-time setup.
 - [ ] BLOCKED on MM or the bgms companion agent, before the first deploy: retire pkgdown in the bgms repo (delete `.github/workflows/pkgdown.yaml` and `_pkgdown.yml`), or its next push rebuilds pkgdown over the new site. Also point the DESCRIPTION `URL` field and the README badge at the canonical site.
 - [ ] Open: no custom 404 page on the canonical site. Unmapped paths fall through to the GitHub Pages default. A `404.qmd` offering navigation would close the last of the BGGM failure mode.
@@ -362,6 +405,12 @@ Governance and traceability:
 
 ## Settled Decisions
 
+- D4 (MM, 2026-07-30): the documentation is versioned. The site root serves
+  the current release directly, /dev/ serves the development documentation
+  and deploys on every push to docs/develop, and a frozen /vX.Y.Z/ archive
+  joins them per CRAN release from the release after 0.2.0.0. Implemented
+  under brief A7; see the Versioned Deployment section above and README.md
+  § Deployment.
 - D2 (MM, 2026-07-30): the edge evidence plot is the site's canonical
   network display; the median-probability network is never a final
   display. Implemented under brief A6; see the Network Figure Convention

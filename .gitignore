@@ -19,6 +19,8 @@ dev/
 .Rhistory
 .RData
 .Ruserdata
+# Local R_LIBS setting for interactive sessions (README § Building from RStudio)
+.Renviron
 
 # OS
 .DS_Store
