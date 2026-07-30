@@ -36,6 +36,22 @@ make example-scripts  # regenerate the Examples companion scripts
 make examples-pdf     # the Examples series as one PDF
 ```
 
+### Building from RStudio
+
+The project file sets `BuildType: Makefile`, so RStudio's Build pane runs
+`make` rather than a bare `quarto render`. That matters: `make` sets `R_LIBS`
+to the documented bgms build and renders with the ci profile, and a bare
+render does neither. The default target is `all`, which builds the site and
+then the Examples PDF.
+
+The Makefile only governs builds. Running chunks interactively in the RStudio
+console still needs `R_LIBS` set in the session; put it in a `.Renviron` in
+the repo root:
+
+```
+R_LIBS=dev/lib-bgms-develop
+```
+
 ### The Examples section
 
 `examples/` holds the worked analyses. Two of its build steps are generated,
