@@ -3,6 +3,8 @@ project:
   output-dir: docs
   resources:
     - icons/
+  # Writes the stubs that keep the previous pkgdown site's URLs alive.
+  post-render: scripts/redirects.R
 
 execute:
   freeze: true

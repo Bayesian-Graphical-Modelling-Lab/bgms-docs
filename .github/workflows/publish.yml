@@ -1,5 +1,16 @@
 name: Build and Deploy Documentation
 
+# The canonical site is https://bayesian-graphical-modelling-lab.github.io/bgms/,
+# which is GitHub Pages for the bgms package repository. This repository owns
+# the content and renders it; the bgms repository owns the URL. So the render
+# output is published to the gh-pages branch of Bayesian-Graphical-Modelling-Lab/bgms
+# (superseding the pkgdown site that used to be built there), and this
+# repository's own Pages site, .../bgms-docs/, serves only the redirect in
+# redirect/.
+#
+# Both deploy steps are guarded on main, so a workflow_dispatch run from a
+# docs/* branch renders and stops without touching either Pages site.
+
 on:
   push:
     branches: [main]
@@ -28,10 +39,26 @@ jobs:
             github::Bayesian-Graphical-Modelling-Lab/bgms
 
       - name: Render site
+        env:
+          # Documented release. Drives the citation picker on the homepage.
+          BGMS_DOC_VERSION: 0.2.0.0
         run: quarto render --profile ci
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy canonical site to the bgms repository
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # SSH deploy key with write access to the bgms repository only.
+          deploy_key: ${{ secrets.BGMS_SITE_DEPLOY_KEY }}
+          external_repository: Bayesian-Graphical-Modelling-Lab/bgms
+          publish_branch: gh-pages
+          publish_dir: ./docs
+          commit_message: "Deploy bgms-docs ${{ github.sha }}"
+
+      - name: Deploy redirect stub to this repository's Pages site
+        if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+          publish_dir: ./redirect
+          commit_message: "Redirect /bgms-docs/ to the canonical site"
