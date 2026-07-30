@@ -35,7 +35,7 @@ $$
 
 For other prior inclusion probabilities, the Bayes factor divides the posterior inclusion odds by the prior inclusion odds — see [The Bayesian Approach](bayesian-approach.qmd) for the general identity.
 
-In practice, the recommended tool is [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf), which returns the log inclusion Bayes factor for every edge with the prior odds already divided out. It is computed from Rao-Blackwellized odds accumulators recorded during sampling, so it remains finite even for edges whose posterior inclusion probability saturates at 0 or 1 — exactly the edges where the transformation above overflows to $\infty$ or collapses to 0.
+In practice, the recommended tool is [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf), which returns the inclusion Bayes factor for every edge with the prior odds already divided out. It is computed from Rao-Blackwellized odds accumulators recorded during sampling, so it remains finite even for edges whose posterior inclusion probability saturates at 0 or 1 — exactly the edges where the transformation above overflows to $\infty$ or collapses to 0. Pass `log = TRUE` to get the natural logarithm instead, which stays finite for evidence too extreme to represent as a Bayes factor.
 
 The reciprocal $1 / \text{BF}_{10}$ quantifies the evidence for edge absence, i.e., conditional independence [@SekulovskiEtAl_2024]. Values of $\text{BF}_{10}$ close to one indicate that the data do not discriminate between the two hypotheses — absence of evidence rather than evidence of absence.
 
@@ -177,13 +177,23 @@ recovers a finite answer from the odds accumulators:
 
 ```{r}
 bf = extract_inclusion_bf(fit)
-round(bf["intrusion", c("dreams", "upset", "avoidact")], 2)
+signif(bf["intrusion", c("dreams", "upset", "avoidact")], 3)
 ```
 
-On the log scale, `intrusion-dreams` gets a Bayes factor of about
-$e^{275}$ — astronomically strong evidence, but now an actual number —
-while the other two entries agree with the posterior-odds
-calculation above ($\log 2.0 \approx 0.68$, $\log(1/33) \approx -3.5$).
+`intrusion-dreams` gets a Bayes factor of about $2 \times 10^{119}$:
+astronomically strong evidence, but now an actual number. The other two
+entries reproduce the posterior-odds calculation above ($2.0$ for
+`intrusion-upset`, and $0.030 \approx 1/33$ for `intrusion-avoidact`).
+
+Evidence that strong runs into the limits of double precision: a Bayes
+factor beyond about $1.8 \times 10^{308}$ comes back as `Inf`. Reading
+the same three edges on the log scale keeps every entry finite and
+comparable:
+
+```{r}
+round(extract_inclusion_bf(fit, log = TRUE)["intrusion",
+      c("dreams", "upset", "avoidact")], 2)
+```
 
 ## Median probability model
 

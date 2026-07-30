@@ -137,12 +137,18 @@ estimator that stays finite even for saturated edges.
 
 ## extract_inclusion_bf {#extract_inclusion_bf}
 
-Compute log inclusion Bayes factors from the Rao-Blackwellized odds
+Compute inclusion Bayes factors from the Rao-Blackwellized odds
 accumulators recorded during sampling.
 
 ```r
-extract_inclusion_bf(bgms_object)
+extract_inclusion_bf(
+  bgms_object,
+  log = FALSE
+)
 ```
+
+`log` selects the scale of the return. The default `FALSE` gives the
+inclusion Bayes factor itself; `TRUE` gives its natural logarithm.
 
 For each indicator, the sampler accumulates the birth/death acceptance
 probabilities on the acceptance-probability scale, so the posterior
@@ -160,9 +166,9 @@ probabilities of about $-745$: edges whose inclusion-probability
 average rounds to 0 or 1 still receive a finite Bayes factor here.
 
 The prior inclusion odds are divided out edge by edge, so the returned
-value is the natural log of the inclusion Bayes factor rather than the
-posterior odds (the two coincide only at a prior inclusion probability
-of $\tfrac{1}{2}$). For `bgm()` fits the prior odds come from
+value is the inclusion Bayes factor rather than the posterior odds (the
+two coincide only at a prior inclusion probability of $\tfrac{1}{2}$).
+For `bgm()` fits the prior odds come from
 [`extract_prior_inclusion_probabilities()`](#extract_prior_inclusion_probabilities);
 for continuous or stochastic-block models that call may run and cache a
 short prior-only chain. For `bgmCompare()` fits the exchangeable
@@ -170,20 +176,32 @@ difference prior supplies a single prior inclusion probability; a
 stochastic-block difference prior has no single marginal, so the result
 is left as posterior odds there.
 
-Returns a symmetric p x p matrix of log inclusion Bayes factors
-(natural log). Entries are `NA` for indicators that were never
-updated, `+Inf` when no exclusion evidence remains, and `-Inf` when no
-inclusion evidence remains. For `bgms` the diagonal is `NA`; for
+Returns a symmetric p x p matrix of inclusion Bayes factors, or of their
+natural logarithms when `log = TRUE`. Entries are `NA` for indicators
+that were never updated and `+Inf` when no exclusion evidence remains.
+An entry with no inclusion evidence left is `-Inf` on the log scale and
+`0` on the Bayes factor scale. For `bgms` the diagonal is `NA`; for
 `bgmCompare` the diagonal holds main-effect difference Bayes factors.
 
 ```{r}
 bf = extract_inclusion_bf(fit)
-round(bf[1:4, 1:4], 2)
+signif(bf[1:4, 1:4], 3)
 ```
 
-The `intrusion`–`dreams` edge, whose inclusion probability saturates
-at 1 above, here receives a finite log Bayes factor of about 275 —
+The `intrusion`–`dreams` edge, whose inclusion probability saturates at
+1 above, here receives a Bayes factor of about $2 \times 10^{119}$:
 astronomically strong evidence, but quantified rather than `Inf`.
+
+The accumulators are exact on the log scale everywhere, while the Bayes
+factor scale saturates at double precision: an entry whose log exceeds
+about 709.78 nats (a Bayes factor beyond about $1.8 \times 10^{308}$)
+comes back as `+Inf` under the default even though its log-scale value
+is finite. Use `log = TRUE` when you need to separate such extreme
+evidence:
+
+```{r}
+round(extract_inclusion_bf(fit, log = TRUE)[1:4, 1:4], 2)
+```
 
 ## extract_prior_inclusion_probabilities {#extract_prior_inclusion_probabilities}
 
@@ -291,7 +309,10 @@ Returns a list with:
 Retrieve effective sample size estimates for all parameters.
 
 ```r
-extract_ess(bgms_object)
+extract_ess(
+  bgms_object,
+  estimator = c("rb", "mixt")
+)
 ```
 
 Returns a named list with ESS values for each parameter type present in the
@@ -300,16 +321,46 @@ model (e.g., `main`, `pairwise`, `indicator`). ESS values match
 [Technical Manual](../manual/diagnostics.qmd).
 
 Two elements are composite rather than raw-chain quantities. The
-`indicator` element is the transition-based mixture ESS of the binary
-indicator (the `n_eff_mixt` column of `summary(fit)$indicator`), and is
-`NA` for edges whose indicator never flipped. The `pairwise` element is
-the composite ESS of the model-averaged edge weight, which combines
-inclusion and slab uncertainty. See
+`indicator` element reports one of the two effective sample sizes of the
+inclusion inference, and `estimator` picks which. It is ignored for every
+other parameter type.
+
+- `"rb"` (the default) is the `n_eff` column of
+  `summary(fit)$indicator`: the ESS of the Rao-Blackwellized inclusion
+  draws, and therefore the ESS of the inclusion probability the fit
+  reports. It is read from the same continuous chain that
+  [`extract_rhat()`](#extract_rhat) uses for indicators, and it measures
+  precision conditional on exploration.
+- `"mixt"` is the `n_eff_mixt` column: the transition-based ESS of the
+  binary indicator chain, which measures the exploration itself. Few
+  transitions are expected when an edge's inclusion probability sits
+  near 0 or 1, so a small or `NA` transition ESS beside a confident
+  Rao-Blackwellized ESS marks a decisive edge rather than a failure.
+
+Both are `NA` for edges whose indicator never flipped, and they are read
+as a pair; see
 [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
+Fits made with bgms < 0.2.0.0 carry no Rao-Blackwellized draws: a
+default call falls back to the transition ESS there, while an explicit
+`estimator = "rb"` errors.
+
+The `pairwise` element is the composite ESS of the model-averaged edge
+weight, which combines inclusion and slab uncertainty.
 
 ```{r}
 ess = extract_ess(fit)
 round(head(ess$pairwise), 0)
+```
+
+Both indicator readings side by side, for a contested edge and a
+decisive one:
+
+```{r}
+edges = c("intrusion-upset", "intrusion-avoidact")
+data.frame(
+  rb   = round(extract_ess(fit)$indicator[edges]),
+  mixt = round(extract_ess(fit, estimator = "mixt")$indicator[edges])
+)
 ```
 
 Low values relative to the total number of retained draws signal slow
