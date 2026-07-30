@@ -23,6 +23,11 @@ cat("fit_wenchuan ...\n")
 fit = bgm(Wenchuan, chains = 2, seed = 1234)
 saveRDS(fit, file.path(out, "fit_wenchuan.rds"))
 
+# reference/prior-sensitivity.qmd
+cat("ps_wenchuan ...\n")
+ps = prior_sensitivity_check(fit)
+saveRDS(ps, file.path(out, "ps_wenchuan.rds"))
+
 # guide/clustering.qmd
 cat("fit_wenchuan_sbm ...\n")
 fit_sbm = bgm(Wenchuan, edge_prior = sbm_prior(), chains = 2, seed = 1234)

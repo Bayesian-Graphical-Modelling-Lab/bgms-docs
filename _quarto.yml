@@ -110,6 +110,9 @@ website:
         - section: "Methods"
           contents:
             - reference/methods.qmd
+        - section: "Diagnostics"
+          contents:
+            - reference/prior-sensitivity.qmd
         - reference/extractors.qmd
         - reference/datasets.qmd
 

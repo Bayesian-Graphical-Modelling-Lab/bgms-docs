@@ -24,7 +24,6 @@ and simulation studies.
 | [`sample_ggm_prior()`](sample-ggm-prior.qmd) | Prior sampler for the GGM precision matrix (conditional, joint, or hierarchical specification). |
 | [`sample_graph_prior()`](prior-samplers.qmd#sample_graph_prior) | Prior sampler for the edge-inclusion indicators and edge-prior hyperparameters. |
 | [`sample_sbm_prior()`](prior-samplers.qmd#sample_sbm_prior) | Ancestral sampler for the stochastic block model hyperprior (allocations, pair probabilities). |
-| [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge) | Trust gauge for the hierarchical graph prior's fast normalizer approximation. |
 
 ## Prior Constructors
 
@@ -54,6 +53,15 @@ Prior specification objects passed to `bgm()` and `bgmCompare()` via the
 | [`simulate()`](methods.qmd#simulate) | Simulate datasets from the posterior distribution |
 | [`simulate_mrf()`](methods.qmd#simulate_mrf) | Simulate observations from a Markov Random Field |
 
+## Diagnostics
+
+Post-fit checks on a model you have already estimated.
+
+| Function | Description |
+|----------|-------------|
+| [`prior_sensitivity_check()`](prior-sensitivity.qmd) | Recover each edge's inclusion Bayes factor curve across the slab scale and classify which verdicts depend on it. |
+| [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge) | Trust gauge for the hierarchical graph prior's fast normalizer approximation. |
+
 ## Extractor Functions
 
 | Function | Description |
@@ -62,7 +70,7 @@ Prior specification objects passed to `bgm()` and `bgmCompare()` via the
 | [`extract_main_effects()`](extractors.qmd#extract_main_effects) | Extract main-effect parameters: posterior means for `bgms` fits, posterior samples for `bgmCompare` fits |
 | [`extract_pairwise_interactions()`](extractors.qmd#extract_pairwise_interactions) | Extract posterior samples of partial association parameters |
 | [`extract_indicators()`](extractors.qmd#extract_indicators) | Extract posterior samples of edge or difference indicators |
-| [`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities) | Compute posterior inclusion probabilities from indicator samples |
+| [`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities) | Compute posterior inclusion probabilities, from the Rao-Blackwellized draws by default or from the raw indicator samples |
 | [`extract_prior_inclusion_probabilities()`](extractors.qmd#extract_prior_inclusion_probabilities) | Compute prior inclusion probabilities, matched in shape to the posterior ones for Bayes factor computation |
 | [`extract_inclusion_bf()`](extractors.qmd#extract_inclusion_bf) | Compute log inclusion Bayes factors from the Rao-Blackwellized odds accumulators; finite even for saturated edges |
 | [`extract_indicator_priors()`](extractors.qmd#extract_indicator_priors) | Retrieve the indicator prior specification (prior type and hyperparameters) |
