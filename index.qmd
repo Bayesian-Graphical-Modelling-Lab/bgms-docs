@@ -8,6 +8,11 @@ description: |
   Bayesian estimation and model comparison for graphical models with binary and
   ordinal variables in R.
 hide-description: true
+execute:
+  # The citation picker reads the version off the installed bgms build, so this
+  # page has to run on every render rather than replay a frozen result. Its one
+  # chunk prints text and costs nothing.
+  freeze: false
 ---
 
 :::::: {.hero-banner}
@@ -110,10 +115,11 @@ Choose a citation format (version is set to the documented release):
 ```{r}
 #| echo: false
 #| results: asis
-bgms_doc_version = Sys.getenv("BGMS_DOC_VERSION", unset = "")
-if(bgms_doc_version == "") {
-  bgms_doc_version = "0.2.0.0"
-}
+# The version this build documents, read from the installed bgms rather than
+# written down here; see scripts/doc-build.R. The page is not frozen, so the
+# release build and the development build each print their own.
+source("scripts/doc-build.R")
+bgms_doc_version = doc_version()
 
 cat(sprintf('<div class="citation-picker" data-cite-picker="bgms">
 
