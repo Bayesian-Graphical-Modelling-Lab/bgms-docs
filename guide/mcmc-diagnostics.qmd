@@ -98,6 +98,13 @@ where the indicator never flipped, the Rao-Blackwellized `mcse`,
 `n_eff`, and `Rhat` are reported as `NA` rather than as the misleading
 numbers a near-constant heavy-tailed chain would produce.
 
+[`extract_ess()`](../reference/extractors.qmd#extract_ess) returns the
+Rao-Blackwellized `n_eff` for indicators by default, so its indicator
+element lines up with the summary table's `n_eff` column and with
+[`extract_rhat()`](../reference/extractors.qmd#extract_rhat), which
+reads the same continuous chain. Ask for the exploration half of the
+pair explicitly with `extract_ess(fit, estimator = "mixt")`.
+
 When transitions are observed but rare, the ESS estimate itself becomes
 imprecise: small fluctuations in the transition counts can produce
 large swings in the ESS. In these cases, plotting the cumulative
@@ -335,9 +342,11 @@ One chain has an energy slope that is statistically significant, so the fit
 is flagged. Nothing else in the check is out of range: the variance ratios sit
 near 1, well below the 2 that indicates a chain still settling, and the E-BFMI
 values are far above 0.3. The message the sampler prints tells you where to
-look next, and that check is the one that decides. For indicators
-[`extract_ess()`](../reference/extractors.qmd#extract_ess) reports the
-transition ESS, so the indicator row below is the exploration reading:
+look next, and that check is the one that decides. For indicators both
+[`extract_ess()`](../reference/extractors.qmd#extract_ess) and
+[`extract_rhat()`](../reference/extractors.qmd#extract_rhat) read the
+Rao-Blackwellized inclusion chain by default, so the indicator row
+below is one reading of one chain:
 
 ```{r}
 rh = extract_rhat(fit)
@@ -349,10 +358,16 @@ print(data.frame(
 ), row.names = FALSE)
 ```
 
-Every R-hat is below 1.01 and the smallest effective sample size is in the
-thousands, so the chains agree with each other and with their own halves, and
-the indicators did enough switching to back that agreement up. A
-significant energy slope in one chain out of four, with clean R-hat and ESS, is
+Every R-hat is below 1.01 and the smallest effective sample size is around a
+thousand, so the chains agree with each other and with their own halves. The
+exploration half of the indicator pair backs that agreement up: the smallest
+transition ESS on this fit is about 1100.
+
+```{r}
+round(min(extract_ess(fit, estimator = "mixt")$indicator, na.rm = TRUE))
+```
+
+A significant energy slope in one chain out of four, with clean R-hat and ESS, is
 a sensitive detector firing on a real but small trend, not a reason to
 distrust the posterior. The flag is a prompt to run the two checks above, not a
 verdict on its own. If R-hat or ESS had also been poor, the remedy would be the

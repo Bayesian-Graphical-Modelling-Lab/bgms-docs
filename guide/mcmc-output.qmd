@@ -124,6 +124,9 @@ exploration information, and a near-constant Rao-Blackwellized chain
 would otherwise report reassuring-looking numbers. Read `n_eff` and
 `n_eff_mixt` as a pair; see
 [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
+[`extract_ess()`](../reference/extractors.qmd#extract_ess) returns the
+same two columns for indicators: `n_eff` by default, and `n_eff_mixt`
+with `estimator = "mixt"`.
 
 ### Summary columns
 
@@ -242,11 +245,11 @@ commonly used are:
 | `extract_indicators()` | Raw indicator samples |
 | `extract_posterior_inclusion_probabilities()` | Posterior inclusion probabilities |
 | `extract_prior_inclusion_probabilities()` | Effective prior inclusion probabilities — the denominators for inclusion Bayes factors on continuous data (see [Edge Selection](edge-selection.qmd#sec-bf-continuous)) |
-| `extract_inclusion_bf()` | Log inclusion Bayes factors, computed from Rao-Blackwellized odds accumulators; finite even for edges whose inclusion probability saturates at 0 or 1 |
+| `extract_inclusion_bf()` | Inclusion Bayes factors, computed from Rao-Blackwellized odds accumulators; finite even for edges whose inclusion probability saturates at 0 or 1. `log = TRUE` returns their natural logarithms |
 | `extract_precision()` | Posterior mean precision matrix (GGM / continuous block) |
 | `extract_partial_correlations()` | Posterior mean partial correlation matrix (GGM / continuous block) |
 | `extract_log_odds()` | Posterior mean log-odds matrix (ordinal / discrete block) |
-| `extract_ess()` | Effective sample sizes |
+| `extract_ess()` | Effective sample sizes. For edge indicators the Rao-Blackwellized ESS by default; `estimator = "mixt"` returns the transition ESS |
 | `extract_rhat()` | Split $\hat{R}$ values |
 | `extract_sbm()` | SBM cluster assignments and co-clustering matrix (when `edge_prior = sbm_prior(...)`) |
 | `extract_arguments()` | Arguments used when fitting the model |

@@ -88,10 +88,11 @@ Priors on baseline parameters are specified via prior-object constructors (see [
 | `threshold_prior` | A `bgms_parameter_prior` object for baseline threshold parameters. Allowed: [`beta_prime_prior()`](priors.qmd#beta_prime_prior) (default), [`normal_prior()`](priors.qmd#normal_prior). Default: `beta_prime_prior(alpha = 0.5, beta = 0.5)`. |
 
 ::: {.callout-note}
-## Deprecated scalar prior arguments
+## Deprecated arguments
 
 | Deprecated | Replacement |
 |------------|-------------|
+| `standardize` | No replacement; see the note below the table |
 | `pairwise_scale = s` | `interaction_prior = cauchy_prior(scale = s)` |
 | `main_alpha = a, main_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` |
 | `difference_probability = p` | `difference_prior = bernoulli_prior(p)` |
@@ -105,6 +106,14 @@ Priors on baseline parameters are specified via prior-object constructors (see [
 | `threshold_alpha = a, threshold_beta = b` | `threshold_prior = beta_prime_prior(alpha = a, beta = b)` (deprecated since 0.1.6.0) |
 | `burnin = n` | `warmup = n` (deprecated since 0.1.6.0) |
 | `save` | No replacement; raw samples are always stored (deprecated since 0.1.6.0) |
+
+`standardize` scaled each pair's baseline and difference prior by the
+product of the two variables' maximum scores; pairwise interactions are
+now on the association scale and share one prior scale, so the
+adjustment is gone. `standardize = FALSE`, the old default, is what the
+sampler does, so it warns and fits; `standardize = TRUE` errors and
+points you at setting the scales directly through `interaction_prior`
+and `difference_scale`.
 :::
 
 ### Sampler settings

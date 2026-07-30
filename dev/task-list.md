@@ -18,41 +18,62 @@ Long-lived branch tracking bgms `develop`. First audited against 4e508ed9 on
 re-swept against develop HEAD c1e52c8e on 2026-07-30 under brief A1
 (PRs #176-#185, including the split-Rhat fix, the Rao-Blackwellized
 inclusion machinery, and the refit-based `prior_sensitivity_check()`).
+Reconciled with the release build, develop HEAD 0e116079, on 2026-07-30
+under brief A5 (PRs #186-#188: the `log` argument on
+`extract_inclusion_bf()`, the RB alignment of `extract_ess()`, and the
+lifecycle deprecation of `standardize`).
 Rules: never merge into main until the package develop ships; periodically
 merge main into it; re-sweep against bgms develop HEAD at each sync.
 
-## Fixture Configuration (brief A4, 2026-07-30)
+## Fixture Configuration (brief A4, rebaked under A5, 2026-07-30)
+
+All four fixtures are baked on the release build, bgms develop **0e116079**
+(version 0.2.0.0).
 
 The Wenchuan fit and its prior sensitivity check are baked at the tutorial
 paper's manuscript-grade configuration: `bgm(Wenchuan, iter = 1e4,
 warmup = 5e3, seed = 123)` and `prior_sensitivity_check(fit, seed = 123)`,
 read from the tutorial repo's `R/01-worked-example.R` and
-`R/16-run-sensitivity-check.R`. Same build (c1e52c8e), seed, settings, and
-data as the paper, so the site and the paper quote one set of numbers by
-construction, not by coordination. Verified identical against the tutorial's
-`tables/` outputs from its 2026-07-30 run: evidence verdicts 35 presence /
-39 undecided / 62 absence, per-edge inclusion probabilities agreeing to
-5e-16 and log Bayes factors to 4e-13.
+`R/16-run-sensitivity-check.R`. Same seed, settings, and data as the paper,
+so the site and the paper quote one set of numbers by construction, not by
+coordination. Verified identical against the tutorial's `tables/` outputs
+from its 2026-07-30 run: evidence verdicts 35 presence / 39 undecided /
+62 absence, per-edge inclusion probabilities agreeing to 5e-16 and log
+Bayes factors to 4e-13.
+
+The A4 pin was the earlier build c1e52c8e. The A5 rebake on 0e116079 is
+bit-identical to it on every statistic: raw draws, RB inclusion draws and
+odds accumulators, all summary tables, every extractor return on both
+scales, and the whole prior-sensitivity result apart from its wall-clock
+columns (`$grid$seconds`, `$runtime_seconds`). PRs #186-#188 touch the
+extractors and argument validation, not the samplers, and the fixtures
+confirm it.
 
 The SBM fit and the ADHD group comparison are not manuscript analyses and run
 at package defaults with the same seed. No 2-chain fixtures remain. Rebake and
 re-render together; the bake costs about ten minutes (see `fixtures/bake.R`).
 
-Two bgms-side changes will require a rebake and a sweep when they land, both
-open at the time of this brief:
+Both bgms-side changes that A4 left open have landed and are applied on the
+site (brief A5):
 
-- BGMS-2, the `extract_ess()` RB alignment. A4's sequencing note asked for it
-  first, but it is not merged on any bgms branch, so A4 baked against c1e52c8e.
-  On that build `extract_ess()$indicator` is the transition ESS (`n_eff_mixt`),
-  which is what reference/extractors.qmd § extract_ess and the new
-  guide/mcmc-diagnostics.qmd warmup subsection say; both need rewording once
-  the indicator element becomes the RB `n_eff` by default.
-- PR #186, merged to bgms develop as cc3410f0 after A4's build was installed.
-  It gives `extract_inclusion_bf()` a `log` argument defaulting to `FALSE`, so
-  the function returns the Bayes factor rather than its natural log. On
-  c1e52c8e it returns the log, which is what reference/extractors.qmd
-  § extract_inclusion_bf and guide/edge-selection.qmd document. Both pages
-  quote log-scale values (log BF 275) and will need the new default applied.
+- BGMS-2 (bgms #188, `0e116079`). `extract_ess()` gained
+  `estimator = c("rb", "mixt")` and its `indicator` element is now the RB
+  `n_eff`, matching `summary(fit)$indicator$n_eff` and `extract_rhat()`.
+  Swept on reference/extractors.qmd § extract_ess, reference/index.qmd,
+  guide/mcmc-diagnostics.qmd (§ sec-rb-inclusion-ess and the warmup
+  subsection), and guide/mcmc-output.qmd. The same PR put `standardize`
+  through lifecycle; documented on reference/bgm.qmd and
+  reference/bgmCompare.qmd.
+- PR #186 (`cc3410f0`). `extract_inclusion_bf()` gained `log = FALSE`, so
+  the default return is the Bayes factor rather than its natural log. Swept
+  on reference/extractors.qmd § extract_inclusion_bf, reference/index.qmd,
+  guide/edge-selection.qmd, and guide/mcmc-output.qmd. The quoted evidence
+  for `intrusion-dreams` is now the Bayes factor, about 2e119, with the log
+  scale (274.76) shown alongside it; the log values themselves did not move.
+
+The 2b decision did not change `precision_graph_prior`: the installed
+release build still defaults to `"joint"`, so the effective-prior workaround
+on guide/edge-selection.qmd § sec-bf-continuous stands as written.
 
 ## Current Cycle Focus
 
@@ -108,21 +129,21 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | guide/ggm.qmd | Medium | Scaffolded | No | No | - |
 | guide/omrf.qmd | High | Scaffolded | No | No | - |
 | guide/mixed-model.qmd | Medium | Not started | No | No | - |
-| guide/edge-selection.qmd | Medium | Scaffolded | No | No | A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, BF10 2.8 -> 2.0, BF01 35 -> 33, log BF 317 -> 275) |
-| guide/group-comparison.qmd | Medium | Scaffolded | No | No | A4: numbers moved to the defaults fixture (BF10 290 -> 305, 3.5 -> 3.3, BF01 2.6 -> 2.5) |
-| guide/clustering.qmd | Medium | Not started | No | No | A4: numbers moved to the defaults fixture (P(B=1) 0.43 -> 0.42) |
-| guide/mcmc-output.qmd | Medium | Populated | No | No | A4: numbers moved to the manuscript-grade fixture; the credible-interval example now pools all four chains instead of the first two |
-| guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | A4: numbers moved to the manuscript-grade fixture; new subsection reads the warmup flag this fit now raises |
+| guide/edge-selection.qmd | Medium | Scaffolded | No | No | A5: fixture baked on 0e116079, numbers unchanged from A4; the saturated-edge readout is now the Bayes factor (about 2e119) with the log scale (274.76) shown beside it. A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, BF10 2.8 -> 2.0, BF01 35 -> 33, log BF 317 -> 275) |
+| guide/group-comparison.qmd | Medium | Scaffolded | No | No | A5: fixture baked on 0e116079, numbers unchanged. A4: numbers moved to the defaults fixture (BF10 290 -> 305, 3.5 -> 3.3, BF01 2.6 -> 2.5) |
+| guide/clustering.qmd | Medium | Not started | No | No | A5: fixture baked on 0e116079, numbers unchanged. A4: numbers moved to the defaults fixture (P(B=1) 0.43 -> 0.42) |
+| guide/mcmc-output.qmd | Medium | Populated | No | No | A5: fixtures baked on 0e116079, numbers unchanged; the extractor table now states both extractor scales. A4: numbers moved to the manuscript-grade fixture; the credible-interval example now pools all four chains instead of the first two |
+| guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | A5: fixture baked on 0e116079, fixture numbers unchanged, but the indicator ESS the page prints moved from the transition ESS to the RB one (min 1122 -> 995) because `extract_ess()` changed its default; the transition reading is now shown explicitly. A4: numbers moved to the manuscript-grade fixture; new subsection reads the warmup flag this fit now raises |
 | guide/missing-data.qmd | Medium | Populated | No | No | - |
 | **Reference** | | | | | |
-| reference/index.qmd | Low | Scaffolded | No | No | - |
-| reference/bgm.qmd | High | Populated | No | No | A4: numbers moved to the manuscript-grade fixture |
-| reference/bgmCompare.qmd | High | Populated | No | No | - |
+| reference/index.qmd | Low | Scaffolded | No | No | A5: the `extract_inclusion_bf()` and `extract_ess()` rows now name the release defaults |
+| reference/bgm.qmd | High | Populated | No | No | A5: fixture baked on 0e116079, numbers unchanged; `standardize` added to the deprecated-arguments callout. A4: numbers moved to the manuscript-grade fixture |
+| reference/bgmCompare.qmd | High | Populated | No | No | A5: `standardize` added to the deprecated-arguments callout |
 | reference/sample-ggm-prior.qmd | High | Populated | No | No | - |
 | reference/priors.qmd | High | Populated | No | No | - |
-| reference/methods.qmd | Medium | Populated | No | No | A4: numbers moved to the manuscript-grade fixture |
-| reference/prior-sensitivity.qmd | High | Populated | No | No | A4: numbers moved to the manuscript-grade fixture (91 of 136 verdicts robust, 8 not certifiable) |
-| reference/extractors.qmd | Medium | Populated | No | No | A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, log BF 317 -> 275) |
+| reference/methods.qmd | Medium | Populated | No | No | A5: fixtures baked on 0e116079, numbers unchanged. A4: numbers moved to the manuscript-grade fixture |
+| reference/prior-sensitivity.qmd | High | Populated | No | No | A5: fixture baked on 0e116079; every statistic unchanged, only the reported refit wall-clock moved (166 s -> 129 s). A4: numbers moved to the manuscript-grade fixture (91 of 136 verdicts robust, 8 not certifiable) |
+| reference/extractors.qmd | Medium | Populated | No | No | A5: fixture baked on 0e116079, numbers unchanged; the extract_inclusion_bf and extract_ess entries carry the release signatures and both scales. A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, log BF 317 -> 275) |
 | reference/datasets.qmd | Low | Populated | No | No | - |
 | **Manual** | | | | | |
 | manual/index.qmd | Low | Scaffolded | No | No | - |
