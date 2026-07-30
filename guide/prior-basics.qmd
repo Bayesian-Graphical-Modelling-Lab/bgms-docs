@@ -50,6 +50,8 @@ The Normal slab concentrates prior mass on moderate effect sizes: its peak at ze
 
 The scale parameter controls the width of the slab. A wider slab spreads prior probability over a larger range of effect sizes. This has a direct consequence for edge selection: because the slab is also the alternative hypothesis for the inclusion Bayes factor, a wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small.
 
+Because the choice is consequential, `bgms` lets you check it after the fact. [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd) recovers each edge's inclusion Bayes factor across a range of slab scales around the one you used, and reports which edge verdicts are robust to that choice and which depend on it.
+
 ## The spike: priors on the edge indicators
 
 Edge indicators $\gamma_{ij}$ govern edge inclusion in the spike-and-slab prior. Their prior determines, before seeing the data, how likely each edge is to be excluded ($\gamma_{ij}=0$) or included ($\gamma_{ij}=1$), and therefore governs overall sparsity and structure.

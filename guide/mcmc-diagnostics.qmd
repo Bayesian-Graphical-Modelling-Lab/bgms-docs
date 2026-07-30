@@ -44,9 +44,7 @@ Two ESS measures are reported:
   (including zeros). Measures how precisely the overall posterior mean is
   estimated.
 - **`n_eff_mixt`**: the mixture ESS, which accounts for additional
-  uncertainty from the spike-and-slab switching. Suppressed in printed
-  output when the total number of indicator transitions ($n_{0 \to 1} +
-  n_{1 \to 0}$) is below 5, though still computed and stored.
+  uncertainty from the spike-and-slab switching.
 
 The mixture ESS treats the on/off indicator sequence as a two-state
 process and measures how often the chain actually switches between the
@@ -57,20 +55,48 @@ The formula is derived in
 [Convergence Diagnostics](../manual/diagnostics.qmd) in the Technical
 Manual.
 
-**Limitations near the boundary.** The mixture ESS is unreliable when
+**Limitations near the boundary.** The mixture ESS is imprecise when
 the inclusion probability is near 0 or 1. In these cases the indicator
 is almost always in the same state, so transitions are rare and the
-estimated switching rates are based on very few events. A single extra
-transition can change the ESS estimate substantially, making it
-unreliable as a precision diagnostic. For this reason, `n_eff_mixt` is
-suppressed in printed output when the total number of transitions is
-below 5.
+estimated switching rates rest on very few events. A single extra
+transition can change the estimate substantially. The value is still
+reported, because it is the honest measure of how much exploration
+happened; read it together with the directional transition counts
+`n0->1` and `n1->0` in the same table, whose asymmetry the symmetric
+mixture ESS cannot recover.
 
 At the extreme — when the indicator never switches — there are no
-transitions to estimate from. This does not necessarily indicate a
-problem: if the posterior strongly favors inclusion or exclusion, there is
-little uncertainty about the indicator and the inclusion probability is
-well determined even without switching.
+transitions to estimate from, and `n_eff_mixt` is `NA`. This does not
+necessarily indicate a problem: if the posterior strongly favors
+inclusion or exclusion, there is little uncertainty about the indicator
+and the inclusion probability is well determined even without
+switching. For such zero-flip edges the verdict rests on the inclusion
+probability itself and on
+[`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf),
+which stays finite where the probability saturates.
+
+### Inclusion ESS and the exploration pair {#sec-rb-inclusion-ess}
+
+For edge indicators the summary table reports its precision columns
+(`mcse`, `n_eff`, `Rhat`) on the Rao-Blackwellized inclusion draws
+rather than on the binary indicators. Those draws are continuous, so
+the standard continuous machinery applies to inclusion inference (see
+[Model Output](mcmc-output.qmd#sec-posterior-summaries)).
+
+The two ESS columns then measure different things, and the pair is the
+diagnostic:
+
+- `n_eff` measures precision *conditional on exploration*. A chain
+  stuck in one region of model space can still produce a smooth,
+  well-converged Rao-Blackwellized chain with a large `n_eff`.
+- `n_eff_mixt` measures the exploration itself.
+
+Large on both means converged and explored. A confident `n_eff` beside
+a small or `NA` `n_eff_mixt` is the boundary signature: a precise
+one-step estimate resting on little transition evidence. For edges
+where the indicator never flipped, the Rao-Blackwellized `mcse`,
+`n_eff`, and `Rhat` are reported as `NA` rather than as the misleading
+numbers a near-constant heavy-tailed chain would produce.
 
 When transitions are observed but rare, the ESS estimate itself becomes
 imprecise: small fluctuations in the transition counts can produce
@@ -86,16 +112,16 @@ The MCSE measures the additional variability introduced by using a finite
 number of MCMC draws instead of the exact posterior. It depends on both
 the posterior variability and the effective sample size.
 
-For continuous parameters:
 $$
 \text{MCSE} = \frac{\text{sd}}{\sqrt{n_{\text{eff}}}}
 $$
 
-For inclusion probabilities, the posterior variance has the Bernoulli form
-$\hat{p}(1 - \hat{p})$, so:
-$$
-\text{MCSE}(\hat{p}) = \sqrt{\frac{\hat{p}(1 - \hat{p})}{\text{ESS}}}
-$$
+The same formula covers inclusion probabilities: because the reported
+estimate is the average of the continuous Rao-Blackwellized inclusion
+draws rather than of the binary indicators, its `sd` and `n_eff` are
+those of that continuous chain (see
+[Inclusion ESS and the exploration pair](#sec-rb-inclusion-ess)). Edges
+whose indicator never flipped report `NA` here.
 
 A small MCSE relative to the posterior standard deviation indicates stable
 estimates; a large MCSE suggests that more iterations are needed.
@@ -114,6 +140,18 @@ separate chains. This makes the diagnostic sensitive to within-chain
 drift — a single chain that slowly trends will disagree with its own
 second half, even if all chains happen to end up in the same place.
 
+The statistic is the classic form. With $W$ the mean within-sub-chain
+variance, $B$ the between-sub-chain variance, and $n$ draws per
+sub-chain,
+
+$$
+\hat{R} = \sqrt{\frac{\widehat{\text{var}}^{+}}{W}},
+\qquad
+\widehat{\text{var}}^{+} = \frac{n - 1}{n}\,W + \frac{B}{n}
+$$
+
+No degrees-of-freedom adjustment is applied.
+
 R-hat is reported in `summary()` output and through `extract_rhat()`.
 It is `NA` when only one chain was run, and when a parameter is
 constant at the same value in every chain — for example, a pairwise
@@ -122,6 +160,11 @@ zero. Constant chains carry no mixing information, so no value is
 reported rather than a misleading one. If chains are instead stuck at
 *different* constant values, R-hat is `+Inf`: that is a real mixing
 failure, and it is reported loudly rather than hidden.
+
+For edge indicators, the reported R-hat is computed on the continuous
+Rao-Blackwellized inclusion draws, and is `NA` for edges whose
+indicator never flipped
+([see above](#sec-rb-inclusion-ess)).
 
 ## Trace plots
 

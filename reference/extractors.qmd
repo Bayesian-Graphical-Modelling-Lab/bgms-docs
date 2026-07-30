@@ -124,7 +124,7 @@ round(pip[1:4, 1:4], 2)
 ```
 
 Here the `intrusion`–`dreams` edge saturates at probability 1, while
-`intrusion`–`upset` sits around 0.75 — the data do not clearly decide
+`intrusion`–`upset` sits around 0.74 — the data do not clearly decide
 that edge. See [Edge Selection](../guide/edge-selection.qmd) for
 turning these into Bayes factors, and
 [`extract_inclusion_bf()`](#extract_inclusion_bf) for a Bayes-factor
@@ -299,6 +299,14 @@ model (e.g., `main`, `pairwise`, `indicator`). ESS values match
 `coda::effectiveSize`. For implementation details, see the
 [Technical Manual](../manual/diagnostics.qmd).
 
+Two elements are composite rather than raw-chain quantities. The
+`indicator` element is the transition-based mixture ESS of the binary
+indicator (the `n_eff_mixt` column of `summary(fit)$indicator`), and is
+`NA` for edges whose indicator never flipped. The `pairwise` element is
+the composite ESS of the model-averaged edge weight, which combines
+inclusion and slab uncertainty. See
+[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
+
 ```{r}
 ess = extract_ess(fit)
 round(head(ess$pairwise), 0)
@@ -321,8 +329,12 @@ Returns a named list with R-hat values for each parameter type present in
 the model (e.g., `main`, `pairwise`, `indicator`). The statistic is
 split-R-hat [@VehtariEtAl_2021]: each chain is split in half and the
 Gelman-Rubin formula is applied to the half-chains, so that within-chain
-drift is detected as well as between-chain disagreement. For
-implementation details, see [diagnostics](../manual/diagnostics.qmd) in the Technical Manual.
+drift is detected as well as between-chain disagreement. No
+degrees-of-freedom adjustment is applied. For implementation details, see
+[diagnostics](../manual/diagnostics.qmd) in the Technical Manual.
+
+The `indicator` element is computed on the continuous Rao-Blackwellized
+inclusion draws, and is `NA` for edges whose indicator never flipped.
 
 ## extract_precision {#extract_precision}
 

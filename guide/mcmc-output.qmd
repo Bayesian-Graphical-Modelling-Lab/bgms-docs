@@ -116,22 +116,33 @@ near 1 indicates strong evidence for the edge; near 0 indicates strong
 evidence against it. Values around 0.5 are inconclusive. The
 directional transition counts (`n0->1`, `n1->0`) show how often the
 edge indicator switched between excluded (0) and included (1) states
-during sampling. Edges with very few transitions (fewer than 5) have
-unreliable mixture ESS estimates; `bgms` suppresses these
-automatically, and for edges that never switched at all, the
-RB-based precision columns (`mcse`, `n_eff`, `Rhat`) are reported as
-`NA`.
+during sampling, and `n_eff_mixt` is the transition-based ESS that
+summarizes them. For edges whose indicator never switched, both the
+transition ESS and the Rao-Blackwellized precision columns (`mcse`,
+`n_eff`, `Rhat`) are reported as `NA`: such a chain carries no
+exploration information, and a near-constant Rao-Blackwellized chain
+would otherwise report reassuring-looking numbers. Read `n_eff` and
+`n_eff_mixt` as a pair; see
+[MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
 
 ### Summary columns
 
 | Column | Meaning |
 |--------|---------|
-| `mean` | Posterior mean of the parameter. |
+| `mean` | Posterior mean of the parameter. For inclusion indicators, the Rao-Blackwellized inclusion probability. |
 | `sd` | Posterior standard deviation — the width of the posterior. |
 | `mcse` | Monte Carlo standard error — how precisely the posterior mean is estimated. A small MCSE relative to `sd` indicates sufficient sampling. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mcse). |
 | `n_eff` | Effective sample size — the number of independent draws the chain is equivalent to. Values below 100 warrant longer runs. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-ess). |
-| `n_eff_mixt` | Mixture ESS for binary edge indicators, accounting for the spike-and-slab structure. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mixture-ess). |
+| `share_incl` | Tables of parameters under selection only (`pairwise` for [`bgm()`](../reference/bgm.qmd); `main_diff` and `pairwise_diff` for [`bgmCompare()`](../reference/bgmCompare.qmd)). The share of the squared Monte Carlo error of the model-averaged parameter that comes from inclusion uncertainty rather than from the slab. Values near 1 mean the bottleneck is how well the chain resolved whether the parameter is in; values near 0 mean it is how well the chain resolved the effect size given inclusion. |
+| `n_eff_mixt` | Inclusion table only. Transition-based ESS for the binary edge indicator, accounting for the spike-and-slab structure. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mixture-ess). |
+| `n0->1`, `n1->0` | Inclusion table only. Directional counts of indicator transitions. |
 | `Rhat` | Split $\hat{R}$ convergence diagnostic. Values above 1.01 suggest the chains have not mixed. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rhat). |
+
+In the pairwise table for an edge-selected fit, `mcse` and `n_eff` are
+the composite quantities for the model-averaged edge weight: the weight
+mixes an exact zero with a slab value, so its Monte Carlo error combines
+an inclusion part and a slab part, and `n_eff` is the posterior variance
+divided by that composite squared error rather than a raw-chain ESS.
 
 ### Accessing specific tables
 

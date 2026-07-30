@@ -17,7 +17,7 @@ The prior probability of inclusion is controlled by the `edge_prior` argument. S
 
 ## Posterior inclusion probabilities
 
-The posterior inclusion probability for edge $(i, j)$ is the posterior mean of $\gamma_{ij}$: it is estimated as the proportion of MCMC iterations in which the edge was included. It ranges from 0 to 1:
+The posterior inclusion probability for edge $(i, j)$ is the posterior mean of $\gamma_{ij}$. By default `bgms` estimates it by averaging the Rao-Blackwellized inclusion draws rather than the 0/1 indicators themselves, which targets the same quantity with less Monte Carlo noise (see [Model Output](mcmc-output.qmd#sec-posterior-summaries)). It ranges from 0 to 1:
 
 - Values near 1.0: strong evidence that the edge is present.
 - Values near 0.0: strong evidence that the edge is absent.
@@ -192,3 +192,5 @@ The default `edge_prior = bernoulli_prior(0.5)` is a standard noninformative cho
 - **Structured sparsity**: use `edge_prior = sbm_prior(...)` when edges are expected to cluster (see [Edge Clustering](clustering.qmd)).
 
 The `interaction_prior` controls the slab width. A wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small, because the prior spreads probability over a wide range. The default is `normal_prior(scale = 1)`.
+
+To see how much your edge verdicts depend on that width, run [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd) on the fit. It recovers each edge's inclusion Bayes factor across a range of slab scales around the one you used, and separates edges whose verdict genuinely changes from edges that merely wobble between reruns of the same prior.

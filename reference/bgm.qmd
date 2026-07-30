@@ -123,7 +123,7 @@ table above.
 | `chains` | Integer. Number of parallel chains to run. Default: `4`. |
 | `cores` | Integer. Number of CPU cores for parallel execution. Sampling uses `min(cores, chains)`; some computations outside of sampling (such as building the edge-selection prior correction table) use all `cores`. Default: `parallel::detectCores()`. |
 | `display_progress` | Character. Controls progress reporting during sampling. Options: `"per-chain"` (separate bar per chain), `"total"` (single combined bar), or `"none"` (no progress). Default: `"per-chain"`. |
-| `seed` | Optional integer. Random seed for reproducibility. Must be a single non-negative integer. |
+| `seed` | Optional integer. Random seed for reproducibility. Must be a single non-negative integer. On Windows with `RcppParallel` >= 6.0.0, a fixed seed reproduces a run only at the same `cores` setting: under the oneTBB 2022 scheduler, runs at different core counts are statistically equivalent but not bit-for-bit identical. |
 | `verbose` | Logical. If `TRUE`, prints informational messages during data processing (e.g., missing data handling, variable recoding). Defaults to `getOption("bgms.verbose", TRUE)`. Set `options(bgms.verbose = FALSE)` to suppress messages globally. |
 | `progress_callback` | Optional R function with signature `function(completed, total)`, called at regular intervals during sampling with the number of completed and total iterations across all chains. Useful for external front-ends (e.g., JASP) that supply their own progress reporting. Default: `NULL` (no callback). |
 
@@ -233,8 +233,10 @@ summary(fit)
 
 The threshold and pairwise tables report the posterior mean, Monte
 Carlo standard error (`mcse`), posterior standard deviation, effective
-sample size, and R-hat for each parameter. In the pairwise table, an
-estimate of exactly `0.000` (e.g. `intrusion-avoidth`) is an edge that
+sample size, and R-hat for each parameter; the pairwise table adds
+`share_incl`, the share of that Monte Carlo error owed to inclusion
+rather than slab uncertainty. In the pairwise table, an
+estimate of `0.000` (e.g. `intrusion-avoidact`) is an edge that
 edge selection excluded in essentially every draw. The inclusion table
 (further down the printed output) gives each edge's posterior
 inclusion probability in the `mean` column. See

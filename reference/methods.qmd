@@ -55,11 +55,27 @@ summary(object, ...)
 
 Returns a summary object containing:
 
-- `main` — Data frame of main-effect summaries (mean, sd, MCSE, ESS, Rhat).
-- `pairwise` — Data frame of partial association summaries.
-- `indicator` — Data frame of inclusion indicator summaries (if edge/difference selection enabled).
+- `main` — Data frame of main-effect summaries: `mean`, `mcse`, `sd`,
+  `n_eff`, `Rhat`.
+- `pairwise` — Data frame of partial association summaries. With edge
+  selection the parameter is the model-averaged edge weight, so `mcse`
+  and `n_eff` are composite quantities and the table adds `share_incl`,
+  the share of the squared Monte Carlo error owed to inclusion rather
+  than slab uncertainty.
+- `indicator` — Data frame of inclusion indicator summaries (if
+  edge/difference selection enabled): `mean`, `mcse`, `sd`, `n_eff`,
+  `n_eff_mixt`, `Rhat`, `n0->1`, `n1->0`. The `mean`, `mcse`, `sd`, and
+  `n_eff` columns are computed on the Rao-Blackwellized inclusion draws;
+  `mcse`, `n_eff`, `n_eff_mixt`, and `Rhat` are `NA` for indicators that
+  never flipped.
 
-For `bgmCompare`, summaries are split into baseline and difference components.
+See [Model Output](../guide/mcmc-output.qmd#sec-posterior-summaries) for
+how to read these columns.
+
+For `bgmCompare`, summaries are split into baseline and difference
+components: `main` and `pairwise` carry the baseline parameters, while
+`main_diff` and `pairwise_diff` carry the differences and, being the
+selected parameters there, are the tables that report `share_incl`.
 
 ## coef {#coef}
 
@@ -170,7 +186,7 @@ original data.
 ```{r}
 #| eval: false
 # Fit a model
-fit = bgm(Wenchuan, seed = 1234)
+fit = bgm(Wenchuan, chains = 2, seed = 1234)
 ```
 
 ```{r}
