@@ -126,13 +126,25 @@ fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
 
 To see these quantities on real output, fit the
 [Wenchuan](../reference/datasets.qmd#wenchuan) PTSD data (run in
-advance here; this takes a few minutes):
+advance here; at this length the fit takes a few minutes):
 
 ```{r}
 #| eval: false
 library(bgms)
-fit = bgm(Wenchuan, chains = 2, seed = 1234)
+fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
 ```
+
+Everything except the run length is left at its default: four chains,
+ordinal variables, edge selection on, a `bernoulli_prior(0.5)` edge prior,
+and a `normal_prior(scale = 1)` slab. The longer run is the point. What you
+are reading off this fit is an inclusion probability, and the run has to be
+long enough for that probability to be resolved to the precision the
+evidence claim needs. At the default `iter = 2000` and `warmup = 2000` these
+data leave the inclusion effective sample sizes in the hundreds and the
+largest indicator R-hat above the 1.01 guideline; at the length above the ESS
+run into the thousands and every R-hat clears the guideline. All 17 variables
+are used, and the 18 rows with missing values are dropped by the default
+`na_action = "listwise"`, leaving 344 respondents.
 
 The `summary(fit)$indicator` table holds the posterior inclusion
 probability of every edge in its `mean` column (the Rao-Blackwellized
@@ -153,11 +165,11 @@ Three different conclusions, one from each row:
 - **`intrusion-dreams`**: the inclusion probability rounds to 1 —
   every sweep left this edge included — so the posterior-odds
   transformation overflows to infinity.
-- **`intrusion-upset`**: an inclusion probability of about 0.74 gives
-  $\text{BF}_{10} \approx 2.8$ — the data lean toward including this
+- **`intrusion-upset`**: an inclusion probability of about 0.66 gives
+  $\text{BF}_{10} \approx 2.0$ — the data lean toward including this
   edge, but the evidence is weak.
 - **`intrusion-avoidact`**: an inclusion probability of about 0.03
-  gives $\text{BF}_{01} \approx 35$ — strong evidence that this edge
+  gives $\text{BF}_{01} \approx 33$ — strong evidence that this edge
   is *absent* (evidence of absence).
 
 For the saturated edge, [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf)
@@ -169,9 +181,9 @@ round(bf["intrusion", c("dreams", "upset", "avoidact")], 2)
 ```
 
 On the log scale, `intrusion-dreams` gets a Bayes factor of about
-$e^{317}$ — astronomically strong evidence, but now an actual number —
+$e^{275}$ — astronomically strong evidence, but now an actual number —
 while the other two entries agree with the posterior-odds
-calculation above ($\log 2.8 \approx 1.0$, $\log(1/35) \approx -3.5$).
+calculation above ($\log 2.0 \approx 0.68$, $\log(1/33) \approx -3.5$).
 
 ## Median probability model
 

@@ -51,8 +51,7 @@ fit = bgm(Wenchuan[, 1:5], seed = 1234)
 
 ```{r}
 #| include: false
-fit = bgm(Wenchuan[, 1:5], seed = 1234, chains = 2, display_progress = "none",
-           verbose = TRUE)
+fit = bgm(Wenchuan[, 1:5], seed = 1234, display_progress = "none")
 ```
 
 By default, [`bgm()`](../reference/bgm.qmd) runs four parallel MCMC chains using the [No-U-Turn Sampler (NUTS)](mcmc-diagnostics.qmd#nuts-specific-diagnostics) — the default sampling algorithm — in combination with Bayesian [edge selection](edge-selection.qmd). Here we use `seed = 1234` for reproducibility. If the sampler diagnostics indicate persistent problems, refit with `update_method = "adaptive-metropolis"`.
@@ -162,8 +161,8 @@ summary(fit_ggm)
 
 ```{r}
 #| include: false
-fit_ggm = bgm(marks, variable_type = "continuous", seed = 1234, chains = 2, display_progress = "none",
-               verbose = TRUE)
+fit_ggm = bgm(marks, variable_type = "continuous", seed = 1234,
+              display_progress = "none")
 ```
 
 ```{r}

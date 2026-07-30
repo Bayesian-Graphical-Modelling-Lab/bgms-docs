@@ -195,7 +195,7 @@ and output interpretation and convergence checks are covered in
 x = Boredom[Boredom$language == "fr", 2:6]
 y = Boredom[Boredom$language != "fr", 2:6]
 
-fit = bgmCompare(x, y, chains = 2)
+fit = bgmCompare(x, y, seed = 123)
 
 # Posterior inclusion probabilities
 summary(fit)$indicator

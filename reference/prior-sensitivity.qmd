@@ -199,8 +199,8 @@ were run in advance here):
 ```{r}
 #| eval: false
 library(bgms)
-fit = bgm(Wenchuan, chains = 2, seed = 1234)
-ps = prior_sensitivity_check(fit)
+fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
+ps = prior_sensitivity_check(fit, seed = 123)
 ```
 
 `print()` gives the answer first: how many verdicts hold across the whole

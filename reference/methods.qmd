@@ -186,7 +186,7 @@ original data.
 ```{r}
 #| eval: false
 # Fit a model
-fit = bgm(Wenchuan, chains = 2, seed = 1234)
+fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
 ```
 
 ```{r}

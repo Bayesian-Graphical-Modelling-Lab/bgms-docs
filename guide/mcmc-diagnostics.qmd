@@ -174,17 +174,21 @@ fluctuating around a stable mean; chains that have not converged show
 trends, level shifts, or poor mixing.
 
 Raw samples are accessible through `fit$raw_samples`. The examples on this
-page use a model fitted to the Wenchuan dataset (17 PTSD symptom items,
-362 respondents):
+page use a model fitted to the Wenchuan dataset (17 PTSD symptom items; of
+the 362 respondents, the 344 with complete data enter the fit under the
+default `na_action = "listwise"`):
 
 ```r
 library(bgms)
-fit = bgm(Wenchuan, chains = 2, seed = 1234)
+fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
 ```
 
 ```{r}
 #| label: load-fixture
 #| echo: false
+#| message: false
+library(bgms)
+
 resolve_fixture = function(name) {
   input_dir = dirname(knitr::current_input(dir = TRUE))
   candidates = c(
@@ -205,7 +209,7 @@ fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
 
 ```{r}
 #| label: fig-traceplot
-#| fig-cap: "Trace plot for the first pairwise interaction parameter across two chains."
+#| fig-cap: "Trace plot for the first pairwise interaction parameter across four chains."
 #| fig-width: 7
 #| fig-height: 3.5
 param_index = 1
@@ -309,6 +313,50 @@ warmup, try refitting with `update_method = "adaptive-metropolis"` and
 compare posterior summaries. If the two samplers produce similar results,
 the estimates are likely trustworthy despite the warnings; if they differ,
 further investigation is warranted.
+
+### The flag on this page's own fit
+
+The Wenchuan fit used throughout this page raises the flag, which makes it a
+useful worked case rather than an embarrassment. Here is what it says:
+
+```{r}
+wc = fit$nuts_diag$warmup_check
+print(data.frame(
+  chain = seq_along(wc$warmup_incomplete),
+  incomplete = wc$warmup_incomplete,
+  slope_signif = as.logical(wc$slope_significant),
+  energy_slope = signif(as.numeric(wc$energy_slope), 2),
+  var_ratio = round(wc$var_ratio, 3),
+  ebfmi_2nd_half = round(wc$ebfmi_second_half, 3)
+), row.names = FALSE)
+```
+
+One chain has an energy slope that is statistically significant, so the fit
+is flagged. Nothing else in the check is out of range: the variance ratios sit
+near 1, well below the 2 that indicates a chain still settling, and the E-BFMI
+values are far above 0.3. The message the sampler prints tells you where to
+look next, and that check is the one that decides. For indicators
+[`extract_ess()`](../reference/extractors.qmd#extract_ess) reports the
+transition ESS, so the indicator row below is the exploration reading:
+
+```{r}
+rh = extract_rhat(fit)
+ess = extract_ess(fit)
+print(data.frame(
+  component = names(rh),
+  max_rhat = round(vapply(rh, function(v) max(unlist(v), na.rm = TRUE), 0), 4),
+  min_ess = round(vapply(ess[names(rh)], function(v) min(unlist(v), na.rm = TRUE), 0))
+), row.names = FALSE)
+```
+
+Every R-hat is below 1.01 and the smallest effective sample size is in the
+thousands, so the chains agree with each other and with their own halves, and
+the indicators did enough switching to back that agreement up. A
+significant energy slope in one chain out of four, with clean R-hat and ESS, is
+a sensitive detector firing on a real but small trend, not a reason to
+distrust the posterior. The flag is a prompt to run the two checks above, not a
+verdict on its own. If R-hat or ESS had also been poor, the remedy would be the
+one in the previous paragraph: more warmup, then a different sampler.
 
 ## Trust gauge for the hierarchical graph prior {#sec-trust-gauge}
 
