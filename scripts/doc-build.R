@@ -42,7 +42,7 @@ doc_version = function() {
                      error = function(e) "")
   if(!nzchar(version)) {
     stop("no installed bgms to read a version from. Point R_LIBS at the build ",
-         "this render documents (see the Makefile), or set BGMS_DOC_VERSION.",
+         "this render documents (see the GNUmakefile), or set BGMS_DOC_VERSION.",
          call. = FALSE)
   }
   version

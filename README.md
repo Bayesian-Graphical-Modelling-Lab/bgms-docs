@@ -25,9 +25,12 @@ quarto render
 
 Output goes to `docs/`.
 
-The `Makefile` wraps the builds that need more than a bare `quarto render`, and
-takes `QUARTO=` if Quarto is not on your `PATH` (the RStudio-bundled binary
-lives under `/Applications/RStudio.app/Contents/Resources/app/quarto/bin`):
+The `GNUmakefile` wraps the builds that need more than a bare `quarto render`,
+and takes `QUARTO=` if Quarto is not on your `PATH` (the RStudio-bundled binary
+lives under `/Applications/RStudio.app/Contents/Resources/app/quarto/bin`). It
+is named `GNUmakefile`, not `Makefile`, on purpose: `make` reads it either way,
+but a file named `Makefile` in the repo root makes RStudio classify the project
+as a Makefile project and replace the Quarto build UI (see below).
 
 ```bash
 make site             # render the whole site with the ci profile
@@ -38,19 +41,25 @@ make examples-pdf     # the Examples series as one PDF
 
 ### Building from RStudio
 
-The project file sets `BuildType: Makefile`, so RStudio's Build pane runs
-`make` rather than a bare `quarto render`. That matters: `make` sets `R_LIBS`
-to the documented bgms build and renders with the ci profile, and a bare
-render does neither. The default target is `all`, which builds the site and
-then the Examples PDF.
+`bgms-docs.Rproj` deliberately carries no `BuildType` line. RStudio then
+detects the Quarto project from `_quarto.yml` and offers its Build Website
+button, which renders and opens a local preview. Do not set a build type in
+Tools > Project Options > Build Tools: choosing Makefile there replaces the
+Quarto build UI with a bare `make` run that shows no preview.
 
-The Makefile only governs builds. Running chunks interactively in the RStudio
-console still needs `R_LIBS` set in the session; put it in a `.Renviron` in
-the repo root:
+A bare render does not set `R_LIBS` or the profile, so put both in a
+`.Renviron` in the repo root (untracked, already gitignored) and restart the R
+session:
 
 ```
 R_LIBS=dev/lib-bgms-develop
+QUARTO_PROFILE=ci
 ```
+
+With that in place the Build Website button renders against the documented
+bgms build with the ci profile, matching what CI publishes. The `GNUmakefile`
+targets remain the terminal equivalents, and are still the only way to build
+the Examples PDF.
 
 ### The Examples section
 
