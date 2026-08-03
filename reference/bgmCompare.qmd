@@ -13,7 +13,7 @@ two datasets (`x` and `y`) or through a grouping vector in `group_indicator`.
 This page is the technical reference for arguments and return values. For
 workflow and interpretation, see [Group Comparison](../guide/group-comparison.qmd),
 [Edge Selection](../guide/edge-selection.qmd),
-[MCMC Output](../guide/mcmc-output.qmd), and
+[Model Output](../guide/mcmc-output.qmd), and
 [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd). Methodological background
 is provided in @MarsmanEtAl_2025_ttest.
 
@@ -193,7 +193,7 @@ contrasts is explained in
 [Graphical Models](../guide/graphical-models.qmd). Prior choices for
 difference selection are discussed in [Edge Selection](../guide/edge-selection.qmd),
 and output interpretation and convergence checks are covered in
-[MCMC Output](../guide/mcmc-output.qmd) and
+[Model Output](../guide/mcmc-output.qmd) and
 [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
 
 ## Examples

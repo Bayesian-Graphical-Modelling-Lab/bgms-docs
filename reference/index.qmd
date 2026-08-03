@@ -72,7 +72,7 @@ Post-fit checks on a model you have already estimated.
 | [`extract_indicators()`](extractors.qmd#extract_indicators) | Extract posterior samples of edge or difference indicators |
 | [`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities) | Compute posterior inclusion probabilities, from the Rao-Blackwellized draws by default or from the raw indicator samples |
 | [`extract_prior_inclusion_probabilities()`](extractors.qmd#extract_prior_inclusion_probabilities) | Compute prior inclusion probabilities, matched in shape to the posterior ones for Bayes factor computation |
-| [`extract_inclusion_bf()`](extractors.qmd#extract_inclusion_bf) | Compute inclusion Bayes factors from the Rao-Blackwellized odds accumulators, on the Bayes factor scale by default or on the log scale with `log = TRUE`; finite even for saturated edges |
+| [`extract_inclusion_bf()`](extractors.qmd#extract_inclusion_bf) | Compute inclusion Bayes factors from the Rao-Blackwellized odds accumulators, on the Bayes factor scale by default or on the log scale with `log = TRUE`; finite for saturated edges up to the numerical bound |
 | [`extract_indicator_priors()`](extractors.qmd#extract_indicator_priors) | Retrieve the indicator prior specification (prior type and hyperparameters) |
 | [`extract_group_params()`](extractors.qmd#extract_group_params) | Extract group-specific parameters from a `bgmCompare` fit |
 | [`extract_sbm()`](extractors.qmd#extract_sbm) | Extract stochastic block model assignments and probabilities |

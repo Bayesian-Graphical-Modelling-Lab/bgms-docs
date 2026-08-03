@@ -29,8 +29,13 @@ analysis workflows, and MCMC output.
 
 ### MCMC Output
 
-- [MCMC Output](mcmc-output.qmd) — What the sampler returns and how to access it
+- [Model Output](mcmc-output.qmd) — What the sampler returns and how to access it
 - [MCMC Diagnostics](mcmc-diagnostics.qmd) — Convergence checks: ESS, R-hat, trace plots, divergences
+
+### Worked analyses
+
+The Guide explains why; the [Examples](../examples/index.qmd) section runs
+each analysis end to end, showing the code and reading the output.
 
 ### Prerequisites
 

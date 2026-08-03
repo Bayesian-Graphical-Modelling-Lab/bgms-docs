@@ -58,7 +58,7 @@ bgm(
 
 ### Prior specification
 
-Priors are specified by passing prior-object constructors (see [Prior Constructors](priors.qmd)). The legacy scalar arguments listed below the table (`pairwise_scale`, `main_alpha`, `main_beta`, `inclusion_probability`, `beta_bernoulli_alpha/beta`, …) are deprecated as of bgms 0.2.0; they still work but emit a lifecycle warning and forward to the equivalent prior object.
+Priors are specified by passing prior-object constructors (see [Prior Constructors](priors.qmd)). The legacy scalar arguments listed below the table (`pairwise_scale`, `main_alpha`, `main_beta`, `inclusion_probability`, `beta_bernoulli_alpha/beta`, …) are deprecated as of bgms 0.2.0.0; they still work but emit a lifecycle warning and forward to the equivalent prior object.
 
 | Argument | Description |
 |----------|-------------|
@@ -200,7 +200,7 @@ and [Mixed MRF](../guide/mixed-model.qmd). Prior specification and structure
 learning are discussed in [Prior Basics](../guide/prior-basics.qmd),
 [Edge Selection](../guide/edge-selection.qmd), and
 [Edge Clustering](../guide/clustering.qmd). To interpret outputs and verify
-chain quality, see [MCMC Output](../guide/mcmc-output.qmd) and
+chain quality, see [Model Output](../guide/mcmc-output.qmd) and
 [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
 
 ## Examples
@@ -243,16 +243,17 @@ inclusion probabilities precisely enough to read as evidence (see
 summary(fit)
 ```
 
-The threshold and pairwise tables report the posterior mean, Monte
-Carlo standard error (`mcse`), posterior standard deviation, effective
-sample size, and R-hat for each parameter; the pairwise table adds
+The threshold and pairwise tables report, in that column order, the
+posterior mean, posterior standard deviation, Monte Carlo standard error
+(`mcse`), effective sample size, and R-hat for each parameter; the
+pairwise table adds
 `share_incl`, the share of that Monte Carlo error owed to inclusion
 rather than slab uncertainty. In the pairwise table, an
 estimate of `0.000` (e.g. `intrusion-avoidact`) is an edge that
 edge selection excluded in essentially every draw. The inclusion table
 (further down the printed output) gives each edge's posterior
 inclusion probability in the `mean` column. See
-[MCMC Output](../guide/mcmc-output.qmd) for a walkthrough of every
+[Model Output](../guide/mcmc-output.qmd) for a walkthrough of every
 component and [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) for
 how to act on `n_eff` and `Rhat`.
 

@@ -48,7 +48,9 @@ fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
 
 ## The fit object
 
-[`bgm()`](../reference/bgm.qmd) returns a list of class `"bgms"`.
+[`bgm()`](../reference/bgm.qmd) returns an S7 object of class `bgms`
+(`class(fit)` reports `"bgms"` and `"S7_object"`). Its components are
+reached with `$`, as below.
 
 ```{r}
 names(fit)
@@ -76,7 +78,7 @@ Calling `summary()` prints formatted tables of posterior statistics.
 summary(fit)
 ```
 
-### Reading the output
+### Which tables appear
 
 The summary produces a set of tables depending on the model type. Each row
 is a parameter; each column is a posterior summary statistic. The tables
@@ -210,7 +212,7 @@ indicators — it is the default estimator behind `summary()` and
 
 ### Example: posterior density for an edge
 
-To extract the posterior samples for the intrusion--dreams interaction
+To extract the posterior samples for the `intrusion-dreams` interaction
 and compute a 95% credible interval:
 
 ```{r}
@@ -247,7 +249,7 @@ commonly used are:
 | `extract_indicators()` | Raw indicator samples |
 | `extract_posterior_inclusion_probabilities()` | Posterior inclusion probabilities |
 | `extract_prior_inclusion_probabilities()` | Effective prior inclusion probabilities — the denominators for inclusion Bayes factors on continuous data (see [Edge Selection](edge-selection.qmd#sec-bf-continuous)) |
-| `extract_inclusion_bf()` | Inclusion Bayes factors, computed from Rao-Blackwellized odds accumulators; finite even for edges whose inclusion probability saturates at 0 or 1. `log = TRUE` returns their natural logarithms |
+| `extract_inclusion_bf()` | Inclusion Bayes factors, computed from Rao-Blackwellized odds accumulators, so they stay finite where edges whose inclusion probability saturates at 0 or 1 would overflow the posterior-odds transformation — up to the numerical bound, beyond which the value is still `Inf`. `log = TRUE` returns their natural logarithms |
 | `extract_precision()` | Posterior mean precision matrix (GGM / continuous block) |
 | `extract_partial_correlations()` | Posterior mean partial correlation matrix (GGM / continuous block) |
 | `extract_log_odds()` | Posterior mean log-odds matrix (ordinal / discrete block) |
@@ -277,7 +279,7 @@ concern. These are described in detail in
 
 ## Output from [`bgmCompare()`](../reference/bgmCompare.qmd)
 
-[`bgmCompare()`](../reference/bgmCompare.qmd) returns a list of class `"bgmCompare"` with the same
+[`bgmCompare()`](../reference/bgmCompare.qmd) returns an S7 object of class `bgmCompare` with the same
 structure as [`bgm()`](../reference/bgm.qmd), plus additional components for group differences.
 The examples use the ADHD data (18 binary items, two groups):
 

@@ -9,7 +9,9 @@ If another note conflicts with this file, this file wins.
 - Update this file when page status changes.
 - Use one status value only: `Scaffolded`, `Populated`, `Contradiction-checked`, `Reviewed`, `Approved`, `Blocked`.
 - Technical sign-off owner: Maarten.
-- Readability sign-off owner: Emily.
+- Readability sign-off owner: Maarten, who took the role over on 2026-08-03.
+- An AI checklist pass runs first and feeds that sign-off: it is an input, not
+  a gate. See `dev/set-up.md` Phase 5 for the checklist and its limits.
 
 ## docs/develop Branch
 
@@ -165,6 +167,47 @@ documentation at .../bgms/dev/ in public, while the pkgdown site keeps
 serving the root until the acceptance-day deploy. The switcher only appears
 once main has deployed the root versions.json.
 
+## A2 Readability Pass (2026-08-03)
+
+AI checklist pass over the nine newcomer-path pages, feeding MM's readability
+sign-off. All internal links and anchors on those pages resolve (~130 checked,
+zero broken); the A4/A5 number set is consistent across them.
+
+MM adjudicated six judgment items; applied:
+
+- `bgm()` returns an **S7 object**, not a list (`class(fit)` is `"bgms"`,
+  `"S7_object"`). Corrected on guide/mcmc-output.qmd, which contradicted
+  reference/bgm.qmd and reference/index.qmd.
+- "graphical models", never "network models" — one instance on
+  reference/prior-sensitivity.qmd.
+- The inclusion Bayes factor is finite *almost everywhere* but can hit a
+  numerical bound. The blanket "finite even for saturated edges" softened on
+  reference/index.qmd and guide/mcmc-output.qmd (closes flagged issue 17);
+  guide/edge-selection.qmd already read correctly and was left alone.
+- guide/mcmc-diagnostics.qmd's energy-slope closing sentence: KEEP as written
+  (MM).
+- guide/edge-selection.qmd's "two alternatives" list: the third item was not an
+  alternative; it is now a paragraph opening "As an alternative to these two".
+- Leading Edge Selection with spike-and-slab: fine on that page (MM).
+
+Mechanical fixes applied in the same pass: page name standardized to **Model
+Output** in link text (was split 7/6 with "MCMC Output"); en-GB spellings
+(`favour`, `favours`, `neighbouring`) moved to the site's en-US; the homepage
+Quick Start's lone `<-` moved to `=`; bgms 0.2.0 -> 0.2.0.0 on reference/bgm.qmd;
+summary column order corrected there; a literal parameter name that rendered as
+an en dash; a heading that collided with the example page it links to; and a
+trace-plot loop that shadowed `c()`.
+
+Structural: the Examples section was unreachable from the homepage,
+guide/index.qmd, and Getting Started's Next steps, though it is in the navbar —
+entry points added to all three (the homepage hero gained a third button in its
+existing three-column grid, and the feature grid a fourth card, which needed
+`.feature` to go from 33% to 50% width in index.css so four cards lay out two by
+two). reference/prior-samplers.qmd was missing from the board; row added above.
+
+Not covered, and not to be recorded as passed: the naive-reader pass. See
+`dev/set-up.md` Phase 5.
+
 ## Current Cycle Focus
 
 - Build trusted docs with automation-first QA.
@@ -173,7 +216,7 @@ once main has deployed the root versions.json.
 
 ## Review Sequence (Main Workflow)
 
-This is the main A -> B workflow for Maarten and Emily.
+This is the main A -> B workflow for Maarten and the AI sessions.
 Anything below in "Secondary Backlog" is not part of this immediate review sequence.
 
 ### A. Draft and source-linking
@@ -194,7 +237,8 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 ### C. Human review gate
 
 - [ ] Maarten completes technical sign-off.
-- [ ] Emily completes readability sign-off.
+- [ ] AI readability checklist pass run and its findings recorded.
+- [ ] Maarten completes readability sign-off.
 - [ ] Any blocking issue is logged in the page board and resolved.
 
 ### D. Final release gate
@@ -206,7 +250,7 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 
 ## Page Status Board
 
-| Page | Risk | Status | Technical sign-off (Maarten) | Readability sign-off (Emily) | Blocking issue |
+| Page | Risk | Status | Technical sign-off (Maarten) | Readability sign-off (Maarten) | Blocking issue |
 |---|---|---|---|---|---|
 | **Site** | | | | | |
 | news.qmd | Low | Populated | No | No | A6: the 0.2.0.0 entry was reweighted to NEWS.md's own emphasis (model-class expansion, predict/simulate, NUTS backend, RB inclusion, prior constructors, sensitivity check last); MM reviews the wording. A3: the "bgms 0.2.0.0 on CRAN" entry and both entry dates (2026-07-30) are launch-gated; correct the dates if CRAN acceptance lands on another day |
@@ -239,6 +283,7 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | reference/bgm.qmd | High | Populated | No | No | A5: fixture baked on 0e116079, numbers unchanged; `standardize` added to the deprecated-arguments callout. A4: numbers moved to the manuscript-grade fixture |
 | reference/bgmCompare.qmd | High | Populated | No | No | A5: `standardize` added to the deprecated-arguments callout |
 | reference/sample-ggm-prior.qmd | High | Populated | No | No | - |
+| reference/prior-samplers.qmd | High | Populated | No | No | A2 readability pass 2026-08-03: page is in the sidebar and linked five times from reference/index.qmd and reference/bgm.qmd, but was missing from this board (same class as the null-space and zratio-hierarchical findings under A1). Never gated; not on the A2 newcomer path, so it does not block launch |
 | reference/priors.qmd | High | Populated | No | No | - |
 | reference/methods.qmd | Medium | Populated | No | No | A5: fixtures baked on 0e116079, numbers unchanged. A4: numbers moved to the manuscript-grade fixture |
 | reference/prior-sensitivity.qmd | High | Populated | No | No | A6: the page no longer claims the method is that of @BartosEtAl_2026_sensitivity; the citation stays as the single-fit approach the design departs from, per `R/prior_sensitivity.R:11-14`. A5: fixture baked on 0e116079; every statistic unchanged, only the reported refit wall-clock moved (166 s -> 129 s). A4: numbers moved to the manuscript-grade fixture (91 of 136 verdicts robust, 8 not certifiable) |

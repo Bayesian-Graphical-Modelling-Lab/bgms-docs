@@ -235,9 +235,9 @@ plot(chains[[1]][, param_index], type = "l", col = cols[1], lwd = 0.6,
   xlab = "Iteration", ylab = colnames(chains[[1]])[param_index],
   ylim = range(sapply(chains, function(ch) range(ch[, param_index]))),
   las = 1, bty = "l")
-if(nchains > 1) {
-  for(c in 2:nchains) {
-    lines(chains[[c]][, param_index], col = cols[c], lwd = 0.6)
+if (nchains > 1) {
+  for (ch in 2:nchains) {
+    lines(chains[[ch]][, param_index], col = cols[ch], lwd = 0.6)
   }
 }
 legend("topright", legend = paste("Chain", seq_len(nchains)),

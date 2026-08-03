@@ -28,7 +28,7 @@ Each parameter compares one category to the next; nothing in the model treats th
 
 This choice has a practical payoff: the model uses only the *ordering* of the categories, not their numeric labels or spacing. Whether you code a five-point scale as 0–4 or 1–5, or the distances between response options are unequal, the estimates are the same — no interval-scale measurement is assumed.
 
-It is also the choice that makes a network model possible at all. Other ordinal regressions, such as the cumulative logit or continuation ratio models, cannot serve as building blocks of a joint network: their conditional distributions are incompatible with any joint distribution [@SuggalaYangRavikumar_2017]. The adjacent category model's conditionals are compatible, and the joint distribution they generate is exactly the ordinal MRF above [@MarsmanVandenBerghHaslbeck_2025]. The formal development is in [OMRF Internals](../manual/omrf-internals.qmd).
+It is also the choice that makes a graphical model possible at all. Other ordinal regressions, such as the cumulative logit or continuation ratio models, cannot serve as building blocks of a joint network: their conditional distributions are incompatible with any joint distribution [@SuggalaYangRavikumar_2017]. The adjacent category model's conditionals are compatible, and the joint distribution they generate is exactly the ordinal MRF above [@MarsmanVandenBerghHaslbeck_2025]. The formal development is in [OMRF Internals](../manual/omrf-internals.qmd).
 
 ## Connection to the MRF framework
 

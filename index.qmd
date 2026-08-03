@@ -43,6 +43,9 @@ execute:
 ::: {.g-col-12 .g-col-sm-4 .mb-2}
 [User's Guide](guide/index.qmd){#btn-guide .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
 :::
+::: {.g-col-12 .g-col-sm-4 .mb-2}
+[Worked Analyses](examples/index.qmd){#btn-examples .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
+:::
 :::
 
 ::::
@@ -67,7 +70,7 @@ install.packages("bgms")
 # Fit an ordinal Markov random field to the Wenchuan earthquake data
 library(bgms)
 data(Wenchuan)
-fit <- bgm(Wenchuan)
+fit = bgm(Wenchuan)
 summary(fit)
 ```
 
@@ -83,6 +86,13 @@ summary(fit)
 Learn `bgms` from the ground up: installation, basic usage, and statistical concepts behind Bayesian graphical models for mixed variable types.
 
 [Guide →](guide/index.qmd)
+::::
+
+:::: {.feature}
+### Worked Analyses
+Complete analyses, start to finish: fit a model, read the output, and see what each result licenses you to say.
+
+[Examples →](examples/index.qmd)
 ::::
 
 :::: {.feature}

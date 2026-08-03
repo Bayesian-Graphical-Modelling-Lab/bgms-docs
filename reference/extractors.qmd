@@ -128,7 +128,8 @@ Here the `intrusion`–`dreams` edge saturates at probability 1, while
 that edge. See [Edge Selection](../guide/edge-selection.qmd) for
 turning these into Bayes factors, and
 [`extract_inclusion_bf()`](#extract_inclusion_bf) for a Bayes-factor
-estimator that stays finite even for saturated edges.
+estimator that stays finite for saturated edges up to the numerical
+bound described there.
 - **`bgmCompare`**: Diagonal entries are main-effect inclusion probabilities;
   off-diagonal entries are pairwise difference inclusion probabilities.
   Requires `difference_selection = TRUE`. With `estimator = "rb"`,

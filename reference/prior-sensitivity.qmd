@@ -21,9 +21,9 @@ repeated refit at one anchor, keeps boundary edges that merely flip
 between reruns of the same prior from being reported as prior sensitivity.
 
 The check prices the curve with a handful of warm-started anchor fits,
-reweighting between neighbouring anchors. It deliberately does not use the
+reweighting between neighboring anchors. It deliberately does not use the
 single-fit shortcut of @BartosEtAl_2026_sensitivity, which recovers the
-whole curve by reweighting one fit: on network models the scale posterior
+whole curve by reweighting one fit: on graphical models the scale posterior
 is too narrow for a single fit to cover the band.
 
 For why the slab scale matters for edge verdicts at all, see

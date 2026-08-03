@@ -8,9 +8,11 @@ All page statuses are tracked in one file: `dev/task-list.md`.
 
 ### Roles
 
-- **Maarten** — technical sign-off (facts, code, algorithms).
-- **Emily** — readability sign-off (clarity, audience fit).
-- **LLMs** — drafting and transformation only. Never treated as source of truth.
+- **Maarten** — technical sign-off (facts, code, algorithms) and, since
+  2026-08-03, readability sign-off (clarity, audience fit) as well.
+- **AI** — drafting and transformation, plus a readability checklist pass
+  that feeds Maarten's sign-off. Never treated as source of truth, and the
+  checklist pass is an input, not a gate. See Phase 5.
 
 ### How git branches work
 
@@ -256,7 +258,8 @@ Do this:
 
 ## Phase 5 — Human review
 
-**Goal:** Maarten validates facts. Emily validates readability. Both sign off.
+**Goal:** Maarten validates facts and readability, the second informed by an
+AI checklist pass run first.
 
 ### Maarten (technical sign-off)
 
@@ -269,11 +272,27 @@ Do this:
 - [ ] For algorithm pages, verify equations/steps against code or design notes.
 - [ ] Log review decisions (what changed and why).
 
-### Emily (readability sign-off)
+### Maarten (readability sign-off), on an AI checklist pass
+
+Reassigned 2026-08-03. The AI pass runs first and reports; Maarten signs off.
+State the limit plainly: the pass runs over pages the same agent lineage
+drafted, so it cannot reproduce what a first-time reader caught — the sentence
+that only parses if you already know the answer. It is a checklist pass, not a
+naive-reader pass, and it is run in a session separate from the drafting
+session, against the rendered page.
 
 - [ ] Review each page for clarity and audience fit.
 - [ ] Flag jargon, unclear steps, or confusing structure.
+- [ ] Every term defined at first use on the page, or linked to where it is.
+- [ ] Register per `STYLE_GUIDE.md`: second person, short sentences, no
+      manuscript apparatus.
+- [ ] Structure matches the page template (Examples pages: figure first, one
+      concept, full output then explanation, closing "What to report").
+- [ ] Cross-links out to Guide (why) and Reference (details) actually resolve.
 - [ ] Log review decisions.
+
+What this does not cover stays open: a naive-reader pass on the newcomer path
+is unstaffed. Record it as a known gap rather than as a passed gate.
 
 ### Both
 
@@ -329,7 +348,7 @@ Do this:
 
 ### Release
 
-- [ ] Final sign-off by both Maarten and Emily.
+- [ ] Final technical and readability sign-off by Maarten.
 - [ ] Update status to `Approved` in `dev/task-list.md`.
 - [ ] Merge cycle branch into `main` and deploy.
 

@@ -62,7 +62,7 @@ $$
 \rho_{ij \cdot \text{rest}} = \frac{2\,\omega_{ij}}{\sqrt{\theta_{ii}\, \theta_{jj}}}
 $$
 
-When comparing the strength of associations across variable pairs — identifying which edges are strongest relative to each variable's conditional variability — partial correlations are the natural summary. When the goal is edge selection or comparison with discrete network models, the partial associations are more appropriate. To obtain the partial correlation matrix directly, use `extract_partial_correlations(fit)`.
+When comparing the strength of associations across variable pairs — identifying which edges are strongest relative to each variable's conditional variability — partial correlations are the natural summary. When the goal is edge selection or comparison with discrete graphical models, the partial associations are more appropriate. To obtain the partial correlation matrix directly, use `extract_partial_correlations(fit)`.
 
 ## The precision matrix
 

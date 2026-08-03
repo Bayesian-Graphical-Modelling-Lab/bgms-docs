@@ -66,7 +66,7 @@ By default, [`bgm()`](../reference/bgm.qmd) runs four parallel MCMC chains using
 summary(fit)
 ```
 
-The summary shows posterior means, standard deviations, [Monte Carlo standard errors (MCSE)](mcmc-diagnostics.qmd#sec-mcse), [effective sample sizes (ESS)](mcmc-diagnostics.qmd#sec-ess), and [R-hat](mcmc-diagnostics.qmd#sec-rhat) values for each parameter. For partial associations, it also reports posterior inclusion probabilities because we used edge selection. For a full description of the output structure, see [MCMC Output](mcmc-output.qmd); for guidance on interpreting the convergence diagnostics (ESS and R-hat), see [MCMC Diagnostics](mcmc-diagnostics.qmd).
+The summary shows posterior means, standard deviations, [Monte Carlo standard errors (MCSE)](mcmc-diagnostics.qmd#sec-mcse), [effective sample sizes (ESS)](mcmc-diagnostics.qmd#sec-ess), and [R-hat](mcmc-diagnostics.qmd#sec-rhat) values for each parameter. For partial associations, it also reports posterior inclusion probabilities because we used edge selection. For a full description of the output structure, see [Model Output](mcmc-output.qmd); for guidance on interpreting the convergence diagnostics (ESS and R-hat), see [MCMC Diagnostics](mcmc-diagnostics.qmd).
 
 ## Posterior means
 
@@ -125,7 +125,7 @@ plot_edge_evidence(fit, colnames(Wenchuan)[1:5], "#f0ae0e")
 
 Each panel licenses a different statement.
 
-- **Evidence of presence.** For these eight pairs the data favour a direct association, one that survives conditioning on the other three symptoms. Only this panel is weighted: line width is the posterior mean partial association, so the effect sizes live here.
+- **Evidence of presence.** For these eight pairs the data favor a direct association, one that survives conditioning on the other three symptoms. Only this panel is weighted: line width is the posterior mean partial association, so the effect sizes live here.
 - **Evidence of absence.** `dreams-physior` is the one pair the data actively rule out, with an inclusion Bayes factor of about 0.08, or roughly 12 to 1 against. That is a positive statement of conditional independence, and it is the statement an estimation workflow cannot make: there, a missing edge might just as well mean too little data. The panel is drawn dashed and at uniform width because for these pairs the classification, not a weight, is the result.
 - **Undecided.** `flash-upset` is the pair these data have too little to say about. Its Bayes factor of about 0.11 sits just inside the undecided band, so it is neither supported nor ruled out.
 
@@ -203,6 +203,7 @@ One caution specific to continuous data: here the Bayes factor is not the poster
 
 ## Next steps
 
+- Work through a complete analysis in [Worked Analyses](../examples/index.qmd), where each page runs one analysis end to end and reads its output
 - Learn about the unified [graphical model framework](graphical-models.qmd) in `bgms`, with [ordinal](omrf.qmd) and [continuous](ggm.qmd) special cases
 - Understand [edge selection](edge-selection.qmd) with spike-and-slab priors
 - Check your prior with [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd), which reports which edge verdicts depend on the slab scale you chose
