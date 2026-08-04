@@ -28,10 +28,10 @@ linked section for why it is the right thing to do.
 | Blank `mcse`, `n_eff`, or `Rhat` cells in the summary | Usually nothing to fix: the cells are `NA` because the inclusion draw is pinned; confirm the chain still moved in the transition counts (`n0->1`, `n1->0`). | [Model Output](mcmc-output.qmd#sec-pinned-indicators) |
 | Divergences reported | Raise `target_accept` above its default of 0.80; if that does not help, refit with `update_method = "adaptive-metropolis"`. | [Divergent transitions](#sec-divergences) |
 | The sampler hit the maximum tree depth | Raise `nuts_max_depth`; occasional hits are normal. | [Tree depth](#sec-tree-depth) |
-| E-BFMI below 0.3 | Raise `warmup`; under edge selection the usual cause is a graph structure still equilibrating when warmup ended. | [E-BFMI](#sec-ebfmi) |
+| E-BFMI below 0.3 | Check ESS and R-hat; if they flag too, raise `warmup`. | [E-BFMI](#sec-ebfmi) |
 | Mean acceptance well below `target_accept` | Raise `warmup`; the step-size tuning did not converge. | [Mean acceptance probability](#sec-accept-prob) |
 | `warmup_incomplete` is `TRUE` | Raise `warmup` and refit; check R-hat and ESS before distrusting the fit. | [Warmup equilibration check](#sec-warmup-check) |
-| The trust gauge flagged a chain | Raise `bgms.zratio_gauge_sweeps` (via `options()`) and refit to see whether the signal is real. | [Trust gauge](#sec-trust-gauge) |
+| The trust gauge flagged a chain | Accept the approximation or refit with `precision_graph_prior = "joint"`; a larger audit (raise `bgms.zratio_gauge_sweeps`, refit) first tells you whether the flag is noise. | [Trust gauge](#sec-trust-gauge) |
 | Verdicts flagged `fragile` | Run more iterations; the verdict sits within two standard errors of a boundary. | [`verdicts()`](../reference/checks.qmd#verdicts) |
 | A verdict changes with the prior scale | Report that edge as scale-dependent, or treat it as undecided; do not pick the scale that gives the verdict you want. | [Check your priors](../examples/check-your-priors.qmd#sec-how-to-act) |
 | Results differ between runs | Set `seed`; hold `cores` and the installed binary fixed; if the runs still differ, read it as a mixing problem. | [Results differ between runs](#sec-reproducibility) |
@@ -496,12 +496,16 @@ quotes as the floor and the suggestion as the target.
 | `<k> of <n> chain(s) failed and will be dropped.` | The fit is built from the surviving chains only. R-hat needs at least two, so refit if too few are left for the diagnostics you need. If every chain fails the call stops instead, and the message carries the first chain's error. |
 | `Stopped sampling after user interrupt, results are likely uninterpretable.` | Discard the object and refit. The chains stopped wherever the interrupt reached them, so the draws are not a posterior sample. |
 
-### The normalizing-constant correction was skipped {#sec-warn-correction}
+### The normalizing-constant correction could not be built {#sec-warn-correction}
 
-Both fire on a continuous or mixed fit that combines edge selection with
-a Beta-Bernoulli or Stochastic-Block edge prior. The chains still run;
-what is missing is the correction that keeps the edge-prior updates
-exact, so read the inclusion probabilities as approximate.
+Continuous and mixed fits that combine edge selection with a
+Beta-Bernoulli or Stochastic-Block edge prior run their edge-prior
+updates *with* a normalizing-constant correction, built at the start of
+the analysis from a tilted prior sweep; a fit that builds it silently is
+running corrected. These two warnings mark the cases where the
+correction cannot be built. The chains still run, but the edge-prior
+updates lose the correction that keeps them exact, so read the inclusion
+probabilities as approximate.
 
 | Warning | What to do |
 |---|---|
