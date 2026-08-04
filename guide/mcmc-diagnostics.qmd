@@ -24,17 +24,17 @@ linked section for why it is the right thing to do.
 |---|---|---|
 | `Rhat` above 1.01 | Run longer: raise `warmup` first, then `iter`, and keep at least two chains. | [R-hat](#sec-rhat) |
 | `n_eff` below 100 | Raise `iter`; precision grows with the number of retained draws. | [Effective sample size](#sec-ess) |
-| `mcse` large next to `sd` | Raise `iter`; the MCSE falls as the square root of the effective sample size. | [Monte Carlo standard error](#sec-mcse) |
-| Blank `mcse`, `n_eff`, or `Rhat` cells in the summary | Nothing to fix: those cells are `NA` because the inclusion draw is pinned, not because the chain is bad. | [Model Output](mcmc-output.qmd#sec-pinned-indicators) |
+| `mcse` large next to `sd` | Raise `iter`; quadrupling the effective sample size halves the MCSE. | [Monte Carlo standard error](#sec-mcse) |
+| Blank `mcse`, `n_eff`, or `Rhat` cells in the summary | Usually nothing to fix: the cells are `NA` because the inclusion draw is pinned; confirm the chain still moved in the transition counts (`n0->1`, `n1->0`). | [Model Output](mcmc-output.qmd#sec-pinned-indicators) |
 | Divergences reported | Raise `target_accept` above its default of 0.80; if that does not help, refit with `update_method = "adaptive-metropolis"`. | [Divergent transitions](#sec-divergences) |
 | The sampler hit the maximum tree depth | Raise `nuts_max_depth`; occasional hits are normal. | [Tree depth](#sec-tree-depth) |
-| E-BFMI below 0.3 | Raise `warmup`; under edge selection the usual cause is a graph structure that had not equilibrated. | [E-BFMI](#sec-ebfmi) |
+| E-BFMI below 0.3 | Raise `warmup`; under edge selection the usual cause is a graph structure still equilibrating when warmup ended. | [E-BFMI](#sec-ebfmi) |
 | Mean acceptance well below `target_accept` | Raise `warmup`; the step-size tuning did not converge. | [Mean acceptance probability](#sec-accept-prob) |
 | `warmup_incomplete` is `TRUE` | Raise `warmup` and refit; check R-hat and ESS before distrusting the fit. | [Warmup equilibration check](#sec-warmup-check) |
-| The trust gauge flagged a chain | Raise `options(bgms.zratio_gauge_sweeps)` and refit, to see whether the signal is real. | [Trust gauge](#sec-trust-gauge) |
+| The trust gauge flagged a chain | Raise `bgms.zratio_gauge_sweeps` (via `options()`) and refit to see whether the signal is real. | [Trust gauge](#sec-trust-gauge) |
 | Verdicts flagged `fragile` | Run more iterations; the verdict sits within two standard errors of a boundary. | [`verdicts()`](../reference/checks.qmd#verdicts) |
 | A verdict changes with the prior scale | Report that edge as scale-dependent, or treat it as undecided; do not pick the scale that gives the verdict you want. | [Check your priors](../examples/check-your-priors.qmd#sec-how-to-act) |
-| Results differ between runs | Set `seed`, and hold `cores` and the installed binary fixed; if they still differ, read it as a mixing problem. | [Results differ between runs](#sec-reproducibility) |
+| Results differ between runs | Set `seed`; hold `cores` and the installed binary fixed; if the runs still differ, read it as a mixing problem. | [Results differ between runs](#sec-reproducibility) |
 | The sampler raised a warning | Look the message up in the list and follow its action; the warnings name the setting to change. | [What the sampler's warnings mean](#sec-sampler-warnings) |
 | Still stuck | Refit with `update_method = "adaptive-metropolis"` and compare the two posteriors. | [Still stuck](#sec-still-stuck) |
 
@@ -475,8 +475,8 @@ which are not part of this list.
 ### Warmup is too short for part of the adaptation {#sec-warn-warmup}
 
 These five fire before sampling starts, under `update_method = "nuts"`
-and `verbose = TRUE`, which is the default because `verbose` reads
-`getOption("bgms.verbose", TRUE)`. Each names the part of warmup
+with `verbose = TRUE` (the default; `verbose` reads
+`getOption("bgms.verbose", TRUE)`). Each names the part of warmup
 adaptation that your `warmup` is too short to run. The action is the
 same for all five: raise `warmup`, using the threshold the message
 quotes as the floor and the suggestion as the target.
@@ -493,7 +493,7 @@ quotes as the floor and the suggestion as the target.
 
 | Warning | What to do |
 |---|---|
-| `<k> of <n> chain(s) failed and will be dropped.` | The fit is built from the surviving chains only. Check that enough are left for the diagnostics you need, since R-hat requires at least two, and refit. If every chain fails the call stops instead, and the message carries the first chain's error. |
+| `<k> of <n> chain(s) failed and will be dropped.` | The fit is built from the surviving chains only. R-hat needs at least two, so refit if too few are left for the diagnostics you need. If every chain fails the call stops instead, and the message carries the first chain's error. |
 | `Stopped sampling after user interrupt, results are likely uninterpretable.` | Discard the object and refit. The chains stopped wherever the interrupt reached them, so the draws are not a posterior sample. |
 
 ### The normalizing-constant correction was skipped {#sec-warn-correction}
