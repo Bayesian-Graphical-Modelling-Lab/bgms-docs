@@ -139,9 +139,14 @@ fits refit cold with full warmup, costing about one fit per scale.
 
 Because the warm starts sit near the chosen-scale posterior, cross-chain
 dispersion is reduced by construction, which weakens split-$\hat{R}$ as a
-between-chain diagnostic. The refit gate therefore leans on per-chain
-verdict agreement and the indicator effective sample size, reported per
-anchor as `inclusion_ess_min`, not on $\hat{R}$ alone.
+between-chain diagnostic. The refit gate therefore does not read
+$\hat{R}$ alone: an anchor is usable when the median split-$\hat{R}$ over
+the continuous parameters and over the Rao-Blackwellized inclusion
+probabilities both clear 1.01 and the NUTS energy diagnostics pass. The
+smallest Rao-Blackwellized inclusion `n_eff` is reported per anchor as
+`inclusion_ess_min` but does not gate; the per-chain agreement that
+guards an individual verdict is the
+[edge-level sufficiency check](#edge-level-sufficiency) below.
 
 ### The mover rule
 
