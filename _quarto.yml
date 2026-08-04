@@ -5,6 +5,9 @@ project:
     - icons/
     # Companion scripts for the Examples series, written by the pre-render step.
     - examples/R/
+    # Datasets used by Examples pages that are not shipped with bgms, published
+    # so the companion scripts can download them from the site.
+    - data/
   # Regenerates examples/R/NN-slug.R from the Examples pages, so the companion
   # script published beside a page always matches that page.
   pre-render: scripts/extract-example-code.R
@@ -95,6 +98,7 @@ website:
         - examples/reading-the-output.qmd
         - examples/check-your-priors.qmd
         - examples/comparing-groups.qmd
+        - examples/edge-clustering.qmd
         - examples/from-bootnet-qgraph.qmd
 
     - id: guide

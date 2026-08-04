@@ -53,10 +53,10 @@ Licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 Used in the example of [`bgmCompare()`](bgmCompare.qmd).
 
 Responses to the 8-item Short Boredom Proneness Scale (SBPS), a self-report
-measure of susceptibility to boredom (@MartarelliEtAl_2023_boredom). Items were
+measure of susceptibility to boredom (@MartarelliEtAl_2023_sbps). Items were
 rated on a 7-point Likert scale from 1 ("strongly disagree") to 7 ("strongly
 agree"). The scale was administered in either English @StrukEtAl_2015_bps
-or French @MartarelliEtAl_2023_boredom.
+or French @MartarelliEtAl_2023_sbps.
 
 ```r
 data("Boredom")
@@ -76,9 +76,16 @@ A data frame with 986 rows and 9 columns:
 | `sit_around` | Much of the time, I just sit around doing nothing. |
 | `half_dead_dull` | Unless I am doing something exciting, even dangerous, I feel half-dead and dull. |
 
-**Source**: @MartarelliEtAl_2023_boredom. Data retrieved from
+**Source**: @MartarelliEtAl_2023_sbps. Data retrieved from
 [osf.io/qhux8](https://osf.io/qhux8). Licensed under
 [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+The [Edge clustering](../examples/edge-clustering.qmd) worked analysis
+uses a companion dataset from the same validation study: the French
+subsample (490 participants) with all 18 items, the 8 SBPS items
+together with 10 items of the Curiosity and Exploration
+Inventory (CEI-II). A copy of that file is published with this site;
+the example page shows the download call.
 
 ## Wenchuan {#wenchuan}
 

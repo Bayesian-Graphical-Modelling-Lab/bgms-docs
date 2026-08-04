@@ -36,9 +36,10 @@ carries the reasoning, the Reference the details.
    [`bgmCompare()`](../reference/bgmCompare.qmd). Afterwards you can state both
    kinds of claim the method separates: this association differs between groups,
    and this one is credibly the same.
-6. **Edge clustering.** The stochastic block model prior on the same data.
-   Afterwards you can report clusters of variables together with the uncertainty
-   in the allocations.
+6. **[Edge clustering](edge-clustering.qmd).** The stochastic block model prior
+   on boredom and curiosity items. Afterwards you can test whether variables
+   cluster and report the clusters together with the uncertainty in the
+   allocations.
 7. **[Coming from bootnet and qgraph](from-bootnet-qgraph.qmd).** Your current
    workflow mapped onto `bgms`, call by call. Afterwards you know which function
    replaces which step, what is new, and what has no direct analogue.

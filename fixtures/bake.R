@@ -70,11 +70,28 @@ saveRDS(fit, file.path(out, "fit_wenchuan.rds"))
 ps = timed("ps_wenchuan", prior_sensitivity_check(fit, seed = 123))
 saveRDS(ps, file.path(out, "ps_wenchuan.rds"))
 
-# guide/clustering.qmd
-# Package defaults plus the seed; not a manuscript analysis.
-fit_sbm = timed("fit_wenchuan_sbm",
-                bgm(Wenchuan, edge_prior = sbm_prior(), seed = 123))
-saveRDS(fit_sbm, file.path(out, "fit_wenchuan_sbm.rds"))
+# examples/edge-clustering.qmd
+# Not a manuscript analysis. The data are the Martarelli et al. (2023)
+# French SBPS validation sample (18 ordinal items: 8 boredom, 10
+# curiosity/exploration), shipped in this repo at data/martarelli.rds and
+# published with the site so the companion script can download it. Source:
+# the lab's BGM_Workshops repo (PsyNets_Summer_2026, Morning Session /
+# Group Assignment / data.rds). Columns 1:2 are Age and Gender; the
+# network runs on the 18 items.
+#
+# Run length is deliberate, not the default. At the defaults (2e3/2e3)
+# this fit prints a warmup warning and the checks confirm it (largest
+# split-Rhat 1.35, smallest ESS 44), and the clustering answer is not yet
+# stable (clustering BF about 6 at iter = 1e4 vs about 200 here). At
+# 2e4/1e4 the worst split-Rhat is 1.013 (six parameters, all on edges
+# straddling the two blocks) with smallest ESS about 350. The page walks
+# this escalation. Bake cost: about 11 minutes uncontended.
+martarelli = readRDS("data/martarelli.rds")
+fit_sbm = timed("fit_martarelli_sbm",
+                bgm(as.data.frame(martarelli[, 3:20]),
+                    edge_prior = sbm_prior(),
+                    iter = 2e4, warmup = 1e4, seed = 123))
+saveRDS(fit_sbm, file.path(out, "fit_martarelli_sbm.rds"))
 
 # guide/mcmc-output.qmd, guide/group-comparison.qmd, reference/methods.qmd
 # Package defaults plus the seed; not a manuscript analysis.
