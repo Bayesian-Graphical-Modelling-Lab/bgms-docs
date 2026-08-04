@@ -75,6 +75,93 @@ Returns a matrix with one row per post-warmup iteration and one column per
 edge. For `bgmCompare`, columns correspond to baseline partial association
 parameters.
 
+## extract_centrality {#extract_centrality}
+
+Evaluate a node centrality on every posterior draw of the network, giving
+the posterior distribution of each node's centrality.
+
+```r
+extract_centrality(bgms_object, measure = "strength", group = 1, ...)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `bgms_object` | A fitted `bgms` or `bgmCompare` object. |
+| `measure` | Character; the centrality to evaluate. Currently `"strength"` (default) is the only accepted value, the sum of the absolute weights of a node's edges. Anything else is an error. |
+| `group` | For a `bgmCompare` fit: a single group index, giving that group's centrality, or two indices, giving the difference in centrality between them (the first minus the second). Default: `1`. Ignored for a `bgms` fit, which has one network. |
+| `...` | Passed to methods. |
+
+Returns a numeric matrix of class `"bgms_centrality"` with one row per
+posterior draw and one column per variable, carrying `measure` as an
+attribute.
+
+The object has `summary()` and `plot()` methods:
+
+```r
+summary(object, probs = c(0.025, 0.975), ...)
+plot(x, probs = c(0.025, 0.975), ...)
+```
+
+`summary()` returns a data frame with one row per variable, ordered by
+decreasing posterior mean: `node`, `mean`, `lower`, `upper`, and
+`p_most_central`, the posterior probability that the node has the largest
+centrality of all nodes. For a difference between two groups the last
+column is `p_positive` instead, the posterior probability that the node's
+centrality is higher in the first group than in the second; which node is
+*most* central is not a question a difference answers. `plot()` draws each
+node's posterior mean with its credible interval, nodes ordered by mean,
+and returns `x` invisibly.
+
+### Details
+
+The centrality is evaluated on the model-averaged pairwise draws, in which
+an edge excluded at a given iteration contributes exactly zero. Structural
+uncertainty therefore propagates into the centrality without any extra
+step: a node whose edges are themselves uncertain gets a wide centrality
+posterior, which is the honest summary. Conditioning on the included-only
+draws instead would report each node's centrality in the models where its
+edges happen to be present, which is a different and generally larger
+quantity.
+
+Strength sums absolute edge weights, so positive and negative associations
+both add to a node's total involvement rather than cancelling.
+
+For a `bgmCompare()` fit each group's network is rebuilt on every draw as
+`baseline + (P %*% differences)`, with the fit's own contrast projection
+`P`, rather than from posterior means. That is what carries the
+uncertainty through: with `group = c(1, 2)` the credible interval is the
+interval of the *difference* in a node's centrality, which answers whether
+the groups differ in it directly, where two separately drawn intervals do
+not.
+
+Read a centrality difference with care, and as numbers rather than as a
+picture; `plot()` declines to draw one. Strength sums absolute weights,
+so a difference of zero can mean identical networks or compensating edge
+differences, and its sign says nothing about which edges moved.
+[`verdicts()`](checks.qmd#verdicts) is the per-difference evidence.
+
+A difference also has a point mass at exactly zero, from the draws in
+which every one of the node's difference indicators is excluded and the
+two groups share the network. `p_positive` and its mirror therefore need
+not sum to one, and a node can have a positive posterior mean with
+`p_positive` well below `0.5`: the remaining mass is on no difference at
+all, which is the model averaging reporting itself.
+
+### Example
+
+```{r}
+strength = extract_centrality(fit)
+summary(strength)
+```
+
+```{r}
+#| label: fig-centrality
+#| fig-cap: "Posterior strength centrality for the Wenchuan fit, nodes ordered by posterior mean, with 95% credible intervals."
+#| fig-width: 7
+#| fig-height: 5
+plot(strength)
+```
+
 ## extract_indicators {#extract_indicators}
 
 Retrieve posterior samples of inclusion indicators.
