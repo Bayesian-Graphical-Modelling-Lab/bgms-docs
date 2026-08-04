@@ -188,6 +188,7 @@ website:
               contents:
                 - manual/pseudolikelihood.qmd
                 - manual/variable-helpers.qmd
+                - manual/simulation-prediction.qmd
         - section: "Priors"
           contents:
             - manual/parameter-priors.qmd

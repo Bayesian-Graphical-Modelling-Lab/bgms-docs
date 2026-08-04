@@ -1,0 +1,373 @@
+---
+title: "Simulation and Prediction"
+---
+
+`bgms` can run its models forwards as well as backwards. Two operations do
+this. **Simulation** generates new observations from a set of parameters,
+either parameters you supply yourself or parameters estimated from a fit.
+**Prediction** computes the conditional distribution of one variable given
+observed values on all the others, which is the same conditional distribution
+the samplers use internally.
+
+The layer is split across four R files and two C++ files. `R/simulate_mrf.R`
+holds `simulate_mrf()`, the standalone generator. `R/simulate_predict.R` holds
+the `simulate()` and `predict()` methods and the helpers they share.
+`R/predict_simulate_ggm.R` and `R/predict_simulate_mixed.R` hold the
+model-specific work for continuous and mixed data. On the C++ side,
+`src/mrf_simulation.cpp` holds every generator and its parallel worker, and
+`src/mrf_prediction.cpp` holds the three conditional-distribution kernels.
+
+For argument lists, defaults, and return formats, see
+[`simulate_mrf()`](../reference/methods.qmd#simulate_mrf),
+[`simulate()`](../reference/methods.qmd#simulate), and
+[`predict()`](../reference/methods.qmd#predict) in the Reference. This page
+documents what runs underneath them.
+
+## Entry points
+
+| User call | R implementation | C++ entry point |
+|---|---|---|
+| `simulate_mrf(variable_type = "continuous")` | `simulate_mrf()` | `sample_ggm_direct()` |
+| `simulate_mrf()`, all ordinal | `simulate_mrf()` | `sample_omrf_gibbs()` |
+| `simulate_mrf()`, any Blume-Capel | `simulate_mrf()` | `sample_bcomrf_gibbs()` |
+| `simulate(fit)`, discrete, posterior mean | `simulate.bgms()` | `sample_omrf_gibbs()` or `sample_bcomrf_gibbs()` |
+| `simulate(fit)`, discrete, posterior sample | `simulate.bgms()` | `run_simulation_parallel()` |
+| `simulate(fit)`, continuous | `simulate_bgms_ggm()` | `sample_ggm_direct()` or `run_ggm_simulation_parallel()` |
+| `simulate(fit)`, mixed | `simulate_bgms_mixed()` | `sample_mixed_mrf_gibbs()` or `run_mixed_simulation_parallel()` |
+| `predict(fit)`, discrete | `predict.bgms()` | `compute_conditional_probs()` |
+| `predict(fit)`, continuous | `predict_bgms_ggm()` | `compute_conditional_ggm()` |
+| `predict(fit)`, mixed | `predict_bgms_mixed()` | `compute_conditional_mixed()` |
+
+`simulate.bgmCompare()` and `predict.bgmCompare()` reach the same discrete
+kernels after converting the fitted contrasts into one group's parameters; see
+[Group parameters](#group-parameters) below.
+
+## Simulating from supplied parameters
+
+`simulate_mrf()` takes a model rather than a fit: a pairwise matrix, a matrix
+of main effects, the number of categories per variable, and the variable types.
+It validates all of these, then branches on whether the variables are
+continuous.
+
+### The continuous branch is exact
+
+For `variable_type = "continuous"` the `pairwise` argument is read as the full
+precision matrix, diagonal included. Any `NA` entry is treated as an excluded
+edge and set to zero, the matrix must be symmetric with a strictly positive
+diagonal, and `main` supplies the mean vector (zeros if you omit it).
+
+`sample_ggm_direct()` then draws from the multivariate normal in three steps:
+invert the precision matrix to a covariance matrix with `arma::inv_sympd()`,
+take the lower Cholesky factor $L$ so that $\Sigma = L L^\top$, and return
+$X = Z L^\top + \mathbf{1}\mu^\top$ for a matrix $Z$ of independent standard
+normal draws.
+
+These are independent exact draws, not a Markov chain. The `iter` argument is
+read and validated for the discrete branch only, and has no effect here:
+
+```r
+Omega = diag(c(1, 1.2, 0.8)); Omega[1, 2] = Omega[2, 1] = 0.3
+a = simulate_mrf(5, 3, pairwise = Omega, variable_type = "continuous",
+                 iter = 1,     seed = 42)
+b = simulate_mrf(5, 3, pairwise = Omega, variable_type = "continuous",
+                 iter = 99999, seed = 42)
+identical(a, b)
+#> [1] TRUE
+```
+
+### The discrete branch is a Gibbs sampler
+
+Ordinal and Blume-Capel variables have no closed-form joint sampler, so the
+generator runs a Gibbs chain. `simulate_mrf()` dispatches on whether any
+variable is Blume-Capel: `sample_omrf_gibbs()` when none is,
+`sample_bcomrf_gibbs()` when at least one is. Both call the same C++ core; the
+first hard-codes every type to `"ordinal"` with a reference category of zero,
+the second passes the types through and forces the reference category to zero
+for every variable that is not Blume-Capel.
+
+The core copies the pairwise matrix and zeros its diagonal, so a nonzero
+diagonal in your input cannot become a self-interaction. It then gives every
+cell a uniform random starting category and runs `iter` sweeps. Within a sweep,
+each variable is updated for every observation from its full conditional. The
+conditional depends on the **rest score**, the total pairwise input a variable
+receives from its neighbours in that row:
+
+$$
+r_{is} = \sum_{k} 2\,(x_{ik} - b_k)\,\omega_{ks},
+$$
+
+with $x_{ik}$ observation $i$'s value on variable $k$, $b_k$ that variable's
+reference category (zero unless it is Blume-Capel), and $\omega_{ks}$ the
+partial association. From the rest score the two variable types build
+unnormalized category weights differently. An ordinal variable pins category
+zero at weight one and gives category $c \ge 1$ the weight
+$\exp(\mu_{sc} + c\,r_{is})$. A Blume-Capel variable gives category $c$ the
+weight $\exp(\alpha_s d + \beta_s d^2 + d\,r_{is})$ with $d = c - b_s$, so no
+category is pinned. Both then sample by inverse transform on the cumulative
+weights.
+
+Two consequences follow from that loop structure. The rest score for
+observation $i$ reads only row $i$, so the `num_states` rows are independent
+chains advanced in lockstep, not one chain sampled `num_states` times. And the
+returned matrix is the state after `iter` sweeps, with no convergence check, so
+`iter` is the only control you have over how close the output is to the target
+distribution.
+
+The exponentials use `MY_EXP`, the portable `exp()` documented under
+[OpenLibM Integration](numerical.qmd). Unlike the sampler's own likelihood
+kernels, this generator exponentiates the category weights directly rather than
+subtracting a per-observation maximum first; the mixed generator described
+below does subtract one.
+
+`mrfSampler()` is the same function under its pre-0.1.6.3 name and warns as
+deprecated.
+
+## Simulating from a fit
+
+`simulate.bgms()` reads the model class off the fit and hands continuous and
+mixed data to their own implementations before the discrete path is reached.
+Whichever path runs, the `method` argument decides what the parameters are.
+
+**`method = "posterior-mean"`** collapses the posterior to one parameter set
+and generates one dataset from it. This is a single simulation and ignores
+`cores`.
+
+**`method = "posterior-sample"`** selects `ndraws` posterior draws at random
+(all of them when `ndraws` is `NULL`, capped at the number available) and
+generates one dataset per draw, so parameter uncertainty carries into the
+simulated data. The datasets come back as a list. This path runs in parallel
+across draws through RcppParallel, with the thread count capped by
+`tbb::global_control` at the resolved `cores` value.
+
+### Discrete fits
+
+Under `posterior-mean` the method simply calls `simulate_mrf()` with the
+posterior mean pairwise and main-effect matrices, so everything in the section
+above applies unchanged.
+
+Under `posterior-sample`, `run_simulation_parallel()` takes the stacked draw
+matrices and rebuilds the parameters inside each worker: the pairwise vector is
+unpacked column by column into a symmetric matrix, and the main-effect vector
+is unpacked using a per-variable parameter count of two for a Blume-Capel
+variable and `num_categories[v]` for an ordinal one. Each worker then runs the
+same Gibbs core.
+
+### Continuous fits
+
+`simulate_bgms_ggm()` has to solve a scale problem first: `bgm()` fits
+continuous data after centring it on the training column means, so a simulation
+on the fitted scale would come back centred. The stored `column_means` are
+therefore passed as the mean vector, and fits old enough to lack them fall back
+to zeros.
+
+The two methods rebuild the precision matrix from different places, because the
+posterior summaries and the raw draws are not on the same scale.
+`reconstruct_precision()` builds it from the posterior means as
+$\boldsymbol{\Theta} = -2\boldsymbol{\Omega}$ off the diagonal, with `NA` at
+excluded edges mapped to zero and the diagonal set to the reciprocal of the
+posterior mean residual variances. The raw draws, by contrast, are already
+stored on the precision scale, so `build_precision_from_draw()` and
+`run_ggm_simulation_parallel()` place the pairwise and main-effect values into
+the matrix as they stand.
+
+Either way the draw itself is the exact multivariate normal sampler, so a
+continuous simulation involves no Gibbs sweeps at all.
+
+### Mixed fits
+
+`simulate_bgms_mixed()` reassembles the three interaction blocks (discrete by
+discrete, discrete by continuous, continuous by continuous) plus the discrete
+thresholds `mux` and the continuous means `muy`, then calls
+`sample_mixed_mrf_gibbs()` or, per draw, `run_mixed_simulation_parallel()`.
+
+The C++ generator is a block Gibbs sampler. Before the loop it forms the
+continuous-block precision matrix $\boldsymbol{\Theta}_{yy} = -2
+\boldsymbol{\Omega}_{yy}$, inverts it, factors the result, and precomputes the
+cross block times the covariance matrix, so none of that work repeats per
+iteration. Each sweep then updates every discrete variable from its full
+conditional given the other discrete variables and the current continuous
+values, and then draws the whole continuous vector at once from its conditional
+Gaussian, whose mean shifts with the centred discrete state. The discrete
+update subtracts the largest log weight before exponentiating.
+
+One structural difference from the discrete-only generator: the mixed generator
+loops over observations on the outside and runs a full `iter`-sweep chain for
+each one, initialising the discrete variables uniformly and the continuous
+variables from their marginal. The discrete-only generator advances all
+observations together. The output is the same in kind, but the cost scales as
+`num_states` times `iter` rather than with a shared sweep.
+
+`build_output_mixed_mrf()` stores the two blocks separately, so
+`split_mixed_raw_samples()` has to cut the flat draw matrices back apart before
+the parallel worker sees them: the main matrix splits as
+`[mux | muy | continuous diagonal]` and the pairwise matrix as
+`[discrete upper triangle | continuous off-diagonal | cross]`, with the
+continuous diagonal and off-diagonal interleaved back into the
+column-major upper triangle the C++ side expects.
+
+### Group parameters {#group-parameters}
+
+`simulate.bgmCompare()` requires a `group` argument and supports
+`posterior-mean` only. It calls `extract_group_params()`, which applies the
+projection matrix to turn the baseline parameters and the contrast parameters
+$\delta_{ij}^{(k)}$ into that group's own parameters, rebuilds the threshold
+matrix with `reconstruct_main()` and the interaction matrix from its lower
+triangle, and then calls `simulate_mrf()` like any discrete fit. Variable types
+come from the fit's ordinal flags, so a variable is either ordinal or
+Blume-Capel and `reconstruct_main()` reads the matching number of parameters
+per variable.
+
+## Predicting conditional distributions
+
+`predict()` computes, for each requested variable and each row of `newdata`,
+the distribution of that variable given the row's values on all the others.
+Nothing is sampled. Every kernel in `src/mrf_prediction.cpp` evaluates a
+closed-form conditional, so prediction is deterministic given the parameters.
+
+`predict.bgms()` validates `newdata` (a matrix or data frame with exactly the
+fitted number of columns), resolves `variables` from names or indices to column
+positions, and dispatches to the continuous or mixed implementation before the
+discrete kernel is reached.
+
+**Discrete.** `compute_conditional_probs()` accumulates the rest score across
+all variables except the target, centring a neighbour's contribution on its
+reference category when that neighbour is Blume-Capel, and then evaluates the
+category probabilities through `compute_probs_ordinal()` or
+`compute_probs_blume_capel()`. Those are the bounded, overflow-protected
+helpers documented under [Fast Computation](variable-helpers.qmd), the same
+ones the likelihood code uses. The result is one $n \times (C_s + 1)$
+probability matrix per predicted variable, with columns labelled `cat_0`
+upwards.
+
+**Continuous.** `compute_conditional_ggm()` uses the standard Gaussian
+conditional read straight off the precision matrix:
+
+$$
+X_j \mid X_{-j} \sim \mathcal{N}\!\left(
+  -\theta_{jj}^{-1} \sum_{k \ne j} \theta_{jk} x_k,\;
+  \theta_{jj}^{-1} \right).
+$$
+
+The conditional standard deviation therefore does not vary across rows; only
+the mean does. The kernel computes all rows at once by multiplying the data by
+column $j$ of the precision matrix and subtracting the self-contribution.
+`predict_bgms_ggm()` wraps this in the same centring correction the simulation
+path uses: `newdata` is swept by the training column means before the kernel
+runs, and the training mean of the predicted variable is added back to the
+conditional means afterwards. Output is an $n \times 2$ matrix of `mean` and
+`sd` per predicted variable.
+
+**Mixed.** `compute_conditional_mixed()` runs whichever of the two kernels the
+predicted variable calls for. A discrete variable's rest score picks up a
+contribution from the continuous block through the cross interactions; a
+continuous variable's conditional mean picks up contributions from the other
+continuous variables and from the centred discrete state, with the conditional
+precision read as $-2$ times the continuous block's diagonal entry.
+`predict_bgms_mixed()` maps the user's column indices onto the internal layout,
+in which the discrete variables occupy positions $0 \ldots p-1$ and the
+continuous variables $p \ldots p+q-1$.
+
+### Averaging over draws
+
+Under `method = "posterior-sample"`, `predict()` evaluates the kernel once per
+selected draw and averages. Unlike the simulation path this loop runs in R, one
+draw at a time, with no parallel worker. `average_draws()` stacks a variable's
+per-draw matrices into an array and reduces it to a mean matrix and a standard
+deviation matrix; the mean becomes the returned value and the standard
+deviation is attached as the `"sd"` attribute.
+
+Read that average as the posterior mean of the conditional probability, not as
+a predictive distribution that has integrated out the parameters. For a
+continuous variable in particular, the returned `sd` column is the average
+conditional standard deviation across draws, and the separate `"sd"` attribute
+reports how much each quantity moved across draws.
+
+`type = "response"` reduces the distribution to a point: the most probable
+category for a discrete variable (`which.max` on the probability matrix, minus
+one for the zero-based codes), and the conditional mean for a continuous one.
+
+`predict.bgmCompare()` supports `posterior-mean` only and requires `group`. It
+derives that group's parameters exactly as the simulation method does.
+
+## Category codes on the way in and out
+
+`bgm()` recodes discrete data to contiguous zero-based codes before fitting, so
+both operations have to cross that boundary. Two helpers do it, and they are
+inverses of each other.
+
+`recode_data_for_prediction()` maps `newdata` from the original values onto the
+fitted codes using the recode map the fit stores. The map takes one of two
+forms. For `bgm()` fits it is an unnamed sorted vector of the original values,
+and the code is the position minus one. For `bgmCompare()` fits it is a named
+lookup whose names are the original values and whose entries are the final
+codes, which may be many to one where categories were collapsed across groups.
+A value in `newdata` that was never observed in training has no code; those
+cells become `NA` and the function warns. Blume-Capel variables carry an
+additive shift instead of a map, and continuous variables carry neither. Fits
+old enough to have no map fall back to subtracting the column minimum.
+
+`recode_simulated_to_original()` runs the inverse over simulated data, so
+`simulate()` returns discrete columns on the original scale and its output can
+be fed straight to `predict()`. Where the map is many to one it inverts to the
+smallest original value carrying each code, which `predict()` recodes back to
+that same code.
+
+## Seeding
+
+Reproducibility crosses two random number generators, and it is worth being
+precise about which one does what.
+
+**The R side.** `check_seed()` returns your seed as an integer when you give
+one, and otherwise draws a fresh seed with `sample.int()` from R's own
+generator. That is why `set.seed()` before an unseeded call reproduces the
+result: it fixes the seed that gets drawn.
+
+```r
+set.seed(1); c1 = simulate_mrf(5, 3, pairwise = Omega, variable_type = "continuous")
+set.seed(1); c2 = simulate_mrf(5, 3, pairwise = Omega, variable_type = "continuous")
+identical(c1, c2)
+#> [1] TRUE
+```
+
+R's generator is also what picks which posterior draws are used, through
+`sample.int()`, in both the simulation and the prediction paths.
+
+**The C++ side.** The resolved integer seed is passed to `SafeRNG`, the
+xoshiro256++ wrapper documented under [Parallel Chains](parallel-chains.qmd).
+Every generator in this subsystem draws from it and nothing draws from R's
+generator once C++ has been entered.
+
+**Across parallel draws.** The three parallel workers each build one generator
+per draw before the parallel region opens, seeding draw $d$ with `seed + d`.
+The generators are constructed up front and indexed by position, so the results
+do not depend on how the scheduler assigns draws to threads: the same seed and
+the same `ndraws` give the same list of datasets whatever `cores` is set to.
+
+## Exact and Monte Carlo
+
+Worth keeping straight, because the two words apply at two different levels.
+
+| Operation | Draw mechanism | Approximation |
+|---|---|---|
+| Continuous simulation | Cholesky transform of independent normals | exact draws from the fitted normal |
+| Discrete simulation | Gibbs, `iter` sweeps, last state kept | approximate; controlled by `iter` |
+| Mixed simulation | Block Gibbs, `iter` sweeps per observation | approximate; controlled by `iter` |
+| Prediction, any model | closed-form conditional | exact given the parameters |
+
+That column concerns the parameters as given. On top of it sits a second
+question: whether the parameters are a single point or a posterior sample.
+`method = "posterior-mean"` conditions on one parameter set and reports nothing
+about parameter uncertainty. `method = "posterior-sample"` is a Monte Carlo
+average over the posterior, and its accuracy is governed by `ndraws`. A
+continuous simulation under `posterior-sample` is exact at every draw and Monte
+Carlo across them.
+
+## See also
+
+[R Scaffolding](r-scaffolding.qmd),
+[Fit Objects](fit-objects.qmd),
+[Extractor Internals](extractors-internals.qmd),
+[Mixed MRF Internals](mixed-internals.qmd),
+[Fast Computation](variable-helpers.qmd),
+[Parallel Chains](parallel-chains.qmd),
+[Methods reference](../reference/methods.qmd).

@@ -43,6 +43,7 @@ Supporting pages:
 
 - [Pseudolikelihood](pseudolikelihood.qmd) — Pseudolikelihood objectives for OMRF, mixed MRF, and group-comparison models, including statistical properties and the marginal pseudolikelihood used for mixed models.
 - [Fast Computation](variable-helpers.qmd) — Recursive accumulation of MRF category probabilities that avoids per-category `exp()` calls. The FAST path provides a major speedup; the SAFE path handles overflow-prone cases.
+- [Simulation and Prediction](simulation-prediction.qmd) — Running the models forwards: the standalone and fitted-model generators per model class, the conditional-distribution kernels behind `predict()`, seeding, and which operations are exact.
 
 ## Priors
 
