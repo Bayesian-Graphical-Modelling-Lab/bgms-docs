@@ -58,16 +58,22 @@ generic vector-level sampler cannot access.
 ## Robbins–Monro adaptation
 
 During warmup, the proposal standard deviations $\sigma_k$ are
-adapted to target an acceptance rate of 0.44. The
+adapted toward a target acceptance rate $\alpha^*$. The
 `MetropolisAdaptationController` applies the update rule:
 
 $$
-\sigma_k^{(t+1)} = \sigma_k^{(t)} + \bigl(\alpha_k^{(t)} - 0.44\bigr)\,w_t,
+\sigma_k^{(t+1)} = \sigma_k^{(t)} + \bigl(\alpha_k^{(t)} - \alpha^*\bigr)\,w_t,
 $$
 
 where $w_t = t^{-0.75}$ is the Robbins–Monro weight with decay
 exponent 0.75. The updated value is clamped to $[0.001,\; 2.0]$.
 NaN values (from degenerate proposals) are reset to 1.0.
+
+Under `update_method = "adaptive-metropolis"` the target is the
+resolved `target_accept`, which defaults to 0.44, the componentwise
+random-walk optimum. Under NUTS the edge-move proposals tuned in
+stage 3b use a fixed 0.44 instead, because `target_accept` there sets
+the step-size adaptation target.
 
 ### Element-wise adaptation
 
