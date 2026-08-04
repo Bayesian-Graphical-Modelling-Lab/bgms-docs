@@ -67,7 +67,7 @@ roles it needs:
 | Role | Used by | Default |
 |------|---------|---------|
 | Pairwise interactions | GGM, OMRF, mixed MRF | `normal_prior(scale = 1)` |
-| Baseline pairwise interactions | bgmCompare | `cauchy_prior(scale = 1)` |
+| Baseline pairwise interactions | bgmCompare | `normal_prior(scale = 1)` |
 | Category thresholds | OMRF, mixed MRF, bgmCompare | `beta_prime_prior(0.5, 0.5)` |
 | Continuous means | mixed MRF | `normal_prior(scale = 1)` |
 | Precision-matrix diagonal | GGM, mixed MRF | `exponential_prior(eta = 1)` |
