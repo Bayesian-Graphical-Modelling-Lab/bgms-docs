@@ -54,6 +54,12 @@ Prior distributions on model parameters and graph structure.
 - [SBM Prior](sbm-prior.qmd) — Mixture-of-finite-mixtures SBM formulation, collapsed Gibbs updates, cluster allocation sampling
 - [Hierarchical Graph Prior and the Z-Ratio Engine](zratio-hierarchical.qmd) — Per-graph normalized precision prior: the per-edge normalizer ratio, its deterministic estimator, and the trust gauge
 
+## Results and Checks
+
+The layer between the finished sampler run and the numbers a reader reports.
+
+- [Fit Objects](fit-objects.qmd) — The S7 classes behind `bgm()` and `bgmCompare()`: what the object stores, the lazy summary cache, the accessor contract, and where the same quantity appears on two scales.
+
 ## Group Comparison
 
 - [bgmCompare Internals](bgmcompare-internals.qmd) — Multi-group parameterization (baseline plus differences), group-specific gradients, difference-edge selection
