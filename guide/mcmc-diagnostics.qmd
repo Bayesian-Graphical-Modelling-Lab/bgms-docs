@@ -15,6 +15,29 @@ half and the halves are compared as if they were separate chains. For
 how both are computed, see the
 [Technical Manual](../manual/diagnostics.qmd).
 
+## Symptom index {#sec-symptom-index}
+
+Find your symptom, do the one thing in the middle column, then read the
+linked section for why it is the right thing to do.
+
+| Symptom | First thing to do | Where it is explained |
+|---|---|---|
+| `Rhat` above 1.01 | Run longer: raise `warmup` first, then `iter`, and keep at least two chains. | [R-hat](#sec-rhat) |
+| `n_eff` below 100 | Raise `iter`; precision grows with the number of retained draws. | [Effective sample size](#sec-ess) |
+| `mcse` large next to `sd` | Raise `iter`; the MCSE falls as the square root of the effective sample size. | [Monte Carlo standard error](#sec-mcse) |
+| Blank `mcse`, `n_eff`, or `Rhat` cells in the summary | Nothing to fix: those cells are `NA` because the inclusion draw is pinned, not because the chain is bad. | [Model Output](mcmc-output.qmd#sec-pinned-indicators) |
+| Divergences reported | Raise `target_accept` above its default of 0.80; if that does not help, refit with `update_method = "adaptive-metropolis"`. | [Divergent transitions](#sec-divergences) |
+| The sampler hit the maximum tree depth | Raise `nuts_max_depth`; occasional hits are normal. | [Tree depth](#sec-tree-depth) |
+| E-BFMI below 0.3 | Raise `warmup`; under edge selection the usual cause is a graph structure that had not equilibrated. | [E-BFMI](#sec-ebfmi) |
+| Mean acceptance well below `target_accept` | Raise `warmup`; the step-size tuning did not converge. | [Mean acceptance probability](#sec-accept-prob) |
+| `warmup_incomplete` is `TRUE` | Raise `warmup` and refit; check R-hat and ESS before distrusting the fit. | [Warmup equilibration check](#sec-warmup-check) |
+| The trust gauge flagged a chain | Raise `options(bgms.zratio_gauge_sweeps)` and refit, to see whether the signal is real. | [Trust gauge](#sec-trust-gauge) |
+| Verdicts flagged `fragile` | Run more iterations; the verdict sits within two standard errors of a boundary. | [`verdicts()`](../reference/checks.qmd#verdicts) |
+| A verdict changes with the prior scale | Report that edge as scale-dependent, or treat it as undecided; do not pick the scale that gives the verdict you want. | [Check your priors](../examples/check-your-priors.qmd#sec-how-to-act) |
+| Results differ between runs | Set `seed`, and hold `cores` and the installed binary fixed; if they still differ, read it as a mixing problem. | [Results differ between runs](#sec-reproducibility) |
+| The sampler raised a warning | Look the message up in the list and follow its action; the warnings name the setting to change. | [What the sampler's warnings mean](#sec-sampler-warnings) |
+| Still stuck | Refit with `update_method = "adaptive-metropolis"` and compare the two posteriors. | [Still stuck](#sec-still-stuck) |
+
 ## Effective sample size (ESS) {#sec-ess}
 
 The effective sample size estimates how many independent draws the MCMC
