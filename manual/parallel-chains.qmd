@@ -26,13 +26,16 @@ clone-and-dispatch pattern:
 4. **Collect** — Results are gathered and returned as a vector of
    `ChainResult` objects.
 
-After a chain's main loop finishes, two post-loop steps run before the
-chain returns. If the Z-ratio trust gauge is enabled
+After a chain's main loop finishes, three post-loop steps run before
+the chain returns. If the Z-ratio trust gauge is enabled
 (`options(bgms.zratio_gauge_sweeps = ...)` under the hierarchical
 graph prior), the chain runs the configured number of assessment
 sweeps on the frozen kernel — deployed selection passes that also
 reference non-trivial edge moves against the exact block-local
-calculation; no stored samples are touched. Then
+calculation; no stored samples are touched. Next the sampler's
+adaptation-averaged step size and diagonal metric are retained on the
+`ChainResult` (`final_step_size`, `final_inv_mass`; NaN and empty for
+non-gradient samplers) so a refit can warm-start them. Then
 `model.collect_chain_diagnostics(chain_result)` copies run-level
 diagnostic state (Z-ratio counters, frozen constants, gauge results)
 into the `ChainResult`.
@@ -54,7 +57,7 @@ Before dispatching, `bgms` sets the maximum parallelism via TBB's
 global control:
 
 ```cpp
-tbb::global_control gc(
+tbb::global_control control(
     tbb::global_control::max_allowed_parallelism,
     no_threads
 );
@@ -70,13 +73,32 @@ The `MCMCChainRunner` struct inherits from `RcppParallel::Worker` and
 implements `operator()(begin, end)`. Each unit of work is one chain:
 
 ```cpp
-void MCMCChainRunner::operator()(size_t begin, size_t end) {
-    for(size_t i = begin; i < end; ++i) {
-        run_mcmc_chain(results_[i], *models_[i], *edge_priors_[i],
-                       config_, i, pm_);
+void MCMCChainRunner::operator()(std::size_t begin, std::size_t end) {
+    for (std::size_t i = begin; i < end; ++i) {
+        ChainResult& chain_result = results_[i];
+        BaseModel& model = *models_[i];
+        BaseEdgePrior& edge_prior = *edge_priors_[i];
+        model.set_seed(config_.seed + static_cast<int>(i));
+
+        try {
+            run_mcmc_chain(chain_result, model, edge_prior, config_,
+                           static_cast<int>(i), pm_, warm_eps, warm_metric);
+        } catch (std::exception& e) {
+            chain_result.error = true;
+            chain_result.error_msg = e.what();
+        } catch (...) {
+            chain_result.error = true;
+            chain_result.error_msg = "Unknown error";
+        }
     }
 }
 ```
+
+The `try`/`catch` is what turns a thrown chain into the `error` and
+`error_msg` fields the R output builder reads, rather than an
+exception crossing a worker thread. `warm_eps` and `warm_metric` are
+the per-chain warm-start step size and diagonal metric, NaN and empty
+unless a refit supplied them.
 
 Dispatch uses `RcppParallel::parallelFor(0, no_chains, runner)`.
 
@@ -125,6 +147,8 @@ Each chain writes its output into a preallocated `ChainResult`:
 |-------|-------|---------|
 | `samples` | param_dim × n_iter | Parameter samples (post-warmup) |
 | `indicator_samples` | n_edges × n_iter | Edge indicators (if edge selection) |
+| `rb_inclusion_samples` | n_edges × n_iter | Rao-Blackwellized inclusion draws (if edge selection) |
+| `rb_counts` | n_edges × 4 | Per-edge odds accumulators `[n01, n10, n0_visits, n1_visits]` on the alpha scale (if edge selection) |
 | `allocation_samples` | n_vars × n_iter | SBM cluster allocations (if SBM prior) |
 | `inclusion_parameter_samples` | n_iter | Sampled inclusion probability (if Beta-Bernoulli edge prior on a continuous or mixed model) |
 | `treedepth_samples` | n_iter | NUTS tree depth (if NUTS) |

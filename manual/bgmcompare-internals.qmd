@@ -73,9 +73,10 @@ The `gradient()` function combines three components:
   evaluating softmax probabilities, and subtracting expected counts.
 - **Prior gradient** — penalties on both baseline and contrast
   pairwise parameters through the polymorphic prior objects: the
-  baseline family comes from `interaction_prior` (Cauchy default) and
-  the contrast family from `difference_family` (`"Cauchy"` default or
-  `"Normal"`) at scale `difference_scale`. See
+  baseline family comes from `interaction_prior`
+  (`normal_prior(scale = 1)` by default) and the contrast family from
+  `difference_family` (`"Normal"` by default, or `"Cauchy"`) at scale
+  `difference_scale`. See
   [Parameter Priors](parameter-priors.qmd).
 
 ## Sampler implementation
@@ -157,10 +158,13 @@ The `bgmCompareOutput` struct stores:
 | `main_samples` | Main-effect posterior samples (iterations $\times$ thresholds $\times$ groups) |
 | `pairwise_samples` | Pairwise-effect posterior samples (iterations $\times$ pairs $\times$ groups) |
 | `indicator_samples` | Contrast inclusion indicators (iterations $\times$ parameters) |
+| `rb_inclusion_samples` | Rao-Blackwellized inclusion draws, same layout as `indicator_samples`; NaN marks indicators that were not selected |
+| `rb_counts` | Per-indicator odds accumulators (parameters $\times$ 4) on the alpha scale: `[n01, n10, n0_visits, n1_visits]` |
 | `allocation_samples` | Cluster allocations (iterations $\times$ variables; SBM difference prior only) |
 | `treedepth_samples` | Tree depth per iteration (NUTS only) |
 | `divergent_samples` | Divergent transition flags (NUTS only) |
 | `energy_samples` | Hamiltonian energy per iteration (NUTS only) |
+| `accept_prob_samples` | Mean per-trajectory acceptance probability (NUTS only) |
 
 As in the single-group `ChainResult`, buffers are preallocated with
 "not sampled" sentinels (−1 for integer fields, NaN for floating

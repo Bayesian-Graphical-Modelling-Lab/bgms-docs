@@ -329,9 +329,9 @@ constrained value. The log-acceptance ratio sums:
 - The $O(1)$ likelihood ratio via the matrix-determinant lemma, plus
   $\delta$ times the same log-determinant ratio (the tilt)
 - The prior odds $\log\{(1 - \pi_{ij}) / \pi_{ij}\}$
-- $-\log J$ under the
+- $-\log J$ under the default
   [hierarchical specification](zratio-hierarchical.qmd) (absent under
-  the default joint specification)
+  the joint specification)
 - The reverse proposal density
   $+\log\{\phi(\theta_{ij}^{\text{curr}} / c_3;\, 0,\, \sigma_{ij}) / c_3\}$
 - Minus the slab density of the removed entry, evaluated on the

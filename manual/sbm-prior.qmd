@@ -84,7 +84,7 @@ cluster assignments.
 
 ## Corrected sweeps on continuous data
 
-On continuous (GGM) and mixed models under the default joint graph
+On continuous (GGM) and mixed models under the joint graph
 specification, the sweeps above run in a corrected form: the
 determinant-tilted precision prior reweights the graph marginal, so
 the plain collapsed updates would target the wrong block structure

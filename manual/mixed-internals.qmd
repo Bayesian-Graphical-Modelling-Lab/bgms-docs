@@ -177,9 +177,10 @@ continuous variables (`missing_index_discrete`,
 
 ## Output assembly
 
-The R output builder (`build_output_mixed_mrf()` in `build_output.R`)
-maps the flat storage vector back to the original variable ordering
-using `fill_mixed_symmetric()`. This function places discrete-discrete,
+The R output builder (`build_output_mixed_mrf()` in
+`R/build_output_mixed_mrf.R`) maps the flat storage vector back to the
+original variable ordering using `fill_mixed_symmetric()` (defined in
+`R/build_output.R`). This function places discrete-discrete,
 continuous-continuous, and cross-type interactions into the correct
 cells of the $(p+q) \times (p+q)$ output matrix, respecting the
 original column order (which may interleave discrete and continuous

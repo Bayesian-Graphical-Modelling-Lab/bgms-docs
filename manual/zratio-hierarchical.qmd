@@ -10,9 +10,9 @@ per-edge normalizing-constant ratio, the deterministic estimator that
 evaluates it inside every edge move, and the trust gauge that audits
 the estimator after sampling.
 
-Source: `src/models/ggm/zratio_engine.{h,cpp}`, `src/models/zratio_gauge.h`,
-and the fit-time builders in `R/zratio_tables.R` and
-`R/zratio_surfaces.R`.
+Source: `src/models/ggm/zratio_engine.{h,cpp}`,
+`src/models/ggm/zratio_gauge.h`, and the fit-time builders in
+`R/zratio_tables.R` and `R/zratio_surfaces.R`.
 
 ## Joint versus hierarchical specification
 
@@ -21,7 +21,7 @@ graph $\Gamma$: the slab on the included off-diagonals, the scale prior
 on the diagonal, the determinant tilt $|\Theta|^{\delta}$, and the
 positive-definite-cone indicator with zeros at excluded edges.
 
-- **Joint** (default): $p(\Theta, \Gamma) \propto \rho_\Gamma(\Theta)\,
+- **Joint**: $p(\Theta, \Gamma) \propto \rho_\Gamma(\Theta)\,
   \pi(\Gamma)$. Nothing is normalized per graph, so the implied graph
   marginal is $\pi(\Gamma)\, Z(\Gamma)$ with
   $Z(\Gamma) = \int \rho_\Gamma(\Theta)\, d\Theta$ — the edge prior
@@ -29,7 +29,7 @@ positive-definite-cone indicator with zeros at excluded edges.
   Beta-Bernoulli or SBM edge prior the hyperparameter updates then
   need the normalizing-constant correction described in
   [Edge Priors](edge-priors.qmd).
-- **Hierarchical**: $p(\Gamma)\, p(\Theta \mid \Gamma)$ with
+- **Hierarchical** (default): $p(\Gamma)\, p(\Theta \mid \Gamma)$ with
   $p(\Theta \mid \Gamma) = \rho_\Gamma(\Theta) / Z(\Gamma)$ normalized
   per graph. The graph marginal is exactly the edge prior, and the
   hyperparameter updates stay clean conjugate — but every between-model
@@ -147,10 +147,12 @@ at the end of the run (see [Parallel Chains](parallel-chains.qmd)).
 
 ## The trust gauge
 
-The estimator is deterministic and fast, but approximate. The optional
+The estimator is deterministic and fast, but approximate. The
 **trust gauge** quantifies whether the approximation could have
-mattered. It is off by default; enable it with
-`options(bgms.zratio_gauge_sweeps = 2L)` before fitting.
+mattered. It runs by default, at two assessment sweeps per chain;
+`options(bgms.zratio_gauge_sweeps = 0L)` turns it off, and
+`fit$zratio_diag` is then `NULL`. Raising the option audits more edge
+moves per chain.
 
 After sampling, each chain runs the configured number of assessment
 sweeps on the frozen kernel: deployed selection passes that re-decide a

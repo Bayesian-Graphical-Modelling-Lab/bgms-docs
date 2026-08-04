@@ -39,8 +39,9 @@ surfaced in R as `fit$inclusion_parameter_samples`.
 The simplest prior: each edge has a fixed inclusion probability that
 does not change during sampling. The `update()` method is a no-op.
 
-This prior is used when the user specifies `edge_prior = "Bernoulli"`
-with a fixed inclusion probability matrix. This is the default edge
+This prior is used when the user passes
+`edge_prior = bernoulli_prior(p)`, which fixes the inclusion
+probability matrix at `p`. `bernoulli_prior(0.5)` is the default edge
 prior in `bgms`.
 
 ## BetaBernoulliEdgePrior
@@ -53,7 +54,7 @@ the data. At each iteration:
 3. Draw a new inclusion probability from its full conditional. On
    discrete models this is the plain conjugate draw
    $\pi \sim \text{Beta}(\alpha + k,\; \beta + m - k)$. On continuous
-   and mixed models under the default joint specification, a
+   and mixed models under the joint specification, a
    [correction table](#normalizing-constant-corrections) is attached
    and the draw instead targets the corrected conditional carrying
    the $1/C(\pi)$ factor.
@@ -92,7 +93,7 @@ the current cluster assignment vector. These are stored in
 
 ## Normalizing-constant corrections {#normalizing-constant-corrections}
 
-On continuous (GGM) and mixed models under the default
+On continuous (GGM) and mixed models under
 `precision_graph_prior = "joint"`, the graph marginal of the
 spike-and-slab prior is not the edge prior $\pi(\Gamma)$ but
 $\pi(\Gamma)\, Z(\Gamma)$ — the edge prior reweighted by each graph's
@@ -128,7 +129,7 @@ On the mixed-MRF path the tilt acts on the continuous precision block
 only, so the correction reads continuous-continuous pairs exclusively
 (a per-node mask carries the variable types); with fewer than two
 continuous variables no edge is tilted and the plain conjugate
-updates apply unchanged. Under
+updates apply unchanged. Under the default
 [`precision_graph_prior = "hierarchical"`](zratio-hierarchical.qmd)
 no correction is needed at all — the per-graph normalization makes the
 graph marginal exactly $\pi(\Gamma)$ and the conjugate updates are

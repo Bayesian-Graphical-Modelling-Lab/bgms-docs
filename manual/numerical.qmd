@@ -48,8 +48,8 @@ implementations from OpenLibM (the FreeBSD/Sun math library). These
 are self-contained C functions that bypass the toolchain's standard
 library, bringing Windows performance much closer to macOS and Linux.
 
-The implementation in `custom_explog.cpp` (approximately 800 lines)
-is the original Sun/FreeBSD code, lightly adapted to compile as C++
+The implementation in `custom_explog.cpp` (just under 400 lines) is
+the original Sun/FreeBSD code, lightly adapted to compile as C++
 within an R package.
 
 ## Platform detection

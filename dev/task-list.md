@@ -291,6 +291,42 @@ Open: the "results differ between runs" row points at the new on-page
 section only. When C2 ships, add the FAQ answer as a second target
 (the brief asks for both).
 
+## M1 Manual Technical Pass (2026-08-05)
+
+Adversarial audit of the 22 pages under `manual/` in `_quarto.yml`
+against the 0.2.0.0 release source (bgms main at 6126312a, read from a
+clean `git archive` export). Note for the board: the brief says 19
+pages; the sidebar has carried 22 since the Supporting Pages
+subsection was added.
+
+Shipped: 13 commits, one per page, each citing the source file:line
+that decides the fix. The two that spanned pages were a stale default
+sweep: `precision_graph_prior` was called "joint" on four pages when
+R/bgm.R:500 has made `"hierarchical"` the default since 0.2.0.0
+(r-scaffolding, ggm-internals, edge-priors, sbm-prior,
+zratio-hierarchical), and bgmCompare's slabs were called Cauchy on two
+pages when R/bgmCompare.R:265-268 defaults both the baseline and the
+contrast family to Normal (parameter-priors, bgmcompare-internals).
+Also corrected: the trust gauge is on by default, not opt-in
+(R/zratio_surfaces.R:661-665); the Gibbs prior-family gate is C++-side,
+not R-side (src/sample_ggm.cpp:100-105); `baseline_category` has no
+default for Blume-Capel variables (R/validate_model.R:229-231); the
+spec invariant on `edge_prior` was stated backwards (R/bgm_spec.R:
+192-195); the `MCMCChainRunner::operator()` listing and the post-loop
+step count predated the refit warm-start work
+(chain_runner.cpp:206-240). Two file paths and one line count were
+wrong. No prose was rewritten beyond the words each fix needed.
+
+Not fixed, MM's call (ranked in the completion report): the
+simulate/predict subsystem (~4000 lines across R/ and
+src/mrf_*.cpp) has no manual page at all, and neither do the
+calibration/verdicts machinery, `prior_sensitivity_check()`, the refit
+engine, or the fit-object class layer. A cryptic-prose work order for
+the Fable pass is in the completion report.
+
+Project render clean (56/56), all 13 touched pages rendered
+individually first, link check clean (160 pages, zero broken).
+
 ## A9 Reference Coverage (2026-08-04)
 
 Closes flagged-issues bgms-docs item 20. Every 0.2.0.0 export now has a
