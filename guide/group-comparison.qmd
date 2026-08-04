@@ -40,7 +40,7 @@ fit = bgmCompare(x = data, group_indicator = groups, seed = 1234)
 When `difference_selection = TRUE` (the default), spike-and-slab priors are placed on the contrast parameters. For each pairwise interaction, a binary indicator $\gamma_{ij}$ — here indexing difference inclusion, not the edge inclusion it denotes in `bgm()` — governs whether the contrast parameters are included in the model:
 
 - When $\gamma_{ij} = 0$ (spike), the contrast parameters are exactly zero — all groups have the same partial association.
-- When $\gamma_{ij} = 1$ (slab), each contrast parameter receives a slab prior and is estimated from the data. The slab family is set by `difference_family` — `"Cauchy"` (the default) or `"Normal"` — with scale `difference_scale`.
+- When $\gamma_{ij} = 1$ (slab), each contrast parameter receives a slab prior and is estimated from the data. The slab family is set by `difference_family` — `"Normal"` (the default) or `"Cauchy"` — with scale `difference_scale`.
 
 By default, only pairwise interaction differences are selected (`main_difference_selection = FALSE`). Threshold differences are always included as free parameters. This default reflects that thresholds are typically nuisance parameters: their selection can interfere with pairwise selection under the Beta-Bernoulli prior, and group differences in thresholds are rarely the primary research question.
 
@@ -124,17 +124,17 @@ diffs$BF10 = diffs$mean / (1 - diffs$mean)
 print(diffs, digits = 3, row.names = FALSE)
 ```
 
-- **`motor-seat`**: an inclusion probability of 0.997 gives
-  $\text{BF}_{10} \approx 305$ — strong evidence that the partial
+- **`motor-seat`**: an inclusion probability of 0.999 gives
+  $\text{BF}_{10} \approx 886$ — strong evidence that the partial
   association between these two symptoms differs between the groups.
-- **`avoid-closeatt`**: $\text{BF}_{10} \approx 3.3$ — modest evidence
+- **`avoid-closeatt`**: $\text{BF}_{10} \approx 6.2$ — modest evidence
   for a group difference.
-- **`forget-talks`**: an inclusion probability of about 0.28 gives
-  $\text{BF}_{01} \approx 2.5$ — the data lean toward invariance, but
+- **`forget-talks`**: an inclusion probability of about 0.23 gives
+  $\text{BF}_{01} \approx 3.4$ — the data lean toward invariance, but
   the evidence is weak.
 
 ## Prior guidance
 
-- **`difference_scale = 1`** (default): scale of the slab on the contrast parameters, whose family is set by `difference_family` (`"Cauchy"` by default, `"Normal"` as the lighter-tailed alternative). The default matches the scale of the baseline `interaction_prior` (`cauchy_prior(scale = 1)`). Note the asymmetry with [`bgm()`](../reference/bgm.qmd): the single-group model defaults to a Normal slab, while `bgmCompare()` keeps Cauchy defaults for both the baseline interactions and the contrast parameters.
+- **`difference_scale = 1`** (default): scale of the slab on the contrast parameters, whose family is set by `difference_family` (`"Normal"` by default, `"Cauchy"` as the heavier-tailed alternative). The default matches the scale of the baseline `interaction_prior` (`normal_prior(scale = 1)`), and both match [`bgm()`](../reference/bgm.qmd), so a comparison and separate single-group fits price a baseline interaction alike. Pass `difference_family = "Cauchy"` and `interaction_prior = cauchy_prior(scale = 1)` to recover the pre-0.2.0.0 behavior. The choice matters most for differences on categories one group never observed: a Normal slab bounds an unidentified threshold difference far more tightly than a Cauchy one.
 - **`difference_prior = bernoulli_prior(0.5)`** (default): each difference has a fixed prior inclusion probability of 0.5. Pass [`beta_bernoulli_prior(1, 1)`](../reference/priors.qmd#beta_bernoulli_prior) to place a beta hyperprior on the inclusion probability instead — this provides automatic multiplicity correction, important when the number of potential group differences is large [@MarsmanEtAl_2025_ttest]. Setting `bernoulli_prior(p)` with `p = 0.5` makes the prior odds equal to one, so the Bayes factor simplifies to the posterior odds.
 - **`difference_prior = sbm_prior(...)`**: a stochastic block model on the off-diagonal differences, with cluster-structured inclusion probabilities. Useful when group differences are expected to concentrate within latent clusters of variables. The diagonal (main-effect difference inclusions, when `main_difference_selection = TRUE`) follows a separate Beta-Bernoulli using the within-cluster `alpha` and `beta`. See [Edge Clustering](clustering.qmd) and [SBM Prior](../manual/sbm-prior.qmd) for the formulation; cluster summaries are accessible via [`extract_sbm()`](../reference/extractors.qmd#extract_sbm).

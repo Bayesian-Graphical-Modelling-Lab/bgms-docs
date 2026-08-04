@@ -29,9 +29,9 @@ bgmCompare(
   variable_type = "ordinal",
   baseline_category,
   difference_scale = 1,
-  difference_family = c("Cauchy", "Normal"),
+  difference_family = c("Normal", "Cauchy"),
   difference_prior = bernoulli_prior(0.5),
-  interaction_prior = cauchy_prior(scale = 1),
+  interaction_prior = normal_prior(scale = 1),
   threshold_prior = beta_prime_prior(alpha = 0.5, beta = 0.5),
   iter = 2000,
   warmup = 2000,
@@ -69,7 +69,7 @@ bgmCompare(
 | `difference_selection` | Logical. If `TRUE`, spike-and-slab priors are applied to the contrast parameters that encode group differences (for two groups, a single scaled difference; for $G > 2$ groups, $G - 1$ orthogonal contrasts). Default: `TRUE`. |
 | `main_difference_selection` | Logical. If `TRUE`, apply spike-and-slab selection to main effect (threshold) differences. Since main effects are often nuisance parameters and their selection can interfere with pairwise selection under the Beta-Bernoulli prior, the default is `FALSE`. Only used when `difference_selection = TRUE`. |
 | `difference_scale` | Scale of the prior for the contrast parameters. Default: `1`. |
-| `difference_family` | Character. Distributional family of the prior on the contrast parameters, one of `"Cauchy"` (default) or `"Normal"`. Independent of `interaction_prior`, which governs the baseline interactions. |
+| `difference_family` | Character. Distributional family of the slab prior on the contrast parameters, one of `"Normal"` (default) or `"Cauchy"`. Independent of `interaction_prior`, which governs the baseline interactions. |
 | `difference_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior on difference inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), or [`sbm_prior()`](priors.qmd#sbm_prior) — see the note below the table for the SBM case. Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) and the scalar `difference_probability` / `beta_bernoulli_alpha` / `beta_bernoulli_beta` arguments are accepted but deprecated. Default: `bernoulli_prior(0.5)`. |
 
 Under `difference_prior = sbm_prior(...)`, the stochastic block model
@@ -84,7 +84,7 @@ Priors on baseline parameters are specified via prior-object constructors (see [
 
 | Argument | Description |
 |----------|-------------|
-| `interaction_prior` | A `bgms_parameter_prior` object for baseline pairwise interactions. Allowed: [`cauchy_prior()`](priors.qmd#cauchy_prior) (default), [`normal_prior()`](priors.qmd#normal_prior). Note that the default here remains Cauchy, unlike [`bgm()`](bgm.qmd), whose default interaction prior is Normal. Default: `cauchy_prior(scale = 1)`. |
+| `interaction_prior` | A `bgms_parameter_prior` object for baseline pairwise interactions. Allowed: [`normal_prior()`](priors.qmd#normal_prior) (default), [`cauchy_prior()`](priors.qmd#cauchy_prior). This matches the default in [`bgm()`](bgm.qmd), so a comparison and separate single-group fits price a baseline interaction alike. Default: `normal_prior(scale = 1)`. |
 | `threshold_prior` | A `bgms_parameter_prior` object for baseline threshold parameters. Allowed: [`beta_prime_prior()`](priors.qmd#beta_prime_prior) (default), [`normal_prior()`](priors.qmd#normal_prior). Default: `beta_prime_prior(alpha = 0.5, beta = 0.5)`. |
 
 ::: {.callout-note}
