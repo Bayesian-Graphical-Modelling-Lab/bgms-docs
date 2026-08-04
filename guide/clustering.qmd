@@ -92,16 +92,17 @@ This returns:
 
 ## A worked example
 
-The full SBM analysis of the
-[Wenchuan](../reference/datasets.qmd#wenchuan) PTSD data, run at the
-package defaults, is the worked analysis
-[Edge clustering](../examples/edge-clustering.qmd): the posterior over
-the number of clusters (probability 0.42 on a single cluster), both
-clustering Bayes factors computed from it, the modal allocations, and
-the co-clustering matrix as the uncertainty statement for the
-partition. On these data the model finds no compelling evidence for
-block structure, a finding in itself and a caution against
-over-reading apparent groupings in the network plot.
+The full SBM analysis of 18 boredom and curiosity items from the
+French Short Boredom Proneness Scale validation study
+[@MartarelliEtAl_2023_sbps] is the worked analysis
+[Edge clustering](../examples/edge-clustering.qmd): the posterior
+over the number of clusters, both clustering Bayes factors computed
+from it, the modal allocations, and the co-clustering matrix as the
+uncertainty statement for the partition. On those data the model
+recovers the two questionnaires as two clusters without being told
+the item assignments, while remaining undecided between two and
+three clusters, a second-order statement no post-hoc community
+detection can make.
 
 ## Choosing hyperparameters
 
