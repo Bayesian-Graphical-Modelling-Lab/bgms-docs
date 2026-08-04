@@ -198,6 +198,7 @@ website:
         - section: "Results and Checks"
           contents:
             - manual/fit-objects.qmd
+            - manual/checks-internals.qmd
         - manual/bgmcompare-internals.qmd
         - manual/numerical.qmd
 

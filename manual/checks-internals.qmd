@@ -1,0 +1,321 @@
+---
+title: "Checks Internals"
+---
+
+Two functions turn a fit into a judgement. `verdicts()` reads each edge
+indicator's inclusion Bayes factor as one of three verdicts and says whether a
+rerun of the sampler could change it. `calibration_check()` asks whether the
+model's conditional predictions land where they claim to. A third piece of
+machinery sits behind the prior sensitivity check: the anchored curve, which
+turns a handful of fits at fixed prior scales into a continuous curve without
+refitting in between.
+
+The three live in `R/verdicts.R`, `R/calibration_check.R`, and
+`R/anchor_curve.R`. For argument lists and return formats, see
+[Checking Tools](../reference/checks.qmd) in the Reference. This page documents
+the estimators.
+
+## The three-way rule
+
+The decision rule itself is four lines. Write $\ell$ for the natural log
+inclusion Bayes factor of an indicator and $t$ for the evidence threshold. With
+$\lambda = \log t$:
+
+$$
+\text{verdict} =
+\begin{cases}
+\text{presence} & \ell \ge \lambda \\
+\text{absence} & \ell \le -\lambda \\
+\text{undecided} & \text{otherwise.}
+\end{cases}
+$$
+
+A missing Bayes factor gives a missing verdict rather than "undecided", which
+matters for indicators that were never updated. The threshold is validated to
+be a single finite number greater than one, so the two boundaries are always
+on opposite sides of zero, and the same rule serves `verdicts()` and the
+per-anchor verdicts of the sensitivity check.
+
+The Bayes factor comes from
+[`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf),
+read on the natural log scale. Working in logs is not cosmetic here: `log_bf`
+stays finite where `bf` saturates at zero or infinity, and the fragility
+machinery below needs a finite number to measure distances with.
+
+`verdicts()` requires selection to have been on. Without it every edge is in
+the model and there is no inclusion Bayes factor to read, so the function stops
+with that explanation rather than returning an empty table.
+
+### Reading the indicators in the right order
+
+The verdict table is one row per indicator, in the order the raw indicator
+draws lay them out, and that order is not the same for every model. A GGM or
+ordinal fit lays its indicators out as the row-major upper triangle of the
+variable order. A mixed fit lays them out by block, discrete by discrete first,
+then continuous by continuous, then the cross block, which is a different
+permutation whenever the discrete and continuous columns interleave in the
+original data. `indicator_pair_index()` recovers the right one by filling the
+mixed layout with draw positions and reading the positions back off, so the
+Bayes factors and inclusion probabilities are looked up out of their symmetric
+matrices at the positions the draws actually used.
+
+`bgmCompare()` has its own layout again: for each variable, that variable's
+main-effect difference on the diagonal followed by its pairwise differences,
+which is what `compare_indicator_index()` builds.
+
+## The fragility flag
+
+A verdict near a boundary can flip on a rerun purely through Monte Carlo noise.
+The flag makes that a per-edge statement rather than a caveat in the prose.
+
+**The operating point.** In a known-truth calibration study of 37,010 graded
+edge-fits across ordinal, binary, and Gaussian graphical models, all 66 verdict
+errors sat within 0.58 of a threshold on the log Bayes factor scale, and no
+edge further out was ever misclassified. Verdict error is therefore a boundary
+phenomenon, and the flag marks the boundary region: an edge is fragile when a
+verdict boundary lies within two standard errors of its estimated evidence.
+
+**Two standard errors, because neither is enough alone.** Both are standard
+errors of the logit inclusion probability, which is the log inclusion Bayes
+factor scale shifted by the constant prior inclusion odds, so they are directly
+comparable with $\ell$.
+
+The *two-state* standard error, `two_state_se_logit()`, models each binary
+indicator chain as a first-order two-state Markov chain. It counts within-chain
+transitions only, never across the join between chains, and applies Jeffreys
+smoothing to the transition rates:
+
+$$
+\hat a = \frac{n_{01} + \tfrac12}{n_0 + 1}, \qquad
+\hat b = \frac{n_{10} + \tfrac12}{n_1 + 1}.
+$$
+
+The smoothing is what keeps the estimate defined at zero flips, where the
+unsmoothed rates would be $0/0$. From $\hat a$ and $\hat b$ the routine forms
+the stationary probability $p = \hat a / (\hat a + \hat b)$ and the two-state
+effective sample size, and returns $1/\sqrt{\text{ESS}\,p(1-p)}$. On its own
+this standard error caught 74% of the study's verdict errors.
+
+The *Rao-Blackwellized* standard error, `rb_se_logit()`, takes the Monte Carlo
+standard error of the one-step inclusion draws (see
+[GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws)) to the
+logit scale by the delta method, multiplying by $1/(p(1-p))$. It is `NA`
+wherever the incoming MCSE is, which is where the draws are constant to double
+precision. On its own it caught 94%.
+
+**The union rule.** `boundary_distance()` divides the gap to the nearer
+boundary, $\min(|\ell - \lambda|, |\ell + \lambda|)$, by each standard error,
+and an edge is fragile when either distance falls below 2. A missing distance
+abstains rather than votes. The union caught all 66 errors at the cost of
+flagging 3.0% of correct verdicts, and it transfers across model types, so the
+same operating point serves Gaussian graphical models as it serves ordinal and
+binary ones.
+
+A fragile verdict is not a wrong verdict. It is a verdict the run was too short
+to settle, and the remedy is more iterations.
+
+**Where the flag is not calibrated.** Every arm of the study fitted a single
+network. On `bgmCompare()` difference indicators the same arithmetic runs and
+still marks verdicts near a boundary, but no study has measured what share of
+difference-verdict errors it catches or how many correct verdicts it rejects.
+The returned object carries `flag_validated = FALSE` for those fits and the
+print method says so in plain language, alongside a second caveat that
+difference verdicts are contingent on `difference_scale`, whose default
+calibration is under study.
+
+`verdicts()` draws no random numbers. Given a fit and a threshold it is
+deterministic, and there is no `seed` argument.
+
+### The reporting cap
+
+`format_log_bf()` prints a rounded value inside a cap of $10^4$ and an
+inequality outside it. Past the cap the digits carry no information a longer
+run would reproduce, and a saturated Bayes factor has no value to print at all.
+A log Bayes factor that rounds to zero prints as `0`, never `-0.0`: the sign of
+a rounded-away quantity is not something the run established.
+
+## Calibration
+
+`calibration_check()` asks a different question: not whether an edge is there,
+but whether the model's predictions are honest. The unit is the conditional
+distribution $P(x_{ij} \mid \text{the rest of case } i)$, which is the model's
+own regression unit, so the check runs one variable at a time. Pooling across
+variables would let miscalibrations in opposite directions cancel.
+
+### Discrete variables
+
+For every case and every category threshold the model issues a cumulative
+probability and the data record whether the case fell at or below it. Isotonic
+regression, through `stats::isoreg()`, estimates the observed frequency as a
+monotone function of the predicted probability, and a calibrated variable
+tracks the diagonal. The final cumulative probability is 1 for every case and
+is dropped, since it says nothing about calibration.
+
+The predictions are the posterior-mean ones from
+[`predict()`](simulation-prediction.qmd#predicting-conditional-distributions).
+
+**The consistency band.** The band answers "how far from the diagonal does a
+model that is calibrated by construction wander on data this size?" It is built
+by simulation: for each of `nrep` replicates, `pav_panels()` draws one
+*category* per case from that case's own predicted distribution by inverse CDF,
+recomputes the isotonic curve, and takes pointwise quantiles of the result.
+
+Resampling the category rather than the threshold events is the load-bearing
+choice. One case's cumulative threshold events are nested by construction, and
+resampling them independently would produce a band that is too narrow, making
+ordinary wander look like miscalibration.
+
+### Continuous variables
+
+A continuous variable's prediction is a density, so there is no category to
+have fallen in. The same question is asked through the probability integral
+transform: $u_{ij} = F_j(y_{ij} \mid y_{i,-j})$ is Uniform(0, 1) exactly when
+the conditional predictive distribution is right. The panel is the empirical
+distribution function of the $u$ values against the uniform diagonal.
+
+`conditional_pit()` builds $F_j$ as the predictive mixture over `ndraws`
+posterior draws,
+
+$$
+u_{ij} = \frac{1}{D} \sum_{d=1}^{D}
+  \Phi\!\left( \frac{y_{ij} - m_{ij}^{(d)}}{s_{ij}^{(d)}} \right),
+$$
+
+using the internal `return_draws` path of the prediction helpers so it receives
+the per-draw conditional parameters instead of their average. Parameter
+uncertainty therefore sits inside the distribution the observation is
+transformed by. A single draw's Gaussian would be too narrow by exactly the
+amount the posterior is uncertain, and the uniform reference would no longer be
+the right one.
+
+**Its band is not resampled from the model.** Under the transform the null is
+Uniform(0, 1) whatever the conditional density was, so `uniform_ecdf_band()`
+simulates the empirical distribution functions of $n$ independent uniforms and
+takes pointwise quantiles. It depends on $n$ alone, which is why one band
+serves every continuous variable in a fit.
+
+The two panel kinds therefore condition on different things: the isotonic panel
+on posterior-mean probabilities, the transform panel on the full predictive
+distribution. Both live on the unit square against the diagonal, so a mixed fit
+produces one figure and one summary table, with a `kind` column recording which
+construction produced each row.
+
+### What is seeded
+
+Both bands consume random numbers from R's own generator, and `seed` is the
+only control over them: `calibration_check()` calls `set.seed()` when `seed` is
+supplied and does nothing otherwise. Because the selection of posterior draws
+for the predictive mixture also goes through R's generator, one seed fixes the
+whole check. Leave `seed` unset and the summary numbers move a little between
+calls, by the width of the band's own Monte Carlo error.
+
+### Per group
+
+On a `bgmCompare()` fit the check runs per group. A group's cases are the ones
+its own parameters predict, so pooling them would let a variable predicted too
+high in one group cancel against another, exactly as pooling variables would.
+Every variable in a comparison fit is discrete, so every panel is isotonic, and
+`ndraws` has no effect because `predict.bgmCompare()` issues posterior-mean
+predictions only.
+
+The row alignment is worth stating, because it is a real trap. The fit stores
+its cases sorted by group, so the membership vector the check uses is in that
+internal order. Supplied `newdata` arrives in the order the data were given and
+is permuted by the same stable sort before use, which is why the method insists
+on one row per fitted case in the original order rather than accepting an
+arbitrary matrix.
+
+### What the check does not say
+
+Evaluated on the fitted data the check is in-sample: the observation entered
+the parameters it is judged against, so the transform is mildly
+under-dispersed and the check is conservative. Held-out `newdata` removes that
+and makes it strictly harder to pass.
+
+More important, calibrated conditional predictions do not imply that the model
+reproduces the joint distribution. A model can predict each variable well from
+the others and still understate how strongly they depend on one another. That
+question needs a display built on [`simulate()`](simulation-prediction.qmd).
+
+## The anchored curve
+
+`R/anchor_curve.R` is the estimator behind the prior sensitivity check's
+continuous curve. The check refits the model at a handful of fixed slab scales,
+the anchors; this file fills in everything between them without refitting.
+[Sensitivity and Refits](sensitivity-refit.qmd) documents the grid, the refits,
+and the gate that decides which anchors are allowed to contribute.
+
+### Reweighting
+
+Take a fit at anchor scale $s_a$ and ask what its posterior would have been at
+a nearby scale $s$. Only the slab prior on the currently included edges
+changes, so the likelihood cancels, the spike terms cancel, and a fixed-scale
+anchor has no scale posterior to integrate. What is left is a per-draw ratio of
+slab densities. `anchor_log_weights()` forms its logarithm over the included
+edges, with $m_t$ the number of included edges in draw $t$:
+
+$$
+\log w_t(s) = -m_t \log\frac{s}{s_a}
+  - \frac{1}{2} \left( \frac{1}{s^2} - \frac{1}{s_a^2} \right)
+    \sum_{e:\,\gamma_{te}=1} \theta_{te}^2
+$$
+
+for a Normal slab, and the matching sum of $\log(1 + (\theta/s)^2)$ differences
+for a Cauchy one. This is the posterior-density-ratio reweighting identity of
+@BartosEtAl_2026_sensitivity, applied locally around each anchor; the anchored
+construction that stitches the anchors together is specific to `bgms`.
+
+`anchor_draws()` supplies $\theta$ in the frame the slab prior applies to,
+which for a GGM fit means the precision draws carry the $-\tfrac12$ factor
+first. For a `bgmCompare()` fit one indicator can gate several parameters: a
+pairwise difference indicator gates that pair's difference in every contrast,
+and a main-effect difference indicator gates the whole block of that variable's
+threshold differences in every contrast. `compare_anchor_draws()` builds the
+ownership map, so the weight sums over gated parameters while the inclusion
+probability stays reported per indicator.
+
+`anchor_reweight()` then does self-normalized importance sampling at each
+target scale, both pooled across chains and per chain, and records the
+importance effective sample size $(\sum w)^2 / \sum w^2$ alongside each
+estimate.
+
+### Stitching
+
+`assemble_curve()` builds the displayed curve one grid point at a time. Every
+anchor whose importance ESS at that point clears `ess_floor`, and which passed
+its own convergence gate, contributes its reweighted inclusion probability,
+weighted by inverse variance on that scale:
+
+$$
+w_a = \frac{\text{ESS}_a}{\max\!\left(p_a(1 - p_a),\, 10^{-6}\right)}.
+$$
+
+The clamp keeps a saturated edge from dividing by zero. Pooling happens on the
+inclusion-probability scale and is transformed to the log Bayes factor
+afterwards, which is what removes the staircase seams and the infinities that
+winner-take-all anchor selection produced at hand-off points: a capped-edge
+anchor no longer hands off discontinuously to a finite one.
+
+Grid points where no anchor clears the floor are masked to `NA` rather than
+extrapolated. Each surviving point is tagged with its highest-ESS anchor for
+reporting, and at an anchor's own grid position that tag is the anchor itself.
+The per-chain curves pool with the same weights, so the downstream per-point
+Monte Carlo standard error and chain-unanimity checks carry over unchanged.
+
+The pooled rows are an approximation and are treated as one. Exactness lives on
+the anchor fits' own Rao-Blackwellized statistics: the per-anchor verdict
+columns and every chosen-scale quantity are read straight from each fit, so the
+`1x` column is exactly the original fit's reported analysis. This is the
+multistate-bridge direction; fully self-consistent weights are future work.
+
+## See also
+
+[Sensitivity and Refits](sensitivity-refit.qmd),
+[Extractor Internals](extractors-internals.qmd),
+[Simulation and Prediction](simulation-prediction.qmd),
+[Convergence Diagnostics](diagnostics.qmd),
+[GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws),
+[Checking Tools reference](../reference/checks.qmd),
+[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
+
+## References
