@@ -38,44 +38,44 @@ When edge selection is active, pairwise effects are governed by
 spike-and-slab priors. The parameter is set to exactly zero when the edge
 is excluded, creating a chain that mixes between zero and nonzero values.
 
-The pairwise table reports one ESS for such a parameter, `n_eff`, and it is
-a composite of the model-averaged weight rather than a raw ESS of the full
-chain. Run through the standard autocorrelation machinery, a spike-and-slab
-chain inflates the ESS wherever the inclusion indicator rather than the
-weight drives the variability, so the package builds the statistic from the
-two Monte Carlo errors that actually limit the model-averaged weight: the
-inclusion part and the slab part. The companion column `share_incl` reports
-which of the two dominates. `mean`, `sd`, and `Rhat` do come from the full
+For such a parameter the pairwise table reports a single `n_eff`, and it
+is built differently than for an ordinary chain. To the standard
+autocorrelation machinery, the switching between zero and nonzero values
+looks like fast mixing, so the ESS comes out too large exactly where the
+indicator rather than the weight drives the variability. The package
+instead combines the two sources of Monte Carlo error that limit the
+model-averaged weight — how well the chain resolved whether the edge is
+in, and how well it resolved the weight given inclusion — into one
+equivalent sample size. The companion column `share_incl` tells you which
+source dominates. `mean`, `sd`, and `Rhat` are computed from the full
 chain, zeros included. See
 [Model Output](mcmc-output.qmd#sec-posterior-summaries) for the columns.
 
-**The retired mixture ESS.** A second, transition-based statistic was
-reported alongside `n_eff` in earlier versions. It treated the on/off
-indicator sequence as a two-state process and compared the chain's switch
-rates with those of an independent chain at the same inclusion probability
-[@VanDenBerghEtAl_2026_moms]. It is retired in 0.2.0.0, because that
-two-state model is rejected on a substantial share of edge chains, so the
-statistic no longer bears on any inclusion verdict. It is gone from the
-summary tables, and `extract_ess(fit, estimator = "mixt")` is deprecated.
-The precision of the inclusion probability and of its Bayes factor is
-carried by the Rao-Blackwellized `n_eff` and `mcse` instead, and the
-exploration signal it used to carry is now read off the directional
-transition counts `n0->1` and `n1->0`, which stay in
-`summary(fit)$indicator`.
+**The retired mixture ESS.** Earlier versions reported a second,
+transition-based statistic beside `n_eff`. It modeled the on/off indicator
+sequence as a simple two-state process and scored the chain's switch rates
+against an independent chain with the same inclusion probability
+[@VanDenBerghEtAl_2026_moms]. That simple process turns out to describe
+many edge chains poorly, so the statistic could mislead, and 0.2.0.0
+retires it: the `n_eff_mixt` column is gone from the summary tables, and
+`extract_ess(fit, estimator = "mixt")` is deprecated. The precision of the
+inclusion probability and of its Bayes factor is carried by the
+Rao-Blackwellized `n_eff` and `mcse`; the exploration it used to measure
+is read from the directional transition counts `n0->1` and `n1->0`, which
+stay in `summary(fit)$indicator`.
 
-How often an indicator flips in absolute terms mainly reflects the
-inclusion probability itself, being highest near 0.5, so a low flip count
-is not on its own a sign of trouble: an edge with an inclusion probability
-near 0 or 1 flips rarely even under perfect mixing. Read the counts with
-that in mind, and read their asymmetry, which a symmetric summary cannot
-recover.
+How often an indicator flips mainly reflects the inclusion probability
+itself: flips are most frequent near 0.5, and an edge with an inclusion
+probability near 0 or 1 flips rarely even under perfect mixing. A low flip
+count is therefore not on its own a sign of trouble. Do note the asymmetry
+between the two directions, which no single summary number can show.
 
-At the extreme the indicator never switches at all. This does not
-necessarily indicate a problem: if the posterior strongly favors inclusion
-or exclusion, there is little uncertainty about the indicator and the
-inclusion probability is well determined even without switching. For such
-zero-flip edges the verdict rests on the inclusion
-probability itself and on
+At the extreme, the indicator never switches at all. Even that is not
+necessarily a problem: when the posterior strongly favors inclusion or
+exclusion, there is little uncertainty about the indicator, and the
+inclusion probability is well determined without any switching. For these
+zero-flip edges the verdict rests on the inclusion probability itself and
+on
 [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf),
 which stays finite where the probability saturates.
 
@@ -101,15 +101,13 @@ evidence. On a saturated edge that is the expected reading rather than a
 fault.
 
 The Rao-Blackwellized columns come back `NA` when the inclusion draw
-carries too little variability for the machinery to work on, which happens
-by two routes. If the draws are constant to double precision, `sd` is
-exactly `0` and `mcse`, `n_eff`, and `Rhat` are all `NA`. If the variance
-is non-zero but below the numerical floor of the autocovariance kernel,
-`mcse` and `n_eff` come back `NA` while `sd` and `Rhat` are still
-reported. Either way the reading is the same: the inclusion probability is
-pinned, not poorly estimated. Note that this is not the same set as the
-zero-transition edges — a binary chain that never flipped can still have a
-Rao-Blackwellized draw with enough variability to summarize.
+barely varies: the chain is certain about the edge, and there is no
+remaining precision to estimate. Depending on how completely the draw is
+pinned, either all of `mcse`, `n_eff`, and `Rhat` are `NA`, or `Rhat`
+survives while `mcse` and `n_eff` do not. The reading is the same either
+way: the inclusion probability is pinned, not poorly estimated. These are
+not the same edges as the zero-transition ones — an indicator that never
+flipped can still leave a draw with enough variability to summarize.
 
 [`extract_ess()`](../reference/extractors.qmd#extract_ess) returns the
 Rao-Blackwellized `n_eff` for indicators, so its indicator
@@ -374,7 +372,7 @@ Every R-hat is below 1.01 and the smallest effective sample size is around a
 thousand, so the chains agree with each other and with their own halves. The
 transition counts back that agreement up: of the 136 edges, the 120 the data
 did not decide outright all moved between structures in both directions,
-though the thinnest of them managed only one flip each way.
+though the slowest of them managed only one flip each way.
 
 ```{r}
 ind = summary(fit)$indicator
@@ -433,13 +431,12 @@ The summary reports two channels per chain:
   see.
 
 Small values on both channels mean the approximation did not
-meaningfully affect the sampled graphs. The advice printed for a
-flagged chain is a ladder: it reports the measured error and what the
-audit covered, then advises raising
-`options(bgms.zratio_gauge_sweeps)` and refitting to resolve whether
-the signal is real, and only then mentions
-`precision_graph_prior = "joint"` — which targets a different model,
-not a fix. The gauge never switches specification on its own. See
+meaningfully affect the sampled graphs. A flagged chain prints the
+measured error and what the audit covered, followed by advice in
+order: first raise `options(bgms.zratio_gauge_sweeps)` and refit, to
+see whether the signal is real; only after that consider
+`precision_graph_prior = "joint"`, which is a different model rather
+than a fix. The gauge never switches specification on its own. See
 [`summarize_zratio_gauge()`](../reference/prior-samplers.qmd#summarize_zratio_gauge)
 for the full output format and thresholds.
 

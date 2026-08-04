@@ -68,7 +68,7 @@ and `fit$zratio_diag` holds the trust-gauge summary, which a continuous
 or mixed fit with edge selection produces by default under
 `precision_graph_prior = "hierarchical"` (see
 [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-trust-gauge)); both are
-`NULL` otherwise, and on this ordinal fit both are.
+`NULL` otherwise, as they are on this ordinal fit.
 
 ## Posterior summaries {#sec-posterior-summaries}
 
@@ -120,14 +120,14 @@ near 1 indicates strong evidence for the edge; near 0 indicates strong
 evidence against it. Values around 0.5 are inconclusive. The
 directional transition counts (`n0->1`, `n1->0`) show how often the
 edge indicator switched between excluded (0) and included (1) states
-during sampling; they are the table's exploration signal. Read them
+during sampling; they show how much the sampler explored. Read them
 beside `n_eff`, which measures precision conditional on that
 exploration; see
 [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
 The Rao-Blackwellized precision columns (`mcse`, `n_eff`, `Rhat`) come
-back `NA` when the inclusion draw carries too little variability to
-summarize, rather than reporting the reassuring-looking numbers a
-near-constant chain would otherwise produce.
+back `NA` when the chain is so certain about an edge that there is
+nothing left to estimate, rather than reporting the reassuring-looking
+numbers a near-constant chain would otherwise produce.
 [`extract_ess()`](../reference/extractors.qmd#extract_ess) returns the
 same Rao-Blackwellized `n_eff` for indicators.
 
@@ -140,7 +140,7 @@ same Rao-Blackwellized `n_eff` for indicators.
 | `mcse` | Monte Carlo standard error — how precisely the posterior mean is estimated. A small MCSE relative to `sd` indicates sufficient sampling. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mcse). |
 | `n_eff` | Effective sample size — the number of independent draws the chain is equivalent to. Values below 100 warrant longer runs. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-ess). |
 | `share_incl` | Tables of parameters under selection only (`pairwise` for [`bgm()`](../reference/bgm.qmd); `main_diff` and `pairwise_diff` for [`bgmCompare()`](../reference/bgmCompare.qmd)). The share of the squared Monte Carlo error of the model-averaged parameter that comes from inclusion uncertainty rather than from the slab. Values near 1 mean the bottleneck is how well the chain resolved whether the parameter is in; values near 0 mean it is how well the chain resolved the effect size given inclusion. |
-| `n0->1`, `n1->0` | Inclusion table only. Directional counts of indicator transitions, and the table's exploration signal. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mixture-ess). |
+| `n0->1`, `n1->0` | Inclusion table only. Directional counts of indicator transitions; they show how much the sampler moved between structures. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mixture-ess). |
 | `Rhat` | Split $\hat{R}$ convergence diagnostic. Values above 1.01 suggest the chains have not mixed. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rhat). |
 
 In the pairwise table for an edge-selected fit, `mcse` and `n_eff` are

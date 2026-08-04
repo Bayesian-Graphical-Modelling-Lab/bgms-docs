@@ -337,16 +337,16 @@ directional transition counts `n0->1` and `n1->0`, which carry the
 exploration itself; see
 [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
 
-`estimator` is the sole choice this function takes, and only `"rb"` is
-live. `estimator = "mixt"`, the transition-based ESS of the binary
-indicator chain, is deprecated as of 0.2.0.0: the two-state model behind
-it is rejected on a substantial share of edge chains, so it no longer
-bears on any inclusion verdict. Passing it warns and still returns the
+`estimator` has one live value, `"rb"`. The alternative,
+`estimator = "mixt"` — the transition-based ESS of the binary indicator
+chain — is deprecated as of 0.2.0.0: the simple two-state process it
+assumes describes many edge chains poorly, so the statistic no longer
+feeds any inclusion verdict. Passing it warns and still returns the
 statistic. `n_eff_mixt` is no longer a column of `summary(fit)$indicator`.
 
-The `indicator` element is `NA` wherever the Rao-Blackwellized draw
-carries too little variability to summarize; see
-[`extract_rhat()`](#extract_rhat) for the two routes that produce it.
+The `indicator` element is `NA` wherever the inclusion probability is
+pinned at its bound and no precision is left to estimate; see
+[`extract_rhat()`](#extract_rhat) for the exact rule.
 Fits made with bgms < 0.2.0.0 carry no Rao-Blackwellized draws, so an
 explicit `estimator = "rb"` errors there.
 
@@ -394,12 +394,12 @@ degrees-of-freedom adjustment is applied. For implementation details, see
 [diagnostics](../manual/diagnostics.qmd) in the Technical Manual.
 
 The `indicator` element is computed on the continuous Rao-Blackwellized
-inclusion draws. It is `NA` where those draws are constant to double
-precision, the inclusion probability sitting at its numerical bound. An
-edge whose draws vary a little — below the numerical floor of the
-autocovariance kernel, but above zero — still reports a finite `Rhat`
-even though its `mcse` and `n_eff` come back `NA`. Note that neither set
-is the same as the set of edges whose binary indicator never flipped.
+inclusion draws. It is `NA` where those draws are exactly constant, with
+the inclusion probability pinned at its bound. Draws that vary too
+little for the autocorrelation machinery, without being exactly
+constant, keep a finite `Rhat` while `mcse` and `n_eff` are `NA`.
+Neither set is the same as the set of edges whose binary indicator never
+flipped.
 
 ::: {.callout-note}
 ## One failure mode these diagnostics do not see
