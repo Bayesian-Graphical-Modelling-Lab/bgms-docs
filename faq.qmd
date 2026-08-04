@@ -1,0 +1,144 @@
+---
+title: "Frequently asked questions"
+---
+
+Short answers that route to the page carrying the full story. If your
+question is not here, the [worked analyses](examples/index.qmd) and the
+[User's Guide](guide/index.qmd) are the two front doors.
+
+## Getting started
+
+### What data can I give `bgm()`?
+
+Binary, ordinal, and continuous variables, in a matrix or a data frame;
+`variable_type` says which columns are which, and the default reads
+every column as ordinal. Binary items are ordinal items with two
+categories, so they need no special treatment. More:
+[`bgm()`](reference/bgm.qmd) and
+[Getting Started](guide/getting-started.qmd).
+
+### Why does the documentation run `bgm()` so much longer than the default?
+
+The defaults (2,000 warmup and 2,000 sampling iterations) are tuned for
+exploration. What you read off a fit is evidence, and the run has to be
+long enough to pin each inclusion probability down to the precision the
+evidence claim needs, which is why the worked analyses run
+`iter = 1e4, warmup = 5e3`. More:
+[run-length settings](guide/mcmc-diagnostics.qmd#sec-run-length) and
+[Reading the output](examples/reading-the-output.qmd).
+
+### Why does `bgm()` take minutes when `EBICglasso` takes seconds?
+
+Because it computes a posterior over network structures and weights
+rather than one penalized point estimate. The credible intervals, the
+evidence per edge, and the undecided category all come out of those
+draws, with no bootstrap loop to run afterwards; the comparison page
+prices the trade honestly. More:
+[Coming from bootnet and qgraph](examples/from-bootnet-qgraph.qmd).
+
+## Reading the results
+
+### What does an inclusion Bayes factor of 10 mean?
+
+The data have multiplied the prior odds in favor of the edge by ten. It
+is a ratio, so it runs in both directions: 1/10 is tenfold evidence
+against the edge, and values near one mean the data moved nothing
+either way. Ten is a reporting convention, not a law of nature; state
+the threshold you use. More:
+[Edge Selection](guide/edge-selection.qmd).
+
+### Can I say an edge is absent?
+
+Yes, and that is much of the point: an inclusion Bayes factor at or
+below 1/10 is evidence of conditional independence, a positive finding
+you can report. What you cannot do is read absence off a blank in an
+estimated network, which cannot distinguish "ruled out" from "not
+enough data". More:
+[From estimation to evidence](examples/estimation-to-evidence.qmd).
+
+### The posterior inclusion probability is high. Is that the evidence?
+
+Not by itself. The inclusion probability mixes what the data showed
+with where the prior started, so under any edge prior other than 0.5
+the posterior odds understate or overstate the evidence. The inclusion
+Bayes factor divides the prior odds out, which is why the verdicts are
+read from it. More:
+[Edge Selection](guide/edge-selection.qmd#sec-bf-continuous).
+
+### I reran the analysis and the numbers changed slightly. Is something wrong?
+
+No: the estimates are Monte Carlo averages, so two unseeded runs differ
+by sampling error, and `summary(fit)` reports each estimate's `mcse`.
+Set `seed` for a repeatable run, and read the diagnostics page for what
+a seed does and does not guarantee. A difference large enough to change
+what you would report is a mixing problem, not a seeding one. More:
+[Results differ between runs](guide/mcmc-diagnostics.qmd#sec-reproducibility).
+
+### Does a thicker edge mean stronger evidence?
+
+No. Width encodes the estimated weight, and effect size and evidence
+are different quantities: a moderate weight can be estimated with
+overwhelming evidence, and a large one with next to none. That is why
+the edge evidence plot weights only its presence panel and draws the
+other two by classification alone. More:
+[the edge evidence plot](reference/methods.qmd#plot).
+
+### Can I use centrality to pick intervention targets?
+
+Centrality summarizes a node's total involvement in the fitted network;
+it is not a causal quantity, and no analysis of cross-sectional
+conditional associations becomes a causal claim by itself. `bgms`
+reports strength centrality with its posterior uncertainty, so the
+ranking's stability is at least visible rather than assumed. More:
+[`extract_centrality()`](reference/extractors.qmd#extract_centrality).
+
+### `verdicts()` flagged some verdicts as fragile. Is the analysis broken?
+
+No: fragile means the verdict sits within two Monte Carlo standard
+errors of an evidence threshold, so a rerun or a longer run could
+change it. It is a statement about run length, not about the data, and
+the remedy is more iterations. More:
+[`verdicts()`](reference/checks.qmd#verdicts).
+
+## Priors
+
+### Do the default priors matter?
+
+They are defensible defaults, not neutral ones: the slab is the
+alternative hypothesis the inclusion Bayes factor tests against, so its
+scale has real leverage on the verdicts. Understand what the defaults
+assume, and state them when you report. More:
+[Prior Basics](guide/prior-basics.qmd).
+
+### A reviewer asks whether my conclusions depend on the prior. What do I answer?
+
+Run `prior_sensitivity_check(fit)` and report what it prints: how many
+verdicts hold across the examined range of prior scales, which edges
+genuinely move, and the scale the data prefer next to the one you
+chose. One page walks the whole report, including the two-sentence
+manuscript template. More:
+[Check your priors](examples/check-your-priors.qmd).
+
+## Practicalities
+
+### What happens to my missing data?
+
+By default, rows with any missing value are dropped
+(`na_action = "listwise"`), and a message reports how many. Setting
+`na_action = "impute"` instead imputes the missing entries inside the
+MCMC, drawing each from its full conditional distribution at every
+iteration. More: [Missing Data](guide/missing-data.qmd).
+
+### How do I cite `bgms`?
+
+`citation("bgms")` prints the reference for your installed version, and
+the [homepage](index.qmd) has a citation picker with APA, Chicago,
+BibTeX, and RIS formats. Cite the version you actually used.
+
+### Where do I ask a question or report a bug?
+
+On the
+[bgms issue tracker](https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/issues).
+A report that can be acted on carries the `bgm()` call as you ran it,
+`fit$nuts_diag$summary`, and the output of `sessionInfo()`. More:
+[Still stuck](guide/mcmc-diagnostics.qmd#sec-still-stuck).
