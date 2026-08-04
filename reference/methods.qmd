@@ -147,8 +147,8 @@ uniform width, dashed for evidence of absence and dotted for undecided:
 for those pairs the classification is the result, and a width would
 suggest an effect size the data have either ruled out or not established.
 
-The figure carries no key, because each panel is titled with the evidence
-class it holds and the rule that defines it.
+The figure carries no key: each panel's title names the evidence class and
+its count, with the classification rule printed beneath it.
 
 For the same display built by hand with `qgraph`, and for the reasoning
 behind it, see the `plot_edge_evidence()` helper in
@@ -157,8 +157,8 @@ behind it, see the `plot_edge_evidence()` helper in
 
 **Device size.** Three networks side by side need a wide device. R's
 default 7 by 7 inches leaves each panel a little over two inches, and at
-that size the labels and titles crowd; `plot()` says so when it detects
-one. Open a wider device before plotting:
+that size the labels and titles crowd; `plot()` says so when the device is
+too small. Open a wider device before plotting:
 
 ```r
 dev.new(width = 13, height = 5)   # or pdf(f, width = 13, height = 5)

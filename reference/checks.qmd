@@ -92,13 +92,13 @@ its counts.
 ### Details
 
 **What "fragile" means.** An edge is fragile when a verdict boundary lies
-within two standard errors of its estimated evidence, which is the regime
-where the reported verdict rests on Monte Carlo noise rather than on the
+within two standard errors of its estimated evidence, close enough that
+the reported verdict could rest on Monte Carlo noise rather than on the
 data. A fragile verdict is not a wrong verdict; it is a verdict the run is
 too short to settle, and the remedy is more sampling iterations.
 
-Two standard errors are computed because neither catches every error on
-its own. The two-state standard error models the binary indicator chain as
+Two kinds of standard error enter that rule, because neither catches every
+error on its own. The two-state standard error models the binary indicator chain as
 a first-order two-state Markov chain with Jeffreys-smoothed transition
 rates, which keeps it defined when the indicator never flips. The
 Rao-Blackwellized standard error is the Monte Carlo standard error of the
@@ -106,23 +106,23 @@ one-step inclusion draws, carried to the logit scale by the delta method.
 The flag fires when either one places a boundary within two standard
 errors.
 
-The operating point behind that rule comes from a known-truth calibration
-study of 37,010 graded edge-fits across ordinal, binary, and Gaussian
-graphical models. Every one of the 66 verdict errors in that study sat
-within 0.58 of a threshold on the natural log Bayes factor scale. Taken
-alone the two-state error caught 74% of them and the Rao-Blackwellized
-error 94%; flagging on either caught all 66, at the cost of also flagging
-3.0% of correct verdicts. The union transfers across model types, so the
-flag applies to Gaussian graphical models as it does to ordinal and binary
-ones.
+The operating point behind that rule comes from a calibration study that
+graded 37,010 edge verdicts against known truth, across ordinal, binary,
+and Gaussian graphical models. Every one of the 66 verdict errors in that
+study sat within 0.58 of a threshold on the natural log Bayes factor
+scale. Taken alone the two-state error caught 74% of them and the
+Rao-Blackwellized error 94%; flagging on either caught all 66, at the cost
+of also flagging 3.0% of correct verdicts. That performance carried across
+the three model types, so the flag applies to Gaussian graphical models as
+it does to ordinal and binary ones.
 
-Every arm of that study fitted a single network, so the operating point
-applies to the edge indicators of [`bgm()`](bgm.qmd). On the difference
+Every fit in that study was of a single network, so the operating point
+covers the edge indicators of [`bgm()`](bgm.qmd). On the difference
 indicators of [`bgmCompare()`](bgmCompare.qmd) the flag still marks
 verdicts sitting near a boundary, but no study has measured what share of
 difference-verdict errors it catches or how many correct verdicts it
-rejects. The print method says so, and the returned object carries
-`flag_validated = FALSE`.
+flags along the way. The print method says so, and the returned object
+carries `flag_validated = FALSE`.
 
 The threshold is a reporting convention, not a property of the data.
 Moving it moves the boundaries, and with them which edges sit close enough
@@ -234,8 +234,8 @@ function of the predicted one, and a calibrated variable tracks the
 diagonal. The band resamples each case's *category* from its own predicted
 distribution and refits the curve. It has to be built that way: the
 cumulative threshold events of one case are nested, so resampling the
-events independently would understate the band and make an ordinary wander
-look like miscalibration. The predictions are the posterior-mean ones.
+events independently would understate the band and make ordinary sampling
+variation look like miscalibration. The predictions are the posterior-mean ones.
 
 **Continuous variables** have a density rather than a distribution over
 categories, and are checked through the probability integral transform
@@ -265,10 +265,11 @@ no effect.
 
 **In-sample and out-of-sample.** Evaluated on the fitted data the check is
 in-sample, and the band is the reference a model that is calibrated by
-construction produces on the same data. In-sample the observation also
-entered the parameters it is judged against, so the transform is mildly
-under-dispersed and the check is conservative. Supplying held-out
-`newdata` removes that and makes the check strictly harder to pass.
+construction produces on the same data. In-sample, each observation has
+also helped estimate the parameters it is judged against, which pulls the
+predictions slightly toward the data and makes the check conservative.
+Supplying held-out `newdata` removes that advantage and makes the check
+strictly harder to pass.
 
 **What a pass does not buy you.** Calibrated conditional predictions do
 not imply that the model reproduces the joint distribution: a model can
@@ -289,8 +290,8 @@ check
 `share_outside_band` is a proportion on a 0 to 1 scale, so `0.3` means
 that 30% of the curve lies outside its band. Read the table as a ranking
 of where to look first, not as a test with a pass mark: the band is a
-consistency reference for a model calibrated by construction, and an
-ordinary wander crosses it here and there.
+consistency reference for a model calibrated by construction, and even a
+well-calibrated variable crosses it here and there.
 
 `plot()` draws the reliability diagrams, worst departure first:
 
