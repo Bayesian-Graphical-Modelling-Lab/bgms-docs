@@ -80,11 +80,13 @@ coef(fit)
 
 A single network drawing has to make every pair either an edge or a blank, and a blank cannot say whether the data ruled the pair out or simply had too little to say about it. Because `bgms` returns an inclusion Bayes factor for every pair, you do not have to make that choice. The network is drawn as three panels on one shared layout: the pairs the data support, the pairs the data rule out, and the pairs the data cannot decide. This is the **edge evidence plot**, and it is the display this documentation uses for every network result.
 
-The categories come from [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) at an inclusion Bayes factor of 10 in either direction. See [Edge Selection](edge-selection.qmd) for why the Bayes factor, and not the inclusion probability on its own, is what licenses a claim about an edge. The drawing uses the `qgraph` package [@EpskampEtAl_2012_qgraph].
+The categories come from [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) at an inclusion Bayes factor of 10 in either direction. See [Edge Selection](edge-selection.qmd) for why the Bayes factor, and not the inclusion probability on its own, is what licenses a claim about an edge. [`plot(fit)`](../reference/methods.qmd#plot) draws a rudimentary version of this display in one call, and the [easybgm](https://cran.r-project.org/package=easybgm) package offers more elaborate plotting and summary functions on top of `bgms`. The drawing below uses the `qgraph` package directly [@EpskampEtAl_2012_qgraph], with every styling choice under your control.
 
 ```{r}
 #| fig-width: 9.5
 #| fig-height: 3.7
+#| message: false
+#| warning: false
 library(qgraph)
 
 plot_edge_evidence = function(fit, labels, node_color, threshold = 10,

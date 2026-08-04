@@ -246,6 +246,22 @@ debt is now paid: A9 (2026-08-04) shipped the site pages and restored the
 "complete documentation" headline. The naive-reader gap recorded under
 Phase 5 remains open and is unaffected by this pass.
 
+## Live-Site Review Fixes (2026-08-04, MM review comments)
+
+Three fixes from MM's review of the live flagship. (1) The leaked
+"package 'qgraph' was built under R version 4.6.1" warning at the top of
+examples/estimation-to-evidence.qmd and inside guide/getting-started.qmd's
+visible library(qgraph) chunk is suppressed (warning: false on both
+chunks). (2) Both pages now say, next to the qgraph helper, that plot(fit)
+draws a rudimentary version of the edge evidence display in one call and
+that the easybgm package (CRAN link; no references.bib entry, so no
+citation) offers more elaborate plotting and summary functions on top of
+bgms. (3) The flagship's What-to-report callout gained a
+plot_edge_posterior() line for the single-edge figure. Package-side, MM
+routed the summary print's NA-suppression note to a bgms agent; when that
+lands in a build, reading-the-output's indicator-block prose and the
+frozen printouts need a text check at the next render.
+
 ## A9 Reference Coverage (2026-08-04)
 
 Closes flagged-issues bgms-docs item 20. Every 0.2.0.0 export now has a

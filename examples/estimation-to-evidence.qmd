@@ -6,6 +6,7 @@ title: "From estimation to evidence"
 #| label: setup
 #| echo: false
 #| message: false
+#| warning: false
 #| purl: false
 library(bgms)
 library(qgraph)
@@ -205,8 +206,13 @@ contract.
 ## The three panels
 
 The figure at the top of the page is the verdict table drawn as three
-networks on one shared layout, so the panels match node for node
-(`plot(fit)` draws the same display in one call):
+networks on one shared layout, so the panels match node for node. You do
+not need custom code to get it: [`plot(fit)`](../reference/methods.qmd#plot)
+draws a rudimentary version of the same display in one call, and the
+[easybgm](https://cran.r-project.org/package=easybgm) package offers more
+elaborate plotting and summary functions on top of `bgms`. The helper below
+builds the figure with `qgraph` directly, with every styling choice under
+your control:
 
 ```{r}
 #| label: panels-mirror
@@ -292,6 +298,11 @@ quarter of the network as settled when it is an open question.
 - For an undecided edge: "The evidence for a conditional association
   between `<X>` and `<Y>` was inconclusive
   ($\text{BF}_{10} = \texttt{<value>}$); these data do not decide it."
+- For an edge that carries a substantive claim,
+  [`plot_edge_posterior(fit, "intrusion", "concen")`](../reference/methods.qmd#plot_edge_posterior)
+  draws the posterior of its weight against the prior it was updated from,
+  with the inclusion evidence as a probability wheel: a single-edge figure
+  for a results section.
 - State the evidence threshold and the counts it produced, and check the
   fragility note in `verdicts()` before resting a conclusion on a
   borderline edge.
