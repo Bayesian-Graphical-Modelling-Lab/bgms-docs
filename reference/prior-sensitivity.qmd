@@ -20,7 +20,7 @@ exactly the analysis you already ran. A noise band, calibrated from a
 repeated refit at one anchor, keeps boundary edges that merely flip
 between reruns of the same prior from being reported as prior sensitivity.
 
-The check prices the curve with a handful of warm-started anchor fits,
+The check builds the curve from a handful of warm-started anchor fits,
 reweighting between neighboring anchors. The reweighting itself is the
 posterior-density-ratio identity of @BartosEtAl_2026_sensitivity, applied
 locally around each refit anchor; the anchored construction is `bgms`'s own.

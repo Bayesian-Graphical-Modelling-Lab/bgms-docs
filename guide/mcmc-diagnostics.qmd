@@ -137,8 +137,9 @@ The same formula covers inclusion probabilities: because the reported
 estimate is the average of the continuous Rao-Blackwellized inclusion
 draws rather than of the binary indicators, its `sd` and `n_eff` are
 those of that continuous chain (see
-[Inclusion ESS and the exploration pair](#sec-rb-inclusion-ess)). Edges
-whose indicator never flipped report `NA` here.
+[Inclusion ESS and the exploration counts](#sec-rb-inclusion-ess)).
+Edges whose inclusion probability is pinned at its bound report `NA`
+here.
 
 A small MCSE relative to the posterior standard deviation indicates stable
 estimates; a large MCSE suggests that more iterations are needed.
@@ -179,9 +180,8 @@ reported rather than a misleading one. If chains are instead stuck at
 failure, and it is reported loudly rather than hidden.
 
 For edge indicators, the reported R-hat is computed on the continuous
-Rao-Blackwellized inclusion draws, and is `NA` for edges whose
-indicator never flipped
-([see above](#sec-rb-inclusion-ess)).
+Rao-Blackwellized inclusion draws, and is `NA` where those draws are
+exactly constant ([see above](#sec-rb-inclusion-ess)).
 
 ## Trace plots
 
@@ -352,11 +352,11 @@ One chain has an energy slope that is statistically significant, so the fit
 is flagged. Nothing else in the check is out of range: the variance ratios sit
 near 1, well below the 2 that indicates a chain still settling, and the E-BFMI
 values are far above 0.3. The message the sampler prints tells you where to
-look next, and that check is the one that decides. For indicators both
+look next, and that check is the one that decides. For indicators,
 [`extract_ess()`](../reference/extractors.qmd#extract_ess) and
-[`extract_rhat()`](../reference/extractors.qmd#extract_rhat) read the
-Rao-Blackwellized inclusion chain by default, so the indicator row
-below is one reading of one chain:
+[`extract_rhat()`](../reference/extractors.qmd#extract_rhat) both read
+the Rao-Blackwellized inclusion chain, so the indicator row below is
+two summaries of the same draws:
 
 ```{r}
 rh = extract_rhat(fit)

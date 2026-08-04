@@ -3,9 +3,14 @@ title: "Function Reference"
 toc: false
 ---
 
-Complete documentation for all exported functions in `bgms`.
+Documentation for the `bgms` API.
 
 `bgm()` and `bgmCompare()` return S7 objects (classes `bgms` and `bgmCompare`). Standard methods like `print()`, `summary()`, and `coef()` work through S3 dispatch for compatibility with base R generics.
+
+A few 0.2.0.0 additions do not have site pages yet: `verdicts()`,
+`calibration_check()`, `plot_edge_posterior()`, `extract_centrality()`,
+and the `plot()` methods. Their R help pages are complete — start with
+`?verdicts` — and site pages follow in a documentation update.
 
 ## Core Functions
 
