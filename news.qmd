@@ -7,7 +7,7 @@ package's complete change log, including breaking changes and bug fixes, is
 [NEWS.md](https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/blob/main/NEWS.md)
 in the package repository.
 
-## 2026-07-30: bgms 0.2.0.0 on CRAN
+## 2026-08-04: bgms 0.2.0.0 on CRAN
 
 This release widens the model class. [`bgm()`](reference/bgm.qmd) now fits
 Gaussian graphical models with `variable_type = "continuous"`, and mixed
@@ -22,7 +22,20 @@ saturates. Priors are now built with constructor functions such as
 [`prior_sensitivity_check()`](reference/prior-sensitivity.qmd), which reports
 which edge verdicts depend on the slab scale you chose.
 
-## 2026-07-30: Documentation site launched
+Several defaults changed, so a script written against 0.1.6.3 can run and
+give different numbers. Pairwise parameters are now reported on the
+association scale, about half their old values. The interaction slab
+defaults to `normal_prior(scale = 1)` in both
+[`bgm()`](reference/bgm.qmd) and
+[`bgmCompare()`](reference/bgmCompare.qmd), which also takes
+`difference_family = "Normal"` for group differences; on continuous and
+mixed models `precision_graph_prior` defaults to `"hierarchical"`, so the
+prior over structures is exactly the edge prior you wrote down. `iter` and
+`warmup` default to `2000` and the NUTS `target_accept` to `0.80`. The
+package's [NEWS.md](https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/blob/main/NEWS.md)
+lists every one of them with the argument that restores the old behavior.
+
+## 2026-08-04: Documentation site launched
 
 This site replaces the reference-only pages that used to live at this address.
 It adds a [User's Guide](guide/index.qmd) that explains the modelling and prior
