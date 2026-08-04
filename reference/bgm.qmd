@@ -30,7 +30,7 @@ bgm(
   delta = NULL,
   edge_selection = TRUE,
   edge_prior = bernoulli_prior(0.5),
-  precision_graph_prior = c("joint", "hierarchical"),
+  precision_graph_prior = c("hierarchical", "joint"),
   na_action = c("listwise", "impute"),
   update_method = c("nuts", "adaptive-metropolis", "gibbs"),
   target_accept,
@@ -69,25 +69,36 @@ Priors are specified by passing prior-object constructors (see [Prior Constructo
 | `delta` | Non-negative numeric, or `NULL` for the dimension-adaptive default. Determinant-tilt exponent on the continuous-block precision matrix $K$ (GGM) or $K_{yy}$ (mixed MRF): multiplies the prior by $|K|^{\delta}$, softly repelling the chain from the boundary of the positive-definite cone. `NULL` (default) auto-resolves to $0.5 \log(p)$, with $p$ the number of continuous variables. Pass `delta = 0` for the untilted prior. Ignored for pure ordinal models. |
 | `edge_selection` | Logical. Whether to perform Bayesian edge selection. If `FALSE`, the model estimates all edges. Default: `TRUE`. |
 | `edge_prior` | A [`bgms_indicator_prior`](priors.qmd) object specifying the prior for edge inclusion. Allowed: [`bernoulli_prior()`](priors.qmd#bernoulli_prior) (default), [`beta_bernoulli_prior()`](priors.qmd#beta_bernoulli_prior), [`sbm_prior()`](priors.qmd#sbm_prior). Legacy character strings (`"Bernoulli"`, `"Beta-Bernoulli"`, `"Stochastic-Block"`) are accepted but deprecated. For continuous and mixed models with `beta_bernoulli_prior()` or `sbm_prior()`, the hyperparameter updates carry a normalizing-constant correction; see the note below. Default: `bernoulli_prior(0.5)`. |
-| `precision_graph_prior` | Character. How the precision prior composes with the edge prior under edge selection for continuous (GGM) data. `"joint"` (default): the un-normalized joint specification, whose graph marginal is the edge prior times a graph-dependent normalizing constant; with `beta_bernoulli_prior()` or `sbm_prior()` the hyperparameter updates then carry the normalizing-constant correction described in the note below. `"hierarchical"`: the hierarchical specification $p(\Gamma)\,p(K \mid \Gamma)$ with the precision prior normalized per graph, so that the graph marginal is exactly the edge prior. Each edge move then evaluates a normalizer ratio with a fast local approximation, built once at the start of the analysis. An optional trust gauge (off by default; enable with `options(bgms.zratio_gauge_sweeps = 2L)` before fitting) audits the approximation after sampling; its summary is returned as `fit$zratio_diag` (see [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge)). Requires `edge_selection = TRUE`, a `normal_prior()` or `cauchy_prior()` interaction prior, and continuous data — all-continuous, or mixed with at least two continuous variables (the normalizer then lives on the continuous block, and only continuous-continuous edge moves are affected). Default: `"joint"`. |
+| `precision_graph_prior` | Character. How the precision prior composes with the edge prior under edge selection for continuous (GGM) data. `"hierarchical"` (default): the hierarchical specification $p(\Gamma)\,p(K \mid \Gamma)$ with the precision prior normalized per graph, so that the graph marginal is exactly the edge prior. Each edge move then evaluates a normalizer ratio with a fast local approximation, built once at the start of the analysis; a trust gauge runs in-chain and audits that approximation, and its summary is returned as `fit$zratio_diag` (see [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge)). Set `options(bgms.zratio_gauge_sweeps = 0L)` before fitting to switch the gauge off. `"joint"`: the un-normalized joint specification, whose graph marginal is the edge prior times a graph-dependent normalizing constant; with `beta_bernoulli_prior()` or `sbm_prior()` the hyperparameter updates then carry the normalizing-constant correction described in the note below. The hierarchical specification requires `edge_selection = TRUE`, a `normal_prior()` or `cauchy_prior()` interaction prior, and continuous data — all-continuous, or mixed with at least two continuous variables (the normalizer then lives on the continuous block, and only continuous-continuous edge moves are affected). Where the choice is vacuous — `edge_selection = FALSE`, or no continuous precision block — the argument is accepted rather than an error, the correction surface and the gauge are skipped, and the posterior is identical under either value; naming the argument there reports it when `verbose = TRUE`. Default: `"hierarchical"`. |
 
 ::: {.callout-note}
-## Edge-prior correction for continuous models
+## What a continuous fit builds before the chains start
 
-For continuous (GGM) and mixed models with `beta_bernoulli_prior()` or
-`sbm_prior()` under the default `precision_graph_prior = "joint"`, the
-hyperparameter updates carry a normalizing-constant correction: under the
-determinant-tilted precision prior, the plain conjugate updates would target
-the wrong marginals for the inclusion probability and the block structure. In
-mixed models the tilt acts on the continuous precision block, so the
-correction reads continuous-continuous edges only; with fewer than two
-continuous variables the plain conjugate updates apply unchanged. The
-correction table is built from the prior distribution at the first fit of a
-model configuration — a one-time cost of the order of minutes, announced when
-`verbose = TRUE` — and cached on disk via
-`tools::R_user_dir("bgms", "cache")`, so later fits of the same configuration
-skip the build. With `beta_bernoulli_prior()` the sampled inclusion
-probability is returned per chain in `fit$inclusion_parameter_samples`.
+Both specifications precompute something once per analysis, and both cache it
+on disk via `tools::R_user_dir("bgms", "cache")`, so a repeat fit of the same
+configuration skips the build.
+
+Under the default `precision_graph_prior = "hierarchical"` it is the
+**normalizer surface** the edge moves evaluate their ratio against. It
+announces itself with the size it covers and the number of cores it uses, then
+reports its elapsed time — this is the pause before the chains start on a first
+hierarchical fit. At the full 80-variable range it costs about 24 seconds
+serial and about 7 on four cores; a fit on fewer variables sizes the build to
+its own variable count. A hierarchical fit needs no edge-prior correction
+table, whatever its edge prior.
+
+Under `precision_graph_prior = "joint"` with `beta_bernoulli_prior()` or
+`sbm_prior()` it is instead the **edge-prior correction table**, which the
+hyperparameter updates read: under the determinant-tilted precision prior, the
+plain conjugate updates would target the wrong marginals for the inclusion
+probability and the block structure. In mixed models the tilt acts on the
+continuous precision block, so the correction reads continuous-continuous
+edges only; with fewer than two continuous variables the plain conjugate
+updates apply unchanged. The table is keyed on the interaction prior and takes
+of the order of minutes to build. It announces itself only when it actually
+builds; a cache hit is silent. With `beta_bernoulli_prior()` the sampled
+inclusion probability is returned per chain in
+`fit$inclusion_parameter_samples`.
 :::
 
 ::: {.callout-note}
@@ -181,9 +192,12 @@ Fields tied to specific settings:
 - `inclusion_parameter_samples` --- Per-chain draws of the sampled inclusion
   probability, present for continuous and mixed models with
   `edge_prior = beta_bernoulli_prior(...)`.
-- `zratio_diag` --- Trust-gauge summary for
-  `precision_graph_prior = "hierarchical"` when the gauge is enabled with
-  `options(bgms.zratio_gauge_sweeps = 2L)`; `NULL` otherwise. See
+- `zratio_diag` --- Per-chain trust-gauge summary, present on any fit that runs
+  the deployed hierarchical path: a continuous or mixed model with edge
+  selection at the default `precision_graph_prior = "hierarchical"`. It is
+  `NULL` under `"joint"`, where there is no approximation to audit, on models
+  with no continuous precision block, and when the gauge is switched off with
+  `options(bgms.zratio_gauge_sweeps = 0L)`. See
   [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge).
 - `nuts_diag` --- NUTS diagnostics (tree depth, divergences, acceptance
   probabilities, energy, E-BFMI, and a warmup-completeness check), present
