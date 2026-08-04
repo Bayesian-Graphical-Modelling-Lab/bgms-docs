@@ -102,7 +102,7 @@ inclusion probability is returned per chain in
 :::
 
 ::: {.callout-note}
-## Deprecated arguments
+## Deprecated arguments []{#sec-deprecated-arguments}
 
 The following arguments are deprecated as of bgms 0.2.0. They still work
 but emit a lifecycle warning. Use the prior-object equivalents in the

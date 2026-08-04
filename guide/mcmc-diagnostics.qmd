@@ -15,6 +15,29 @@ half and the halves are compared as if they were separate chains. For
 how both are computed, see the
 [Technical Manual](../manual/diagnostics.qmd).
 
+## Symptom index {#sec-symptom-index}
+
+Find your symptom, do the one thing in the middle column, then read the
+linked section for why it is the right thing to do.
+
+| Symptom | First thing to do | Where it is explained |
+|---|---|---|
+| `Rhat` above 1.01 | Run longer: raise `warmup` first, then `iter`, and keep at least two chains. | [R-hat](#sec-rhat) |
+| `n_eff` below 100 | Raise `iter`; precision grows with the number of retained draws. | [Effective sample size](#sec-ess) |
+| `mcse` large next to `sd` | Raise `iter`; quadrupling the effective sample size halves the MCSE. | [Monte Carlo standard error](#sec-mcse) |
+| Blank `mcse`, `n_eff`, or `Rhat` cells in the summary | Usually nothing to fix: the cells are `NA` because the inclusion draw is pinned; confirm the chain still moved in the transition counts (`n0->1`, `n1->0`). | [Model Output](mcmc-output.qmd#sec-pinned-indicators) |
+| Divergences reported | Raise `target_accept` above its default of 0.80; if that does not help, refit with `update_method = "adaptive-metropolis"`. | [Divergent transitions](#sec-divergences) |
+| The sampler hit the maximum tree depth | Raise `nuts_max_depth`; occasional hits are normal. | [Tree depth](#sec-tree-depth) |
+| E-BFMI below 0.3 | Check ESS and R-hat; if they flag too, raise `warmup`. | [E-BFMI](#sec-ebfmi) |
+| Mean acceptance well below `target_accept` | Raise `warmup`; the step-size tuning did not converge. | [Mean acceptance probability](#sec-accept-prob) |
+| `warmup_incomplete` is `TRUE` | Raise `warmup` and refit; check R-hat and ESS before distrusting the fit. | [Warmup equilibration check](#sec-warmup-check) |
+| The trust gauge flagged a chain | Accept the approximation or refit with `precision_graph_prior = "joint"`; a larger audit (raise `bgms.zratio_gauge_sweeps`, refit) first tells you whether the flag is noise. | [Trust gauge](#sec-trust-gauge) |
+| Verdicts flagged `fragile` | Run more iterations; the verdict sits within two standard errors of a boundary. | [`verdicts()`](../reference/checks.qmd#verdicts) |
+| A verdict changes with the prior scale | Report that edge as scale-dependent, or treat it as undecided; do not pick the scale that gives the verdict you want. | [Check your priors](../examples/check-your-priors.qmd#sec-how-to-act) |
+| Results differ between runs | Set `seed`; hold `cores` and the installed binary fixed; if the runs still differ, read it as a mixing problem. | [Results differ between runs](#sec-reproducibility) |
+| The sampler raised a warning | Look the message up in the list and follow its action; the warnings name the setting to change. | [What the sampler's warnings mean](#sec-sampler-warnings) |
+| Still stuck | Refit with `update_method = "adaptive-metropolis"` and compare the two posteriors. | [Still stuck](#sec-still-stuck) |
+
 ## Effective sample size (ESS) {#sec-ess}
 
 The effective sample size estimates how many independent draws the MCMC
@@ -183,7 +206,7 @@ For edge indicators, the reported R-hat is computed on the continuous
 Rao-Blackwellized inclusion draws, and is `NA` where those draws are
 exactly constant ([see above](#sec-rb-inclusion-ess)).
 
-## Trace plots
+## Trace plots {#sec-trace-plots}
 
 Visually inspecting the sampled values across iterations is a direct way to
 assess convergence. Chains that have converged look like random noise
@@ -248,12 +271,12 @@ legend("topright", legend = paste("Chain", seq_len(nchains)),
   col = cols[seq_len(nchains)], lwd = 1.5, bty = "n", cex = 0.8)
 ```
 
-## NUTS-specific diagnostics
+## NUTS-specific diagnostics {#sec-nuts-diagnostics}
 
 When using `update_method = "nuts"` (the default), additional diagnostics
 are stored in `fit$nuts_diag`.
 
-### E-BFMI
+### E-BFMI {#sec-ebfmi}
 
 E-BFMI (Energy Bayesian Fraction of Missing Information) measures how
 efficiently the sampler explores the posterior
@@ -267,7 +290,7 @@ warrant investigation. In models with edge selection, the most common cause
 is that the warmup period was too short for the discrete graph structure to
 equilibrate. Increasing `warmup` often resolves this.
 
-### Divergent transitions
+### Divergent transitions {#sec-divergences}
 
 Divergent transitions occur when the numerical integrator encounters
 regions where the posterior curvature changes too rapidly for the current
@@ -279,7 +302,7 @@ If divergences are frequent, increase `target_accept` (which reduces the
 step size). If that does not help, try `update_method = "adaptive-metropolis"`
 and compare results.
 
-### Mean acceptance probability
+### Mean acceptance probability {#sec-accept-prob}
 
 `fit$nuts_diag$accept_prob` is a chains × iterations matrix of the mean
 acceptance probability across every leapfrog step in each trajectory.
@@ -290,7 +313,7 @@ a signal that the automatic step-size tuning did not converge — usually
 because warmup was too short or the geometry has features that warrant
 a higher target.
 
-### Tree depth
+### Tree depth {#sec-tree-depth}
 
 NUTS builds trajectories by repeatedly doubling their length until a
 U-turn criterion is satisfied. If the trajectory frequently reaches the
@@ -299,7 +322,7 @@ benefit from longer trajectories. Hitting the maximum depth occasionally is
 normal; hitting it on most iterations may indicate challenging posterior
 geometry. Consider increasing `nuts_max_depth`.
 
-## Warmup equilibration check
+## Warmup equilibration check {#sec-warmup-check}
 
 In models with edge selection, the discrete graph structure may take longer
 to reach stationarity than the continuous parameters. Even after warmup
@@ -331,7 +354,7 @@ compare posterior summaries. If the two samplers produce similar results,
 the estimates are likely trustworthy despite the warnings; if they differ,
 further investigation is warranted.
 
-### The flag on this page's own fit
+### The flag on this page's own fit {#sec-warmup-flag-worked}
 
 The Wenchuan fit used throughout this page raises the flag, which makes it a
 useful worked case rather than an embarrassment. Here is what it says:
@@ -440,6 +463,123 @@ than a fix. The gauge never switches specification on its own. See
 [`summarize_zratio_gauge()`](../reference/prior-samplers.qmd#summarize_zratio_gauge)
 for the full output format and thresholds.
 
+## What the sampler's warnings mean {#sec-sampler-warnings}
+
+The lists below cover the warnings a fit and its checks can raise in
+0.2.0.0. They are ordinary R warnings, so they surface after the call
+returns, unlike the `NUTS issues:` block and the trust gauge report,
+which the sampler prints while it runs and which the sections above
+explain. The simulation and prediction helpers carry their own warnings,
+which are not part of this list.
+
+### Warmup is too short for part of the adaptation {#sec-warn-warmup}
+
+These five fire before sampling starts, under `update_method = "nuts"`
+with `verbose = TRUE` (the default; `verbose` reads
+`getOption("bgms.verbose", TRUE)`). Each names the part of warmup
+adaptation that your `warmup` is too short to run. The action is the
+same for all five: raise `warmup`, using the threshold the message
+quotes as the floor and the suggestion as the target.
+
+| Warning | When it fires |
+|---|---|
+| `warmup = <n> is very short for edge selection. Consider >= 300.` | Edge selection on, `warmup` below 50 |
+| `warmup = <n>: proposal SD tuning skipped (needs >= 200). Consider >= 300.` | Edge selection on, `warmup` from 50 to 199 |
+| `warmup = <n>: limited proposal SD tuning. Consider >= 300.` | Edge selection on, `warmup` from 200 to 299 |
+| `warmup = <n>: no mass matrix estimation (needs >= 20).` | Edge selection off, `warmup` below 20 |
+| `warmup = <n>: using proportional allocation (needs >= 150 for fixed buffers).` | Edge selection off, `warmup` from 20 to 149 |
+
+### A chain did not finish {#sec-warn-chains}
+
+| Warning | What to do |
+|---|---|
+| `<k> of <n> chain(s) failed and will be dropped.` | The fit is built from the surviving chains only. R-hat needs at least two, so refit if too few are left for the diagnostics you need. If every chain fails the call stops instead, and the message carries the first chain's error. |
+| `Stopped sampling after user interrupt, results are likely uninterpretable.` | Discard the object and refit. The chains stopped wherever the interrupt reached them, so the draws are not a posterior sample. |
+
+### The normalizing-constant correction could not be built {#sec-warn-correction}
+
+Continuous and mixed fits that combine edge selection with a
+Beta-Bernoulli or Stochastic-Block edge prior run their edge-prior
+updates *with* a normalizing-constant correction, built at the start of
+the analysis from a tilted prior sweep; a fit that builds it silently is
+running corrected. These two warnings mark the cases where the
+correction cannot be built. The chains still run, but the edge-prior
+updates lose the correction that keeps them exact, so read the inclusion
+probabilities as approximate.
+
+| Warning | What to do |
+|---|---|
+| `The <edge prior> updates are run without the normalizing-constant correction: the tilted prior sampler supports only cauchy_prior() and normal_prior() interaction priors.` | Refit with `interaction_prior = cauchy_prior()` or `normal_prior()` if you want the corrected updates. Reaching this warning at all takes `precision_graph_prior = "joint"`, because the default `"hierarchical"` rejects any other slab with an error rather than a warning. |
+| `The Stochastic-Block updates are run without the normalizing-constant correction: the slope curve is not resolvable for this model cell (a single tilted pair).` | Nothing in the call to change: the correction table could not resolve its slope curve for this combination of size and prior. Read the block structure as approximate, and compare it against a Beta-Bernoulli fit of the same data before reporting it. |
+
+### The z-ratio tables left their certified range {#sec-warn-zratio}
+
+Both fire while the hierarchical graph prior builds its approximation, on
+a fit whose precision diagonal shape is not 1. They say the approximation
+behind every edge move may be less accurate than certified, so check
+`fit$zratio_diag` before reading the graph; see the
+[trust gauge](#sec-trust-gauge).
+
+| Warning | What to do |
+|---|---|
+| `Z-ratio constants at diagonal shape <a> lie outside the certified range [0.5, 20]; the fixed quadrature grids are not scored there and may lose accuracy.` | Bring the diagonal shape back inside 0.5 to 20 if the analysis allows it. Otherwise treat the gauge as the check that decides. |
+| `Z-ratio pair integrals retain visible mass at the grid edge (delta = <d>, eta = <e>, shape = <a>); the saddle tables may be truncated.` | Same reading: the quadrature grid did not capture the whole integrand at this prior setting, so let the gauge decide whether it mattered. |
+
+### The data cannot support part of the model {#sec-warn-data}
+
+| Warning | What to do |
+|---|---|
+| `Blume-Capel variable <name> has <k> categories. This may slow computation. Empty categories are not collapsed.` | Nothing is wrong with the fit; expect it to be slower. Fires above 10 categories. Empty categories in the range still cost time, so collapse them yourself if they are an artifact of coding. |
+| `Some categories were not used by every group: ...` | A [`bgmCompare()`](../reference/bgmCompare.qmd) warning. The threshold differences it names rest on the prior rather than on the data. Do not read them as evidence of a group difference; the printed summary marks the rows with `*`, and `extract_arguments(fit)$category_support` holds the per-group counts. Pairwise differences are unaffected. It carries the condition class `bgms_group_support_warning`, so you can catch this one warning without muffling the rest. |
+
+### A deprecated argument {#sec-warn-deprecated}
+
+The arguments the 0.2.0 prior objects replaced still work, and warn
+through `lifecycle` naming their replacement:
+
+```
+The `pairwise_scale` argument of `bgm()` is deprecated as of bgms 0.2.0.
+Please use the `interaction_prior` argument instead.
+```
+
+Nothing about the fit is wrong. Move the call to the replacement so it
+keeps working past the deprecation; the full mapping is on
+[`bgm()`](../reference/bgm.qmd#sec-deprecated-arguments) and
+[`bgmCompare()`](../reference/bgmCompare.qmd#sec-deprecated-arguments).
+
+### The checks and the ecosystem {#sec-warn-checks}
+
+| Warning | What to do |
+|---|---|
+| `The usable radii of the <a>x and <b>x anchors do not overlap; the curve has a gap between them. Add an anchor in that range.` | From [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd). Rerun with an extra anchor between the two the message names, so the curve is continuous there. |
+| `easybgm <version> is not compatible with S7-based bgms objects. Running in S3 compatibility mode. Please update easybgm to version 0.5.0 or later.` | Update `easybgm`. Until then the fit is returned as a plain list, so the S7 accessors this documentation uses will not all apply. |
+
+## Results differ between runs {#sec-reproducibility}
+
+Two runs of the same call differ for one of two reasons, and the remedy
+differs with them.
+
+If you did not set `seed`, the runs drew different random numbers and
+small differences are expected. Pass a single non-negative integer to
+`seed` to make a run repeatable.
+
+If you did set `seed` and the runs still differ, the guarantee is
+narrower than it looks, and
+[`bgm()`](../reference/bgm.qmd) states its exact scope. Results are
+bit-reproducible for a given installed binary; they are not portable
+across compilers or optimization settings, so a rebuilt or reinstalled
+binary can produce different draws from the same seed, with the
+differences concentrated where the posterior is weakly identified. On
+Windows with `RcppParallel` 6.0.0 or later, a fixed seed reproduces a run
+only at the same `cores` setting: runs at different core counts are
+statistically equivalent, not identical.
+
+Differences that survive all of that, and that change what you would
+report, are a mixing problem rather than a seeding one. Two runs landing
+on different answers is what R-hat is built to detect across chains, so
+check R-hat and ESS first and treat the run-to-run gap as the same
+failure seen from outside.
+
 ## Run-length settings {#sec-run-length}
 
 Three [`bgm()`](../reference/bgm.qmd) arguments control how much sampling is done:
@@ -456,7 +596,7 @@ When diagnostics indicate a problem, match the remedy to the symptom:
 - **Warmup warnings in `fit$nuts_diag$warmup_check`, persistent divergences, or acceptance below target** — increase `warmup`; the sampler needs more adaptation time, and extra post-warmup draws will not fix a poorly tuned sampler.
 - **R-hat above 1.01** — first check the trace plots; if chains disagree, longer `warmup` (and sometimes longer `iter`) is the remedy. Keep at least two chains — with a single chain, R-hat cannot be computed.
 
-## Recommended workflow
+## Recommended workflow {#sec-workflow}
 
 1. **Inspect `summary()`**: check R-hat (< 1.01) and ESS (≥ 100) for all
    parameters.
@@ -474,3 +614,24 @@ When diagnostics indicate a problem, match the remedy to the symptom:
    chains. The trust gauge fills it by default.
 6. **If problems are found**: increase `warmup` and/or `iter`, adjust
    `target_accept`, or switch samplers.
+
+## Still stuck {#sec-still-stuck}
+
+If longer warmup and more iterations have not moved the diagnostics,
+refit with the other sampler and compare:
+
+```r
+fit_am = bgm(data, update_method = "adaptive-metropolis")
+```
+
+How to read the comparison is in the
+[warmup equilibration check](#sec-warmup-check): if the two samplers
+produce similar posterior summaries, the estimates are likely
+trustworthy despite the warnings, and if they differ, the disagreement
+is itself the finding and nothing should be reported until it is
+resolved.
+
+If that leaves you stuck, ask on the
+[bgms issue tracker](https://github.com/Bayesian-Graphical-Modelling-Lab/bgms/issues).
+A report that can be acted on carries the `bgm()` call as you ran it,
+`fit$nuts_diag$summary`, and the output of `sessionInfo()`.
