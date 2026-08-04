@@ -125,9 +125,10 @@ library(bgms)
 fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
 ```
 
-To see these quantities on real output, fit the
-[Wenchuan](../reference/datasets.qmd#wenchuan) PTSD data (run in
-advance here; at this length the fit takes a few minutes):
+To see these quantities on real output, this snippet reads three edges off
+the [Wenchuan](../reference/datasets.qmd#wenchuan) fit that
+[From estimation to evidence](../examples/estimation-to-evidence.qmd) runs
+end to end (run in advance here):
 
 ```{r}
 #| eval: false
@@ -135,17 +136,8 @@ library(bgms)
 fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
 ```
 
-Everything except the run length is left at its default: four chains,
-ordinal variables, edge selection on, a `bernoulli_prior(0.5)` edge prior,
-and a `normal_prior(scale = 1)` slab. The longer run is the point. What you
-are reading off this fit is an inclusion probability, and the run has to be
-long enough for that probability to be resolved to the precision the
-evidence claim needs. At the default `iter = 2000` and `warmup = 2000` these
-data leave the inclusion effective sample sizes in the hundreds and the
-largest indicator R-hat above the 1.01 guideline; at the length above the ESS
-run into the thousands and every R-hat clears the guideline. All 17 variables
-are used, and the 18 rows with missing values are dropped by the default
-`na_action = "listwise"`, leaving 344 respondents.
+That page owns the analysis, including why this fit runs longer than the
+default; here we only read the quantities this page has introduced.
 
 The `summary(fit)$indicator` table holds the posterior inclusion
 probability of every edge in its `mean` column (the Rao-Blackwellized

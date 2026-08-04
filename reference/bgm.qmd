@@ -251,7 +251,7 @@ fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
 
 Only the run length departs from the defaults; the longer run resolves the
 inclusion probabilities precisely enough to read as evidence (see
-[Edge Selection](../guide/edge-selection.qmd#a-worked-example)).
+[From estimation to evidence](../examples/estimation-to-evidence.qmd#the-fit)).
 
 ```{r}
 summary(fit)

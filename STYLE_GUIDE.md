@@ -308,11 +308,11 @@ This matches the `evidence_threshold` default of
 `prior_sensitivity_check()` and the verdict names the package itself uses
 (`"presence"`, `"absence"`, `"undecided"`).
 
-Never classify from the posterior inclusion probability alone. For
-continuous and mixed models the prior inclusion probability of a
-continuous edge is not 0.5 under the default `precision_graph_prior`, so
-the posterior odds are not the Bayes factor; `extract_inclusion_bf()`
-divides the prior odds out.
+Never classify from the posterior inclusion probability alone. Under an
+edge prior away from one half, and for continuous edges fitted with
+`precision_graph_prior = "joint"`, the posterior odds are not the Bayes
+factor; `extract_inclusion_bf()` divides the right prior odds out in
+every case.
 
 ### Caption duties
 

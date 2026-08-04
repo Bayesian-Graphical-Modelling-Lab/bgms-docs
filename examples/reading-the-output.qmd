@@ -52,7 +52,8 @@ The [Wenchuan](../reference/datasets.qmd#wenchuan) data ship with the
 package: 17 ordinal PTSD symptom items, with 344 of the 362 survivors
 complete under the default `na_action = "listwise"`. Everything except the
 run length is at its default; see [`bgm()`](../reference/bgm.qmd) for the
-arguments and [Edge Selection](../guide/edge-selection.qmd#a-worked-example)
+arguments and
+[From estimation to evidence](estimation-to-evidence.qmd#the-fit)
 for why this fit runs longer than the default.
 
 ## The output in full
