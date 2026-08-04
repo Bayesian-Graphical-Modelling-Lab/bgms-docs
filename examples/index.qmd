@@ -27,7 +27,8 @@ carries the reasoning, the Reference the details.
 3. **[Reading the output](reading-the-output.qmd).** The `summary()` of a real
    fit, walked block by block. Afterwards you can tell whether a fit is
    trustworthy and where every number you need lives.
-4. **Check your priors.** [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd)
+4. **[Check your priors](check-your-priors.qmd).**
+   [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd)
    run on a fitted model, with its report and its curve read in full. Afterwards
    you can answer the question of whether your prior drove your conclusions, and
    report the answer.

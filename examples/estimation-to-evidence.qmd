@@ -301,9 +301,8 @@ quarter of the network as settled when it is an open question.
 ## Where to next
 
 - [Edge Selection](../guide/edge-selection.qmd) for why the inclusion Bayes
-  factor works this way. A *Check your priors* page, on whether your
-  verdicts depend on the prior, is in preparation; until it ships, see
-  [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd).
+  factor works this way, and [Check your priors](check-your-priors.qmd) for
+  whether these verdicts depend on the prior.
 - [`bgm()`](../reference/bgm.qmd) and
   [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf)
   for the arguments and return values.
