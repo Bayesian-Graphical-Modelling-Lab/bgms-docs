@@ -74,10 +74,25 @@ fit = bgm(Wenchuan)
 summary(fit)
 ```
 
+The same fit weighs every possible edge and reports the evidence:
+
+![The Wenchuan network split by evidence: pairs the data support, pairs they rule out, and pairs they leave undecided.](images/edge-evidence-wenchuan.png){.img-fluid fig-alt="Three network panels on one shared layout: evidence of presence (35 edges, weighted), evidence of absence (62, dashed), undecided (39, dotted)."}
+
+Of the 136 possible edges, 35 are supported, 62 are ruled out, and 39
+are undecided: the split an estimated network cannot make.
+[See the full analysis →](examples/estimation-to-evidence.qmd)
+
 :::::
 ::::::
 
 :::::: {.content-block}
+
+::: {.text-center .pt-3 .pb-2}
+New to Bayesian graphical models? Start with the
+[worked analyses](examples/index.qmd). Coming from `bootnet` or
+`qgraph`? Start with
+[your workflow, translated](examples/from-bootnet-qgraph.qmd).
+:::
 
 ::::: {.features}
 
@@ -186,6 +201,19 @@ To generate citations directly from your installed package in R:
 citation("bgms")
 toBibtex(citation("bgms"))
 ```
+
+### The science
+
+The tutorial developing this workflow end to end is in preparation.
+The methods are published:
+[Marsman et al. (2022)](https://doi.org/10.1007/s11336-022-09848-8) on
+Bayesian edge screening and structure selection,
+[Sekulovski et al. (2024)](https://doi.org/10.1080/00273171.2024.2345915)
+on testing conditional independence, and
+[Huth et al. (2026)](https://doi.org/10.1038/s41562-025-02314-2) on how
+often published network edges rest on inconclusive evidence.
+
+**2026-08-04**: `bgms` 0.2.0.0 is on CRAN. [News →](news.qmd)
 
 :::::
 ::::::
