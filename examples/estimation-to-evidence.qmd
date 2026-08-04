@@ -199,7 +199,8 @@ classification with `verdicts(fit, evidence_threshold = 3)` gives 40
 presence, 12 undecided, and 84 absence; at a threshold of 30 the counts
 become 29, 83, and 24. The counts shift with the convention, but no edge can
 jump between presence and absence, and stating a second threshold costs one
-sentence. See `?verdicts` for the full contract.
+sentence. See [`verdicts()`](../reference/checks.qmd#verdicts) for the full
+contract.
 
 ## The three panels
 

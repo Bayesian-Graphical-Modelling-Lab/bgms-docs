@@ -5,12 +5,9 @@ toc: false
 
 Documentation for the `bgms` API.
 
-`bgm()` and `bgmCompare()` return S7 objects (classes `bgms` and `bgmCompare`). Standard methods like `print()`, `summary()`, and `coef()` work through S3 dispatch for compatibility with base R generics.
+Complete documentation for all exported functions.
 
-A few 0.2.0.0 additions do not have site pages yet: `verdicts()`,
-`calibration_check()`, `plot_edge_posterior()`, `extract_centrality()`,
-and the `plot()` methods. Their R help pages are complete — start with
-`?verdicts` — and site pages follow in a documentation update.
+`bgm()` and `bgmCompare()` return S7 objects (classes `bgms` and `bgmCompare`). Standard methods like `print()`, `summary()`, and `coef()` work through S3 dispatch for compatibility with base R generics.
 
 ## Core Functions
 
@@ -54,9 +51,11 @@ Prior specification objects passed to `bgm()` and `bgmCompare()` via the
 | [`print()`](methods.qmd#print) | Minimal console output for a fitted model |
 | [`summary()`](methods.qmd#summary) | Summary statistics for posterior samples |
 | [`coef()`](methods.qmd#coef) | Extract posterior means of model parameters |
+| [`plot()`](methods.qmd#plot) | Draw the fitted model: the edge evidence plot by default, or posterior centrality |
+| [`plot_edge_posterior()`](methods.qmd#plot_edge_posterior) | Draw one edge's posterior against its prior, with the inclusion evidence as a probability wheel |
 | [`predict()`](methods.qmd#predict) | Predict new observations from a fitted model |
 | [`simulate()`](methods.qmd#simulate) | Simulate datasets from the posterior distribution |
-| [`simulate_mrf()`](methods.qmd#simulate_mrf) | Simulate observations from a Markov Random Field |
+| [`simulate_mrf()`](methods.qmd#simulate_mrf) | Simulate observations from a Markov Random Field (`mrfSampler()` is the deprecated former name) |
 
 ## Diagnostics
 
@@ -64,6 +63,8 @@ Post-fit checks on a model you have already estimated.
 
 | Function | Description |
 |----------|-------------|
+| [`verdicts()`](checks.qmd#verdicts) | Read each edge's inclusion Bayes factor as a presence / undecided / absence verdict, and flag the verdicts a longer run could change. |
+| [`calibration_check()`](checks.qmd#calibration_check) | Reliability diagrams of the model's conditional predictions, with the consistency band a calibrated model wanders inside. |
 | [`prior_sensitivity_check()`](prior-sensitivity.qmd) | Recover each edge's inclusion Bayes factor curve across the slab scale and classify which verdicts depend on it. |
 | [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge) | Trust gauge for the hierarchical graph prior's fast normalizer approximation. |
 
@@ -74,6 +75,7 @@ Post-fit checks on a model you have already estimated.
 | [`extract_arguments()`](extractors.qmd#extract_arguments) | Retrieve the arguments used when fitting a model |
 | [`extract_main_effects()`](extractors.qmd#extract_main_effects) | Extract main-effect parameters: posterior means for `bgms` fits, posterior samples for `bgmCompare` fits |
 | [`extract_pairwise_interactions()`](extractors.qmd#extract_pairwise_interactions) | Extract posterior samples of partial association parameters |
+| [`extract_centrality()`](extractors.qmd#extract_centrality) | Evaluate strength centrality on every posterior draw, giving each node's centrality posterior; `summary()` and `plot()` read it |
 | [`extract_indicators()`](extractors.qmd#extract_indicators) | Extract posterior samples of edge or difference indicators |
 | [`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities) | Compute posterior inclusion probabilities, from the Rao-Blackwellized draws by default or from the raw indicator samples |
 | [`extract_prior_inclusion_probabilities()`](extractors.qmd#extract_prior_inclusion_probabilities) | Compute prior inclusion probabilities, matched in shape to the posterior ones for Bayes factor computation |

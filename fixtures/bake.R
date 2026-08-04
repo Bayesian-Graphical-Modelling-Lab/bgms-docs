@@ -59,7 +59,8 @@ timed = function(label, expr) {
 }
 
 # guide/mcmc-diagnostics.qmd, guide/mcmc-output.qmd, guide/edge-selection.qmd,
-# reference/bgm.qmd, reference/methods.qmd, reference/extractors.qmd
+# reference/bgm.qmd, reference/methods.qmd, reference/extractors.qmd,
+# reference/checks.qmd
 # Manuscript-grade: matches R/01-worked-example.R in the tutorial repo.
 fit = timed("fit_wenchuan", bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123))
 saveRDS(fit, file.path(out, "fit_wenchuan.rds"))
