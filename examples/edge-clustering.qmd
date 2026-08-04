@@ -1,0 +1,225 @@
+---
+title: "Edge clustering"
+---
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+#| purl: false
+library(bgms)
+
+# Fixture loader, copied verbatim from the guide pages.
+resolve_fixture = function(name) {
+  input_dir = dirname(knitr::current_input(dir = TRUE))
+  candidates = c(
+    file.path(input_dir, "..", "fixtures", name),
+    file.path(input_dir, "fixtures", name),
+    file.path("fixtures", name),
+    file.path("..", "fixtures", name)
+  )
+  hit = candidates[file.exists(candidates)][1]
+  if (is.na(hit)) {
+    stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+  }
+  hit
+}
+
+fit = readRDS(resolve_fixture("fit_wenchuan_sbm.rds"))
+```
+
+```{r}
+#| label: fig-payoff
+#| echo: false
+#| purl: false
+#| fig-width: 7
+#| fig-height: 7
+sbm = extract_sbm(fit)
+cm = sbm$posterior_mean_coclustering_matrix
+p = nrow(cm)
+op = par(mar = c(6.5, 6.5, 1, 1))
+image(1:p, 1:p, cm[, p:1], col = hcl.colors(20, "Blues", rev = TRUE),
+      axes = FALSE, xlab = "", ylab = "")
+axis(1, at = 1:p, labels = rownames(cm), las = 2, cex.axis = 0.7)
+axis(2, at = p:1, labels = colnames(cm), las = 1, cex.axis = 0.7)
+par(op)
+```
+
+This is the posterior co-clustering matrix of the 17 Wenchuan PTSD
+symptoms: each cell is the share of posterior draws in which two
+symptoms landed in the same cluster. There is visible texture, with
+the intrusion and arousal symptoms shading darker together than the
+avoidance items between them, but it stays texture: even the lightest
+pairs co-cluster in 57 percent of draws, every symptom's modal
+allocation is the same single cluster, and the posterior puts
+probability 0.42 on there being no clusters at all. The model's answer
+to "do these symptoms form communities?" is that these data do not
+say. That verdict is the page: a clustering claim that comes with its
+own evidence and its own uncertainty, including the honest case where
+the evidence is thin.
+
+The usual route to communities is post-hoc: estimate a network, then
+run a community detection algorithm on the point estimate. That
+returns a partition, always, with no statement of how sure to be about
+it, and no way to conclude that there is *no* community structure. The
+stochastic block model (SBM) edge prior instead makes the clustering
+part of the graphical model: cluster assignments, the number of
+clusters, and the evidence for clustering against no clustering are
+all estimated together with the network, so every cluster statement
+arrives with a posterior probability attached
+[@SekulovskiEtAl_2025_sbm].
+
+## The fit
+
+```{r}
+#| label: fit-mirror
+#| eval: false
+library(bgms)
+
+fit = bgm(Wenchuan, edge_prior = sbm_prior(), seed = 123)
+```
+
+The [Wenchuan](../reference/datasets.qmd#wenchuan) data ship with the
+package: 17 ordinal PTSD symptom items from 362 survivors of the 2008
+Wenchuan earthquake. Apart from the edge prior and the seed this is
+[`bgm()`](../reference/bgm.qmd) at its defaults, and
+[`sbm_prior()`](../reference/priors.qmd#sbm_prior) is itself at its
+defaults, with `lambda = 1`: a prior expectation of two clusters, and
+prior probability $\exp(-1) \approx 0.37$ on no clustering at all. The
+run takes several minutes. The guide's
+[Edge Clustering](../guide/clustering.qmd) page carries the model and
+the hyperparameter guidance, including settings for when clustering is
+expected and when the goal is to protect against false positive
+clusters.
+
+## Read the clustering
+
+Everything cluster-related lives in one extractor,
+[`extract_sbm()`](../reference/extractors.qmd#extract_sbm). Its first
+component is the posterior over the number of clusters:
+
+```{r}
+#| label: num-blocks
+sbm = extract_sbm(fit)
+round(head(sbm$posterior_num_blocks, 4), 3)
+```
+
+The rows are numbers of clusters: probability 0.42 on one cluster,
+0.36 on two, 0.16 on three, and a thin tail beyond. The test of
+clustering against no clustering compares the posterior odds of $B >
+1$ with the prior odds, which under the shifted-Poisson prior are
+$\exp(\lambda) - 1$:
+
+```{r}
+#| label: clustering-bf
+p1 = sbm$posterior_num_blocks["1", "probability"]
+((1 - p1) / p1) / (exp(1) - 1)
+```
+
+A Bayes factor of about 0.80: essentially no evidence either way. The
+pointwise comparison of one cluster against two (prior odds one at
+`lambda = 1`, so the Bayes factor is the ratio of the two posterior
+probabilities) is about 1.16, just as undecided. These data neither
+support block structure among the PTSD symptoms nor rule it out; both
+tests and their prior odds are derived in the guide's
+[Testing for clustering](../guide/clustering.qmd#testing-for-clustering)
+section.
+
+The allocations tell the same story:
+
+```{r}
+#| label: allocations
+table(sbm$posterior_mode_allocations)
+cm = sbm$posterior_mean_coclustering_matrix
+round(range(cm[upper.tri(cm)]), 2)
+```
+
+All 17 symptoms share one modal cluster, and the co-clustering shares
+range from 0.57 to 0.91: high everywhere, sharp nowhere. That is what
+the figure at the top of the page shows; it was drawn from the
+extractor's co-clustering matrix directly:
+
+```{r}
+#| label: coclustering-mirror
+#| eval: false
+p = nrow(cm)
+op = par(mar = c(6.5, 6.5, 1, 1))
+image(1:p, 1:p, cm[, p:1], col = hcl.colors(20, "Blues", rev = TRUE),
+      axes = FALSE, xlab = "", ylab = "")
+axis(1, at = 1:p, labels = rownames(cm), las = 2, cex.axis = 0.7)
+axis(2, at = p:1, labels = colnames(cm), las = 1, cex.axis = 0.7)
+par(op)
+```
+
+In a dataset with real block structure this plot shows distinct dark
+diagonal blocks of variables that always cluster together, and the
+modal allocations split into groups. Report the two together: a
+partition without its co-clustering matrix hides exactly the
+uncertainty this analysis exists to expose.
+
+## The edges still get verdicts
+
+The SBM prior is an edge prior, so the fit is still a full analysis of
+the network itself, and every tool from the earlier pages applies:
+
+```{r}
+#| label: verdicts
+table(verdicts(fit)$verdict)
+```
+
+These counts differ a little from the ones in
+[From estimation to evidence](estimation-to-evidence.qmd) (32
+supported, 32 undecided, 72 ruled out here, against 35, 39, and 62
+there); that fit used the default Bernoulli edge prior and a longer
+run, so this is not a controlled comparison of priors. The point is
+smaller and worth knowing: the edge prior is part of the model, and
+the inclusion Bayes factors inherit it.
+
+## What a cluster is not
+
+A cluster here is structure in edge *inclusion probabilities* under
+this prior: symptoms in the same block are modeled as more likely to
+share edges with each other than with the rest. It is not a causal
+module, not a latent factor, and not a clinical subscale; none of
+those readings are licensed by a partition of a partial association
+structure. And an uncertain clustering is not a failed analysis. On
+these data the model was free to find blocks and did not, which is a
+finding in itself, and a caution against over-reading the apparent
+groupings that any network drawing produces by placing connected nodes
+near each other.
+
+## What to report
+
+::: {.callout-note appearance="simple"}
+## What to report
+
+- The clustering test with the prior it rests on: "The Bayes factor
+  for clustering against no clustering was
+  $\text{BF} = \texttt{<value>}$ under `sbm_prior()` with
+  $\lambda = \texttt{<value>}$," and its verdict: support, evidence
+  against, or, as here, undecided.
+- If clusters are supported: the posterior over the number of
+  clusters, the modal allocations, and the co-clustering matrix (or
+  its range) as the uncertainty statement for the partition.
+- The hyperparameters, if changed from the defaults: they encode how
+  strongly the prior expects clustering.
+- Not licensed: reading groups in a network drawing as clusters,
+  reporting a partition without its allocation uncertainty, or
+  reading a Bayes factor near one as evidence that there are no
+  clusters.
+:::
+
+## Where to next
+
+- [Edge Clustering](../guide/clustering.qmd) for the model: the
+  block structure on inclusion probabilities, the two Bayes factor
+  tests, and hyperparameter guidance.
+- [`sbm_prior()`](../reference/priors.qmd#sbm_prior) and
+  [`extract_sbm()`](../reference/extractors.qmd#extract_sbm) for the
+  arguments and the return value.
+- @SekulovskiEtAl_2025_sbm for the step-by-step tutorial behind this
+  analysis.
+- Back in the series:
+  [From estimation to evidence](estimation-to-evidence.qmd), the
+  single-network analysis this page builds on.

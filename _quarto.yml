@@ -95,6 +95,7 @@ website:
         - examples/reading-the-output.qmd
         - examples/check-your-priors.qmd
         - examples/comparing-groups.qmd
+        - examples/edge-clustering.qmd
         - examples/from-bootnet-qgraph.qmd
 
     - id: guide
