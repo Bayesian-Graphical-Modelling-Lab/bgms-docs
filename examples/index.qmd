@@ -32,7 +32,7 @@ carries the reasoning, the Reference the details.
    run on a fitted model, with its report and its curve read in full. Afterwards
    you can answer the question of whether your prior drove your conclusions, and
    report the answer.
-5. **Comparing groups.** Two groups compared with
+5. **[Comparing groups](comparing-groups.qmd).** Two groups compared with
    [`bgmCompare()`](../reference/bgmCompare.qmd). Afterwards you can state both
    kinds of claim the method separates: this association differs between groups,
    and this one is credibly the same.
