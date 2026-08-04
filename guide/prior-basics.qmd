@@ -50,7 +50,7 @@ The Normal slab concentrates prior mass on moderate effect sizes: its peak at ze
 
 The scale parameter controls the width of the slab. A wider slab spreads prior probability over a larger range of effect sizes. This has a direct consequence for edge selection: because the slab is also the alternative hypothesis for the inclusion Bayes factor, a wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small.
 
-Because the choice is consequential, `bgms` lets you check it after the fact. [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd) recovers each edge's inclusion Bayes factor across a range of slab scales around the one you used, and reports which edge verdicts are robust to that choice and which depend on it.
+Because the choice is consequential, `bgms` lets you check it after the fact. [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd) recovers each edge's inclusion Bayes factor across a range of slab scales around the one you used, and reports which edge verdicts are robust to that choice and which depend on it. [Check your priors](../examples/check-your-priors.qmd) runs the check on a real fit and walks through its report, its curve, and what to do with a verdict that moves.
 
 ## The spike: priors on the edge indicators
 

@@ -90,6 +90,7 @@ website:
         - examples/index.qmd
         - examples/estimation-to-evidence.qmd
         - examples/reading-the-output.qmd
+        - examples/check-your-priors.qmd
 
     - id: guide
       title: "User's Guide"
