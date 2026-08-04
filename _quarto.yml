@@ -141,6 +141,7 @@ website:
             - reference/methods.qmd
         - section: "Diagnostics"
           contents:
+            - reference/checks.qmd
             - reference/prior-sensitivity.qmd
         - reference/extractors.qmd
         - reference/datasets.qmd
