@@ -27,9 +27,10 @@ Priors on real-valued parameters. Used for `interaction_prior`,
 
 ### `cauchy_prior()` {#cauchy_prior}
 
-Cauchy(0, scale) prior. Produces heavy-tailed shrinkage toward zero. The
-default for baseline pairwise interactions in `bgmCompare()`; in `bgm()`
-the default interaction prior is [`normal_prior()`](#normal_prior).
+Cauchy(0, scale) prior. Produces heavy-tailed shrinkage toward zero. It is
+the opt-in alternative for pairwise interactions in both `bgm()` and
+`bgmCompare()`, whose shared default is
+[`normal_prior(scale = 1)`](#normal_prior).
 
 ```r
 cauchy_prior(scale = 1)
@@ -44,9 +45,10 @@ Returns a `bgms_parameter_prior` object with `family = "cauchy"`.
 ### `normal_prior()` {#normal_prior}
 
 Normal(0, scale) prior. Lighter-tailed than Cauchy, and the default for
-pairwise interactions in `bgm()`. The lighter tails also make it the
-better choice for simulation studies, where a Cauchy prior can generate
-data with extreme parameter values.
+pairwise interactions in both `bgm()` and `bgmCompare()`, which also takes
+it as the default slab family for group differences. The lighter tails also
+make it the better choice for simulation studies, where a Cauchy prior can
+generate data with extreme parameter values.
 
 ```r
 normal_prior(scale = 1)

@@ -24,13 +24,21 @@ Reconciled with the release build, develop HEAD 0e116079, on 2026-07-30
 under brief A5 (PRs #186-#188: the `log` argument on
 `extract_inclusion_bf()`, the RB alignment of `extract_ess()`, and the
 lifecycle deprecation of `standardize`).
+Reconciled with the CRAN release, bgms main HEAD **6126312a**, on
+2026-08-04 under brief A8, after the 2026-08 pre-CRAN review cycle
+(roughly 270 commits past the A5 pin). bgms 0.2.0.0 was accepted on CRAN
+on 2026-08-04.
 Rules: never merge into main until the package develop ships; periodically
 merge main into it; re-sweep against bgms develop HEAD at each sync.
 
-## Fixture Configuration (brief A4, rebaked under A5, 2026-07-30)
+## Fixture Configuration (brief A4, rebaked under A5 and A8)
 
-All four fixtures are baked on the release build, bgms develop **0e116079**
-(version 0.2.0.0).
+All four fixtures are baked on the CRAN release build, bgms main
+**6126312a** (version 0.2.0.0), rebaked 2026-08-04 under brief A8. The
+installed build is a clean export of bgms main; its package sources were
+diffed against the CRAN source tarball `bgms_0.2.0.0.tar.gz` and are
+identical across `R/`, `man/`, `vignettes/`, `NAMESPACE`, and `NEWS.md`,
+with `src/` differing only in trailing newlines added by `R CMD build`.
 
 The Wenchuan fit and its prior sensitivity check are baked at the tutorial
 paper's manuscript-grade configuration: `bgm(Wenchuan, iter = 1e4,
@@ -51,9 +59,43 @@ columns (`$grid$seconds`, `$runtime_seconds`). PRs #186-#188 touch the
 extractors and argument validation, not the samplers, and the fixtures
 confirm it.
 
+The A8 rebake on 6126312a holds that line where it counts and moves where
+the package moved. **`fit_wenchuan` is bit-identical to the A5 bake** on
+every statistic checked: raw draws, all four summary tables, all three
+`coef()` tables, fourteen extractors, both Bayes-factor scales, and
+`verdicts()`. The ordinal samplers are untouched by the 2026-08 cycle and
+the fixture proves it. Three traced deviations elsewhere, none of them a
+sampler change:
+
+- `fit_wenchuan_sbm`: every S7 property identical except
+  `posterior_summary_pairwise_allocations`. The allocation draws
+  themselves are bit-identical; the transition counts moved by at most 1
+  per cell because the counter stopped counting a transition at every
+  chain boundary (bgms F-095, `0bd1cd50`). Row sums go from 7999 to the
+  correct `4 * (2000 - 1) = 7996`. `mean`, `sd`, and `Rhat` are unchanged.
+- `ps_wenchuan`: verdicts, mover classifications, `chosen_scale_pip`,
+  `$curve`, and every anchor verdict are identical, and the refits are
+  provably the same draws (`$grid$rhat_continuous` bit-identical on all
+  six rows). What moved is the unit and the diagnostics. The curve is
+  reported in natural log rather than log10 (`log10_bf` -> `log_bf`,
+  `chosen_scale_log10_bf` -> `chosen_scale_log_bf`, `tolerance` 0.5 ->
+  `0.5 * log(10)`; bgms F-051, `4cc8ce41`) and the new values equal the
+  old ones times `log(10)` to 7e-15. The grid's `indicator_pair_ess`
+  column is replaced by `inclusion_ess_min` (RB rather than transition
+  ESS), `rb_median_rhat` shifts in the fourth decimal, and
+  `ess_continuous` moves on one anchor row, all from the RB indicator
+  masking change (bgms `b42df13f`). New fields `$unit` and `$vary`.
+- `fit_compare_adhd`: **expected to move** (bgms F-119, `436a7a89`). The
+  fixture bakes at package defaults, and those defaults changed from
+  Cauchy to Normal for both the baseline interaction prior and the
+  difference family. Quoted numbers on guide/group-comparison.qmd shifted
+  accordingly; see that page's row.
+
 The SBM fit and the ADHD group comparison are not manuscript analyses and run
 at package defaults with the same seed. No 2-chain fixtures remain. Rebake and
 re-render together; the bake costs about ten minutes (see `fixtures/bake.R`).
+Baked `.rds` files resurface as `-rw-------` when Dropbox is syncing;
+`chmod 644 fixtures/*.rds` after a bake.
 
 Both bgms-side changes that A4 left open have landed and are applied on the
 site (brief A5):
@@ -65,7 +107,15 @@ site (brief A5):
   guide/mcmc-diagnostics.qmd (§ sec-rb-inclusion-ess and the warmup
   subsection), and guide/mcmc-output.qmd. The same PR put `standardize`
   through lifecycle; documented on reference/bgm.qmd and
-  reference/bgmCompare.qmd.
+  reference/bgmCompare.qmd. **Superseded in part by A8**: the release
+  drops `n_eff_mixt` from `summary(fit)$indicator` and deprecates
+  `extract_ess(estimator = "mixt")` (bgms `b42df13f`), on the ground that
+  the two-state model behind it is rejected on a substantial share of edge
+  chains. The exploration signal is now the directional transition counts.
+  Swept across guide/mcmc-diagnostics.qmd, guide/mcmc-output.qmd,
+  reference/extractors.qmd, reference/methods.qmd, reference/index.qmd, and
+  examples/reading-the-output.qmd; manual/diagnostics.qmd still describes
+  the retired statistic and is left to the post-launch manual pass.
 - PR #186 (`cc3410f0`). `extract_inclusion_bf()` gained `log = FALSE`, so
   the default return is the Bayes factor rather than its natural log. Swept
   on reference/extractors.qmd § extract_inclusion_bf, reference/index.qmd,
@@ -73,9 +123,18 @@ site (brief A5):
   for `intrusion-dreams` is now the Bayes factor, about 2e119, with the log
   scale (274.76) shown alongside it; the log values themselves did not move.
 
-The 2b decision did not change `precision_graph_prior`: the installed
-release build still defaults to `"joint"`, so the effective-prior workaround
-on guide/edge-selection.qmd § sec-bf-continuous stands as written.
+`precision_graph_prior` now defaults to `"hierarchical"` on the CRAN
+release build (bgms F-010, merged `d3d8dbcf`); the signature is
+`c("hierarchical", "joint")`. Verified against the installed build under
+A8: a default continuous fit runs the hierarchical path, its prior
+inclusion probabilities are exactly the nominal 0.5 under
+`bernoulli_prior(0.5)`, and the trust gauge runs in-chain and fills
+`fit$zratio_diag`, with `options(bgms.zratio_gauge_sweeps = 0L)` as the
+off switch. Naming the argument where it is vacuous (ordinal data, or
+`edge_selection = FALSE`) is accepted and reported rather than an error.
+The effective-prior workaround on guide/edge-selection.qmd
+§ sec-bf-continuous is therefore reframed as the `"joint"` opt-in path,
+and the posterior-odds shortcut now holds for continuous edges by default.
 
 ## Network Figure Convention (brief A6, 2026-07-30)
 
@@ -253,41 +312,41 @@ Anything below in "Secondary Backlog" is not part of this immediate review seque
 | Page | Risk | Status | Technical sign-off (Maarten) | Readability sign-off (Maarten) | Blocking issue |
 |---|---|---|---|---|---|
 | **Site** | | | | | |
-| news.qmd | Low | Populated | No | No | A6: the 0.2.0.0 entry was reweighted to NEWS.md's own emphasis (model-class expansion, predict/simulate, NUTS backend, RB inclusion, prior constructors, sensitivity check last); MM reviews the wording. A3: the "bgms 0.2.0.0 on CRAN" entry and both entry dates (2026-07-30) are launch-gated; correct the dates if CRAN acceptance lands on another day |
+| news.qmd | Low | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): both entry dates corrected to 2026-08-04, the CRAN Published date; the 0.2.0.0 entry gained a changed-defaults paragraph (association scale, Normal slab in both entry points, hierarchical precision-graph prior, iter/warmup 2000, target_accept 0.80). A6: the 0.2.0.0 entry was reweighted to NEWS.md's own emphasis (model-class expansion, predict/simulate, NUTS backend, RB inclusion, prior constructors, sensitivity check last); MM reviews the wording. A3: the "bgms 0.2.0.0 on CRAN" entry and both entry dates (2026-07-30) are launch-gated; correct the dates if CRAN acceptance lands on another day |
 | **Guide** | | | | | |
 | guide/index.qmd | Low | Not started | No | No | - |
-| guide/getting-started.qmd | Medium | Scaffolded | No | No | A6: both median-probability plots replaced by the three-panel edge evidence plot (D2); ordinal splits 8 presence / 1 absence / 1 undecided, GGM 3 / 5 / 2. The shown chunks now execute rather than mirroring a hidden twin, so the `qgraph` soft guard is gone (qgraph is a CI dependency). Install snippet pinned to `@develop`. MM re-reviews the figures. A4: numbers moved (the hidden fits ran `chains = 2` while the shown calls used the four-chain default; the hidden chunks now match the shown calls) |
+| guide/getting-started.qmd | Medium | Scaffolded | No | No | A8 (2026-08-04, bgms main 6126312a): the live GGM fit runs the new hierarchical default, so its numbers moved: the two undecided pairs go from pip 0.64/0.40 and BF 2.7/1.1 to 0.502/0.552 and BF 1.0/1.2, and the prior inclusion probability is now exactly 0.5. The verdict split is unchanged (3 presence / 5 absence / 2 undecided, same pairs). The closing caution is rewritten: the Bayes factor now IS the posterior odds by default, and the median-probability foil is rewritten because both undecided pairs now sit above 0.5. A6: both median-probability plots replaced by the three-panel edge evidence plot (D2); ordinal splits 8 presence / 1 absence / 1 undecided, GGM 3 / 5 / 2. The shown chunks now execute rather than mirroring a hidden twin, so the `qgraph` soft guard is gone (qgraph is a CI dependency). Install snippet pinned to `@develop`. MM re-reviews the figures. A4: numbers moved (the hidden fits ran `chains = 2` while the shown calls used the four-chain default; the hidden chunks now match the shown calls) |
 | guide/graphical-models.qmd | Low | Not started | No | No | - |
 | guide/bayesian-approach.qmd | Low | Not started | No | No | - |
-| guide/prior-basics.qmd | Medium | Not started | No | No | Renamed from prior-guide.qmd |
-| guide/ggm.qmd | Medium | Scaffolded | No | No | - |
+| guide/prior-basics.qmd | Medium | Not started | No | No | A8 (2026-08-04, bgms main 6126312a): hierarchical/joint framing inverted in sec-edge-priors-continuous; the Cauchy slab no longer described as the bgmCompare baseline default. Renamed from prior-guide.qmd |
+| guide/ggm.qmd | Medium | Scaffolded | No | No | A8 (2026-08-04, bgms main 6126312a): the precision_graph_prior bullets reordered with `"hierarchical"` as the default, the gauge described as in-chain, and the vacuous-argument acceptance stated |
 | guide/omrf.qmd | High | Scaffolded | No | No | - |
-| guide/mixed-model.qmd | Medium | Not started | No | No | - |
-| guide/edge-selection.qmd | Medium | Scaffolded | No | No | A6: the median-probability section now says it is a summary, not a display, and points at the edge evidence plot (D2). A5: fixture baked on 0e116079, numbers unchanged from A4; the saturated-edge readout is now the Bayes factor (about 2e119) with the log scale (274.76) shown beside it. A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, BF10 2.8 -> 2.0, BF01 35 -> 33, log BF 317 -> 275) |
-| guide/group-comparison.qmd | Medium | Scaffolded | No | No | A5: fixture baked on 0e116079, numbers unchanged. A4: numbers moved to the defaults fixture (BF10 290 -> 305, 3.5 -> 3.3, BF01 2.6 -> 2.5) |
+| guide/mixed-model.qmd | Medium | Not started | No | No | A8 (2026-08-04, bgms main 6126312a): continuous-block paragraph reframed on the hierarchical default |
+| guide/edge-selection.qmd | Medium | Scaffolded | No | No | A8 (2026-08-04, bgms main 6126312a): sec-bf-continuous rewritten: the posterior-odds shortcut holds for continuous edges under the new default, and the effective-prior workaround is reframed as the `"joint"` opt-in. A6: the median-probability section now says it is a summary, not a display, and points at the edge evidence plot (D2). A5: fixture baked on 0e116079, numbers unchanged from A4; the saturated-edge readout is now the Bayes factor (about 2e119) with the log scale (274.76) shown beside it. A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, BF10 2.8 -> 2.0, BF01 35 -> 33, log BF 317 -> 275) |
+| guide/group-comparison.qmd | Medium | Scaffolded | No | No | A8 (2026-08-04, bgms main 6126312a): compare-slab defaults swept Cauchy -> Normal (F-119), and the ADHD fixture rebaked at the new defaults moved every quoted number: motor-seat BF10 305 -> 886 (pip 0.997 -> 0.999), avoid-closeatt 3.3 -> 6.2, forget-talks BF01 2.5 -> 3.4 (pip 0.28 -> 0.23). A5: fixture baked on 0e116079, numbers unchanged. A4: numbers moved to the defaults fixture (BF10 290 -> 305, 3.5 -> 3.3, BF01 2.6 -> 2.5) |
 | guide/clustering.qmd | Medium | Not started | No | No | A5: fixture baked on 0e116079, numbers unchanged. A4: numbers moved to the defaults fixture (P(B=1) 0.43 -> 0.42) |
-| guide/mcmc-output.qmd | Medium | Populated | No | No | A5: fixtures baked on 0e116079, numbers unchanged; the extractor table now states both extractor scales. A4: numbers moved to the manuscript-grade fixture; the credible-interval example now pools all four chains instead of the first two |
-| guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | A6: the `n_eff_mixt` gloss was wrong ("frequent switching means precisely estimated") and is corrected against `src/mcmc_diagnostics.cpp:375-387`: the statistic compares switch rates with an independent chain at the same inclusion probability, so absolute flip frequency is not a quality measure (a2-review-findings 1). A5: fixture baked on 0e116079, fixture numbers unchanged, but the indicator ESS the page prints moved from the transition ESS to the RB one (min 1122 -> 995) because `extract_ess()` changed its default; the transition reading is now shown explicitly. A4: numbers moved to the manuscript-grade fixture; new subsection reads the warmup flag this fit now raises |
+| guide/mcmc-output.qmd | Medium | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): `n_eff_mixt` removed as a reported summary column and from the extractor table; the NA rule corrected; the zratio_diag gloss now says the gauge runs by default. A5: fixtures baked on 0e116079, numbers unchanged; the extractor table now states both extractor scales. A4: numbers moved to the manuscript-grade fixture; the credible-interval example now pools all four chains instead of the first two |
+| guide/mcmc-diagnostics.qmd | Medium | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): sec-mixture-ess rewritten around the composite ESS, with the transition-based mixture ESS recorded as retired in 0.2.0.0; sec-rb-inclusion-ess reworked onto the transition counts and the two NA routes; sec-trust-gauge rewritten for the run-by-default gauge with its off switch, thresholds (1% flip rate, 0.02 harm), and advice ladder; the live `estimator = "mixt"` chunk replaced. A6: the `n_eff_mixt` gloss was wrong ("frequent switching means precisely estimated") and is corrected against `src/mcmc_diagnostics.cpp:375-387`: the statistic compares switch rates with an independent chain at the same inclusion probability, so absolute flip frequency is not a quality measure (a2-review-findings 1). A5: fixture baked on 0e116079, fixture numbers unchanged, but the indicator ESS the page prints moved from the transition ESS to the RB one (min 1122 -> 995) because `extract_ess()` changed its default; the transition reading is now shown explicitly. A4: numbers moved to the manuscript-grade fixture; new subsection reads the warmup flag this fit now raises |
 | guide/missing-data.qmd | Medium | Populated | No | No | - |
 | **Examples** | | | | | |
 | examples/index.qmd | Low | Scaffolded | No | No | B0: section wired and the series contract written; the seven entries below stay unlinked plain text in the index prose until their pages ship. The PDF download link stays commented until the first one does; uncommenting it also means adding the `make examples-pdf` step to publish.yml, after the render and before the deploy, since a site render rewrites `docs/` |
 | examples/estimation-to-evidence.qmd | High | Not started | No | No | B1; D3 gate (ship at launch vs hold for the tutorial preprint) |
-| examples/reading-the-output.qmd | Medium | Populated | No | No | B2: summary() of the Wenchuan fit walked block by block, all column claims verified against R/mcmc_summary.R and src/mcmc_diagnostics.cpp on the release build. Template deviation, with reason: the payoff slot holds the full printed summary() instead of a figure (the printout is the artifact this page teaches), and the fit mirror precedes it so the companion script runs in order. The brief's "partial correlations" row in Where-is-X is split per model type: extract_partial_correlations() returns NULL on this all-ordinal fit, so the ordinal row points at extract_log_odds(). Closing bgmCompare pointer goes to guide/group-comparison.qmd until the B4 example ships. guide/mcmc-output.qmd gained the top-of-page pointer here |
+| examples/reading-the-output.qmd | Medium | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): the indicator-block walkthrough corrected: `n_eff_mixt` is gone from the table, the blanks are nine edges rather than sixteen (the sixteen zero-transition edges are a different, larger set), and `distant-numb` is named as the second NA route. B2: summary() of the Wenchuan fit walked block by block, all column claims verified against R/mcmc_summary.R and src/mcmc_diagnostics.cpp on the release build. Template deviation, with reason: the payoff slot holds the full printed summary() instead of a figure (the printout is the artifact this page teaches), and the fit mirror precedes it so the companion script runs in order. The brief's "partial correlations" row in Where-is-X is split per model type: extract_partial_correlations() returns NULL on this all-ordinal fit, so the ordinal row points at extract_log_odds(). Closing bgmCompare pointer goes to guide/group-comparison.qmd until the B4 example ships. guide/mcmc-output.qmd gained the top-of-page pointer here |
 | examples/check-your-priors.qmd | High | Not started | No | No | B3; reads ps_wenchuan.rds |
 | examples/comparing-groups.qmd | Medium | Not started | No | No | B4 |
 | examples/edge-clustering.qmd | Medium | Not started | No | No | B5 |
 | examples/from-bootnet-qgraph.qmd | High | Not started | No | No | B6; terminology sync with the tutorial manuscript (NS) |
 | examples/reporting.qmd | High | Not started | No | No | B7; GATED on the guidelines terminology freeze (NS) |
 | **Reference** | | | | | |
-| reference/index.qmd | Low | Scaffolded | No | No | A5: the `extract_inclusion_bf()` and `extract_ess()` rows now name the release defaults |
-| reference/bgm.qmd | High | Populated | No | No | A5: fixture baked on 0e116079, numbers unchanged; `standardize` added to the deprecated-arguments callout. A4: numbers moved to the manuscript-grade fixture |
-| reference/bgmCompare.qmd | High | Populated | No | No | A5: `standardize` added to the deprecated-arguments callout |
+| reference/index.qmd | Low | Scaffolded | No | No | A8 (2026-08-04, bgms main 6126312a): the prior table no longer names Cauchy as the bgmCompare default; the extract_ess row drops `estimator = "mixt"`. A5: the `extract_inclusion_bf()` and `extract_ess()` rows now name the release defaults |
+| reference/bgm.qmd | High | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): signature and precision_graph_prior row rewritten for the hierarchical default; the correction-table callout split into the hierarchical surface build and the joint correction table; the zratio_diag return field rewritten. A5: fixture baked on 0e116079, numbers unchanged; `standardize` added to the deprecated-arguments callout. A4: numbers moved to the manuscript-grade fixture |
+| reference/bgmCompare.qmd | High | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): signature and both prior rows swept to the Normal defaults (F-119). A5: `standardize` added to the deprecated-arguments callout |
 | reference/sample-ggm-prior.qmd | High | Populated | No | No | - |
-| reference/prior-samplers.qmd | High | Populated | No | No | A2 readability pass 2026-08-03: page is in the sidebar and linked five times from reference/index.qmd and reference/bgm.qmd, but was missing from this board (same class as the null-space and zratio-hierarchical findings under A1). Never gated; not on the A2 newcomer path, so it does not block launch |
-| reference/priors.qmd | High | Populated | No | No | - |
-| reference/methods.qmd | Medium | Populated | No | No | A5: fixtures baked on 0e116079, numbers unchanged. A4: numbers moved to the manuscript-grade fixture |
-| reference/prior-sensitivity.qmd | High | Populated | No | No | A6: the page no longer claims the method is that of @BartosEtAl_2026_sensitivity; the citation stays as the single-fit approach the design departs from, per `R/prior_sensitivity.R:11-14`. A5: fixture baked on 0e116079; every statistic unchanged, only the reported refit wall-clock moved (166 s -> 129 s). A4: numbers moved to the manuscript-grade fixture (91 of 136 verdicts robust, 8 not certifiable) |
-| reference/extractors.qmd | Medium | Populated | No | No | A5: fixture baked on 0e116079, numbers unchanged; the extract_inclusion_bf and extract_ess entries carry the release signatures and both scales. A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, log BF 317 -> 275) |
+| reference/prior-samplers.qmd | High | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): the summarize_zratio_gauge section no longer says the gauge is off by default; `harm_threshold` corrected 0.01 -> 0.02 (F-103) in both the signature and the argument table; `block_lo`/`block_hi` added to the per_chain columns. A2 readability pass 2026-08-03: page is in the sidebar and linked five times from reference/index.qmd and reference/bgm.qmd, but was missing from this board (same class as the null-space and zratio-hierarchical findings under A1). Never gated; not on the A2 newcomer path, so it does not block launch |
+| reference/priors.qmd | High | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): cauchy_prior() no longer described as the bgmCompare baseline default |
+| reference/methods.qmd | Medium | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): the indicator-table column list drops `n_eff_mixt` and states the two NA routes. A5: fixtures baked on 0e116079, numbers unchanged. A4: numbers moved to the manuscript-grade fixture |
+| reference/prior-sensitivity.qmd | High | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): the Bartos framing aligned to the MM-approved F-005 roxygen (the reweighting identity is Bartos's, applied locally; the anchored construction is the package's); the whole page moved from log10 to natural log units (F-051), the renamed columns fixed in the Value table and in the live chunk, the new `vary` argument documented, `tolerance` default corrected to `0.5 * log(10)`, and the display cap stated as ln(1e6). A6: the page no longer claims the method is that of @BartosEtAl_2026_sensitivity; the citation stays as the single-fit approach the design departs from, per `R/prior_sensitivity.R:11-14`. A5: fixture baked on 0e116079; every statistic unchanged, only the reported refit wall-clock moved (166 s -> 129 s). A4: numbers moved to the manuscript-grade fixture (91 of 136 verdicts robust, 8 not certifiable) |
+| reference/extractors.qmd | Medium | Populated | No | No | A8 (2026-08-04, bgms main 6126312a): extract_prior_inclusion_probabilities rewritten for the hierarchical default (no table, no chain); the F-020 slab-weight-disagreement caveat added to extract_rhat with its manual workaround; extract_ess rewritten for the deprecation of `estimator = "mixt"` and its live chunk replaced. A5: fixture baked on 0e116079, numbers unchanged; the extract_inclusion_bf and extract_ess entries carry the release signatures and both scales. A4: numbers moved to the manuscript-grade fixture (inclusion probability 0.74 -> 0.66, log BF 317 -> 275) |
 | reference/datasets.qmd | Low | Populated | No | No | - |
 | **Manual** | | | | | |
 | manual/index.qmd | Low | Scaffolded | No | No | - |

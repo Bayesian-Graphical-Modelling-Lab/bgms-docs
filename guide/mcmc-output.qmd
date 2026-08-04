@@ -64,11 +64,11 @@ Some components are present only for particular configurations:
 `fit$inclusion_parameter_samples` holds per-chain draws of the shared
 inclusion probability for continuous models with
 `beta_bernoulli_prior()` (see [Gaussian Graphical Model](ggm.qmd)),
-and `fit$zratio_diag` holds the trust-gauge summary for
-`precision_graph_prior = "hierarchical"` fits when the gauge is
-enabled (see
+and `fit$zratio_diag` holds the trust-gauge summary, which a continuous
+or mixed fit with edge selection produces by default under
+`precision_graph_prior = "hierarchical"` (see
 [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-trust-gauge)); both are
-`NULL` otherwise.
+`NULL` otherwise, as they are on this ordinal fit.
 
 ## Posterior summaries {#sec-posterior-summaries}
 
@@ -120,17 +120,16 @@ near 1 indicates strong evidence for the edge; near 0 indicates strong
 evidence against it. Values around 0.5 are inconclusive. The
 directional transition counts (`n0->1`, `n1->0`) show how often the
 edge indicator switched between excluded (0) and included (1) states
-during sampling, and `n_eff_mixt` is the transition-based ESS that
-summarizes them. For edges whose indicator never switched, both the
-transition ESS and the Rao-Blackwellized precision columns (`mcse`,
-`n_eff`, `Rhat`) are reported as `NA`: such a chain carries no
-exploration information, and a near-constant Rao-Blackwellized chain
-would otherwise report reassuring-looking numbers. Read `n_eff` and
-`n_eff_mixt` as a pair; see
+during sampling; they show how much the sampler explored. Read them
+beside `n_eff`, which measures precision conditional on that
+exploration; see
 [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
+The Rao-Blackwellized precision columns (`mcse`, `n_eff`, `Rhat`) come
+back `NA` when the chain is so certain about an edge that there is
+nothing left to estimate, rather than reporting the reassuring-looking
+numbers a near-constant chain would otherwise produce.
 [`extract_ess()`](../reference/extractors.qmd#extract_ess) returns the
-same two columns for indicators: `n_eff` by default, and `n_eff_mixt`
-with `estimator = "mixt"`.
+same Rao-Blackwellized `n_eff` for indicators.
 
 ### Summary columns
 
@@ -141,8 +140,7 @@ with `estimator = "mixt"`.
 | `mcse` | Monte Carlo standard error — how precisely the posterior mean is estimated. A small MCSE relative to `sd` indicates sufficient sampling. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mcse). |
 | `n_eff` | Effective sample size — the number of independent draws the chain is equivalent to. Values below 100 warrant longer runs. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-ess). |
 | `share_incl` | Tables of parameters under selection only (`pairwise` for [`bgm()`](../reference/bgm.qmd); `main_diff` and `pairwise_diff` for [`bgmCompare()`](../reference/bgmCompare.qmd)). The share of the squared Monte Carlo error of the model-averaged parameter that comes from inclusion uncertainty rather than from the slab. Values near 1 mean the bottleneck is how well the chain resolved whether the parameter is in; values near 0 mean it is how well the chain resolved the effect size given inclusion. |
-| `n_eff_mixt` | Inclusion table only. Transition-based ESS for the binary edge indicator, accounting for the spike-and-slab structure. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mixture-ess). |
-| `n0->1`, `n1->0` | Inclusion table only. Directional counts of indicator transitions. |
+| `n0->1`, `n1->0` | Inclusion table only. Directional counts of indicator transitions; they show how much the sampler moved between structures. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mixture-ess). |
 | `Rhat` | Split $\hat{R}$ convergence diagnostic. Values above 1.01 suggest the chains have not mixed. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rhat). |
 
 In the pairwise table for an edge-selected fit, `mcse` and `n_eff` are
@@ -253,7 +251,7 @@ commonly used are:
 | `extract_precision()` | Posterior mean precision matrix (GGM / continuous block) |
 | `extract_partial_correlations()` | Posterior mean partial correlation matrix (GGM / continuous block) |
 | `extract_log_odds()` | Posterior mean log-odds matrix (ordinal / discrete block) |
-| `extract_ess()` | Effective sample sizes. For edge indicators the Rao-Blackwellized ESS by default; `estimator = "mixt"` returns the transition ESS |
+| `extract_ess()` | Effective sample sizes. For edge indicators, the Rao-Blackwellized ESS |
 | `extract_rhat()` | Split $\hat{R}$ values |
 | `extract_sbm()` | SBM cluster assignments and co-clustering matrix (when `edge_prior = sbm_prior(...)`) |
 | `extract_arguments()` | Arguments used when fitting the model |

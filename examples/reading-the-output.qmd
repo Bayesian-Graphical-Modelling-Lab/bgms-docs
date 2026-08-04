@@ -152,26 +152,26 @@ the thresholds and their reading.
 `mcse`, `sd`, `n_eff`, and `Rhat` are the familiar columns, computed on the
 Rao-Blackwellized draws. The two new columns watch the sampler's exploration
 of structures: `n0->1` and `n1->0` count how often the edge indicator
-switched state across the four chains, and `n_eff_mixt` is the effective
-sample size built from those switch rates. Read `n_eff` and `n_eff_mixt` as
-a pair: `n_eff` says the probability estimate is precise, `n_eff_mixt` says
-the chain actually moved between structures, and only together do they say
-converged and explored. See
+switched state across the four chains. Read them beside `n_eff`: `n_eff`
+says the probability estimate is precise, the counts say the chain actually
+moved between structures, and only together do they say converged and
+explored. See
 [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
 
-The blanks are the note's suppressed `NA` values. Sixteen edges here,
+The blanks are the note's suppressed `NA` values. Nine edges here,
 `intrusion-dreams` among them, were included in every sweep of every chain:
-zero transitions, so the transition-based `n_eff_mixt` does not exist, and
-the package also reports `NA` for the Rao-Blackwellized `mcse`, `n_eff`, and
-`Rhat` rather than print reassuring-looking numbers computed from a chain
-that never moved. The `mean` stays, and for these saturated edges the
-evidence verdict rests on `extract_inclusion_bf()`, which remains finite
-where the probability rounds to 1.
+their inclusion probabilities are pinned at 1, and a chain that never moves
+gives the precision estimates nothing to work with. The package reports
+`NA` for `mcse` and `n_eff` on those rows (and for all but one of them
+`Rhat` too) rather than print reassuring-looking numbers. The `mean`
+stays, and for these saturated edges the evidence verdict rests on
+`extract_inclusion_bf()`, which remains finite where the probability
+rounds to 1.
 
 Is this block okay? Guidelines as before, applied to the non-blank rows:
-here the smallest `n_eff` is 995, the smallest `n_eff_mixt` is 1122, and
-every `Rhat` is at most 1.006. Blank rows are not failures; here they are
-the sixteen edges the data decided most emphatically.
+here the smallest `n_eff` is 995 and every `Rhat` is at most 1.006. Blank
+rows are not failures; they are the edges the data decided most
+emphatically.
 
 ## Where is X?
 

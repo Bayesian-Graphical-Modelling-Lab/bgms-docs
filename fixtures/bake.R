@@ -22,14 +22,17 @@
 #     same 18 rows, so passing Wenchuan directly gives bit-identical draws.
 #     Because the seed, settings, and data all match, the numbers on this
 #     site and the numbers in the paper are the same numbers, not merely
-#     compatible ones. The current bake is on bgms develop 0e116079, whose
-#     release-run draws are bit-identical to the c1e52c8e run the tutorial
-#     used: the changes since then are in the extractors and in argument
-#     validation, not in the samplers.
+#     compatible ones. The current bake is on the CRAN release, bgms main
+#     6126312a, whose draws are bit-identical to the 0e116079 and c1e52c8e
+#     runs before it, and to the run the tutorial used: nothing in the
+#     2026-08 pre-CRAN cycle touches the ordinal samplers.
 #
 #   * The SBM fit and the ADHD group comparison are not manuscript analyses,
 #     so they run at package defaults with the same seed. What the site shows
-#     for them is what the defaults give you.
+#     for them is what the defaults give you. Because they track the defaults,
+#     a release that changes one moves their numbers: the 0.2.0.0 compare
+#     slabs went Cauchy -> Normal, so the ADHD numbers moved on the 2026-08-04
+#     rebake. That is the fixture doing its job, not a regression.
 #
 # Bake cost, measured on a 15-core M-series laptop: fit_wenchuan 4.5 min,
 # ps_wenchuan 2.8 min (warm-started NUTS refits, so the check costs less than

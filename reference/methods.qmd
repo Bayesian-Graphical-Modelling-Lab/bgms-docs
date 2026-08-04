@@ -64,10 +64,15 @@ Returns a summary object containing:
   than slab uncertainty.
 - `indicator` — Data frame of inclusion indicator summaries (if
   edge/difference selection enabled): `mean`, `mcse`, `sd`, `n_eff`,
-  `n_eff_mixt`, `Rhat`, `n0->1`, `n1->0`. The `mean`, `mcse`, `sd`, and
-  `n_eff` columns are computed on the Rao-Blackwellized inclusion draws;
-  `mcse`, `n_eff`, `n_eff_mixt`, and `Rhat` are `NA` for indicators that
-  never flipped.
+  `Rhat`, `n0->1`, `n1->0`. The `mean`, `mcse`, `sd`, and `n_eff`
+  columns are computed on the Rao-Blackwellized inclusion draws;
+  `n0->1` and `n1->0` count transitions of the binary indicator chain
+  and carry the exploration signal. The precision columns come back `NA`
+  where the inclusion probability is pinned and no precision is left to
+  estimate: `mcse`, `n_eff`, and `Rhat` when the draws are exactly
+  constant, and `mcse` and `n_eff` alone when the draws vary too little
+  for the autocorrelation machinery. The transition-based `n_eff_mixt`
+  column was dropped in 0.2.0.0.
 
 See [Model Output](../guide/mcmc-output.qmd#sec-posterior-summaries) for
 how to read these columns.

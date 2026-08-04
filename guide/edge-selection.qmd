@@ -39,11 +39,11 @@ In practice, the recommended tool is [`extract_inclusion_bf()`](../reference/ext
 
 The reciprocal $1 / \text{BF}_{10}$ quantifies the evidence for edge absence, i.e., conditional independence [@SekulovskiEtAl_2024]. Values of $\text{BF}_{10}$ close to one indicate that the data do not discriminate between the two hypotheses — absence of evidence rather than evidence of absence.
 
-### Continuous data: use the effective prior probabilities {#sec-bf-continuous}
+### When posterior odds equal the Bayes factor {#sec-bf-continuous}
 
-The shortcut "posterior odds = Bayes factor" relies on the prior inclusion probability being exactly $\frac{1}{2}$. For discrete (ordinal) data with `bernoulli_prior(0.5)` this holds. For continuous (GGM) data — and for the continuous-continuous edges of a mixed model — it does not, under the default `precision_graph_prior = "joint"`: the edge prior there combines with the un-normalized precision-matrix prior, and the effective prior inclusion probability of a continuous edge differs from the nominal edge-prior value (see [Prior Basics](prior-basics.qmd#sec-edge-priors-continuous)).
+The shortcut "posterior odds = Bayes factor" holds when the prior inclusion odds equal one, and that takes two ingredients. First, the edge prior must put probability $\frac{1}{2}$ on inclusion. Under `bernoulli_prior(0.5)` it does; under, say, `bernoulli_prior(0.1)` the prior odds are $1/9$, and reading the posterior odds as a Bayes factor overstates the evidence by a factor of nine, whatever the data type. Second, the model must use the probability you wrote down. For discrete (ordinal) data it always does. For continuous (GGM) data — and for the continuous-continuous edges of a mixed model — it does under the default `precision_graph_prior = "hierarchical"`, which normalizes the precision prior per graph so that the prior over structures is exactly the edge prior (see [Prior Basics](prior-basics.qmd#sec-edge-priors-continuous)).
 
-For these models, compute the Bayes factor from the general identity — posterior inclusion odds divided by *prior* inclusion odds — with the prior probabilities from [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities):
+The second ingredient fails if you opt into `precision_graph_prior = "joint"`. The edge prior there combines with the un-normalized precision-matrix prior, and the effective prior inclusion probability of a continuous edge differs from the nominal edge-prior value. On a joint fit, compute the Bayes factor from the general identity — posterior inclusion odds divided by *prior* inclusion odds — with the prior probabilities from [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities):
 
 ```r
 post = extract_posterior_inclusion_probabilities(fit)
@@ -54,7 +54,7 @@ BF10 = (post / (1 - post)) / (prior / (1 - prior))
 Both extractors return matrices of matching shape, so the odds combine
 element-wise.
 
-Alternatively, fitting with `precision_graph_prior = "hierarchical"` makes the prior over structures exactly the edge prior, so the nominal prior inclusion probability — and with `bernoulli_prior(0.5)` the posterior-odds shortcut — applies to continuous edges as well.
+In every case, [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) computes the Bayes factor from that same identity with the prior odds the fit actually used, so it needs no adjustment: not for an edge prior away from $\frac{1}{2}$, and not for either `precision_graph_prior` specification.
 
 ## Other approaches to testing conditional independence
 

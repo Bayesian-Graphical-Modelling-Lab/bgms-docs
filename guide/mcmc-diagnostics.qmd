@@ -32,56 +32,54 @@ $\hat{R}$ and the ESS estimate itself become unreliable
 required, more iterations or chains are needed: two significant digits
 require an ESS on the order of 10,000 [@MargossianGelman_2024].
 
-### Mixture ESS for edge-selected parameters {#sec-mixture-ess}
+### Composite ESS for edge-selected parameters {#sec-mixture-ess}
 
 When edge selection is active, pairwise effects are governed by
 spike-and-slab priors. The parameter is set to exactly zero when the edge
 is excluded, creating a chain that mixes between zero and nonzero values.
 
-Two ESS measures are reported:
+For such a parameter the pairwise table reports a single `n_eff`, and it
+is built differently than for an ordinary chain. To the standard
+autocorrelation machinery, the switching between zero and nonzero values
+looks like fast mixing, so the ESS comes out too large exactly where the
+indicator rather than the weight drives the variability. The package
+instead combines the two sources of Monte Carlo error that limit the
+model-averaged weight — how well the chain resolved whether the edge is
+in, and how well it resolved the weight given inclusion — into one
+equivalent sample size. The companion column `share_incl` tells you which
+source dominates. `mean`, `sd`, and `Rhat` are computed from the full
+chain, zeros included. See
+[Model Output](mcmc-output.qmd#sec-posterior-summaries) for the columns.
 
-- **`n_eff`**: the unconditional ESS, computed from the full chain
-  (including zeros). Measures how precisely the overall posterior mean is
-  estimated.
-- **`n_eff_mixt`**: the mixture ESS, which accounts for additional
-  uncertainty from the spike-and-slab switching.
+**The retired mixture ESS.** Earlier versions reported a second,
+transition-based statistic beside `n_eff`. It modeled the on/off indicator
+sequence as a simple two-state process and scored the chain's switch rates
+against an independent chain with the same inclusion probability
+[@VanDenBerghEtAl_2026_moms]. That simple process turns out to describe
+many edge chains poorly, so the statistic could mislead, and 0.2.0.0
+retires it: the `n_eff_mixt` column is gone from the summary tables, and
+`extract_ess(fit, estimator = "mixt")` is deprecated. The precision of the
+inclusion probability and of its Bayes factor is carried by the
+Rao-Blackwellized `n_eff` and `mcse`; the exploration it used to measure
+is read from the directional transition counts `n0->1` and `n1->0`, which
+stay in `summary(fit)$indicator`.
 
-The mixture ESS treats the on/off indicator sequence as a two-state
-process and compares the chain's switch rates with those of an
-independent chain having the same inclusion probability
-[@VanDenBerghEtAl_2026_moms]. An independent chain earns the full $N$ at
-any inclusion probability; a chain that lingers in its current state
-longer than its own inclusion probability warrants earns less. What is
-penalized is stickiness relative to that probability, not a low flip
-count as such. How often the indicator flips in absolute terms mainly
-reflects the inclusion probability itself, being highest near 0.5, and
-is not on its own a measure of quality: an edge with an inclusion
-probability near 0 or 1 flips rarely even under perfect mixing. The
-formula is derived in
-[Convergence Diagnostics](../manual/diagnostics.qmd) in the Technical
-Manual.
+How often an indicator flips mainly reflects the inclusion probability
+itself: flips are most frequent near 0.5, and an edge with an inclusion
+probability near 0 or 1 flips rarely even under perfect mixing. A low flip
+count is therefore not on its own a sign of trouble. Do note the asymmetry
+between the two directions, which no single summary number can show.
 
-**Limitations near the boundary.** The mixture ESS is imprecise when
-the inclusion probability is near 0 or 1. In these cases the indicator
-is almost always in the same state, so transitions are rare and the
-estimated switching rates rest on very few events. A single extra
-transition can change the estimate substantially. The value is still
-reported, because it is the honest measure of how much exploration
-happened; read it together with the directional transition counts
-`n0->1` and `n1->0` in the same table, whose asymmetry the symmetric
-mixture ESS cannot recover.
-
-At the extreme — when the indicator never switches — there are no
-transitions to estimate from, and `n_eff_mixt` is `NA`. This does not
-necessarily indicate a problem: if the posterior strongly favors
-inclusion or exclusion, there is little uncertainty about the indicator
-and the inclusion probability is well determined even without
-switching. For such zero-flip edges the verdict rests on the inclusion
-probability itself and on
+At the extreme, the indicator never switches at all. Even that is not
+necessarily a problem: when the posterior strongly favors inclusion or
+exclusion, there is little uncertainty about the indicator, and the
+inclusion probability is well determined without any switching. For these
+zero-flip edges the verdict rests on the inclusion probability itself and
+on
 [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf),
 which stays finite where the probability saturates.
 
-### Inclusion ESS and the exploration pair {#sec-rb-inclusion-ess}
+### Inclusion ESS and the exploration counts {#sec-rb-inclusion-ess}
 
 For edge indicators the summary table reports its precision columns
 (`mcse`, `n_eff`, `Rhat`) on the Rao-Blackwellized inclusion draws
@@ -89,27 +87,33 @@ rather than on the binary indicators. Those draws are continuous, so
 the standard continuous machinery applies to inclusion inference (see
 [Model Output](mcmc-output.qmd#sec-posterior-summaries)).
 
-The two ESS columns then measure different things, and the pair is the
-diagnostic:
+Precision and exploration are still two different questions, and the
+table answers them in two different places:
 
 - `n_eff` measures precision *conditional on exploration*. A chain
   stuck in one region of model space can still produce a smooth,
   well-converged Rao-Blackwellized chain with a large `n_eff`.
-- `n_eff_mixt` measures the exploration itself.
+- `n0->1` and `n1->0` measure the exploration itself.
 
-Large on both means converged and explored. A confident `n_eff` beside
-a small or `NA` `n_eff_mixt` is the boundary signature: a precise
-one-step estimate resting on little transition evidence. For edges
-where the indicator never flipped, the Rao-Blackwellized `mcse`,
-`n_eff`, and `Rhat` are reported as `NA` rather than as the misleading
-numbers a near-constant heavy-tailed chain would produce.
+A confident `n_eff` beside near-zero transition counts is the boundary
+signature: a precise one-step estimate resting on little transition
+evidence. On a saturated edge that is the expected reading rather than a
+fault.
+
+The Rao-Blackwellized columns come back `NA` when the inclusion draw
+barely varies: the chain is certain about the edge, and there is no
+remaining precision to estimate. Depending on how completely the draw is
+pinned, either all of `mcse`, `n_eff`, and `Rhat` are `NA`, or `Rhat`
+survives while `mcse` and `n_eff` do not. The reading is the same either
+way: the inclusion probability is pinned, not poorly estimated. These are
+not the same edges as the zero-transition ones — an indicator that never
+flipped can still leave a draw with enough variability to summarize.
 
 [`extract_ess()`](../reference/extractors.qmd#extract_ess) returns the
-Rao-Blackwellized `n_eff` for indicators by default, so its indicator
+Rao-Blackwellized `n_eff` for indicators, so its indicator
 element lines up with the summary table's `n_eff` column and with
 [`extract_rhat()`](../reference/extractors.qmd#extract_rhat), which
-reads the same continuous chain. Ask for the exploration half of the
-pair explicitly with `extract_ess(fit, estimator = "mixt")`.
+reads the same continuous chain.
 
 When transitions are observed but rare, the ESS estimate itself becomes
 imprecise: small fluctuations in the transition counts can produce
@@ -366,11 +370,15 @@ print(data.frame(
 
 Every R-hat is below 1.01 and the smallest effective sample size is around a
 thousand, so the chains agree with each other and with their own halves. The
-exploration half of the indicator pair backs that agreement up: the smallest
-transition ESS on this fit is about 1100.
+transition counts back that agreement up: of the 136 edges, the 120 the data
+did not decide outright all moved between structures in both directions,
+though the slowest of them managed only one flip each way.
 
 ```{r}
-round(min(extract_ess(fit, estimator = "mixt")$indicator, na.rm = TRUE))
+ind = summary(fit)$indicator
+moved = ind[["n0->1"]] > 0 & ind[["n1->0"]] > 0
+c(edges = nrow(ind), moved_both_ways = sum(moved),
+  fewest_flips = min(pmin(ind[["n0->1"]], ind[["n1->0"]])[moved]))
 ```
 
 A significant energy slope in one chain out of four, with clean R-hat and ESS, is
@@ -381,35 +389,54 @@ one in the previous paragraph: more warmup, then a different sampler.
 
 ## Trust gauge for the hierarchical graph prior {#sec-trust-gauge}
 
-This check applies only to continuous (GGM) models fitted with
+This check applies to continuous (GGM) and mixed models fitted with
+edge selection under the default
 `precision_graph_prior = "hierarchical"`. Under that prior, every
 edge move evaluates a normalizing-constant ratio through a fast
 approximation built at the start of the analysis (see the
 [Technical Manual](../manual/zratio-hierarchical.qmd)). The trust
-gauge audits that approximation after sampling: in a few extra
-assessment sweeps it redoes a subset of each chain's own edge
-decisions with the exact calculation and checks whether the
-approximation changed any of them.
+gauge audits that approximation: two assessment sweeps redo a
+capped subset of each chain's own edge decisions with the exact
+calculation and check whether the approximation changed any of
+them.
 
-The gauge is off by default. Enable it before fitting with:
+The gauge runs by default, so a default continuous or mixed fit
+already carries its result:
 
 ```r
-options(bgms.zratio_gauge_sweeps = 2L)
-fit = bgm(data, precision_graph_prior = "hierarchical", ...)
+fit = bgm(data, variable_type = "continuous", ...)
 fit$zratio_diag
+```
+
+It is silent when clean and prints only flagged chains. Its cost is
+fixed per chain rather than proportional to `iter` — nothing on a
+sparse posterior, and seconds per chain on a dense one at 100 to 200
+variables. That is negligible against a production-length fit and
+noticeable on a short exploratory one, which is what the off switch
+is for:
+
+```r
+options(bgms.zratio_gauge_sweeps = 0L)
 ```
 
 The summary reports two channels per chain:
 
 - **`flip_rate`** — the fraction of audited add/remove decisions that
-  would have come out differently under the exact calculation.
+  would have come out differently under the exact calculation. A chain
+  above 1% is flagged.
 - **`harm_pred`** — the projected distortion of the mean posterior
-  inclusion probability, in probability units.
+  inclusion probability, in probability units, flagged above 0.02. This
+  channel catches a consistent error that shifts the recovered network
+  without changing individual edge decisions, which `flip_rate` cannot
+  see.
 
 Small values on both channels mean the approximation did not
-meaningfully affect the sampled graphs. A flagged chain prints a
-warning-style message; in that case treat the edge inclusion
-probabilities with caution. See
+meaningfully affect the sampled graphs. A flagged chain prints the
+measured error and what the audit covered, followed by advice in
+order: first raise `options(bgms.zratio_gauge_sweeps)` and refit, to
+see whether the signal is real; only after that consider
+`precision_graph_prior = "joint"`, which is a different model rather
+than a fix. The gauge never switches specification on its own. See
 [`summarize_zratio_gauge()`](../reference/prior-samplers.qmd#summarize_zratio_gauge)
 for the full output format and thresholds.
 
@@ -443,7 +470,7 @@ When diagnostics indicate a problem, match the remedy to the symptom:
    incomplete equilibration.
 4. **Plot traces**: visually inspect a few key parameters for mixing and
    stationarity.
-5. **With the hierarchical graph prior**: if the trust gauge was enabled,
-   check `fit$zratio_diag` for flagged chains.
+5. **On a continuous or mixed fit**: check `fit$zratio_diag` for flagged
+   chains. The trust gauge fills it by default.
 6. **If problems are found**: increase `warmup` and/or `iter`, adjust
    `target_accept`, or switch samplers.
