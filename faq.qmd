@@ -83,15 +83,6 @@ the edge evidence plot weights only its presence panel and draws the
 other two by classification alone. More:
 [the edge evidence plot](reference/methods.qmd#plot).
 
-### Can I use centrality to pick intervention targets?
-
-Centrality summarizes a node's total involvement in the fitted network;
-it is not a causal quantity, and no analysis of cross-sectional
-conditional associations becomes a causal claim by itself. `bgms`
-reports strength centrality with its posterior uncertainty, so the
-ranking's stability is at least visible rather than assumed. More:
-[`extract_centrality()`](reference/extractors.qmd#extract_centrality).
-
 ### `verdicts()` flagged some verdicts as fragile. Is the analysis broken?
 
 No: fragile means the verdict sits within two Monte Carlo standard
