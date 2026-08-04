@@ -88,7 +88,7 @@ Priors on baseline parameters are specified via prior-object constructors (see [
 | `threshold_prior` | A `bgms_parameter_prior` object for baseline threshold parameters. Allowed: [`beta_prime_prior()`](priors.qmd#beta_prime_prior) (default), [`normal_prior()`](priors.qmd#normal_prior). Default: `beta_prime_prior(alpha = 0.5, beta = 0.5)`. |
 
 ::: {.callout-note}
-## Deprecated arguments
+## Deprecated arguments []{#sec-deprecated-arguments}
 
 | Deprecated | Replacement |
 |------------|-------------|

@@ -124,6 +124,7 @@ during sampling; they show how much the sampler explored. Read them
 beside `n_eff`, which measures precision conditional on that
 exploration; see
 [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
+[]{#sec-pinned-indicators}
 The Rao-Blackwellized precision columns (`mcse`, `n_eff`, `Rhat`) come
 back `NA` when the chain is so certain about an edge that there is
 nothing left to estimate, rather than reporting the reassuring-looking

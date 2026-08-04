@@ -162,7 +162,7 @@ sentences:
 > neighboring category (`<named edges and directions>`); the data-preferred
 > scale was `<s-hat>` `[<lo>, <hi>]` against the chosen `<s>`.
 
-## How to act
+## How to act {#sec-how-to-act}
 
 Acting on the result follows the report's categories.
 

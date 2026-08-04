@@ -183,7 +183,7 @@ For edge indicators, the reported R-hat is computed on the continuous
 Rao-Blackwellized inclusion draws, and is `NA` where those draws are
 exactly constant ([see above](#sec-rb-inclusion-ess)).
 
-## Trace plots
+## Trace plots {#sec-trace-plots}
 
 Visually inspecting the sampled values across iterations is a direct way to
 assess convergence. Chains that have converged look like random noise
@@ -248,12 +248,12 @@ legend("topright", legend = paste("Chain", seq_len(nchains)),
   col = cols[seq_len(nchains)], lwd = 1.5, bty = "n", cex = 0.8)
 ```
 
-## NUTS-specific diagnostics
+## NUTS-specific diagnostics {#sec-nuts-diagnostics}
 
 When using `update_method = "nuts"` (the default), additional diagnostics
 are stored in `fit$nuts_diag`.
 
-### E-BFMI
+### E-BFMI {#sec-ebfmi}
 
 E-BFMI (Energy Bayesian Fraction of Missing Information) measures how
 efficiently the sampler explores the posterior
@@ -267,7 +267,7 @@ warrant investigation. In models with edge selection, the most common cause
 is that the warmup period was too short for the discrete graph structure to
 equilibrate. Increasing `warmup` often resolves this.
 
-### Divergent transitions
+### Divergent transitions {#sec-divergences}
 
 Divergent transitions occur when the numerical integrator encounters
 regions where the posterior curvature changes too rapidly for the current
@@ -279,7 +279,7 @@ If divergences are frequent, increase `target_accept` (which reduces the
 step size). If that does not help, try `update_method = "adaptive-metropolis"`
 and compare results.
 
-### Mean acceptance probability
+### Mean acceptance probability {#sec-accept-prob}
 
 `fit$nuts_diag$accept_prob` is a chains × iterations matrix of the mean
 acceptance probability across every leapfrog step in each trajectory.
@@ -290,7 +290,7 @@ a signal that the automatic step-size tuning did not converge — usually
 because warmup was too short or the geometry has features that warrant
 a higher target.
 
-### Tree depth
+### Tree depth {#sec-tree-depth}
 
 NUTS builds trajectories by repeatedly doubling their length until a
 U-turn criterion is satisfied. If the trajectory frequently reaches the
@@ -299,7 +299,7 @@ benefit from longer trajectories. Hitting the maximum depth occasionally is
 normal; hitting it on most iterations may indicate challenging posterior
 geometry. Consider increasing `nuts_max_depth`.
 
-## Warmup equilibration check
+## Warmup equilibration check {#sec-warmup-check}
 
 In models with edge selection, the discrete graph structure may take longer
 to reach stationarity than the continuous parameters. Even after warmup
@@ -331,7 +331,7 @@ compare posterior summaries. If the two samplers produce similar results,
 the estimates are likely trustworthy despite the warnings; if they differ,
 further investigation is warranted.
 
-### The flag on this page's own fit
+### The flag on this page's own fit {#sec-warmup-flag-worked}
 
 The Wenchuan fit used throughout this page raises the flag, which makes it a
 useful worked case rather than an embarrassment. Here is what it says:
@@ -456,7 +456,7 @@ When diagnostics indicate a problem, match the remedy to the symptom:
 - **Warmup warnings in `fit$nuts_diag$warmup_check`, persistent divergences, or acceptance below target** — increase `warmup`; the sampler needs more adaptation time, and extra post-warmup draws will not fix a poorly tuned sampler.
 - **R-hat above 1.01** — first check the trace plots; if chains disagree, longer `warmup` (and sometimes longer `iter`) is the remedy. Keep at least two chains — with a single chain, R-hat cannot be computed.
 
-## Recommended workflow
+## Recommended workflow {#sec-workflow}
 
 1. **Inspect `summary()`**: check R-hat (< 1.01) and ESS (≥ 100) for all
    parameters.
