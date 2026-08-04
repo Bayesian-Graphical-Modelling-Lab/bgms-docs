@@ -91,6 +91,7 @@ website:
         - examples/estimation-to-evidence.qmd
         - examples/reading-the-output.qmd
         - examples/check-your-priors.qmd
+        - examples/from-bootnet-qgraph.qmd
 
     - id: guide
       title: "User's Guide"

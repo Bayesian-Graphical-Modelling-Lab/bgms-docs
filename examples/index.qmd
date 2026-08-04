@@ -39,9 +39,9 @@ carries the reasoning, the Reference the details.
 6. **Edge clustering.** The stochastic block model prior on the same data.
    Afterwards you can report clusters of variables together with the uncertainty
    in the allocations.
-7. **Coming from bootnet and qgraph.** Your current workflow mapped onto `bgms`,
-   call by call. Afterwards you know which function replaces which step, what is
-   new, and what has no direct analogue.
+7. **[Coming from bootnet and qgraph](from-bootnet-qgraph.qmd).** Your current
+   workflow mapped onto `bgms`, call by call. Afterwards you know which function
+   replaces which step, what is new, and what has no direct analogue.
 8. **Reporting your results.** Checklists and template paragraphs per analysis
    type. Afterwards you can assemble a Methods and Results section that a
    reviewer can follow.

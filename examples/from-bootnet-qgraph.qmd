@@ -1,0 +1,200 @@
+---
+title: "Coming from bootnet and qgraph"
+---
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+#| purl: false
+library(bgms)
+
+# Fixture loader, copied verbatim from the guide pages.
+resolve_fixture = function(name) {
+  input_dir = dirname(knitr::current_input(dir = TRUE))
+  candidates = c(
+    file.path(input_dir, "..", "fixtures", name),
+    file.path(input_dir, "fixtures", name),
+    file.path("fixtures", name),
+    file.path("..", "fixtures", name)
+  )
+  hit = candidates[file.exists(candidates)][1]
+  if (is.na(hit)) {
+    stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+  }
+  hit
+}
+
+fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
+```
+
+```{r}
+#| label: verify-map
+#| echo: false
+#| include: false
+#| purl: false
+# Every bgms call in the map below, run against the baked fixture so a
+# broken claim fails the render rather than reaching a reader.
+w = extract_pairwise_interactions(fit)
+stopifnot(all(c("intrusion-dreams", "intrusion-upset") %in% colnames(w)))
+q = quantile(w[, "intrusion-dreams"] - w[, "intrusion-upset"],
+             c(0.025, 0.975))
+s = summary(fit)$pairwise
+v = verdicts(fit)
+bf = extract_inclusion_bf(fit)
+cen = extract_centrality(fit)
+invisible(summary(cen))
+invisible(calibration_check(fit, seed = 123))
+```
+
+You already know what to ask of a network analysis; the estimation
+workflow of `qgraph` and `bootnet` is the field's standard for good
+reasons [@EpskampEtAl_2012_qgraph; @EpskampEtAl_2018_bootnet], and
+nothing on this page asks you to unlearn it. What `bgms` adds is a
+second question next to "what is the network?": *what is the evidence
+for each edge?* You keep your data, your plots, and most of your
+intuitions; this page maps each familiar step onto its Bayesian
+counterpart, says what is conceptually new, and says plainly what you
+give up.
+
+## The map {#sec-the-map}
+
+Each row is one question you already ask. The left call is the
+estimation workflow's answer (verified against `bootnet` 1.9.1,
+`qgraph` 1.10.1, and `NetworkComparisonTest` 2.2.3); the right call is
+the `bgms` counterpart, with `fit = bgm(Wenchuan)` as the one fit every
+right-hand call reads from.
+
+| The question | Estimation workflow | Bayesian counterpart | What changes |
+|---|---|---|---|
+| What does the network look like? | `network = estimateNetwork(Wenchuan, default = "EBICglasso")` | `fit = bgm(Wenchuan)` | One point estimate becomes a model-averaged posterior over structures and weights. |
+| How do I draw it? | `plot(network)` | `plot(fit)` | The drawing splits into three panels by evidence. Your `qgraph` skills carry over: `qgraph(coef(fit)$pairwise, ...)` draws the posterior means with any styling you already use. |
+| How certain are the edge weights? | `boots = bootnet(network, nBoots = 1000)`, then `plot(boots)` | `summary(fit)$pairwise` | Credible intervals come with the fit; there is no resampling loop to run or wait for. |
+| How stable are the results? | `corStability(bootnet(network, nBoots = 1000, type = "case"))` | Nothing to run | The posterior carries its uncertainty natively, so the case-drop bootstrap has no counterpart and there is no CS-coefficient to report; see [the honest trade-offs](#sec-give-up). |
+| Is this edge in the network? | In or out of the point estimate | `verdicts(fit)` | In-or-out becomes graded evidence: an inclusion Bayes factor per edge, classified as presence, absence, or undecided. |
+| Is this edge absent? | Unanswerable | `verdicts(fit)` | Evidence of absence becomes a positive, reportable finding rather than a blank. |
+| Do these two edges differ? | `differenceTest(boots, "intrusion--dreams", "intrusion--upset", measure = "edge")` | `w = extract_pairwise_interactions(fit)`, then `quantile(w[, "intrusion-dreams"] - w[, "intrusion-upset"], c(0.025, 0.975))` | The difference between two weights has a posterior distribution of its own; read its credible interval directly. |
+| Which nodes are central? | `centralityPlot(network)` | `plot(extract_centrality(fit))` | Centrality gets a posterior: every node's strength comes with a credible interval, and the ranking's uncertainty is visible instead of assumed away. |
+| Do the groups differ? | `NCT(data1, data2, it = 1000, test.edges = TRUE)` | `bgmCompare(x = data1, y = data2)` | Where the Network Comparison Test asks whether two networks differ somewhere, the comparison answers parameter by parameter, and evidence of *equality* becomes expressible. See [Group Comparison](../guide/group-comparison.qmd). |
+| Does the model describe the data? | Not part of the standard workflow | `calibration_check(fit, seed = 123)` | A new check: reliability diagrams of the model's conditional predictions, plus [`simulate()`](../reference/methods.qmd#simulate) for posterior predictive displays. |
+| What does a blank in the drawing mean? | It cannot say: ruled out and undecided look the same | The blank splits in two: evidence of absence and undecided are separate panels of `plot(fit)` | The three-way reading is worked through in [From estimation to evidence](estimation-to-evidence.qmd). |
+
+Every call in the left column is real, runnable `bootnet`/`qgraph`
+syntax, verified against the installed packages; every call in the
+right column runs against a `bgm()` fit of the
+[Wenchuan](../reference/datasets.qmd#wenchuan) data during the build of
+this page.
+
+## Run the right column {#sec-run-it}
+
+The complete Bayesian side of the table, on data that ship with the
+package. This is also the page's companion script:
+
+```{r}
+#| label: right-column
+#| eval: false
+library(bgms)
+
+# Fit once; everything else reads from the fit.
+fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
+
+# The network, split by evidence, and the verdict table behind it.
+plot(fit)
+verdicts(fit)
+
+# Edge weights with credible intervals.
+summary(fit)$pairwise
+
+# The difference between two edges, as a posterior.
+w = extract_pairwise_interactions(fit)
+quantile(w[, "intrusion-dreams"] - w[, "intrusion-upset"],
+         c(0.025, 0.975))
+
+# Centrality with uncertainty.
+plot(extract_centrality(fit))
+
+# Do the conditional predictions hold up?
+calibration_check(fit, seed = 123)
+```
+
+The run length is the one departure from the defaults, and it is
+deliberate: what you read off this fit is evidence, and the run must be
+long enough to pin each inclusion probability down.
+[Reading the output](reading-the-output.qmd) walks the `summary()` of
+this exact fit.
+
+## What changes conceptually
+
+**Selection is not evidence.** `EBICglasso` answers "is this edge in
+the network?" with the point estimate's word: in or out. The penalty
+biases every weight toward zero, and the `bootnet` authors are explicit
+that the bootstrapped intervals "should not be interpreted as
+significance tests to zero" [@EpskampEtAl_2018_bootnet, p. 200], so a
+zero in the estimated network is silent about whether the data ruled
+the edge out or simply had too little to say. The inclusion Bayes
+factor answers that question directly, in both directions: the same
+number that can support an edge can support its absence.
+[From estimation to evidence](estimation-to-evidence.qmd) runs both
+workflows on the same data and shows a zero turning into strong
+evidence of presence.
+
+**The bootstrap was a substitute; the posterior is the original.** The
+bootstrap exists because a point estimate carries no uncertainty of its
+own, so resampling manufactures a stand-in. A posterior distribution
+carries its uncertainty natively: the credible intervals, the edge
+differences, and the centrality uncertainty all come from the same set
+of draws the fit already produced. This is why the stability row of the
+map has nothing on the right side; the information the bootstrap
+approximates is already in the output.
+
+**Undecided is a feature.** The estimation workflow must commit every
+pair to edge or blank. The Bayesian workflow keeps a third category for
+the pairs the data cannot decide, and reports it as a count you can
+state in a paper. An analysis that can say "these data are not enough
+to settle this association" is telling you something the point estimate
+never could, and on real data the undecided category is rarely empty:
+39 of the Wenchuan analysis's 136 pairs land there.
+
+## What you give up {#sec-give-up}
+
+Honesty about the trade. A `bgm()` fit at evidence-grade run lengths
+takes minutes where `EBICglasso` takes seconds, and the gap grows with
+the number of variables. The shrinkage the penalty provided is now the
+job of the prior distributions, which you should understand and can
+check ([Prior Basics](../guide/prior-basics.qmd),
+[Check your priors](check-your-priors.qmd)). And parts of the `bootnet`
+ecosystem have no `bgms` analogue: the CS-coefficient as a familiar,
+reviewer-recognized stability number; bridge centrality and expected
+influence; the many `estimateNetwork` defaults beyond `EBICglasso`,
+including the time-series models. If your analysis depends on those,
+the estimation workflow remains the right tool for that part, and the
+two can coexist in one paper.
+
+## Run your own data {#sec-your-data}
+
+```r
+install.packages("bgms")
+fit = bgm(YourData, iter = 1e4, warmup = 5e3, seed = 123)
+verdicts(fit); plot(fit)
+```
+
+[Getting Started](../guide/getting-started.qmd) walks this first fit
+step by step;
+[From estimation to evidence](estimation-to-evidence.qmd) is the full
+worked analysis, from the familiar starting point to the reported
+sentence.
+
+## Where to next
+
+- [From estimation to evidence](estimation-to-evidence.qmd): both
+  workflows on the same data, and what the Bayes factors add.
+- [Edge Selection](../guide/edge-selection.qmd) for why the inclusion
+  Bayes factor works the way it does.
+- [Group Comparison](../guide/group-comparison.qmd) for the
+  `bgmCompare()` counterpart to network comparison tests.
+- The tutorial manuscript that develops this translation in full is in
+  preparation.
+- Next in the series: *Reporting your results* is in preparation;
+  until it ships, the what-to-report callouts on each example page
+  carry the templates.
