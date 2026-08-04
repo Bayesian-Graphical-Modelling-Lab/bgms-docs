@@ -68,7 +68,7 @@ right-hand call reads from.
 
 | The question | Estimation workflow | Bayesian counterpart | What changes |
 |---|---|---|---|
-| What does the network look like? | `network = estimateNetwork(Wenchuan, default = "EBICglasso")` | `fit = bgm(Wenchuan)` | One point estimate becomes a model-averaged posterior over structures and weights. |
+| What does the network look like? | `network = estimateNetwork(Wenchuan, default = "EBICglasso", corMethod = "cor_auto")` | `fit = bgm(Wenchuan)` | One point estimate becomes a model-averaged posterior over structures and weights. |
 | How do I draw it? | `plot(network)` | `plot(fit)` | The drawing splits into three panels by evidence. Your `qgraph` skills carry over: `qgraph(coef(fit)$pairwise, ...)` draws the posterior means with any styling you already use. |
 | How certain are the edge weights? | `boots = bootnet(network, nBoots = 1000)`, then `plot(boots)` | `summary(fit)$pairwise` | Credible intervals come with the fit; there is no resampling loop to run or wait for. |
 | How stable are the results? | `corStability(bootnet(network, nBoots = 1000, type = "case"))` | Nothing to run | The posterior carries its uncertainty natively, so the case-drop bootstrap has no counterpart and there is no CS-coefficient to report; see [the honest trade-offs](#sec-give-up). |
@@ -85,6 +85,14 @@ syntax, verified against the installed packages; every call in the
 right column runs against a `bgm()` fit of the
 [Wenchuan](../reference/datasets.qmd#wenchuan) data during the build of
 this page.
+
+One argument in the first row deserves a note. The Wenchuan items are
+ordinal, so the estimation workflow computes polychoric correlations,
+which is what `corMethod = "cor_auto"` requests; `bootnet` 1.9.1's own
+default, `corMethod = "cor"`, would treat the items as continuous, and
+the choice is not cosmetic (73 versus 81 selected edges on these data).
+On the right side there is nothing to set: `bgm()` reads the items as
+ordinal by default (`variable_type = "ordinal"`).
 
 ## Run the right column {#sec-run-it}
 
