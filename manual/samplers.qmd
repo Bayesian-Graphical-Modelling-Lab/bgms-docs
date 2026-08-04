@@ -51,12 +51,23 @@ class SamplerBase {
   virtual StepResult step(BaseModel& model, int iteration) = 0;
   virtual void initialize(BaseModel& model) {}
   virtual bool has_nuts_diagnostics() const { return false; }
+
+  virtual void set_warm_step_size(double eps) {}
+  virtual double get_final_step_size() const;      // NaN if none
+  virtual void set_warm_inv_mass(const arma::vec& inv_mass) {}
+  virtual arma::vec get_final_inv_mass() const;    // empty if none
 };
 ```
 
 `step()` performs one MCMC iteration and returns a `StepResult`
 containing the accepted parameter vector, acceptance probability,
 and optional NUTS diagnostics.
+
+The four warm-start methods carry adapted state between fits: a refit
+injects the previous fit's step size and diagonal metric before the
+loop, and the chain runner reads the adapted values back out
+afterwards (see [Parallel Chains](parallel-chains.qmd)). Non-gradient
+samplers ignore the setters and return the NaN and empty sentinels.
 
 `initialize()` is called once by the chain runner before the MCMC loop.
 For NUTS it runs the step-size heuristic that finds a reasonable initial
@@ -119,10 +130,12 @@ the row-block draw). Each call to `step()` invokes
 `model.do_one_gibbs_step(iteration)` — an exact conjugate row sweep —
 and reports `accept_prob = 1` (an exact draw always "accepts"). With
 edge selection, the between-model step uses the full-conditional edge
-birth/death proposal, which needs no tuning. `create_sampler()` gates
-this sampler to models whose full conditionals are conjugate (currently
-the GGM); the R layer additionally validates the prior family
-(Normal or Cauchy slab, Gamma diagonal).
+birth/death proposal, which needs no tuning. Two gates keep this
+sampler on models whose full conditionals are conjugate: the R layer
+rejects `update_method = "gibbs"` on anything but all-continuous data,
+and the GGM entry point rejects an unsupported prior family
+(`row_block_gibbs_eligible()` requires a Normal or Cauchy slab with a
+Gamma diagonal).
 
 Warmup staging under Gibbs is minimal: a short full-model settle
 window, then selection-active warmup for the remainder (see
