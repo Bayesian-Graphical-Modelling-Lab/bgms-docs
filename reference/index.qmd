@@ -33,8 +33,8 @@ Prior specification objects passed to `bgm()` and `bgmCompare()` via the
 
 | Constructor | Family | Used for |
 |-------------|--------|----------|
-| [`cauchy_prior()`](priors.qmd#cauchy_prior) | Cauchy(0, scale) | Interactions (`bgmCompare()` default), thresholds, means |
-| [`normal_prior()`](priors.qmd#normal_prior) | Normal(0, scale) | Interactions (`bgm()` default), thresholds, means |
+| [`cauchy_prior()`](priors.qmd#cauchy_prior) | Cauchy(0, scale) | Interactions, thresholds, means |
+| [`normal_prior()`](priors.qmd#normal_prior) | Normal(0, scale) | Interactions (`bgm()` and `bgmCompare()` default), thresholds, means |
 | [`beta_prime_prior()`](priors.qmd#beta_prime_prior) | Beta-prime | Thresholds (default), interactions |
 | [`gamma_prior()`](priors.qmd#gamma_prior) | Gamma(shape, rate or eta) | Precision-matrix diagonal |
 | [`exponential_prior()`](priors.qmd#exponential_prior) | Exponential(rate or eta) | Precision-matrix diagonal (default) |
@@ -76,7 +76,7 @@ Post-fit checks on a model you have already estimated.
 | [`extract_indicator_priors()`](extractors.qmd#extract_indicator_priors) | Retrieve the indicator prior specification (prior type and hyperparameters) |
 | [`extract_group_params()`](extractors.qmd#extract_group_params) | Extract group-specific parameters from a `bgmCompare` fit |
 | [`extract_sbm()`](extractors.qmd#extract_sbm) | Extract stochastic block model assignments and probabilities |
-| [`extract_ess()`](extractors.qmd#extract_ess) | Compute effective sample sizes for model parameters; for indicators the Rao-Blackwellized ESS by default or the transition ESS with `estimator = "mixt"` |
+| [`extract_ess()`](extractors.qmd#extract_ess) | Compute effective sample sizes for model parameters; for indicators, the Rao-Blackwellized ESS |
 | [`extract_rhat()`](extractors.qmd#extract_rhat) | Compute split-R-hat convergence diagnostics |
 | [`extract_precision()`](extractors.qmd#extract_precision) | Extract posterior mean precision matrix (GGM / continuous block) |
 | [`extract_partial_correlations()`](extractors.qmd#extract_partial_correlations) | Extract posterior mean partial correlation matrix |

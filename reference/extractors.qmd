@@ -231,22 +231,28 @@ probability is simply the edge prior's marginal: the fixed probability for
 `beta_bernoulli_prior()`, and the mixture of the within- and between-block
 means for `sbm_prior()`.
 
-Under the default joint spike-and-slab prior on a continuous block
-(`precision_graph_prior = "joint"` in [`bgm()`](bgm.qmd)), the graph
-marginal is reweighted by a per-graph normalizing constant, so the prior
-inclusion probability of a continuous-continuous edge differs from the
-edge-prior marginal — even at `delta = 0`. This function returns the actual
+Under the default `precision_graph_prior = "hierarchical"` in
+[`bgm()`](bgm.qmd) the same holds for a continuous block: $p(K \mid \Gamma)$
+is normalized per graph, so integrating $K$ out returns the edge prior
+exactly and every edge class keeps the edge-prior marginal. Nothing is read
+off a table or estimated by a chain, and the function returns quickly.
+
+Under `precision_graph_prior = "joint"` the graph marginal is instead
+reweighted by a per-graph normalizing constant, so the prior inclusion
+probability of a continuous-continuous edge differs from the edge-prior
+marginal — even at `delta = 0`. This function then returns the actual
 reweighted probabilities: for `bernoulli_prior()` and
 `beta_bernoulli_prior()` they are read from the same cached
 normalizing-constant table that corrects the fit's hyperparameter updates;
 for `sbm_prior()` (and slab families without a table) they are estimated by
 a prior-only chain run with the fit's own prior settings, controlled by
 `iter` and `warmup`. That estimate is cached on the fit, and
-`recompute = TRUE` re-runs it.
+`recompute = TRUE` re-runs it. Building an uncached table takes minutes; the
+build is announced and draws a progress bar rather than pausing silently.
 
 In mixed models only continuous-continuous edges live in the joint block,
-so the matrix carries up to three distinct values: discrete-discrete,
-continuous-continuous, and cross edges.
+so on a joint fit the matrix carries up to three distinct values:
+discrete-discrete, continuous-continuous, and cross edges.
 
 ## extract_indicator_priors {#extract_indicator_priors}
 
@@ -322,28 +328,27 @@ model (e.g., `main`, `pairwise`, `indicator`). ESS values match
 [Technical Manual](../manual/diagnostics.qmd).
 
 Two elements are composite rather than raw-chain quantities. The
-`indicator` element reports one of the two effective sample sizes of the
-inclusion inference, and `estimator` picks which. It is ignored for every
-other parameter type.
-
-- `"rb"` (the default) is the `n_eff` column of
-  `summary(fit)$indicator`: the ESS of the Rao-Blackwellized inclusion
-  draws, and therefore the ESS of the inclusion probability the fit
-  reports. It is read from the same continuous chain that
-  [`extract_rhat()`](#extract_rhat) uses for indicators, and it measures
-  precision conditional on exploration.
-- `"mixt"` is the `n_eff_mixt` column: the transition-based ESS of the
-  binary indicator chain, which measures the exploration itself. Few
-  transitions are expected when an edge's inclusion probability sits
-  near 0 or 1, so a small or `NA` transition ESS beside a confident
-  Rao-Blackwellized ESS marks a decisive edge rather than a failure.
-
-Both are `NA` for edges whose indicator never flipped, and they are read
-as a pair; see
+`indicator` element is the `n_eff` column of `summary(fit)$indicator`: the
+ESS of the Rao-Blackwellized inclusion draws, and therefore the ESS of the
+inclusion probability the fit reports. It is read from the same continuous
+chain that [`extract_rhat()`](#extract_rhat) uses for indicators, and it
+measures precision conditional on exploration. Read it beside the
+directional transition counts `n0->1` and `n1->0`, which carry the
+exploration itself; see
 [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
-Fits made with bgms < 0.2.0.0 carry no Rao-Blackwellized draws: a
-default call falls back to the transition ESS there, while an explicit
-`estimator = "rb"` errors.
+
+`estimator` is the sole choice this function takes, and only `"rb"` is
+live. `estimator = "mixt"`, the transition-based ESS of the binary
+indicator chain, is deprecated as of 0.2.0.0: the two-state model behind
+it is rejected on a substantial share of edge chains, so it no longer
+bears on any inclusion verdict. Passing it warns and still returns the
+statistic. `n_eff_mixt` is no longer a column of `summary(fit)$indicator`.
+
+The `indicator` element is `NA` wherever the Rao-Blackwellized draw
+carries too little variability to summarize; see
+[`extract_rhat()`](#extract_rhat) for the two routes that produce it.
+Fits made with bgms < 0.2.0.0 carry no Rao-Blackwellized draws, so an
+explicit `estimator = "rb"` errors there.
 
 The `pairwise` element is the composite ESS of the model-averaged edge
 weight, which combines inclusion and slab uncertainty.
@@ -353,14 +358,17 @@ ess = extract_ess(fit)
 round(head(ess$pairwise), 0)
 ```
 
-Both indicator readings side by side, for a contested edge and a
-decisive one:
+The indicator ESS beside the transition counts that carry the exploration,
+for a contested edge and a decisive one:
 
 ```{r}
 edges = c("intrusion-upset", "intrusion-avoidact")
+ind = summary(fit)$indicator
 data.frame(
-  rb   = round(extract_ess(fit)$indicator[edges]),
-  mixt = round(extract_ess(fit, estimator = "mixt")$indicator[edges])
+  n_eff = round(extract_ess(fit)$indicator[edges]),
+  `n0->1` = ind[edges, "n0->1"],
+  `n1->0` = ind[edges, "n1->0"],
+  check.names = FALSE
 )
 ```
 
@@ -386,7 +394,28 @@ degrees-of-freedom adjustment is applied. For implementation details, see
 [diagnostics](../manual/diagnostics.qmd) in the Technical Manual.
 
 The `indicator` element is computed on the continuous Rao-Blackwellized
-inclusion draws, and is `NA` for edges whose indicator never flipped.
+inclusion draws. It is `NA` where those draws are constant to double
+precision, the inclusion probability sitting at its numerical bound. An
+edge whose draws vary a little — below the numerical floor of the
+autocovariance kernel, but above zero — still reports a finite `Rhat`
+even though its `mcse` and `n_eff` come back `NA`. Note that neither set
+is the same as the set of edges whose binary indicator never flipped.
+
+::: {.callout-note}
+## One failure mode these diagnostics do not see
+
+Chains can agree that an edge is included while disagreeing about the
+magnitude of its weight — for instance when the weight's posterior has more
+than one mode and different chains settle in different ones. The indicator
+diagnostics cannot see this by construction, and the pooled-draw `pairwise`
+R-hat responds only weakly when inclusion is intermittent, because the zeros
+the excluded draws contribute dominate the between-chain comparison.
+
+When it matters, compare each edge's weight across chains using only the
+draws in which that edge is included, reading the per-chain pairwise and
+indicator draws out of `fit$raw_samples`. A dedicated diagnostic for this is
+planned for a future release.
+:::
 
 ## extract_precision {#extract_precision}
 

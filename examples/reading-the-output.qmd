@@ -152,26 +152,32 @@ the thresholds and their reading.
 `mcse`, `sd`, `n_eff`, and `Rhat` are the familiar columns, computed on the
 Rao-Blackwellized draws. The two new columns watch the sampler's exploration
 of structures: `n0->1` and `n1->0` count how often the edge indicator
-switched state across the four chains, and `n_eff_mixt` is the effective
-sample size built from those switch rates. Read `n_eff` and `n_eff_mixt` as
-a pair: `n_eff` says the probability estimate is precise, `n_eff_mixt` says
-the chain actually moved between structures, and only together do they say
-converged and explored. See
+switched state across the four chains. Read them beside `n_eff`: `n_eff`
+says the probability estimate is precise, the counts say the chain actually
+moved between structures, and only together do they say converged and
+explored. See
 [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
 
-The blanks are the note's suppressed `NA` values. Sixteen edges here,
-`intrusion-dreams` among them, were included in every sweep of every chain:
-zero transitions, so the transition-based `n_eff_mixt` does not exist, and
-the package also reports `NA` for the Rao-Blackwellized `mcse`, `n_eff`, and
-`Rhat` rather than print reassuring-looking numbers computed from a chain
-that never moved. The `mean` stays, and for these saturated edges the
-evidence verdict rests on `extract_inclusion_bf()`, which remains finite
-where the probability rounds to 1.
+The blanks are the note's suppressed `NA` values. Nine edges here,
+`intrusion-dreams` among them, have a Rao-Blackwellized inclusion draw with
+too little variability to summarize, so the package reports `NA` for `mcse`
+and `n_eff` rather than print reassuring-looking numbers. Eight of them have
+a draw that is constant to double precision, and those lose `Rhat` too; the
+ninth, `distant-numb`, varies by about `1e-12`, which is enough for a
+finite `Rhat` and not enough for the autocovariance kernel. The `mean`
+stays in every case, and for these saturated edges the evidence verdict
+rests on `extract_inclusion_bf()`, which remains finite where the
+probability rounds to 1.
+
+Sixteen edges were included in every sweep of every chain — zero
+transitions in both directions — which is a larger set than the nine blank
+rows: a binary indicator that never flipped can still leave a
+Rao-Blackwellized draw with enough movement to summarize.
 
 Is this block okay? Guidelines as before, applied to the non-blank rows:
-here the smallest `n_eff` is 995, the smallest `n_eff_mixt` is 1122, and
-every `Rhat` is at most 1.006. Blank rows are not failures; here they are
-the sixteen edges the data decided most emphatically.
+here the smallest `n_eff` is 995 and every `Rhat` is at most 1.006. Blank
+rows are not failures; they are the edges the data decided most
+emphatically.
 
 ## Where is X?
 

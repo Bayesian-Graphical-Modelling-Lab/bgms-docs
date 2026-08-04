@@ -21,10 +21,13 @@ repeated refit at one anchor, keeps boundary edges that merely flip
 between reruns of the same prior from being reported as prior sensitivity.
 
 The check prices the curve with a handful of warm-started anchor fits,
-reweighting between neighboring anchors. It deliberately does not use the
-single-fit shortcut of @BartosEtAl_2026_sensitivity, which recovers the
-whole curve by reweighting one fit: on graphical models the scale posterior
-is too narrow for a single fit to cover the band.
+reweighting between neighboring anchors. The reweighting itself is the
+posterior-density-ratio identity of @BartosEtAl_2026_sensitivity, applied
+locally around each refit anchor; the anchored construction is `bgms`'s own.
+What the check deliberately does not use is that paper's single-fit
+shortcut, which recovers the whole curve by reweighting one fit: on
+graphical models the scale posterior is too narrow for a single fit to cover
+the band.
 
 For why the slab scale matters for edge verdicts at all, see
 [Prior Basics](../guide/prior-basics.qmd) and
@@ -37,10 +40,11 @@ prior_sensitivity_check(
   bgms_object,
   anchors = c(0.4, 0.63, 1, 1.6, 2.5),
   evidence_threshold = 10,
+  vary = c("auto", "slab", "slab-and-diagonal"),
   refit_sampler = "same-as-fit",
   iter = NULL,
   warmup = NULL,
-  tolerance = 0.5,
+  tolerance = 0.5 * log(10),
   ess_floor = 400,
   include_preferred_scale = FALSE,
   cores = NULL,
@@ -64,9 +68,10 @@ plot(x, max_labels = 10L, ...)
 | `bgms_object` | A fitted `bgms` object from [`bgm()`](bgm.qmd), run with `edge_selection = TRUE`. |
 | `anchors` | Numeric vector of positive anchor multipliers of the chosen scale. Default `c(0.4, 0.63, 1, 1.6, 2.5)`, log-spaced so that adjacent anchors' usable reweighting radii overlap. The multiplier `1` is always included and is the original fit; every other anchor costs one warm refit. |
 | `evidence_threshold` | Positive numeric. Inclusion Bayes factor threshold for a presence verdict; `1 / evidence_threshold` is the absence threshold. Default: `10`. |
+| `vary` | What the sweep moves, for models that also have a prior on the precision diagonal (continuous and mixed); ignored for discrete models, which have none. The slab scale $s$ and the diagonal rate are tied through the standardized frame (raw rate $= \eta / s$), so a sweep of $s$ has to hold one of the two fixed. `"slab"` holds the raw diagonal rate at its fitted value and moves the interaction prior alone, answering how much the verdicts depend on how wide an edge is allowed to be. `"slab-and-diagonal"` holds $\eta$ fixed and lets the raw rate follow, answering how much they depend on the overall prior scale with its shape held fixed. `"auto"` (default) follows the frame the fit itself used: `"slab-and-diagonal"` when the diagonal prior was given as `eta`, `"slab"` when it was given as a raw `rate`. The resolved mode is named in the printed report. |
 | `refit_sampler` | `"same-as-fit"` (default; inherit the original fit's update method), or an explicit `"nuts"`, `"adaptive-metropolis"`, or `"gibbs"`. NUTS refits of an ordinal fit carry the adapted metric and run fastest; when an inherited slower sampler makes the check cost more than about a minute, a message suggests the switch. |
 | `iter`, `warmup` | Integer sampling and warmup iterations per refit, or `NULL` (default) to use the validated short schedule for warm NUTS refits and to inherit the original fit's schedule otherwise. |
-| `tolerance` | Numeric. Minimum change in $\log_{10}$ Bayes factor across scales for a verdict flip to count as a move, before the MCSE and noise floors. Default: `0.5`. |
+| `tolerance` | Numeric. Minimum change in natural log Bayes factor across scales for a verdict flip to count as a move, before the MCSE and noise floors. Default: `0.5 * log(10)`, about `1.15`. |
 | `ess_floor` | Positive numeric. Minimum pooled importance effective sample size for a curve point to be reported; points below it are `NA`. Default: `400`. |
 | `include_preferred_scale` | Logical. Add an extra anchor at the data-preferred scale $\hat{s}$. Default: `FALSE`. |
 | `cores` | Integer thread count for each refit's chains. Default: the original fit's core count. |
@@ -85,11 +90,12 @@ invisibly and is called for the side effect of drawing.
 
 | Component | Contents |
 |-----------|----------|
-| `edges` | Data frame, one row per edge: `edge`, `prior_inclusion_probability`, the chosen-scale quantities (`chosen_scale_pip`, `chosen_scale_log10_bf`, `chosen_scale_mcse`, `chosen_scale_verdict`), the dense-grid stability range (`stability_lower`, `stability_upper`), the `mover` category, `insufficient` with its two subcauses `insufficient_noisy` and `insufficient_disagree`, `saturated`, and one `verdict_x<multiplier>` column per anchor. |
-| `grid` | Data frame, one row per anchor fit plus the replicate: `multiplier`, `scale`, `replicate`, `original_fit`, `usable`, the convergence numbers behind the gate (`rhat_continuous`, the median across continuous parameters, alongside `rhat_continuous_max`, `ess_continuous`, `indicator_pair_ess`, `rb_median_rhat`, `warmup_incomplete`), `sampler_notes`, and `seconds`. |
+| `edges` | Data frame, one row per edge: `edge`, `prior_inclusion_probability`, the chosen-scale quantities (`chosen_scale_pip`, `chosen_scale_log_bf`, `chosen_scale_mcse`, `chosen_scale_verdict`), the dense-grid stability range (`stability_lower`, `stability_upper`), the `mover` category, `insufficient` with its two subcauses `insufficient_noisy` and `insufficient_disagree`, `saturated`, and one `verdict_x<multiplier>` column per anchor. |
+| `grid` | Data frame, one row per anchor fit plus the replicate: `multiplier`, `scale`, `replicate`, `original_fit`, `usable`, the convergence numbers behind the gate (`rhat_continuous`, the median across continuous parameters, alongside `rhat_continuous_max`, `ess_continuous`, `inclusion_ess_min`, `rb_median_rhat`, `warmup_incomplete`), `sampler_notes`, and `seconds`. |
 | `anchors`, `replicate_anchor` | The anchor multipliers, and the anchor that was refit twice to measure the noise band. |
 | `multipliers`, `scales`, `anchor_index`, `chosen_index` | The dense display grid (43 points by default), in multipliers and in absolute scale, plus the grid positions of the anchors and of the chosen scale. |
-| `log10_bf`, `log10_bf_mcse`, `verdict` | Grid-by-edge matrices holding the curve, its Monte Carlo standard error, and the verdict at each point. `NA` where the point was masked. |
+| `log_bf`, `log_bf_mcse`, `verdict` | Grid-by-edge matrices holding the curve, its Monte Carlo standard error, and the verdict at each point, on the natural log Bayes-factor scale that the rest of the package uses. `NA` where the point was masked. |
+| `unit`, `vary` | What the curve varies and in what units: the varied prior quantity, the scale it is measured on, and the plain-language question the check answers. |
 | `anchor_verdict` | Anchor-by-edge character matrix of the verdicts read straight from the anchor fits. |
 | `curve` | Curve bookkeeping: per-point importance `ess`, the dominant `anchor_used` at each point, the `ess_floor` in force, and per-point chain `unanimous`ity. |
 | `wobble` | The run-to-run noise yardstick: `q95`, `median`, `per_edge`, and the `anchor` it was measured at. |
@@ -113,7 +119,7 @@ refit is needed between anchors. Each point of the dense log-spaced
 display grid pools every anchor that clears `ess_floor` there, weighting
 each anchor's inclusion-probability estimate by its inverse variance. The
 pooling happens on the inclusion-probability scale and is then transformed
-to the $\log_{10}$ Bayes factor, which keeps the curve continuous across
+to the natural log Bayes factor, which keeps the curve continuous across
 anchor hand-offs and finite at capped edges. Points where no anchor clears
 the floor are `NA` rather than extrapolated, and non-overlapping anchor
 radii trigger a warning to add anchors.
@@ -134,25 +140,25 @@ fits refit cold with full warmup, costing about one fit per scale.
 Because the warm starts sit near the chosen-scale posterior, cross-chain
 dispersion is reduced by construction, which weakens split-$\hat{R}$ as a
 between-chain diagnostic. The refit gate therefore leans on per-chain
-verdict agreement and the indicator transition ESS, not on $\hat{R}$
-alone.
+verdict agreement and the indicator effective sample size, reported per
+anchor as `inclusion_ess_min`, not on $\hat{R}$ alone.
 
 ### The mover rule
 
 An edge is flagged scale-sensitive only if its verdict differs somewhere
-along the curve *and* its $\log_{10}$ Bayes-factor change across scales
+along the curve *and* its natural log Bayes-factor change across scales
 exceeds `max(tolerance, 2 * MCSE, noise)`. The per-point MCSE comes from
 the chain-level spread of the reweighted estimate, so it carries both the
 between-chain and the importance-sampling uncertainty. The noise band is
 the 95th percentile of the spread between one anchor refit and its repeat,
-over threshold-relevant edges ($|\log_{10} \text{BF}| \le 3$; near-saturated
+over threshold-relevant edges ($|\log \text{BF}| \le 3\log 10 \approx 6.91$; near-saturated
 edges would inflate it). A bare verdict flip inside the replicate noise is
 never reported as a move.
 
 ### Edge-level sufficiency
 
 An edge whose per-chain verdicts disagree, or whose between-chain-inflated
-$\log_{10}$ Bayes factor band straddles a verdict threshold, is marked
+natural log Bayes factor band straddles a verdict threshold, is marked
 `insufficient` at that scale: the refit cannot certify its verdict. This
 errs toward caution, because disagreement widens the band rather than
 vanishing into a pooled estimate. The printed report calls these edges
@@ -219,12 +225,13 @@ ps
 ```
 
 `plot()` draws the same result as curves. Each line is one edge's
-$\log_{10}$ inclusion Bayes factor across the anchored scale range, with
+natural log inclusion Bayes factor across the anchored scale range, with
 dots at the anchor scales. The shaded band is the undecided zone between
 the evidence thresholds. Edges whose verdict depends on the scale are
 colored and labeled by name; the rest are the muted background. Masked
 curve points leave visible gaps, and a saturated edge is capped at a large
-finite Bayes factor rather than running off the panel.
+finite value rather than running off the panel: the cap follows from the
+inclusion-probability clamp and sits at $\log(10^6)$, about 13.8.
 
 ```{r}
 #| label: fig-prior-sensitivity
@@ -237,7 +244,7 @@ plot(ps)
 The per-edge table carries the same information numerically:
 
 ```{r}
-head(ps$edges[, c("edge", "chosen_scale_log10_bf", "chosen_scale_verdict",
+head(ps$edges[, c("edge", "chosen_scale_log_bf", "chosen_scale_verdict",
                   "stability_lower", "stability_upper", "mover")], 6)
 ```
 
