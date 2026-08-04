@@ -54,17 +54,21 @@ variables are treated as ordinal. When a named vector is provided,
 each variable is classified individually.
 
 `validate_baseline_category()` sets the reference category for
-Blume-Capel variables. The default (0) places the reference at the
-lowest observed category.
+Blume-Capel variables. It is required whenever any variable is
+Blume-Capel: the function errors if `baseline_category` was not
+supplied. A single integer is recycled across variables. When every
+variable is ordinal the function returns zeros, which nothing reads.
 
 ### Sampler validation (`validate_sampler.R`)
 
 `validate_sampler()` resolves the `update_method` argument into a
 concrete sampler type (`"nuts"`, `"adaptive-metropolis"`, or
 `"gibbs"`) and sets defaults for tuning parameters (`target_accept`,
-`nuts_max_depth`). The Gibbs sampler is gated here: it requires
-all-continuous data with a Normal or Cauchy interaction prior and a
-Gamma-family scale prior, and its `target_accept` is recorded as
+`nuts_max_depth`). The Gibbs sampler is gated here on data type only:
+it requires all-continuous data. The prior-family requirement (a
+Normal or Cauchy interaction prior with a Gamma-family scale prior) is
+checked C++-side instead, in `sample_ggm.cpp` via
+`GGMModel::row_block_gibbs_eligible()`. Its `target_accept` is recorded as
 `NA_real_` — an exact draw has no acceptance target, and the C++ side
 ignores the value for Gibbs. The function also issues the progressive
 short-warmup warnings (see [Warmup Schedule](warmup.qmd)), detects the
@@ -101,7 +105,8 @@ Each builder assembles a spec with seven components:
 
 The result passes through `new_bgm_spec()` (type assertions) and
 `validate_bgm_spec()` (cross-field invariants, such as: if
-`edge_selection = FALSE` then `edge_prior` must be `"Not applicable"`).
+`edge_selection = TRUE` then `edge_prior` must not be
+`"Not Applicable"`).
 
 ## Sampler dispatch (`run_sampler.R`)
 
@@ -123,7 +128,7 @@ For continuous and mixed models with edge selection, `run_sampler()`
 also prepares the graph-prior machinery before the C++ call, and the
 two paths are mutually exclusive:
 
-- Under `precision_graph_prior = "hierarchical"`, it assembles the
+- Under the default `precision_graph_prior = "hierarchical"`, it assembles the
   **Z-ratio spec**: the analytic cell constants
   (`zratio_cell_constants()`, from `delta`, the slab family and scale,
   and the diagonal prior's rate frame), the Option-B absolute-moment
@@ -131,7 +136,7 @@ two paths are mutually exclusive:
   the build fails or the diagonal's Gamma shape is non-unit, the
   engine falls back to the coarser additive path with a message), and
   the trust-gauge option (`options(bgms.zratio_gauge_sweeps = ...)`).
-- Under the default `"joint"` composition with a Beta-Bernoulli or SBM
+- Under the `"joint"` composition with a Beta-Bernoulli or SBM
   edge prior, it builds or loads the **normalizing-constant correction
   table** (`ggm_edge_prior_correction()`), cached on disk via
   `tools::R_user_dir("bgms", "cache")` so later fits of the same
