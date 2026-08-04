@@ -88,6 +88,7 @@ website:
       align: left
       contents:
         - examples/index.qmd
+        - examples/estimation-to-evidence.qmd
         - examples/reading-the-output.qmd
 
     - id: guide

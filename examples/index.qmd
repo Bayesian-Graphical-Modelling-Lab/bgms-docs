@@ -19,8 +19,9 @@ carries the reasoning, the Reference the details.
    your first model, and read the network split by evidence. Afterwards you can
    fit [`bgm()`](../reference/bgm.qmd) to your own data and produce the figure
    this site treats as the canonical result display.
-2. **From estimation to evidence.** The full Wenchuan network, estimated first
-   and then weighed pair by pair with an inclusion Bayes factor. Afterwards you
+2. **[From estimation to evidence](estimation-to-evidence.qmd).** The full
+   Wenchuan network, estimated first and then weighed pair by pair with an
+   inclusion Bayes factor. Afterwards you
    can say which associations your data support, which they rule out, and which
    they leave open.
 3. **[Reading the output](reading-the-output.qmd).** The `summary()` of a real
