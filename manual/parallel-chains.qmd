@@ -35,7 +35,8 @@ reference non-trivial edge moves against the exact block-local
 calculation; no stored samples are touched. Next the sampler's
 adaptation-averaged step size and diagonal metric are retained on the
 `ChainResult` (`final_step_size`, `final_inv_mass`; NaN and empty for
-non-gradient samplers) so a refit can warm-start them. Then
+non-gradient samplers) so a refit can warm-start them (see
+[Sensitivity and Refits](sensitivity-refit.qmd#the-warm-start)). Then
 `model.collect_chain_diagnostics(chain_result)` copies run-level
 diagnostic state (Z-ratio counters, frozen constants, gauge results)
 into the `ChainResult`.

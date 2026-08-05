@@ -199,6 +199,7 @@ website:
           contents:
             - manual/fit-objects.qmd
             - manual/checks-internals.qmd
+            - manual/sensitivity-refit.qmd
         - manual/bgmcompare-internals.qmd
         - manual/numerical.qmd
 

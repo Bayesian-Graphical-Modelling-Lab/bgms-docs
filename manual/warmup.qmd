@@ -128,6 +128,12 @@ schedule (the `SamplerSpec` fields `learn_sd` and the Gibbs
 - **No edge selection** (any sampler) — the full budget goes to the
   core stages 1-3a.
 
+A warm-started refit is the one case that legitimately runs a short
+warmup: it inherits an adapted step size and mass matrix, so the
+expensive part of stages 1-3a is already paid for. See
+[Sensitivity and Refits](sensitivity-refit.qmd#why-the-check-costs-less-than-the-fit)
+for the schedule that applies and the conditions under which it does.
+
 ## Warning system
 
 Short-warmup warnings are the responsibility of `validate_sampler()`
