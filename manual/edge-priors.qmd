@@ -100,8 +100,24 @@ $\pi(\Gamma)\, Z(\Gamma)$ — the edge prior reweighted by each graph's
 share of the determinant-tilted precision prior's mass (see
 [GGM Internals — Determinant tilt](ggm-internals.qmd#determinant-tilt)).
 For the hierarchical edge priors this bias propagates into the
-hyperparameter updates: the graph-prior mean of the normalizer,
-$C(\theta)$, enters the full conditional of the inclusion probability
+hyperparameter updates, and two symbols carry the correction. In this
+section $\theta$ is the *prior inclusion probability*, the quantity
+the Beta-Bernoulli prior treats as random; it is never a precision
+entry here, whatever it denotes on the sampler pages. The correction
+itself enters through one scalar curve and two views of it:
+
+- $C(\theta)$, the graph-prior mean of the per-graph normalizer
+  $Z(\Gamma)$ when every edge is included with probability $\theta$:
+  how much the positive-definite cone reweights the average graph at
+  that density.
+- $f(\theta) = \log C(\theta) / E$, the same curve per candidate
+  pair, with $E$ the number of pairs. Only differences of $f$ ever
+  enter, so its additive constant is immaterial.
+- $f'(d)$, the slope of that curve read at a local edge density $d$,
+  which lets a single edge's update use the correction without
+  evaluating the whole-graph curve.
+
+$C(\theta)$ enters the full conditional of the inclusion probability
 and of the block structure, so the plain conjugate draws would target
 the wrong marginals.
 
@@ -120,10 +136,13 @@ cached on disk via `tools::R_user_dir("bgms", "cache")`) supplies:
   additive constant is immaterial; outside the tabulated range it is
   extended linearly with the boundary slope.
 - **SBM** — local reads of the same table: the per-edge tilt slope
-  $f'(d)$ evaluated at the edge's min-endpoint expected degree
-  density (extended as constants beyond the tabulated range), and the
-  per-pair $f(\theta)$ curve pre-interpolated onto a uniform
-  quadrature grid for the new-cluster collapsed marginal.
+  $f'(d)$, evaluated at a local density $d$ built from the edge's two
+  endpoints (each endpoint has an expected degree density under the
+  current block probabilities, taken over the continuous subgraph,
+  and the smaller of the two is used; the slope is extended as a
+  constant beyond the tabulated range), and the per-pair
+  $f(\theta)$ curve pre-interpolated onto a uniform quadrature grid
+  for the new-cluster collapsed marginal.
 
 On the mixed-MRF path the tilt acts on the continuous precision block
 only, so the correction reads continuous-continuous pairs exclusively

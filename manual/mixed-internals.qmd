@@ -15,7 +15,7 @@ blocks and three interaction blocks:
 
 | Block | Parameters | Size |
 |-------|-----------|------|
-| Thresholds | Discrete category thresholds | $\text{thresholds}$ |
+| Thresholds | Discrete category thresholds | $\sum_x m_x$ (with $m_x$ the number of threshold parameters of discrete variable $x$: its category count for an ordinal variable, 2 for Blume-Capel) |
 | Means | Continuous variable means | $q$ |
 | Discrete-discrete | Pairwise discrete interactions (symmetric) | $p(p-1)/2$ |
 | Cross-type | Discrete-continuous interactions | $p \times q$ |

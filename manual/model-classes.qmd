@@ -90,9 +90,11 @@ Under the hierarchical graph prior, the sampler decides edge moves with
 a fast normalizer-ratio approximation, and an optional trust gauge
 audits those decisions after sampling (see
 [`summarize_zratio_gauge()`](../reference/prior-samplers.qmd#summarize_zratio_gauge)).
-While the gauge is active, `update_edge_indicators()` also references
-non-trivial edge moves against a block-local exact calculation; the
-begin/end hooks bracket each assessment sweep. All four methods are
+While the gauge is active, `update_edge_indicators()` re-decides
+each non-trivial edge move (one with a non-empty mediating block) and
+also evaluates the exact block-local reference for it, so the fast
+decision and the exact one can be compared; the begin/end hooks
+bracket each assessment sweep. All four methods are
 no-ops for models without a Z-ratio engine.
 
 ### Parameter access

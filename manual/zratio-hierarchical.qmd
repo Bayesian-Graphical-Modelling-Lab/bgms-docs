@@ -47,16 +47,16 @@ inside the acceptance step of every edge move.
 ## The mediating block
 
 The ratio $J$ is a *local* quantity: toggling edge $(i, j)$ changes the
-normalizer only through the neighbourhood that couples the two
+normalizer only through the neighborhood that couples the two
 endpoints. The engine extracts this **mediating block** for each
 candidate edge:
 
-- the common neighbours of $i$ and $j$,
-- plus the endpoints of 2-hop bridges between the exclusive neighbour
+- the common neighbors of $i$ and $j$,
+- plus the endpoints of 2-hop bridges between the exclusive neighbor
   sets of $i$ and $j$,
 
 together with the block's adjacency and three integer counts: the
-number of common-neighbour nodes, the edges among them, and the bridge
+number of common-neighbor nodes, the edges among them, and the bridge
 edges between the exclusive sides. The toggled edge's own state never
 enters, so a single $\log J$ value serves the add move and (negated)
 the delete move. When one side of the block is empty, the ratio reduces
@@ -64,16 +64,37 @@ to a precomputed isolated-edge constant $\psi_0$.
 
 ## The additive-counts saddle
 
-The baseline estimator maps the three counts to $\log J$ through a
-**two-moment saddle**: per-channel moment constants (one $(S_1, S_2)$
-pair each for common-neighbour nodes, CN–CN edges, and bridge edges)
-are summed according to the counts, and the resulting total moments are
-pushed through a saddle-point map over cosine-transform tables of the
-tilted prior's pair integrals. All of these constants are built once at
-fit time in R (`zratio_cell_constants()` in `R/zratio_tables.R`):
-closed-form Bessel and quadrature pair integrals, their
-cosine-transform tables on a fixed grid, the six additive moment
-constants, and $\psi_0$.
+The baseline estimator turns the three block counts into $\log J$
+without any sampling. Three ingredients make that possible, and each
+deserves a name before the pipeline is stated.
+
+**Pair integrals.** Under the standardized prior, the contribution of
+a single coupling to the normalizer reduces to a one-dimensional
+integral: $I_{\text{spike}}(c)$ for an excluded pair, available in
+closed form through Bessel functions, and $G(c)$ for an included pair,
+evaluated by quadrature. These are the elementary building blocks;
+everything above them is bookkeeping over how many of each kind the
+block contains.
+
+**Two moments per channel.** The block enters the normalizer through
+three kinds of contribution, the *channels*: common-neighbor nodes,
+edges among the common neighbors, and bridge edges. Each channel is
+characterized by a pair of moment constants $(S_1, S_2)$, and the
+estimator treats the channels' contributions as additive in those
+moments, so the block's total $(S_1, S_2)$ is a count-weighted sum:
+three multiplications and two additions per candidate edge. The
+additivity is the approximation this estimator makes; the surface
+refinement below exists for the blocks where it coarsens.
+
+**A saddle-point map.** The total moments are converted into $\log J$
+by a saddle-point approximation whose ingredients are the cosine
+transforms of the pair integrals, tabulated once on a fixed grid, so
+the map is a table lookup and a root-find rather than an integral.
+
+All constants are built once at fit time in R
+(`zratio_cell_constants()` in `R/zratio_tables.R`): the pair
+integrals, their cosine-transform tables, the six additive moment
+constants (one $(S_1, S_2)$ pair per channel), and $\psi_0$.
 
 No sampling runs inside the acceptance step, and distinct count tuples
 are evaluated once and served from a persistent cache whose counters
@@ -92,25 +113,31 @@ A Cauchy slab is handled through its scale-mixture-of-normals
 representation: the block couplings run omega-augmented, matching the
 marginal-Cauchy normalizer that the tables integrate.
 
-## Option-B absolute-moment surfaces
+## Per-component moment surfaces {#option-b-absolute-moment-surfaces}
 
-The additive-counts saddle treats the mediating block through totals,
-which coarsens when blocks have structure. The deployed refinement —
-"Option B" — replaces the additive moments with **per-component
-surface predictions**:
+The additive-counts saddle sees the mediating block only through its
+totals, and totals coarsen when the block has structure: two blocks
+with the same three counts can interlock differently. The deployed
+refinement replaces the additive moments with per-component
+predictions. (The source code calls this refinement Option B; the
+name is development history, kept here only so the code can be read
+alongside this page.)
 
 1. At fit time, `zratio_build_surfaces()` fits one smooth surface per
-   component family — common-neighbour cluster and bipartite bridge —
-   predicting the absolute per-component $\log S_1$ and $\log S_2$
-   from (size, density). Each surface is a bivariate quadratic in
-   $(\log \text{size}, \text{density})$ over nine monomials, fit to
-   **block-Gibbs anchors**: short runs of the sampler's own conjugate
-   row-wise kernel on synthetic components, Rao-Blackwellized through
-   cross-resolvent trace moments. Short chains suffice because the
-   low-order fit denoises the Monte Carlo noise across anchors.
+   component family, common-neighbor cluster and bipartite bridge,
+   predicting a component's absolute $\log S_1$ and $\log S_2$ from
+   its size and density. Each surface is a bivariate quadratic in
+   $(\log \text{size}, \text{density})$ over nine monomials. Its
+   training data are *block-Gibbs anchors*: synthetic components of
+   known size and density, run briefly through the sampler's own
+   conjugate row-wise kernel, with each anchor's target moments
+   computed by the C++ bare-component oracle
+   (`zratio_block_oracle_moments`). Short runs suffice because the
+   low-order fit smooths the anchors' Monte Carlo noise.
 2. At sampling time, the engine decomposes each mediating block into
    disjoint components, predicts each component's moments from its
-   family surface, sums them, and applies the same saddle map.
+   family surface, sums them, and applies the same saddle map as the
+   additive path.
 
 The surface is built once at the analysis's own $(\eta, \delta)$ —
 $\eta$ is a build parameter, not a switch. Predictions are clamped to

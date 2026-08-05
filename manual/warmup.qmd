@@ -114,19 +114,21 @@ How the warmup budget is divided depends on the sampler hosting the
 schedule (the `SamplerSpec` fields `learn_sd` and the Gibbs
 `select_during_warmup` flag; see [Sampler Hierarchy](samplers.qmd)):
 
-- **NUTS with edge selection** — split 85% (stages 1-3a) / 10%
-  (stage 3b) / ~5% (stage 3c). If stage 3b would get fewer than 20
+- **NUTS with edge selection** (`edge_selection` with `learn_sd`) —
+  split 85% (stages 1-3a) / 10% (stage 3b) / ~5% (stage 3c). If stage 3b would get fewer than 20
   iterations it is skipped entirely (default proposal SDs are used).
-- **Gibbs with edge selection** — there is no adaptation to run, so
+- **Gibbs with edge selection** (`edge_selection` with
+  `select_during_warmup`) — there is no adaptation to run, so
   the schedule reduces to a settle-then-select split: the first 15%
   of warmup runs the full model (all edges included, selection off)
   so the precision matrix settles, and stage 3c covers the remaining
   85% with selection active. Both windows scale with the warmup
   budget.
-- **Adaptive Metropolis with edge selection** — stage 3c is empty;
-  selection activates at the first sampling iteration.
-- **No edge selection** (any sampler) — the full budget goes to the
-  core stages 1-3a.
+- **Adaptive Metropolis with edge selection** (`edge_selection` with
+  both flags off) — stage 3c is empty; selection activates at the
+  first sampling iteration.
+- **No edge selection** (any sampler; both flags irrelevant) — the
+  full budget goes to the core stages 1-3a.
 
 A warm-started refit is the one case that legitimately runs a short
 warmup: it inherits an adapted step size and mass matrix, so the

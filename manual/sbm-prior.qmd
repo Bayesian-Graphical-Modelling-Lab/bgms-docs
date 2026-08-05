@@ -93,8 +93,10 @@ corrections](edge-priors.qmd#normalizing-constant-corrections)). The
 correction enters the SBM locally:
 
 - each allocation move adds a per-edge tilt term, the slope
-  $f'(d)$ of the correction curve evaluated at the edge's
-  min-endpoint expected degree density;
+  $f'(d)$ of the correction curve evaluated at a local density $d$:
+  each endpoint of the edge has an expected degree density under the
+  current block probabilities, and the smaller of the two is the one
+  read;
 - the new-cluster collapsed marginal integrates the corrected
   per-pair curve $f(\theta)$ over a quadrature grid instead of the
   plain Beta marginal.

@@ -100,10 +100,14 @@ weights are accumulated in `log_sum_weight` with log-sum-exp. Within a
 subtree (`build_tree`) sibling subtrees are combined symmetrically:
 accept the new subtree with probability
 $\exp(w_{\text{new}} - \mathrm{LSE}(w_{\text{old}},\, w_{\text{new}}))$.
-At the top level (`nuts_step`) the new subtree is accepted via biased
-progressive sampling — accept with probability
-$\min(1,\, w_{\text{subtree}} / w_{\text{trajectory}})$ — so later
-subtrees are preferred on average. Divergence is detected directly by
+At the top level (`nuts_step`) the new subtree is accepted with
+probability $\min(1,\, W_{\text{subtree}} / W_{\text{trajectory}})$,
+where the capital $W$ are the summed weights on the linear scale,
+recovered from the log-scale accumulators by exponentiation. This rule
+is what Stan calls *biased progressive sampling*: biased because the
+new subtree competes with its full weight rather than its
+proportional share, which on average prefers later, farther-out
+subtrees over staying near the starting point. Divergence is detected directly by
 $h - H_0 > 1000$; no slice variable is used.
 
 ## Divergence detection

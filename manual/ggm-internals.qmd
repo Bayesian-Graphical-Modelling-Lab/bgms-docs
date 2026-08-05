@@ -60,13 +60,20 @@ $$
 \theta = (\psi_1,\; f_2, \psi_2,\; f_3, \psi_3,\; \ldots,\; f_p, \psi_p),
 $$
 
-Notation: on this page $\theta$ without subscripts is the packed
-sampler position (the $q$ of the [NUTS](nuts.qmd) and
-[Constrained Cholesky Parameterization](null-space.qmd) pages — here
-$q$ indexes Cholesky
-columns instead, mirroring the code); the doubly-subscripted
-$\theta_{ij}$ always denotes an entry of the precision matrix
-$\boldsymbol{\Theta}$. For each column $q$:
+Notation, fixed before anything else, because three symbols carry
+this page:
+
+- $\theta$ with no subscripts is the packed sampler position, the one
+  vector the sampler moves through. The [NUTS](nuts.qmd) and
+  [Constrained Cholesky Parameterization](null-space.qmd) pages call
+  that same vector $q$; this page cannot, because $q$ is needed below
+  as the Cholesky column index, mirroring the code.
+- $\theta_{ij}$, doubly subscripted, is always an entry of the
+  precision matrix $\boldsymbol{\Theta}$, never a position
+  coordinate.
+- $q$ is a column index of the Cholesky factor $\Phi$, nothing else.
+
+For each column $q$:
 
 - $\psi_q = \log(\Phi_{qq})$ — the log-transformed diagonal entry,
   ensuring $\Phi_{qq} > 0$.
@@ -211,6 +218,10 @@ permutation or refactorization of the precision matrix.
 
 ### Roverato constraint structure
 
+The name is the code's own, after @Roverato_2002_hiw, whose analysis
+of Cholesky parameterizations of graph-constrained precision matrices
+this update exploits. The structure is this:
+
 Since $\boldsymbol{\Theta} = \boldsymbol{\Phi}^\top\boldsymbol{\Phi}$,
 each off-diagonal precision entry ($i < j$) is
 
@@ -317,8 +328,8 @@ When edge selection is active, each edge $(i,j)$ has a binary
 indicator $\gamma_{ij}$, updated by add/delete moves
 [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms] that reuse the
 Roverato constants and in-place machinery described above. In the
-proposals below, $c_3$ denotes the Roverato scaling constant
-(`constants_[3]`) that relates a proposal on the Cholesky scale to
+proposals below, $c_3$ denotes the scaling constant, precomputed and
+stored by the model, that relates a proposal on the Cholesky scale to
 the resulting precision entry.
 
 ### Delete move ($\gamma_{ij} = 1 \to 0$)
@@ -419,9 +430,11 @@ as in the random-walk moves.
 ## Warm starts and initialization
 
 With data present, the precision matrix is initialized from a
-regularized MLE: $\boldsymbol{\Theta}_0 = n\,(\mathbf{S} + \delta_0
-\mathbf{I})^{-1}$ with $\delta_0 = \operatorname{tr}(\mathbf{S}) /
+regularized MLE: $\boldsymbol{\Theta}_0 = n\,(\mathbf{S} + r_0
+\mathbf{I})^{-1}$ with ridge $r_0 = \operatorname{tr}(\mathbf{S}) /
 (p\, n)$, shrinking toward the identity at a scale-appropriate rate.
+(The ridge is written $r_0$ here to keep it apart from the
+determinant tilt $\delta$, a different quantity.)
 If the initial graph excludes edges, the excluded entries are zeroed
 and the diagonal is inflated to diagonal dominance so the start stays
 positive definite. If the inversion fails, the identity is kept.
@@ -467,3 +480,5 @@ recomputed for the next likelihood evaluation.
 [Edge Priors](edge-priors.qmd),
 [Parameter Priors](parameter-priors.qmd),
 [Sampler Hierarchy](samplers.qmd).
+
+## References
