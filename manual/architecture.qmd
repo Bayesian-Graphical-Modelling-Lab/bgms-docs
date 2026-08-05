@@ -20,6 +20,9 @@ src/
 │   │                    #   hamiltonian_utils.h/cpp (kinetic energy, step-size heuristic)
 │   ├── samplers/        # Stateful: NUTSSampler, MetropolisSampler, GibbsSampler
 │   └── execution/       # Orchestration: chain_runner, warmup_schedule, chain_result
+│                        #   + sampler_config.h (SamplerConfig: the one settings
+│                        #     struct every chain is run from),
+│                        #     step_result.h (per-iteration sampler return)
 ├── models/
 │   ├── base_model.h     # Abstract interface (30+ virtual methods)
 │   ├── ggm/             # GGMModel — NUTS, adaptive Metropolis, or conjugate Gibbs

@@ -188,12 +188,19 @@ website:
               contents:
                 - manual/pseudolikelihood.qmd
                 - manual/variable-helpers.qmd
+                - manual/simulation-prediction.qmd
         - section: "Priors"
           contents:
             - manual/parameter-priors.qmd
             - manual/edge-priors.qmd
             - manual/sbm-prior.qmd
             - manual/zratio-hierarchical.qmd
+        - section: "Results and Checks"
+          contents:
+            - manual/fit-objects.qmd
+            - manual/extractors-internals.qmd
+            - manual/checks-internals.qmd
+            - manual/sensitivity-refit.qmd
         - manual/bgmcompare-internals.qmd
         - manual/numerical.qmd
 

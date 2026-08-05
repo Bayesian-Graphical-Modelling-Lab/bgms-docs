@@ -1,0 +1,267 @@
+---
+title: "Fit Objects"
+---
+
+Everything on this site that starts with a fitted model starts with the object
+that `bgm()` or `bgmCompare()` returned. This page documents that object. It
+covers the class the object belongs to, the fields it holds, which of those
+fields are already filled in when the fit is built and which are computed only
+when you first ask for them, and the rules for reading them.
+
+Four files define it. `R/class_s7.R` declares the two S7 classes and the
+converters that build them. `R/fit_accessors.R` holds the internal readers the
+rest of the package uses. `R/methods_bgms.R` and `R/methods_bgmcompare.R` hold
+the user-facing methods, including the `$` and `[[` methods that keep the
+object usable as if it were still a list.
+
+For what to do with the object, see [Model Output](../guide/mcmc-output.qmd) in
+the Guide and the [Methods reference](../reference/methods.qmd).
+
+## Two classes
+
+`bgm()` returns an object of class `bgms`; `bgmCompare()` returns one of class
+`bgmCompare`. Both are classes in S7, R's newer object system, and both are
+declared with `package = NULL`. That declaration means the class vector
+carries the bare names `"bgms"` and `"bgmCompare"`, with no package prefix,
+alongside `"S7_object"`. Because the bare names are present, existing S3
+dispatch (R's older method lookup by class name) on those names keeps working.
+Every user-facing method in the package is registered as an S3 method against
+those names.
+
+The two classes hold different parameter fields, because the two models
+parameterize differently. A `bgms` fit stores main effects and pairwise
+associations directly. A `bgmCompare` fit instead stores a baseline and a set
+of contrast parameters, and it stores them in separate fields:
+`posterior_mean_main_baseline`, `posterior_mean_pairwise_baseline`,
+`posterior_mean_main_differences`, and `posterior_mean_pairwise_differences`.
+You cannot look up the parameters of one particular group directly; they have
+to be computed from the baseline and the contrasts. That computation is what
+[`extract_group_params()`](../reference/extractors.qmd#extract_group_params)
+does.
+
+## How the object is built
+
+The object is assembled as an ordinary named list first and converted to an S7
+object at the very end. `build_output()` dispatches on the model type to
+`build_output_bgm()` (which serves both the Gaussian graphical model, GGM for
+short, and the ordinal Markov random field, MRF), `build_output_mixed_mrf()`, or
+`build_output_compare()`. Each builder fills a plain list and sets its class
+to `"bgms"` or `"bgmCompare"`. It finishes by calling `s3_list_to_bgms()` or
+`s3_list_to_bgmCompare()`, which copies each element of that list into the
+matching S7 property.
+
+There is one escape hatch, kept for compatibility with older versions of the
+`easybgm` package. `needs_easybgm_s3_compat()` reports whether the `easybgm`
+namespace is loaded at a version below 0.5.0, warning and naming the version
+when it is. Each builder consults it and, when it reports `TRUE`, returns the
+plain list without converting it. A fit made that way is a list, not an S7
+object. That is why every internal reader in the package handles both forms.
+
+The conversion also records `names(results)`, the names of the original list,
+into the `.field_names` property. That single line is the whole `names()`
+contract: what `names()` later returns on a fit is decided right there. The
+contract is described below.
+
+## What the object stores
+
+### Always present
+
+`arguments` is the settings record: dimensions, priors, sampler configuration,
+variable metadata, the package version that produced the fit, and the recode
+maps. It is built by `build_arguments()` (see
+[R Scaffolding](r-scaffolding.qmd#the-arguments-record)) and read by almost
+everything downstream. `raw_samples` holds the per-chain draw matrices.
+`cache` is an environment, discussed below.
+
+`raw_samples` is assembled by `build_raw_samples_list()` and always carries
+`main`, `pairwise`, `nchains`, `niter`, and a `parameter_names` list. When
+edge selection is on, that is, when the model also samples which edges are
+included, it additionally carries `indicator`. It then also carries the
+Rao-Blackwellized inclusion draws `rb_inclusion` and the odds accumulators
+`rb_counts`; both are described under
+[GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws). Under a
+stochastic block prior it also carries `allocations`.
+
+### Posterior means
+
+The `posterior_mean_*` fields are computed during construction. Computing them
+there is cheap, because each one is only a column mean over the pooled draws,
+the draws of all chains taken together. They are set once and never
+recomputed. Which fields exist depends on the model. A GGM fit has no main
+effects, so its `posterior_mean_main` is `NULL`; it does have
+`posterior_mean_residual_variance`. An ordinal fit is the other way around:
+main effects present, no residual variance. Edge selection adds
+`posterior_mean_indicator`. A stochastic block prior adds the co-clustering
+matrix, the mean and modal allocations, and the posterior distribution over
+the number of blocks.
+
+### Sampler diagnostics
+
+`nuts_diag`, `am_diag`, and `zratio_diag` are attached only when the run that
+produces them actually happened. Whether the first two exist depends on which
+sampler was chosen. `zratio_diag` exists only when the hierarchical graph
+prior ran with its [trust gauge](zratio-hierarchical.qmd) enabled, the
+in-chain check on the normalizer-ratio estimator. Each field is `NULL`
+otherwise.
+
+### Internal fields
+
+Three fields are not part of the user-facing object. They are documented here
+because they explain behavior elsewhere. `refit_step_sizes` and
+`refit_inv_mass` hold each chain's final step size and diagonal metric from
+NUTS, the No-U-Turn Sampler. A refit can start from those values instead of
+adapting them all over again; see
+[Sensitivity and Refits](sensitivity-refit.qmd). `.bgm_spec` holds the
+validated specification the sampler ran on. A refit needs to know exactly
+what was run, so this record is what makes a refit possible at all.
+
+## The lazy summary cache
+
+Effective sample size, split-R-hat, and Monte Carlo standard error (all
+described under [Convergence Diagnostics](diagnostics.qmd)) are expensive to
+compute across every parameter, and many uses of a fit never need them. So
+they are not computed when the fit is built. Instead `build_output_*` creates
+`cache`, an environment that holds the normalized chains and the metadata
+needed to summarize them, with a flag `summaries_computed` set to `FALSE`.
+
+Every `posterior_summary_*` property is declared with an S7 getter that calls
+`ensure_summaries()` and then reads the answer out of the cache.
+`ensure_summaries()` returns immediately if `summaries_computed` is already
+`TRUE`, and otherwise computes every summary the model has and sets the flag.
+The work therefore happens exactly once, on whichever summary is asked for
+first:
+
+```r
+f = bgm(Wenchuan[1:80, 1:4], iter = 200, warmup = 200, chains = 2)
+f@cache$summaries_computed
+#> [1] FALSE
+invisible(f$posterior_summary_pairwise)
+f@cache$summaries_computed
+#> [1] TRUE
+```
+
+An environment is used rather than a list on purpose. Environments have
+reference semantics: writing into an environment changes the one shared
+object, where writing into a list changes a copy. Because of this, the getter
+can write the computed summaries back into the object it was called on, and
+the caller never has to reassign anything.
+
+`ensure_summaries()` also fixes the scale of what it reports: some quantities
+are converted before they are summarized. Knowing which scale a number is on
+matters for reading it correctly. See [Scales](#scales) below.
+
+## The accessor contract
+
+There are three ways to read a field from the object, and they do not all mean
+the same thing.
+
+**`fit@property`** is S7 property access and reaches all 27 declared
+properties, including the internal ones.
+
+**`fit$name` and `fit[["name"]]`** go through the `$.bgms` and `[[.bgms`
+methods. On an S7 object these simply forward to `S7::prop()`. On a legacy
+list (a fit returned through the `easybgm` escape hatch above), there are no
+S7 getters to trigger the lazy computation, so the methods do that work
+themselves: they intercept any name starting with `posterior_summary_`, run
+`ensure_summaries()` first, and read the cache. That branch is what lets one
+body of downstream code serve both object forms. Numeric indexing is refused
+with an explicit error rather than silently returning a property by position:
+
+```r
+fit[[1]]
+#> Error: numeric indexing is not supported for bgms objects
+```
+
+**`names(fit)`** returns `.field_names`: the names of the list that existed at
+construction time, not the full property list. For a typical ordinal fit with
+edge selection that is 13 names, against 27 declared properties. The names
+that do not appear are the ones the model did not populate, plus the internal
+fields. This is deliberate. `names()` describes what this particular fit has,
+so a conditional field shows up only when it is really there.
+
+Reading a declared but unpopulated property returns `NULL` rather than an
+error. So when you want to know whether a fit has something, guard on the
+value being `NULL`, not on the name appearing in `names(fit)`.
+
+### Internal accessors
+
+`R/fit_accessors.R` gives the package four readers that work on either object
+form: `get_fit_cache()`, `get_fit_spec()`, `get_raw_samples()`, and
+`get_posterior_mean(fit, field)`. The last of these composes the full field
+name from a suffix, so callers can ask for `"pairwise"` or
+`"pairwise_baseline"` in the same way. Package code uses these readers rather
+than `$`. The `$` and `[[` methods themselves are the one exception: they use
+`S7::prop()` directly, because routing them back through the helpers would
+recurse.
+
+## Methods
+
+`print()` gives one screen of information: whether edge selection was on and
+under which edge prior, the model type with its dimensions, the case and
+variable counts, and the total post-warmup iterations across chains. It also
+reports the number of chains that survived. That is the number of chains kept
+in `raw_samples`, and it can be smaller than the number you requested.
+
+`summary()` calls `ensure_summaries()` and returns a `summary.bgms` or
+`summary.bgmCompare` object holding the tables the model has. Each table comes
+with a print method that shows the first six rows and points at
+`summary(fit)$<component>` for the rest. Two of the printed notes are worth
+knowing about. First, blank cells in the pairwise and indicator tables are
+`NA` values that the print method suppresses. An `NA` occurs for an edge that
+was never selected, or for an edge whose draws are constant; the printed note
+says so, and the tables themselves keep the `NA`. Second, in the `bgmCompare`
+main-effect difference block, a leading `*` marks a threshold difference that
+rests on the prior rather than the data. That happens because some group has
+no observations in that category, or none in the reference category. The
+counts behind the mark are in `extract_arguments(fit)$category_support`.
+
+`coef()` returns posterior means only, with no diagnostics. Posterior means
+are computed at construction, so calling `coef()` does not trigger the lazy
+cache. On a `bgmCompare` fit it returns both the raw baseline-plus-contrast
+matrices and the per-group matrices obtained by applying the projection
+matrix, which is the fit's own record of how the contrasts combine into each
+group's parameters.
+
+## Scales {#scales}
+
+The same quantity can appear on two scales in one object, and the object does
+not relabel it for you; you have to know which field sits on which scale. For
+a GGM fit, `raw_samples$pairwise` holds off-diagonal **precision** elements
+and `raw_samples$main` holds the precision diagonal, because the precision
+scale is what the sampler works in. The summarized views are converted. In the
+table below, $\theta_{ij}$ is an element of the precision matrix and
+$\omega_{ij}$ is the corresponding partial association:
+
+| Field | Scale |
+|---|---|
+| `raw_samples$pairwise` (GGM) | precision, $\theta_{ij}$ |
+| `posterior_mean_pairwise` (GGM) | partial association, $\omega_{ij} = -\tfrac{1}{2}\theta_{ij}$ |
+| `posterior_summary_pairwise` (GGM) | partial association |
+| `raw_samples$main` (GGM) | precision diagonal |
+| `posterior_mean_residual_variance` | residual variance, mean of $1/\theta_{jj}$ |
+| `posterior_summary_quadratic` (GGM) | residual variance |
+| `posterior_summary_quadratic` (mixed) | residual variance, $-1/(2\theta_{jj})$ from the negative association diagonal |
+
+Two details follow from that table. First, the residual variance posterior
+mean averages the per-draw reciprocals $1/\theta_{jj}$; it does not invert the
+averaged precision. Those are different numbers: this field is the posterior
+mean of the residual variance itself, not a transform of the posterior mean
+precision. Second, the conversion of the pairwise draws happens inside
+`ensure_summaries()`, before the draws are summarized. The mean, the standard
+deviation, and the Monte Carlo standard error are therefore all on the
+association scale. The conversion also maps zeros to zeros, so the two-part
+structure of the selection posterior (exact zeros where an edge is excluded,
+continuous values where it is included) stays intact.
+
+An ordinal fit needs none of this: its draws are already on the association
+scale, so there is nothing to convert.
+
+## See also
+
+[R Scaffolding](r-scaffolding.qmd),
+[Extractor Internals](extractors-internals.qmd),
+[Convergence Diagnostics](diagnostics.qmd),
+[bgmCompare Internals](bgmcompare-internals.qmd),
+[Sensitivity and Refits](sensitivity-refit.qmd),
+[Model Output](../guide/mcmc-output.qmd),
+[Methods reference](../reference/methods.qmd).
