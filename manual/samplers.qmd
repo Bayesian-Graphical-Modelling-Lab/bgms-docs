@@ -197,6 +197,51 @@ can select Metropolis via `update_method = "adaptive-metropolis"` for
 any model, and the conjugate Gibbs sweep via `update_method = "gibbs"`
 for all-continuous (GGM) data.
 
+### SamplerConfig
+
+`SamplerConfig` (`mcmc/execution/sampler_config.h`) is the second
+argument to `create_sampler()` above: one plain struct carrying the run
+settings the chain runner and the samplers need. Each of the three
+`bgm()` entry points (`sample_ggm.cpp`, `sample_omrf.cpp`,
+`sample_mixed.cpp`) fills one from its R arguments and passes it by
+const reference from there on, so no sampler reads the R list and
+nothing downstream can disagree about a setting. `bgmCompare()` does
+not use it at all: it runs its own sampler in
+`models/bgmCompare/bgmCompare_sampler.cpp` and never constructs a
+`SamplerConfig`.
+
+The struct holds eleven fields in four groups: the sampler selection
+(`sampler_type`, the same string `resolve_sampler_spec()` consumes);
+the run length (`no_iter`, `no_warmup`); the gradient-sampler tuning
+(`max_tree_depth`, `initial_step_size`, `target_acceptance`,
+`learn_mass_matrix`); and the per-run switches (`edge_selection`,
+`na_impute`, `zratio_gauge_sweeps`, `seed`).
+
+Only `NUTSSampler` reads any of it. `MetropolisSampler` and
+`GibbsSampler` both take the config and discard it with `(void)config`:
+Metropolis gets its adaptation from the model and the schedule, and the
+Gibbs draw is exact, so neither has a tuning parameter to receive.
+
+Two fields are easy to misread. `seed` is the base seed, not the seed a
+chain uses: the runner gives chain `c` the seed `config.seed + c` (see
+[Parallel Chains](parallel-chains.qmd)). And `zratio_gauge_sweeps` is
+the number of post-sampling assessment sweeps the in-chain
+[trust gauge](zratio-hierarchical.qmd) runs, with `0` switching it off;
+the reference draws per pair and the per-sweep referenced-pair cap are
+not settings here, but fixed design parameters owned by `ZRatioGauge`
+itself. It is filled by the GGM and mixed entry points only, since an
+ordinal model has no continuous block to gauge.
+
+Every field carries a default in the struct declaration, and those
+declared values are not the defaults a user sees. `sampler_type`
+declares `"adaptive-metropolis"` while the R layer resolves NUTS for
+every model, and each entry point overwrites it before the struct is
+used. `initial_step_size` is the one field no production entry point
+sets, so NUTS always starts from the declared `0.1` and adapts from
+there; it is overridden only in the gradient test interface. Read the
+declared values as fallbacks, and [R Scaffolding](r-scaffolding.qmd)
+for the defaults that actually reach a fit.
+
 ## Step-size and mass-matrix adaptation
 
 The full adaptation schedule for the `NUTSAdaptationController`

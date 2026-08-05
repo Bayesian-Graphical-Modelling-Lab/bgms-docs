@@ -108,6 +108,54 @@ The result passes through `new_bgm_spec()` (type assertions) and
 `edge_selection = TRUE` then `edge_prior` must not be
 `"Not Applicable"`).
 
+## The arguments record (`build_arguments.R`) {#the-arguments-record}
+
+The spec is an internal object: it carries the data matrices, the
+precomputed sufficient statistics, and everything else the sampler
+needs, and it is not what downstream code should be reading. So one
+step sits between the validated spec and the fit object, and it is the
+step that decides what the rest of the package can see.
+
+`build_arguments(spec)` produces the `$arguments` list every fit
+carries. It is a pure function of the spec, so it belongs to this stage
+conceptually, but it runs later: each of the three output builders in
+the next section calls it while assembling the fit object. It
+dispatches on `spec$model_type` to one of four builders, mirroring the
+four spec builders above:
+
+| Model type | Builder | What only it carries |
+|-----------|---------|----------------------|
+| `"ggm"` | `build_arguments_ggm()` | `column_means` (the training means continuous data was centred on), `is_continuous = TRUE` |
+| `"omrf"` | `build_arguments_omrf()` | `category_levels`, `blume_capel_shift`, `baseline_category`, `nuts_max_depth` |
+| `"mixed_mrf"` | `build_arguments_mixed_mrf()` | `discrete_indices` / `continuous_indices`, `num_discrete` / `num_continuous`, `is_mixed = TRUE` |
+| `"compare"` | `build_arguments_compare()` | `projection`, `num_groups`, `group_labels`, `category_support` |
+
+Three things about the result are worth knowing, because they explain
+behaviour elsewhere.
+
+**It is the model-class oracle.** Nothing downstream re-derives the
+model type from the data. `extract_arguments(fit)$is_continuous` and
+`$is_mixed` are the flags that
+[`simulate()` and `predict()`](simulation-prediction.qmd) branch on, and
+`model_type` is what
+[`print()`](fit-objects.qmd#methods) turns into a label.
+
+**It carries the recode maps.** `category_levels` and
+`blume_capel_shift` are the only record of how the fitted data were
+mapped onto zero-based codes, which is what lets `predict()` accept
+`newdata` on the original scale and `simulate()` return data on it.
+
+**It is a compatibility surface, not a clean design.** Several fields
+are duplicated or legacy: `no_variables` repeats `num_variables` under
+the pre-0.1.6.0 name, and `version` records the package version that
+produced the fit so that later readers can branch on vintage. Both are
+kept because reading a saved fit has to keep working.
+
+The ordinal builder also collapses `variable_type` to a single string
+when every variable shares one, which is why
+`extract_arguments(fit)$variable_type` can be length one or length `p`
+and callers pass it through `expand_variable_type()` before indexing it.
+
 ## Sampler dispatch (`run_sampler.R`)
 
 `run_sampler()` reads `spec$model_type` and calls the corresponding
