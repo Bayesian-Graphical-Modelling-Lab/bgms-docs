@@ -2,54 +2,75 @@
 title: "Sensitivity and Refits"
 ---
 
-`prior_sensitivity_check()` asks whether the edge verdicts a fit reports would
-survive a different choice of prior scale. Answering that honestly means
-refitting the model, several times, and then deciding which of those refits are
-trustworthy enough to use. This page documents the machinery that does it:
-`R/refit_engine.R`, which produces one refit at a given scale, and
-`R/prior_sensitivity.R`, which drives the grid and adjudicates the results.
+`prior_sensitivity_check()` asks one question: would the edge verdicts a fit
+reports survive a different choice of prior scale? A verdict here is the
+three-way call, presence, absence, or undecided, that the
+[three-way rule](checks-internals.qmd#the-three-way-rule) makes for each edge
+from its inclusion Bayes factor. Answering the question honestly means
+refitting the model several times at other scales, and then deciding which of
+those refits are trustworthy enough to use. This page documents the machinery
+that does both jobs: `R/refit_engine.R` produces one refit at a given scale,
+and `R/prior_sensitivity.R` drives the grid of scales and adjudicates the
+results.
 
-The refit engine is documented here once. [Warmup Schedule](warmup.qmd) and
-[Parallel Chains](parallel-chains.qmd) own the adaptation and the per-chain
-plumbing a refit reuses; this page owns only what a refit does differently.
+The refit engine is documented here once. A refit reuses the same warmup
+adaptation and per-chain plumbing as any other fit, and those pieces are owned
+by [Warmup Schedule](warmup.qmd) and [Parallel Chains](parallel-chains.qmd).
+This page owns only what a refit does differently.
 
-The estimator that fills the space between the refits, the anchored curve, is
-documented under [Checks Internals](checks-internals.qmd#the-anchored-curve).
+The refits land at a handful of fixed scales. The estimator that fills the
+space between them, the anchored curve, is documented under
+[Checks Internals](checks-internals.qmd#the-anchored-curve).
 For argument lists and return formats, see
 [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd) in the
 Reference.
 
 ## The grid
 
-The check sweeps one prior scale. On a `bgm()` fit it is the interaction slab
-scale, `pairwise_scale`, and the reported unit is the edge indicator. On a
-`bgmCompare()` fit it is the difference slab scale, `difference_scale`, and the
-unit is the difference indicator, which covers the pairwise and main-effect
-difference families alike because `bgmCompare()` gives them one scale. Two
-small constructors, `single_network_unit()` and `difference_unit()`, carry that
-difference; every other stage of the check is shared.
+The check sweeps exactly one prior scale. On a `bgm()` fit that scale is
+`pairwise_scale`, the scale of the slab prior on the included pairwise
+interactions, and the unit the check reports on is the edge indicator, the
+binary variable that says whether an edge is in the graph. On a `bgmCompare()`
+fit the swept scale is `difference_scale`, the scale of the slab prior on the
+group differences, and the unit is the difference indicator. That one
+indicator family covers the pairwise and main-effect difference families
+alike, because `bgmCompare()` gives them one scale. Two small constructors,
+`single_network_unit()` and `difference_unit()`, carry that difference between
+the two cases; every other stage of the check is shared.
 
-The **anchors** are multipliers of the scale the fit already used, defaulting to
-`c(0.4, 0.63, 1, 1.6, 2.5)`. The multiplier 1 is always included and is never
-refit: it *is* the original fit. Every other anchor is one refit. The spacing is
-log-uniform on purpose, so that adjacent anchors' usable reweighting radii
-overlap and the stitched curve has no gap.
+The **anchors** are the scales at which the model is actually refit. They are
+given as multipliers of the scale the fit already used, called the chosen
+scale below, and default to `c(0.4, 0.63, 1, 1.6, 2.5)`. The multiplier 1 is
+always included and is never refit, because it *is* the original fit. Every
+other anchor costs one refit. The anchors are spaced log-uniformly on purpose.
+A refit can only be reweighted usefully within a limited radius of its own
+scale, and log-uniform spacing makes the usable radii of adjacent anchors
+overlap, so the stitched curve has no gap.
 
-The **display grid** is denser: 41 log-spaced points spanning the anchors, with
-the anchors themselves and the chosen scale merged in. The curve is reported on
-this grid, and every point between anchors is reweighted rather than refit.
+The **display grid** is denser than the anchor set: 41 log-spaced points
+spanning the anchors, with the anchors themselves and the chosen scale merged
+in. The curve is reported on this grid. Every point between anchors is
+reweighted rather than refit: draws from a refit at a nearby anchor are
+importance-weighted to stand in for a refit at that point. This is the
+anchored curve introduced above.
 
 One extra refit is run beyond the anchors. The **replicate** repeats the
-non-unit anchor nearest 1.6x with a different seed, which is what calibrates the
-run-to-run noise band described below. It sits at a refit anchor rather than at
-the chosen scale so that its noise is measured under the refit settings.
+non-unit anchor nearest 1.6x with a different seed. Comparing the replicate
+with the anchor it repeats shows how much two runs differ by chance alone, and
+that comparison is what calibrates the run-to-run noise band described under
+the mover rule below. The replicate sits at a refit anchor rather than at the
+chosen scale for a reason: the noise it measures should be the noise of the
+refit settings, which are the settings every other refit on the curve uses.
 
 ### Which prior moves
 
-For models with a prior on the precision diagonal, continuous and mixed ones,
-the slab scale and the diagonal rate are tied through the standardized frame:
-the raw rate is $\eta / s$ for a slab of scale $s$. A sweep of $s$ therefore has
-to hold one of the two fixed, and `resolve_vary()` decides which.
+Continuous and mixed models place a prior on the diagonal of the precision
+matrix, and that prior is tied to the slab through the
+[standardized frame](parameter-priors.qmd#eta-frame): writing $s$ for the slab
+scale and $\eta$ for the diagonal rate given in that frame, the raw diagonal
+rate is $\eta / s$. The tie means a sweep of $s$ cannot hold both quantities
+fixed at once. It has to hold one of the two fixed, and `resolve_vary()`
+decides which.
 
 | `vary` | What is held fixed | The question it answers |
 |---|---|---|
@@ -57,14 +78,16 @@ to hold one of the two fixed, and `resolve_vary()` decides which.
 | `"slab-and-diagonal"` | $\eta$, so the raw rate follows | how much do they depend on the overall prior scale, with its shape held fixed? |
 | `"auto"` (default) | follows the frame the fit itself used | |
 
-Under `"auto"` the mode is `"slab-and-diagonal"` when the fit gave its diagonal
-prior as `eta` and `"slab"` when it gave a raw `rate`. A fit specified in the
-raw frame carries no $\eta$, so the mode uses the one its own scale implies,
-`rate` times `pairwise_scale`, which is the same one-parameter family anchored
-at the chosen scale. These are two different questions and neither approximates
-the other, so the resolved mode is named in the printed report rather than left
-implicit. Discrete models have no precision diagonal, and `resolve_vary()`
-returns `"none"` for them.
+Under `"auto"` the mode follows the frame the fit itself used: it resolves to
+`"slab-and-diagonal"` when the fit gave its diagonal prior as `eta`, and to
+`"slab"` when the fit gave a raw `rate`. A fit specified in the raw frame
+carries no $\eta$ of its own. In that case the mode uses the $\eta$ its own
+scale implies, `rate` times `pairwise_scale`, which defines the same
+one-parameter family anchored at the chosen scale. The two modes answer two
+different questions, and neither approximates the other. That is why the
+resolved mode is named in the printed report rather than left implicit.
+Discrete models have no precision diagonal at all, so `resolve_vary()` returns
+`"none"` for them.
 
 ## One refit
 
@@ -77,70 +100,80 @@ five things, and reruns the sampler:
 4. the warmup, iteration count, seed, and core count;
 5. the initial state, when a warm start is available.
 
-It then calls `run_sampler()` and `build_output()` directly, which is the same
-pair the fitting functions call, so a refit is an ordinary fit that happens to
-start closer to its answer. One consequence is worth flagging: the refit
-bypasses `validate_sampler()`, so it applies the core guard itself through
+It then calls `run_sampler()` and `build_output()` directly. Those are the
+same two functions the fitting functions call, so a refit is an ordinary fit
+that happens to start closer to its answer. One consequence of the direct call
+is worth flagging: the refit bypasses `validate_sampler()`, where the core
+guard normally runs, so it applies that guard itself through
 `normalize_parallel_cores()`.
 
-Refits are silent by default. Each one's sampler notes are captured rather than
-printed, because a reader watching the check cannot act on per-refit alarms
-mid-run and the convergence gate re-tests everything they gesture at. The
-captured text stays available in `$refit_diagnostics`, and `verbose = TRUE`
-prints it live.
+Refits are silent by default: each one's sampler notes are captured rather
+than printed. There are two reasons. A reader watching the check cannot act on
+per-refit alarms in the middle of a run. And the convergence gate below
+re-tests everything those alarms gesture at, so nothing is lost by holding
+them back. The captured text stays available in `$refit_diagnostics`, and
+`verbose = TRUE` prints it live.
 
 ### The warm start
 
-Warm starting is implemented for ordinal fits only. `extract_warm_state()`
-errors on any other model type, and continuous and mixed fits therefore refit
-cold, at full warmup, costing about one fit per scale.
+Warm starting means starting a refit from the original fit's final state, so
+that it begins near its answer. It is implemented for ordinal fits only:
+`extract_warm_state()` errors on any other model type. Continuous and mixed
+fits therefore refit cold, at full warmup, which costs about one fit per
+scale.
 
-For an ordinal fit the warm state is each chain's final row of draws, laid out
-in the exact vectorization the C++ sampler consumes: main effects followed by
-the whole pairwise upper triangle, row-major. A NUTS refit additionally carries
-the origin fit's per-chain final step size and diagonal metric out of the
-`refit_step_sizes` and `refit_inv_mass` fields described under
-[Fit Objects](fit-objects.qmd#internal-fields). Dual averaging stays live for
-the step size while the metric is held fixed, so the short warmup does not pay
-to re-estimate the mass matrix. A non-NUTS refit simply ignores those fields,
-which is what makes the warm state sampler-agnostic.
+For an ordinal fit the warm state is each chain's final row of draws. The row
+is laid out in the exact vectorization the C++ sampler consumes: main effects
+followed by the whole pairwise upper triangle, row-major. A NUTS refit
+additionally carries two things from the origin fit: each chain's final step
+size, and its diagonal metric, the mass matrix NUTS adapted during the
+original warmup. Both come out of the `refit_step_sizes` and `refit_inv_mass`
+fields described under [Fit Objects](fit-objects.qmd#internal-fields). During
+the refit, [dual averaging](warmup.qmd#dual-averaging) stays live for the step
+size while the metric is held fixed, so the short warmup does not pay to
+re-estimate the mass matrix. A non-NUTS refit simply ignores those fields, and
+that is what makes the warm state sampler-agnostic.
 
-**No indicator state is carried.** The warm start uses the default dense,
-all-edges-active graph. Warm-starting a sparse indicator configuration would
-desynchronize the sampler's active-parameter dimension from the full storage
-dimension before selection-active warmup, whereas a dense start matches the
-cold-start dimension exactly. The short warmup re-settles the graph, which
-shifts with the scale anyway.
+**No indicator state is carried.** The warm start uses the default dense
+graph, with every edge active. The reason is dimensional. Warm-starting a
+sparse indicator configuration would desynchronize the sampler's
+active-parameter dimension from the full storage dimension before
+selection-active warmup, whereas a dense start matches the cold-start
+dimension exactly. Little is lost by dropping the indicator state: the short
+warmup re-settles the graph, and the graph shifts with the scale anyway.
 
 ### Why the check costs less than the fit
 
-`refit_run_length()` sets the run length, and the saving is conditional. A NUTS
-refit that carries the origin's metric runs the validated short schedule, 500
-warmup and 1000 sampling iterations, because the expensive part of warmup,
-estimating the mass matrix, has already been paid for. Every other path
-inherits the original fit's own schedule and gets no speed-up.
+`refit_run_length()` sets each refit's run length, and the saving is
+conditional. A NUTS refit that carries the origin's metric runs the validated
+short schedule of 500 warmup and 1000 sampling iterations. It can afford that
+schedule because the expensive part of warmup, estimating the mass matrix, has
+already been paid for by the original fit. Every other path inherits the
+original fit's own schedule and gets no speed-up.
 
-So the cost claim is specific: for an ordinal fit refit under NUTS, the whole
+So the cost claim is specific. For an ordinal fit refit under NUTS, the whole
 check costs roughly one original fit. For a continuous or mixed fit, or for an
-ordinal fit refit under a non-NUTS sampler, it costs roughly one fit per anchor.
-When an inherited slower sampler is projected to push the total past about a
-minute, the check says so once and suggests `refit_sampler = "nuts"`.
+ordinal fit refit under a non-NUTS sampler, the check costs roughly one fit
+per anchor instead. When an inherited slower sampler is projected to push the
+total past about a minute, the check says so once and suggests
+`refit_sampler = "nuts"`.
 
-Switching samplers between the original fit and the refits is sound because
-every comparison the check makes runs refit against refit under one identical
-pipeline. The original fit never enters a comparison; it is the analysis under
-check.
+Switching samplers between the original fit and the refits might look like it
+biases the comparison. It does not, because every comparison the check makes
+runs refit against refit, under one identical pipeline. The original fit never
+enters a comparison; it is the analysis under check.
 
 ## The gate
 
-Refits that did not converge must not be pooled into the curve, so each one
-passes a gate before its verdicts are used. There are two levels: one on the
-whole refit, one on the individual edge.
+Refits that did not converge must not be pooled into the curve. Each refit
+therefore passes a gate before its verdicts are used, and the gate has two
+levels: one on the whole refit, and one on the individual edge.
 
 ### The refit-level gate
 
-`refit_convergence_gate()` is a global-failure detector on bulk quantities. A
-refit is usable when all four of these hold:
+`refit_convergence_gate()` detects global failure, and it works on bulk
+quantities: summaries taken over many parameters at once rather than over any
+single one. A refit is usable when all four of these hold:
 
 | Criterion | Threshold |
 |---|---|
@@ -149,116 +182,149 @@ refit is usable when all four of these hold:
 | minimum E-BFMI across warmup halves (NUTS) | above 0.3 |
 | maximum first-half to second-half energy variance ratio (NUTS) | below 2 |
 
+The first two criteria look at R-hat. Split-R-hat is the variance-ratio
+convergence diagnostic computed on half-chains, documented under
+[Convergence Diagnostics](diagnostics.qmd#split-r-hat), and the
+[Rao-Blackwellized inclusion draws](ggm-internals.qmd#rao-blackwellized-inclusion-draws)
+are the per-iteration conditional inclusion probabilities the sampler records
+for each edge. The last two criteria read the NUTS energy diagnostics; E-BFMI
+is the energy Bayesian fraction of missing information (see
+[NUTS](nuts.qmd)).
+
 Two of those choices are deliberate and easy to misread.
 
-**The median, not the maximum.** The maximum continuous R-hat is routinely
-inflated by a few flat-likelihood directions: near-unidentified extreme-category
-thresholds, and interactions of near-saturated edges. Their R-hat is an
-identification artifact, not a verdict-corrupting failure. Global slow mixing
-lifts the median and the inclusion median together and is caught; a couple of
-flat directions are not. The maximum continuous R-hat and the smallest inclusion
-effective sample size are still reported, for transparency, in the `grid` table.
+**The median, not the maximum.** The gate takes the median R-hat because the
+maximum continuous R-hat is routinely inflated by a few flat-likelihood
+directions: near-unidentified thresholds for extreme categories, and
+interactions of near-saturated edges. In those directions a high R-hat is an
+identification artifact, not a failure that corrupts any verdict. The median
+is robust to them. Global slow mixing lifts the median and the inclusion
+median together, so the gate catches it; a couple of flat directions do not
+move the medians, so they do not fail the gate. The maximum continuous R-hat
+and the smallest inclusion effective sample size are still reported, for
+transparency, in the `grid` table.
 
-**Split-R-hat is not asked to carry the tail.** Warm starts sit near the
-chosen-scale posterior, so cross-chain dispersion is reduced by construction and
-split-R-hat's between-chain signal is weakened. The inclusion tail is therefore
-gated at the edge level instead, through per-chain verdict agreement.
+**Split-R-hat is not asked to carry the tail.** Split-R-hat detects failure
+through disagreement between chains. A warm start weakens that signal by
+construction: every chain starts near the chosen-scale posterior, so
+cross-chain dispersion is reduced before sampling even begins. The inclusion
+tail is therefore gated at the edge level instead, through the per-chain
+verdict agreement described below.
 
-The energy-slope warmup heuristic is deliberately not gated, because it flags
-healthy cold fits. An unassessable criterion abstains rather than failing:
-`finite_reduce()` returns a stated value when nothing is finite, so a degenerate
-source fit with every energy diagnostic missing leaves the two R-hat criteria to
-decide.
+The energy-slope warmup heuristic is deliberately left out of the gate: it
+flags healthy cold fits, so gating on it would fail refits that are in fact
+fine. A criterion that cannot be assessed abstains rather than failing.
+`finite_reduce()` returns a stated value when none of its inputs is finite, so
+a degenerate source fit with every energy diagnostic missing leaves the two
+R-hat criteria to decide on their own.
 
-A failed anchor is reported once, in plain language, naming which anchor, which
-criterion failed through `gate_failure_reason()`, and what the curve loses. It
-is never silently pooled. Two failures get special handling. If the replicate
-fails, the noise band cannot be measured and the mover rule falls back to its
-other two floors. If the *original fit* fails, its chosen-scale verdicts are
-still reported, because they are the analysis under check, with a message saying
-to read the whole curve with caution.
+A failed anchor is reported once, in plain language. The message names which
+anchor failed, names the failing criterion through `gate_failure_reason()`,
+and says what the curve loses without that anchor. A failed anchor is never
+silently pooled. Two particular failures get special handling. If the
+replicate fails, the run-to-run noise band cannot be measured, so the mover
+rule falls back to its other two floors. If the *original fit* fails, its
+chosen-scale verdicts are still reported, because they are the analysis under
+check, but the report adds a message saying to read the whole curve with
+caution.
 
 ### The edge-level check
 
-`refit_edge_stats()` computes each edge's quantities from one refit: the
-Rao-Blackwellized inclusion probability, its log inclusion Bayes factor through
-the prior odds, the within-chain Monte Carlo standard error, a between-chain
-half-band of twice the standard error of the grand mean, and whether the chains
-agree on the verdict. Both uncertainty measures are propagated to the log Bayes
-factor scale by the derivative $1/(p(1-p))$, clamped at $10^{-6}$.
+`refit_edge_stats()` computes each edge's quantities from one refit. There are
+five: the Rao-Blackwellized inclusion probability; the log inclusion Bayes
+factor that probability implies through the prior odds; the within-chain Monte
+Carlo standard error; a between-chain half-band, taken as twice the standard
+error of the grand mean; and whether the chains agree on the verdict. The two
+uncertainty measures live on the probability scale, so both are propagated to
+the log Bayes factor scale by the derivative $1/(p(1-p))$, clamped at
+$10^{-6}$, where $p$ is the edge's inclusion probability.
 
-An edge at the chosen scale is marked **insufficient** when its per-chain
-verdicts disagree, or when its band, taken as the wider of the between-chain
-half-band and twice the Monte Carlo standard error, straddles a verdict
-boundary. The two subcauses are recorded separately as `insufficient_disagree`
-and `insufficient_noisy`. This errs toward caution: disagreement widens the band
+An edge at the chosen scale is marked **insufficient** in two situations. The
+first: its per-chain verdicts disagree. The second: its uncertainty band
+straddles a verdict boundary, a value of the log Bayes factor at which the
+verdict would change; the band here is taken as the wider of the between-chain
+half-band and twice the Monte Carlo standard error. The two subcauses are
+recorded separately, as `insufficient_disagree` and `insufficient_noisy`. The
+construction errs toward caution: disagreement between chains widens the band
 rather than vanishing into a pooled estimate. Edges whose per-chain inclusion
-probabilities are all at 0 or all at 1 are saturated, and are exempt.
+probabilities are all at 0 or all at 1 are saturated, and saturated edges are
+exempt.
 
 ## The mover rule
 
-A verdict that differs somewhere along the curve is not automatically a finding.
-It counts as a move only when the total swing in the log Bayes factor across
-scales exceeds
+A verdict that differs somewhere along the curve is not automatically a
+finding, because the difference could be nothing more than noise. It counts as
+a move only when the total swing in the log Bayes factor across scales
+exceeds
 
 $$
 \max\bigl(\text{tolerance},\; 2 \times \text{MCSE},\; q_{95}\bigr),
 $$
 
-with `tolerance` defaulting to $\tfrac12 \log 10 \approx 1.15$, the MCSE taken
-per point from the chain-level spread of the reweighted estimate so it carries
-both the between-chain and the importance-sampling uncertainty, and $q_{95}$ the
-run-to-run noise band.
+The three floors inside the maximum are these. `tolerance` defaults to
+$\tfrac12 \log 10 \approx 1.15$. The MCSE is a Monte Carlo standard error
+taken per point from the chain-level spread of the reweighted estimate;
+computed that way, it carries both the between-chain uncertainty and the
+importance-sampling uncertainty. And $q_{95}$ is the run-to-run noise band,
+measured as described next.
 
-The noise band comes from the replicate pair. `wobble_yardstick()` takes the
-absolute difference in log Bayes factor between the replicate anchor's two
-fits and reports its 95th percentile over **threshold-relevant** edges only,
-meaning those with $|\log \mathrm{BF}| \le 3 \log 10 \approx 6.91$ at the chosen
-scale. Near-saturated edges are excluded because their log-odds derivative
-explodes, and their replicate spread would inflate the yardstick past any
-genuine scale-driven move. An edge that is threshold-relevant in one refit and
-saturated in the other has a censored spread rather than an infinite one, and is
-left out of the percentile; the printed report counts them. Where no
-threshold-relevant edge has a measurable spread the band is `NA` and the rule
-falls back to the tolerance and MCSE floors.
+The noise band comes from the replicate pair: the two fits at the replicate
+anchor, which differ only in their seed, so any spread between them is
+run-to-run noise. `wobble_yardstick()` takes the absolute difference in log
+Bayes factor between the replicate anchor's two fits, edge by edge, and
+reports its 95th percentile over **threshold-relevant** edges only, meaning
+those with $|\log \mathrm{BF}| \le 3 \log 10 \approx 6.91$ at the chosen
+scale. Near-saturated edges are excluded for a reason: their log-odds
+derivative explodes, so their replicate spread would inflate the yardstick
+past any genuine scale-driven move. An edge that is threshold-relevant in one
+refit and saturated in the other has a censored spread rather than an infinite
+one, so it is left out of the percentile; the printed report counts how many
+edges that affects. Where no threshold-relevant edge has a measurable spread,
+the band is `NA` and the rule falls back to the tolerance and MCSE floors.
 
-The result lands in the `mover` column as `stable`,
-`indistinguishable-from-wobble`, or `moved-beyond-wobble`. A bare verdict flip
-inside the replicate noise is never reported as a move.
+The result lands in the `mover` column, which takes one of three values:
+`stable`, `indistinguishable-from-wobble`, or `moved-beyond-wobble`. The
+guarantee this buys is simple: a bare verdict flip inside the replicate noise
+is never reported as a move.
 
-Alongside it, `stability_interval()` reports the widest contiguous range of
-relative scales around the chosen scale over which the verdict does not change.
-Masked grid points break the run rather than being interpolated across.
+Alongside the `mover` column, `stability_interval()` reports the widest
+contiguous range of relative scales around the chosen scale over which the
+verdict does not change. A masked grid point breaks that run; the interval is
+never interpolated across one.
 
 ## The data-preferred scale
 
-`data_preferred_scale()` answers a different question and costs nothing: what
-slab scale do these data themselves prefer? It reads the original fit's draws
-with no refit at all. The estimate $\hat{s}$ is the root-mean-square of the
-included interactions, with an approximate log-scale standard error of
-$1/\sqrt{2m}$ where $m$ is the mean number of included edges, and a 95% interval
-from those. As on the reweighting path, the GGM slab sits on
-$-\tfrac12 \boldsymbol{\Omega}$, so the draws carry that factor first.
+`data_preferred_scale()` answers a different question: what slab scale do
+these data themselves prefer? It costs nothing, because it reads the original
+fit's draws with no refit at all. The estimate $\hat{s}$ is the
+root-mean-square of the included interactions. It comes with an approximate
+log-scale standard error of $1/\sqrt{2m}$, where $m$ is the mean number of
+included edges, and a 95% interval built from those two quantities. One detail
+is shared with the reweighting path: for a GGM the slab sits on
+$-\tfrac12 \boldsymbol{\Omega}$, with $\boldsymbol{\Omega}$ the precision
+matrix, so the draws carry that factor first.
 
-It is defined only where the swept prior is the one on the pairwise
-interactions, so it is `NA` for a `bgmCompare()` sweep, whose difference slab
-has no comparable plug-in estimate. Setting `include_preferred_scale = TRUE`
-adds an anchor there.
+The estimate is defined only where the swept prior is the one on the pairwise
+interactions. It is therefore `NA` for a `bgmCompare()` sweep, because the
+difference slab has no comparable plug-in estimate. Setting
+`include_preferred_scale = TRUE` adds an anchor at the data-preferred scale.
 
 ## Where exactness lives
 
 The pooled curve is an approximation, and the check is built so that nothing
-important rests on it. Every per-anchor verdict column and every chosen-scale
-quantity is read straight from the fit that produced it, through that fit's own
-Rao-Blackwellized statistics. The `1x` column is therefore exactly the original
-fit's reported analysis, not a reweighted estimate of it.
+important rests on that approximation. Every per-anchor verdict column and
+every chosen-scale quantity is read straight from the fit that produced it,
+through that fit's own Rao-Blackwellized statistics; reweighting plays no part
+in those numbers. The `1x` column is therefore exactly the original fit's
+reported analysis, not a reweighted estimate of it.
 
-Between the anchors the curve can deviate from an actual refit at that scale by
-up to roughly 0.01 in inclusion probability at the extrapolation ends. Pooled
-inclusion probabilities are capped away from 0 and 1 at the same $10^{-6}$ floor
-the Rao-Blackwellized machinery uses, so an edge that saturates at some scale
-stays a large finite Bayes factor rather than an infinity. The verdict is
-unchanged, still decisive, and the curve, its range, and the plot stay finite.
+Between the anchors the curve can deviate from what an actual refit at that
+scale would report, by up to roughly 0.01 in inclusion probability at the
+extrapolation ends. Pooled inclusion probabilities are also capped away from 0
+and 1, at the same $10^{-6}$ floor the Rao-Blackwellized machinery uses. The
+cap means an edge that saturates at some scale keeps a large finite Bayes
+factor rather than turning into an infinity. Its verdict is unchanged and
+still decisive, and the curve, its range, and the plot all stay finite.
 
 ## See also
 
