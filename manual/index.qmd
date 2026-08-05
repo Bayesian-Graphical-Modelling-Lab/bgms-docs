@@ -59,6 +59,7 @@ Prior distributions on model parameters and graph structure.
 The layer between the finished sampler run and the numbers a reader reports.
 
 - [Fit Objects](fit-objects.qmd) — The S7 classes behind `bgm()` and `bgmCompare()`: what the object stores, the lazy summary cache, the accessor contract, and where the same quantity appears on two scales.
+- [Extractor Internals](extractors-internals.qmd) — The layer between the raw draws and the reference API: block reindexing and scale conversion, the two inclusion estimators, the joint-prior correction path, and the derived centrality and clustering summaries.
 - [Checks Internals](checks-internals.qmd) — The three-way verdict rule and its Monte Carlo fragility flag, the calibration resampling schemes for discrete and continuous variables, and the anchored reweighting curve.
 - [Sensitivity and Refits](sensitivity-refit.qmd) — The prior-sensitivity anchor grid, the warm-started refit engine, the two-level convergence gate, and the noise band the mover rule reads.
 

@@ -1,0 +1,294 @@
+---
+title: "Extractor Internals"
+---
+
+The `extract_*()` functions are the layer between the raw draws a fit stores
+and the quantities the reference API promises. Very little of that layer is a
+lookup. It reindexes block-ordered draws back into variable order, converts
+between the sampler's scale and the reported one, chooses between two
+estimators of the same quantity, and in one case runs a whole prior-only chain
+to supply a number the fit never sampled.
+
+Four files hold it. `R/extractor_functions.R` is the bulk: the parameter and
+indicator extractors, the two inclusion estimators, and the diagnostic
+accessors. `R/extract_prior_inclusion_probabilities.R` supplies the prior odds
+that turn posterior odds into Bayes factors.
+`R/centrality.R` and `R/mcmc_summary_sbm.R` hold the two derived summaries that
+need more than a reshape.
+
+For signatures, arguments, and return shapes, see
+[Extractor Functions](../reference/extractors.qmd) in the Reference. For the
+object being read, see [Fit Objects](fit-objects.qmd).
+
+## Three things that go wrong without this layer
+
+Every extractor that touches a symmetric matrix has to solve the same three
+problems, and it is worth naming them once.
+
+**Order.** A GGM or ordinal fit stores its pairwise draws in the lower triangle
+of the variable order. A mixed fit stores them by block: discrete by discrete,
+then continuous by continuous, then the cross block, over internally reordered
+variables. Filling a matrix with the mixed layout as though it were the
+triangular one attaches every number to the wrong pair.
+`fill_mixed_symmetric()` is the single place that mapping lives, and the
+extractors that need it call it rather than rederiving it.
+
+**Scale.** A GGM fit's raw pairwise draws are precision elements. The reported
+partial association is $\omega_{ij} = -\tfrac12 \theta_{ij}$, so
+`extract_pairwise_interactions()` applies that factor on the way out, and
+anything reading the raw draws directly must apply it itself. See
+[Fit Objects](fit-objects.qmd#scales) for the full table.
+
+**Vintage.** Fit objects from earlier releases lack fields that current ones
+have. The extractors handle this explicitly rather than failing: a legacy field
+name falls back through `%||%`, a deprecated storage format warns through
+`lifecycle`, and a defunct one stops with the version to refit under. The
+pattern to notice is that a *default* call degrades gracefully while an
+*explicit* request for a modern quantity errors, which keeps a silent estimator
+switch from happening behind the reader's back.
+
+## Two estimators of inclusion
+
+`extract_posterior_inclusion_probabilities()` offers `estimator = "rb"`
+(the default) and `estimator = "raw"`. They estimate the same posterior
+inclusion probability and are not interchangeable in precision.
+
+The **raw** estimator averages the binary indicator draws. The
+**Rao-Blackwellized** estimator averages the one-step draw
+
+$$
+J_t = \gamma_t + (1 - 2\gamma_t)\,\alpha_t,
+$$
+
+with $\gamma_t$ the indicator state before the move and $\alpha_t$ the
+acceptance probability of the birth or death proposal. Where those draws come
+from and why they exist is documented under
+[GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws); this page
+covers what the extraction layer does with them.
+
+In exact arithmetic $\bar{J}$ lies strictly inside $(0, 1)$, so even an
+indicator whose raw average saturates receives an interior estimate. In double
+precision it does not quite hold: $1 - \alpha_t$ underflows once $\alpha_t$
+drops below about $10^{-16}$, so the average of the stored draws still rounds to
+exactly 0 or 1 for edges with overwhelming per-iteration evidence.
+
+The Rao-Blackwellized estimator changes the summary, not the sampler. It
+inherits the chain's mixing and does not rescue a chain that failed to explore
+the model space. What it does buy is that $J$ is continuous, so the ordinary
+MCSE, effective sample size, and split-R-hat machinery applies to it, which is
+why the fit summary's inclusion table reports those three columns on the RB
+draws. Read them as precision *conditional on* exploration: a stuck chain can
+show a well-converged $J$ chain with a high `n_eff`. The per-direction flip
+counts `n0->1` and `n1->0` sit beside them and record the exploration itself.
+
+A fit made before 0.2.0.0 carries no RB draws. A default call falls back to
+`"raw"`; an explicit `estimator = "rb"` errors with the version to refit under.
+
+## Inclusion Bayes factors
+
+`extract_inclusion_bf()` does not read the RB draws. It reads the odds
+accumulators, `rb_counts`, and that difference is the point of the function.
+
+`rb_log_odds_from_counts()` pools the per-chain accumulators and applies the
+exact identity
+
+$$
+\frac{\bar{J}}{1 - \bar{J}}
+  = \frac{n_{01} + n_1 - n_{10}}{n_0 - n_{01} + n_{10}},
+$$
+
+where $n_{01}$ and $n_{10}$ sum the acceptance probabilities of birth and death
+proposals and $n_0$, $n_1$ count them. Because $1 - \alpha$ is never formed per
+draw, the odds stay finite down to log acceptances of about $-745$. Edges that
+saturate the naive average therefore still receive a finite Bayes factor here.
+
+The three non-finite returns are distinct and each means something:
+
+| Return | Cause |
+|---|---|
+| `NA` | the indicator was never proposed |
+| `+Inf` | the denominator is exactly zero, so no exclusion evidence remains |
+| `-Inf` (or `0` on the Bayes factor scale) | the numerator is exactly zero |
+
+"Never proposed" is narrower than "never moved". An edge indicator in `bgm()`
+that stays included for the whole run is still proposed at every iteration, so
+the accumulators see its conditional inclusion odds and it gets a finite,
+possibly very large, Bayes factor. An unselected main-effect difference in
+`bgmCompare()` is never proposed at all, so no Rao-Blackwellized quantity
+exists for it and `NA` is the honest entry rather than a lost number.
+
+`rb_bf_scale()` handles the `log` argument, and the asymmetry between the two
+scales is real: the accumulators are exact on the log scale everywhere, while
+the Bayes factor scale saturates at double precision. An entry whose log exceeds
+about 709.78 nats is `+Inf` under `log = FALSE` even though its log-scale value
+is finite. Workflows that must separate extreme evidence need `log = TRUE`,
+which is why [`verdicts()`](checks-internals.qmd) reads it that way.
+
+### Dividing out the prior
+
+The accumulators give posterior inclusion *odds*. A Bayes factor needs the
+prior odds removed, edge by edge, and the two coincide only at a prior inclusion
+probability of one half. `extract_inclusion_bf()` therefore calls
+`extract_prior_inclusion_probabilities()` and subtracts on the log scale.
+
+For a `bgmCompare()` fit the difference prior is exchangeable across difference
+indicators, so one prior inclusion probability covers the main-effect and
+pairwise families alike. A stochastic block difference prior has no single
+marginal, and there the result is left as posterior odds.
+
+## The prior inclusion probability
+
+This is the part of the layer that does real work, because for some models the
+prior inclusion probability is not the number the reader typed into the edge
+prior.
+
+Under the `"joint"` composition on a continuous block, the graph marginal is
+reweighted by the per-graph normalizing constant $Z(\Gamma)$, the
+positive-definite-cone mass of the slab under that edge pattern, further shaped
+by the determinant tilt. So a continuous-continuous edge's prior inclusion
+probability is *not* the edge-prior marginal, at any value of `delta`, including
+zero. It is the prior edge density of the joint block.
+
+Under the default `"hierarchical"` specification, $p(K \mid \Gamma)$ is
+normalized per graph, so integrating $K$ out returns $\pi(\Gamma)$ exactly.
+Every class keeps the edge-prior marginal, and neither the table nor the chain
+described below is built at all.
+
+### Edge classes
+
+Nodes are a priori exchangeable within variable type, so the prior inclusion
+probability is constant within an edge class and the whole matrix reduces to a
+handful of values:
+
+| Model | Classes |
+|---|---|
+| ordinal MRF | one, fully factorized |
+| GGM | one, all pairs in the joint block |
+| mixed MRF | three: discrete-discrete and cross pairs carry the edge-prior marginal, continuous-continuous pairs the joint-block density |
+
+### Where each value comes from
+
+For a factorized class the value is the edge prior's own marginal: $\theta_0$
+under `bernoulli_prior(theta0)`, and $a/(a+b)$ under
+`beta_bernoulli_prior(a, b)`.
+
+For a joint-block class it is read from the same cached
+normalizing-constant correction table that corrects the fit's own
+hyperparameter updates. Under a Bernoulli prior the value is the tilted prior
+edge density at $\theta_0$, interpolated linearly on the table's grid with
+constant extension past the ends. Under a Beta-Bernoulli prior it is the
+Beta$(a, b)$ quadrature of that same density curve, normalized by the
+same-grid Beta mass so the truncated tails cancel.
+
+A stochastic block prior is different again, because the block structure
+reweights the partition as well. A fully factorized fit has an analytic
+exchangeable marginal,
+
+$$
+s\,\mu_{\text{within}} + (1 - s)\,\mu_{\text{between}}, \qquad
+s = \sum_k \mathrm{dpois}(k - 1, \lambda)\,\frac{\alpha + 1}{k\alpha + 1},
+$$
+
+with $s$ the prior probability that two nodes share a block. A fit with a joint
+block has no such expression and needs a prior-only chain, run at the fit's own
+correction resolution and pooled within edge class.
+
+A prior-only chain is also the fallback for Bernoulli and Beta-Bernoulli fits
+whose slab family the table builder does not support, which on the release means
+beta-prime.
+
+### Caching, and the cost
+
+Both expensive paths are cached. The class values land in the fit's `cache`
+environment under `prior_inclusion_class_values`, so a second call is free;
+`recompute = TRUE` forces a rerun. The correction table itself is cached on
+disk, so later fits in the same configuration skip the build.
+
+The cost is worth stating plainly, because it surprises people: a call to
+`extract_inclusion_bf()` on a continuous fit under the joint composition can
+trigger a table build that runs for minutes, or a prior-only chain of 4000
+iterations after 1000 warmup. Neither is silent. The table build announces
+itself on the verbose flag and draws the sampler's progress bar.
+
+One shortcut exists. Heterogeneous per-edge Bernoulli probabilities pass through
+untouched when nothing reweights the graph, meaning fewer than two continuous
+variables or the hierarchical specification, since there is no single marginal
+to compute and the supplied matrix already is the answer.
+
+## Centrality
+
+`extract_centrality()` returns draws, not a point estimate: a
+draws-by-nodes matrix carrying the whole posterior of each node's centrality,
+which is what lets the summary and plot methods put credible intervals on it.
+`strength_from_pairwise()` computes strength centrality as the row sum of the
+absolute edge weights incident to each node.
+
+The incidence comes from the edge *order*, not from splitting the column names.
+That is deliberate: a variable named with a hyphen in it would defeat splitting
+`"A-B"` back into its endpoints.
+
+On a `bgmCompare()` fit the computation runs per draw rather than on posterior
+means. The pairwise draws hold the baseline block followed by one block per
+contrast, and a group's weights are the baseline plus the projection-weighted
+contrasts. Asking for two groups returns the per-draw *difference* in their
+centralities, which is a posterior over the difference rather than a difference
+of posterior means.
+
+## Stochastic block summaries
+
+`R/mcmc_summary_sbm.R` turns the allocation draws into three things.
+
+**Co-clustering.** `summarize_alloc_pairs()` converts each node pair into a
+binary "same block" series across iterations and runs the standard indicator
+diagnostics on it: the mixture effective sample size and transition counts from
+the C++ kernel, and split-R-hat over the same array. The pairwise means become
+the co-clustering matrix.
+
+**A representative partition.** `find_representative_clustering()` returns two.
+The *mean* is Dahl's method: the draw whose membership matrix is closest in
+squared distance to the posterior similarity matrix. The *mode* is the most
+frequent partition. Both are computed without materializing per-iteration
+membership matrices, which matters at realistic node counts: the squared
+distance expands into block-by-block sums over the similarity matrix, and the
+mode uses a canonical relabeling of each allocation vector as an $O(p)$ hash
+key, since two vectors induce the same partition exactly when their
+first-occurrence relabelings match.
+
+**A posterior over the number of blocks.** `compute_p_k_given_t()` implements
+the conditional probability of $K$ blocks given the observed partition
+cardinality $t$, from the mixture-of-finite-mixtures result. The prior is the
+shifted Poisson $K - 1 \sim \mathrm{Poisson}(\lambda)$, matching the partition
+coefficients that drive the sampler. Falling and rising factorials are formed
+through `lgamma()` on the log scale so that large $K$ or $t$ cannot overflow.
+`posterior_summary_SBM()` evaluates this once per *unique* cardinality and
+averages against the observed frequencies, since the per-iteration value depends
+on the cardinality alone.
+
+## Diagnostic accessors
+
+`extract_rhat()` and `extract_ess()` read the fit summary tables, so the first
+call triggers [the lazy cache](fit-objects.qmd#the-lazy-summary-cache).
+
+`extract_ess()` has the same two-estimator structure as the inclusion
+extractor, and the same fallback rule. The default `"rb"` returns the continuous
+effective sample size of the Rao-Blackwellized draws straight from the summary
+table, so the `NA` masking applied there carries over unchanged. The deprecated
+`"mixt"` is the indicator chain's transition-based effective sample size, which
+is no longer a summary column and is recomputed from the raw indicator draws by
+`indicator_transition_ess()` for as long as the argument is accepted. A fit
+without RB draws falls back to `"mixt"` on a default call and errors on an
+explicit `"rb"`.
+
+One detail in that lookup is load-bearing: the presence check uses `names()`
+rather than `$`, because `$` would partial-match `n_eff` to a legacy table's
+`n_eff_mixt` column and silently return the wrong estimator.
+
+## See also
+
+[Fit Objects](fit-objects.qmd),
+[Checks Internals](checks-internals.qmd),
+[Convergence Diagnostics](diagnostics.qmd),
+[GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws),
+[SBM Prior](sbm-prior.qmd),
+[Hierarchical Graph Prior](zratio-hierarchical.qmd),
+[Extractor Functions reference](../reference/extractors.qmd).

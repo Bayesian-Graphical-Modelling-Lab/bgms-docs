@@ -198,6 +198,7 @@ website:
         - section: "Results and Checks"
           contents:
             - manual/fit-objects.qmd
+            - manual/extractors-internals.qmd
             - manual/checks-internals.qmd
             - manual/sensitivity-refit.qmd
         - manual/bgmcompare-internals.qmd
