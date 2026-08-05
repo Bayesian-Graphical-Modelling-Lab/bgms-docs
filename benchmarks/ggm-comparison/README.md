@@ -10,6 +10,7 @@ modelSelection 1.0.7, ssgraph 1.16, one fit at a time.
 | file | what it is |
 |---|---|
 | `results.md`, `results.csv` | the full tables at p = 50, 100, 200: wall clock, CPU, threads, edge recovery at each package's own rule and at matched 0.5, AUC |
+| `CORRECTION-1.md` | correction to the original work-accounting: modelSelection's per-visit cost was undercounted 20x; corrected counts, throughput, and the spike mechanism, with source and probe provenance. No measured quantity was affected |
 | `SETTINGS.md` | per-package settings rationale, every recommendation quoted from the help page it came from |
 | `gen-data.R` | regenerates the datasets; generator and seeds verbatim from the bgms repository's `data-raw/make-fast-ggm.R` |
 | `bench-cell.R`, `run-bench.sh` | one benchmark cell / the one-fit-at-a-time driver |
