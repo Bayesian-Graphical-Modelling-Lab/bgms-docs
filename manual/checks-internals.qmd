@@ -177,7 +177,8 @@ For every case and every category threshold, the model issues a cumulative
 probability: the predicted chance that the case falls at or below that
 category. The data then record whether the case actually did. Isotonic
 regression, run through `stats::isoreg()`, estimates the observed frequency as
-a monotone function of the predicted probability. For a calibrated variable
+a monotone function of the predicted probability; this is the construction of
+the CORP reliability diagram [@DimitriadisEtAl_2021_corp]. For a calibrated variable
 that estimated curve tracks the diagonal, where observed frequency equals
 predicted probability. The final cumulative probability is 1 for every case,
 so it says nothing about calibration and is dropped.
@@ -204,7 +205,8 @@ miscalibration.
 
 A continuous variable's prediction is a density, so there is no category to
 have fallen in. The same question is therefore asked through the probability
-integral transform. Write $y_{ij}$ for the observed value of variable $j$ in
+integral transform, following the visual predictive checking recommendations
+of @SailynojaEtAl_2025_vpc. Write $y_{ij}$ for the observed value of variable $j$ in
 case $i$, $y_{i,-j}$ for that case's other variables, and $F_j$ for the
 model's conditional predictive distribution function of variable $j$. The
 transformed value $u_{ij} = F_j(y_{ij} \mid y_{i,-j})$ is Uniform(0, 1)
