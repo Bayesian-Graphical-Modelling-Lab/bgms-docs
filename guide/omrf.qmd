@@ -5,6 +5,23 @@ title: "Ordinal Markov Random Field"
 
 The ordinal Markov random field (MRF) is a graphical model for networks of binary and ordinal variables [@AndersonVermunt_2000; @SuggalaYangRavikumar_2017]. It is the default model in `bgms` and forms the discrete component of the [Mixed MRF](mixed-model.qmd). To fit an ordinal MRF, use the default `variable_type = "ordinal"`.
 
+## The model as a regression
+
+The model answers one question for each item: given how a person answered all the other items, how likely is each possible answer here? Every item is regressed on the remaining items, much as an outcome is regressed on predictors in an ordinary regression model. Because the answers are ordered categories rather than continuous scores, the regression is an adjacent-category logistic regression [@Agresti_2010]: it predicts the probability of each answer category instead of a conditional mean.
+
+The regression uses two kinds of parameters, and each has one job. The category thresholds describe how common each answer category of an item is when every neighboring item sits at its lowest category, scored zero. Some symptoms are rare and most people answer "not at all"; the thresholds absorb these differences in prevalence so that they cannot masquerade as edges. The pairwise parameters are the edge weights. A positive weight between two items means that higher answers on one go with higher answers on the other, conditional on all remaining items. A weight of zero means that no conditional association remains, and no edge is drawn.
+
+Written out, the regression for item $i$ compares adjacent answer categories, such as responding in category $c + 1$ rather than category $c$:
+
+$$
+\log \frac{P(x_i = c + 1 \mid \text{rest})}{P(x_i = c \mid \text{rest})}
+\;=\; \underbrace{\mu_{i, c+1} - \mu_{i, c}}_{\substack{\text{baseline preference for }\\c+1\text{ over }c}} \;+\; \underbrace{\textstyle\sum_{j \neq i} 2\,\omega_{ij}\, x_j}_{\text{the pull of the neighbors}} .
+$$
+
+The left side is the log odds of one adjacent answer over the other. The right side collects everything that shifts those odds: the threshold difference, plus each neighboring answer $x_j$ weighted by twice its edge weight $\omega_{ij}$. If one neighboring response increases by one category, the adjacent-category log odds change by exactly $2\,\omega_{ij}$. The edge weight $\omega_{ij}$ is therefore half the log odds ratio between adjacent categories of the two items, the same for every adjacent pair [@MarsmanVandenBerghHaslbeck_2025].
+
+Together, the item-level regressions define one joint model over complete response patterns, so the items are analyzed as one system, not one at a time. That joint form is the model below.
+
 ## The model
 
 For $p$ ordinal variables with observations $\mathbf{x} = (x_1, \ldots, x_p)$, the ordinal MRF specifies the joint distribution as:
