@@ -4,6 +4,34 @@ title: "Mixed Markov Random Field"
 
 The mixed Markov random field (MRF) is a graphical model for networks containing both discrete (binary or ordinal) and continuous variables. It unites the [Ordinal MRF](omrf.qmd) and the [GGM](ggm.qmd) into a single joint distribution through the conditional Gaussian framework [@LauritzenWermuth_1989; @Lauritzen1996]. To fit a mixed MRF, provide a `variable_type` vector that includes both discrete and continuous types.
 
+## The model in plain words
+
+Real datasets mix currencies: a symptom rated in ordered boxes, a
+mood item rated the same way, and next to them a continuous measure
+such as hours of sleep. The mixed MRF keeps every variable in its own
+currency and still asks the one question this site asks of every
+pair: with everything else held fixed, is anything left between these
+two?
+
+There are three kinds of pair, and each answers in its own dialect.
+Between two ordinal items, the tie works through the odds of sitting
+one box higher, exactly as in the [ordinal model](omrf.qmd). Between
+two continuous variables, it works through the precision matrix,
+exactly as in the [GGM](ggm.qmd). Between an ordinal item and a
+continuous variable, the tie is a shift: among people alike on
+everything else, sitting one box higher on the item goes with a
+higher or lower expected value of the continuous variable, in
+proportion to their association. All three kinds are reported on one
+partial-association scale, so a single fit draws a single graph over
+all the variables instead of stitching together separate analyses.
+
+One structural fact holds the mixture together: given the values of
+the ordinal variables, the continuous variables are jointly normal,
+with a mean that shifts with the ordinal scores and a spread that
+does not change with them. That is the conditional Gaussian
+structure, and it is what makes the combination one coherent model
+rather than an improvisation. The sections below state it exactly.
+
 ## The model
 
 For $p$ discrete variables $\mathbf{x} = (x_1, \ldots, x_p)$ and $q$ continuous variables $\mathbf{y} = (y_1, \ldots, y_q)$, the mixed MRF specifies the joint distribution as:

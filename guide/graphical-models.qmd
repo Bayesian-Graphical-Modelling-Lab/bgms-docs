@@ -5,6 +5,49 @@ title: "Graphical Models"
 
 A graphical model represents relationships among a set of variables as a graph. `bgms` estimates a class of undirected graphical models: pairwise Markov random fields.
 
+## The idea in plain words
+
+Take three things measured on the same people: trouble sleeping,
+intrusive memories, and irritability. All three tend to rise and fall
+together, so all three pairwise correlations come out positive. That
+leaves the interesting question unanswered: which of these ties are
+direct, and which only pass through the third variable? Perhaps
+irritability tracks intrusive memories only because both are tied to
+poor sleep. A correlation cannot tell you; it looks at each pair in
+isolation.
+
+A graphical model asks a sharper question for every pair: once you
+hold all the other variables fixed, is there anything left between
+these two? Each variable becomes a dot in a picture (a node), and a
+line between two dots (an edge) is drawn only when the answer is yes:
+knowing one variable still tells you something about the other, even
+among people who score identically on everything else. No line means
+that whatever association the pair shows in the raw data is fully
+carried by the other variables in the model.
+
+The picture that results is a map of direct associations. It does not
+say which variable drives which: the lines have no arrowheads, and
+the model makes no causal claims. What it does say is precise. Every
+missing line claims that two variables have nothing left to say about
+each other once the rest are known; every drawn line claims that they
+do.
+
+Two warnings keep the reading honest. First, "direct" means direct
+among the variables in the model. Adding or dropping a variable can
+redraw the map, because holding everything else fixed then means
+something different. Second, a line missing from an estimated picture
+is not by itself evidence that the association is absent; deciding
+when the data genuinely support absence is a question of its own, and
+answering it is much of what this package is for (see
+[The Bayesian Approach](bayesian-approach.qmd) and
+[Edge Selection](edge-selection.qmd)).
+
+Everything below makes this exact: it defines nodes, edges, and the
+mathematics that turns "nothing left to say" into a checkable
+property of a joint distribution. If you would rather see the model
+run before reading the theory,
+[Getting Started](getting-started.qmd) fits one first.
+
 ## Nodes and edges
 
 In a graphical model, the $p$ variables in a dataset are represented as nodes (or vertices) of a graph. An edge between two nodes indicates a direct statistical association between the corresponding variables, after accounting for all other variables in the model.

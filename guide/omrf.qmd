@@ -5,6 +5,43 @@ title: "Ordinal Markov Random Field"
 
 The ordinal Markov random field (MRF) is a graphical model for networks of binary and ordinal variables [@AndersonVermunt_2000; @SuggalaYangRavikumar_2017]. It is the default model in `bgms` and forms the discrete component of the [Mixed MRF](mixed-model.qmd). To fit an ordinal MRF, use the default `variable_type = "ordinal"`.
 
+## The model in plain words
+
+An ordinal item does one modest thing: it places each person in one
+of a few ordered boxes. Take three items from the Wenchuan PTSD data
+used throughout this site: intrusive memories, bad dreams, and sleep
+problems, each rated in ordered categories from low to high. The
+boxes have an order but no arithmetic. The step from "never" to
+"sometimes" need not equal the step from "often" to "always", and
+nothing guarantees that a rating of 4 means twice as much as a 2. A
+model for such items should use the order and nothing else.
+
+The ordinal MRF is built from exactly that restraint. For each item
+it works with a simple quantity: the odds of sitting one box higher
+rather than staying put. Association between two items is then a
+statement about how those odds move together: intrusive memories and
+bad dreams are tied when, among people who answer identically on
+everything else, sitting one box higher on one item raises the odds
+of sitting one box higher on the other. One number per pair of
+variables carries this tie, the partial association, and it reads the
+same for every adjacent pair of boxes: positive means higher goes
+with higher, negative means higher goes with lower, zero means the
+items have nothing left to say about each other once the rest are
+known.
+
+Each item also gets a set of threshold numbers of its own. Some boxes
+are simply more popular than others, network or no network, and the
+thresholds absorb that popularity so the associations do not have to.
+They are necessary bookkeeping and rarely interesting in themselves.
+
+Because the model uses only the ordering, recoding a 0-to-4 scale as
+1-to-5 changes nothing, and unequal spacing between response options
+costs nothing. That is not a small convenience; it is the reason this
+model rather than some other one, and the next sections say so
+precisely. To see the model at work on the full Wenchuan data before
+the theory, read
+[From estimation to evidence](../examples/estimation-to-evidence.qmd).
+
 ## The model
 
 For $p$ ordinal variables with observations $\mathbf{x} = (x_1, \ldots, x_p)$, the ordinal MRF specifies the joint distribution as:

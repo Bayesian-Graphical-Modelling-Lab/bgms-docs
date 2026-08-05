@@ -4,6 +4,42 @@ title: "Gaussian Graphical Model"
 
 The Gaussian graphical model (GGM) is a Markov random field for continuous variables. It is the most widely studied undirected graphical model [@Lauritzen1996] and forms the continuous component of the [Mixed MRF](mixed-model.qmd) in `bgms`. To fit a GGM, set `variable_type = "continuous"`.
 
+## The model in plain words
+
+Continuous measurements change the currency but not the question.
+Take resting heart rate, sleep duration, and perceived stress,
+measured on the same people. Any two of them may correlate, and any
+of those correlations may be a loan from the third variable rather
+than a tie of its own. The pairwise question is the same as
+everywhere on this site: with the others held fixed, do these two
+still move together?
+
+For jointly normal variables that question has an exact address, and
+it is not the correlation matrix. It is the inverse of the covariance
+matrix, called the precision matrix. A zero entry in the precision
+matrix says that the two variables are conditionally independent:
+among cases alike on every other variable, the two have nothing left
+in common. A nonzero entry says the tie is direct, and its sign says
+which way it points.
+
+Two familiar readings make the precision matrix less exotic than it
+sounds. The first is regression: predict one variable from all the
+others, and the entry linking two variables is, up to sign and
+scaling, the regression coefficient of the one on the other, while
+each diagonal entry is the reciprocal of the leftover variance that
+regression cannot explain. The second is standardization: rescaled by
+its diagonal, the off-diagonal entries become partial correlations,
+numbers between $-1$ and $1$ that read like ordinary correlations
+with the rest of the network held fixed.
+
+So the graph of a GGM is drawn by the zeros of the precision matrix,
+and estimating the graph means deciding which entries are zero.
+`bgms` reports these ties on the same partial-association scale it
+uses for ordinal items, so a continuous network and an ordinal one
+read side by side. The sections below derive all of this, and
+[Getting Started](getting-started.qmd) shows the fitting workflow the
+GGM shares with every other model here.
+
 ## The model
 
 A GGM assumes that $p$ continuous variables follow a multivariate normal distribution:
