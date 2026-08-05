@@ -1,0 +1,52 @@
+---
+title: "Large Gaussian Graphical Models"
+---
+
+Continuous data are where graphs get large, and large graphs are where runtime becomes the constraint. Two hundred variables is twenty thousand candidate edges, and an analysis that decides them one by one is a long analysis. For that case `bgm()` has a faster route, selected by two arguments:
+
+``` r
+fit = bgm(y,
+  variable_type = "continuous",
+  precision_graph_prior = "joint",
+  update_method = "gibbs"
+)
+```
+
+`update_method = "gibbs"` replaces the default No-U-Turn sampler with a conjugate sampler that redraws a whole column of the precision matrix at a time. `precision_graph_prior = "joint"` normalizes the prior over the precision matrix and the graph once, globally, instead of once per graph, which puts every term of the edge move in closed form. Neither is the default, and the second one changes the model being fitted: under the joint specification the prior over graphs is the edge prior reweighted toward sparsity, so its inclusion Bayes factors are not interchangeable with the default route's. [Gaussian Graphical Model](ggm.qmd#sampling-with-the-gibbs-sampler) describes both arguments and that trade-off; the package's fast-GGM vignette (`vignette("fast-ggm")`, in `bgms` from 0.2.0.1) walks the route end to end with timings. This page asks a different question: how does the route compare with its neighbors?
+
+## How the fast route compares
+
+Two CRAN packages target the same task, Bayesian edge selection for Gaussian graphical models: **ssgraph** (1.16), which samples the precision matrix under a spike-and-slab prior, and **modelSelection** (1.0.7), which runs Bayesian model selection over the entries of the precision matrix column by column. We ran all three on the simulated data of the fast-GGM vignette (Erdős–Rényi graphs of average degree 3, n = 1000, p = 50 to 200), each package at its own defaults and at the settings its own documentation recommends, one fit at a time on the same machine (Apple M5 Pro, R 4.6.0, serial reference BLAS). The full protocol, per-setting rationale quoted from each package's help pages, and complete three-size tables ship with the site, [in the repository](https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs/tree/main/benchmarks/ggm-comparison).
+
+At p = 200 (19,900 candidate edges, 289 true ones), selection at the common rule of inclusion probability above 0.5:
+
+| package | settings | threads | wall clock | selected | true pos. | false pos. | AUC |
+|---|---|---:|---:|---:|---:|---:|---:|
+| bgms | vignette call, Bernoulli(0.5) prior | 4 | 394 s | 382 | 258 | 124 | 0.996 |
+| bgms | same call, 2/(p−1) edge prior | 4 | 122 s | 169 | 168 | 1 | 0.996 |
+| bgms | same call, one thread | 1 | 1410 s | 382 | 258 | 124 | 0.996 |
+| modelSelection | defaults, 1/p edge prior | 1 | 4.2 s | 152 | 152 | 0 | 0.994 |
+| modelSelection | empirical-Bayes edge prior | 1 | 24.8 s | 170 | 169 | 1 | 0.994 |
+| ssgraph | defaults, g.prior 0.2 | 1 | 3174 s | 260 | 238 | 22 | 0.996 |
+| ssgraph | g.prior 0.5 | 1 | 3180 s | 435 | 264 | 171 | 0.996 |
+| ssgraph | 2/(p−1) edge prior | 1 | 3276 s | 161 | 159 | 2 | 0.990 |
+
+Four things the numbers say.
+
+**Per unit of sampling, bgms is the faster full-sweep sampler, and threads are not the reason.** A bgms iteration and an ssgraph iteration are the same unit, one full pass over every column of the precision matrix. At p = 200 that pass costs bgms 96 ms and ssgraph 634 ms, a factor of 6.6 that grows with dimension (per-sweep cost scales roughly as p^3.4^ for bgms and p^3.9^ for ssgraph over this range). Even on a single thread, bgms completes 3.2 times as much sampling as ssgraph's default run in less than half the wall clock.
+
+**bgms's runtime adapts to the sparsity it infers; ssgraph's does not.** Moving bgms from the Bernoulli(0.5) default to a 2/(p−1) edge prior cuts the p = 200 fit from 394 to 122 seconds, because sparser sampled graphs make cheaper updates. The same change moves ssgraph by three percent. When you expect a sparse graph, saying so in the prior buys both a cleaner selection and a faster fit.
+
+**modelSelection is much faster still, by design, and its speed is real.** Its 4.2-second default at p = 200 attempts 150,000 edge updates against the 318 million of a full-sweep run: each iteration visits about sqrt(p) columns, it starts from a glasso solution, and it reports Rao-Blackwellized inclusion probabilities. Rerunning it at 4, 16, and 64 times its default length does not change its ranking of the edges, so the short run is converged, not undersampled. What you give up is a different posterior (its edge prior is 1/p, and it works on the correlation scale), somewhat lower recall at a matched threshold (152 true edges recovered against 168 for bgms with a comparable sparse prior), and exact reproducibility: it exposes no seed and its counts vary by about two percent across identical calls. bgms and ssgraph runs are reproducible bit for bit.
+
+**The three packages largely agree on which pairs are edges.** The inclusion-probability AUC exceeds 0.99 in every cell but one (modelSelection's global regression proposal, 0.975, which also costs 94 times its default and is the one documented setting that hurt it here). Where the packages differ is where they cut: default edge priors span 0.5 (bgms), 0.2 (ssgraph), and 1/p (modelSelection), and that prior, not the sampler, is what moves the false-positive column.
+
+Caveats in one breath: one simulated data family, one machine, CRAN source builds; ssgraph documents OpenMP threading but the CRAN source build on this toolchain links no OpenMP runtime, so it ran single-threaded, which its CPU-to-wall ratio confirms.
+
+## Time to a converged ranking
+
+The table above prices each package at its own default run length; a follow-up study asked instead how quickly each sampler reaches its final edge ranking. At p = 100, one chain on one thread per package, across ten replicate datasets at each of n = 1000, 500 and 200, we measured the wall clock, burn-in included, for the inclusion-probability AUC to come within 0.01 of its converged value. Only the prior-matched pair compares samplers directly — bgms against ssgraph, both at a 0.5 edge prior, both scored on raw inclusion frequencies — and there bgms converges a median 18 to 25 times faster depending on sample size, with wide replicate-to-replicate spread (full range 4 to 73 times; ssgraph was the slower sampler in all 30 of 30 replicates). The Rao-Blackwellized probabilities bgms actually reports converge faster still, but that estimator can look settled before the indicator chain has moved, so the raw ratio is the sampler claim. modelSelection converged within about a second at every sample size, the floor of the tested grid, which confirms rather than challenges its short default. The converged rankings themselves are effectively tied across packages; what differs is how fast each sampler arrives.
+
+## Rebuilding the tables
+
+Every number on this page is traceable to a seeded runner script. The scripts, the per-package settings rationale, and the complete tables at all three sizes live in [`benchmarks/ggm-comparison/`](https://github.com/Bayesian-Graphical-Modelling-Lab/bgms-docs/tree/main/benchmarks/ggm-comparison) in this site's repository, so the comparison can be re-baked when a competitor releases a new version. Timings are facts about a machine; the ratios will travel further than the seconds.

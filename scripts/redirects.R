@@ -66,6 +66,7 @@ REDIRECTS = c(
   "articles/diagnostics.html"     = "guide/mcmc-diagnostics.html",
   "articles/missing_data.html"    = "guide/missing-data.html",
   "articles/prior-sensitivity.html" = "reference/prior-sensitivity.html",
+  "articles/fast-ggm.html"        = "guide/fast-ggm.html",
 
   # Package-level topic.
   "reference/bgms-package.html"   = "reference/index.html",
