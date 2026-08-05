@@ -71,9 +71,10 @@ $$
 
 with $\gamma_t$ the indicator state before the move at iteration $t$ and
 $\alpha_t$ the acceptance probability of the birth or death proposal at that
-iteration. Where those draws come from, and why they exist at all, is
-documented under
-[GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws); this page
+iteration. Every model class that runs edge selection produces those draws, not only the
+GGM; where they come from, and why they exist at all, is documented under
+[GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws), the page
+where the machinery is introduced. This page
 covers what the extraction layer does with them.
 
 In exact arithmetic the average $\bar{J}$ of those draws lies strictly inside

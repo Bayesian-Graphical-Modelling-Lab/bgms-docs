@@ -115,9 +115,12 @@ $1/\sqrt{\text{ESS}\,p(1-p)}$. On its own this standard error caught 74% of
 the study's verdict errors.
 
 The *Rao-Blackwellized* standard error, `rb_se_logit()`, starts from the
-Monte Carlo standard error of the one-step inclusion draws; how those draws
-are formed is described in
-[GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws). It moves
+Monte Carlo standard error of the one-step inclusion draws. Every model class
+that runs edge selection produces those draws, the ordinal, mixed, and
+comparison models as much as the GGM; the construction is described once,
+under
+[GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws), the page
+where the machinery is introduced. It moves
 that standard error to the logit scale by the delta method, which here means
 multiplying by $1/(p(1-p))$. It is `NA` wherever the incoming Monte Carlo
 standard error is `NA`, and that happens where the draws are constant to
@@ -295,11 +298,13 @@ and the gate that decides which anchors are allowed to contribute.
 ### Reweighting
 
 Take a fit at anchor scale $s_a$ and ask what its posterior would have been
-at a nearby scale $s$. Between those two posteriors, only the slab prior on
-the currently included edges changes. The likelihood therefore cancels, and
-the spike terms, the prior terms belonging to the excluded edges, cancel too.
-And because an anchor is fitted at a fixed scale, there is no posterior over
-the scale itself to integrate. What is left is a per-draw ratio of slab
+at a nearby scale $s$. The importance weight of a draw is the ratio of the two
+unnormalized posterior densities evaluated at that draw. In that ratio the
+likelihood appears as the same factor in numerator and denominator, since the
+data and the draw are the same, so it cancels; the spike terms, the prior
+factors of the excluded edges, do not depend on the slab scale and cancel the
+same way. And because an anchor is fitted at a fixed scale, there is no
+posterior over the scale itself to integrate. What is left is a per-draw ratio of slab
 densities. `anchor_log_weights()` forms the logarithm of that ratio over the
 included edges. Write $w_t(s)$ for draw $t$'s weight at target scale $s$,
 $m_t$ for the number of included edges in draw $t$, $\gamma_{te}$ for edge
@@ -313,8 +318,12 @@ $$
 
 for a Normal slab. A Cauchy slab keeps the same leading
 $-m_t \log(s / s_a)$ term and replaces the second one with the matching sum of
-$\log(1 + (\theta/s)^2)$ differences. This is the posterior-density-ratio reweighting
-identity of @BartosEtAl_2026_sensitivity, applied locally around each anchor.
+$\log(1 + (\theta/s)^2)$ differences. Mapping a Bayes factor as a function of the prior
+without refitting for every candidate prior goes back at least to
+@SinharayStern_2002_sensitivity, who traced the point-mass-prior Bayes factor
+over a grid; the per-draw form used here is the posterior-density-ratio
+reweighting identity of @BartosEtAl_2026_sensitivity, applied locally around
+each anchor.
 The anchored construction that stitches the anchors together is specific to
 `bgms`.
 
