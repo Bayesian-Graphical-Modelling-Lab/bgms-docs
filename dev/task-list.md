@@ -291,6 +291,71 @@ Open: the "results differ between runs" row points at the new on-page
 section only. When C2 ships, add the FAQ answer as a second target
 (the brief asks for both).
 
+## M2 Manual Coverage Build-Out (2026-08-05)
+
+Closes the coverage map M1 left for MM's call: every substantial
+subsystem the audit found undocumented now has a manual page, source-
+verified against the 0.2.0.0 release source (bgms main at 6126312a,
+read from a clean `git archive` export) at the M1 standard, one commit
+per page with the deciding `file:line` in the commit body.
+
+Five new pages. **Simulation and Prediction** (the ~3,950-line
+simulate/predict subsystem: the standalone and fitted-model generators
+per model class, the three conditional-distribution kernels, the
+category-code round trip, seeding across R's generator and SafeRNG,
+and which operations are exact). **Fit Objects** (the two S7 classes,
+the lazy summary cache, the `$`/`[[`/`names()` contract, and the
+scale table; this closes M1's T4 observation that no page owned the
+object the user holds). **Checks Internals** (`verdicts()`, the
+fragility flag's operating point, the two calibration resampling
+schemes, and the anchored curve's estimator). **Sensitivity and
+Refits** (the anchor grid, the warm-started refit engine, the
+two-level convergence gate, and the wobble yardstick). **Extractor
+Internals** (block reindexing and scale conversion, the two inclusion
+estimators, the joint-prior correction path, centrality, and the SBM
+summaries).
+
+Three section-sized additions. r-scaffolding gains an arguments-record
+section for `build_arguments.R`; architecture completes its
+`mcmc/execution/` listing with `sampler_config.h` and `step_result.h`
+(the `cholupdate` and `cholesky_helpers` entries M1 had already landed
+correctly were verified and left alone); samplers gains a
+`SamplerConfig` subsection under Factory dispatch. The refit engine is
+documented once on sensitivity-refit; warmup.qmd and
+parallel-chains.qmd gained one-sentence pointers rather than a second
+copy.
+
+Three release facts the write-up turned up, all now on the pages and
+cited: `bgmCompare()` never constructs a `SamplerConfig` (it runs its
+own sampler); only `NUTSSampler` reads that struct, while
+`MetropolisSampler` and `GibbsSampler` discard it with `(void)config`;
+and `initial_step_size` is the one field no production entry point
+sets, so NUTS always starts from the declared 0.1.
+
+Sidebar: a new **Results and Checks** group holds fit-objects,
+extractors-internals, checks-internals, and sensitivity-refit;
+simulation-prediction sits under Model Internals > Supporting Pages,
+the brief's stated default. Both are minimal wiring. The grouping
+proposal, including whether simulation-prediction should move into the
+new group, is MM's call and is in the completion report.
+
+Fable prose pass RAN, one agent per page, against the exemplars the
+brief names. Prose only; heading counts, anchors, tables, formulas and
+numbers verified unchanged after it. The pass reported its own
+uncertainties, and re-checking those against the source caught one
+real defect in the Opus draft: the `vary = "auto"` paragraph on
+sensitivity-refit implied that the `rate * pairwise_scale` fallback
+for a raw-frame fit applies under `"auto"`, when `resolve_vary()`
+reaches it only under an explicit `vary = "slab-and-diagonal"`. Fixed.
+Eleven smaller corrections are listed in the prose-pass commit body.
+
+Plotting machinery (`plot_bgms.R`, `plot_style.R`) got a DECISION NOTE
+in the completion report, not a page, as the brief directs.
+
+Project render clean (62/62), every new and edited page rendered
+individually first, link check clean (166 pages, 3,972 links, zero
+broken).
+
 ## M1 Manual Technical Pass (2026-08-05)
 
 Adversarial audit of the 22 pages under `manual/` in `_quarto.yml`

@@ -80,12 +80,19 @@ decides which.
 
 Under `"auto"` the mode follows the frame the fit itself used: it resolves to
 `"slab-and-diagonal"` when the fit gave its diagonal prior as `eta`, and to
-`"slab"` when the fit gave a raw `rate`. A fit specified in the raw frame
-carries no $\eta$ of its own. In that case the mode uses the $\eta$ its own
-scale implies, `rate` times `pairwise_scale`, which defines the same
-one-parameter family anchored at the chosen scale. The two modes answer two
-different questions, and neither approximates the other. That is why the
-resolved mode is named in the printed report rather than left implicit.
+`"slab"` when the fit gave a raw `rate`.
+
+One case needs an $\eta$ the fit does not carry. Asking explicitly for
+`vary = "slab-and-diagonal"` on a fit specified in the raw frame requires a
+value to hold fixed, and that fit has none. There `resolve_vary()` uses the
+$\eta$ the fit's own scale implies, `rate` times `pairwise_scale`, which
+defines the same one-parameter family anchored at the chosen scale. The
+substitution never happens under `"auto"`, because `"auto"` sends a raw-frame
+fit to `"slab"`, where no $\eta$ is needed.
+
+The two modes answer two different questions, and neither approximates the
+other. That is why the resolved mode is named in the printed report rather
+than left implicit.
 Discrete models have no precision diagonal at all, so `resolve_vary()` returns
 `"none"` for them.
 
@@ -211,9 +218,11 @@ cross-chain dispersion is reduced before sampling even begins. The inclusion
 tail is therefore gated at the edge level instead, through the per-chain
 verdict agreement described below.
 
-The energy-slope warmup heuristic is deliberately left out of the gate: it
-flags healthy cold fits, so gating on it would fail refits that are in fact
-fine. A criterion that cannot be assessed abstains rather than failing.
+The energy-slope warmup heuristic, the completeness check that surfaces as
+`warmup_incomplete` in `fit$nuts_diag` (see
+[Warmup Schedule](warmup.qmd#warning-system)), is deliberately left out of the
+gate: it flags healthy cold fits, so gating on it would fail refits that are
+in fact fine. A criterion that cannot be assessed abstains rather than failing.
 `finite_reduce()` returns a stated value when none of its inputs is finite, so
 a degenerate source fit with every energy diagnostic missing leaves the two
 R-hat criteria to decide on their own.
@@ -236,8 +245,10 @@ factor that probability implies through the prior odds; the within-chain Monte
 Carlo standard error; a between-chain half-band, taken as twice the standard
 error of the grand mean; and whether the chains agree on the verdict. The two
 uncertainty measures live on the probability scale, so both are propagated to
-the log Bayes factor scale by the derivative $1/(p(1-p))$, clamped at
-$10^{-6}$, where $p$ is the edge's inclusion probability.
+the log Bayes factor scale by the derivative $1/(p(1-p))$, where $p$ is the
+edge's inclusion probability. The clamp sits on the denominator: $p(1-p)$ is
+floored at $10^{-6}$ before the reciprocal is taken, so a saturated edge
+cannot divide by zero.
 
 An edge at the chosen scale is marked **insufficient** in two situations. The
 first: its per-chain verdicts disagree. The second: its uncertainty band
@@ -289,8 +300,9 @@ is never reported as a move.
 
 Alongside the `mover` column, `stability_interval()` reports the widest
 contiguous range of relative scales around the chosen scale over which the
-verdict does not change. A masked grid point breaks that run; the interval is
-never interpolated across one.
+verdict does not change. A masked grid point, one where no anchor cleared the
+importance-ESS floor and the curve therefore reports `NA`, breaks that run;
+the interval is never interpolated across one.
 
 ## The data-preferred scale
 
