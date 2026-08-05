@@ -5,6 +5,12 @@ title: "Graphical Models"
 
 A graphical model represents relationships among a set of variables as a graph. `bgms` estimates a class of undirected graphical models: pairwise Markov random fields.
 
+## The central idea
+
+The central idea of these models is simple: two variables are connected by an edge when they remain associated after accounting for every other variable in the analysis. Nothing is assumed about hidden continuous variables underlying discrete responses; the models work with the answers as they are. And despite the similar name, these are not Bayesian networks. Those are directed models that represent variables as parents and descendants; the graphs here are undirected, and the word Bayesian in `bgms` refers to the analysis, not to the model.
+
+Each model page that follows makes this idea concrete in the same way, as one regression per variable: given all the other variables, what does this one do? The edge weight between two variables appears in both of their regressions with the same value, and an edge is absent exactly when that weight is zero. The [Ordinal MRF](omrf.qmd) walks this regression for ordered categorical items, the [GGM](ggm.qmd) for continuous variables, and the [Mixed MRF](mixed-model.qmd) for datasets holding both.
+
 ## Nodes and edges
 
 In a graphical model, the $p$ variables in a dataset are represented as nodes (or vertices) of a graph. An edge between two nodes indicates a direct statistical association between the corresponding variables, after accounting for all other variables in the model.

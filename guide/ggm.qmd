@@ -4,6 +4,18 @@ title: "Gaussian Graphical Model"
 
 The Gaussian graphical model (GGM) is a Markov random field for continuous variables. It is the most widely studied undirected graphical model [@Lauritzen1996] and forms the continuous component of the [Mixed MRF](mixed-model.qmd) in `bgms`. To fit a GGM, set `variable_type = "continuous"`.
 
+## The model as a regression
+
+For continuous variables, the model answers the same question as the [Ordinal MRF](omrf.qmd): given all the other variables, what does this one do? Each variable is an ordinary linear regression on the rest. The threshold's job from the ordinal model is handled before the regression starts: `bgms` first subtracts each variable's mean, so that every score becomes a deviation from that variable's own average. A variable's overall level is thereby removed from the data and cannot masquerade as association; the model only describes how variables move together around their averages. What remains is the pull of the neighbors:
+
+$$
+E\bigl(x_i \mid \text{rest}\bigr) \;=\; \frac{1}{\theta_{ii}}\, \underbrace{\textstyle\sum_{j \neq i} 2\,\omega_{ij}\, x_j}_{\text{the pull of the neighbors}} .
+$$
+
+The pull is the same expression as in the ordinal regression: each neighboring value $x_j$ enters with twice its edge weight $\omega_{ij}$, conditional on all remaining variables. Only the noise around the regression changes, Gaussian rather than categorical. The factor $1/\theta_{ii}$ is the residual variance of $x_i$, the variance that remains after its neighbors have done their work, and it converts the pull into the units of $x_i$.
+
+Together, the variable-level regressions define one joint model, a multivariate normal distribution whose precision matrix collects all the parameters. That joint form is the model below, and it is also the model behind the familiar EBICglasso analysis: readers arriving from that workflow have been fitting it all along, and what changes here is not the model but the question asked of it.
+
 ## The model
 
 A GGM assumes that $p$ continuous variables follow a multivariate normal distribution:
