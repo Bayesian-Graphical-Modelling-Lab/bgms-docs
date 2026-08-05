@@ -28,11 +28,23 @@ We measured it on ten replicate datasets at each of three sample sizes (p = 100;
 | 500 | 2.8 s [1.5, 5.7] | 0.56 s [0.52, 0.62] | 65.4 s [13.6, 65.9] | 0.94 s [0.89, 0.98] |
 | 200 | 7.0 s [3.5, 68.0] | 0.65 s [0.55, 1.04] | 189 s [63, 254] | 0.53 s [0.44, 0.60] |
 
-What the table says:
+bgms reaches its converged ranking in seconds at every sample size: by raw inclusion frequencies — the like-for-like sampler comparison — half a second at n = 1000 and about three and seven seconds at the harder sizes, and in well under a second everywhere by the Rao-Blackwellized probabilities `bgm()` actually reports (the caveat below explains why the raw column is still the claim to quote). Against ssgraph at the matched 0.5 edge prior, computed per replicate:
 
-**bgms reaches its converged ranking in seconds at every sample size.** By raw inclusion frequencies — the like-for-like sampler comparison — half a second at n = 1000 and about three and seven seconds at the harder sizes. The Rao-Blackwellized probabilities `bgm()` actually reports converge in well under a second everywhere (the caveat below explains why the raw column is still the claim to quote).
+| n | raw vs raw (the sampler claim) | as shipped (RB) |
+|---:|---|---|
+| 1000 | 18× [6, 30] | 25× [6, 30] |
+| 500 | 18× [5, 44] | 114× [26, 126] |
+| 200 | 25× [4, 73] | 235× [61, 424] |
 
-**Against ssgraph at a matched 0.5 edge prior, that is a median 18 to 25 times faster, in 30 of 30 replicates.** Computed per replicate, raw against raw, the median ratio is 18× at n = 1000 and 500 and 25× at n = 200, with wide replicate-to-replicate spread (full ranges [6, 30], [5, 44] and [4, 73]); ssgraph was the slower sampler in every single replicate. Against the Rao-Blackwellized probabilities bgms ships, the median ratios are 25×, 114× and 235×. The magnitude at any one sample size is not pinned down better than a factor of two or three, so these are medians with ranges, never point estimates. The mechanism is plain in the chain lengths: bgms's raw ranking converges after a median 8, 64 and 125 sweeps against ssgraph's 100, 500 and 1500 — and each bgms sweep is also cheaper (8 ms against 39 at p = 100).
+ssgraph is the slower sampler in all 30 of 30 replicate comparisons. The direction is certain; the magnitude at any one sample size is good to a factor of two or three, so these are medians with ranges, never point estimates. The mechanism sits in how many sweeps each sampler needs (median, at convergence):
+
+| n | bgms, raw | bgms, RB | ssgraph |
+|---:|---:|---:|---:|
+| 1000 | 8 | 8 | 100 |
+| 500 | 64 | 8 | 500 |
+| 200 | 125 | 8 | 1500 |
+
+— and each bgms sweep is also cheaper: 8 ms against ssgraph's 39 at p = 100.
 
 **modelSelection converges within about a second everywhere, and that speed is real.** It sat at the floor of the tested grid at every sample size in all ten replicates, so its number is an upper bound: its short default is converged for ranking, not undersampled.
 
