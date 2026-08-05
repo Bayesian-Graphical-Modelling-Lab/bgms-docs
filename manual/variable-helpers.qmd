@@ -46,7 +46,8 @@ gates the FAST path). Then:
 
 1. Precompute $e_r = \exp(r)$, $e_B = \exp(-B)$, and
    $e_\mu(c) = \exp(\mu(c))$ for each category (once per variable)
-2. Accumulate the denominator with a running power $P$:
+2. Accumulate the denominator with a running power $P$, written here
+   as pseudo-code with $\leftarrow$ for assignment:
 
 $$
 \begin{aligned}
@@ -61,7 +62,12 @@ $$
 Only two per-person `exp()` calls are needed ($e_r$ and $e_B$),
 plus $K$ for the main effects. The running product $P = e_r^{\,c}$
 replaces the $K$ per-category `exp()` calls that a naive
-implementation would require.
+implementation would require. Note where the stabilization lands:
+every accumulated term carries the same factor $e_B$, so $D$ is the
+true denominator scaled by $\exp(-B)$. The factor is common to all
+of that person's terms, so it cancels in the category probabilities,
+and the bound is passed alongside the sum wherever the unshifted
+value matters.
 
 ### SAFE path detail
 

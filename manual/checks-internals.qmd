@@ -132,7 +132,10 @@ and divides that gap by each standard error in turn. An edge is fragile when
 either distance falls below 2. A missing distance abstains rather than votes:
 it neither flags the edge itself nor prevents the other standard error from
 flagging it. In the study the union caught all 66 errors, at the cost of
-flagging 3.0% of correct verdicts. It also transfers across model types, so
+flagging 3.0% of correct verdicts. In absolute terms that cost is roughly
+seventeen flags on correct verdicts for every error caught, which is the
+deliberate price of catching them all: most flagged verdicts are correct ones
+standing near a boundary. The rule also transfers across model types, so
 the same operating point serves Gaussian graphical models as it serves ordinal
 and binary ones.
 

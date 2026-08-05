@@ -139,8 +139,9 @@ over all $p(p-1)/2$ edges at the start of each iteration, before the
 parameter update step. For each edge $(i, j)$:
 
 **Add move** ($\gamma_{ij} = 0 \to 1$). Propose a new interaction
-value $\omega_{ij}^\star \sim \mathcal{N}(\omega_{ij},\, \sigma_{ij}^2)$
-and accept with probability
+value $\omega_{ij}^\star \sim \mathcal{N}(\omega_{ij},\, \sigma_{ij}^2)$,
+write $q(\cdot \mid \cdot)$ for that Gaussian proposal density, and
+accept with probability
 $$
 \alpha = \min\!\left\{1,\;
   \frac{p(\boldsymbol{\gamma}^\star, \boldsymbol{\omega}^\star \mid \mathbf{X})}
@@ -159,7 +160,7 @@ $$
 \alpha = \min\!\left\{1,\;
   \frac{p(\boldsymbol{\gamma}^\star, \boldsymbol{\omega}^\star \mid \mathbf{X})}
        {p(\boldsymbol{\gamma},\, \boldsymbol{\omega} \mid \mathbf{X})}
-  \;\frac{q(\omega_{ij} \mid \omega_{ij}^\star)}{1}
+  \;q(\omega_{ij} \mid \omega_{ij}^\star)
 \right\}
 $$
 

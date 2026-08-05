@@ -88,7 +88,8 @@ as `eta / s`, with `s` the slab's `scale()`. Because graph and
 partial-correlation inference is invariant to a joint rescaling of
 slab and diagonal, fixing `eta` keeps the prior geometry — how far the
 prior mass sits from the positive-definite cone boundary — unchanged
-when the user widens or narrows the slab. The standardized cell
-$(\delta, \eta, \alpha)$ is also the frame in which the
+when the user widens or narrows the slab. This triple
+$(\delta, \eta, \alpha)$ at unit slab scale is what the engine
+pages call the *standardized cell*; it is the frame in which the
 [Z-ratio constants](zratio-hierarchical.qmd) and correction tables are
 built, which is why one table serves every slab scale.
