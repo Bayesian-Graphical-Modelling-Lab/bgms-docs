@@ -1,0 +1,28 @@
+"cell","package","version","kind","p","n","pairs","edges","threads","elapsed_s","cpu_s","own_cut","own_selected","own_tp","own_fp","own_fn","own_precision","own_recall","m_selected","m_tp","m_fp","m_fn","m_precision","m_recall","auc","tp_at_E","max_rhat"
+"bgms-vignette","bgms","0.2.0.0","vignette settings (joint + gibbs)",50,1000,1225,80,4,4.3,14.18,0.5,84,78,6,2,0.929,0.975,84,78,6,2,0.929,0.975,0.9986,75,1.0012
+"bgms-vignette","bgms","0.2.0.0","vignette settings (joint + gibbs)",100,1000,4950,146,4,34.61,127.78,0.5,161,135,26,11,0.839,0.925,161,135,26,11,0.839,0.925,0.9964,129,1.0012
+"bgms-vignette","bgms","0.2.0.0","vignette settings (joint + gibbs)",200,1000,19900,289,4,393.88,1531.94,0.5,382,258,124,31,0.675,0.893,382,258,124,31,0.675,0.893,0.9957,247,1.0015
+"bgms-sparse-prior","bgms","0.2.0.0","supplementary: vignette settings, sparse edge prior",50,1000,1225,80,4,3.22,9.7,0.5,59,59,0,21,1,0.738,59,59,0,21,1,0.738,0.9984,75,1.0014
+"bgms-sparse-prior","bgms","0.2.0.0","supplementary: vignette settings, sparse edge prior",100,1000,4950,146,4,16.58,56.05,0.5,91,91,0,55,1,0.623,91,91,0,55,1,0.623,0.9962,129,1.002
+"bgms-sparse-prior","bgms","0.2.0.0","supplementary: vignette settings, sparse edge prior",200,1000,19900,289,4,122.28,441.9,0.5,169,168,1,121,0.994,0.581,169,168,1,121,0.994,0.581,0.9957,245,1.0024
+"bgms-serial","bgms","0.2.0.0","supplementary: vignette settings, 1 thread",50,1000,1225,80,1,12.39,12.85,0.5,84,78,6,2,0.929,0.975,84,78,6,2,0.929,0.975,0.9986,75,1.0012
+"bgms-serial","bgms","0.2.0.0","supplementary: vignette settings, 1 thread",100,1000,4950,146,1,111.86,113.45,0.5,161,135,26,11,0.839,0.925,161,135,26,11,0.839,0.925,0.9964,129,1.0012
+"bgms-serial","bgms","0.2.0.0","supplementary: vignette settings, 1 thread",200,1000,19900,289,1,1410.39,1412.96,0.5,382,258,124,31,0.675,0.893,382,258,124,31,0.675,0.893,0.9957,247,1.0015
+"modelSelection-default","modelSelection","1.0.7","package defaults",50,1000,1225,80,1,1.16,1.16,0.95,25,25,0,55,1,0.312,52,52,0,28,1,0.65,0.9981,75,NA
+"modelSelection-default","modelSelection","1.0.7","package defaults",100,1000,4950,146,1,1.8,1.8,0.95,52,52,0,94,1,0.356,84,84,0,62,1,0.575,0.9942,129,NA
+"modelSelection-default","modelSelection","1.0.7","package defaults",200,1000,19900,289,1,4.25,4.15,0.95,92,92,0,197,1,0.318,152,152,0,137,1,0.526,0.9937,241,NA
+"modelSelection-ebayes","modelSelection","1.0.7","documentation-directed: empirical-Bayes edge prior",50,1000,1225,80,1,4.14,4.12,0.95,33,33,0,47,1,0.412,63,62,1,18,0.984,0.775,0.9982,75,NA
+"modelSelection-ebayes","modelSelection","1.0.7","documentation-directed: empirical-Bayes edge prior",100,1000,4950,146,1,8.47,8.45,0.95,60,60,0,86,1,0.411,91,91,0,55,1,0.623,0.9941,128,NA
+"modelSelection-ebayes","modelSelection","1.0.7","documentation-directed: empirical-Bayes edge prior",200,1000,19900,289,1,24.83,24.79,0.95,108,108,0,181,1,0.374,170,169,1,120,0.994,0.585,0.9938,242,NA
+"modelSelection-doc","modelSelection","1.0.7","documentation-directed",50,1000,1225,80,1,13.44,13.4,0.95,25,25,0,55,1,0.312,52,52,0,28,1,0.65,0.9931,73,NA
+"modelSelection-doc","modelSelection","1.0.7","documentation-directed",100,1000,4950,146,1,76.87,76.64,0.95,53,53,0,93,1,0.363,83,83,0,63,1,0.568,0.9886,128,NA
+"modelSelection-doc","modelSelection","1.0.7","documentation-directed",200,1000,19900,289,1,393.27,392.34,0.95,95,95,0,194,1,0.329,151,151,0,138,1,0.522,0.9751,237,NA
+"ssgraph-default","ssgraph","1.16","package defaults",50,1000,1225,80,1,13.58,13.49,0.5,73,70,3,10,0.959,0.875,73,70,3,10,0.959,0.875,0.9989,76,NA
+"ssgraph-default","ssgraph","1.16","package defaults",100,1000,4950,146,1,194.17,193.01,0.5,123,120,3,26,0.976,0.822,123,120,3,26,0.976,0.822,0.9968,131,NA
+"ssgraph-default","ssgraph","1.16","package defaults",200,1000,19900,289,1,3173.92,3168.65,0.5,260,238,22,51,0.915,0.824,260,238,22,51,0.915,0.824,0.9957,249,NA
+"ssgraph-doc","ssgraph","1.16","documentation-directed",50,1000,1225,80,1,13.56,13.49,0.5,88,78,10,2,0.886,0.975,88,78,10,2,0.886,0.975,0.9988,76,NA
+"ssgraph-doc","ssgraph","1.16","documentation-directed",100,1000,4950,146,1,186.14,185.88,0.5,171,136,35,10,0.795,0.932,171,136,35,10,0.795,0.932,0.9968,130,NA
+"ssgraph-doc","ssgraph","1.16","documentation-directed",200,1000,19900,289,1,3179.92,3175.59,0.5,435,264,171,25,0.607,0.913,435,264,171,25,0.607,0.913,0.9958,249,NA
+"ssgraph-sparse-prior","ssgraph","1.16","supplementary: sparse edge prior",50,1000,1225,80,1,14.19,14.17,0.5,60,60,0,20,1,0.75,60,60,0,20,1,0.75,0.9983,74,NA
+"ssgraph-sparse-prior","ssgraph","1.16","supplementary: sparse edge prior",100,1000,4950,146,1,188.51,187.91,0.5,88,88,0,58,1,0.603,88,88,0,58,1,0.603,0.9926,128,NA
+"ssgraph-sparse-prior","ssgraph","1.16","supplementary: sparse edge prior",200,1000,19900,289,1,3276.5,3263.98,0.5,161,159,2,130,0.988,0.55,161,159,2,130,0.988,0.55,0.9903,242,NA

@@ -117,6 +117,7 @@ website:
         - section: "Models"
           contents:
             - guide/ggm.qmd
+            - guide/fast-ggm.qmd
             - guide/omrf.qmd
             - guide/mixed-model.qmd
         - section: "Analyses"

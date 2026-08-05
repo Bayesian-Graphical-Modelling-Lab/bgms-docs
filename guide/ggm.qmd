@@ -103,6 +103,8 @@ Besides the default NUTS sampler and adaptive Metropolis, all-continuous data ad
 
 Because every draw comes from an exact conditional, there are no step sizes or acceptance targets to tune — `target_accept` is ignored — and the warmup is spent settling rather than adapting: with edge selection, the first 15% of warmup runs the full model so the precision matrix settles, and selection is active for the remaining 85%. See [GGM Internals](../manual/ggm-internals.qmd) for the update formulas.
 
+Paired with `precision_graph_prior = "joint"`, this sampler is the fast route for large models — two hundred variables in minutes rather than hours. [Large Gaussian Graphical Models](fast-ggm.qmd) shows what the pair costs and buys, including a measured comparison with the neighboring CRAN packages.
+
 ## Missing data
 
 Missing values can be handled via listwise deletion (the default) or imputed within the Gibbs sampler by setting `na_action = "impute"`. For continuous data, missing entries are drawn from their conditional normal distribution at each MCMC iteration. See [Missing Data](missing-data.qmd) for details on both approaches and recommendations.
