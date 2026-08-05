@@ -107,7 +107,7 @@ otherwise.
 ### Internal fields
 
 Three fields are not part of the user-facing object. They are documented here
-because they explain behaviour elsewhere. `refit_step_sizes` and
+because they explain behavior elsewhere. `refit_step_sizes` and
 `refit_inv_mass` hold each chain's final step size and diagonal metric from
 NUTS, the No-U-Turn Sampler. A refit can start from those values instead of
 adapting them all over again; see
@@ -228,7 +228,7 @@ The same quantity can appear on two scales in one object, and the object does
 not relabel it for you; you have to know which field sits on which scale. For
 a GGM fit, `raw_samples$pairwise` holds off-diagonal **precision** elements
 and `raw_samples$main` holds the precision diagonal, because the precision
-scale is what the sampler works in. The summarised views are converted. In the
+scale is what the sampler works in. The summarized views are converted. In the
 table below, $\theta_{ij}$ is an element of the precision matrix and
 $\omega_{ij}$ is the corresponding partial association:
 

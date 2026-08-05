@@ -227,14 +227,17 @@ marginal is still analytic:
 
 $$
 s\,\mu_{\text{within}} + (1 - s)\,\mu_{\text{between}}, \qquad
-s = \sum_k \mathrm{dpois}(k - 1, \lambda)\,\frac{\alpha + 1}{k\alpha + 1},
+s = \sum_{k \ge 1} \frac{\lambda^{k-1} e^{-\lambda}}{(k - 1)!}
+    \,\frac{\alpha_{\mathrm{Dir}} + 1}{k\,\alpha_{\mathrm{Dir}} + 1},
 $$
 
 with $s$ the prior probability that two nodes share a block. The quantities
 $\mu_{\text{within}}$ and $\mu_{\text{between}}$ are the prior inclusion
 probabilities for a pair in the same block and a pair in different blocks, and
-$\lambda$ and $\alpha$ are parameters of the block prior (see
-[SBM Prior](sbm-prior.qmd)). A fit with a joint block has no such closed
+$\lambda$ and $\alpha_{\mathrm{Dir}}$ are the shifted-Poisson rate and the
+Dirichlet concentration of the block prior (see
+[SBM Prior](sbm-prior.qmd)); the subscript keeps the concentration apart from
+the acceptance probability $\alpha_t$ defined earlier on this page. A fit with a joint block has no such closed
 expression. It therefore needs a prior-only chain: a run of the sampler under
 the prior alone, without data. That chain runs at the fit's own correction
 resolution, and its results are pooled within edge class.

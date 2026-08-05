@@ -103,7 +103,7 @@ cell a uniform random starting category and runs `iter` sweeps. Within a
 sweep, each variable is updated for every observation by drawing from its full
 conditional, the distribution of that variable given the current values of all
 the others. That conditional depends on the **rest score**, the total pairwise
-input a variable receives from its neighbours in that row:
+input a variable receives from its neighbors in that row:
 
 $$
 r_{is} = \sum_{k} 2\,(x_{ik} - b_k)\,\omega_{ks}.
@@ -175,8 +175,8 @@ Each worker then runs the same Gibbs core.
 ### Continuous fits
 
 `simulate_bgms_ggm()` has to solve a scale problem first. `bgm()` fits
-continuous data after centring it on the training column means, so a
-simulation on the fitted scale would come back centred rather than on the
+continuous data after centering it on the training column means, so a
+simulation on the fitted scale would come back centered rather than on the
 original scale of the data. To undo this, the stored `column_means` are passed
 as the mean vector. Fits old enough to lack stored column means fall back to
 zeros.
@@ -216,16 +216,18 @@ matrix, so none of that work repeats per iteration. Each sweep then updates
 every discrete variable from its full conditional given the other discrete
 variables and the current continuous values. After that, it draws the whole
 continuous vector at once from its conditional Gaussian, whose mean shifts
-with the centred discrete state. The discrete update subtracts the largest log
+with the centered discrete state. The discrete update subtracts the largest log
 weight before exponentiating.
 
 One structural difference from the discrete-only generator is worth spelling
 out. The mixed generator loops over observations on the outside, and it runs a
-full `iter`-sweep chain for each observation separately. It initialises the
+full `iter`-sweep chain for each observation separately. It initializes the
 discrete variables uniformly and the continuous variables from their marginal.
 The discrete-only generator, by contrast, advances all observations together.
-The output is the same in kind, but the cost scales as `num_states` times
-`iter` rather than with a shared sweep.
+The output is the same in kind, and so is the total work: every observation
+receives `iter` sweeps whichever loop is outermost. What differs is that each
+observation's chain is initialized separately rather than advancing in
+lockstep with the rest.
 
 `build_output_mixed_mrf()` stores the two blocks separately, so
 `split_mixed_raw_samples()` has to cut the flat draw matrices back apart
@@ -262,15 +264,15 @@ dispatches to the continuous or mixed implementation before the discrete
 kernel is reached.
 
 **Discrete.** `compute_conditional_probs()` accumulates the rest score across
-all variables except the target. When a neighbour is Blume-Capel, that
-neighbour's contribution is centred on its reference category. The kernel then
+all variables except the target. When a neighbor is Blume-Capel, that
+neighbor's contribution is centered on its reference category. The kernel then
 evaluates the category probabilities through `compute_probs_ordinal()` or
 `compute_probs_blume_capel()`. Those are the bounded, overflow-protected
 helpers documented under [Fast Computation](variable-helpers.qmd), and they
 are the same ones the likelihood code uses. The result is one
 $n \times (C_s + 1)$ probability matrix per predicted variable, where $n$ is
 the number of rows in `newdata` and $C_s$ is variable $s$'s highest category
-code; the columns are labelled `cat_0` upwards.
+code; the columns are labeled `cat_0` upwards.
 
 **Continuous.** `compute_conditional_ggm()` uses the standard Gaussian
 conditional read straight off the precision matrix:
@@ -287,7 +289,7 @@ $\theta_{jj}^{-1}$ contains no data, so the conditional standard deviation
 does not vary across rows; only the mean does. The kernel computes all rows at
 once by multiplying the data by column $j$ of the precision matrix and
 subtracting the self-contribution. `predict_bgms_ggm()` wraps this in the same
-centring correction the simulation path uses. `newdata` is swept by the
+centering correction the simulation path uses. `newdata` is swept by the
 training column means before the kernel runs, and the training mean of the
 predicted variable is added back to the conditional means afterwards. Output
 is an $n \times 2$ matrix of `mean` and `sd` per predicted variable.
@@ -296,7 +298,7 @@ is an $n \times 2$ matrix of `mean` and `sd` per predicted variable.
 the predicted variable calls for. For a discrete variable, the rest score
 picks up a contribution from the continuous block through the cross
 interactions. For a continuous variable, the conditional mean picks up
-contributions from the other continuous variables and from the centred
+contributions from the other continuous variables and from the centered
 discrete state, and the conditional precision is read as $-2$ times the
 continuous block's diagonal entry. `predict_bgms_mixed()` maps the user's
 column indices onto the internal layout, in which the $p$ discrete variables
@@ -312,11 +314,14 @@ stacks a variable's per-draw matrices into an array and reduces that array to
 a mean matrix and a standard deviation matrix. The mean becomes the returned
 value; the standard deviation is attached as the `"sd"` attribute.
 
-Read that average as the posterior mean of the conditional probability, not as
-a predictive distribution that has integrated out the parameters. For a
-continuous variable in particular, keep the two spreads apart. The returned
-`sd` column is the average conditional standard deviation across draws. The
-separate `"sd"` attribute reports how much each quantity moved across draws.
+For a discrete variable that average is the posterior predictive conditional
+distribution: averaging the per-draw probabilities is exactly how the
+predictive integrates the parameters out. For a continuous variable the
+returned pair is not a predictive distribution. Its `sd` column is the average
+conditional standard deviation across draws, and averaging the two moments
+separately understates the predictive spread, which would also carry how much
+the conditional means moved between draws. That movement is what the separate
+`"sd"` attribute reports.
 
 `type = "response"` reduces the distribution to a point. For a discrete
 variable that point is the most probable category, computed as `which.max` on

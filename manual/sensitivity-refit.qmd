@@ -162,7 +162,8 @@ So the cost claim is specific. For an ordinal fit refit under NUTS, the whole
 check costs roughly one original fit. For a continuous or mixed fit, or for an
 ordinal fit refit under a non-NUTS sampler, the check costs roughly one fit
 per anchor instead. When an inherited slower sampler is projected to push the
-total past about a minute, the check says so once and suggests
+total refit time past 60 seconds, the first refit's wall time times the
+number of remaining jobs, the check says so once and suggests
 `refit_sampler = "nuts"`.
 
 Switching samplers between the original fit and the refits might look like it

@@ -2,7 +2,7 @@
 title: "Checks Internals"
 ---
 
-Two functions turn a fit into a judgement. `verdicts()` works on the edge
+Two functions turn a fit into a judgment. `verdicts()` works on the edge
 indicators, the binary variables that record whether each edge is in the
 model. It reads each indicator's inclusion Bayes factor, translates it into
 one of three verdicts, and says whether a rerun of the sampler could change
