@@ -28,9 +28,7 @@ Under the joint specification, the graph prior is the edge prior reweighted
 toward sparsity. Its inclusion Bayes factors are therefore not interchangeable
 with those from the default specification. [Gaussian Graphical
 Model](ggm.qmd#sampling-with-the-gibbs-sampler) describes both arguments and
-this trade-off. The package's fast-GGM vignette
-(`vignette("fast-ggm")`, available in `bgms` from version 0.2.0.1) follows the
-analysis from start to finish and reports its timings.
+this trade-off.
 
 This page compares the faster specification with two CRAN packages designed
 for the same task, Bayesian edge selection in Gaussian graphical models:
@@ -38,8 +36,8 @@ for the same task, Bayesian edge selection in Gaussian graphical models:
 prior, and **modelSelection** (1.0.7), which performs Bayesian model selection
 over the entries of the precision matrix one column at a time.
 
-Everything below uses the simulated data from the fast-GGM vignette:
-Erdős--Rényi graphs with average degree 3 and p = 50 to 200. Fits were run one
+Everything below uses simulated data: Erdős--Rényi graphs with average
+degree 3 and p = 50 to 200. Fits were run one
 at a time on the same machine (Apple M5 Pro, R 4.6.0, serial reference BLAS),
 with each package evaluated at its defaults and at settings recommended in its
 own documentation. The full protocol, the rationale for each setting quoted
@@ -151,7 +149,7 @@ settings. At n = 1000 and p = 200, corresponding to 19,900 candidate edges and
 
 | package | settings | threads | wall clock | selected | true pos. | false pos. | AUC |
 |---|---|---:|---:|---:|---:|---:|---:|
-| bgms | vignette call, Bernoulli(0.5) prior | 4 | 394 s | 382 | 258 | 124 | 0.996 |
+| bgms | the call above, Bernoulli(0.5) prior | 4 | 394 s | 382 | 258 | 124 | 0.996 |
 | bgms | same call, 2/(p−1) edge prior | 4 | 122 s | 169 | 168 | 1 | 0.996 |
 | bgms | same call, one thread | 1 | 1410 s | 382 | 258 | 124 | 0.996 |
 | modelSelection | defaults, 1/p edge prior | 1 | 4.2 s | 152 | 152 | 0 | 0.994 |
