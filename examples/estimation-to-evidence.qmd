@@ -78,8 +78,8 @@ into the thousands. [Reading the output](reading-the-output.qmd) walks the
 ## The silent zero
 
 Start where the field starts. The standard estimation workflow computes
-polychoric correlations and fits a regularized network with `EBICglasso`,
-which sets small partial associations to exactly zero:
+polychoric correlations and fits a regularized network with `EBICglasso`
+[@EpskampEtAl_2012_qgraph], which sets small partial associations to exactly zero:
 
 ```{r}
 #| label: glasso

@@ -176,12 +176,7 @@ legend("topright", legend = paste("Chain", seq_len(nchains)),
 
 ## Results differ between runs {#sec-reproducibility}
 
-Two runs of the same call differ for one of two reasons, and the remedy
-differs with them.
-
-If you did not set `seed`, the runs drew different random numbers and
-small differences are expected. Pass a single non-negative integer to
-`seed` to make a run repeatable.
+Two unseeded runs of the same call differ by sampling error. Pass a single non-negative integer to `seed` to make a run repeatable. A run that still differs with the seed fixed, by enough to change what you would report, is a mixing problem rather than a seeding one: check R-hat and ESS first. The narrower cases, a rebuilt binary or a different core count on Windows, are described under [Reproducibility across builds and platforms](../reference/sampler-diagnostics.qmd#sec-reproducibility-scope).
 
 ## Run-length settings {#sec-run-length}
 

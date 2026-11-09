@@ -2,6 +2,8 @@
 title: "Sampler diagnostics and warnings"
 ---
 
+This page lists the sampler-level diagnostics and every warning a fit can raise: the field or message, what it means, and what to do. Read [Checking convergence](../guide/mcmc-diagnostics.qmd) first; its symptom index links here for the detail.
+
 ## Composite ESS for edge-selected parameters {#sec-mixture-ess}
 
 When edge selection is active, pairwise effects are governed by

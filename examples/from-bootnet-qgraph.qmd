@@ -158,11 +158,11 @@ approximates is already in the output.
 
 **Undecided is a feature.** The estimation workflow must commit every
 pair to edge or blank. The Bayesian workflow keeps a third category for
-the pairs the data cannot decide, and reports it as a count you can
+the edges the data cannot decide, and reports it as a count you can
 state in a paper. An analysis that can say "these data are not enough
 to settle this association" is telling you something the point estimate
 never could, and on real data the undecided category is rarely empty:
-39 of the Wenchuan analysis's 136 pairs land there.
+39 of the Wenchuan analysis's 136 edges land there.
 
 ## What you give up {#sec-give-up}
 
@@ -189,8 +189,8 @@ verdicts(fit); plot(fit)
 
 [Getting started](getting-started.qmd) walks this first fit
 step by step;
-[From estimation to evidence](estimation-to-evidence.qmd) is the full
-worked analysis, from the familiar starting point to the reported
+[From estimation to evidence](estimation-to-evidence.qmd) is the complete
+example, from the familiar starting point to the reported
 sentence.
 
 ## Where to next
@@ -203,6 +203,3 @@ sentence.
   `bgmCompare()` counterpart to network comparison tests.
 - The tutorial manuscript that develops this translation in full is in
   preparation.
-- Next in the series: *Reporting your results* is in preparation;
-  until it ships, the what-to-report callouts on each example page
-  carry the templates.

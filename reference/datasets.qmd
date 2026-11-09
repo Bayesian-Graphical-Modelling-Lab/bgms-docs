@@ -80,7 +80,7 @@ A data frame with 986 rows and 9 columns:
 [osf.io/qhux8](https://osf.io/qhux8). Licensed under
 [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
-The [Edge clustering](../examples/edge-clustering.qmd) worked analysis
+The [Edge clustering](../examples/edge-clustering.qmd) example
 uses a companion dataset from the same validation study: the French
 subsample (490 participants) with all 18 items, the 8 SBPS items
 together with 10 items of the Curiosity and Exploration

@@ -155,7 +155,7 @@ A stricter reading of the evidence moves the boundaries:
 table(verdicts(fit, evidence_threshold = 30)$verdict)
 ```
 
-For the same table read as a worked analysis, see
+For the same table read as an example, see
 [From estimation to evidence](../examples/estimation-to-evidence.qmd).
 
 ## calibration_check {#calibration_check}

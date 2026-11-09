@@ -178,7 +178,7 @@ evidence display as for a single network, read for differences. The
 first panel holds the five supported differences, weighted by the
 posterior mean difference; the second holds the differences the data
 rule out, drawn dashed, and is empty here; the third holds the 148
-dotted undecided pairs. A blank in a side-by-side drawing of two
+dotted undecided edges. A blank in a side-by-side drawing of two
 estimated networks cannot distinguish "no difference" from "cannot
 tell"; this display keeps them apart, and on these data the honest
 panel is the crowded third one.
