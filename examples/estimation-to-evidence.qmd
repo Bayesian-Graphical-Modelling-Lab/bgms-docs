@@ -9,7 +9,6 @@ title: "From estimation to evidence"
 #| warning: false
 #| purl: false
 library(bgms)
-library(qgraph)
 
 # Fixture loader, copied verbatim from the guide pages.
 resolve_fixture = function(name) {
@@ -28,51 +27,15 @@ resolve_fixture = function(name) {
 }
 
 fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
-
-# The Getting Started helper, with node sizes for a 17-node network. Styling
-# per STYLE_GUIDE.md, Network Figures. The reader-facing copy is the mirror
-# chunk in the panels section below; keep the two identical.
-plot_edge_evidence = function(fit, labels, node_color, threshold = 10,
-                              seed = 1234, vsize = 9) {
-  bf = extract_inclusion_bf(fit)
-  weights = coef(fit)$pairwise
-
-  presence = bf >= threshold
-  absence = bf <= 1 / threshold
-  undecided = !presence & !absence
-  diag(presence) = diag(absence) = diag(undecided) = FALSE
-
-  # One layout, computed from every pair, so the three panels match node
-  # for node.
-  set.seed(seed)
-  shared = qgraph(abs(weights), layout = "spring", repulsion = 0.9,
-                  DoNotPlot = TRUE)$layout
-
-  panel = function(edges, label, count, ...) {
-    qgraph(edges, layout = shared, labels = labels, fade = FALSE,
-           color = node_color, vsize = vsize, label.scale.equal = TRUE,
-           border.color = "grey30", mar = c(3, 4, 8, 4), ...)
-    mtext(sprintf("%s: %d", label, count), side = 3, line = 1.2,
-          cex = 0.95, font = 2)
-  }
-
-  par(mfrow = c(1, 3))
-  panel(weights * presence, "evidence of presence", sum(presence) / 2,
-        theme = "TeamFortress", edge.width = 1.1)
-  panel(absence * 1, "evidence of absence", sum(absence) / 2,
-        edge.color = "#A66A1E", lty = 2, edge.width = 1.1)
-  panel(undecided * 1, "undecided", sum(undecided) / 2,
-        edge.color = "#8A8578", lty = 3, edge.width = 1.4)
-}
 ```
 
 ```{r}
 #| label: fig-payoff
 #| echo: false
 #| purl: false
-#| fig-width: 9.5
-#| fig-height: 3.7
-plot_edge_evidence(fit, colnames(Wenchuan), "#f0ae0e")
+#| fig-width: 13
+#| fig-height: 5
+plot(fit)
 ```
 
 The 35 pairs in the presence panel are associations these data support, each
@@ -206,53 +169,18 @@ contract.
 ## The three panels
 
 The figure at the top of the page is the verdict table drawn as three
-networks on one shared layout, so the panels match node for node. You do
-not need custom code to get it: [`plot(fit)`](../reference/methods.qmd#plot)
-draws a rudimentary version of the same display in one call, and the
+networks on one shared layout, so the panels match node for node.
+`plot(fit)` draws this display; [Methods](../reference/methods.qmd#plot)
+documents its arguments. To style the network yourself,
+`qgraph(coef(fit)$pairwise, ...)` draws the posterior means with any
+styling you already use. The
 [easybgm](https://cran.r-project.org/package=easybgm) package offers more
-elaborate plotting and summary functions on top of `bgms`. The helper below
-builds the figure with `qgraph` directly, with every styling choice under
-your control:
+elaborate plotting and summary functions on top of `bgms`.
 
 ```{r}
 #| label: panels-mirror
 #| eval: false
-library(qgraph)
-
-plot_edge_evidence = function(fit, labels, node_color, threshold = 10,
-                              seed = 1234, vsize = 9) {
-  bf = extract_inclusion_bf(fit)
-  weights = coef(fit)$pairwise
-
-  presence = bf >= threshold
-  absence = bf <= 1 / threshold
-  undecided = !presence & !absence
-  diag(presence) = diag(absence) = diag(undecided) = FALSE
-
-  # One layout, computed from every pair, so the three panels match node
-  # for node.
-  set.seed(seed)
-  shared = qgraph(abs(weights), layout = "spring", repulsion = 0.9,
-                  DoNotPlot = TRUE)$layout
-
-  panel = function(edges, label, count, ...) {
-    qgraph(edges, layout = shared, labels = labels, fade = FALSE,
-           color = node_color, vsize = vsize, label.scale.equal = TRUE,
-           border.color = "grey30", mar = c(3, 4, 8, 4), ...)
-    mtext(sprintf("%s: %d", label, count), side = 3, line = 1.2,
-          cex = 0.95, font = 2)
-  }
-
-  par(mfrow = c(1, 3))
-  panel(weights * presence, "evidence of presence", sum(presence) / 2,
-        theme = "TeamFortress", edge.width = 1.1)
-  panel(absence * 1, "evidence of absence", sum(absence) / 2,
-        edge.color = "#A66A1E", lty = 2, edge.width = 1.1)
-  panel(undecided * 1, "undecided", sum(undecided) / 2,
-        edge.color = "#8A8578", lty = 3, edge.width = 1.4)
-}
-
-plot_edge_evidence(fit, colnames(Wenchuan), "#f0ae0e")
+plot(fit)
 ```
 
 **Evidence of presence.** For these 35 pairs the data favor a direct
