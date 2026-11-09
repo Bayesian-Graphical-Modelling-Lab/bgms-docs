@@ -89,16 +89,16 @@ This first table also introduces the five columns that every block repeats:
   parameter. More data would shrink it; a longer run would not.
 - `mcse` is the Monte Carlo standard error: how precisely the finite chain
   has pinned down the posterior mean. A longer run shrinks it. See
-  [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-mcse).
+  [Checking convergence](../guide/mcmc-diagnostics.qmd#sec-mcse).
 - `n_eff` is the effective sample size: how many independent draws the
   chain is worth. As a rule of thumb, 100 buys one significant digit of
   precision, and values below 100 also make the diagnostics themselves
   unreliable [@VehtariEtAl_2021]. See
-  [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-ess).
+  [Checking convergence](../guide/mcmc-diagnostics.qmd#sec-ess).
 - `Rhat` compares the four chains with each other and each chain's halves
   with each other. Values above 1.01 mean the chains disagree and the run
   should be longer [@VehtariEtAl_2021]. See
-  [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rhat).
+  [Checking convergence](../guide/mcmc-diagnostics.qmd#sec-rhat).
 
 Is this block okay? Here every threshold has `n_eff` in the thousands and
 `Rhat` at most 1.001, comfortably clear of both guidelines. The
@@ -157,7 +157,7 @@ switched state across the four chains. Read them beside `n_eff`: `n_eff`
 says the probability estimate is precise, the counts say the chain actually
 moved between structures, and only together do they say converged and
 explored. See
-[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
+[Sampler diagnostics and warnings](../reference/sampler-diagnostics.qmd#sec-rb-inclusion-ess).
 
 The blanks are the note's suppressed `NA` values. Nine edges here,
 `intrusion-dreams` among them, were included in every sweep of every chain:
@@ -209,7 +209,7 @@ The numbers users look for that are not in `summary()`:
 ## Where to next
 
 - [The fit object](../reference/fit-object.qmd) for the full output structure,
-  and [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) for why the
+  and [Checking convergence](../guide/mcmc-diagnostics.qmd) for why the
   diagnostic guidelines are what they are.
 - [Methods](../reference/methods.qmd) for the `summary()`, `print()`, and
   `coef()` contract, and [Extractor Functions](../reference/extractors.qmd)

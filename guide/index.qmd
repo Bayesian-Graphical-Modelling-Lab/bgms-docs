@@ -5,7 +5,7 @@ toc: false
 
 The Guide covers conceptual background and practical tutorials for
 `bgms`. It is organized into four parts: background concepts, model types,
-analysis workflows, and MCMC output.
+analysis workflows, and output and diagnostics.
 
 ### Background
 
@@ -25,10 +25,10 @@ analysis workflows, and MCMC output.
 - [Edge Clustering](clustering.qmd) — Stochastic block model prior for discovering edge clusters
 - [Missing Data](missing-data.qmd) — Handling missing values via listwise deletion or MCMC imputation
 
-### MCMC Output
+### Output and diagnostics
 
+- [Checking convergence](mcmc-diagnostics.qmd) — Convergence checks: ESS, R-hat, trace plots
 - [The fit object](../reference/fit-object.qmd) (Reference) — What the sampler returns and how to access it
-- [MCMC Diagnostics](mcmc-diagnostics.qmd) — Convergence checks: ESS, R-hat, trace plots, divergences
 
 ### Examples
 

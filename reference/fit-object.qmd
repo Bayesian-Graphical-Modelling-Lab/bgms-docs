@@ -34,7 +34,7 @@ distribution of the model parameters. The output of
 computed from these samples, posterior mean matrices, the raw MCMC draws
 themselves, and sampler
 diagnostics. This chapter describes how to access and interpret each of
-these components. For diagnostics related to the sampler itself, see [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
+these components. For diagnostics related to the sampler itself, see [Checking convergence](../guide/mcmc-diagnostics.qmd).
 For a walkthrough of a real output, block by block on a fitted model, see
 [Reading the output](../examples/reading-the-output.qmd).
 
@@ -67,7 +67,7 @@ inclusion probability for continuous models with
 and `fit$zratio_diag` holds the trust-gauge summary, which a continuous
 or mixed fit with edge selection produces by default under
 `precision_graph_prior = "hierarchical"` (see
-[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-trust-gauge)); both are
+[Sampler diagnostics and warnings](sampler-diagnostics.qmd#sec-trust-gauge)); both are
 `NULL` otherwise, as they are on this ordinal fit.
 
 ## Posterior summaries {#sec-posterior-summaries}
@@ -123,7 +123,7 @@ edge indicator switched between excluded (0) and included (1) states
 during sampling; they show how much the sampler explored. Read them
 beside `n_eff`, which measures precision conditional on that
 exploration; see
-[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
+[Sampler diagnostics and warnings](sampler-diagnostics.qmd#sec-rb-inclusion-ess).
 []{#sec-pinned-indicators}
 The Rao-Blackwellized precision columns (`mcse`, `n_eff`, `Rhat`) come
 back `NA` when the chain is so certain about an edge that there is
@@ -138,11 +138,11 @@ same Rao-Blackwellized `n_eff` for indicators.
 |--------|---------|
 | `mean` | Posterior mean of the parameter. For inclusion indicators, the Rao-Blackwellized inclusion probability. |
 | `sd` | Posterior standard deviation — the width of the posterior. |
-| `mcse` | Monte Carlo standard error — how precisely the posterior mean is estimated. A small MCSE relative to `sd` indicates sufficient sampling. See [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-mcse). |
-| `n_eff` | Effective sample size — the number of independent draws the chain is equivalent to. Values below 100 warrant longer runs. See [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-ess). |
+| `mcse` | Monte Carlo standard error — how precisely the posterior mean is estimated. A small MCSE relative to `sd` indicates sufficient sampling. See [Checking convergence](../guide/mcmc-diagnostics.qmd#sec-mcse). |
+| `n_eff` | Effective sample size — the number of independent draws the chain is equivalent to. Values below 100 warrant longer runs. See [Checking convergence](../guide/mcmc-diagnostics.qmd#sec-ess). |
 | `share_incl` | Tables of parameters under selection only (`pairwise` for [`bgm()`](bgm.qmd); `main_diff` and `pairwise_diff` for [`bgmCompare()`](bgmCompare.qmd)). The share of the squared Monte Carlo error of the model-averaged parameter that comes from inclusion uncertainty rather than from the slab. Values near 1 mean the bottleneck is how well the chain resolved whether the parameter is in; values near 0 mean it is how well the chain resolved the effect size given inclusion. |
-| `n0->1`, `n1->0` | Inclusion table only. Directional counts of indicator transitions; they show how much the sampler moved between structures. See [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-mixture-ess). |
-| `Rhat` | Split $\hat{R}$ convergence diagnostic. Values above 1.01 suggest the chains have not mixed. See [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rhat). |
+| `n0->1`, `n1->0` | Inclusion table only. Directional counts of indicator transitions; they show how much the sampler moved between structures. See [Sampler diagnostics and warnings](sampler-diagnostics.qmd#sec-mixture-ess). |
+| `Rhat` | Split $\hat{R}$ convergence diagnostic. Values above 1.01 suggest the chains have not mixed. See [Checking convergence](../guide/mcmc-diagnostics.qmd#sec-rhat). |
 
 In the pairwise table for an edge-selected fit, `mcse` and `n_eff` are
 the composite quantities for the model-averaged edge weight: the weight
@@ -250,7 +250,7 @@ str(fit$nuts_diag, max.level = 1)
 ```
 
 These are described in detail in
-[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-nuts-diagnostics).
+[Sampler diagnostics and warnings](sampler-diagnostics.qmd#sec-nuts-diagnostics).
 
 ## Output from [`bgmCompare()`](bgmCompare.qmd)
 

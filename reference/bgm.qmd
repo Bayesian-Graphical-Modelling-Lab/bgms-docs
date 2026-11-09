@@ -215,7 +215,7 @@ learning are discussed in [Prior Basics](../guide/prior-basics.qmd),
 [Edge Selection](../guide/edge-selection.qmd), and
 [Edge Clustering](../guide/clustering.qmd). To interpret outputs and verify
 chain quality, see [The fit object](fit-object.qmd) and
-[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
+[Checking convergence](../guide/mcmc-diagnostics.qmd).
 
 ## Examples
 
@@ -268,7 +268,7 @@ edge selection excluded in essentially every draw. The inclusion table
 (further down the printed output) gives each edge's posterior
 inclusion probability in the `mean` column. See
 [The fit object](fit-object.qmd) for a walkthrough of every
-component and [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) for
+component and [Checking convergence](../guide/mcmc-diagnostics.qmd) for
 how to act on `n_eff` and `Rhat`.
 
 ## See also

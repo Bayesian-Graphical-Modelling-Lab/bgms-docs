@@ -394,6 +394,6 @@ work.
 [Convergence Diagnostics](diagnostics.qmd),
 [GGM Internals](ggm-internals.qmd#rao-blackwellized-inclusion-draws),
 [Checking Tools reference](../reference/checks.qmd),
-[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
+[Checking convergence](../guide/mcmc-diagnostics.qmd).
 
 ## References

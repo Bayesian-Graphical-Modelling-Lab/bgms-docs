@@ -66,9 +66,9 @@ timed = function(label, expr) {
 only = commandArgs(trailingOnly = TRUE)
 bake = function(step) length(only) == 0L || step %in% only
 
-# guide/mcmc-diagnostics.qmd, reference/fit-object.qmd, guide/edge-selection.qmd,
-# reference/bgm.qmd, reference/methods.qmd, reference/extractors.qmd,
-# reference/checks.qmd
+# guide/mcmc-diagnostics.qmd, reference/sampler-diagnostics.qmd,
+# reference/fit-object.qmd, guide/edge-selection.qmd, reference/bgm.qmd,
+# reference/methods.qmd, reference/extractors.qmd, reference/checks.qmd
 # Manuscript-grade: matches R/01-worked-example.R in the tutorial repo.
 if(bake("fit_wenchuan")) {
   fit = timed("fit_wenchuan",

@@ -102,7 +102,7 @@ probability $\exp(-1) \approx 0.37$ on no clustering at all. The run
 length is the one deliberate setting, and it earns its place on this
 page. At the package defaults (2,000 warmup, 2,000 sampling
 iterations) this fit prints a warmup warning, and the follow-up checks
-that [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) prescribes
+that [Checking convergence](../guide/mcmc-diagnostics.qmd) prescribes
 confirm it is real: largest split-$\hat{R}$ 1.35, smallest effective
 sample size 44. Worse, the clustering answer is not yet stable at
 short lengths; an intermediate run at `iter = 1e4` put a Bayes factor

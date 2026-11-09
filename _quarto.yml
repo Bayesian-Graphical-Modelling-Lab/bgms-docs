@@ -123,7 +123,7 @@ website:
             - guide/fast-ggm.qmd
             - guide/clustering.qmd
             - guide/missing-data.qmd
-        - section: "Output & Diagnostics"
+        - section: "Output and diagnostics"
           contents:
             - guide/mcmc-diagnostics.qmd
 
@@ -151,6 +151,7 @@ website:
           contents:
             - reference/checks.qmd
             - reference/prior-sensitivity.qmd
+            - reference/sampler-diagnostics.qmd
         - reference/extractors.qmd
         - reference/datasets.qmd
 
