@@ -23,7 +23,7 @@ and simulation studies.
 
 | Function | Description |
 |----------|-------------|
-| [`sample_ggm_prior()`](sample-ggm-prior.qmd) | Prior sampler for the GGM precision matrix (conditional, joint, or hierarchical specification). |
+| [`sample_ggm_prior()`](prior-samplers.qmd#sample_ggm_prior) | Prior sampler for the GGM precision matrix (conditional, joint, or hierarchical specification). |
 | [`sample_graph_prior()`](prior-samplers.qmd#sample_graph_prior) | Prior sampler for the edge-inclusion indicators and edge-prior hyperparameters. |
 | [`sample_sbm_prior()`](prior-samplers.qmd#sample_sbm_prior) | Ancestral sampler for the stochastic block model hyperprior (allocations, pair probabilities). |
 

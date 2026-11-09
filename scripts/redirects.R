@@ -73,6 +73,7 @@ REDIRECTS = c(
   "guide/getting-started.html"    = "examples/getting-started.html",
   "guide/group-comparison.html"   = "examples/comparing-groups.html",
   "guide/mcmc-output.html"        = "reference/fit-object.html",
+  "reference/sample-ggm-prior.html" = "reference/prior-samplers.html#sample_ggm_prior",
 
   # Package-level topic.
   "reference/bgms-package.html"   = "reference/index.html",
@@ -100,8 +101,8 @@ REDIRECTS = c(
   "reference/unpack_indicator_prior.html"   = "reference/priors.html#indicator-priors",
 
   # Prior samplers and the hierarchical trust gauge.
-  "reference/sample_ggm_prior.html"       = "reference/sample-ggm-prior.html",
-  "reference/sample_precision_prior.html" = "reference/sample-ggm-prior.html",
+  "reference/sample_ggm_prior.html"       = "reference/prior-samplers.html#sample_ggm_prior",
+  "reference/sample_precision_prior.html" = "reference/prior-samplers.html#sample_ggm_prior",
   "reference/sample_graph_prior.html"     = "reference/prior-samplers.html#sample_graph_prior",
   "reference/sample_sbm_prior.html"       = "reference/prior-samplers.html#sample_sbm_prior",
   "reference/summarize_zratio_gauge.html" = "reference/prior-samplers.html#summarize_zratio_gauge",
