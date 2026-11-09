@@ -123,3 +123,53 @@ To obtain model-specific parameterizations, use the dedicated extractors:
 
 - [`extract_precision(fit)`](../reference/extractors.qmd#extract_precision) — returns the full precision matrix $\boldsymbol{\Theta}$.
 - [`extract_partial_correlations(fit)`](../reference/extractors.qmd#extract_partial_correlations) — returns the partial correlation matrix.
+
+### Example: five examination marks
+
+The classic examination marks dataset from @MardiaKentBibby_1979 holds the scores of 88 students on five examinations and is published at <https://bayesian-graphical-modelling-lab.github.io/bgms/data/marks.rds>.
+
+```{r}
+#| label: fit-marks-mirror
+#| eval: false
+marks = readRDS(url(
+  "https://bayesian-graphical-modelling-lab.github.io/bgms/data/marks.rds"
+))
+fit_ggm = bgm(marks, variable_type = "continuous", seed = 1234)
+```
+
+```{r}
+#| label: load-fixture
+#| echo: false
+#| message: false
+library(bgms)
+
+resolve_fixture = function(name) {
+  input_dir = dirname(knitr::current_input(dir = TRUE))
+  candidates = c(
+    file.path(input_dir, "..", "fixtures", name),
+    file.path(input_dir, "fixtures", name),
+    file.path("fixtures", name),
+    file.path("..", "fixtures", name)
+  )
+  hit = candidates[file.exists(candidates)][1]
+  if (is.na(hit)) {
+    stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+  }
+  hit
+}
+
+fit_ggm = readRDS(resolve_fixture("fit_marks.rds"))
+```
+
+```{r}
+#| label: fig-marks
+#| fig-width: 13
+#| fig-height: 5
+plot(fit_ggm)
+```
+
+Eighty-eight students is not much data for ten pairs, and the display says so. Three pairs are supported, and all three run through `algebra`. Five are ruled out: the four pairs that cross between the `mechanics`-`vectors` side and the `analysis`-`statistics` side, plus `analysis-statistics` itself. Two are left undecided, `mechanics-algebra` and `mechanics-vectors`, with Bayes factors of about 1.2 and 1.0: the data barely move either pair off its prior.
+
+A non-empty undecided panel is a feature of this display, not a defect of the fit. Those two pairs are exactly where a thresholded drawing would have misled you: `mechanics-algebra` has a posterior inclusion probability of 0.55 and `mechanics-vectors` of 0.502, both just above one half, so the median probability model would have drawn both as present edges, indistinguishable from the three pairs the data actually support. Two pairs the data cannot decide would have been drawn as if they were settled.
+
+One convenience specific to continuous data: on this fit the Bayes factor *is* the posterior inclusion odds. Under the default `precision_graph_prior = "hierarchical"` the prior over structures is exactly the edge prior, so with `bernoulli_prior(0.5)` the prior inclusion probability of a continuous edge is 0.5 and the prior odds are one. That does not hold under `precision_graph_prior = "joint"`; [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) divides out the right prior odds in either case. See [Edge Selection](edge-selection.qmd#sec-bf-continuous) for what to do if you compute the Bayes factor by hand.
