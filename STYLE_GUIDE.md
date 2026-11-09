@@ -169,19 +169,19 @@ Citations if applicable.
 
 ## Example Pages
 
-Pages in `examples/` are the worked-analysis layer of the site. Each one runs a
+Pages in `examples/` are the Examples layer of the site. Each one runs a
 single analysis end to end and stops there. Template:
 `dev/templates/example-page.qmd`, which carries a comment per slot and is not
 part of the render. Copy it rather than a shipped page.
 
 ### What the layer owns
 
-Examples pages own code and workflow. Guide pages own the reasoning, Reference
-pages own the API contract. Where an example page needs a reason, it gives one
-orienting sentence and links to the Guide; where it needs an argument or a
-return value, it links to the Reference. One page owns each analysis: if a
-Guide page carries a full worked run of an analysis that now has an example
-page, trim it to a snippet and link across.
+Examples pages own an analysis end to end, including the model section and the
+prior guidance specific to it (Comparing groups is the pattern). Guide pages
+own background that is not specific to one analysis. Reference pages own the
+contract. One page owns each analysis: if a Guide page carries a full worked
+run of an analysis that now has an example page, move it there or trim it to
+a snippet and link across.
 
 ### Page shape
 
@@ -331,9 +331,12 @@ network, say explicitly that a blank there is not evidence of absence.
 
 ### Reference implementation
 
-`guide/getting-started.qmd` defines `plot_edge_evidence()` and applies it
-to both an ordinal and a continuous fit. Copy it rather than re-deriving
-the styling.
+`plot(fit)` is the implementation (MM, 2026-11-08): the package draws the
+edge evidence plot, and every page uses it. The hand-written
+`plot_edge_evidence()` helper is retired. For custom styling, draw the
+posterior means with qgraph, `qgraph(coef(fit)$pairwise, ...)`. The
+styling column of the panel table above records the retired helper's
+settings; `plot()` carries its own (see reference/methods.qmd § plot).
 
 ### Single-edge display
 
@@ -350,7 +353,8 @@ palette when a page first needs parameter-level display.
 Site figures are R-generated PNGs with an opaque white background, so
 they read the same in light and dark mode. Keep ink dark and rely on
 line style, not on hue alone, to separate the categories. Render the
-three-panel figure at `fig-width: 9.5`, `fig-height: 3.7`.
+three-panel figure at `fig-width: 13`, `fig-height: 5`, the device size
+`plot()` asks for.
 
 ---
 
