@@ -212,8 +212,6 @@ not edges the analysis failed on, and they are not absences. Fold them in
 with the blanks of a thresholded drawing and you would report more than a
 quarter of the network as settled when it is an open question.
 
-## What to report
-
 ::: {.callout-note appearance="simple"}
 ## What to report
 

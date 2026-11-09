@@ -191,8 +191,6 @@ When your chosen scale sits far above the scale the data prefer, as it does
 here, absence verdicts near the threshold are scale-conditional statements
 and should be reported as such.
 
-## What to report
-
 ::: {.callout-note appearance="simple"}
 ## What to report
 

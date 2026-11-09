@@ -238,8 +238,6 @@ finding, and a caution against over-reading the apparent groupings
 that any network drawing produces by placing connected nodes near
 each other.
 
-## What to report
-
 ::: {.callout-note appearance="simple"}
 ## What to report
 

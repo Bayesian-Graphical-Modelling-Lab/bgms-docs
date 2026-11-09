@@ -137,8 +137,6 @@ summary(fit)
 <Reading of that output. Say which numbers are the result and which are
 housekeeping.>
 
-## What to report
-
 <!--
   WHAT TO REPORT. The closing block, and the reason an applied reader keeps the
   page open. Give the sentences they can write, with <placeholders> where a
