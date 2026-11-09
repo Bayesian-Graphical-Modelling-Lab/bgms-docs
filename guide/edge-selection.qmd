@@ -17,7 +17,7 @@ The prior probability of inclusion is controlled by the `edge_prior` argument. S
 
 ## Posterior inclusion probabilities
 
-The posterior inclusion probability for edge $(i, j)$ is the posterior mean of $\gamma_{ij}$. By default `bgms` estimates it by averaging the Rao-Blackwellized inclusion draws rather than the 0/1 indicators themselves, which targets the same quantity with less Monte Carlo noise (see [Model Output](mcmc-output.qmd#sec-posterior-summaries)). It ranges from 0 to 1:
+The posterior inclusion probability for edge $(i, j)$ is the posterior mean of $\gamma_{ij}$. By default `bgms` estimates it by averaging the Rao-Blackwellized inclusion draws rather than the 0/1 indicators themselves, which targets the same quantity with less Monte Carlo noise (see [The fit object](../reference/fit-object.qmd#sec-posterior-summaries)). It ranges from 0 to 1:
 
 - Values near 1.0: strong evidence that the edge is present.
 - Values near 0.0: strong evidence that the edge is absent.
@@ -141,7 +141,7 @@ default; here we only read the quantities this page has introduced.
 
 The `summary(fit)$indicator` table holds the posterior inclusion
 probability of every edge in its `mean` column (the Rao-Blackwellized
-estimate; see [Model Output](mcmc-output.qmd)). With the default prior
+estimate; see [The fit object](../reference/fit-object.qmd)). With the default prior
 inclusion probability of 0.5, the inclusion Bayes factor is the
 posterior odds:
 

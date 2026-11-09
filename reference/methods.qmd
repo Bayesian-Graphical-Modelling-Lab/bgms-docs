@@ -74,7 +74,7 @@ Returns a summary object containing:
   for the autocorrelation machinery. The transition-based `n_eff_mixt`
   column was dropped in 0.2.0.0.
 
-See [Model Output](../guide/mcmc-output.qmd#sec-posterior-summaries) for
+See [The fit object](fit-object.qmd#sec-posterior-summaries) for
 how to read these columns.
 
 For `bgmCompare`, summaries are split into baseline and difference

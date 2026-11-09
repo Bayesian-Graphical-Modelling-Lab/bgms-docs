@@ -27,7 +27,7 @@ analysis workflows, and MCMC output.
 
 ### MCMC Output
 
-- [Model Output](mcmc-output.qmd) — What the sampler returns and how to access it
+- [The fit object](../reference/fit-object.qmd) (Reference) — What the sampler returns and how to access it
 - [MCMC Diagnostics](mcmc-diagnostics.qmd) — Convergence checks: ESS, R-hat, trace plots, divergences
 
 ### Examples

@@ -72,6 +72,7 @@ REDIRECTS = c(
   # 2026-11). Same machinery: an old URL keeps resolving to its new home.
   "guide/getting-started.html"    = "examples/getting-started.html",
   "guide/group-comparison.html"   = "examples/comparing-groups.html",
+  "guide/mcmc-output.html"        = "reference/fit-object.html",
 
   # Package-level topic.
   "reference/bgms-package.html"   = "reference/index.html",

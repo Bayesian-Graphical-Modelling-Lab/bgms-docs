@@ -214,7 +214,7 @@ and [Mixed MRF](../guide/mixed-model.qmd). Prior specification and structure
 learning are discussed in [Prior Basics](../guide/prior-basics.qmd),
 [Edge Selection](../guide/edge-selection.qmd), and
 [Edge Clustering](../guide/clustering.qmd). To interpret outputs and verify
-chain quality, see [Model Output](../guide/mcmc-output.qmd) and
+chain quality, see [The fit object](fit-object.qmd) and
 [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
 
 ## Examples
@@ -267,7 +267,7 @@ estimate of `0.000` (e.g. `intrusion-avoidact`) is an edge that
 edge selection excluded in essentially every draw. The inclusion table
 (further down the printed output) gives each edge's posterior
 inclusion probability in the `mean` column. See
-[Model Output](../guide/mcmc-output.qmd) for a walkthrough of every
+[The fit object](fit-object.qmd) for a walkthrough of every
 component and [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) for
 how to act on `n_eff` and `Rhat`.
 

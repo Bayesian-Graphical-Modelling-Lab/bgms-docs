@@ -25,7 +25,7 @@ linked section for why it is the right thing to do.
 | `Rhat` above 1.01 | Run longer: raise `warmup` first, then `iter`, and keep at least two chains. | [R-hat](#sec-rhat) |
 | `n_eff` below 100 | Raise `iter`; precision grows with the number of retained draws. | [Effective sample size](#sec-ess) |
 | `mcse` large next to `sd` | Raise `iter`; quadrupling the effective sample size halves the MCSE. | [Monte Carlo standard error](#sec-mcse) |
-| Blank `mcse`, `n_eff`, or `Rhat` cells in the summary | Usually nothing to fix: the cells are `NA` because the inclusion draw is pinned; confirm the chain still moved in the transition counts (`n0->1`, `n1->0`). | [Model Output](mcmc-output.qmd#sec-pinned-indicators) |
+| Blank `mcse`, `n_eff`, or `Rhat` cells in the summary | Usually nothing to fix: the cells are `NA` because the inclusion draw is pinned; confirm the chain still moved in the transition counts (`n0->1`, `n1->0`). | [The fit object](../reference/fit-object.qmd#sec-pinned-indicators) |
 | Divergences reported | Raise `target_accept` above its default of 0.80; if that does not help, refit with `update_method = "adaptive-metropolis"`. | [Divergent transitions](#sec-divergences) |
 | The sampler hit the maximum tree depth | Raise `nuts_max_depth`; occasional hits are normal. | [Tree depth](#sec-tree-depth) |
 | E-BFMI below 0.3 | Check ESS and R-hat; if they flag too, raise `warmup`. | [E-BFMI](#sec-ebfmi) |
@@ -72,7 +72,7 @@ in, and how well it resolved the weight given inclusion — into one
 equivalent sample size. The companion column `share_incl` tells you which
 source dominates. `mean`, `sd`, and `Rhat` are computed from the full
 chain, zeros included. See
-[Model Output](mcmc-output.qmd#sec-posterior-summaries) for the columns.
+[The fit object](../reference/fit-object.qmd#sec-posterior-summaries) for the columns.
 
 **The retired mixture ESS.** Earlier versions reported a second,
 transition-based statistic beside `n_eff`. It modeled the on/off indicator
@@ -108,7 +108,7 @@ For edge indicators the summary table reports its precision columns
 (`mcse`, `n_eff`, `Rhat`) on the Rao-Blackwellized inclusion draws
 rather than on the binary indicators. Those draws are continuous, so
 the standard continuous machinery applies to inclusion inference (see
-[Model Output](mcmc-output.qmd#sec-posterior-summaries)).
+[The fit object](../reference/fit-object.qmd#sec-posterior-summaries)).
 
 Precision and exploration are still two different questions, and the
 table answers them in two different places:

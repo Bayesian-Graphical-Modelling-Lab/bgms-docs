@@ -125,7 +125,6 @@ website:
             - guide/missing-data.qmd
         - section: "Output & Diagnostics"
           contents:
-            - guide/mcmc-output.qmd
             - guide/mcmc-diagnostics.qmd
 
     - id: reference
@@ -147,6 +146,7 @@ website:
         - section: "Methods"
           contents:
             - reference/methods.qmd
+            - reference/fit-object.qmd
         - section: "Diagnostics"
           contents:
             - reference/checks.qmd

@@ -118,7 +118,7 @@ edge set its weight to exactly zero, and those zeros enter the average. The
 excluded the edge with nonzero values from the rest, so it is smaller than
 the typical weight in the sweeps that included it. Read it as the estimate
 under structure uncertainty, not as "the effect, given that the edge
-exists". See [Model Output](../guide/mcmc-output.qmd#sec-posterior-summaries).
+exists". See [The fit object](../reference/fit-object.qmd#sec-posterior-summaries).
 
 The diagnostics account for that mixture. The Monte Carlo error of a
 model-averaged weight has two sources, how well the chain resolved whether
@@ -208,7 +208,7 @@ The numbers users look for that are not in `summary()`:
 
 ## Where to next
 
-- [Model Output](../guide/mcmc-output.qmd) for the full output structure,
+- [The fit object](../reference/fit-object.qmd) for the full output structure,
   and [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) for why the
   diagnostic guidelines are what they are.
 - [Methods](../reference/methods.qmd) for the `summary()`, `print()`, and

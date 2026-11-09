@@ -52,6 +52,7 @@ Prior specification objects passed to `bgm()` and `bgmCompare()` via the
 | [`summary()`](methods.qmd#summary) | Summary statistics for posterior samples |
 | [`coef()`](methods.qmd#coef) | Extract posterior means of model parameters |
 | [`plot()`](methods.qmd#plot) | Draw the fitted model: the edge evidence plot by default, or posterior centrality |
+| [The fit object](fit-object.qmd) | What `bgm()` and `bgmCompare()` return, which tables `summary()` prints, what the columns mean |
 | [`plot_edge_posterior()`](methods.qmd#plot_edge_posterior) | Draw one edge's posterior against its prior, with the inclusion evidence as a probability wheel |
 | [`predict()`](methods.qmd#predict) | Predict new observations from a fitted model |
 | [`simulate()`](methods.qmd#simulate) | Simulate datasets from the posterior distribution |

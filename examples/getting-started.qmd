@@ -67,7 +67,7 @@ By default, [`bgm()`](../reference/bgm.qmd) runs four parallel MCMC chains using
 summary(fit)
 ```
 
-The summary shows posterior means, standard deviations, [Monte Carlo standard errors (MCSE)](../guide/mcmc-diagnostics.qmd#sec-mcse), [effective sample sizes (ESS)](../guide/mcmc-diagnostics.qmd#sec-ess), and [R-hat](../guide/mcmc-diagnostics.qmd#sec-rhat) values for each parameter. For partial associations, it also reports posterior inclusion probabilities because we used edge selection. For a full description of the output structure, see [Model Output](../guide/mcmc-output.qmd); for guidance on interpreting the convergence diagnostics (ESS and R-hat), see [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
+The summary shows posterior means, standard deviations, [Monte Carlo standard errors (MCSE)](../guide/mcmc-diagnostics.qmd#sec-mcse), [effective sample sizes (ESS)](../guide/mcmc-diagnostics.qmd#sec-ess), and [R-hat](../guide/mcmc-diagnostics.qmd#sec-rhat) values for each parameter. For partial associations, it also reports posterior inclusion probabilities because we used edge selection. For a full description of the output structure, see [The fit object](../reference/fit-object.qmd); for guidance on interpreting the convergence diagnostics (ESS and R-hat), see [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
 
 ## Posterior means
 

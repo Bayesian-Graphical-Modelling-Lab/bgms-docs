@@ -66,7 +66,7 @@ timed = function(label, expr) {
 only = commandArgs(trailingOnly = TRUE)
 bake = function(step) length(only) == 0L || step %in% only
 
-# guide/mcmc-diagnostics.qmd, guide/mcmc-output.qmd, guide/edge-selection.qmd,
+# guide/mcmc-diagnostics.qmd, reference/fit-object.qmd, guide/edge-selection.qmd,
 # reference/bgm.qmd, reference/methods.qmd, reference/extractors.qmd,
 # reference/checks.qmd
 # Manuscript-grade: matches R/01-worked-example.R in the tutorial repo.
@@ -109,7 +109,7 @@ if(bake("fit_martarelli_sbm")) {
   saveRDS(fit_sbm, file.path(out, "fit_martarelli_sbm.rds"))
 }
 
-# guide/mcmc-output.qmd, examples/comparing-groups.qmd, reference/methods.qmd
+# reference/fit-object.qmd, examples/comparing-groups.qmd, reference/methods.qmd
 # Package defaults plus the seed; not a manuscript analysis.
 if(bake("fit_compare_adhd")) {
   fit_compare = timed("fit_compare_adhd", bgmCompare(
