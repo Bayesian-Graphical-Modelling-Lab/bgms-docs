@@ -76,7 +76,7 @@ right-hand call reads from.
 | Is this edge absent? | Unanswerable | `verdicts(fit)` | Evidence of absence becomes a positive, reportable finding rather than a blank. |
 | Do these two edges differ? | `differenceTest(boots, "intrusion--dreams", "intrusion--upset", measure = "edge")` | `w = extract_pairwise_interactions(fit)`, then `quantile(w[, "intrusion-dreams"] - w[, "intrusion-upset"], c(0.025, 0.975))` | The difference between two weights has a posterior distribution of its own; read its credible interval directly. |
 | Which nodes are central? | `centralityPlot(network)` | `plot(extract_centrality(fit))` | Centrality gets a posterior: every node's strength comes with a credible interval, and the ranking's uncertainty is visible instead of assumed away. |
-| Do the groups differ? | `NCT(data1, data2, it = 1000, test.edges = TRUE)` | `bgmCompare(x = data1, y = data2)` | Where the Network Comparison Test asks whether two networks differ somewhere, the comparison answers parameter by parameter, and evidence of *equality* becomes expressible. See [Group Comparison](../guide/group-comparison.qmd). |
+| Do the groups differ? | `NCT(data1, data2, it = 1000, test.edges = TRUE)` | `bgmCompare(x = data1, y = data2)` | Where the Network Comparison Test asks whether two networks differ somewhere, the comparison answers parameter by parameter, and evidence of *equality* becomes expressible. See [Comparing groups](comparing-groups.qmd). |
 | Does the model describe the data? | Not part of the standard workflow | `calibration_check(fit, seed = 123)` | A new check: reliability diagrams of the model's conditional predictions, plus [`simulate()`](../reference/methods.qmd#simulate) for posterior predictive displays. |
 | What does a blank in the drawing mean? | It cannot say: ruled out and undecided look the same | The blank splits in two: evidence of absence and undecided are separate panels of `plot(fit)` | The three-way reading is worked through in [From estimation to evidence](estimation-to-evidence.qmd). |
 
@@ -199,7 +199,7 @@ sentence.
   workflows on the same data, and what the Bayes factors add.
 - [Edge Selection](../guide/edge-selection.qmd) for why the inclusion
   Bayes factor works the way it does.
-- [Group Comparison](../guide/group-comparison.qmd) for the
+- [Comparing groups](comparing-groups.qmd) for the
   `bgmCompare()` counterpart to network comparison tests.
 - The tutorial manuscript that develops this translation in full is in
   preparation.

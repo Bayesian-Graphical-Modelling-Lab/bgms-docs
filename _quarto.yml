@@ -121,7 +121,6 @@ website:
           contents:
             - guide/edge-selection.qmd
             - guide/fast-ggm.qmd
-            - guide/group-comparison.qmd
             - guide/clustering.qmd
             - guide/missing-data.qmd
         - section: "Output & Diagnostics"

@@ -109,7 +109,7 @@ if(bake("fit_martarelli_sbm")) {
   saveRDS(fit_sbm, file.path(out, "fit_martarelli_sbm.rds"))
 }
 
-# guide/mcmc-output.qmd, guide/group-comparison.qmd, reference/methods.qmd
+# guide/mcmc-output.qmd, examples/comparing-groups.qmd, reference/methods.qmd
 # Package defaults plus the seed; not a manuscript analysis.
 if(bake("fit_compare_adhd")) {
   fit_compare = timed("fit_compare_adhd", bgmCompare(

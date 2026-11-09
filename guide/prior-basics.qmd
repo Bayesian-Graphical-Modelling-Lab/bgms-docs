@@ -3,7 +3,7 @@ title: "Prior Basics"
 ---
 
 
-This page explains the prior distributions used in `bgms` and how they connect to the Bayesian graphical modeling framework introduced on the [Bayesian Approach](bayesian-approach.qmd) page. Analysis-specific guidance appears on the [Edge Selection](edge-selection.qmd), [Group Comparison](group-comparison.qmd), and [Edge Clustering](clustering.qmd) pages.
+This page explains the prior distributions used in `bgms` and how they connect to the Bayesian graphical modeling framework introduced on the [Bayesian Approach](bayesian-approach.qmd) page. Analysis-specific guidance appears on the [Edge Selection](edge-selection.qmd), [Comparing groups](../examples/comparing-groups.qmd), and [Edge Clustering](clustering.qmd) pages.
 
 ## What is a prior?
 

@@ -62,7 +62,7 @@ REDIRECTS = c(
   "articles/index.html"           = "guide/index.html",
   "articles/intro.html"           = "examples/getting-started.html",
   "articles/introduction.html"    = "examples/getting-started.html",
-  "articles/comparison.html"      = "guide/group-comparison.html",
+  "articles/comparison.html"      = "examples/comparing-groups.html",
   "articles/diagnostics.html"     = "guide/mcmc-diagnostics.html",
   "articles/missing_data.html"    = "guide/missing-data.html",
   "articles/prior-sensitivity.html" = "reference/prior-sensitivity.html",
@@ -71,6 +71,7 @@ REDIRECTS = c(
   # Pages the Quarto site itself has retired or moved (R1 restructure,
   # 2026-11). Same machinery: an old URL keeps resolving to its new home.
   "guide/getting-started.html"    = "examples/getting-started.html",
+  "guide/group-comparison.html"   = "examples/comparing-groups.html",
 
   # Package-level topic.
   "reference/bgms-package.html"   = "reference/index.html",

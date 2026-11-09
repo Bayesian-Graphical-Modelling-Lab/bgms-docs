@@ -220,5 +220,4 @@ The numbers users look for that are not in `summary()`:
 
 A [`bgmCompare()`](../reference/bgmCompare.qmd) fit prints more tables than
 this, adding group differences and their own inclusion probabilities; see
-[Group Comparison](../guide/group-comparison.qmd) until the comparing-groups
-example page ships.
+[Comparing groups](comparing-groups.qmd).
