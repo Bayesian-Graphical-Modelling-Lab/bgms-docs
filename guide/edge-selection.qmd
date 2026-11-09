@@ -6,12 +6,7 @@ Bayesian edge selection determines which edges are present in the network by pla
 
 ## Spike-and-slab priors
 
-For each edge $(i, j)$, an indicator variable $\gamma_{ij} \in \{0, 1\}$ governs whether the interaction is included in the model:
-
-- When $\gamma_{ij} = 0$ (spike), the partial association $\omega_{ij}$ is set to exactly zero — the edge is absent.
-- When $\gamma_{ij} = 1$ (slab), the partial association receives the slab prior set via `interaction_prior` (default `normal_prior(scale = 1)`) — the edge is present and the effect size is estimated.
-
-In this formulation of the spike-and-slab prior [@GottardoRaftery_2008; @VanDenBerghEtAl_2026_moms], each edge is either exactly zero or follows a continuous distribution — with no overlap between the two components. An excluded edge is genuinely absent from the model, not merely shrunk toward zero, which is what makes exact statements like "the data support excluding this edge" possible.
+For each edge $(i, j)$, an indicator variable $\gamma_{ij} \in \{0, 1\}$ governs whether the interaction is included in the model.
 
 The prior probability of inclusion is controlled by the `edge_prior` argument. See [Prior Basics](prior-basics.qmd) for the available options (Bernoulli, Beta-Bernoulli, Stochastic-Block).
 
@@ -39,22 +34,7 @@ In practice, the recommended tool is [`extract_inclusion_bf()`](../reference/ext
 
 The reciprocal $1 / \text{BF}_{10}$ quantifies the evidence for edge absence, i.e., conditional independence [@SekulovskiEtAl_2024]. Values of $\text{BF}_{10}$ close to one indicate that the data do not discriminate between the two hypotheses — absence of evidence rather than evidence of absence.
 
-### When posterior odds equal the Bayes factor {#sec-bf-continuous}
-
-The shortcut "posterior odds = Bayes factor" holds when the prior inclusion odds equal one, and that takes two ingredients. First, the edge prior must put probability $\frac{1}{2}$ on inclusion. Under `bernoulli_prior(0.5)` it does; under, say, `bernoulli_prior(0.1)` the prior odds are $1/9$, and the posterior odds understate the evidence for inclusion by a factor of nine, whatever the data type. Second, the model must use the probability you wrote down. For discrete (ordinal) data it always does. For continuous (GGM) data — and for the continuous-continuous edges of a mixed model — it does under the default `precision_graph_prior = "hierarchical"`, which normalizes the precision prior per graph so that the prior over structures is exactly the edge prior (see [Prior Basics](prior-basics.qmd#sec-edge-priors-continuous)).
-
-The second ingredient fails if you opt into `precision_graph_prior = "joint"`. The edge prior there combines with the un-normalized precision-matrix prior, and the effective prior inclusion probability of a continuous edge differs from the nominal edge-prior value. On a joint fit, compute the Bayes factor from the general identity — posterior inclusion odds divided by *prior* inclusion odds — with the prior probabilities from [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities):
-
-```r
-post = extract_posterior_inclusion_probabilities(fit)
-prior = extract_prior_inclusion_probabilities(fit)
-BF10 = (post / (1 - post)) / (prior / (1 - prior))
-```
-
-Both extractors return matrices of matching shape, so the odds combine
-element-wise.
-
-In every case, [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) computes the Bayes factor from that same identity with the prior odds the fit actually used, so it needs no adjustment: not for an edge prior away from $\frac{1}{2}$, and not for either `precision_graph_prior` specification.
+The shortcut "posterior odds = Bayes factor" holds when the prior inclusion odds equal one. In every case, [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) computes the Bayes factor from that same identity with the prior odds the fit actually used, so it needs no adjustment: not for an edge prior away from $\frac{1}{2}$, and not for either `precision_graph_prior` specification (see [When posterior odds equal the Bayes factor](ggm.qmd#sec-bf-continuous)).
 
 ## Other approaches to testing conditional independence
 
@@ -102,92 +82,6 @@ As an illustration from psychology, @HuthEtAl_2026_evidence reanalyzed 293 netwo
 
 This is precisely why a Bayesian approach matters. Without it, a missing edge in an estimated network is ambiguous: did the method find evidence that the edge is absent, or was there simply not enough data to detect it? The Bayes factor makes this distinction explicit. When the evidence is inconclusive, it says so — and that information is just as valuable as a decisive result, because it prevents conclusions that the data cannot support.
 
-## A worked example
-
-```{r}
-#| label: load-fixtures
-#| echo: false
-resolve_fixture = function(name) {
- input_dir = dirname(knitr::current_input(dir = TRUE))
- candidates = c(
-   file.path(input_dir, "..", "fixtures", name),
-   file.path(input_dir, "fixtures", name),
-   file.path("fixtures", name),
-   file.path("..", "fixtures", name)
- )
- hit = candidates[file.exists(candidates)][1]
- if (is.na(hit)) {
-   stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
- }
- hit
-}
-library(bgms)
-fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
-```
-
-To see these quantities on real output, this snippet reads three edges off
-the [Wenchuan](../reference/datasets.qmd#wenchuan) fit that
-[From estimation to evidence](../examples/estimation-to-evidence.qmd) runs
-end to end (run in advance here):
-
-```{r}
-#| eval: false
-library(bgms)
-fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
-```
-
-That page owns the analysis, including why this fit runs longer than the
-default; here we only read the quantities this page has introduced.
-
-The `summary(fit)$indicator` table holds the posterior inclusion
-probability of every edge in its `mean` column (the Rao-Blackwellized
-estimate; see [The fit object](../reference/fit-object.qmd)). With the default prior
-inclusion probability of 0.5, the inclusion Bayes factor is the
-posterior odds:
-
-```{r}
-ind = summary(fit)$indicator
-edges = ind[c("intrusion-dreams", "intrusion-upset", "intrusion-avoidact"),
-            "mean", drop = FALSE]
-edges$BF10 = edges$mean / (1 - edges$mean)
-round(edges, 3)
-```
-
-Three different conclusions, one from each row:
-
-- **`intrusion-dreams`**: the inclusion probability rounds to 1 —
-  every sweep left this edge included — so the posterior-odds
-  transformation overflows to infinity.
-- **`intrusion-upset`**: an inclusion probability of about 0.66 gives
-  $\text{BF}_{10} \approx 2.0$ — the data lean toward including this
-  edge, but the evidence is weak.
-- **`intrusion-avoidact`**: an inclusion probability of about 0.03
-  gives $\text{BF}_{01} \approx 33$ — strong evidence that this edge
-  is *absent* (evidence of absence).
-
-For the saturated edge, [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf)
-recovers a finite answer from the odds accumulators:
-
-```{r}
-bf = extract_inclusion_bf(fit)
-signif(bf["intrusion", c("dreams", "upset", "avoidact")], 3)
-```
-
-`intrusion-dreams` gets a Bayes factor of about $2 \times 10^{119}$:
-astronomically strong evidence, but now an actual number. The other two
-entries reproduce the posterior-odds calculation above ($2.0$ for
-`intrusion-upset`, and $0.030 \approx 1/33$ for `intrusion-avoidact`).
-
-Evidence that strong runs into the limits of double precision: a Bayes
-factor beyond about $1.8 \times 10^{308}$ comes back as `Inf`. Reading
-the same three edges on the log scale keeps every entry finite and
-comparable:
-
-```{r}
-round(extract_inclusion_bf(fit, log = TRUE)["intrusion",
-      c("dreams", "upset", "avoidact")], 2)
-```
-
 ## Median probability model
 
 A common summary of the posterior network is the median probability model [@BarbieriBerger_2004]: retain all edges with posterior inclusion probability above 0.5. This corresponds to including edges for which there is more evidence for presence than absence.
@@ -201,13 +95,4 @@ Use this as a summary of what the posterior favors, not as a picture of what the
 
 ## Prior guidance for edge selection
 
-The default `edge_prior = bernoulli_prior(0.5)` is a standard noninformative choice. Considerations for changing it:
-
-- **Sparse networks**: lower the inclusion probability (e.g., `bernoulli_prior(0.25)`) to encode a prior expectation that most edges are absent.
-- **Dense networks**: raise the inclusion probability if prior knowledge suggests many edges.
-- **Learned inclusion probability**: use `edge_prior = beta_bernoulli_prior(1, 1)` to let the data inform the overall sparsity level.
-- **Structured sparsity**: use `edge_prior = sbm_prior(...)` when edges are expected to cluster (see [Edge Clustering](clustering.qmd)).
-
-The `interaction_prior` controls the slab width. A wider slab makes it harder for the Bayes factor to favor inclusion when the true effect is small, because the prior spreads probability over a wide range. The default is `normal_prior(scale = 1)`.
-
-To see how much your edge verdicts depend on that width, run [`prior_sensitivity_check()`](../reference/prior-sensitivity.qmd) on the fit. It recovers each edge's inclusion Bayes factor across a range of slab scales around the one you used, and separates edges whose verdict genuinely changes from edges that merely wobble between reruns of the same prior.
+The guidance on choosing the edge prior and the slab is on [Prior Basics](prior-basics.qmd).

@@ -63,7 +63,7 @@ with where the prior started, so under any edge prior other than 0.5
 the posterior odds understate or overstate the evidence. The inclusion
 Bayes factor divides the prior odds out, which is why the verdicts are
 read from it. More:
-[Edge Selection](guide/edge-selection.qmd#sec-bf-continuous).
+[Gaussian Graphical Model](guide/ggm.qmd#sec-bf-continuous).
 
 ### I reran the analysis and the numbers changed slightly. Is something wrong?
 

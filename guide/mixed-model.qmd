@@ -30,6 +30,8 @@ where:
 
 The three interaction blocks ($\boldsymbol{\Omega}_{xx}$, $\boldsymbol{\Omega}_{yy}$, $\boldsymbol{\Omega}_{xy}$) enter the density on the same scale.
 
+This is the general pairwise Markov random field of [Graphical models](graphical-models.qmd) with the interaction matrix in three blocks; with no continuous variables it is the ordinal MRF, with no discrete variables the GGM.
+
 ## Conditional Gaussian structure
 
 The mixed MRF belongs to the class of conditional Gaussian (CG) distributions [@LauritzenWermuth_1989]: given the discrete variables, the continuous variables follow a multivariate normal distribution:
@@ -44,17 +46,6 @@ In the pure GGM, `bgms` centers the continuous data so that the mean vector is z
 
 The marginal distribution of $\mathbf{x}$, obtained by integrating out $\mathbf{y}$, is an ordinal MRF whose effective interactions absorb the indirect associations between discrete variables mediated through the continuous block.
 
-## Connection to the MRF framework
-
-The [Graphical Models](graphical-models.qmd) page introduced the general pairwise MRF:
-
-$$
-p(\mathbf{z}) \propto \exp\!\left(\sum_{i} \mu_i(z_i) +
-\mathbf{z}^{\sf T}\boldsymbol{\Omega}\, \mathbf{z}\right)
-$$
-
-The mixed MRF extends this framework to a mixed variable vector $\mathbf{z} = (\mathbf{x}, \mathbf{y})$. The interaction matrix $\boldsymbol{\Omega}$ decomposes into three blocks — $\boldsymbol{\Omega}_{xx}$, $\boldsymbol{\Omega}_{yy}$, and $\boldsymbol{\Omega}_{xy}$ — corresponding to the three types of edges in the graph. When all variables are discrete ($q = 0$), the continuous blocks vanish and the model reduces to the ordinal MRF. When all variables are continuous ($p = 0$), the discrete blocks vanish and the model reduces to the GGM with precision matrix $\boldsymbol{\Theta} = -2\,\boldsymbol{\Omega}_{yy}$.
-
 ## Partial associations
 
 The mixed MRF has three types of partial associations, all reported on the same scale in `coef(fit)$pairwise`:
@@ -65,7 +56,7 @@ The mixed MRF has three types of partial associations, all reported on the same 
 
 **Cross-type.** The entries of $\boldsymbol{\Omega}_{xy}$ capture the direct association between a discrete variable $x_i$ and a continuous variable $y_j$, after accounting for all other variables. A cross-type partial association enters both the full conditional of $x_i$ (through the rest score) and the conditional mean of $y_j$.
 
-When $\omega_{ij} = 0$ for any of the three types, the two variables are conditionally independent and the corresponding edge is absent from the graph. The spike-and-slab prior operates on partial associations regardless of type, so edge selection works uniformly across all three blocks.
+When $\omega_{ij} = 0$ for any of the three types, the two variables are conditionally independent and the corresponding edge is absent from the graph. The spike-and-slab prior operates on partial associations regardless of type, so edge selection works uniformly across all three blocks. With at least two continuous variables, the continuous-continuous edges inherit the continuous-data considerations from the [Gaussian Graphical Model](ggm.qmd#sec-edge-priors-continuous) page.
 
 To obtain model-specific parameterizations: `extract_precision(fit)` returns $\boldsymbol{\Theta}$, `extract_partial_correlations(fit)` returns partial correlations for the continuous block, and `extract_log_odds(fit)` returns the log adjacent-category odds ratios $2\omega_{ij}^{xx}$ for the discrete block.
 
@@ -77,16 +68,6 @@ The two blocks are treated differently during estimation:
 - **Discrete block: pseudolikelihood.** `bgms` first integrates the continuous variables out, which yields an ordinal MRF on the discrete variables whose effective interactions combine the direct discrete–discrete associations with the indirect associations that run through the continuous block. That marginal model is then estimated with the same pseudolikelihood approximation used for the [Ordinal MRF](omrf.qmd).
 
 In practice this means mixed-model estimates keep the exact Gaussian information for continuous pairs, while the discrete side retains the familiar ordinal-MRF interpretation. The full derivation — the marginal density, the effective interaction matrix, and the rest score — is in [Pseudolikelihood](../manual/pseudolikelihood.qmd) in the Technical Manual.
-
-## Edge selection
-
-When `edge_selection = TRUE` (the default), every partial association — discrete–discrete, continuous–continuous, and cross-type alike — receives a spike-and-slab prior, so an edge is either exactly absent or estimated from the data. The prior specification is described in [Prior Basics](prior-basics.qmd), and how to read the resulting inclusion probabilities and Bayes factors in [Edge Selection](edge-selection.qmd).
-
-With at least two continuous variables, the continuous-continuous edges inherit the continuous-data considerations from the [Gaussian Graphical Model](ggm.qmd) page. Under the default `precision_graph_prior = "hierarchical"`, the continuous block's precision prior is normalized per graph, so those edges keep the nominal edge-prior inclusion probability; the normalizer approximation and its trust gauge enter the continuous-continuous edge moves only. Under the `"joint"` alternative their effective prior inclusion probabilities differ from the nominal value (use [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities) for Bayes factors computed by hand), and with `beta_bernoulli_prior()` or `sbm_prior()` the hyperparameter updates carry a normalizing-constant correction that reads the continuous-continuous edges only. Discrete–discrete and cross-type edges are untouched by all of this. With fewer than two continuous variables there is no continuous block for the argument to act on, and the two settings coincide.
-
-## Missing data
-
-Missing values can be handled via listwise deletion (the default) or imputed within the Gibbs sampler by setting `na_action = "impute"`. For mixed data, missing discrete entries are drawn from their full conditional categorical distribution and missing continuous entries from their conditional normal distribution at each MCMC iteration. See [Missing Data](missing-data.qmd) for details on both approaches and recommendations.
 
 ## Fitting a mixed MRF
 
@@ -132,3 +113,9 @@ Some extractors require at least two variables of the corresponding type:
 
 If a model does not meet these requirements, these quantities are not defined for that fit.
 :::
+
+## See also
+
+- [Edge Selection](edge-selection.qmd): how to read the inclusion probabilities and Bayes factors.
+- [Prior Basics](prior-basics.qmd): the spike-and-slab prior specification.
+- [Missing Data](missing-data.qmd): listwise deletion (the default) or imputation with `na_action = "impute"`.

@@ -58,6 +58,13 @@ Edge indicators $\gamma_{ij}$ govern edge inclusion in the spike-and-slab prior.
 
 `bgms` provides three edge priors, each encoding a different type of structural assumption. They are selected by passing one of the [indicator-prior constructors](../reference/priors.qmd#indicator-priors) — [`bernoulli_prior()`](../reference/priors.qmd#bernoulli_prior), [`beta_bernoulli_prior()`](../reference/priors.qmd#beta_bernoulli_prior), or [`sbm_prior()`](../reference/priors.qmd#sbm_prior) — to the `edge_prior` argument.
 
+The default `edge_prior = bernoulli_prior(0.5)` is a standard noninformative choice. Considerations for changing it:
+
+- **Sparse networks**: lower the inclusion probability (e.g., `bernoulli_prior(0.25)`) to encode a prior expectation that most edges are absent.
+- **Dense networks**: raise the inclusion probability if prior knowledge suggests many edges.
+- **Learned inclusion probability**: use `edge_prior = beta_bernoulli_prior(1, 1)` to let the data inform the overall sparsity level.
+- **Structured sparsity**: use `edge_prior = sbm_prior(...)` when edges are expected to cluster (see [Edge Clustering](clustering.qmd)).
+
 ### Bernoulli prior
 
 The simplest edge prior treats each edge independently: the indicator $\gamma_{ij}$ follows a Bernoulli distribution with inclusion probability $\pi_{ij}$. Across all edges, this gives
@@ -68,7 +75,7 @@ $$
 
 The inclusion probability can be set to the same value for all edges (a scalar) or specified per edge (a matrix). The default is $\pi_{ij} = 0.5$ for all edges, which assigns equal prior weight to edge presence and absence. A classic choice due to @ErdosRenyi_1959, this treats every possible network structure as equally likely.
 
-Lowering $\pi_{ij}$ encodes a prior expectation that the network is sparse. Raising it encodes a prior expectation of a dense network. Setting different values for different edges allows prior information about specific relationships to be incorporated.
+Setting different values for different edges allows prior information about specific relationships to be incorporated.
 
 ### Beta-Bernoulli prior
 
@@ -94,15 +101,9 @@ When there is only one block, the SBM reduces to the standard Beta-Bernoulli pri
 
 The SBM prior introduces additional parameters: the number of blocks, the assignment of variables to blocks, and the within- and between-block Beta hyperparameters. These are estimated from the data by default. See [Edge Clustering](clustering.qmd) for the full specification, hyperparameter guidance, and interpretation of results.
 
-### Edge priors on continuous data {#sec-edge-priors-continuous}
+### Edge priors on continuous data
 
-For continuous (GGM) data — and for the continuous block of a mixed model — the edge prior does not act alone: excluding an edge also constrains the precision matrix, whose prior must respect positive definiteness. How the two compose is set by `precision_graph_prior` in [`bgm()`](../reference/bgm.qmd), and the two settings differ in whether the prior you wrote down is the prior the model uses.
-
-Under the default specification (`precision_graph_prior = "hierarchical"`), the precision prior is normalized per graph, so the prior over structures is exactly the edge prior. A Bernoulli prior with $\pi = 0.5$ then does mean a 50% prior inclusion probability for continuous edges, and the nominal value is the correct denominator for an inclusion Bayes factor. The cost is a fast normalizer approximation inside the sampler, which a trust gauge audits as the chains run (see [Sampler diagnostics and warnings](../reference/sampler-diagnostics.qmd#sec-trust-gauge)).
-
-Under `precision_graph_prior = "joint"`, the two priors are combined in un-normalized form instead, and the resulting prior probability that a continuous edge is included is *not* the nominal value from the edge prior: the graph marginal is the edge prior reweighted by a per-graph normalizing constant. If you choose that specification, use [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities) to obtain the effective prior probabilities, which are then the correct denominators for inclusion Bayes factors (see [Edge Selection](edge-selection.qmd)).
-
-For discrete (ordinal) data none of this arises: the edge prior is the structure prior, exactly as written above, under either setting.
+For continuous (GGM) data — and for the continuous block of a mixed model — the edge prior does not act alone: excluding an edge also constrains the precision matrix, whose prior must respect positive definiteness ([Gaussian Graphical Model](ggm.qmd#sec-edge-priors-continuous)).
 
 ## Nuisance parameter priors
 
