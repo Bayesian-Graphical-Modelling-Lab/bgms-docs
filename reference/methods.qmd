@@ -103,7 +103,7 @@ Returns (by class):
 ## plot {#plot}
 
 Draw the fitted model. The default display is the network split by what
-the data settle about each pair.
+the data settle about each edge.
 
 ```r
 plot(x, type = c("network", "centrality"), evidence_threshold = 10,
@@ -130,13 +130,13 @@ network needs the suggested package `qgraph`.
 ### The edge evidence plot
 
 `type = "network"` is the **edge evidence plot**: three panels on one
-shared layout holding the pairs the data support, the pairs the data rule
-out, and the pairs the data cannot decide. It is the canonical result
+shared layout holding the edges the data support, the edges the data rule
+out, and the edges the data cannot decide. It is the canonical result
 display this documentation uses for every network, and `plot()` is its
 in-package implementation: the classification is the one
 [`verdicts()`](checks.qmd#verdicts) reports at the same
 `evidence_threshold`, each panel is titled with what it holds and how many
-pairs are in it, and the layout is computed once from every pair so a node
+edges are in it, and the layout is computed once from every pair so a node
 sits in the same place in all three panels.
 
 Only the first panel is weighted. There, line width is the posterior mean
@@ -144,7 +144,7 @@ pairwise association and color carries its sign, blue for positive and
 vermillion for negative, the Okabe-Ito pair, so the sign survives common
 forms of color-vision deficiency. The other two panels are drawn at
 uniform width, dashed for evidence of absence and dotted for undecided:
-for those pairs the classification is the result, and a width would
+for those edges the classification is the result, and a width would
 suggest an effect size the data have either ruled out or not established.
 
 The figure carries no key: each panel's title names the evidence class and
@@ -168,7 +168,7 @@ posterior mean association and color its sign, titled `"Edge weights"`.
 
 ```{r}
 #| label: fig-edge-evidence
-#| fig-cap: "The edge evidence plot for the Wenchuan fit: 35 pairs supported, 62 ruled out, 39 undecided at an inclusion Bayes factor of 10."
+#| fig-cap: "The edge evidence plot for the Wenchuan fit: 35 edges supported, 62 ruled out, 39 undecided at an inclusion Bayes factor of 10."
 #| fig-width: 13
 #| fig-height: 5
 plot(fit)

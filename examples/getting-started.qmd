@@ -79,7 +79,7 @@ coef(fit)
 
 ## The network, split by evidence
 
-A single network drawing has to make every pair either an edge or a blank, and a blank cannot say whether the data ruled the pair out or simply had too little to say about it. Because `bgms` returns an inclusion Bayes factor for every pair, you do not have to make that choice. The network is drawn as three panels on one shared layout: the pairs the data support, the pairs the data rule out, and the pairs the data cannot decide. This is the **edge evidence plot**, and it is the display this documentation uses for every network result.
+A single network drawing has to make every pair either an edge or a blank, and a blank cannot say whether the data ruled the edge out or simply had too little to say about it. Because `bgms` returns an inclusion Bayes factor for every edge, you do not have to make that choice. The network is drawn as three panels on one shared layout: the edges the data support, the edges the data rule out, and the edges the data cannot decide. This is the **edge evidence plot**, and it is the display this documentation uses for every network result.
 
 The categories come from [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) at an inclusion Bayes factor of 10 in either direction. See [Edge Selection](../guide/edge-selection.qmd) for why the Bayes factor, and not the inclusion probability on its own, is what licenses a claim about an edge. `plot(fit)` draws this display; [Methods](../reference/methods.qmd#plot) documents its arguments. To style the network yourself, `qgraph(coef(fit)$pairwise, ...)` draws the posterior means with any styling you already use. The [easybgm](https://cran.r-project.org/package=easybgm) package offers more elaborate plotting and summary functions on top of `bgms`.
 
@@ -91,9 +91,9 @@ plot(fit)
 
 Each panel licenses a different statement.
 
-- **Evidence of presence.** For these eight pairs the data favor a direct association, one that survives conditioning on the other three symptoms. Only this panel is weighted: line width is the posterior mean partial association, so the effect sizes live here.
-- **Evidence of absence.** `dreams-physior` is the one pair the data actively rule out, with an inclusion Bayes factor of about 0.08, or roughly 12 to 1 against. That is a positive statement of conditional independence, and it is the statement an estimation workflow cannot make: there, a missing edge might just as well mean too little data. The panel is drawn dashed and at uniform width because for these pairs the classification, not a weight, is the result.
-- **Undecided.** `flash-upset` is the pair these data have too little to say about. Its Bayes factor of about 0.11 sits just inside the undecided band, so it is neither supported nor ruled out.
+- **Evidence of presence.** For these eight edges the data favor a direct association, one that survives conditioning on the other three symptoms. Only this panel is weighted: line width is the posterior mean partial association, so the effect sizes live here.
+- **Evidence of absence.** `dreams-physior` is the one edge the data actively rule out, with an inclusion Bayes factor of about 0.08, or roughly 12 to 1 against. That is a positive statement of conditional independence, and it is the statement an estimation workflow cannot make: there, a missing edge might just as well mean too little data. The panel is drawn dashed and at uniform width because for these edges the classification, not a weight, is the result.
+- **Undecided.** `flash-upset` is the edge these data have too little to say about. Its Bayes factor of about 0.11 sits just inside the undecided band, so it is neither supported nor ruled out.
 
 This is why the site does not draw the bare thresholded network. Keeping only the edges with posterior inclusion probability of 0.5 or more, the median probability model, would reproduce exactly the eight edges of the first panel and leave `dreams-physior` and `flash-upset` equally blank. One of those two blanks is a finding; the other is an open question, and the drawing would not tell you which is which.
 

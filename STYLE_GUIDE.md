@@ -261,8 +261,8 @@ site follows it.
 
 **The canonical result display is the edge evidence plot: the network
 split by evidence.** A network drawn as one picture has to make every
-pair either an edge or a blank, and a blank cannot distinguish a pair the
-data ruled out from a pair the data could not decide. Reporting the bare
+pair either an edge or a blank, and a blank cannot distinguish an edge the
+data ruled out from an edge the data could not decide. Reporting the bare
 median-probability network and reading its blanks as absence is exactly
 the conflation the tutorial paper corrects.
 
@@ -278,8 +278,8 @@ layout** so the panels match node for node:
 
 | Panel | Contents | Edge styling |
 |-------|----------|--------------|
-| evidence of presence | pairs with inclusion Bayes factor at or above the threshold | weighted by the posterior mean partial association; solid; `theme = "TeamFortress"`, `edge.width = 1.1` |
-| evidence of absence | pairs with inclusion Bayes factor at or below the reciprocal threshold | uniform width; dashed; `edge.color = "#A66A1E"`, `lty = 2`, `edge.width = 1.1` |
+| evidence of presence | edges with inclusion Bayes factor at or above the threshold | weighted by the posterior mean partial association; solid; `theme = "TeamFortress"`, `edge.width = 1.1` |
+| evidence of absence | edges with inclusion Bayes factor at or below the reciprocal threshold | uniform width; dashed; `edge.color = "#A66A1E"`, `lty = 2`, `edge.width = 1.1` |
 | undecided | everything else | uniform width; dotted; `edge.color = "#8A8578"`, `lty = 3`, `edge.width = 1.4` |
 
 Only the presence panel is weighted. For the other two the classification,
@@ -323,7 +323,7 @@ each panel licenses the reader to say:
   conditioning on the rest of the network.
 - Absence: a **positive statement of conditional independence**. Say so,
   and say that it is the statement an estimation workflow cannot make.
-- Undecided: the pairs these data have too little to say about. Never
+- Undecided: the edges these data have too little to say about. Never
   fold these in with absence.
 
 Where a page has just shown, or could plausibly show, a thresholded

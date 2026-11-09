@@ -38,16 +38,16 @@ fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
 plot(fit)
 ```
 
-The 35 pairs in the presence panel are associations these data support, each
-drawn with its estimated weight. The 62 dashed pairs in the absence panel are
+The 35 edges in the presence panel are associations these data support, each
+drawn with its estimated weight. The 62 dashed edges in the absence panel are
 positive findings too: the data support conditional independence for each of
-them. The 39 dotted pairs in the undecided panel are the ones these data have
+them. The 39 dotted edges in the undecided panel are the ones these data have
 too little to say about, and only this display keeps them visible as their
 own category.
 
 An estimated network cannot give you this figure. It makes every pair either
 an edge or a blank, and a blank cannot tell you whether the data ruled the
-pair out or simply had too little to say — the reanalysis of
+edge out or simply had too little to say — the reanalysis of
 @HuthEtAl_2026_evidence suggests that in published networks the second case
 is the more common one. This page runs the full Wenchuan analysis from that
 familiar starting point to the figure above: fit the model, weigh every pair
@@ -183,7 +183,7 @@ elaborate plotting and summary functions on top of `bgms`.
 plot(fit)
 ```
 
-**Evidence of presence.** For these 35 pairs the data favor a direct
+**Evidence of presence.** For these 35 edges the data favor a direct
 association that survives conditioning on the other symptoms. Only this
 panel is weighted: line width is the posterior mean partial association, so
 the effect sizes live here. The edge between `intrusion` and `concen` — the
@@ -200,13 +200,13 @@ on the other symptoms, more intrusive memories accompany fewer reported
 concentration problems. Strong evidence for an edge, where the estimation
 workflow returned a silent zero.
 
-**Evidence of absence.** Each of these 62 dashed pairs is a positive
+**Evidence of absence.** Each of these 62 dashed edges is a positive
 statement: the data support conditional independence. This is the statement
 an estimated network cannot make — its blanks are silent — and it is stated
 here at uniform width because the classification, not a weight, is the
 result.
 
-**Undecided.** These 39 pairs — 29% of all possible edges, in a sample of
+**Undecided.** These 39 edges — 29% of all possible edges, in a sample of
 344 people — are the ones these data have too little to say about. They are
 not edges the analysis failed on, and they are not absences. Fold them in
 with the blanks of a thresholded drawing and you would report more than a

@@ -76,7 +76,7 @@ summary(fit)
 
 The same fit weighs every possible edge and reports the evidence:
 
-![The Wenchuan network split by evidence: pairs the data support, pairs they rule out, and pairs they leave undecided.](images/edge-evidence-wenchuan.png){.img-fluid fig-alt="Three network panels on one shared layout: evidence of presence (35 edges, weighted), evidence of absence (62, dashed), undecided (39, dotted)."}
+![The Wenchuan network split by evidence: edges the data support, edges they rule out, and edges they leave undecided.](images/edge-evidence-wenchuan.png){.img-fluid fig-alt="Three network panels on one shared layout: evidence of presence (35 edges, weighted), evidence of absence (62, dashed), undecided (39, dotted)."}
 
 Of the 136 possible edges, 35 are supported, 62 are ruled out, and 39
 are undecided: the split an estimated network cannot make.
