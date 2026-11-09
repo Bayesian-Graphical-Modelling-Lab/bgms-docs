@@ -23,7 +23,7 @@ and simulation studies.
 
 | Function | Description |
 |----------|-------------|
-| [`sample_ggm_prior()`](sample-ggm-prior.qmd) | Prior sampler for the GGM precision matrix (conditional, joint, or hierarchical specification). |
+| [`sample_ggm_prior()`](prior-samplers.qmd#sample_ggm_prior) | Prior sampler for the GGM precision matrix (conditional, joint, or hierarchical specification). |
 | [`sample_graph_prior()`](prior-samplers.qmd#sample_graph_prior) | Prior sampler for the edge-inclusion indicators and edge-prior hyperparameters. |
 | [`sample_sbm_prior()`](prior-samplers.qmd#sample_sbm_prior) | Ancestral sampler for the stochastic block model hyperprior (allocations, pair probabilities). |
 
@@ -52,6 +52,7 @@ Prior specification objects passed to `bgm()` and `bgmCompare()` via the
 | [`summary()`](methods.qmd#summary) | Summary statistics for posterior samples |
 | [`coef()`](methods.qmd#coef) | Extract posterior means of model parameters |
 | [`plot()`](methods.qmd#plot) | Draw the fitted model: the edge evidence plot by default, or posterior centrality |
+| [The fit object](fit-object.qmd) | What `bgm()` and `bgmCompare()` return, which tables `summary()` prints, what the columns mean |
 | [`plot_edge_posterior()`](methods.qmd#plot_edge_posterior) | Draw one edge's posterior against its prior, with the inclusion evidence as a probability wheel |
 | [`predict()`](methods.qmd#predict) | Predict new observations from a fitted model |
 | [`simulate()`](methods.qmd#simulate) | Simulate datasets from the posterior distribution |
@@ -67,6 +68,7 @@ Post-fit checks on a model you have already estimated.
 | [`calibration_check()`](checks.qmd#calibration_check) | Reliability diagrams of the model's conditional predictions, with the consistency band a calibrated model wanders inside. |
 | [`prior_sensitivity_check()`](prior-sensitivity.qmd) | Recover each edge's inclusion Bayes factor curve across the slab scale and classify which verdicts depend on it. |
 | [`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge) | Trust gauge for the hierarchical graph prior's fast normalizer approximation. |
+| [Sampler diagnostics and warnings](sampler-diagnostics.qmd) | What a diagnostic field or warning means. |
 
 ## Extractor Functions
 

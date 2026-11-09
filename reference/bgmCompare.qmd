@@ -11,10 +11,10 @@ variables using Bayesian estimation and optional difference selection.
 partial-association parameters for discrete MRFs. Groups can be supplied as
 two datasets (`x` and `y`) or through a grouping vector in `group_indicator`.
 This page is the technical reference for arguments and return values. For
-workflow and interpretation, see [Group Comparison](../guide/group-comparison.qmd),
+workflow and interpretation, see [Comparing groups](../examples/comparing-groups.qmd),
 [Edge Selection](../guide/edge-selection.qmd),
-[Model Output](../guide/mcmc-output.qmd), and
-[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd). Methodological background
+[The fit object](fit-object.qmd), and
+[Checking convergence](../guide/mcmc-diagnostics.qmd). Methodological background
 is provided in @MarsmanEtAl_2025_ttest.
 
 ## Usage
@@ -189,12 +189,12 @@ NUTS diagnostics are available in `fit$nuts_diag` when
 
 For full explanations, see the guide. The modeling setup for cross-group
 contrasts is explained in
-[Group Comparison](../guide/group-comparison.qmd), with related background in
+[Comparing groups](../examples/comparing-groups.qmd), with related background in
 [Graphical Models](../guide/graphical-models.qmd). Prior choices for
 difference selection are discussed in [Edge Selection](../guide/edge-selection.qmd),
 and output interpretation and convergence checks are covered in
-[Model Output](../guide/mcmc-output.qmd) and
-[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd).
+[The fit object](fit-object.qmd) and
+[Checking convergence](../guide/mcmc-diagnostics.qmd).
 
 ## Examples
 
@@ -221,4 +221,4 @@ coef(fit)$pairwise_effects_groups
 [bgm()](bgm.qmd),
 [Methods](methods.qmd),
 [Extractor Functions](extractors.qmd),
-and [Group Comparison](../guide/group-comparison.qmd).
+and [Comparing groups](../examples/comparing-groups.qmd).

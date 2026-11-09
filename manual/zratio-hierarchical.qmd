@@ -212,7 +212,7 @@ for the returned fields.
 ## Prior-only sampling
 
 The same machinery drives zero-data chains:
-[`sample_ggm_prior()`](../reference/sample-ggm-prior.qmd) with
+[`sample_ggm_prior()`](../reference/prior-samplers.qmd#sample_ggm_prior) with
 `spec = "hierarchical"` samples $(\Theta, \Gamma)$ from the per-graph
 normalized prior via the Z-ratio engine and runs the gauge by default,
 and [`sample_graph_prior()`](../reference/prior-samplers.qmd) draws

@@ -422,7 +422,7 @@ chain that [`extract_rhat()`](#extract_rhat) uses for indicators, and it
 measures precision conditional on exploration. Read it beside the
 directional transition counts `n0->1` and `n1->0`, which carry the
 exploration itself; see
-[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
+[Sampler diagnostics and warnings](sampler-diagnostics.qmd#sec-rb-inclusion-ess).
 
 `estimator` has one live value, `"rb"`. The alternative,
 `estimator = "mixt"` — the transition-based ESS of the binary indicator
@@ -461,7 +461,7 @@ data.frame(
 
 Low values relative to the total number of retained draws signal slow
 mixing for that parameter; see
-[MCMC Diagnostics](../guide/mcmc-diagnostics.qmd#sec-ess) for
+[Checking convergence](../guide/mcmc-diagnostics.qmd#sec-ess) for
 guidance.
 
 ## extract_rhat {#extract_rhat}

@@ -9,7 +9,7 @@
 
 ```yaml
 ---
-title: "Getting Started"
+title: "Getting started"
 ---
 ```
 
@@ -53,7 +53,7 @@ title: "Getting Started"
 **Structure:**
 ```yaml
 ---
-title: "User's Guide"
+title: "Guide"
 subtitle: "Short description of this section"
 ---
 ```
@@ -67,7 +67,7 @@ subtitle: "Short description of this section"
 **Structure:**
 ```markdown
 ---
-title: "Getting Started"
+title: "Getting started"
 ---
 
 Brief introduction paragraph.
@@ -169,19 +169,19 @@ Citations if applicable.
 
 ## Example Pages
 
-Pages in `examples/` are the worked-analysis layer of the site. Each one runs a
+Pages in `examples/` are the Examples layer of the site. Each one runs a
 single analysis end to end and stops there. Template:
 `dev/templates/example-page.qmd`, which carries a comment per slot and is not
 part of the render. Copy it rather than a shipped page.
 
 ### What the layer owns
 
-Examples pages own code and workflow. Guide pages own the reasoning, Reference
-pages own the API contract. Where an example page needs a reason, it gives one
-orienting sentence and links to the Guide; where it needs an argument or a
-return value, it links to the Reference. One page owns each analysis: if a
-Guide page carries a full worked run of an analysis that now has an example
-page, trim it to a snippet and link across.
+Examples pages own an analysis end to end, including the model section and the
+prior guidance specific to it (Comparing groups is the pattern). Guide pages
+own background that is not specific to one analysis. Reference pages own the
+contract. One page owns each analysis: if a Guide page carries a full worked
+run of an analysis that now has an example page, move it there or trim it to
+a snippet and link across.
 
 ### Page shape
 
@@ -239,8 +239,8 @@ entries stay in the index prose as plain text, never as a dead link or a
 ### PDF of the series
 
 `make examples-pdf` renders the index and every published example page, in
-series order, into one PDF titled "The bgms worked analyses" and copies it to
-`docs/examples/bgms-worked-analyses.pdf`, which is where the download link on
+series order, into one PDF titled "The bgms examples" and copies it to
+`docs/examples/bgms-examples.pdf`, which is where the download link on
 `examples/index.qmd` points. The build is the `pdf` Quarto profile
 (`_quarto-pdf.yml`); it writes to `_pdf/` and never touches the site render.
 
@@ -261,15 +261,15 @@ site follows it.
 
 **The canonical result display is the edge evidence plot: the network
 split by evidence.** A network drawn as one picture has to make every
-pair either an edge or a blank, and a blank cannot distinguish a pair the
-data ruled out from a pair the data could not decide. Reporting the bare
+pair either an edge or a blank, and a blank cannot distinguish an edge the
+data ruled out from an edge the data could not decide. Reporting the bare
 median-probability network and reading its blanks as absence is exactly
 the conflation the tutorial paper corrects.
 
 A traditional weighted or median-probability network may appear **only**
 as an explicit estimation-workflow foil, labelled as such in the
 surrounding prose, and never as a page's final display. It must not
-appear on Getting Started at all.
+appear on Getting started at all.
 
 ### Panel structure
 
@@ -278,8 +278,8 @@ layout** so the panels match node for node:
 
 | Panel | Contents | Edge styling |
 |-------|----------|--------------|
-| evidence of presence | pairs with inclusion Bayes factor at or above the threshold | weighted by the posterior mean partial association; solid; `theme = "TeamFortress"`, `edge.width = 1.1` |
-| evidence of absence | pairs with inclusion Bayes factor at or below the reciprocal threshold | uniform width; dashed; `edge.color = "#A66A1E"`, `lty = 2`, `edge.width = 1.1` |
+| evidence of presence | edges with inclusion Bayes factor at or above the threshold | weighted by the posterior mean partial association; solid; `theme = "TeamFortress"`, `edge.width = 1.1` |
+| evidence of absence | edges with inclusion Bayes factor at or below the reciprocal threshold | uniform width; dashed; `edge.color = "#A66A1E"`, `lty = 2`, `edge.width = 1.1` |
 | undecided | everything else | uniform width; dotted; `edge.color = "#8A8578"`, `lty = 3`, `edge.width = 1.4` |
 
 Only the presence panel is weighted. For the other two the classification,
@@ -323,7 +323,7 @@ each panel licenses the reader to say:
   conditioning on the rest of the network.
 - Absence: a **positive statement of conditional independence**. Say so,
   and say that it is the statement an estimation workflow cannot make.
-- Undecided: the pairs these data have too little to say about. Never
+- Undecided: the edges these data have too little to say about. Never
   fold these in with absence.
 
 Where a page has just shown, or could plausibly show, a thresholded
@@ -331,9 +331,12 @@ network, say explicitly that a blank there is not evidence of absence.
 
 ### Reference implementation
 
-`guide/getting-started.qmd` defines `plot_edge_evidence()` and applies it
-to both an ordinal and a continuous fit. Copy it rather than re-deriving
-the styling.
+`plot(fit)` is the implementation (MM, 2026-11-08): the package draws the
+edge evidence plot, and every page uses it. The hand-written
+`plot_edge_evidence()` helper is retired. For custom styling, draw the
+posterior means with qgraph, `qgraph(coef(fit)$pairwise, ...)`. The
+styling column of the panel table above records the retired helper's
+settings; `plot()` carries its own (see reference/methods.qmd § plot).
 
 ### Single-edge display
 
@@ -342,7 +345,7 @@ network, the companion figure is the **prior-to-posterior (spike-and-slab)
 plot**: the two-part distribution of that edge weight, with the spike
 drawn as a lollipop whose height is the probability of exactly zero and
 the slab as a filled curve on the same probability-per-bin scale, so the
-two are commensurable. Not required on Getting Started; it enters the
+two are commensurable. Not required on Getting started; it enters the
 palette when a page first needs parameter-level display.
 
 ### Rendering
@@ -350,7 +353,8 @@ palette when a page first needs parameter-level display.
 Site figures are R-generated PNGs with an opaque white background, so
 they read the same in light and dark mode. Keep ink dark and rely on
 line style, not on hue alone, to separate the categories. Render the
-three-panel figure at `fig-width: 9.5`, `fig-height: 3.7`.
+three-panel figure at `fig-width: 13`, `fig-height: 5`, the device size
+`plot()` asks for.
 
 ---
 

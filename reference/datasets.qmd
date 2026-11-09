@@ -80,7 +80,7 @@ A data frame with 986 rows and 9 columns:
 [osf.io/qhux8](https://osf.io/qhux8). Licensed under
 [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
-The [Edge clustering](../examples/edge-clustering.qmd) worked analysis
+The [Edge clustering](../examples/edge-clustering.qmd) example
 uses a companion dataset from the same validation study: the French
 subsample (490 participants) with all 18 items, the 8 SBPS items
 together with 10 items of the Curiosity and Exploration
@@ -89,7 +89,7 @@ the example page shows the download call.
 
 ## Wenchuan {#wenchuan}
 
-Used in the examples of [`bgm()`](bgm.qmd), [Getting Started](../guide/getting-started.qmd), and the MCMC output pages.
+Used in the examples of [`bgm()`](bgm.qmd), [Getting started](../examples/getting-started.qmd), and the MCMC output pages.
 
 Responses to 17 items assessing PTSD symptoms in Chinese adults who survived
 the 2008 Wenchuan earthquake and lost at least one child in the disaster

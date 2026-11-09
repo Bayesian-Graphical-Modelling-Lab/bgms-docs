@@ -1,0 +1,106 @@
+---
+title: "Getting started"
+---
+
+`bgms` implements Bayesian estimation and edge selection for graphical models of mixed binary, ordinal, and continuous variables. Networks are estimated at the level of conditional associations: an edge between two variables indicates a direct relationship that persists after accounting for all other variables in the model.
+
+The package has two main entry points:
+
+- [`bgm()`](../reference/bgm.qmd) — fits a single network for one group of observations.
+- [`bgmCompare()`](../reference/bgmCompare.qmd) — estimates and compares networks across independent groups.
+
+For background on graphical models and the Bayesian approach, see [Graphical Models](../guide/graphical-models.qmd) and [The Bayesian Approach](../guide/bayesian-approach.qmd).
+
+## Installation
+
+### From CRAN
+
+```r
+install.packages("bgms")
+```
+
+### Development version
+
+```r
+if(!requireNamespace("remotes")) {
+  install.packages("remotes")
+}
+remotes::install_github("Bayesian-Graphical-Modelling-Lab/bgms@develop")
+```
+
+The `@develop` suffix matters. Without it `install_github()` takes the
+default branch, which carries the released CRAN lineage rather than the
+development version.
+
+## Fitting a model
+
+The main function is [`bgm()`](../reference/bgm.qmd). It accepts a data frame or matrix of mixed binary, ordinal, and continuous variables and estimates a Markov random field.
+
+The Wenchuan dataset is included in the package, and contains ordinal measures of symptoms of posttraumatic stress from 362 survivors of the 2008 Wenchuan earthquake. 
+
+```{r}
+library(bgms)
+
+data(Wenchuan)
+head(Wenchuan)
+```
+
+
+For illustration, we select five symptoms from the Wenchuan dataset — intrusive memories, disturbing dreams, flashbacks, emotional upset, and physical reactions — so that the output fits on screen:
+
+```{r}
+#| eval: false
+fit = bgm(Wenchuan[, 1:5], seed = 1234)
+```
+
+```{r}
+#| include: false
+#| purl: false
+fit = bgm(Wenchuan[, 1:5], seed = 1234, display_progress = "none")
+```
+
+By default, [`bgm()`](../reference/bgm.qmd) runs four parallel MCMC chains using the [No-U-Turn Sampler (NUTS)](../reference/sampler-diagnostics.qmd#sec-nuts-diagnostics) — the default sampling algorithm — in combination with Bayesian [edge selection](../guide/edge-selection.qmd). Here we use `seed = 1234` for reproducibility. If the sampler diagnostics indicate persistent problems, refit with `update_method = "adaptive-metropolis"`.
+
+## Posterior summaries
+
+```{r}
+summary(fit)
+```
+
+The summary shows posterior means, standard deviations, [Monte Carlo standard errors (MCSE)](../guide/mcmc-diagnostics.qmd#sec-mcse), [effective sample sizes (ESS)](../guide/mcmc-diagnostics.qmd#sec-ess), and [R-hat](../guide/mcmc-diagnostics.qmd#sec-rhat) values for each parameter. For partial associations, it also reports posterior inclusion probabilities because we used edge selection. For a full description of the output structure, see [The fit object](../reference/fit-object.qmd); for guidance on interpreting the convergence diagnostics (ESS and R-hat), see [Checking convergence](../guide/mcmc-diagnostics.qmd).
+
+## Posterior means
+
+```{r}
+coef(fit)
+```
+
+`coef()` returns posterior mean matrices: `$pairwise` contains the partial associations and `$indicator` contains edge inclusion probabilities.
+
+## The network, split by evidence
+
+A single network drawing has to make every pair either an edge or a blank, and a blank cannot say whether the data ruled the edge out or simply had too little to say about it. Because `bgms` returns an inclusion Bayes factor for every edge, you do not have to make that choice. The network is drawn as three panels on one shared layout: the edges the data support, the edges the data rule out, and the edges the data cannot decide. This is the **edge evidence plot**, and it is the display this documentation uses for every network result.
+
+The categories come from [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) at an inclusion Bayes factor of 10 in either direction. See [Edge Selection](../guide/edge-selection.qmd) for why the Bayes factor, and not the inclusion probability on its own, is what licenses a claim about an edge. `plot(fit)` draws this display; [Methods](../reference/methods.qmd#plot) documents its arguments. To style the network yourself, `qgraph(coef(fit)$pairwise, ...)` draws the posterior means with any styling you already use. The [easybgm](https://cran.r-project.org/package=easybgm) package offers more elaborate plotting and summary functions on top of `bgms`.
+
+```{r}
+#| fig-width: 13
+#| fig-height: 5
+plot(fit)
+```
+
+Each panel licenses a different statement.
+
+- **Evidence of presence.** For these eight edges the data favor a direct association, one that survives conditioning on the other three symptoms. Only this panel is weighted: line width is the posterior mean partial association, so the effect sizes live here.
+- **Evidence of absence.** `dreams-physior` is the one edge the data actively rule out, with an inclusion Bayes factor of about 0.08, or roughly 12 to 1 against. That is a positive statement of conditional independence, and it is the statement an estimation workflow cannot make: there, a missing edge might just as well mean too little data. The panel is drawn dashed and at uniform width because for these edges the classification, not a weight, is the result.
+- **Undecided.** `flash-upset` is the edge these data have too little to say about. Its Bayes factor of about 0.11 sits just inside the undecided band, so it is neither supported nor ruled out.
+
+This is why the site does not draw the bare thresholded network. Keeping only the edges with posterior inclusion probability of 0.5 or more, the median probability model, would reproduce exactly the eight edges of the first panel and leave `dreams-physior` and `flash-upset` equally blank. One of those two blanks is a finding; the other is an open question, and the drawing would not tell you which is which.
+
+For continuous variables the same call fits a Gaussian graphical model with `variable_type = "continuous"`, and the same display applies; the [Gaussian graphical model](../guide/ggm.qmd#fitting-a-ggm) page shows one.
+
+## Where to next
+
+- Learn about the unified [graphical model framework](../guide/graphical-models.qmd) in `bgms`, with [ordinal](../guide/omrf.qmd) and [continuous](../guide/ggm.qmd) special cases.
+- [`bgm()`](../reference/bgm.qmd) for the arguments and return values.
+- Next in the series: [From estimation to evidence](estimation-to-evidence.qmd).

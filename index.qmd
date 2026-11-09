@@ -38,13 +38,13 @@ execute:
 
 ::: {.grid .gap-3 .pb-3 .pt-4}
 ::: {.g-col-12 .g-col-sm-4}
-[Get Started](guide/getting-started.qmd){.btn-action-primary .btn-action .btn .btn-lg .w-100 role="button"}
+[Getting started](examples/getting-started.qmd){.btn-action-primary .btn-action .btn .btn-lg .w-100 role="button"}
 :::
 ::: {.g-col-12 .g-col-sm-4 .mb-2}
-[User's Guide](guide/index.qmd){#btn-guide .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
+[Guide](guide/index.qmd){#btn-guide .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
 :::
 ::: {.g-col-12 .g-col-sm-4 .mb-2}
-[Worked Analyses](examples/index.qmd){#btn-examples .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
+[Examples](examples/index.qmd){#btn-examples .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
 :::
 :::
 
@@ -61,8 +61,6 @@ execute:
 :::::: {.alt-background}
 ::::: {.content-block .quick-start}
 
-## Quick Start
-
 ```r
 # Install from CRAN
 install.packages("bgms")
@@ -76,56 +74,32 @@ summary(fit)
 
 The same fit weighs every possible edge and reports the evidence:
 
-![The Wenchuan network split by evidence: pairs the data support, pairs they rule out, and pairs they leave undecided.](images/edge-evidence-wenchuan.png){.img-fluid fig-alt="Three network panels on one shared layout: evidence of presence (35 edges, weighted), evidence of absence (62, dashed), undecided (39, dotted)."}
+![The Wenchuan network split by evidence: edges the data support, edges they rule out, and edges they leave undecided.](images/edge-evidence-wenchuan.png){.img-fluid fig-alt="Three network panels on one shared layout: evidence of presence (35 edges, weighted), evidence of absence (62, dashed), undecided (39, dotted)."}
 
 Of the 136 possible edges, 35 are supported, 62 are ruled out, and 39
 are undecided: the split an estimated network cannot make.
 [See the full analysis →](examples/estimation-to-evidence.qmd)
 
-:::::
-::::::
+Four pages take you from installation to a reported analysis.
 
-:::::: {.content-block}
+1. [Getting started](examples/getting-started.qmd): install `bgms`, fit
+   your first model, and read the network split by evidence.
+2. [From estimation to evidence](examples/estimation-to-evidence.qmd): the
+   full Wenchuan network, estimated first and then weighed pair by pair with
+   an inclusion Bayes factor.
+3. [Reading the output](examples/reading-the-output.qmd): the `summary()`
+   of a real fit, walked block by block.
+4. [Check your priors](examples/check-your-priors.qmd):
+   [`prior_sensitivity_check()`](reference/prior-sensitivity.qmd) run on a
+   fitted model, with its report and its curve read in full.
 
-::: {.text-center .pt-3 .pb-2}
-New to Bayesian graphical models? Start with the
-[worked analyses](examples/index.qmd). Coming from `bootnet` or
-`qgraph`? Start with
-[your workflow, translated](examples/from-bootnet-qgraph.qmd).
-:::
+After that: [comparing groups](examples/comparing-groups.qmd), [edge
+clustering](examples/edge-clustering.qmd), and [your bootnet and
+qgraph workflow translated](examples/from-bootnet-qgraph.qmd).
 
-::::: {.features}
-
-:::: {.feature}
-### User's Guide
-Learn `bgms` from the ground up: installation, basic usage, and statistical concepts behind Bayesian graphical models for mixed variable types.
-
-[Guide →](guide/index.qmd)
-::::
-
-:::: {.feature}
-### Worked Analyses
-Complete analyses, start to finish: fit a model, read the output, and see what each result licenses you to say.
-
-[Examples →](examples/index.qmd)
-::::
-
-:::: {.feature}
-### Reference
-Complete documentation for all R functions: [`bgm()`](reference/bgm.qmd), [`bgmCompare()`](reference/bgmCompare.qmd), S3 methods, and extractor functions.
-
-[Reference →](reference/index.qmd)
-::::
-
-:::: {.feature}
-### Manual
-Technical documentation for contributors: C++ architecture, MCMC algorithms, and implementation details.
-
-[Manual →](manual/index.qmd)
-::::
+The [Guide](guide/index.qmd) carries the reasoning behind these pages and the [Reference](reference/index.qmd) the function contracts.
 
 :::::
-
 ::::::
 
 :::::: {.get-started .alt-background}
@@ -206,12 +180,20 @@ toBibtex(citation("bgms"))
 
 The tutorial developing this workflow end to end is in preparation.
 The methods are published:
+[Marsman, van den Bergh and Haslbeck (2025)](https://doi.org/10.1017/psy.2024.4)
+on the ordinal Markov random field,
 [Marsman et al. (2022)](https://doi.org/10.1007/s11336-022-09848-8) on
 Bayesian edge screening and structure selection,
 [Sekulovski et al. (2024)](https://doi.org/10.1080/00273171.2024.2345915)
-on testing conditional independence, and
+on testing conditional independence,
+[Marsman, Waldorp, Sekulovski and Haslbeck (2025)](https://doi.org/10.1017/psy.2025.10060)
+on Bayes factor tests for group differences,
+[Sekulovski et al. (2026)](https://doi.org/10.1037/met0000847) on the
+stochastic block prior for clustering, and
 [Huth et al. (2026)](https://doi.org/10.1038/s41562-025-02314-2) on how
 often published network edges rest on inconclusive evidence.
+The companion [reporting guidelines](https://doi.org/10.31234/osf.io/xce7j_v1)
+by Sekulovski et al. (2026) say what to report and how.
 
 **2026-08-04**: `bgms` 0.2.0.0 is on CRAN. [News →](news.qmd)
 

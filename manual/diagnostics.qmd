@@ -2,7 +2,7 @@
 title: "Convergence Diagnostics"
 ---
 
-This page documents the C++ implementation of convergence diagnostics in `bgms`. The ESS and R-hat computations are implemented in C++ for speed, enabling fast diagnostics even with long chains and many parameters. For how to *interpret* these diagnostics as a user, see [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) in the Guide; the user-facing accessors are [`extract_ess()` and `extract_rhat()`](../reference/extractors.qmd).
+This page documents the C++ implementation of convergence diagnostics in `bgms`. The ESS and R-hat computations are implemented in C++ for speed, enabling fast diagnostics even with long chains and many parameters. For how to *interpret* these diagnostics as a user, see [Checking convergence](../guide/mcmc-diagnostics.qmd) in the Guide; the user-facing accessors are [`extract_ess()` and `extract_rhat()`](../reference/extractors.qmd).
 
 ## Overview
 

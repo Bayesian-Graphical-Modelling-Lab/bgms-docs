@@ -76,7 +76,7 @@ right-hand call reads from.
 | Is this edge absent? | Unanswerable | `verdicts(fit)` | Evidence of absence becomes a positive, reportable finding rather than a blank. |
 | Do these two edges differ? | `differenceTest(boots, "intrusion--dreams", "intrusion--upset", measure = "edge")` | `w = extract_pairwise_interactions(fit)`, then `quantile(w[, "intrusion-dreams"] - w[, "intrusion-upset"], c(0.025, 0.975))` | The difference between two weights has a posterior distribution of its own; read its credible interval directly. |
 | Which nodes are central? | `centralityPlot(network)` | `plot(extract_centrality(fit))` | Centrality gets a posterior: every node's strength comes with a credible interval, and the ranking's uncertainty is visible instead of assumed away. |
-| Do the groups differ? | `NCT(data1, data2, it = 1000, test.edges = TRUE)` | `bgmCompare(x = data1, y = data2)` | Where the Network Comparison Test asks whether two networks differ somewhere, the comparison answers parameter by parameter, and evidence of *equality* becomes expressible. See [Group Comparison](../guide/group-comparison.qmd). |
+| Do the groups differ? | `NCT(data1, data2, it = 1000, test.edges = TRUE)` | `bgmCompare(x = data1, y = data2)` | Where the Network Comparison Test asks whether two networks differ somewhere, the comparison answers parameter by parameter, and evidence of *equality* becomes expressible. See [Comparing groups](comparing-groups.qmd). |
 | Does the model describe the data? | Not part of the standard workflow | `calibration_check(fit, seed = 123)` | A new check: reliability diagrams of the model's conditional predictions, plus [`simulate()`](../reference/methods.qmd#simulate) for posterior predictive displays. |
 | What does a blank in the drawing mean? | It cannot say: ruled out and undecided look the same | The blank splits in two: evidence of absence and undecided are separate panels of `plot(fit)` | The three-way reading is worked through in [From estimation to evidence](estimation-to-evidence.qmd). |
 
@@ -158,11 +158,11 @@ approximates is already in the output.
 
 **Undecided is a feature.** The estimation workflow must commit every
 pair to edge or blank. The Bayesian workflow keeps a third category for
-the pairs the data cannot decide, and reports it as a count you can
+the edges the data cannot decide, and reports it as a count you can
 state in a paper. An analysis that can say "these data are not enough
 to settle this association" is telling you something the point estimate
 never could, and on real data the undecided category is rarely empty:
-39 of the Wenchuan analysis's 136 pairs land there.
+39 of the Wenchuan analysis's 136 edges land there.
 
 ## What you give up {#sec-give-up}
 
@@ -187,10 +187,10 @@ fit = bgm(YourData, iter = 1e4, warmup = 5e3, seed = 123)
 verdicts(fit); plot(fit)
 ```
 
-[Getting Started](../guide/getting-started.qmd) walks this first fit
+[Getting started](getting-started.qmd) walks this first fit
 step by step;
-[From estimation to evidence](estimation-to-evidence.qmd) is the full
-worked analysis, from the familiar starting point to the reported
+[From estimation to evidence](estimation-to-evidence.qmd) is the complete
+example, from the familiar starting point to the reported
 sentence.
 
 ## Where to next
@@ -199,10 +199,7 @@ sentence.
   workflows on the same data, and what the Bayes factors add.
 - [Edge Selection](../guide/edge-selection.qmd) for why the inclusion
   Bayes factor works the way it does.
-- [Group Comparison](../guide/group-comparison.qmd) for the
+- [Comparing groups](comparing-groups.qmd) for the
   `bgmCompare()` counterpart to network comparison tests.
 - The tutorial manuscript that develops this translation in full is in
   preparation.
-- Next in the series: *Reporting your results* is in preparation;
-  until it ships, the what-to-report callouts on each example page
-  carry the templates.

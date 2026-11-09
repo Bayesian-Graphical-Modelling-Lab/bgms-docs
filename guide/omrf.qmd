@@ -18,7 +18,7 @@ $$
 \;=\; \underbrace{\mu_{i, c+1} - \mu_{i, c}}_{\substack{\text{baseline preference for }\\c+1\text{ over }c}} \;+\; \underbrace{\textstyle\sum_{j \neq i} 2\,\omega_{ij}\, x_j}_{\text{the pull of the neighbors}} .
 $$
 
-The left side is the log odds of one adjacent answer over the other. The right side collects everything that shifts those odds: the threshold difference, plus each neighboring answer $x_j$ weighted by twice its edge weight $\omega_{ij}$. If one neighboring response increases by one category, the adjacent-category log odds change by exactly $2\,\omega_{ij}$. The edge weight $\omega_{ij}$ is therefore half the log odds ratio between adjacent categories of the two items, the same for every adjacent pair [@MarsmanVandenBerghHaslbeck_2025].
+The left side is the log odds of one adjacent answer over the other. The right side collects everything that shifts those odds: the threshold difference, plus each neighboring answer $x_j$ weighted by twice its edge weight $\omega_{ij}$. If one neighboring response increases by one category, the adjacent-category log odds change by exactly $2\,\omega_{ij}$. The edge weight $\omega_{ij}$ is therefore half the log odds ratio between adjacent categories of the two items, the same for every adjacent pair [@MarsmanEtAl_2025_ordinal].
 
 Together, the item-level regressions define one joint model over complete response patterns, so the items are analyzed as one system, not one at a time. That joint form is the model below.
 
@@ -33,6 +33,8 @@ $$
 
 where $\mu_{ic}$ is the category threshold parameter for category $c$ of variable $i$ (one per category above the baseline $c = 0$, which is fixed at $\mu_{i0} = 0$) and $\boldsymbol{\Omega}$ is a symmetric interaction matrix whose off-diagonal entry $\omega_{ij}$ is the partial association between variables $i$ and $j$.
 
+This is the general pairwise Markov random field of [Graphical models](graphical-models.qmd): the node potentials are the category thresholds, and the bilinear form reduces to $2\sum_{i<j}\omega_{ij}\,x_i x_j$ because $\boldsymbol{\Omega}$ is symmetric.
+
 ## Why the adjacent category model?
 
 The ordinal MRF is the multivariate generalization of the adjacent category logit model for ordinal responses [@Agresti_2010]. For a single ordinal variable with categories $0, \dots, m$, that model describes the log-odds between each pair of successive categories:
@@ -45,18 +47,7 @@ Each parameter compares one category to the next; nothing in the model treats th
 
 This choice has a practical payoff: the model uses only the *ordering* of the categories, not their numeric labels or spacing. Whether you code a five-point scale as 0–4 or 1–5, or the distances between response options are unequal, the estimates are the same — no interval-scale measurement is assumed.
 
-It is also the choice that makes a graphical model possible at all. Other ordinal regressions, such as the cumulative logit or continuation ratio models, cannot serve as building blocks of a joint network: their conditional distributions are incompatible with any joint distribution [@SuggalaYangRavikumar_2017]. The adjacent category model's conditionals are compatible, and the joint distribution they generate is exactly the ordinal MRF above [@MarsmanVandenBerghHaslbeck_2025]. The formal development is in [OMRF Internals](../manual/omrf-internals.qmd).
-
-## Connection to the MRF framework
-
-The [Graphical Models](graphical-models.qmd) page introduced the general pairwise MRF:
-
-$$
-p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
-\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
-$$
-
-The ordinal MRF is the discrete special case. The node potentials $\mu_i(x_i)$ are the category thresholds $\mu_{ic}$, and the interaction matrix $\boldsymbol{\Omega}$ has off-diagonal entries $\omega_{ij}$. The bilinear form $\mathbf{x}^{\sf T}\boldsymbol{\Omega}\,\mathbf{x}$ reduces to $2\sum_{i < j} \omega_{ij}\, x_i\, x_j$ because $\boldsymbol{\Omega}$ is symmetric (the diagonal terms are not identifiable, and absorbed by the thresholds).
+It is also the choice that makes a graphical model possible at all. Other ordinal regressions, such as the cumulative logit or continuation ratio models, cannot serve as building blocks of a joint network: their conditional distributions are incompatible with any joint distribution [@SuggalaYangRavikumar_2017]. The adjacent category model's conditionals are compatible, and the joint distribution they generate is exactly the ordinal MRF above [@MarsmanEtAl_2025_ordinal]. The formal development is in [OMRF Internals](../manual/omrf-internals.qmd).
 
 ## Partial associations
 
@@ -116,7 +107,7 @@ The thresholds are nuisance parameters — they are estimated during MCMC sampli
 
 ## Pseudolikelihood
 
-The normalizing constant of the ordinal MRF involves a sum over all possible configurations of $p$ ordinal variables, which is intractable for all but the smallest networks. `bgms` uses a pseudolikelihood approximation [@MarsmanVandenBerghHaslbeck_2025]: the joint distribution is replaced by the product of each variable's conditional distribution given all the others (its *full conditional*).
+The normalizing constant of the ordinal MRF involves a sum over all possible configurations of $p$ ordinal variables, which is intractable for all but the smallest networks. `bgms` uses a pseudolikelihood approximation [@MarsmanEtAl_2025_ordinal]: the joint distribution is replaced by the product of each variable's conditional distribution given all the others (its *full conditional*).
 
 The full conditional distribution for variable $i$ given all other variables is:
 
@@ -125,14 +116,6 @@ p(x_i = c \mid \mathbf{x}_{-i}) = \frac{\exp\!\left(\mu_{ic} + c \cdot r_i\right
 $$
 
 where $r_i = 2\sum_{j \neq i} x_j\, \omega_{ij}$ is the residual score — a single summary of the influence of all other variables on $x_i$. The pseudolikelihood is the product of these conditionals across all observations and variables.
-
-## Edge selection
-
-When `edge_selection = TRUE` (the default), each partial association $\omega_{ij}$ receives a spike-and-slab prior, so an edge is either exactly absent or estimated from the data. The prior specification is described in [Prior Basics](prior-basics.qmd), and how to read the resulting inclusion probabilities and Bayes factors in [Edge Selection](edge-selection.qmd).
-
-## Missing data
-
-Missing values can be handled via listwise deletion (the default) or imputed within the Gibbs sampler by setting `na_action = "impute"`. For discrete data, missing entries are drawn from their full conditional categorical distribution at each MCMC iteration. See [Missing Data](missing-data.qmd) for details on both approaches and recommendations.
 
 ## Fitting an ordinal MRF
 
@@ -155,3 +138,10 @@ To obtain model-specific parameterizations, use the dedicated extractors:
 
 - [`extract_main_effects(fit)`](../reference/extractors.qmd#extract_main_effects) — returns the category threshold parameters.
 - [`extract_log_odds(fit)`](../reference/extractors.qmd#extract_log_odds) — returns the log adjacent-category odds ratios $2\omega_{ij}$.
+
+## See also
+
+- [Edge Selection](edge-selection.qmd): how to read the inclusion probabilities and Bayes factors.
+- [Prior Basics](prior-basics.qmd): the spike-and-slab prior specification.
+- [Missing Data](missing-data.qmd): listwise deletion (the default) or imputation with `na_action = "impute"`.
+- [From estimation to evidence](../examples/estimation-to-evidence.qmd): an ordinal network analysis end to end.

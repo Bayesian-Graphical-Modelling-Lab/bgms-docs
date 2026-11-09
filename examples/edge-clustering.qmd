@@ -68,7 +68,7 @@ the clustering part of the graphical model: cluster assignments, the
 number of clusters, and the evidence for clustering against no
 clustering are all estimated together with the network, so every
 cluster statement arrives with a posterior probability attached
-[@SekulovskiEtAl_2025_sbm].
+[@SekulovskiEtAl_2026_sbm].
 
 ## The data and the fit
 
@@ -102,7 +102,7 @@ probability $\exp(-1) \approx 0.37$ on no clustering at all. The run
 length is the one deliberate setting, and it earns its place on this
 page. At the package defaults (2,000 warmup, 2,000 sampling
 iterations) this fit prints a warmup warning, and the follow-up checks
-that [MCMC Diagnostics](../guide/mcmc-diagnostics.qmd) prescribes
+that [Checking convergence](../guide/mcmc-diagnostics.qmd) prescribes
 confirm it is real: largest split-$\hat{R}$ 1.35, smallest effective
 sample size 44. Worse, the clustering answer is not yet stable at
 short lengths; an intermediate run at `iter = 1e4` put a Bayes factor
@@ -238,8 +238,6 @@ finding, and a caution against over-reading the apparent groupings
 that any network drawing produces by placing connected nodes near
 each other.
 
-## What to report
-
 ::: {.callout-note appearance="simple"}
 ## What to report
 
@@ -267,7 +265,7 @@ each other.
 - [`sbm_prior()`](../reference/priors.qmd#sbm_prior) and
   [`extract_sbm()`](../reference/extractors.qmd#extract_sbm) for the
   arguments and the return value.
-- @SekulovskiEtAl_2025_sbm for the step-by-step tutorial behind this
+- @SekulovskiEtAl_2026_sbm for the step-by-step tutorial behind this
   analysis, and @MartarelliEtAl_2023_sbps for the study the data
   come from.
 - Back in the series:

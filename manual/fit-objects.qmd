@@ -14,8 +14,8 @@ rest of the package uses. `R/methods_bgms.R` and `R/methods_bgmcompare.R` hold
 the user-facing methods, including the `$` and `[[` methods that keep the
 object usable as if it were still a list.
 
-For what to do with the object, see [Model Output](../guide/mcmc-output.qmd) in
-the Guide and the [Methods reference](../reference/methods.qmd).
+For what to do with the object, see [The fit object](../reference/fit-object.qmd) in
+the Reference and the [Methods reference](../reference/methods.qmd).
 
 ## Two classes
 
@@ -263,5 +263,5 @@ scale, so there is nothing to convert.
 [Convergence Diagnostics](diagnostics.qmd),
 [bgmCompare Internals](bgmcompare-internals.qmd),
 [Sensitivity and Refits](sensitivity-refit.qmd),
-[Model Output](../guide/mcmc-output.qmd),
+[The fit object](../reference/fit-object.qmd),
 [Methods reference](../reference/methods.qmd).

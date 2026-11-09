@@ -273,7 +273,7 @@ $$
 where $\boldsymbol{\Omega}_{xx}$, $\boldsymbol{\Omega}_{yy}$, and
 $\boldsymbol{\Omega}_{xy}$ are the discrete-discrete, continuous-continuous,
 and cross-type pairwise interaction matrices (see the
-[User's Guide](../guide/mixed-model.qmd) for their statistical
+[Guide](../guide/mixed-model.qmd) for their statistical
 interpretation).
 
 **Sampling.** All five parameter blocks are updated jointly by NUTS.

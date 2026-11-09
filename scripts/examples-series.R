@@ -2,10 +2,8 @@
 # that need the order: the companion scripts (scripts/extract-example-code.R)
 # and the PDF (scripts/build-examples-pdf.R). Sourced, never run on its own.
 #
-# Entry 1 of the series as the reader sees it on examples/index.qmd is "Your
-# first network", which is guide/getting-started.qmd and not an examples page.
-# The examples pages therefore start at position 2, which is what SERIES_OFFSET
-# encodes and what the companion scripts are numbered with.
+# Getting started is entry 1 and an examples page like the others, so the
+# companion scripts are numbered from 01 and SERIES_OFFSET is zero.
 #
 # Adding a page means listing its slug here, adding it to the `examples`
 # sidebar in _quarto.yml, and adding an entry to examples/index.qmd. Pages
@@ -13,16 +11,16 @@
 # list can run ahead of the pages.
 
 SERIES = c(
+  "getting-started",          # 01
   "estimation-to-evidence",   # 02
   "reading-the-output",       # 03
   "check-your-priors",        # 04
   "comparing-groups",         # 05
   "edge-clustering",          # 06
-  "from-bootnet-qgraph",      # 07
-  "reporting"                 # 08
+  "from-bootnet-qgraph"       # 07
 )
 
-SERIES_OFFSET = 1L
+SERIES_OFFSET = 0L
 
 # Slugs in series order, restricted to the pages that exist.
 series_pages = function(project_dir = ".") {

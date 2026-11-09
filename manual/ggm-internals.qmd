@@ -19,7 +19,7 @@ $\mathbf{S} = \mathbf{X}^\top \mathbf{X}$.
 Priors are specified on the partial-association scale: the slab
 (`interaction_prior`) acts on $-\theta_{ij}/2$ and the scale prior
 (`precision_scale_prior`) on $\theta_{ii}/2$, matching the convention
-of [`sample_ggm_prior()`](../reference/sample-ggm-prior.qmd). Both are
+of [`sample_ggm_prior()`](../reference/prior-samplers.qmd#sample_ggm_prior). Both are
 polymorphic prior objects (see [Parameter Priors](parameter-priors.qmd));
 the defaults are a Normal slab and an exponential diagonal.
 
@@ -442,7 +442,7 @@ positive definite. If the inversion fails, the identity is kept.
 ## Prior-only mode
 
 With $n = 0$ (used by
-[`sample_ggm_prior()`](../reference/sample-ggm-prior.qmd)), the
+[`sample_ggm_prior()`](../reference/prior-samplers.qmd#sample_ggm_prior)), the
 likelihood terms vanish and the same machinery samples the prior
 alone. One safeguard becomes necessary: with data, the
 $\tfrac{n}{2}\log|\boldsymbol{\Theta}|$ term vetoes proposals that

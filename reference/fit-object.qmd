@@ -1,5 +1,5 @@
 ---
-title: "Model Output"
+title: "The fit object"
 ---
 
 
@@ -29,12 +29,12 @@ fit_compare = readRDS(resolve_fixture("fit_compare_adhd.rds"))
 
 `bgms` uses Markov chain Monte Carlo (MCMC) to sample from the posterior
 distribution of the model parameters. The output of
-[`bgm()`](../reference/bgm.qmd) and
-[`bgmCompare()`](../reference/bgmCompare.qmd) contains posterior summaries
+[`bgm()`](bgm.qmd) and
+[`bgmCompare()`](bgmCompare.qmd) contains posterior summaries
 computed from these samples, posterior mean matrices, the raw MCMC draws
 themselves, and sampler
 diagnostics. This chapter describes how to access and interpret each of
-these components. For diagnostics related to the sampler itself, see [MCMC Diagnostics](mcmc-diagnostics.qmd).
+these components. For diagnostics related to the sampler itself, see [Checking convergence](../guide/mcmc-diagnostics.qmd).
 For a walkthrough of a real output, block by block on a fitted model, see
 [Reading the output](../examples/reading-the-output.qmd).
 
@@ -48,7 +48,7 @@ fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
 
 ## The fit object
 
-[`bgm()`](../reference/bgm.qmd) returns an S7 object of class `bgms`
+[`bgm()`](bgm.qmd) returns an S7 object of class `bgms`
 (`class(fit)` reports `"bgms"` and `"S7_object"`). Its components are
 reached with `$`, as below.
 
@@ -63,11 +63,11 @@ The two primary interfaces are `summary()` for tabular diagnostics and
 Some components are present only for particular configurations:
 `fit$inclusion_parameter_samples` holds per-chain draws of the shared
 inclusion probability for continuous models with
-`beta_bernoulli_prior()` (see [Gaussian Graphical Model](ggm.qmd)),
+`beta_bernoulli_prior()` (see [Gaussian Graphical Model](../guide/ggm.qmd)),
 and `fit$zratio_diag` holds the trust-gauge summary, which a continuous
 or mixed fit with edge selection produces by default under
 `precision_graph_prior = "hierarchical"` (see
-[MCMC Diagnostics](mcmc-diagnostics.qmd#sec-trust-gauge)); both are
+[Sampler diagnostics and warnings](sampler-diagnostics.qmd#sec-trust-gauge)); both are
 `NULL` otherwise, as they are on this ordinal fit.
 
 ## Posterior summaries {#sec-posterior-summaries}
@@ -100,7 +100,7 @@ categories are less probable.
 **Residual variances** report the posterior estimates of the residual
 variance $1 / \Theta_{ii}$ for each continuous variable, where
 $\Theta_{ii}$ is the corresponding diagonal element of the precision
-matrix (see [Gaussian Graphical Model](ggm.qmd)). Use
+matrix (see [Gaussian Graphical Model](../guide/ggm.qmd)). Use
 `extract_precision()` to obtain the full precision matrix.
 
 **Pairwise interactions** report the conditional association between each
@@ -123,13 +123,13 @@ edge indicator switched between excluded (0) and included (1) states
 during sampling; they show how much the sampler explored. Read them
 beside `n_eff`, which measures precision conditional on that
 exploration; see
-[MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rb-inclusion-ess).
+[Sampler diagnostics and warnings](sampler-diagnostics.qmd#sec-rb-inclusion-ess).
 []{#sec-pinned-indicators}
 The Rao-Blackwellized precision columns (`mcse`, `n_eff`, `Rhat`) come
 back `NA` when the chain is so certain about an edge that there is
 nothing left to estimate, rather than reporting the reassuring-looking
 numbers a near-constant chain would otherwise produce.
-[`extract_ess()`](../reference/extractors.qmd#extract_ess) returns the
+[`extract_ess()`](extractors.qmd#extract_ess) returns the
 same Rao-Blackwellized `n_eff` for indicators.
 
 ### Summary columns
@@ -138,11 +138,11 @@ same Rao-Blackwellized `n_eff` for indicators.
 |--------|---------|
 | `mean` | Posterior mean of the parameter. For inclusion indicators, the Rao-Blackwellized inclusion probability. |
 | `sd` | Posterior standard deviation — the width of the posterior. |
-| `mcse` | Monte Carlo standard error — how precisely the posterior mean is estimated. A small MCSE relative to `sd` indicates sufficient sampling. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mcse). |
-| `n_eff` | Effective sample size — the number of independent draws the chain is equivalent to. Values below 100 warrant longer runs. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-ess). |
-| `share_incl` | Tables of parameters under selection only (`pairwise` for [`bgm()`](../reference/bgm.qmd); `main_diff` and `pairwise_diff` for [`bgmCompare()`](../reference/bgmCompare.qmd)). The share of the squared Monte Carlo error of the model-averaged parameter that comes from inclusion uncertainty rather than from the slab. Values near 1 mean the bottleneck is how well the chain resolved whether the parameter is in; values near 0 mean it is how well the chain resolved the effect size given inclusion. |
-| `n0->1`, `n1->0` | Inclusion table only. Directional counts of indicator transitions; they show how much the sampler moved between structures. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-mixture-ess). |
-| `Rhat` | Split $\hat{R}$ convergence diagnostic. Values above 1.01 suggest the chains have not mixed. See [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-rhat). |
+| `mcse` | Monte Carlo standard error — how precisely the posterior mean is estimated. A small MCSE relative to `sd` indicates sufficient sampling. See [Checking convergence](../guide/mcmc-diagnostics.qmd#sec-mcse). |
+| `n_eff` | Effective sample size — the number of independent draws the chain is equivalent to. Values below 100 warrant longer runs. See [Checking convergence](../guide/mcmc-diagnostics.qmd#sec-ess). |
+| `share_incl` | Tables of parameters under selection only (`pairwise` for [`bgm()`](bgm.qmd); `main_diff` and `pairwise_diff` for [`bgmCompare()`](bgmCompare.qmd)). The share of the squared Monte Carlo error of the model-averaged parameter that comes from inclusion uncertainty rather than from the slab. Values near 1 mean the bottleneck is how well the chain resolved whether the parameter is in; values near 0 mean it is how well the chain resolved the effect size given inclusion. |
+| `n0->1`, `n1->0` | Inclusion table only. Directional counts of indicator transitions; they show how much the sampler moved between structures. See [Sampler diagnostics and warnings](sampler-diagnostics.qmd#sec-mixture-ess). |
+| `Rhat` | Split $\hat{R}$ convergence diagnostic. Values above 1.01 suggest the chains have not mixed. See [Checking convergence](../guide/mcmc-diagnostics.qmd#sec-rhat). |
 
 In the pairwise table for an edge-selected fit, `mcse` and `n_eff` are
 the composite quantities for the model-averaged edge weight: the weight
@@ -207,7 +207,7 @@ the conditional probability that the edge ends the sweep included,
 given the rest of the state. Averaging these gives a lower-variance
 estimate of the inclusion probability than averaging the binary
 indicators — it is the default estimator behind `summary()` and
-[`extract_posterior_inclusion_probabilities()`](../reference/extractors.qmd#extract_posterior_inclusion_probabilities).
+[`extract_posterior_inclusion_probabilities()`](extractors.qmd#extract_posterior_inclusion_probabilities).
 
 ### Example: posterior density for an edge
 
@@ -238,24 +238,7 @@ abline(v = 0, lty = 2, col = "grey50")
 
 The `extract_*()` family of functions provides targeted access to model
 components. These are documented in the
-[Extractor Functions](../reference/extractors.qmd) reference. The most
-commonly used are:
-
-| Function | Returns |
-|----------|---------|
-| `extract_pairwise_interactions()` | Raw partial association samples |
-| `extract_main_effects()` | Raw main effect samples |
-| `extract_indicators()` | Raw indicator samples |
-| `extract_posterior_inclusion_probabilities()` | Posterior inclusion probabilities |
-| `extract_prior_inclusion_probabilities()` | Effective prior inclusion probabilities — the denominators for inclusion Bayes factors on continuous data (see [Edge Selection](edge-selection.qmd#sec-bf-continuous)) |
-| `extract_inclusion_bf()` | Inclusion Bayes factors, computed from Rao-Blackwellized odds accumulators, so they stay finite where edges whose inclusion probability saturates at 0 or 1 would overflow the posterior-odds transformation — up to the numerical bound, beyond which the value is still `Inf`. `log = TRUE` returns their natural logarithms |
-| `extract_precision()` | Posterior mean precision matrix (GGM / continuous block) |
-| `extract_partial_correlations()` | Posterior mean partial correlation matrix (GGM / continuous block) |
-| `extract_log_odds()` | Posterior mean log-odds matrix (ordinal / discrete block) |
-| `extract_ess()` | Effective sample sizes. For edge indicators, the Rao-Blackwellized ESS |
-| `extract_rhat()` | Split $\hat{R}$ values |
-| `extract_sbm()` | SBM cluster assignments and co-clustering matrix (when `edge_prior = sbm_prior(...)`) |
-| `extract_arguments()` | Arguments used when fitting the model |
+[Extractor Functions](extractors.qmd) reference.
 
 ## NUTS diagnostics
 
@@ -266,20 +249,13 @@ stored in `fit$nuts_diag`:
 str(fit$nuts_diag, max.level = 1)
 ```
 
-The `summary` field aggregates the headline numbers — total divergences,
-maximum-tree-depth hits, the minimum E-BFMI across chains, the mean
-acceptance probability, and whether any chain's warmup looked
-incomplete. The per-iteration detail behind them is stored alongside:
-tree depths, divergence flags, energies, and acceptance probabilities
-(`fit$nuts_diag$accept_prob`), plus the per-chain `warmup_check`
-diagnostics. The `has_issues` flag is `TRUE` when any check raised a
-concern. These are described in detail in
-[MCMC Diagnostics](mcmc-diagnostics.qmd). If these diagnostics remain problematic after tuning, refit with `update_method = "adaptive-metropolis"`.
+These are described in detail in
+[Sampler diagnostics and warnings](sampler-diagnostics.qmd#sec-nuts-diagnostics).
 
-## Output from [`bgmCompare()`](../reference/bgmCompare.qmd)
+## Output from [`bgmCompare()`](bgmCompare.qmd)
 
-[`bgmCompare()`](../reference/bgmCompare.qmd) returns an S7 object of class `bgmCompare` with the same
-structure as [`bgm()`](../reference/bgm.qmd), plus additional components for group differences.
+[`bgmCompare()`](bgmCompare.qmd) returns an S7 object of class `bgmCompare` with the same
+structure as [`bgm()`](bgm.qmd), plus additional components for group differences.
 The examples use the ADHD data (18 binary items, two groups):
 
 ```r
@@ -295,7 +271,7 @@ fit_compare = bgmCompare(
 summary(fit_compare)
 ```
 
-The summary includes two additional tables beyond what [`bgm()`](../reference/bgm.qmd) produces:
+The summary includes two additional tables beyond what [`bgm()`](bgm.qmd) produces:
 
 - **Group differences (main effects)** — posterior estimates of how
   category thresholds differ between the two groups. Large positive or
@@ -311,3 +287,9 @@ When `difference_selection = TRUE` (the default), the inclusion indicators
 for these difference parameters are reported alongside the common-structure
 indicators. An inclusion probability near 1 for a difference parameter
 indicates strong evidence that the groups differ on that effect.
+
+The `coef()` method returns:
+
+- `$pairwise_effects_groups`: group-specific posterior mean partial associations, reconstructed from the overall effects and the projection of the contrast parameters.
+- `$main_effects_groups`: group-specific posterior mean thresholds.
+- `$indicators`: posterior inclusion probabilities for the group differences.

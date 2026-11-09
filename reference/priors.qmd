@@ -247,7 +247,7 @@ fit = bgmCompare(
 ## See also
 
 [`bgm()`](bgm.qmd), [`bgmCompare()`](bgmCompare.qmd),
-[`sample_ggm_prior()`](sample-ggm-prior.qmd),
+[`sample_ggm_prior()`](prior-samplers.qmd#sample_ggm_prior),
 [Prior Samplers](prior-samplers.qmd) (draw from
 `sbm_prior()` / edge priors before seeing data),
 [Prior Basics](../guide/prior-basics.qmd),

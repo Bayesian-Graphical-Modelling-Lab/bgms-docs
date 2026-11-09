@@ -28,23 +28,7 @@ where $\boldsymbol{\mu}$ is the mean vector and $\boldsymbol{\Sigma}$ is the $p 
 
 The GGM is defined not through the covariance matrix but through its inverse, the precision matrix $\boldsymbol{\Theta} = \boldsymbol{\Sigma}^{-1}$. @Dempster_1972 introduced this idea under the name *covariance selection*: the precision matrix separates direct from indirect associations, and a zero entry $\theta_{ij} = 0$ means that variables $i$ and $j$ are conditionally independent given all other variables. In the graph, this corresponds to the absence of the edge between nodes $i$ and $j$.
 
-## Connection to the MRF framework
-
-The [Graphical Models](graphical-models.qmd) page introduced the general pairwise MRF:
-
-$$
-p(\mathbf{x}) \propto \exp\!\left(\sum_{i} \mu_i(x_i) +
-\mathbf{x}^{\sf T}\boldsymbol{\Omega}\, \mathbf{x}\right)
-$$
-
-The GGM is a special case of this form. In `bgms`, continuous variables are centered before estimation, so $\boldsymbol{\mu} = \mathbf{0}$ and the node potentials vanish. The multivariate normal density then reduces to:
-
-$$
-p(\mathbf{x}) \propto \exp\!\left(
-- \tfrac{1}{2}\,\mathbf{x}^{\sf T} \boldsymbol{\Theta}\, \mathbf{x}\right)
-$$
-
-Comparing this with the general MRF identifies the interaction matrix as $\boldsymbol{\Omega} = -\tfrac{1}{2}\,\boldsymbol{\Theta}$. The off-diagonal entry $\omega_{ij} = -\tfrac{1}{2}\,\theta_{ij}$ is the partial association between variables $i$ and $j$, and when $\theta_{ij} = 0$ the partial association is zero and the edge is absent.
+This is the general pairwise Markov random field of [Graphical models](graphical-models.qmd) with $\boldsymbol{\Omega} = -\tfrac{1}{2}\boldsymbol{\Theta}$ and no node potentials, because the variables are centered.
 
 ## Partial associations
 
@@ -86,16 +70,35 @@ In `bgms`, the diagonal entries are nuisance parameters. They receive an exponen
 
 Unlike the ordinal MRF, whose normalizing constant is intractable and requires a pseudolikelihood approximation (see [Ordinal MRF](omrf.qmd)), the GGM has a closed-form likelihood — estimates for continuous data involve no approximation. The exact expression and how it is evaluated are given in [GGM Internals](../manual/ggm-internals.qmd).
 
-## Edge selection
+## Edge selection in the GGM
 
 When `edge_selection = TRUE` (the default), each partial association $\omega_{ij}$ — and therefore each precision entry $\theta_{ij}$ — receives a spike-and-slab prior, so an edge is either exactly absent or estimated from the data. The prior specification is described in [Prior Basics](prior-basics.qmd), and how to read the resulting inclusion probabilities and Bayes factors in [Edge Selection](edge-selection.qmd).
 
-For continuous data, the edge prior interacts with the precision-matrix prior, because excluding an edge constrains a matrix that must remain positive definite. The `precision_graph_prior` argument of [`bgm()`](../reference/bgm.qmd) controls how the two priors compose:
+### Edge priors on continuous data {#sec-edge-priors-continuous}
 
-- **`"hierarchical"` (the default)** normalizes the precision prior per graph, so the prior over structures is exactly the edge prior and nominal prior inclusion probabilities apply. Each edge move then evaluates a normalizer ratio through a fast approximation, and a trust gauge audits that approximation while the chains run (see [MCMC Diagnostics](mcmc-diagnostics.qmd#sec-trust-gauge)). That approximation is built once per analysis before the chains start, which is the pause you see on a first hierarchical fit; the build announces itself with the size it covers and the number of cores it uses, then reports its elapsed time. It is cached in the session and on disk, so a repeat fit of the same configuration reuses it silently. Set `options(bgms.verbose = FALSE)` to mute the announcement.
-- **`"joint"`** combines them in un-normalized form instead. The prior probability that an edge is included then differs from the nominal edge-prior value; use [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities) for the effective values when computing Bayes factors by hand (see [Edge Selection](edge-selection.qmd#sec-bf-continuous)). A fit reports this once when it starts. With `beta_bernoulli_prior()` or `sbm_prior()`, the hyperparameter updates additionally carry a normalizing-constant correction. The correction table is built from the prior at the first fit of a model configuration — a one-time cost of the order of minutes, announced when it actually builds — and cached on disk, so later fits of the same configuration skip the build. With `beta_bernoulli_prior()`, the sampled inclusion probability is returned per chain in `fit$inclusion_parameter_samples`.
+For continuous (GGM) data — and for the continuous block of a mixed model — the edge prior does not act alone: excluding an edge also constrains the precision matrix, whose prior must respect positive definiteness. How the two compose is set by `precision_graph_prior` in [`bgm()`](../reference/bgm.qmd), and the two settings differ in whether the prior you wrote down is the prior the model uses:
+
+- **`"hierarchical"` (the default)** normalizes the precision prior per graph, so the prior over structures is exactly the edge prior and nominal prior inclusion probabilities apply. A Bernoulli prior with $\pi = 0.5$ then does mean a 50% prior inclusion probability for continuous edges, and the nominal value is the correct denominator for an inclusion Bayes factor. Each edge move then evaluates a normalizer ratio through a fast approximation, and a trust gauge audits that approximation while the chains run (see [Sampler diagnostics and warnings](../reference/sampler-diagnostics.qmd#sec-trust-gauge)). That approximation is built once per analysis before the chains start, which is the pause you see on a first hierarchical fit; the build announces itself with the size it covers and the number of cores it uses, then reports its elapsed time. It is cached in the session and on disk, so a repeat fit of the same configuration reuses it silently. Set `options(bgms.verbose = FALSE)` to mute the announcement.
+- **`"joint"`** combines them in un-normalized form instead. The prior probability that an edge is included then differs from the nominal edge-prior value (the graph marginal is the edge prior reweighted by a per-graph normalizing constant); use [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities) for the effective values when computing Bayes factors by hand (see [When posterior odds equal the Bayes factor](#sec-bf-continuous)). A fit reports this once when it starts. With `beta_bernoulli_prior()` or `sbm_prior()`, the hyperparameter updates additionally carry a normalizing-constant correction. The correction table is built from the prior at the first fit of a model configuration — a one-time cost of the order of minutes, announced when it actually builds — and cached on disk, so later fits of the same configuration skip the build. With `beta_bernoulli_prior()`, the sampled inclusion probability is returned per chain in `fit$inclusion_parameter_samples`.
 
 The two specifications differ only where the sampler moves between graphs. With `edge_selection = FALSE` they coincide exactly, and on data without a continuous block the argument simply does not apply. `bgm()` accepts it in both cases rather than stopping with an error, and mentions this when you set the argument yourself and `verbose = TRUE`.
+
+### When posterior odds equal the Bayes factor {#sec-bf-continuous}
+
+The shortcut "posterior odds = Bayes factor" holds when the prior inclusion odds equal one, and that takes two ingredients. First, the edge prior must put probability $\frac{1}{2}$ on inclusion. Under `bernoulli_prior(0.5)` it does; under, say, `bernoulli_prior(0.1)` the prior odds are $1/9$, and the posterior odds understate the evidence for inclusion by a factor of nine, whatever the data type. Second, the model must use the probability you wrote down. For discrete (ordinal) data it always does. For continuous (GGM) data — and for the continuous-continuous edges of a mixed model — it does under the default `precision_graph_prior = "hierarchical"` (see [Edge priors on continuous data](#sec-edge-priors-continuous)).
+
+The second ingredient fails if you opt into `precision_graph_prior = "joint"`. On a joint fit, compute the Bayes factor from the general identity — posterior inclusion odds divided by *prior* inclusion odds — with the prior probabilities from [`extract_prior_inclusion_probabilities()`](../reference/extractors.qmd#extract_prior_inclusion_probabilities):
+
+```r
+post = extract_posterior_inclusion_probabilities(fit)
+prior = extract_prior_inclusion_probabilities(fit)
+BF10 = (post / (1 - post)) / (prior / (1 - prior))
+```
+
+Both extractors return matrices of matching shape, so the odds combine
+element-wise.
+
+In every case, [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) computes the Bayes factor from that same identity with the prior odds the fit actually used, so it needs no adjustment: not for an edge prior away from $\frac{1}{2}$, and not for either `precision_graph_prior` specification.
 
 ## Sampling with the Gibbs sampler
 
@@ -104,10 +107,6 @@ Besides the default NUTS sampler and adaptive Metropolis, all-continuous data ad
 Because every draw comes from an exact conditional, there are no step sizes or acceptance targets to tune — `target_accept` is ignored — and the warmup is spent settling rather than adapting: with edge selection, the first 15% of warmup runs the full model so the precision matrix settles, and selection is active for the remaining 85%. See [GGM Internals](../manual/ggm-internals.qmd) for the update formulas.
 
 Paired with `precision_graph_prior = "joint"`, this sampler is the fast route for large models — two hundred variables in minutes rather than hours. [Large Gaussian Graphical Models](fast-ggm.qmd) shows what the pair costs and buys, including a measured comparison with the neighboring CRAN packages.
-
-## Missing data
-
-Missing values can be handled via listwise deletion (the default) or imputed within the Gibbs sampler by setting `na_action = "impute"`. For continuous data, missing entries are drawn from their conditional normal distribution at each MCMC iteration. See [Missing Data](missing-data.qmd) for details on both approaches and recommendations.
 
 ## Fitting a GGM
 
@@ -123,3 +122,59 @@ To obtain model-specific parameterizations, use the dedicated extractors:
 
 - [`extract_precision(fit)`](../reference/extractors.qmd#extract_precision) — returns the full precision matrix $\boldsymbol{\Theta}$.
 - [`extract_partial_correlations(fit)`](../reference/extractors.qmd#extract_partial_correlations) — returns the partial correlation matrix.
+
+### Example: five examination marks
+
+The classic examination marks dataset from @MardiaKentBibby_1979 holds the scores of 88 students on five examinations and is published at <https://bayesian-graphical-modelling-lab.github.io/bgms/data/marks.rds>.
+
+```{r}
+#| label: fit-marks-mirror
+#| eval: false
+marks = readRDS(url(
+  "https://bayesian-graphical-modelling-lab.github.io/bgms/data/marks.rds"
+))
+fit_ggm = bgm(marks, variable_type = "continuous", seed = 1234)
+```
+
+```{r}
+#| label: load-fixture
+#| echo: false
+#| message: false
+library(bgms)
+
+resolve_fixture = function(name) {
+  input_dir = dirname(knitr::current_input(dir = TRUE))
+  candidates = c(
+    file.path(input_dir, "..", "fixtures", name),
+    file.path(input_dir, "fixtures", name),
+    file.path("fixtures", name),
+    file.path("..", "fixtures", name)
+  )
+  hit = candidates[file.exists(candidates)][1]
+  if (is.na(hit)) {
+    stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+  }
+  hit
+}
+
+fit_ggm = readRDS(resolve_fixture("fit_marks.rds"))
+```
+
+```{r}
+#| label: fig-marks
+#| fig-width: 13
+#| fig-height: 5
+plot(fit_ggm)
+```
+
+Eighty-eight students is not much data for ten edges, and the display says so. Three edges are supported, and all three run through `algebra`. Five are ruled out: the four edges that cross between the `mechanics`-`vectors` side and the `analysis`-`statistics` side, plus `analysis-statistics` itself. Two are left undecided, `mechanics-algebra` and `mechanics-vectors`, with Bayes factors of about 1.2 and 1.0: the data barely move either edge off its prior.
+
+A non-empty undecided panel is a feature of this display, not a defect of the fit. Those two edges are exactly where a thresholded drawing would have misled you: `mechanics-algebra` has a posterior inclusion probability of 0.55 and `mechanics-vectors` of 0.502, both just above one half, so the median probability model would have drawn both as present edges, indistinguishable from the three edges the data actually support. Two edges the data cannot decide would have been drawn as if they were settled.
+
+One convenience specific to continuous data: on this fit the Bayes factor *is* the posterior inclusion odds. Under the default `precision_graph_prior = "hierarchical"` the prior over structures is exactly the edge prior, so with `bernoulli_prior(0.5)` the prior inclusion probability of a continuous edge is 0.5 and the prior odds are one. That does not hold under `precision_graph_prior = "joint"`; [`extract_inclusion_bf()`](../reference/extractors.qmd#extract_inclusion_bf) divides out the right prior odds in either case. See [When posterior odds equal the Bayes factor](#sec-bf-continuous) for what to do if you compute the Bayes factor by hand.
+
+## See also
+
+- [Edge Selection](edge-selection.qmd): how to read the inclusion probabilities and Bayes factors.
+- [Prior Basics](prior-basics.qmd): the spike-and-slab prior specification.
+- [Missing Data](missing-data.qmd): listwise deletion (the default) or imputation with `na_action = "impute"`.

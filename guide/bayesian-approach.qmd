@@ -2,7 +2,7 @@
 title: "The Bayesian Approach"
 ---
 
-`bgms` uses Bayesian inference to learn about the network structure and its parameters from data. This page describes the general framework; details about prior specifications are covered in [Prior Basics](prior-basics.qmd) and the mechanics of edge selection in [Edge Selection](edge-selection.qmd). The posterior is estimated using Markov chain Monte Carlo; see [MCMC Diagnostics](mcmc-diagnostics.qmd) for convergence checks and [Model Output](mcmc-output.qmd) for the output structure.
+`bgms` uses Bayesian inference to learn about the network structure and its parameters from data. This page describes the general framework; details about prior specifications are covered in [Prior Basics](prior-basics.qmd) and the mechanics of edge selection in [Edge Selection](edge-selection.qmd). The posterior is estimated using Markov chain Monte Carlo; see [Checking convergence](mcmc-diagnostics.qmd) for convergence checks and [The fit object](../reference/fit-object.qmd) for the output structure.
 
 ## What we want to learn
 

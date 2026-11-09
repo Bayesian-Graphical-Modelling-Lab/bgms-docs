@@ -60,13 +60,20 @@ REDIRECTS = c(
 
   # Vignettes. The Quarto guide pages own this material now.
   "articles/index.html"           = "guide/index.html",
-  "articles/intro.html"           = "guide/getting-started.html",
-  "articles/introduction.html"    = "guide/getting-started.html",
-  "articles/comparison.html"      = "guide/group-comparison.html",
+  "articles/intro.html"           = "examples/getting-started.html",
+  "articles/introduction.html"    = "examples/getting-started.html",
+  "articles/comparison.html"      = "examples/comparing-groups.html",
   "articles/diagnostics.html"     = "guide/mcmc-diagnostics.html",
   "articles/missing_data.html"    = "guide/missing-data.html",
   "articles/prior-sensitivity.html" = "reference/prior-sensitivity.html",
   "articles/fast-ggm.html"        = "guide/fast-ggm.html",
+
+  # Pages the Quarto site itself has retired or moved (R1 restructure,
+  # 2026-11). Same machinery: an old URL keeps resolving to its new home.
+  "guide/getting-started.html"    = "examples/getting-started.html",
+  "guide/group-comparison.html"   = "examples/comparing-groups.html",
+  "guide/mcmc-output.html"        = "reference/fit-object.html",
+  "reference/sample-ggm-prior.html" = "reference/prior-samplers.html#sample_ggm_prior",
 
   # Package-level topic.
   "reference/bgms-package.html"   = "reference/index.html",
@@ -94,8 +101,8 @@ REDIRECTS = c(
   "reference/unpack_indicator_prior.html"   = "reference/priors.html#indicator-priors",
 
   # Prior samplers and the hierarchical trust gauge.
-  "reference/sample_ggm_prior.html"       = "reference/sample-ggm-prior.html",
-  "reference/sample_precision_prior.html" = "reference/sample-ggm-prior.html",
+  "reference/sample_ggm_prior.html"       = "reference/prior-samplers.html#sample_ggm_prior",
+  "reference/sample_precision_prior.html" = "reference/prior-samplers.html#sample_ggm_prior",
   "reference/sample_graph_prior.html"     = "reference/prior-samplers.html#sample_graph_prior",
   "reference/sample_sbm_prior.html"       = "reference/prior-samplers.html#sample_sbm_prior",
   "reference/summarize_zratio_gauge.html" = "reference/prior-samplers.html#summarize_zratio_gauge",

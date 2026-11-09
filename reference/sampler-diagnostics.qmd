@@ -1,0 +1,412 @@
+---
+title: "Sampler diagnostics and warnings"
+---
+
+This page lists the sampler-level diagnostics and every warning a fit can raise: the field or message, what it means, and what to do. Read [Checking convergence](../guide/mcmc-diagnostics.qmd) first; its symptom index links here for the detail.
+
+## Composite ESS for edge-selected parameters {#sec-mixture-ess}
+
+When edge selection is active, pairwise effects are governed by
+spike-and-slab priors. The parameter is set to exactly zero when the edge
+is excluded, creating a chain that mixes between zero and nonzero values.
+
+For such a parameter the pairwise table reports a single `n_eff`, and it
+is built differently than for an ordinary chain. To the standard
+autocorrelation machinery, the switching between zero and nonzero values
+looks like fast mixing, so the ESS comes out too large exactly where the
+indicator rather than the weight drives the variability. The package
+instead combines the two sources of Monte Carlo error that limit the
+model-averaged weight — how well the chain resolved whether the edge is
+in, and how well it resolved the weight given inclusion — into one
+equivalent sample size. The companion column `share_incl` tells you which
+source dominates. `mean`, `sd`, and `Rhat` are computed from the full
+chain, zeros included. See
+[The fit object](fit-object.qmd#sec-posterior-summaries) for the columns.
+
+How often an indicator flips mainly reflects the inclusion probability
+itself: flips are most frequent near 0.5, and an edge with an inclusion
+probability near 0 or 1 flips rarely even under perfect mixing. A low flip
+count is therefore not on its own a sign of trouble. Do note the asymmetry
+between the two directions, which no single summary number can show.
+
+At the extreme, the indicator never switches at all. Even that is not
+necessarily a problem: when the posterior strongly favors inclusion or
+exclusion, there is little uncertainty about the indicator, and the
+inclusion probability is well determined without any switching. For these
+zero-flip edges the verdict rests on the inclusion probability itself and
+on
+[`extract_inclusion_bf()`](extractors.qmd#extract_inclusion_bf),
+which stays finite where the probability saturates.
+
+## Inclusion ESS and the exploration counts {#sec-rb-inclusion-ess}
+
+For edge indicators the summary table reports its precision columns
+(`mcse`, `n_eff`, `Rhat`) on the Rao-Blackwellized inclusion draws
+rather than on the binary indicators. Those draws are continuous, so
+the standard continuous machinery applies to inclusion inference (see
+[The fit object](fit-object.qmd#sec-posterior-summaries)).
+
+Precision and exploration are still two different questions, and the
+table answers them in two different places:
+
+- `n_eff` measures precision *conditional on exploration*. A chain
+  stuck in one region of model space can still produce a smooth,
+  well-converged Rao-Blackwellized chain with a large `n_eff`.
+- `n0->1` and `n1->0` measure the exploration itself.
+
+A confident `n_eff` beside near-zero transition counts is the boundary
+signature: a precise one-step estimate resting on little transition
+evidence. On a saturated edge that is the expected reading rather than a
+fault.
+
+The Rao-Blackwellized columns come back `NA` when the inclusion draw
+barely varies: the chain is certain about the edge, and there is no
+remaining precision to estimate. Depending on how completely the draw is
+pinned, either all of `mcse`, `n_eff`, and `Rhat` are `NA`, or `Rhat`
+survives while `mcse` and `n_eff` do not. The reading is the same either
+way: the inclusion probability is pinned, not poorly estimated. These are
+not the same edges as the zero-transition ones — an indicator that never
+flipped can still leave a draw with enough variability to summarize.
+
+[`extract_ess()`](extractors.qmd#extract_ess) returns the
+Rao-Blackwellized `n_eff` for indicators, so its indicator
+element lines up with the summary table's `n_eff` column and with
+[`extract_rhat()`](extractors.qmd#extract_rhat), which
+reads the same continuous chain.
+
+When transitions are observed but rare, the ESS estimate itself becomes
+imprecise: small fluctuations in the transition counts can produce
+large swings in the ESS. In these cases, plotting the cumulative
+inclusion probability across iterations provides a more informative
+check on stability: a flat trajectory indicates the estimate has
+settled, while a drifting one suggests the chain needs more
+iterations.
+
+## NUTS-specific diagnostics {#sec-nuts-diagnostics}
+
+When using `update_method = "nuts"` (the default), additional diagnostics
+are stored in `fit$nuts_diag`.
+
+### E-BFMI {#sec-ebfmi}
+
+E-BFMI (Energy Bayesian Fraction of Missing Information) measures how
+efficiently the sampler explores the posterior
+[@Betancourt_2016_ebfmi]. It compares the typical size of energy changes
+between successive samples to the overall spread of energies. Values
+close to 1 indicate efficient exploration; values below 0.3 suggest the
+sampler may be getting stuck [@Betancourt_2017_hmc].
+
+A low E-BFMI does not necessarily mean the results are wrong, but it does
+warrant investigation. In models with edge selection, the most common cause
+is that the warmup period was too short for the discrete graph structure to
+equilibrate. Increasing `warmup` often resolves this.
+
+### Divergent transitions {#sec-divergences}
+
+Divergent transitions occur when the numerical integrator encounters
+regions where the posterior curvature changes too rapidly for the current
+step size. A small number of divergences (fewer than 0.1% of samples) is
+generally acceptable. Many divergences indicate that the sampler may be
+missing important parts of the posterior.
+
+If divergences are frequent, increase `target_accept` (which reduces the
+step size). If that does not help, try `update_method = "adaptive-metropolis"`
+and compare results.
+
+### Mean acceptance probability {#sec-accept-prob}
+
+`fit$nuts_diag$accept_prob` is a chains × iterations matrix of the mean
+acceptance probability across every leapfrog step in each trajectory.
+The per-chain mean is also reported in `fit$nuts_diag$summary`. After
+warmup the per-chain mean should be close to `target_accept` (default
+0.80); a chain whose mean acceptance is materially below the target is
+a signal that the automatic step-size tuning did not converge — usually
+because warmup was too short or the geometry has features that warrant
+a higher target.
+
+### Tree depth {#sec-tree-depth}
+
+NUTS builds trajectories by repeatedly doubling their length until a
+U-turn criterion is satisfied. If the trajectory frequently reaches the
+maximum allowed depth (`nuts_max_depth`), the sampler may
+benefit from longer trajectories. Hitting the maximum depth occasionally is
+normal; hitting it on most iterations may indicate challenging posterior
+geometry. Consider increasing `nuts_max_depth`.
+
+## Warmup equilibration check {#sec-warmup-check}
+
+In models with edge selection, the discrete graph structure may take longer
+to reach stationarity than the continuous parameters. Even after warmup
+completes, the first portion of the sampling phase may still show transient
+behavior.
+
+The `fit$nuts_diag$warmup_check` component provides diagnostics comparing
+the first and second halves of the post-warmup samples:
+
+| Field | Meaning |
+|-------|---------|
+| `warmup_incomplete` | `TRUE` if any indicator below suggests non-stationarity |
+| `energy_slope` | Slope of energy vs. iteration; near zero = stable |
+| `slope_significant` | `TRUE` if energy slope is significant (p < 0.01) |
+| `ebfmi_first_half` | E-BFMI for the first half of post-warmup samples |
+| `ebfmi_second_half` | E-BFMI for the second half |
+| `var_ratio` | Ratio of energy variance (first half / second half); > 2 suggests settling |
+
+Each field is a vector with one entry per chain. With very short runs
+— fewer than 20 usable post-warmup iterations in a chain — there is
+too little energy history to split and assess, so the diagnostics for
+that chain are `NA` and no flag is raised. An `NA` here means "not
+enough draws to check", not "no problem found".
+
+If these diagnostics suggest the chain was still settling, increase `warmup`
+and refit. If diagnostics remain problematic after doubling or tripling
+warmup, try refitting with `update_method = "adaptive-metropolis"` and
+compare posterior summaries. If the two samplers produce similar results,
+the estimates are likely trustworthy despite the warnings; if they differ,
+further investigation is warranted.
+
+### The flag on this page's own fit {#sec-warmup-flag-worked}
+
+The examples on this page use a model fitted to the Wenchuan dataset (17
+PTSD symptom items; of the 362 respondents, the 344 with complete data
+enter the fit under the default `na_action = "listwise"`):
+
+```r
+library(bgms)
+fit = bgm(Wenchuan, iter = 1e4, warmup = 5e3, seed = 123)
+```
+
+```{r}
+#| label: load-fixture
+#| echo: false
+#| message: false
+library(bgms)
+
+resolve_fixture = function(name) {
+  input_dir = dirname(knitr::current_input(dir = TRUE))
+  candidates = c(
+    file.path(input_dir, "..", "fixtures", name),
+    file.path(input_dir, "fixtures", name),
+    file.path("fixtures", name),
+    file.path("..", "fixtures", name)
+  )
+  hit = candidates[file.exists(candidates)][1]
+  if (is.na(hit)) {
+    stop("Fixture not found: ", name, " (searched from ", getwd(), ")")
+  }
+  hit
+}
+
+fit = readRDS(resolve_fixture("fit_wenchuan.rds"))
+```
+
+The Wenchuan fit used throughout this page raises the flag, which makes it a
+useful worked case rather than an embarrassment. Here is what it says:
+
+```{r}
+wc = fit$nuts_diag$warmup_check
+print(data.frame(
+  chain = seq_along(wc$warmup_incomplete),
+  incomplete = wc$warmup_incomplete,
+  slope_signif = as.logical(wc$slope_significant),
+  energy_slope = signif(as.numeric(wc$energy_slope), 2),
+  var_ratio = round(wc$var_ratio, 3),
+  ebfmi_2nd_half = round(wc$ebfmi_second_half, 3)
+), row.names = FALSE)
+```
+
+One chain has an energy slope that is statistically significant, so the fit
+is flagged. Nothing else in the check is out of range: the variance ratios sit
+near 1, well below the 2 that indicates a chain still settling, and the E-BFMI
+values are far above 0.3. The message the sampler prints tells you where to
+look next, and that check is the one that decides. For indicators,
+[`extract_ess()`](extractors.qmd#extract_ess) and
+[`extract_rhat()`](extractors.qmd#extract_rhat) both read
+the Rao-Blackwellized inclusion chain, so the indicator row below is
+two summaries of the same draws:
+
+```{r}
+rh = extract_rhat(fit)
+ess = extract_ess(fit)
+print(data.frame(
+  component = names(rh),
+  max_rhat = round(vapply(rh, function(v) max(unlist(v), na.rm = TRUE), 0), 4),
+  min_ess = round(vapply(ess[names(rh)], function(v) min(unlist(v), na.rm = TRUE), 0))
+), row.names = FALSE)
+```
+
+Every R-hat is below 1.01 and the smallest effective sample size is around a
+thousand, so the chains agree with each other and with their own halves. The
+transition counts back that agreement up: of the 136 edges, the 120 the data
+did not decide outright all moved between structures in both directions,
+though the slowest of them managed only one flip each way.
+
+```{r}
+ind = summary(fit)$indicator
+moved = ind[["n0->1"]] > 0 & ind[["n1->0"]] > 0
+c(edges = nrow(ind), moved_both_ways = sum(moved),
+  fewest_flips = min(pmin(ind[["n0->1"]], ind[["n1->0"]])[moved]))
+```
+
+A significant energy slope in one chain out of four, with clean R-hat and ESS, is
+a sensitive detector firing on a real but small trend, not a reason to
+distrust the posterior. The flag is a prompt to run the two checks above, not a
+verdict on its own. If R-hat or ESS had also been poor, the remedy would be the
+one in the previous paragraph: more warmup, then a different sampler.
+
+## Trust gauge for the hierarchical graph prior {#sec-trust-gauge}
+
+This check applies to continuous (GGM) and mixed models fitted with
+edge selection under the default
+`precision_graph_prior = "hierarchical"`. Under that prior, every
+edge move evaluates a normalizing-constant ratio through a fast
+approximation built at the start of the analysis (see the
+[Technical Manual](../manual/zratio-hierarchical.qmd)). The trust
+gauge audits that approximation: two assessment sweeps redo a
+capped subset of each chain's own edge decisions with the exact
+calculation and check whether the approximation changed any of
+them.
+
+The gauge runs by default, so a default continuous or mixed fit
+already carries its result:
+
+```r
+fit = bgm(data, variable_type = "continuous", ...)
+fit$zratio_diag
+```
+
+It is silent when clean and prints only flagged chains. Its cost is
+fixed per chain rather than proportional to `iter` — nothing on a
+sparse posterior, and seconds per chain on a dense one at 100 to 200
+variables. That is negligible against a production-length fit and
+noticeable on a short exploratory one, which is what the off switch
+is for:
+
+```r
+options(bgms.zratio_gauge_sweeps = 0L)
+```
+
+The summary reports two channels per chain:
+
+- **`flip_rate`** — the fraction of audited add/remove decisions that
+  would have come out differently under the exact calculation. A chain
+  above 1% is flagged.
+- **`harm_pred`** — the projected distortion of the mean posterior
+  inclusion probability, in probability units, flagged above 0.02. This
+  channel catches a consistent error that shifts the recovered network
+  without changing individual edge decisions, which `flip_rate` cannot
+  see.
+
+Small values on both channels mean the approximation did not
+meaningfully affect the sampled graphs. A flagged chain prints the
+measured error and what the audit covered, followed by advice in
+order: first raise `options(bgms.zratio_gauge_sweeps)` and refit, to
+see whether the signal is real; only after that consider
+`precision_graph_prior = "joint"`, which is a different model rather
+than a fix. The gauge never switches specification on its own. See
+[`summarize_zratio_gauge()`](prior-samplers.qmd#summarize_zratio_gauge)
+for the full output format and thresholds.
+
+## What the sampler's warnings mean {#sec-sampler-warnings}
+
+The lists below cover the warnings a fit and its checks can raise in
+0.2.0.0. They are ordinary R warnings, so they surface after the call
+returns, unlike the `NUTS issues:` block and the trust gauge report,
+which the sampler prints while it runs and which the sections above
+explain. The simulation and prediction helpers carry their own warnings,
+which are not part of this list.
+
+### Warmup is too short for part of the adaptation {#sec-warn-warmup}
+
+These five fire before sampling starts, under `update_method = "nuts"`
+with `verbose = TRUE` (the default; `verbose` reads
+`getOption("bgms.verbose", TRUE)`). Each names the part of warmup
+adaptation that your `warmup` is too short to run. The action is the
+same for all five: raise `warmup`, using the threshold the message
+quotes as the floor and the suggestion as the target.
+
+| Warning | When it fires |
+|---|---|
+| `warmup = <n> is very short for edge selection. Consider >= 300.` | Edge selection on, `warmup` below 50 |
+| `warmup = <n>: proposal SD tuning skipped (needs >= 200). Consider >= 300.` | Edge selection on, `warmup` from 50 to 199 |
+| `warmup = <n>: limited proposal SD tuning. Consider >= 300.` | Edge selection on, `warmup` from 200 to 299 |
+| `warmup = <n>: no mass matrix estimation (needs >= 20).` | Edge selection off, `warmup` below 20 |
+| `warmup = <n>: using proportional allocation (needs >= 150 for fixed buffers).` | Edge selection off, `warmup` from 20 to 149 |
+
+### A chain did not finish {#sec-warn-chains}
+
+| Warning | What to do |
+|---|---|
+| `<k> of <n> chain(s) failed and will be dropped.` | The fit is built from the surviving chains only. R-hat needs at least two, so refit if too few are left for the diagnostics you need. If every chain fails the call stops instead, and the message carries the first chain's error. |
+| `Stopped sampling after user interrupt, results are likely uninterpretable.` | Discard the object and refit. The chains stopped wherever the interrupt reached them, so the draws are not a posterior sample. |
+
+### The normalizing-constant correction could not be built {#sec-warn-correction}
+
+Continuous and mixed fits that combine edge selection with a
+Beta-Bernoulli or Stochastic-Block edge prior run their edge-prior
+updates *with* a normalizing-constant correction, built at the start of
+the analysis from a tilted prior sweep; a fit that builds it silently is
+running corrected. These two warnings mark the cases where the
+correction cannot be built. The chains still run, but the edge-prior
+updates lose the correction that keeps them exact, so read the inclusion
+probabilities as approximate.
+
+| Warning | What to do |
+|---|---|
+| `The <edge prior> updates are run without the normalizing-constant correction: the tilted prior sampler supports only cauchy_prior() and normal_prior() interaction priors.` | Refit with `interaction_prior = cauchy_prior()` or `normal_prior()` if you want the corrected updates. Reaching this warning at all takes `precision_graph_prior = "joint"`, because the default `"hierarchical"` rejects any other slab with an error rather than a warning. |
+| `The Stochastic-Block updates are run without the normalizing-constant correction: the slope curve is not resolvable for this model cell (a single tilted pair).` | Nothing in the call to change: the correction table could not resolve its slope curve for this combination of size and prior. Read the block structure as approximate, and compare it against a Beta-Bernoulli fit of the same data before reporting it. |
+
+### The z-ratio tables left their certified range {#sec-warn-zratio}
+
+Both fire while the hierarchical graph prior builds its approximation, on
+a fit whose precision diagonal shape is not 1. They say the approximation
+behind every edge move may be less accurate than certified, so check
+`fit$zratio_diag` before reading the graph; see the
+[trust gauge](#sec-trust-gauge).
+
+| Warning | What to do |
+|---|---|
+| `Z-ratio constants at diagonal shape <a> lie outside the certified range [0.5, 20]; the fixed quadrature grids are not scored there and may lose accuracy.` | Bring the diagonal shape back inside 0.5 to 20 if the analysis allows it. Otherwise treat the gauge as the check that decides. |
+| `Z-ratio pair integrals retain visible mass at the grid edge (delta = <d>, eta = <e>, shape = <a>); the saddle tables may be truncated.` | Same reading: the quadrature grid did not capture the whole integrand at this prior setting, so let the gauge decide whether it mattered. |
+
+### The data cannot support part of the model {#sec-warn-data}
+
+| Warning | What to do |
+|---|---|
+| `Blume-Capel variable <name> has <k> categories. This may slow computation. Empty categories are not collapsed.` | Nothing is wrong with the fit; expect it to be slower. Fires above 10 categories. Empty categories in the range still cost time, so collapse them yourself if they are an artifact of coding. |
+| `Some categories were not used by every group: ...` | A [`bgmCompare()`](bgmCompare.qmd) warning. The threshold differences it names rest on the prior rather than on the data. Do not read them as evidence of a group difference; the printed summary marks the rows with `*`, and `extract_arguments(fit)$category_support` holds the per-group counts. Pairwise differences are unaffected. It carries the condition class `bgms_group_support_warning`, so you can catch this one warning without muffling the rest. |
+
+### A deprecated argument {#sec-warn-deprecated}
+
+The arguments the 0.2.0 prior objects replaced still work, and warn
+through `lifecycle` naming their replacement:
+
+```
+The `pairwise_scale` argument of `bgm()` is deprecated as of bgms 0.2.0.
+Please use the `interaction_prior` argument instead.
+```
+
+Nothing about the fit is wrong. Move the call to the replacement so it
+keeps working past the deprecation; the full mapping is on
+[`bgm()`](bgm.qmd#sec-deprecated-arguments) and
+[`bgmCompare()`](bgmCompare.qmd#sec-deprecated-arguments).
+
+### The checks and the ecosystem {#sec-warn-checks}
+
+| Warning | What to do |
+|---|---|
+| `The usable radii of the <a>x and <b>x anchors do not overlap; the curve has a gap between them. Add an anchor in that range.` | From [`prior_sensitivity_check()`](prior-sensitivity.qmd). Rerun with an extra anchor between the two the message names, so the curve is continuous there. |
+| `easybgm <version> is not compatible with S7-based bgms objects. Running in S3 compatibility mode. Please update easybgm to version 0.5.0 or later.` | Update `easybgm`. Until then the fit is returned as a plain list, so the S7 accessors this documentation uses will not all apply. |
+
+## Reproducibility across builds and platforms {#sec-reproducibility-scope}
+
+If you did set `seed` and the runs still differ, the guarantee is
+narrower than it looks, and
+[`bgm()`](bgm.qmd) states its exact scope. Results are
+bit-reproducible for a given installed binary; they are not portable
+across compilers or optimization settings, so a rebuilt or reinstalled
+binary can produce different draws from the same seed, with the
+differences concentrated where the posterior is weakly identified. On
+Windows with `RcppParallel` 6.0.0 or later, a fixed seed reproduces a run
+only at the same `cores` setting: runs at different core counts are
+statistically equivalent, not identical.

@@ -40,7 +40,7 @@ distribution and are therefore incompatible with a multivariate MRF
 formulation [@SuggalaYangRavikumar_2017]. The adjacent category
 model does yield consistent full conditionals, and the joint
 distribution that generates them is the ordinal MRF
-[@MarsmanVandenBerghHaslbeck_2025].
+[@MarsmanEtAl_2025_ordinal].
 
 ## Ordinal threshold parameterization
 
