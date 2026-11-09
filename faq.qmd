@@ -15,7 +15,7 @@ Binary, ordinal, and continuous variables, in a matrix or a data frame;
 every column as ordinal. Binary items are ordinal items with two
 categories, so they need no special treatment. More:
 [`bgm()`](reference/bgm.qmd) and
-[Getting Started](guide/getting-started.qmd).
+[Getting started](examples/getting-started.qmd).
 
 ### Why does the documentation run `bgm()` so much longer than the default?
 

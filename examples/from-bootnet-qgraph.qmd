@@ -187,7 +187,7 @@ fit = bgm(YourData, iter = 1e4, warmup = 5e3, seed = 123)
 verdicts(fit); plot(fit)
 ```
 
-[Getting Started](../guide/getting-started.qmd) walks this first fit
+[Getting started](getting-started.qmd) walks this first fit
 step by step;
 [From estimation to evidence](estimation-to-evidence.qmd) is the full
 worked analysis, from the familiar starting point to the reported

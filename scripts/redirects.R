@@ -60,13 +60,17 @@ REDIRECTS = c(
 
   # Vignettes. The Quarto guide pages own this material now.
   "articles/index.html"           = "guide/index.html",
-  "articles/intro.html"           = "guide/getting-started.html",
-  "articles/introduction.html"    = "guide/getting-started.html",
+  "articles/intro.html"           = "examples/getting-started.html",
+  "articles/introduction.html"    = "examples/getting-started.html",
   "articles/comparison.html"      = "guide/group-comparison.html",
   "articles/diagnostics.html"     = "guide/mcmc-diagnostics.html",
   "articles/missing_data.html"    = "guide/missing-data.html",
   "articles/prior-sensitivity.html" = "reference/prior-sensitivity.html",
   "articles/fast-ggm.html"        = "guide/fast-ggm.html",
+
+  # Pages the Quarto site itself has retired or moved (R1 restructure,
+  # 2026-11). Same machinery: an old URL keeps resolving to its new home.
+  "guide/getting-started.html"    = "examples/getting-started.html",
 
   # Package-level topic.
   "reference/bgms-package.html"   = "reference/index.html",

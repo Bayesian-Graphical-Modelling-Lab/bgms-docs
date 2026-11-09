@@ -9,7 +9,7 @@ Fits a single-network Bayesian graphical model with `bgm()` and returns an S7 ob
 `bgm()` fits a single network for binary, ordinal, continuous, or mixed data,
 with optional Bayesian edge selection. This page is the technical reference
 for function arguments and returned objects. For interpretation and workflow,
-start with [Getting Started](../guide/getting-started.qmd), then see
+start with [Getting started](../examples/getting-started.qmd), then see
 [Graphical Models](../guide/graphical-models.qmd) and
 [The Bayesian Approach](../guide/bayesian-approach.qmd). Methodological
 background is provided in @MarsmanVandenBerghHaslbeck_2025.
@@ -273,7 +273,7 @@ how to act on `n_eff` and `Rhat`.
 
 ## See also
 
-[Getting Started](../guide/getting-started.qmd),
+[Getting started](../examples/getting-started.qmd),
 [Methods](methods.qmd),
 [Extractor Functions](extractors.qmd),
 and [bgmCompare()](bgmCompare.qmd).

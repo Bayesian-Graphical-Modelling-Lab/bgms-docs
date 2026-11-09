@@ -23,9 +23,9 @@
 project_dir = Sys.getenv("QUARTO_PROJECT_DIR", unset = ".")
 source(file.path(project_dir, "scripts", "examples-series.R"))
 
-TITLE = "The bgms worked analyses"
+TITLE = "The bgms examples"
 out_dir = file.path(project_dir, "_pdf-src")
-out_file = file.path(out_dir, "worked-analyses.qmd")
+out_file = file.path(out_dir, "examples.qmd")
 
 # Canonical site URL, read from _quarto.yml so there is one source of truth
 # (same idiom as scripts/redirects.R).
@@ -103,7 +103,7 @@ pages = c("examples/index.qmd",
 front_matter = c(
   "---",
   sprintf('title: "%s"', TITLE),
-  'subtitle: "Worked analyses from the bgms documentation"',
+  'subtitle: "Examples from the bgms documentation"',
   sprintf('# Assembled by scripts/build-examples-pdf.R from: %s',
           paste(pages, collapse = ", ")),
   "---",

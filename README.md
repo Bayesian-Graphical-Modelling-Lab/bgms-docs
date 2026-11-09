@@ -6,8 +6,8 @@ Documentation site for the [bgms](https://github.com/Bayesian-Graphical-Modellin
 
 ## Structure
 
-- `guide/` — User's Guide (tutorials, statistical concepts)
-- `examples/` — Worked analyses (one analysis per page, code and workflow)
+- `guide/` — Guide (tutorials, statistical concepts)
+- `examples/` — Examples (one analysis per page, code and workflow)
 - `reference/` — Function reference (API documentation)
 - `manual/` — Reference Manual (C++ backend, algorithms)
 
@@ -63,7 +63,7 @@ the Examples PDF.
 
 ### The Examples section
 
-`examples/` holds the worked analyses. Two of its build steps are generated,
+`examples/` holds the Examples. Two of its build steps are generated,
 never hand-maintained:
 
 - **Companion scripts.** Each page's code is tangled to `examples/R/NN-slug.R`
@@ -72,7 +72,7 @@ never hand-maintained:
   are gitignored build artifacts.
 - **The PDF.** `make examples-pdf` renders the index and every published
   example page, in series order, into one PDF and copies it to
-  `docs/examples/bgms-worked-analyses.pdf`. It uses the `pdf` Quarto profile
+  `docs/examples/bgms-examples.pdf`. It uses the `pdf` Quarto profile
   (`_quarto-pdf.yml`), writes to `_pdf/`, and leaves the site render alone. Run
   it after the site render, which rewrites `docs/`; `make all` does both in
   that order.

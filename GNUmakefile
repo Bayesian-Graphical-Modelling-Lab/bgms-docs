@@ -11,7 +11,7 @@
 
 QUARTO ?= quarto
 R_LIBS ?= dev/lib-bgms-develop
-PDF := _pdf/_pdf-src/worked-analyses.pdf
+PDF := _pdf/_pdf-src/examples.pdf
 
 .PHONY: all site preview fixtures example-scripts examples-pdf clean-pdf
 
@@ -41,8 +41,8 @@ example-scripts:
 examples-pdf:
 	R_LIBS=$(R_LIBS) $(QUARTO) render --profile pdf --to pdf
 	mkdir -p docs/examples
-	cp $(PDF) docs/examples/bgms-worked-analyses.pdf
-	@echo "docs/examples/bgms-worked-analyses.pdf"
+	cp $(PDF) docs/examples/bgms-examples.pdf
+	@echo "docs/examples/bgms-examples.pdf"
 
 clean-pdf:
 	rm -rf _pdf _pdf-src

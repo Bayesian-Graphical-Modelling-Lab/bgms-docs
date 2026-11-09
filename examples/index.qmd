@@ -15,7 +15,7 @@ carries the reasoning, the Reference the details.
 
 ## The series
 
-1. **[Your first network](../guide/getting-started.qmd).** Install `bgms`, fit
+1. **[Getting started](getting-started.qmd).** Install `bgms`, fit
    your first model, and read the network split by evidence. Afterwards you can
    fit [`bgm()`](../reference/bgm.qmd) to your own data and produce the figure
    this site treats as the canonical result display.
@@ -43,11 +43,6 @@ carries the reasoning, the Reference the details.
 7. **[Coming from bootnet and qgraph](from-bootnet-qgraph.qmd).** Your current
    workflow mapped onto `bgms`, call by call. Afterwards you know which function
    replaces which step, what is new, and what has no direct analogue.
-8. **Reporting your results.** Checklists and template paragraphs per analysis
-   type. Afterwards you can assemble a Methods and Results section that a
-   reviewer can follow.
-
-Entries without a link are still in preparation.
 
 ## How to use a page
 
@@ -62,5 +57,5 @@ value, it links to the [Reference](../reference/index.qmd).
      PDF profile renders this index alone and the link would offer a one-page
      download. Build it with `make examples-pdf` (see STYLE_GUIDE.md, Example
      Pages).
-[Download the series as a PDF](bgms-worked-analyses.pdf)
+[Download the series as a PDF](bgms-examples.pdf)
 -->

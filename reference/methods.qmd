@@ -150,11 +150,6 @@ suggest an effect size the data have either ruled out or not established.
 The figure carries no key: each panel's title names the evidence class and
 its count, with the classification rule printed beneath it.
 
-For the same display built by hand with `qgraph`, and for the reasoning
-behind it, see the `plot_edge_evidence()` helper in
-[Getting Started](../guide/getting-started.qmd) and
-[Edge Selection](../guide/edge-selection.qmd).
-
 **Device size.** Three networks side by side need a wide device. R's
 default 7 by 7 inches leaves each panel a little over two inches, and at
 that size the labels and titles crowd; `plot()` says so when the device is

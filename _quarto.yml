@@ -94,6 +94,7 @@ website:
       align: left
       contents:
         - examples/index.qmd
+        - examples/getting-started.qmd
         - examples/estimation-to-evidence.qmd
         - examples/reading-the-output.qmd
         - examples/check-your-priors.qmd
@@ -108,7 +109,6 @@ website:
       align: left
       contents:
         - guide/index.qmd
-        - guide/getting-started.qmd
         - section: "Background"
           contents:
             - guide/graphical-models.qmd

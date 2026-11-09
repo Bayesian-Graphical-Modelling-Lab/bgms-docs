@@ -239,8 +239,8 @@ entries stay in the index prose as plain text, never as a dead link or a
 ### PDF of the series
 
 `make examples-pdf` renders the index and every published example page, in
-series order, into one PDF titled "The bgms worked analyses" and copies it to
-`docs/examples/bgms-worked-analyses.pdf`, which is where the download link on
+series order, into one PDF titled "The bgms examples" and copies it to
+`docs/examples/bgms-examples.pdf`, which is where the download link on
 `examples/index.qmd` points. The build is the `pdf` Quarto profile
 (`_quarto-pdf.yml`); it writes to `_pdf/` and never touches the site render.
 

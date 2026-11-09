@@ -197,7 +197,7 @@ network = coef(fit)$pairwise
 network[coef(fit)$indicator < 0.5] = 0
 ```
 
-Use this as a summary of what the posterior favors, not as a picture of what the data decided. Thresholding at 0.5 collapses the three-way distinction this page has just drawn: an edge kept at an inclusion probability of 0.51 is undecided, an edge dropped at 0.49 is undecided too, and neither blank in the resulting drawing means the data support conditional independence. When the network is to be *displayed*, draw the three-panel edge evidence plot instead, which keeps the undecided pairs visible as their own category; [Getting Started](getting-started.qmd#the-network-split-by-evidence) shows how.
+Use this as a summary of what the posterior favors, not as a picture of what the data decided. Thresholding at 0.5 collapses the three-way distinction this page has just drawn: an edge kept at an inclusion probability of 0.51 is undecided, an edge dropped at 0.49 is undecided too, and neither blank in the resulting drawing means the data support conditional independence. When the network is to be *displayed*, draw the three-panel edge evidence plot instead, which keeps the undecided pairs visible as their own category; [Getting started](../examples/getting-started.qmd#the-network-split-by-evidence) shows how.
 
 ## Prior guidance for edge selection
 
