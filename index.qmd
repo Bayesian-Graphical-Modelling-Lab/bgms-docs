@@ -38,13 +38,13 @@ execute:
 
 ::: {.grid .gap-3 .pb-3 .pt-4}
 ::: {.g-col-12 .g-col-sm-4}
-[Get Started](guide/getting-started.qmd){.btn-action-primary .btn-action .btn .btn-lg .w-100 role="button"}
+[Getting started](examples/getting-started.qmd){.btn-action-primary .btn-action .btn .btn-lg .w-100 role="button"}
 :::
 ::: {.g-col-12 .g-col-sm-4 .mb-2}
-[User's Guide](guide/index.qmd){#btn-guide .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
+[Guide](guide/index.qmd){#btn-guide .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
 :::
 ::: {.g-col-12 .g-col-sm-4 .mb-2}
-[Worked Analyses](examples/index.qmd){#btn-examples .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
+[Examples](examples/index.qmd){#btn-examples .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
 :::
 :::
 

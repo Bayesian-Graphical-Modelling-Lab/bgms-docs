@@ -1,5 +1,5 @@
 ---
-title: "Worked analyses"
+title: "Examples"
 subtitle: "One analysis per page, from the call you type to the sentence you write"
 toc: false
 ---

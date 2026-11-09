@@ -3,8 +3,8 @@ title: "Frequently asked questions"
 ---
 
 Short answers that route to the page carrying the full story. If your
-question is not here, the [worked analyses](examples/index.qmd) and the
-[User's Guide](guide/index.qmd) are the two front doors.
+question is not here, the [Examples](examples/index.qmd) and the
+[Guide](guide/index.qmd) are the two front doors.
 
 ## Getting started
 
@@ -22,7 +22,7 @@ categories, so they need no special treatment. More:
 The defaults (2,000 warmup and 2,000 sampling iterations) are tuned for
 exploration. What you read off a fit is evidence, and the run has to be
 long enough to pin each inclusion probability down to the precision the
-evidence claim needs, which is why the worked analyses run
+evidence claim needs, which is why the Examples run
 `iter = 1e4, warmup = 5e3`. More:
 [run-length settings](guide/mcmc-diagnostics.qmd#sec-run-length) and
 [Reading the output](examples/reading-the-output.qmd).

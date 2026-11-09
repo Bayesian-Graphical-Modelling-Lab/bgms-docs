@@ -9,7 +9,7 @@
 
 ```yaml
 ---
-title: "Getting Started"
+title: "Getting started"
 ---
 ```
 
@@ -53,7 +53,7 @@ title: "Getting Started"
 **Structure:**
 ```yaml
 ---
-title: "User's Guide"
+title: "Guide"
 subtitle: "Short description of this section"
 ---
 ```
@@ -67,7 +67,7 @@ subtitle: "Short description of this section"
 **Structure:**
 ```markdown
 ---
-title: "Getting Started"
+title: "Getting started"
 ---
 
 Brief introduction paragraph.
@@ -269,7 +269,7 @@ the conflation the tutorial paper corrects.
 A traditional weighted or median-probability network may appear **only**
 as an explicit estimation-workflow foil, labelled as such in the
 surrounding prose, and never as a page's final display. It must not
-appear on Getting Started at all.
+appear on Getting started at all.
 
 ### Panel structure
 
@@ -342,7 +342,7 @@ network, the companion figure is the **prior-to-posterior (spike-and-slab)
 plot**: the two-part distribution of that edge weight, with the spike
 drawn as a lollipop whose height is the probability of exactly zero and
 the slab as a filled curve on the same probability-per-bin scale, so the
-two are commensurable. Not required on Getting Started; it enters the
+two are commensurable. Not required on Getting started; it enters the
 palette when a page first needs parameter-level display.
 
 ### Rendering

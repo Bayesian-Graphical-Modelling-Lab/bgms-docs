@@ -1,9 +1,9 @@
 ---
-title: "User's Guide"
+title: "Guide"
 toc: false
 ---
 
-The User's Guide covers conceptual background and practical tutorials for
+The Guide covers conceptual background and practical tutorials for
 `bgms`. It is organized into four parts: background concepts, model types,
 analysis workflows, and MCMC output.
 
@@ -31,7 +31,7 @@ analysis workflows, and MCMC output.
 - [Model Output](mcmc-output.qmd) — What the sampler returns and how to access it
 - [MCMC Diagnostics](mcmc-diagnostics.qmd) — Convergence checks: ESS, R-hat, trace plots, divergences
 
-### Worked analyses
+### Examples
 
 The Guide explains why; the [Examples](../examples/index.qmd) section runs
 each analysis end to end, showing the code and reading the output.

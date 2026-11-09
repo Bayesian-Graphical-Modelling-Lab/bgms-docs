@@ -44,6 +44,8 @@ website:
     center:
       - text: "FAQ"
         href: faq.qmd
+      - text: "Developer manual"
+        href: manual/index.qmd
       - text: "Built with Quarto"
         href: https://quarto.org
     right:
@@ -60,16 +62,12 @@ website:
     left:
       - text: "Overview"
         href: index.qmd
-      - text: "Get Started"
-        href: guide/getting-started.qmd
       - text: "Examples"
         href: examples/index.qmd
       - text: "Guide"
         href: guide/index.qmd
       - text: "Reference"
         href: reference/index.qmd
-      - text: "Manual"
-        href: manual/index.qmd
     tools:
       - icon: github
         href: https://github.com/Bayesian-Graphical-Modelling-Lab/bgms
@@ -88,7 +86,7 @@ website:
     # Lists only pages that exist. The full series, including the entries not
     # yet published, lives in the prose of examples/index.qmd.
     - id: examples
-      title: "Worked analyses"
+      title: "Examples"
       style: "floating"
       collapse-level: 1
       align: left
@@ -103,7 +101,7 @@ website:
         - examples/from-bootnet-qgraph.qmd
 
     - id: guide
-      title: "User's Guide"
+      title: "Guide"
       style: "floating"
       collapse-level: 1
       align: left
