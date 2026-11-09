@@ -18,7 +18,7 @@ $$
 \;=\; \underbrace{\mu_{i, c+1} - \mu_{i, c}}_{\substack{\text{baseline preference for }\\c+1\text{ over }c}} \;+\; \underbrace{\textstyle\sum_{j \neq i} 2\,\omega_{ij}\, x_j}_{\text{the pull of the neighbors}} .
 $$
 
-The left side is the log odds of one adjacent answer over the other. The right side collects everything that shifts those odds: the threshold difference, plus each neighboring answer $x_j$ weighted by twice its edge weight $\omega_{ij}$. If one neighboring response increases by one category, the adjacent-category log odds change by exactly $2\,\omega_{ij}$. The edge weight $\omega_{ij}$ is therefore half the log odds ratio between adjacent categories of the two items, the same for every adjacent pair [@MarsmanVandenBerghHaslbeck_2025].
+The left side is the log odds of one adjacent answer over the other. The right side collects everything that shifts those odds: the threshold difference, plus each neighboring answer $x_j$ weighted by twice its edge weight $\omega_{ij}$. If one neighboring response increases by one category, the adjacent-category log odds change by exactly $2\,\omega_{ij}$. The edge weight $\omega_{ij}$ is therefore half the log odds ratio between adjacent categories of the two items, the same for every adjacent pair [@MarsmanEtAl_2025_ordinal].
 
 Together, the item-level regressions define one joint model over complete response patterns, so the items are analyzed as one system, not one at a time. That joint form is the model below.
 
@@ -47,7 +47,7 @@ Each parameter compares one category to the next; nothing in the model treats th
 
 This choice has a practical payoff: the model uses only the *ordering* of the categories, not their numeric labels or spacing. Whether you code a five-point scale as 0–4 or 1–5, or the distances between response options are unequal, the estimates are the same — no interval-scale measurement is assumed.
 
-It is also the choice that makes a graphical model possible at all. Other ordinal regressions, such as the cumulative logit or continuation ratio models, cannot serve as building blocks of a joint network: their conditional distributions are incompatible with any joint distribution [@SuggalaYangRavikumar_2017]. The adjacent category model's conditionals are compatible, and the joint distribution they generate is exactly the ordinal MRF above [@MarsmanVandenBerghHaslbeck_2025]. The formal development is in [OMRF Internals](../manual/omrf-internals.qmd).
+It is also the choice that makes a graphical model possible at all. Other ordinal regressions, such as the cumulative logit or continuation ratio models, cannot serve as building blocks of a joint network: their conditional distributions are incompatible with any joint distribution [@SuggalaYangRavikumar_2017]. The adjacent category model's conditionals are compatible, and the joint distribution they generate is exactly the ordinal MRF above [@MarsmanEtAl_2025_ordinal]. The formal development is in [OMRF Internals](../manual/omrf-internals.qmd).
 
 ## Partial associations
 
@@ -107,7 +107,7 @@ The thresholds are nuisance parameters — they are estimated during MCMC sampli
 
 ## Pseudolikelihood
 
-The normalizing constant of the ordinal MRF involves a sum over all possible configurations of $p$ ordinal variables, which is intractable for all but the smallest networks. `bgms` uses a pseudolikelihood approximation [@MarsmanVandenBerghHaslbeck_2025]: the joint distribution is replaced by the product of each variable's conditional distribution given all the others (its *full conditional*).
+The normalizing constant of the ordinal MRF involves a sum over all possible configurations of $p$ ordinal variables, which is intractable for all but the smallest networks. `bgms` uses a pseudolikelihood approximation [@MarsmanEtAl_2025_ordinal]: the joint distribution is replaced by the product of each variable's conditional distribution given all the others (its *full conditional*).
 
 The full conditional distribution for variable $i$ given all other variables is:
 

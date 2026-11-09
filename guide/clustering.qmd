@@ -3,7 +3,7 @@ title: "Edge Clustering"
 ---
 
 
-In many networks, nodes can be organized in clusters or communities, and edges are not exchangeable. Standard edge priors (Bernoulli, Beta-Bernoulli) cannot encode such structure because they assign the same inclusion probability to every edge. The stochastic block model (SBM) prior embeds the assumption of clustering directly into the graphical model, so that cluster assignments, the number of clusters, and the evidence for clustering are all estimated as part of the analysis [@SekulovskiEtAl_2025_sbm].
+In many networks, nodes can be organized in clusters or communities, and edges are not exchangeable. Standard edge priors (Bernoulli, Beta-Bernoulli) cannot encode such structure because they assign the same inclusion probability to every edge. The stochastic block model (SBM) prior embeds the assumption of clustering directly into the graphical model, so that cluster assignments, the number of clusters, and the evidence for clustering are all estimated as part of the analysis [@SekulovskiEtAl_2026_sbm].
 
 ## The stochastic block model
 
@@ -42,7 +42,7 @@ In summary, the full hierarchical specification is:
 - $\pi_{ab} \mid B \sim \text{Beta}(\alpha_b, \beta_b)$ for $a \neq b$ (between-cluster)
 - $\gamma_{ij} \mid \boldsymbol{\pi}, \mathbf{z}, B \sim \text{Bernoulli}(\pi_{z_i z_j})$
 
-Both $B$ and $\boldsymbol{\delta}$ are analytically marginalized out using the Mixtures of Finite Mixtures (MFM) framework [@MillerHarrison_2018], following the implementation of @GengEtAl_2019 for the SBM. This provides consistent estimation of the number of clusters without the sampler ever having to change dimension. For details, see @SekulovskiEtAl_2025_sbm and, for the technical formulation, [Stochastic Block Model Prior](../manual/sbm-prior.qmd).
+Both $B$ and $\boldsymbol{\delta}$ are analytically marginalized out using the Mixtures of Finite Mixtures (MFM) framework [@MillerHarrison_2018], following the implementation of @GengEtAl_2019 for the SBM. This provides consistent estimation of the number of clusters without the sampler ever having to change dimension. For details, see @SekulovskiEtAl_2026_sbm and, for the technical formulation, [Stochastic Block Model Prior](../manual/sbm-prior.qmd).
 
 ## Setting up the SBM prior
 
@@ -73,7 +73,7 @@ Since $B$ is analytically marginalized out, the MCMC sampler does not produce di
 
 **Comparing specific cluster counts.** The second test compares two point hypotheses — for example $\mathcal{H}_1\!: B = b_1$ versus $\mathcal{H}_2\!: B = b_2$ — with prior odds $\lambda^{b_1 - b_2} \,(b_2 - 1)! \,/\, (b_1 - 1)!$. This allows a finer-grained assessment of the evidence for a particular clustering solution.
 
-Both tests are computed from the posterior cluster probabilities returned by `extract_sbm()` (see below). For the simulation performance and practical recommendations for both Bayes factors, see @SekulovskiEtAl_2025_sbm.
+Both tests are computed from the posterior cluster probabilities returned by `extract_sbm()` (see below). For the simulation performance and practical recommendations for both Bayes factors, see @SekulovskiEtAl_2026_sbm.
 
 ## Interpreting block structure
 
@@ -106,7 +106,7 @@ detection can make.
 
 ## Choosing hyperparameters
 
-The choice of hyperparameters encodes how strongly the prior favors a clustered solution and the expected shape of that solution. @SekulovskiEtAl_2025_sbm provide simulation-based recommendations.
+The choice of hyperparameters encodes how strongly the prior favors a clustered solution and the expected shape of that solution. @SekulovskiEtAl_2026_sbm provide simulation-based recommendations.
 
 **When clustering is expected** — set the within-cluster Beta prior to favor dense connections and the between-cluster prior to favor sparse connections:
 
@@ -144,5 +144,5 @@ The `dirichlet_alpha` argument of [`sbm_prior()`](../reference/priors.qmd#sbm_pr
 
 ::: {.callout-tip}
 ## Tutorial
-@SekulovskiEtAl_2025_sbm provides a step-by-step tutorial on fitting the SBM prior in `bgms`, including guidance on hyperparameter selection and result interpretation. It is available at <https://www.nikolasekulovski.com/blog/post2/>.
+@SekulovskiEtAl_2026_sbm provides a step-by-step tutorial on fitting the SBM prior in `bgms`, including guidance on hyperparameter selection and result interpretation. It is available at <https://www.nikolasekulovski.com/blog/post2/>.
 :::

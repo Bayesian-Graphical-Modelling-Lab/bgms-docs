@@ -68,7 +68,7 @@ the clustering part of the graphical model: cluster assignments, the
 number of clusters, and the evidence for clustering against no
 clustering are all estimated together with the network, so every
 cluster statement arrives with a posterior probability attached
-[@SekulovskiEtAl_2025_sbm].
+[@SekulovskiEtAl_2026_sbm].
 
 ## The data and the fit
 
@@ -267,7 +267,7 @@ each other.
 - [`sbm_prior()`](../reference/priors.qmd#sbm_prior) and
   [`extract_sbm()`](../reference/extractors.qmd#extract_sbm) for the
   arguments and the return value.
-- @SekulovskiEtAl_2025_sbm for the step-by-step tutorial behind this
+- @SekulovskiEtAl_2026_sbm for the step-by-step tutorial behind this
   analysis, and @MartarelliEtAl_2023_sbps for the study the data
   come from.
 - Back in the series:
